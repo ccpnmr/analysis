@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-11 17:18:39 +0100 (Wed, May 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-30 17:47:35 +0100 (Thu, June 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -86,7 +86,7 @@ from ccpn.core.Collection import Collection
 from ccpn.core.lib import SpectrumLib
 from ccpn.core.lib.MoleculeLib import extraBoundAtomPairs
 from ccpn.core.lib import RestraintLib
-from ccpn.core.lib.ContextManagers import notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import notificationEchoBlocking, apiNotificationBlanking
 
 from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
@@ -1049,6 +1049,23 @@ class CcpnNefWriter:
         #
         return result
 
+    def _sortingShifts(self, shift, order=True):
+        """Sort the shifts according to nmrAtom.id or own pid if all Nones
+
+        :param shift: chemical shift to be sorted
+        :param order: True/False, if True undefined will always be at the bottom of the list
+        :return:
+        """
+        # ChainCodes may be before/after 'CS' in list
+        # Prefixed bool forces undefined to bottom of list by pid
+        val = (shift.chainCode, shift.sequenceCode, shift.residueType, shift.atomName)
+        if all(vv is None for vv in val):
+            val = (order, ) + tuple(shift.pid._split())
+        else:
+            val = (not order,) + val
+
+        return val
+
     def chemicalShiftList2Nef(self, chemicalShiftList: ChemicalShiftList, includeOrphans: bool = False) -> StarIo.NmrSaveFrame:
         """Convert ChemicalShiftList to CCPN NEF saveframe"""
 
@@ -1065,7 +1082,7 @@ class CcpnNefWriter:
         loop = result[loopName]
         atomCols = ['chain_code', 'sequence_code', 'residue_name', 'atom_name', ]
         # NB We cannot use nmrAtom.id.split('.'), since the id has reserved characters remapped
-        shifts = sorted(chemicalShiftList.chemicalShifts)
+        shifts = sorted(chemicalShiftList.chemicalShifts, key=lambda sh: self._sortingShifts(sh))
         if shifts:
             for shift in shifts:
                 if shift.orphan and not includeOrphans:
@@ -4789,9 +4806,9 @@ class CcpnNefReader(CcpnNefContent):
                 isotopeCode = None
 
             try:
-                nmrResidue = self.produceNmrResidue(*tt[:3])
-                nmrAtom = self.produceNmrAtom(nmrResidue, tt[3], isotopeCode=isotopeCode)
-                parameters['nmrAtom'] = nmrAtom
+                if (nmrResidue := self.produceNmrResidue(*tt[:3])):
+                    nmrAtom = self.produceNmrAtom(nmrResidue, tt[3], isotopeCode=isotopeCode)
+                    parameters['nmrAtom'] = nmrAtom
                 parameters['static'] = row.get('ccpn_static') or False  # may be undefined for older nef files
 
                 shift = creatorFunc(**parameters)
@@ -6264,6 +6281,7 @@ class CcpnNefReader(CcpnNefContent):
         # _parentName = saveFrame['sf_framecode']
         # _parentSerial = self._stripSpectrumSerial(_parentName)
 
+        peakList = None
         for row in loop.data:
 
             parameters = _parametersFromLoopRow(row, map2)
@@ -6298,9 +6316,23 @@ class CcpnNefReader(CcpnNefContent):
                 parameters['positionError'] = tuple(row.get(x) for x in multipleAttributes['positionError'])
                 # parameters['positionError'] = row._get('position_uncertainty')[:dimensionCount]
 
-                peakList = spectrum.getPeakList(peakListSerial)
+                peakList = spectrum.getPeakList(str(peakListSerial))
                 if not peakList:
-                    peakList = spectrum.newPeakList(str(peakListSerial))
+                    with apiNotificationBlanking():
+                        # must block the creation of peakListViews here until the serial has been defined
+                        #   otherwise creates a badly numbered peakListView :|
+                        peakList = spectrum.newPeakList(str(peakListSerial))
+                    try:
+                        # change the serial number to match the new name
+                        peakList._resetSerial(peakListSerial)
+
+                        from ccpn.ui._implementation.PeakListView import _peakListAddPeakListViews
+
+                        # create new peakListviews here
+                        _peakListAddPeakListViews(self.project, peakList._wrappedData)
+
+                    except:
+                        self.warning(f'Error setting PeakList Serial to {peakListSerial}', loop)
 
                 try:
                     peak = peakList.newPeak(**parameters)
@@ -6308,7 +6340,7 @@ class CcpnNefReader(CcpnNefContent):
                     peaks[peakLabel] = peak
                     result.append(peak)
                 except Exception as es:
-                    pass
+                    self.warning(f'Error creating new peak', loop)
 
             # Add assignment
             # NB the self.defaultChainCode or converts code None to the default chain code
@@ -7629,7 +7661,8 @@ class CcpnNefReader(CcpnNefContent):
             return result
 
         if not sequenceCode:
-            raise ValueError("Cannot produce NmrResidue for sequenceCode: %s" % repr(sequenceCode))
+            return
+            # raise ValueError("Cannot produce NmrResidue for sequenceCode: %s" % repr(sequenceCode))
 
         if isinstance(sequenceCode, int):
             sequenceCode = str(sequenceCode)

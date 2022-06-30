@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 20:15:37 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-30 14:25:23 +0100 (Thu, June 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -126,11 +126,13 @@ TipText_DisappearedPeak                 = f'Set a fixed {DELTA}{Delta} value for
 
 WidgetVarName_CalculateDeltaDelta       = 'CalculateDeltaDelta'
 Label_CalculateDeltaDelta               = f'Calculate {DELTA}{Delta}'
+Button_CalculateDeltaDelta              = f'Re-Calculate '
 TipText_CalculateDeltaDelta             = f'Calculate {DELTA}{Delta} values based on current settings'
 
 
 WidgetVarName_CalculateFitting          = 'CalculateFitting'
 Label_CalculateFitting                  = f'Start Fitting'
+Button_CalculateFitting                 = f'Re-Fit'
 TipText_CalculateFitting                = f'Perform the fitting based on current settings'
 
 ############################################################

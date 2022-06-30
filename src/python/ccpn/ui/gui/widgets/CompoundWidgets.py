@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 20:15:38 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-30 14:25:24 +0100 (Thu, June 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -188,6 +188,11 @@ class ListCompoundWidget(CompoundBaseWidget):
     #     if target == self.pulldownList and event.type() == QtCore.QEvent.MouseButtonPress:
     #         self._preSelectCallBack()
     #     return False
+
+    def clearList(self):
+        self.listWidget._deleteAll()
+
+
 
     def setMaximumItemSelectionCount(self, value):
         self.maxItemSelection = value

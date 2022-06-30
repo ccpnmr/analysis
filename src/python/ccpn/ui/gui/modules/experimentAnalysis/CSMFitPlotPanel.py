@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-27 13:23:36 +0100 (Mon, June 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-30 14:25:23 +0100 (Thu, June 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -58,7 +58,7 @@ class CSMFitPlotPanel(FitPlotPanel):
     def _selectCurrentNmrResiduesNotifierCallback(self, *args):
         getLogger().info('Selected Current. Callback in FitPlot')
         nmrResidues = self.current.nmrResidues
-        dataTables = self.guiModule.getOutputDataTables()
+        dataTables = self.guiModule.outputDataTables
         df = None
         if len(dataTables)>0:
             df = dataTables[0].data

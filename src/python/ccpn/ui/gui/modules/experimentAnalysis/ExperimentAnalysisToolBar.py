@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 11:57:45 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-30 14:25:24 +0100 (Thu, June 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -96,14 +96,8 @@ class ToolBarPanel(GuiPanel):
         getLogger().warn('Not implemented. Clicked _filterButtonCallback')
 
     def _updateButtonCallback(self):
-        """ Update all panels and emit a signal with the settings value as a Dict """
-        settingsDict = self.guiModule.settingsPanelHandler.getAllSettings()
-
-        for panelName, panel in self.guiModule.panelHandler.panels.items():
-            panel.updatePanel(**{guiNameSpaces.SETTINGS:settingsDict})
-
-        ## emit signal as well
-        self.updateRequested.emit({guiNameSpaces.SETTINGS:settingsDict})
+        """ Update all panels."""
+        self.guiModule.updateAll()
 
     def _showStructureButtonCallback(self):
         getLogger().warn('Not implemented. Clicked _showStructureButtonCallback')

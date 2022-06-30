@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 20:15:38 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-30 14:25:24 +0100 (Thu, June 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons, EditableRadioButtons
 import ccpn.ui.gui.widgets.SettingsWidgets as settingWidgets
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Label import maTex2Pixmap
-import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as nameSpaces
+import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
 from ccpn.ui.gui.widgets.HLine import LabeledHLine
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST, ZPlaneNavigationModes
@@ -97,84 +97,84 @@ TABPOS = 0
 class GuiInputDataPanel(GuiSettingPanel):
 
     tabPosition = TABPOS
-    tabName = nameSpaces.Label_InputData
-    tabTipText = nameSpaces.TipText_GuiInputDataPanel
+    tabName = guiNameSpaces.Label_InputData
+    tabTipText = guiNameSpaces.TipText_GuiInputDataPanel
 
     def initWidgets(self):
         mainWindow = self._guiModule.mainWindow
         settingsDict = od((
-            (nameSpaces.WidgetVarName_SpectrumGroupsSeparator,
-                                {'label': nameSpaces.Label_SpectrumGroups,
+            (guiNameSpaces.WidgetVarName_SpectrumGroupsSeparator,
+             {'label': guiNameSpaces.Label_SpectrumGroups,
                                  'type': LabeledHLine,
-                                 'kwds': {'text': nameSpaces.Label_SpectrumGroups,
+                                 'kwds': {'text': guiNameSpaces.Label_SpectrumGroups,
                                           # 'height': 30,
                                           'colour':DividerColour,
                                           'gridSpan':(1,2),
-                                          'tipText': nameSpaces.TipText_SpectrumGroupsSeparator}}),
-            (nameSpaces.WidgetVarName_SpectrumGroupsSelection,
-                                {'label':  nameSpaces.Label_SelectSpectrumGroups,
-                                'tipText': nameSpaces.TipText_SpectrumGroupSelectionWidget,
+                                          'tipText': guiNameSpaces.TipText_SpectrumGroupsSeparator}}),
+            (guiNameSpaces.WidgetVarName_SpectrumGroupsSelection,
+             {'label':  guiNameSpaces.Label_SelectSpectrumGroups,
+                                'tipText': guiNameSpaces.TipText_SpectrumGroupSelectionWidget,
                                 'callBack': None,
                                 'type': settingWidgets.SpectrumGroupSelectionWidget,
                                 'kwds': {
-                                        'labelText': nameSpaces.Label_SelectSpectrumGroups,
-                                        'tipText': nameSpaces.TipText_SpectrumGroupSelectionWidget,
+                                        'labelText': guiNameSpaces.Label_SelectSpectrumGroups,
+                                        'tipText': guiNameSpaces.TipText_SpectrumGroupSelectionWidget,
                                         'displayText': [],
                                         'defaults': [],
                                         'standardListItems':[],
-                                        'objectName': nameSpaces.WidgetVarName_SpectrumGroupsSelection,
+                                        'objectName': guiNameSpaces.WidgetVarName_SpectrumGroupsSelection,
                                         'fixedWidths': SettingsWidgetFixedWidths}, }),
-            (nameSpaces.WidgetVarName_PeakProperty,
-                                {'label': nameSpaces.Label_PeakProperty,
+            (guiNameSpaces.WidgetVarName_PeakProperty,
+             {'label': guiNameSpaces.Label_PeakProperty,
                                 'callBack': None,
-                                'tipText': nameSpaces.TipText_PeakPropertySelectionWidget,
+                                'tipText': guiNameSpaces.TipText_PeakPropertySelectionWidget,
                                 'type': compoundWidget.PulldownListCompoundWidget,
-                                'kwds': {'labelText': nameSpaces.Label_PeakProperty,
-                                       'tipText': nameSpaces.TipText_PeakPropertySelectionWidget,
+                                'kwds': {'labelText': guiNameSpaces.Label_PeakProperty,
+                                       'tipText': guiNameSpaces.TipText_PeakPropertySelectionWidget,
                                        'texts': [],
                                        'fixedWidths': SettingsWidgetFixedWidths}}),
-            (nameSpaces.WidgetVarName_DataTableName,
-                                {'label': nameSpaces.Label_InputDataTableName,
-                                'tipText': nameSpaces.TipText_dataTableNameSelectionWidget,
+            (guiNameSpaces.WidgetVarName_DataTableName,
+             {'label': guiNameSpaces.Label_InputDataTableName,
+                                'tipText': guiNameSpaces.TipText_dataTableNameSelectionWidget,
                                 'callBack': None,
                                 'enabled': True,
                                 'type': compoundWidget.EntryCompoundWidget,
                                 '_init': None,
-                                'kwds': {'labelText': nameSpaces.Label_InputDataTableName,
+                                'kwds': {'labelText': guiNameSpaces.Label_InputDataTableName,
                                          'entryText': 'CSM_Input_DataTable',
-                                         'tipText': nameSpaces.TipText_dataTableNameSelectionWidget,
+                                         'tipText': guiNameSpaces.TipText_dataTableNameSelectionWidget,
                                          'fixedWidths': SettingsWidgetFixedWidths}, }),
-            (nameSpaces.WidgetVarName_CreateDataTable,
-                                {'label': nameSpaces.Label_CreateInput,
-                                'tipText': nameSpaces.TipText_createInputdataTableWidget,
+            (guiNameSpaces.WidgetVarName_CreateDataTable,
+             {'label': guiNameSpaces.Label_CreateInput,
+                                'tipText': guiNameSpaces.TipText_createInputdataTableWidget,
                                 'callBack': None,
                                 'type': compoundWidget.ButtonCompoundWidget,
                                 '_init': None,
-                                'kwds': {'labelText': nameSpaces.Label_CreateInput,
+                                'kwds': {'labelText': guiNameSpaces.Label_CreateInput,
                                          'text': 'Create', # this is the Button name
                                          'hAlign': 'left',
-                                         'tipText': nameSpaces.TipText_createInputdataTableWidget,
+                                         'tipText': guiNameSpaces.TipText_createInputdataTableWidget,
                                          'fixedWidths': SettingsWidgetFixedWidths}}),
-            (nameSpaces.WidgetVarName_DataTableSeparator,
-                                {'label': nameSpaces.Label_DataTables,
+            (guiNameSpaces.WidgetVarName_DataTableSeparator,
+             {'label': guiNameSpaces.Label_DataTables,
                                  'type': LabeledHLine,
-                                 'kwds': {'text':nameSpaces.Label_DataTables,
+                                 'kwds': {'text':guiNameSpaces.Label_DataTables,
                                           # 'height': 30,
                                           'gridSpan':(1,2),
                                           'colour': DividerColour,
-                                          'tipText': nameSpaces.TipText_DataTableSeparator}}),
-            (nameSpaces.WidgetVarName_DataTablesSelection,
-             {'label': nameSpaces.Label_SelectDataTable,
-              'tipText': nameSpaces.TipText_DataTableSelection,
+                                          'tipText': guiNameSpaces.TipText_DataTableSeparator}}),
+            (guiNameSpaces.WidgetVarName_DataTablesSelection,
+             {'label': guiNameSpaces.Label_SelectDataTable,
+              'tipText': guiNameSpaces.TipText_DataTableSelection,
               'callBack': None,
               'type': settingWidgets.DataTableSelectionWidget,
               'kwds': {
-                  'labelText': nameSpaces.Label_SelectDataTable,
-                  'tipText': nameSpaces.TipText_DataTableSelection,
+                  'labelText': guiNameSpaces.Label_SelectDataTable,
+                  'tipText': guiNameSpaces.TipText_DataTableSelection,
                   'displayText': [],
                   'defaults': [],
                   'standardListItems': [],
-                  'objectName': nameSpaces.WidgetVarName_DataTablesSelection,
+                  'objectName': guiNameSpaces.WidgetVarName_DataTablesSelection,
                   'fixedWidths': SettingsWidgetFixedWidths}, }),
             ))
         self._moduleSettingsWidget = settingWidgets.ModuleSettingsWidget(parent=self, mainWindow=mainWindow,
@@ -196,21 +196,21 @@ class CSMGuiInputDataPanel(GuiInputDataPanel):
 
     def _setCreateDataTableButtonCallback(self):
         "Set callback for create-input-DataTable button."
-        buttonWidget = self.getWidget(nameSpaces.WidgetVarName_CreateDataTable)
+        buttonWidget = self.getWidget(guiNameSpaces.WidgetVarName_CreateDataTable)
         if buttonWidget:
             buttonWidget.button.clicked.connect(self._createInputDataTableCallback)
 
     def _setPeakPropertySelection(self):
         "Allow  selection of 'Position' or 'LineWidth' for creating a new input DataTable. "
-        peakPropertyWidget = self.getWidget(nameSpaces.WidgetVarName_PeakProperty)
+        peakPropertyWidget = self.getWidget(guiNameSpaces.WidgetVarName_PeakProperty)
         if peakPropertyWidget:
             properties = [seriesVariables._PPMPOSITION, seriesVariables._LINEWIDTH]
             peakPropertyWidget.setTexts(properties)
 
     def _limitSelectionOnInputData(self):
         "Allow only one selection on SpectrumGroups and DataTable. "
-        sgSelectionWidget = self.getWidget(nameSpaces.WidgetVarName_SpectrumGroupsSelection)
-        dtSelectionWidget = self.getWidget(nameSpaces.WidgetVarName_DataTablesSelection)
+        sgSelectionWidget = self.getWidget(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection)
+        dtSelectionWidget = self.getWidget(guiNameSpaces.WidgetVarName_DataTablesSelection)
 
         if sgSelectionWidget:
             sgSelectionWidget.setMaximumItemSelectionCount(1)
@@ -221,17 +221,25 @@ class CSMGuiInputDataPanel(GuiInputDataPanel):
         """ """
         settingsPanelHandler = self._guiModule.settingsPanelHandler
         inputSettings = settingsPanelHandler.getInputDataSettings()
-        sgPids = inputSettings.get(nameSpaces.WidgetVarName_SpectrumGroupsSelection, [None])
+        sgPids = inputSettings.get(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection, [None])
         spGroup = self._guiModule.project.getByPid(sgPids[-1])
-        dataTableName = inputSettings.get(nameSpaces.WidgetVarName_DataTableName, None)
-        peakProperty = inputSettings.get(nameSpaces.WidgetVarName_PeakProperty, seriesVariables._PPMPOSITION)  #this should give a warning if wrong
+        dataTableName = inputSettings.get(guiNameSpaces.WidgetVarName_DataTableName, None)
+        peakProperty = inputSettings.get(guiNameSpaces.WidgetVarName_PeakProperty, seriesVariables._PPMPOSITION)  #this should give a warning if wrong
         if not spGroup:
             getLogger().warn('Cannot create an input DataTable without a SpectrumGroup. Select one first')
             return
         backend = self._guiModule.backendHandler
-        da = backend.newDataTableFromSpectrumGroup(spGroup, dataTableName=dataTableName, thePeakProperty=peakProperty)
-        backend.addInputDataTable(da)
+        newDataTable = backend.newDataTableFromSpectrumGroup(spGroup, dataTableName=dataTableName, thePeakProperty=peakProperty)
+        backend.addInputDataTable(newDataTable)
         getLogger().info('Successfully created new Input Data. Item available on the DataTable selection')
+        ## add as first selection in the datatable. clear first.
+        dtSelectionWidget = self.getWidget(guiNameSpaces.WidgetVarName_DataTablesSelection)
+        if dtSelectionWidget:
+            dtSelectionWidget.clearList()
+            dtSelectionWidget.updatePulldown()
+            dtSelectionWidget.select(newDataTable.pid)
+            #   update module
+            self._guiModule.updateAll()
 
 TABPOS += 1
 
@@ -239,8 +247,8 @@ TABPOS += 1
 class CSMCalculationPanel(GuiSettingPanel):
 
     tabPosition = TABPOS
-    tabName = nameSpaces.Label_Calculation
-    tabTipText = nameSpaces.TipText_CSMCalculationPanelPanel
+    tabName = guiNameSpaces.Label_Calculation
+    tabTipText = guiNameSpaces.TipText_CSMCalculationPanelPanel
 
     def initWidgets(self):
         mainWindow = self._guiModule.mainWindow
@@ -249,38 +257,40 @@ class CSMCalculationPanel(GuiSettingPanel):
                                         ChemicalShiftCalculationModes.items()]
         extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddCalculationsModes]
         settingsDict = od((
-            (nameSpaces.WidgetVarName_DeltaDeltasSeparator,
-             {'label': nameSpaces.Label_DeltaDeltas,
+            (guiNameSpaces.WidgetVarName_DeltaDeltasSeparator,
+             {'label': guiNameSpaces.Label_DeltaDeltas,
                'type': LabeledHLine,
-               'kwds': {'text':  nameSpaces.Label_DeltaDeltas,
+               'kwds': {'text':  guiNameSpaces.Label_DeltaDeltas,
                         'height': 30,
                         'gridSpan':(1,2),
                         'colour': DividerColour,
-                        'tipText': nameSpaces.TipText_DeltaDeltasSeparator}}),
-            (nameSpaces.WidgetVarName_DDCalculationMode,
-             {'label': nameSpaces.Label_DDCalculationMode,
+                        'tipText': guiNameSpaces.TipText_DeltaDeltasSeparator}}),
+            (guiNameSpaces.WidgetVarName_DDCalculationMode,
+             {'label': guiNameSpaces.Label_DDCalculationMode,
               'type': compoundWidget.RadioButtonsCompoundWidget,
               'postInit': self._calculationModePostInit,
-              'kwds': {'labelText' : nameSpaces.Label_DDCalculationMode,
+              'callBack': self._setCalculationOptionsToBackend,
+              'kwds': {'labelText' : guiNameSpaces.Label_DDCalculationMode,
                        'hAlign':'l',
                        'tipText' :'',
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'compoundKwds':{'texts' : list(ChemicalShiftCalculationModes.keys()),
                                        'extraLabels': extraLabels_ddCalculationsModes,
                                        'tipTexts': tipTexts_ddCalculationsModes,
+                                       
                                        'direction': 'v',
                                        'extraLabelIcons': extraLabelPixmaps}}}),
         ))
         ## add the weighting Factor widgets
         factorsDict = od(())
         for atomName, factorValue in seriesVariables.DEFAULT_ALPHA_FACTORS.items():
-            label = nameSpaces.Label_Factor.format(**{nameSpaces.AtomName:atomName})
-            att = nameSpaces.WidgetVarName_Factor.format(**{nameSpaces.AtomName:atomName})
-            tT = nameSpaces.TipText_Factor.format(**{nameSpaces.AtomName:atomName, nameSpaces.FactorValue:factorValue})
+            label = guiNameSpaces.Label_Factor.format(**{guiNameSpaces.AtomName:atomName})
+            att = guiNameSpaces.WidgetVarName_Factor.format(**{guiNameSpaces.AtomName:atomName})
+            tT = guiNameSpaces.TipText_Factor.format(**{guiNameSpaces.AtomName:atomName, guiNameSpaces.FactorValue:factorValue})
             factorsDict[att] = {'label': label,
-            'callBack': None,
-            'tipText': nameSpaces.TipText_Factor,
+            'tipText': guiNameSpaces.TipText_Factor,
             'type': compoundWidget.DoubleSpinBoxCompoundWidget,
+            'callBack': self._setCalculationOptionsToBackend,
             'kwds': {'labelText': label,
                     'tipText': tT,
                     'value':factorValue,
@@ -288,71 +298,50 @@ class CSMCalculationPanel(GuiSettingPanel):
                     'fixedWidths': SettingsWidgetFixedWidths}}
         settingsDict.update(factorsDict)
         restOfWidgetDict = od((
-            (nameSpaces.WidgetVarName_FollowAtoms,
-             {'label': nameSpaces.Label_FollowAtoms,
-              'tipText': nameSpaces.TipText_FollowAtoms,
-              'callBack': None,
+            (guiNameSpaces.WidgetVarName_FollowAtoms,
+             {'label': guiNameSpaces.Label_FollowAtoms,
+              'tipText': guiNameSpaces.TipText_FollowAtoms,
               'type': settingWidgets.UniqueNmrAtomNamesSelectionWidget,
               'postInit': self._followAtomsWidgetPostInit,
+              'callBack': self._setCalculationOptionsToBackend,
               'kwds': {
-                  'labelText': nameSpaces.Label_FollowAtoms,
-                  'tipText': nameSpaces.TipText_FollowAtoms,
+                  'labelText': guiNameSpaces.Label_FollowAtoms,
+                  'tipText': guiNameSpaces.TipText_FollowAtoms,
                   'texts': seriesVariables.DEFAULT_FILTERING_ATOMS,
                   'defaults': seriesVariables.DEFAULT_FILTERING_ATOMS,
-                  'objectName': nameSpaces.WidgetVarName_FollowAtoms,
+                  'objectName': guiNameSpaces.WidgetVarName_FollowAtoms,
                   'standardListItems': [],
                   'fixedWidths': SettingsWidgetFixedWidths
               }}),
-            (nameSpaces.WidgetVarName_ExcludeResType,
-             {'label': nameSpaces.Label_ExcludeResType,
-              'tipText': nameSpaces.TipText_ExcludeResType,
+            (guiNameSpaces.WidgetVarName_ExcludeResType,
+             {'label': guiNameSpaces.Label_ExcludeResType,
+              'tipText': guiNameSpaces.TipText_ExcludeResType,
               'postInit': self._excludeResiduesWidgetPostInit,
-              'callBack': None,
               'type': settingWidgets.UniqueNmrResidueTypeSelectionWidget,
+              'callBack': self._setCalculationOptionsToBackend,
               'kwds': {
-                  'labelText': nameSpaces.Label_ExcludeResType,
-                  'tipText': nameSpaces.TipText_ExcludeResType,
+                  'labelText': guiNameSpaces.Label_ExcludeResType,
+                  'tipText': guiNameSpaces.TipText_ExcludeResType,
                   'texts': [],
                   'defaults': [],
                   'standardListItems': [],
-                  'objectName': nameSpaces.WidgetVarName_ExcludeResType,
+                  'objectName': guiNameSpaces.WidgetVarName_ExcludeResType,
                   'fixedWidths': SettingsWidgetFixedWidths
               }}),
 
-            (nameSpaces.WidgetVarName_DisappearedPeak,
-             {'label': nameSpaces.Label_DisappearedPeak,
-              'tipText': nameSpaces.TipText_DisappearedPeak,
-              'callBack': None,
+            (guiNameSpaces.WidgetVarName_DisappearedPeak,
+             {'label': guiNameSpaces.Label_DisappearedPeak,
+              'tipText': guiNameSpaces.TipText_DisappearedPeak,
               'enabled': True,
               'type': compoundWidget.DoubleSpinBoxCompoundWidget,
+              'callBack': self._setCalculationOptionsToBackend,
               '_init': None,
-              'kwds': {'labelText': nameSpaces.Label_DisappearedPeak,
-                       'tipText': nameSpaces.TipText_DisappearedPeak,
+              'kwds': {'labelText': guiNameSpaces.Label_DisappearedPeak,
+                       'tipText': guiNameSpaces.TipText_DisappearedPeak,
                        'value': 1,
                        'fixedWidths': SettingsWidgetFixedWidths}, }),
-            ('CalculateDeltaDelta_separator',
-             {'label': 'CalculateDeltaDelta_separator',
-              'type': LabeledHLine,
-              'kwds': {'text': '',
-                       # 'height': 30,
-                       'gridSpan': (1, 2),
-                       'colour': DividerColour,
-                       'tipText': ''}}),
 
-            (nameSpaces.WidgetVarName_CalculateDeltaDelta,
-             {'label': nameSpaces.WidgetVarName_CalculateDeltaDelta,
-              'tipText': nameSpaces.TipText_CalculateDeltaDelta,
-              'callBack': None,
-              'type': compoundWidget.ButtonCompoundWidget,
-              '_init': None,
-              'kwds': {'labelText': nameSpaces.Label_CalculateDeltaDelta,
-                       'text': 'Calculate',  # this is the Button name
-                       'callback': self._calculateDeltaDeltaCallback,
-                       'hAlign': 'left',
-                       'tipText': nameSpaces.TipText_CalculateDeltaDelta,
-                       'fixedWidths': SettingsWidgetFixedWidths}}),
-
-        ))
+            ))
         settingsDict.update(restOfWidgetDict)
         self._moduleSettingsWidget = settingWidgets.ModuleSettingsWidget(parent=self, mainWindow=mainWindow,
                                                                          settingsDict=settingsDict,
@@ -379,7 +368,7 @@ class CSMCalculationPanel(GuiSettingPanel):
     def _getAlphaFactors(self):
         factors = {}
         for atomName, factorValue in seriesVariables.DEFAULT_ALPHA_FACTORS.items():
-            att = nameSpaces.WidgetVarName_Factor.format(**{nameSpaces.AtomName:atomName})
+            att = guiNameSpaces.WidgetVarName_Factor.format(**{guiNameSpaces.AtomName:atomName})
             widget = self.getWidget(att)
             if widget is not None:
                 factors.update({atomName:widget.getValue()})
@@ -387,33 +376,23 @@ class CSMCalculationPanel(GuiSettingPanel):
 
     def getSettingsAsDict(self):
         """Add the Factors in a dict, instead of single entries for each atom """
-        extraSettings = {nameSpaces.ALPHA_FACTORS:self._getAlphaFactors()}
+        extraSettings = {guiNameSpaces.ALPHA_FACTORS:self._getAlphaFactors()}
         settings = super(CSMCalculationPanel, self).getSettingsAsDict()
         settings.update(extraSettings)
         return settings
 
-    def _calculateDeltaDeltaCallback(self, *args):
-        getLogger().info(f'Recalculating {nameSpaces.DELTAdelta} ...')
-        settingsPanelHandler = self._guiModule.settingsPanelHandler
+    def _setCalculationOptionsToBackend(self):
+        """ Update the backend """
         calculationSettings = self.getSettingsAsDict()
-        _filteringAtoms = calculationSettings.get(nameSpaces.WidgetVarName_FollowAtoms, [])
-        _alphaFactors = calculationSettings.get(nameSpaces.ALPHA_FACTORS, {})
-        # need to remove this hack asap:
+        _filteringAtoms = calculationSettings.get(guiNameSpaces.WidgetVarName_FollowAtoms, [])
+        _alphaFactors = calculationSettings.get(guiNameSpaces.ALPHA_FACTORS, {})
+        # could be done more efficiently
         useAlphaFactors = {}
         for atom in _filteringAtoms:
             useAlphaFactors.update({atom:_alphaFactors.get(atom[0])})
         backend = self._guiModule.backendHandler
         backend._AlphaFactors = list(useAlphaFactors.values())
         backend._FilteringAtoms = list(useAlphaFactors.keys())
-        inputDataTables = backend.inputDataTables
-        if not inputDataTables:
-            getLogger().warning('Cannot calculate DeltaShifts. No inputData available')
-            return
-        dataTable = inputDataTables[-1]
-        deltasDF = backend.calculateDeltaDeltaShifts(dataTable.data,
-                                                     FilteringAtoms=list(useAlphaFactors.keys()),
-                                                     AlphaFactors=list(useAlphaFactors.values()) ,
-                                                    )
 
 
 TABPOS += 1
@@ -430,20 +409,21 @@ class CSMGuiFittingPanel(GuiSettingPanel):
                                         ChemicalShiftCalculationModels.items()]
         extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddCalculationsModels]
         settingsDict = od((
-            (nameSpaces.WidgetVarName_FittingSeparator,
-             {'label': nameSpaces.Label_FittingSeparator,
+            (guiNameSpaces.WidgetVarName_FittingSeparator,
+             {'label': guiNameSpaces.Label_FittingSeparator,
               'type': LabeledHLine,
-              'kwds': {'text': nameSpaces.Label_FittingSeparator,
+              'kwds': {'text': guiNameSpaces.Label_FittingSeparator,
                        'height': 30,
                        'gridSpan': (1, 2),
                        'colour': DividerColour,
-                       'tipText': nameSpaces.TipText_FittingSeparator}}),
-            (nameSpaces.WidgetVarName_FittingModel,
-             {'label': nameSpaces.Label_FittingModel,
+                       'tipText': guiNameSpaces.TipText_FittingSeparator}}),
+            (guiNameSpaces.WidgetVarName_FittingModel,
+             {'label': guiNameSpaces.Label_FittingModel,
               'type': compoundWidget.RadioButtonsCompoundWidget,
               'postInit': None,
-              'tipText': nameSpaces.TipText_FittingModel,
-              'kwds': {'labelText': nameSpaces.Label_FittingModel,
+              'tipText': guiNameSpaces.TipText_FittingModel,
+              'enabled': False,
+              'kwds': {'labelText': guiNameSpaces.Label_FittingModel,
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'compoundKwds': {'texts': list(ChemicalShiftCalculationModels.keys()),
                                         'extraLabels': extraLabels_ddCalculationsModels,
@@ -452,30 +432,32 @@ class CSMGuiFittingPanel(GuiSettingPanel):
                                         'tipText': '',
                                         'hAlign': 'l',
                                         'extraLabelIcons': extraLabelPixmaps}}}),
-            (nameSpaces.WidgetVarName_OptimiserSeparator,
-             {'label': nameSpaces.Label_OptimiserSeparator,
+            (guiNameSpaces.WidgetVarName_OptimiserSeparator,
+             {'label': guiNameSpaces.Label_OptimiserSeparator,
               'type': LabeledHLine,
-              'kwds': {'text': nameSpaces.Label_OptimiserSeparator,
+              'kwds': {'text': guiNameSpaces.Label_OptimiserSeparator,
                        'height': 30,
                        'gridSpan': (1, 2),
                        'colour': DividerColour,
-                       'tipText': nameSpaces.TipText_OptimiserSeparator}}),
-            (nameSpaces.WidgetVarName_OptimiserMethod,
-             {'label': nameSpaces.Label_OptimiserMethod,
+                       'tipText': guiNameSpaces.TipText_OptimiserSeparator}}),
+            (guiNameSpaces.WidgetVarName_OptimiserMethod,
+             {'label': guiNameSpaces.Label_OptimiserMethod,
               'callBack': None,
-              'tipText': nameSpaces.TipText_PeakPropertySelectionWidget,
+              'tipText': guiNameSpaces.TipText_PeakPropertySelectionWidget,
               'type': compoundWidget.PulldownListCompoundWidget,
-              'kwds': {'labelText': nameSpaces.Label_OptimiserMethod,
-                       'tipText': nameSpaces.TipText_OptimiserMethod,
+              'enabled': False,
+              'kwds': {'labelText': guiNameSpaces.Label_OptimiserMethod,
+                       'tipText': guiNameSpaces.TipText_OptimiserMethod,
                        'texts': ['leastsq', 'differential_evolution', 'ampgo', 'newton'],
                        'fixedWidths': SettingsWidgetFixedWidths}}),
-            (nameSpaces.WidgetVarName_ErrorMethod,
-             {'label': nameSpaces.Label_ErrorMethod,
+            (guiNameSpaces.WidgetVarName_ErrorMethod,
+             {'label': guiNameSpaces.Label_ErrorMethod,
               'callBack': None,
-              'tipText': nameSpaces.TipText_ErrorMethod,
+              'tipText': guiNameSpaces.TipText_ErrorMethod,
               'type': compoundWidget.PulldownListCompoundWidget,
-              'kwds': {'labelText': nameSpaces.Label_ErrorMethod,
-                       'tipText': nameSpaces.TipText_ErrorMethod,
+              'enabled': False,
+              'kwds': {'labelText': guiNameSpaces.Label_ErrorMethod,
+                       'tipText': guiNameSpaces.TipText_ErrorMethod,
                        'texts': ['parametric bootstrapping', 'non-parametric bootstrapping', 'Monte-Carlo',],
                        'fixedWidths': SettingsWidgetFixedWidths}}),
 
@@ -488,17 +470,17 @@ class CSMGuiFittingPanel(GuiSettingPanel):
                        'colour': DividerColour,
                        'tipText': ''}}),
 
-            (nameSpaces.WidgetVarName_CalculateFitting,
-             {'label': nameSpaces.Label_CalculateFitting,
-              'tipText': nameSpaces.TipText_CalculateFitting,
+            (guiNameSpaces.WidgetVarName_CalculateFitting,
+             {'label': guiNameSpaces.Label_CalculateFitting,
+              'tipText': guiNameSpaces.TipText_CalculateFitting,
               'callBack': None,
               'type': compoundWidget.ButtonCompoundWidget,
               '_init': None,
-              'kwds': {'labelText': nameSpaces.Label_CalculateDeltaDelta,
-                       'text': 'Calculate',  # this is the Button name
+              'kwds': {'labelText': guiNameSpaces.Label_CalculateFitting,
+                       'text': guiNameSpaces.Button_CalculateFitting,  # this is the Button name
                        'callback': self._calculateFittingCallback,
                        'hAlign': 'left',
-                       'tipText': nameSpaces.TipText_CalculateFitting,
+                       'tipText': guiNameSpaces.TipText_CalculateFitting,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
 
         ))
@@ -513,10 +495,10 @@ class CSMGuiFittingPanel(GuiSettingPanel):
                grid=(1, 0), gridSpan=(1, 1))
 
     def _calculateFittingCallback(self, *args):
-        getLogger().info(f'Recalculating {nameSpaces.DELTAdelta} ...')
-
+        getLogger().info(f'Recalculating {guiNameSpaces.DELTAdelta} ...')
         backend = self._guiModule.backendHandler
         backend.fitInputData(**{seriesVariables.OUTPUT_DATATABLE_NAME: 'CSM_outPut_fitting'})
+        self._guiModule.updateAll()
 
 
 
@@ -525,87 +507,87 @@ TABPOS += 1
 class AppearancePanel(GuiSettingPanel):
 
     tabPosition = TABPOS
-    tabName = nameSpaces.AppearancePanel
+    tabName = guiNameSpaces.AppearancePanel
     tabTipText = ''
 
     def initWidgets(self):
         mainWindow = self._guiModule.mainWindow
         settingsDict = od((
-            (nameSpaces.WidgetVarName_GenAppearanceSeparator,
-             {'label': nameSpaces.Label_GeneralAppearance,
+            (guiNameSpaces.WidgetVarName_GenAppearanceSeparator,
+             {'label': guiNameSpaces.Label_GeneralAppearance,
               'type': LabeledHLine,
-              'kwds': {'text': nameSpaces.Label_GeneralAppearance,
+              'kwds': {'text': guiNameSpaces.Label_GeneralAppearance,
                        'height': 30,
                        'colour': DividerColour,
                        'gridSpan': (1, 2),
-                       'tipText': nameSpaces.TipText_GeneralAppearance}}),
-            (nameSpaces.WidgetVarName_ThreshValue,
-             {'label': nameSpaces.Label_ThreshValue,
-              'tipText': nameSpaces.TipText_ThreshValue,
+                       'tipText': guiNameSpaces.TipText_GeneralAppearance}}),
+            (guiNameSpaces.WidgetVarName_ThreshValue,
+             {'label': guiNameSpaces.Label_ThreshValue,
+              'tipText': guiNameSpaces.TipText_ThreshValue,
               'callBack': None,
               'enabled': True,
               'type': compoundWidget.DoubleSpinBoxCompoundWidget,
               '_init': None,
-              'kwds': {'labelText': nameSpaces.Label_ThreshValue,
-                       'tipText': nameSpaces.TipText_ThreshValue,
+              'kwds': {'labelText': guiNameSpaces.Label_ThreshValue,
+                       'tipText': guiNameSpaces.TipText_ThreshValue,
                        'value': 0.1,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
-            (nameSpaces.WidgetVarName_PredefThreshValue,
-             {'label': nameSpaces.Label_PredefThreshValue,
-              'tipText': nameSpaces.TipText_PredefThreshValue,
+            (guiNameSpaces.WidgetVarName_PredefThreshValue,
+             {'label': guiNameSpaces.Label_PredefThreshValue,
+              'tipText': guiNameSpaces.TipText_PredefThreshValue,
               'callBack': None,
               'enabled': True,
               'type': compoundWidget.ButtonCompoundWidget,
               '_init': None,
-              'kwds': {'labelText': nameSpaces.Label_PredefThreshValue,
-                       'tipText': nameSpaces.TipText_PredefThreshValue,
-                       'text':nameSpaces.Label_StdThreshValue,
+              'kwds': {'labelText': guiNameSpaces.Label_PredefThreshValue,
+                       'tipText': guiNameSpaces.TipText_PredefThreshValue,
+                       'text':guiNameSpaces.Label_StdThreshValue,
                        'fixedWidths': SettingsWidgetFixedWidths
                        }}),
-            (nameSpaces.WidgetVarName_AboveThrColour,
-             {'label': nameSpaces.Label_AboveThrColour,
+            (guiNameSpaces.WidgetVarName_AboveThrColour,
+             {'label': guiNameSpaces.Label_AboveThrColour,
               'callBack': None,
-              'tipText': nameSpaces.TipText_AboveThrColour,
+              'tipText': guiNameSpaces.TipText_AboveThrColour,
               'type': compoundWidget.ColourSelectionCompoundWidget,
-              'kwds': {'labelText': nameSpaces.Label_AboveThrColour,
-                       'tipText': nameSpaces.TipText_PeakPropertySelectionWidget,
+              'kwds': {'labelText': guiNameSpaces.Label_AboveThrColour,
+                       'tipText': guiNameSpaces.TipText_PeakPropertySelectionWidget,
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'compoundKwds':{'includeGradients': True}}}),
-            (nameSpaces.WidgetVarName_BelowThrColour,
-             {'label': nameSpaces.Label_BelowThrColour,
+            (guiNameSpaces.WidgetVarName_BelowThrColour,
+             {'label': guiNameSpaces.Label_BelowThrColour,
               'callBack': None,
-              'tipText': nameSpaces.TipText_BelowThrColour,
+              'tipText': guiNameSpaces.TipText_BelowThrColour,
               'type': compoundWidget.ColourSelectionCompoundWidget,
-              'kwds': {'labelText': nameSpaces.Label_BelowThrColour,
-                       'tipText': nameSpaces.TipText_BelowThrColour,
+              'kwds': {'labelText': guiNameSpaces.Label_BelowThrColour,
+                       'tipText': guiNameSpaces.TipText_BelowThrColour,
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'compoundKwds':{'includeGradients': True}}}),
-            (nameSpaces.WidgetVarName_UntraceableColour,
-             {'label': nameSpaces.Label_UntraceableColour,
+            (guiNameSpaces.WidgetVarName_UntraceableColour,
+             {'label': guiNameSpaces.Label_UntraceableColour,
               'callBack': None,
-              'tipText': nameSpaces.TipText_UntraceableColour,
+              'tipText': guiNameSpaces.TipText_UntraceableColour,
               'type': compoundWidget.ColourSelectionCompoundWidget,
-              'kwds': {'labelText': nameSpaces.Label_UntraceableColour,
-                       'tipText': nameSpaces.TipText_UntraceableColour,
+              'kwds': {'labelText': guiNameSpaces.Label_UntraceableColour,
+                       'tipText': guiNameSpaces.TipText_UntraceableColour,
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'compoundKwds':{'includeGradients': True}}}),
-            (nameSpaces.WidgetVarName_MolStrucSeparator,
-             {'label': nameSpaces.Label_MolStrucSeparator,
+            (guiNameSpaces.WidgetVarName_MolStrucSeparator,
+             {'label': guiNameSpaces.Label_MolStrucSeparator,
               'type': LabeledHLine,
-              'kwds': {'text': nameSpaces.Label_MolStrucSeparator,
+              'kwds': {'text': guiNameSpaces.Label_MolStrucSeparator,
                        'height': 30,
                        'colour': DividerColour,
                        'gridSpan': (1, 2),
-                       'tipText': nameSpaces.TipText_MolStrucSeparator}}),
-            (nameSpaces.WidgetVarName_MolStructureFile,
-             {'label': nameSpaces.Label_MolStructureFile,
-              'tipText': nameSpaces.TipText_MolStructureFile,
+                       'tipText': guiNameSpaces.TipText_MolStrucSeparator}}),
+            (guiNameSpaces.WidgetVarName_MolStructureFile,
+             {'label': guiNameSpaces.Label_MolStructureFile,
+              'tipText': guiNameSpaces.TipText_MolStructureFile,
               'enabled': True,
               'type': compoundWidget.EntryPathCompoundWidget,
               '_init': None,
               'kwds': {
-                  'labelText': nameSpaces.Label_MolStructureFile,
-                       'tipText': nameSpaces.TipText_MolStructureFile,
+                  'labelText': guiNameSpaces.Label_MolStructureFile,
+                       'tipText': guiNameSpaces.TipText_MolStructureFile,
                        'entryText': '~',
                         'fixedWidths': SettingsWidgetFixedWidths,
                         'compoundKwds': {'lineEditMinimumWidth':300}

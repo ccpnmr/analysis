@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 11:57:44 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-30 14:25:23 +0100 (Thu, June 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,12 +27,14 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 from ccpn.framework.Application import getApplication, getCurrent, getProject
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisNotifierHandler import CoreNotifiersHandler
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
+from ccpn.util.Logging import getLogger
 
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import PanelHandler,\
     SettingsPanelHandler, IOHandler
+import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiSettingsPanel as settingsPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import ToolBarPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel
@@ -129,6 +131,13 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     #####################################################################
     #####################  Widgets callbacks  ###########################
     #####################################################################
+
+    def updateAll(self):
+        """ Update all Gui panels"""
+        getLogger().debug2(f'{self.className}: Updating all Gui Panels...')
+        settingsDict = self.settingsPanelHandler.getAllSettings()
+        for panelName, panel in self.panelHandler.panels.items():
+            panel.updatePanel(**{guiNameSpaces.SETTINGS: settingsDict})
 
     def restoreWidgetsState(self, **widgetsState):
         # with self.blockWidgetSignals():

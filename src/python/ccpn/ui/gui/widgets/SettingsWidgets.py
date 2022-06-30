@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 20:15:38 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-30 14:25:24 +0100 (Thu, June 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1347,7 +1347,7 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
                     widgetType = data['type']
                     kws = {}
                     if 'callBack' in data:  # this avoid a crash if the widget init doesn't have a callback/mainWindow arg
-                        kws.update({'callBack': data['callBack']})
+                        kws.update({'callback': data['callBack']})
                     kws.update({'mainWindow': self.mainWindow})
                     if 'kwds' in data:
                         kws.update(data['kwds'])
@@ -1369,8 +1369,8 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
                             # enabled=data['enabled']
                             )
                     # newItem.setCallback(data['callBack'] if 'callBack' in data else None)
-                    if 'enabled' in data:
-                        newItem.setEnabled(data['enabled'])
+                if 'enabled' in data:
+                    newItem.setEnabled(data['enabled'])
                 self.widgetsDict[item] = newItem
 
                 self.checkBoxes[item] = {'widget'    : newItem,
@@ -1525,6 +1525,9 @@ class ObjectSelectionWidget(ListCompoundWidget):
                                             targetName=self.KLASS.className,
                                             callback=self._objDeletedCallback)
 
+    def select(self, name):
+        self.pulldownList.select(name)
+
     def _selectObjectInList(self):
         """Handle clicking items in object selection
         """
@@ -1557,13 +1560,19 @@ class ObjectSelectionWidget(ListCompoundWidget):
         """
         pass
 
+    def updatePulldown(self):
+        self._fillPulldownListWidget()
+
     def _fillPulldownListWidget(self):
         """Fill the pulldownList with the currently available objects
         """
         ll = [SelectToAdd] + self.standardListItems
+        pulldownObjs = [None]*len(ll)
         if self.project:
-            ll += [obj.pid for obj in getattr(self.project, self.KLASS._pluralLinkName, [])]
-        self.pulldownList.setData(texts=ll)
+            objects = [obj for obj in getattr(self.project, self.KLASS._pluralLinkName, [])]
+            ll += [obj.pid for obj in objects]
+            pulldownObjs += objects
+        self.pulldownList.setData(texts=ll,)# objects=pulldownObjs)
 
     def _getObjects(self):
         """Return list of objects in the listWidget selection

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 20:15:37 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-30 14:25:23 +0100 (Thu, June 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -260,12 +260,10 @@ class CSMTablePanel(GuiPanel):
         GuiPanel.__init__(self, guiModule, *args , **Framekwargs)
 
     def initWidgets(self):
-        row = 0
-        Label(self, 'Test TablePanel', grid=(row, 0))
+
         self.mainTable = _CSMGuiTableABC(self,
                                              dataFrame=pd.DataFrame(),
                                              guiModule = self.guiModule, grid=(0, 0))
-        self.mainTable.dataFrame = pd.DataFrame([1, 2, 3, 4], columns=['#'])
 
     def setInputData(self, dataFrame):
         self.mainTable.dataFrame = dataFrame

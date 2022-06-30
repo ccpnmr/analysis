@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-30 14:25:24 +0100 (Thu, June 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-30 16:14:19 +0100 (Thu, June 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,20 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.util.DataEnum import DataEnum
 
+
+class PanelUpdateState(DataEnum):
+    """
+    updateState = 0 # status: done, no need to update. icon Green
+    updateState = 1 # status: to be done, on the queue and need to update. icon Orange
+    updateState = 2 # status: suspended, Might be updates. icon red
+    """
+
+    DONE        = 0, 'icons/update_done'
+    DETECTED    = 1, 'icons/update_detected'
+    SUSPENDED   = 2, 'icons/update_suspended'
 
 
 class ToolBarPanel(GuiPanel):
@@ -42,9 +55,12 @@ class ToolBarPanel(GuiPanel):
 
     updateRequested = QtCore.pyqtSignal(object)
 
+    updateState = 0
+
     def __init__(self, guiModule, *args, **Framekwargs):
         GuiPanel.__init__(self, guiModule, *args , **Framekwargs)
         self.setMaximumHeight(100)
+        self._updateState = PanelUpdateState.DONE
 
     def initWidgets(self):
 
@@ -56,6 +72,7 @@ class ToolBarPanel(GuiPanel):
                 'toggle': True,
                 'callback': f'_{guiNameSpaces.FilterButton}{guiNameSpaces.Callback}',  # the exact name as the function def
                 'objectName': guiNameSpaces.FilterButton,
+                'enabled': False,
             },
 
             guiNameSpaces.UpdateButton: {
@@ -73,6 +90,7 @@ class ToolBarPanel(GuiPanel):
                 'toggle': None,
                 'callback': f'_{guiNameSpaces.ShowStructureButton}{guiNameSpaces.Callback}',
                 'objectName':guiNameSpaces.UpdateButton,
+                'enabled': False,
             }}
 
         colPos = 0
@@ -101,4 +119,24 @@ class ToolBarPanel(GuiPanel):
 
     def _showStructureButtonCallback(self):
         getLogger().warn('Not implemented. Clicked _showStructureButtonCallback')
+
+    def getUpdateState(self):
+        return self._updateState
+
+    def setUpdateState(self, value):
+
+        dataEnum = None
+        if isinstance(value, DataEnum):
+            dataEnum = value
+        else:
+            for i in PanelUpdateState:
+                if i.value == value:
+                    dataEnum = value
+
+        if dataEnum:
+            self._updateState = dataEnum.value
+            updateButton = self.getButton(guiNameSpaces.UpdateButton)
+            if updateButton:
+                iconValue = dataEnum.description
+                updateButton.setIcon(Icon(iconValue))
 

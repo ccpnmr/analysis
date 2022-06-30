@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 20:15:37 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-30 16:14:19 +0100 (Thu, June 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -155,6 +155,16 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         outDataFrame[sv.ATOM_NAMES] = deltasDF[sv.ATOM_NAMES]
         outDataFrame[sv.SERIAL] = np.arange(1, len(outDataFrame) + 1)
         return outDataFrame
+
+    def getThresholdValueForData(self, stdFactor=1):
+        """ Get a Standard Deviation for the deltaDeltas  as a (default) Threshold value"""
+        stdFactor = stdFactor if stdFactor and stdFactor >0 else 1
+        thresholdValue = None
+        data = self.getOutputDataFrame()
+        if data is not None:
+            if len(data[sv.DELTA_DELTA_MEAN])>0:
+                thresholdValue = data[sv.DELTA_DELTA_MEAN].std() * stdFactor
+        return thresholdValue
 
     def plotResults(self, *args, **kwargs):
         getLogger().warning('Not implemented yet. Available: plotDeltaDeltas')

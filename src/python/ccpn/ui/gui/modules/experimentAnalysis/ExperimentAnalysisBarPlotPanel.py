@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 11:57:44 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-30 16:14:19 +0100 (Thu, June 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -59,6 +59,7 @@ class BarPlotPanel(GuiPanel):
         self.selectedLabelPen = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
         self.barGraphWidget = BarGraphWidget(self, application=self.application, backgroundColour=self.backgroundColour,
                                              grid=(0,0))
+        self.barGraphWidget.showThresholdLine(True)
         self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._thresholdLineMoved)
         self._setBarGraphWidget()
 
@@ -81,7 +82,8 @@ class BarPlotPanel(GuiPanel):
         if self._appearancePanel:
             w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
             if w:
-                w.setValue(pos)
+                with w.blockWidgetSignals():
+                    w.setValue(pos)
         self.updatePanel()
 
     def plotDataFrame(self, dataFrame):

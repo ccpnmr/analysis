@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-30 14:25:24 +0100 (Thu, June 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-30 16:14:19 +0100 (Thu, June 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -46,6 +46,7 @@ import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVa
 from ccpn.ui.gui.widgets.HLine import LabeledHLine
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import PanelUpdateState
 
 SettingsWidgeMinimumWidths =  (180, 180, 180)
 SettingsWidgetFixedWidths = (250, 300, 300)
@@ -87,7 +88,11 @@ class GuiSettingPanel(Frame):
                 print('Could not find get for: varName, widget',  varName, widget, e)
         return settingsDict
 
-
+    def _setUpdatedDetectedState(self):
+        """ set update detected on toolbar icons. """
+        toolbar = self._guiModule.panelHandler.getToolBarPanel()
+        if toolbar:
+            toolbar.setUpdateState(PanelUpdateState.DETECTED)
 
 TABPOS = 0
 ## Make a default tab ordering as they are added to this file.
@@ -394,6 +399,8 @@ class CSMCalculationPanel(GuiSettingPanel):
         backend._AlphaFactors = list(useAlphaFactors.values())
         backend._FilteringAtoms = list(useAlphaFactors.keys())
 
+        #set update detected.
+        self._setUpdatedDetectedState()
 
 TABPOS += 1
 class CSMGuiFittingPanel(GuiSettingPanel):
@@ -504,7 +511,7 @@ class CSMGuiFittingPanel(GuiSettingPanel):
 
 TABPOS += 1
 
-class AppearancePanel(GuiSettingPanel):
+class CSMAppearancePanel(GuiSettingPanel):
 
     tabPosition = TABPOS
     tabName = guiNameSpaces.AppearancePanel
@@ -524,7 +531,7 @@ class AppearancePanel(GuiSettingPanel):
             (guiNameSpaces.WidgetVarName_ThreshValue,
              {'label': guiNameSpaces.Label_ThreshValue,
               'tipText': guiNameSpaces.TipText_ThreshValue,
-              'callBack': None,
+              'callBack': self._commonCallback,
               'enabled': True,
               'type': compoundWidget.DoubleSpinBoxCompoundWidget,
               '_init': None,
@@ -535,7 +542,7 @@ class AppearancePanel(GuiSettingPanel):
             (guiNameSpaces.WidgetVarName_PredefThreshValue,
              {'label': guiNameSpaces.Label_PredefThreshValue,
               'tipText': guiNameSpaces.TipText_PredefThreshValue,
-              'callBack': None,
+              'callBack': self._setThresholdValueForData,
               'enabled': True,
               'type': compoundWidget.ButtonCompoundWidget,
               '_init': None,
@@ -546,7 +553,7 @@ class AppearancePanel(GuiSettingPanel):
                        }}),
             (guiNameSpaces.WidgetVarName_AboveThrColour,
              {'label': guiNameSpaces.Label_AboveThrColour,
-              'callBack': None,
+              'callBack': self._commonCallback,
               'tipText': guiNameSpaces.TipText_AboveThrColour,
               'type': compoundWidget.ColourSelectionCompoundWidget,
               'kwds': {'labelText': guiNameSpaces.Label_AboveThrColour,
@@ -555,7 +562,7 @@ class AppearancePanel(GuiSettingPanel):
                        'compoundKwds':{'includeGradients': True}}}),
             (guiNameSpaces.WidgetVarName_BelowThrColour,
              {'label': guiNameSpaces.Label_BelowThrColour,
-              'callBack': None,
+              'callBack': self._commonCallback,
               'tipText': guiNameSpaces.TipText_BelowThrColour,
               'type': compoundWidget.ColourSelectionCompoundWidget,
               'kwds': {'labelText': guiNameSpaces.Label_BelowThrColour,
@@ -564,7 +571,7 @@ class AppearancePanel(GuiSettingPanel):
                        'compoundKwds':{'includeGradients': True}}}),
             (guiNameSpaces.WidgetVarName_UntraceableColour,
              {'label': guiNameSpaces.Label_UntraceableColour,
-              'callBack': None,
+              'callBack': self._commonCallback,
               'tipText': guiNameSpaces.TipText_UntraceableColour,
               'type': compoundWidget.ColourSelectionCompoundWidget,
               'kwds': {'labelText': guiNameSpaces.Label_UntraceableColour,
@@ -582,7 +589,7 @@ class AppearancePanel(GuiSettingPanel):
             (guiNameSpaces.WidgetVarName_MolStructureFile,
              {'label': guiNameSpaces.Label_MolStructureFile,
               'tipText': guiNameSpaces.TipText_MolStructureFile,
-              'enabled': True,
+              'enabled': False,
               'type': compoundWidget.EntryPathCompoundWidget,
               '_init': None,
               'kwds': {
@@ -598,5 +605,16 @@ class AppearancePanel(GuiSettingPanel):
                                                                          settingsDict=settingsDict,
                                                                          grid=(0, 0))
         self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
+
+    def _setThresholdValueForData(self):
+        value = self._guiModule.backendHandler.getThresholdValueForData()
+        thresholdValueW = self.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
+        if thresholdValueW and value:
+            thresholdValueW.setValue(round(value, 3))
+        # self._commonCallback()
+
+    def _commonCallback(self, *args):
+        """ _commonCallback to set the updateState icon"""
+        self._setUpdatedDetectedState()
 
 TABPOS += 1

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-01 15:04:25 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-30 16:14:19 +0100 (Thu, June 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -569,8 +569,14 @@ class LineEditButtonDialog(Widget):
         else:
             return False
 
+    def getText(self):
+        return self.get()
+
     def get(self):
         return self.lineEdit.text()
+
+    def set(self, text):
+        self.setText(str(text))
 
     def setText(self, text):
         self.lineEdit.setText(str(text))

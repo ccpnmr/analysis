@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-30 14:25:23 +0100 (Thu, June 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-30 16:14:19 +0100 (Thu, June 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -49,7 +49,7 @@ class ChemicalShiftMappingGuiModule(ExperimentAnalysisGuiModuleBC):
 
     className = 'ChemicalShiftMapping'
 
-    def __init__(self, mainWindow, name='Chemical Shift Mapping (Beta)', **kwds):
+    def __init__(self, mainWindow, name='Chemical Shift Mapping (Alpha)', **kwds):
         super(ExperimentAnalysisGuiModuleBC, self)
         ExperimentAnalysisGuiModuleBC.__init__(self, mainWindow=mainWindow, name=name)
 
@@ -81,7 +81,7 @@ class ChemicalShiftMappingGuiModule(ExperimentAnalysisGuiModuleBC):
         self.settingsPanelHandler.append(settingsPanel.CSMGuiInputDataPanel(self))
         self.settingsPanelHandler.append(settingsPanel.CSMCalculationPanel(self))
         self.settingsPanelHandler.append(settingsPanel.CSMGuiFittingPanel(self))
-        self.settingsPanelHandler.append(settingsPanel.AppearancePanel(self))
+        self.settingsPanelHandler.append(settingsPanel.CSMAppearancePanel(self))
 
 
     #####################################################################

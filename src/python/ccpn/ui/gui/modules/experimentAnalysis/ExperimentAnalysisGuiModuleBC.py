@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-30 14:25:23 +0100 (Thu, June 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-30 16:14:19 +0100 (Thu, June 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import
     SettingsPanelHandler, IOHandler
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiSettingsPanel as settingsPanel
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import ToolBarPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import ToolBarPanel, PanelUpdateState
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
@@ -126,7 +126,7 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         Add the Common Settings Panels to the settingsPanelsManager.
         """
         self.settingsPanelHandler.append(settingsPanel.GuiInputDataPanel(self))
-        self.settingsPanelHandler.append(settingsPanel.AppearancePanel(self))
+        self.settingsPanelHandler.append(settingsPanel.CSMAppearancePanel(self))
 
     #####################################################################
     #####################  Widgets callbacks  ###########################
@@ -138,6 +138,11 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         settingsDict = self.settingsPanelHandler.getAllSettings()
         for panelName, panel in self.panelHandler.panels.items():
             panel.updatePanel(**{guiNameSpaces.SETTINGS: settingsDict})
+
+        #set update done.
+        toolbar = self.panelHandler.getToolBarPanel()
+        if toolbar:
+            toolbar.setUpdateState(PanelUpdateState.DONE)
 
     def restoreWidgetsState(self, **widgetsState):
         # with self.blockWidgetSignals():

@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-21 19:04:44 +0100 (Tue, June 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-30 16:14:18 +0100 (Thu, June 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1996,6 +1996,15 @@ class Framework(NotifierBase, GuiBase):
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
         cs = ChemicalShiftsMapping(mainWindow=mainWindow)
+        mainWindow.moduleArea.addModule(cs, position=position, relativeTo=relativeTo)
+        return cs
+
+    def showChemicalShiftMappingBeta(self, position: str = 'top', relativeTo: CcpnModule = None):
+        from ccpn.ui.gui.modules.experimentAnalysis.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
+        mainWindow = self.ui.mainWindow
+        if not relativeTo:
+            relativeTo = mainWindow.moduleArea
+        cs = ChemicalShiftMappingGuiModule(mainWindow=mainWindow)
         mainWindow.moduleArea.addModule(cs, position=position, relativeTo=relativeTo)
         return cs
 

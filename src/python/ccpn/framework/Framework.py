@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-30 16:14:18 +0100 (Thu, June 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-01 10:12:18 +0100 (Fri, July 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1999,7 +1999,7 @@ class Framework(NotifierBase, GuiBase):
         mainWindow.moduleArea.addModule(cs, position=position, relativeTo=relativeTo)
         return cs
 
-    def showChemicalShiftMappingBeta(self, position: str = 'top', relativeTo: CcpnModule = None):
+    def showChemicalShiftMappingAlpha(self, position: str = 'top', relativeTo: CcpnModule = None):
         from ccpn.ui.gui.modules.experimentAnalysis.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
         mainWindow = self.ui.mainWindow
         if not relativeTo:

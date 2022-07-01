@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 09:41:42 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-01 18:35:08 +0100 (Fri, July 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,8 @@ from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.util.Common import flattenLists
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.framework.Application import getApplication, getCurrent, getProject
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC, ALL_SERIES_DATA_TYPES
+
 
 class SeriesAnalysisABC(ABC):
     """
@@ -105,6 +107,14 @@ class SeriesAnalysisABC(ABC):
     def removeOutputData(self, dataTable):
         self._outputDataTables.discard(dataTable)
 
+    def _setDataType(self, dataTables, theType):
+        """set the dataTable.data (dataFrame) to the given type.
+         Used when restored project lost the dataTable.data Type """
+        for dataTable in dataTables:
+            if not isinstance(dataTable.data, theType):
+                dataTable.data.__class__ = theType
+
+
     @classmethod
     def fitInputData(self, *args, **kwargs):
         """
@@ -158,7 +168,6 @@ class SeriesAnalysisABC(ABC):
         :param kwargs:
         :return:
         """
-        from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC
         if not isinstance(spectrumGroup, SpectrumGroup):
             raise TypeError(f'spectrumGroup argument must be a SpectrumGroup Type. Given: {type(spectrumGroup)}')
 
@@ -166,6 +175,39 @@ class SeriesAnalysisABC(ABC):
         seriesFrame = SeriesFrameBC()
         seriesFrame.buildFromSpectrumGroup(spectrumGroup, thePeakProperty)
         dataTable = project.newDataTable(name=dataTableName, data=seriesFrame)
+        SeriesFrameBC._setRestoringMetadata(dataTable, seriesFrame, spectrumGroup)
+        return dataTable
+
+    @staticmethod
+    def _setRestoringMetadata(dataTable, seriesFrame, spectrumGroup):
+        """ set the metadata needed for restoring the object"""
+        dataTable.setMetadata(spectrumGroup.className, spectrumGroup.pid)
+        dataTable.setMetadata(sv.SERIESFRAMETYPE, seriesFrame.SERIESFRAMETYPE)
+        dataTable.setMetadata(sv._assignmentHeaders, seriesFrame._assignmentHeaders)
+        dataTable.setMetadata(sv._valuesHeaders, seriesFrame._valuesHeaders)
+
+    def _restoreDataTableData(self, dataTable):
+        """
+        Reset variables and Obj type after restoring a project from its metadata.
+        :return: dataTable
+        """
+        spectrumGroupPid = dataTable.metadata.get(SpectrumGroup.className, None)
+        spectrumGroup = self.project.getByPid(spectrumGroupPid)
+        dataTypeStr = dataTable.metadata.get(sv.SERIESFRAMETYPE, SeriesFrameBC.SERIESFRAMETYPE)
+        dataType = ALL_SERIES_DATA_TYPES.get(dataTypeStr, SeriesFrameBC)
+        _assignmentHeaders = dataTable.metadata.get(sv._assignmentHeaders, SeriesFrameBC._assignmentHeaders)
+        _valuesHeaders = dataTable.metadata.get(sv._valuesHeaders, SeriesFrameBC._valuesHeaders)
+        data = dataTable.data
+        if spectrumGroup and data is not None:
+            dataTable.data.__class__ = dataType
+            data.setSeriesSteps(spectrumGroup.series)
+            data.setSeriesUnits(spectrumGroup.seriesUnits)
+            data._assignmentHeaders = _assignmentHeaders
+            data._valuesHeaders = _valuesHeaders
+            if len(_valuesHeaders)>0:
+                data._valuesHeaders = _valuesHeaders
+            else:
+                data._setDefaultValueHeaders()
         return dataTable
 
     @classmethod

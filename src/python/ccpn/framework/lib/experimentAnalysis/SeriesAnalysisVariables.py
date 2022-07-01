@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 11:57:44 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-01 18:35:08 +0100 (Fri, July 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -81,6 +81,8 @@ CSM_INPUT_FRAME         = 'CSMInputFrame'
 CSM_OUTPUT_FRAME        = 'CSMOutputFrame'
 
 SERIESFRAMETYPE         = 'SERIESFRAMETYPE'
+_assignmentHeaders      = '_assignmentHeaders'
+_valuesHeaders          = '_valuesHeaders'
 
 INPUT_SERIESFRAME_TYPES = [
                     CSM_INPUT_FRAME,

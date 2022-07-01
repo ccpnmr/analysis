@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-01 18:35:08 +0100 (Fri, July 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -61,6 +61,8 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
         seriesFrame.buildFromSpectrumGroup(spectrumGroup=spectrumGroup, thePeakProperty=thePeakProperty)
         seriesFrame = _mergeRowsByHeaders(seriesFrame, sv.GROUPPING_HEADERS, dropColumnNames=sv.ATOM_NAME)
         dataTable = project.newDataTable(name=dataTableName, data=seriesFrame)
+        RelaxationAnalysisBC._setRestoringMetadata(dataTable, seriesFrame, spectrumGroup)
+
         return dataTable
 
     def fitInputData(self, *args, **kwargs):

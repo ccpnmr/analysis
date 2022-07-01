@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 09:41:42 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-01 18:35:08 +0100 (Fri, July 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,8 @@ from ccpn.util.Logging import getLogger
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import _registerChemicalShiftMappingModels
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame
+
 
 class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
     """
@@ -48,6 +50,16 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         self._ExcludedResidues = sv.DEFAULT_EXCLUDED_RESIDUES
 
         _registerChemicalShiftMappingModels()
+
+    @property
+    def inputDataTables(self, ) -> list:
+        """
+        List of inputDataTables.
+        """
+        dataTables = super(ChemicalShiftMappingAnalysisBC, self).inputDataTables
+        for dataTable in dataTables:
+            self._restoreDataTableData(dataTable)
+        return dataTables
 
     @staticmethod
     def newDataTableFromSpectrumGroup(spectrumGroup, seriesTableType=sv.CSM_INPUT_FRAME,
@@ -68,6 +80,8 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         seriesFrame = seriesFrameCLS()
         seriesFrame.buildFromSpectrumGroup(spectrumGroup=spectrumGroup, thePeakProperty=thePeakProperty)
         dataTable = project.newDataTable(name=dataTableName, data=seriesFrame)
+        ChemicalShiftMappingAnalysisBC._setRestoringMetadata(dataTable, seriesFrame, spectrumGroup)
+
         return dataTable
 
     def getAlphaFactor(self, atomName):

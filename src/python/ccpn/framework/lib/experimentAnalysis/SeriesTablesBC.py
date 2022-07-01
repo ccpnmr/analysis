@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-26 10:27:10 +0100 (Thu, May 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-01 18:35:08 +0100 (Fri, July 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,7 @@ from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flattenLists
+
 
 class SeriesFrameBC(TableFrame):
     """
@@ -418,6 +419,24 @@ def _getOutputFrameFromInputFrame(inputFrame, outputFrameType=RelaxationOutputFr
 INPUT_CSM_SERIESFRAMES_DICT = {
                               sv.CSM_INPUT_FRAME: CSMInputFrame
                               }
+
+OUTPUT_CSM_SERIESFRAMES_DICT = {
+                              sv.CSM_OUTPUT_FRAME: CSMOutputFrame,
+                              }
+
 INPUT_RELAXATION_SERIESFRAMES_DICT = {
                               sv.RELAXATION_INPUT_FRAME: RelaxationInputFrame
                               }
+
+OUTPUT_RELAXATION_SERIESFRAMES_DICT = {
+                              sv.RELAXATION_OUTPUT_FRAME: RelaxationOutputFrame
+                              }
+
+
+
+ALL_SERIES_DATA_TYPES = {
+                        **INPUT_CSM_SERIESFRAMES_DICT,
+                        **INPUT_RELAXATION_SERIESFRAMES_DICT,
+                        **OUTPUT_CSM_SERIESFRAMES_DICT,
+                        **OUTPUT_RELAXATION_SERIESFRAMES_DICT
+                         }

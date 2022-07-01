@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-30 16:14:19 +0100 (Thu, June 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-01 09:41:43 +0100 (Fri, July 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -47,6 +47,7 @@ from ccpn.ui.gui.widgets.HLine import LabeledHLine
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import PanelUpdateState
+from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
 
 SettingsWidgeMinimumWidths =  (180, 180, 180)
 SettingsWidgetFixedWidths = (250, 300, 300)
@@ -171,9 +172,10 @@ class GuiInputDataPanel(GuiSettingPanel):
             (guiNameSpaces.WidgetVarName_DataTablesSelection,
              {'label': guiNameSpaces.Label_SelectDataTable,
               'tipText': guiNameSpaces.TipText_DataTableSelection,
-              'callBack': None,
+              # 'callBack': self._addInputDataCallback,
               'type': settingWidgets.DataTableSelectionWidget,
               'kwds': {
+                  'objectWidgetChangedCallback':self._addInputDataCallback,
                   'labelText': guiNameSpaces.Label_SelectDataTable,
                   'tipText': guiNameSpaces.TipText_DataTableSelection,
                   'displayText': [],
@@ -186,6 +188,22 @@ class GuiInputDataPanel(GuiSettingPanel):
                                                settingsDict=settingsDict,
                                                grid=(0, 0))
         self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
+
+    def _addInputDataCallback(self, *args):
+
+        backend = self._guiModule.backendHandler
+        dataTablePids = self.getSettingsAsDict().get(guiNameSpaces.WidgetVarName_DataTablesSelection, [])
+        if not dataTablePids:
+            self._guiModule.backendHandler.clearInputDataTables()
+            getLogger().info(f'{self._guiModule.className}:{self.tabName}. Cleaned inputDataTables')
+            return
+        for pid in dataTablePids:
+            obj = self._guiModule.project.getByPid(pid)
+            if obj:
+                backend.addInputDataTable(obj)
+                getLogger().info(f'{self._guiModule.className}:{self.tabName}. {obj} added to inputDataTables')
+
+        self._guiModule.updateAll()
 
 TABPOS += 1
 
@@ -227,6 +245,9 @@ class CSMGuiInputDataPanel(GuiInputDataPanel):
         settingsPanelHandler = self._guiModule.settingsPanelHandler
         inputSettings = settingsPanelHandler.getInputDataSettings()
         sgPids = inputSettings.get(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection, [None])
+        if not sgPids:
+            showWarning('Select SpectrumGroup', 'Cannot create an input DataTable without a SpectrumGroup')
+            return
         spGroup = self._guiModule.project.getByPid(sgPids[-1])
         dataTableName = inputSettings.get(guiNameSpaces.WidgetVarName_DataTableName, None)
         peakProperty = inputSettings.get(guiNameSpaces.WidgetVarName_PeakProperty, seriesVariables._PPMPOSITION)  #this should give a warning if wrong
@@ -235,16 +256,13 @@ class CSMGuiInputDataPanel(GuiInputDataPanel):
             return
         backend = self._guiModule.backendHandler
         newDataTable = backend.newDataTableFromSpectrumGroup(spGroup, dataTableName=dataTableName, thePeakProperty=peakProperty)
-        backend.addInputDataTable(newDataTable)
-        getLogger().info('Successfully created new Input Data. Item available on the DataTable selection')
         ## add as first selection in the datatable. clear first.
         dtSelectionWidget = self.getWidget(guiNameSpaces.WidgetVarName_DataTablesSelection)
         if dtSelectionWidget:
             dtSelectionWidget.clearList()
             dtSelectionWidget.updatePulldown()
             dtSelectionWidget.select(newDataTable.pid)
-            #   update module
-            self._guiModule.updateAll()
+
 
 TABPOS += 1
 
@@ -391,14 +409,15 @@ class CSMCalculationPanel(GuiSettingPanel):
         calculationSettings = self.getSettingsAsDict()
         _filteringAtoms = calculationSettings.get(guiNameSpaces.WidgetVarName_FollowAtoms, [])
         _alphaFactors = calculationSettings.get(guiNameSpaces.ALPHA_FACTORS, {})
-        # could be done more efficiently
-        useAlphaFactors = {}
+        _excludedTypes = calculationSettings.get(guiNameSpaces.WidgetVarName_ExcludeResType, [])
+        useAlphaFactors = {} # could be done more efficiently
         for atom in _filteringAtoms:
             useAlphaFactors.update({atom:_alphaFactors.get(atom[0])})
+        ## update the backend
         backend = self._guiModule.backendHandler
         backend._AlphaFactors = list(useAlphaFactors.values())
         backend._FilteringAtoms = list(useAlphaFactors.keys())
-
+        backend._ExcludedResidues = _excludedTypes
         #set update detected.
         self._setUpdatedDetectedState()
 
@@ -514,7 +533,7 @@ TABPOS += 1
 class CSMAppearancePanel(GuiSettingPanel):
 
     tabPosition = TABPOS
-    tabName = guiNameSpaces.AppearancePanel
+    tabName = guiNameSpaces.Label_GeneralAppearance
     tabTipText = ''
 
     def initWidgets(self):

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-27 13:23:36 +0100 (Mon, June 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-01 09:41:43 +0100 (Fri, July 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,12 @@ from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRand
 from ccpn.ui.gui.widgets.Font import Font, getFont
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 
+class FmtAxisItem(pg.AxisItem):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def tickStrings(self, values, scale, spacing):
+        return [f'{v:.3f}' for v in values]
 
 
 class FitPlotPanel(GuiPanel):
@@ -65,7 +71,7 @@ class FitPlotPanel(GuiPanel):
         ###  Plot setup
         self._bindingPlotView = pg.GraphicsLayoutWidget()
         self._bindingPlotView.setBackground(self.backgroundColour)
-        self.bindingPlot = self._bindingPlotView.addPlot()
+        self.bindingPlot = self._bindingPlotView.addPlot(axisItems={'left': FmtAxisItem(orientation='left')})
         self.bindingPlot.setMenuEnabled(False)
         self.bindingPlot.getAxis('bottom').setPen(self.gridPen)
         self.bindingPlot.getAxis('left').setPen(self.gridPen)

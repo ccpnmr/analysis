@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-30 16:14:19 +0100 (Thu, June 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-01 09:41:42 +0100 (Fri, July 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -136,11 +136,11 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
             outputDataTable.data = outputFrame
             self.addOutputData(outputDataTable)
 
-    def getOutputDataFrame(self, *args):
+    def _getOutputMergedDataFrame(self, *args):
         """ Return the outputDataFrame containing the fitting and deltaDeltas calculations"""
         if len(self.inputDataTables) == 0:
             return
-        inputDataTable = self.inputDataTables[-1]
+        inputDataTable = self.inputDataTables[0]
         deltasDF = self.calculateDeltaDeltaShifts(inputDataTable.data,
                                                      FilteringAtoms=self._FilteringAtoms,
                                                      AlphaFactors=self._AlphaFactors,
@@ -153,14 +153,16 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         deltasDF.set_index(sv._ROW_UID, inplace=True, drop=False)
         outDataFrame[sv.DELTA_DELTA_MEAN] = deltasDF[sv.DELTA_DELTA_MEAN]
         outDataFrame[sv.ATOM_NAMES] = deltasDF[sv.ATOM_NAMES]
+        outDataFrame[sv.RESIDUE_TYPE] = deltasDF[sv.RESIDUE_TYPE]
         outDataFrame[sv.SERIAL] = np.arange(1, len(outDataFrame) + 1)
+        outDataFrame[sv.FLAG] = ['Included']*len(outDataFrame)
         return outDataFrame
 
     def getThresholdValueForData(self, stdFactor=1):
         """ Get a Standard Deviation for the deltaDeltas  as a (default) Threshold value"""
         stdFactor = stdFactor if stdFactor and stdFactor >0 else 1
         thresholdValue = None
-        data = self.getOutputDataFrame()
+        data = self._getOutputMergedDataFrame()
         if data is not None:
             if len(data[sv.DELTA_DELTA_MEAN])>0:
                 thresholdValue = data[sv.DELTA_DELTA_MEAN].std() * stdFactor

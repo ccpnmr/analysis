@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-30 14:25:23 +0100 (Thu, June 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-01 09:41:43 +0100 (Fri, July 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -40,7 +40,6 @@ from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel impor
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.Notifiers import Notifier
-
 
 
 class CSMFitPlotPanel(FitPlotPanel):
@@ -82,6 +81,11 @@ class CSMFitPlotPanel(FitPlotPanel):
     def plotCurve(self, xs, ys):
         self.bindingPlot.clear()
         self.bindingPlot.plot(xs, ys)
+
+    def clearData(self):
+        pass
+        #to do when cleaning input data and avoid wrongly displayed curves
+
 
 
 

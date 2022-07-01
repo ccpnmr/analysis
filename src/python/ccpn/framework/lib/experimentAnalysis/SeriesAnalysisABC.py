@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-01 09:41:42 +0100 (Fri, July 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -52,11 +52,21 @@ class SeriesAnalysisABC(ABC):
         """
         return list(self._inputDataTables)
 
+    @inputDataTables.setter
+    def inputDataTables(self, values):
+        self._inputDataTables = OrderedSet(values)
+
     def addInputDataTable(self, dataTable):
         """
         Add a DataTable as inputData
         """
         self._inputDataTables.add(dataTable)
+
+    def clearInputDataTables(self):
+        """
+        Remove all  DataTable as inputData
+        """
+        self._inputDataTables = OrderedSet()
 
     def getOutputDataTables(self, seriesFrameType:str=None):
         """

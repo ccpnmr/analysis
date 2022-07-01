@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-30 14:25:23 +0100 (Thu, June 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-01 09:41:43 +0100 (Fri, July 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -140,7 +140,7 @@ TipText_CalculateFitting                = f'Perform the fitting based on current
 ############################################################
 
 WidgetVarName_GenAppearanceSeparator    = 'GeneralAppearanceSeparator'
-Label_GeneralAppearance                 = 'General Appearance'
+Label_GeneralAppearance                 = 'Appearance'
 TipText_GeneralAppearance               = 'General Appearance settings'
 
 WidgetVarName_ThreshValue               = 'ThreshValue'
@@ -219,9 +219,9 @@ ColumnR2 = UNICODE_R2
 ColumnCHISQUARE = UNICODE_CHISQUARE
 ColumnREDCHISQUARE = UNICODE_RED_CHISQUARE
 
-ColumnChainCode = 'Chain Code'
-ColumnResidueCode = 'Residue Code'
-ColumnResidueType = 'Residue Type'
+ColumnChainCode = 'Chain'
+ColumnResidueCode = 'Code'
+ColumnResidueType = 'Type'
 ColumnAtoms = 'Atoms'
 
 _COLUM_FLOAT_FORM = '%0.3f'
@@ -245,5 +245,4 @@ CSMBarPlotPanel = 'CSMBarPlotPanel'
 CSMFittingPlotPanel = 'CSMFittingPlotPanel'
 
 RelativeDisplacement = 'Relative Displacement'
-AppearancePanel = 'AppearancePanel'
 ToolbarPanel = 'ToolbarPanel'

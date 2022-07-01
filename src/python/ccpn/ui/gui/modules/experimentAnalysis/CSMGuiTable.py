@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-30 14:25:23 +0100 (Thu, June 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-01 09:41:43 +0100 (Fri, July 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -62,12 +62,21 @@ class _CSMGuiTableABC(gt.GuiTable):
               gt.WIDTH: 50,
               gt.HIDDEN: False
               },
+
         guiNameSpaces.ColumnResidueCode: {gt.NAME: sv.RESIDUE_CODE,
               gt.GETTER: lambda row: _getValueByHeader(row, sv.RESIDUE_CODE),
               gt.TIPTEXT: _makeTipText(guiNameSpaces.ColumnResidueCode, "NmrResidue sequence code"),
               gt.WIDTH: 60,
               gt.HIDDEN: False
               },
+
+        guiNameSpaces.ColumnResidueType: {gt.NAME: sv.RESIDUE_TYPE,
+                                          gt.GETTER: lambda row: _getValueByHeader(row, sv.RESIDUE_TYPE),
+                                          gt.TIPTEXT: _makeTipText(guiNameSpaces.ColumnResidueType, "NmrResidue Type"),
+                                          gt.WIDTH: 50,
+                                          gt.HIDDEN: False
+                                          },
+
         guiNameSpaces.ColumnAtoms: {gt.NAME: sv.ATOM_NAMES,
               gt.GETTER: lambda row: _getValueByHeader(row, sv.ATOM_NAMES),
               gt.TIPTEXT: _makeTipText(guiNameSpaces.ColumnAtoms, "Nmr Atom names included in the calculation"),
@@ -183,6 +192,7 @@ class _CSMGuiTableABC(gt.GuiTable):
         self.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
         self._selectOverride = True # otherwise very odd behaviour
         gt._resizeColumnWidths(self)
+        self.setMinimumWidth(200)
 
     @property
     def dataFrame(self):
@@ -195,10 +205,11 @@ class _CSMGuiTableABC(gt.GuiTable):
 
     def build(self, dataFrame):
         self.clear()
-        self.dfo = self.getDataFromFrame(table=self, df=dataFrame, colDefs=self._columns)
-        self.setTableFromDataFrameObject(dataFrameObject=self.dfo, columnDefs=self._columns)
-        self.setHiddenColumns(_getHiddenColumns(self))
-        gt._resizeColumnWidths(self)
+        if dataFrame is not None:
+            self.dfo = self.getDataFromFrame(table=self, df=dataFrame, colDefs=self._columns)
+            self.setTableFromDataFrameObject(dataFrameObject=self.dfo, columnDefs=self._columns)
+            self.setHiddenColumns(_getHiddenColumns(self))
+            gt._resizeColumnWidths(self)
 
     def mousePressEvent(self, event):
         if self.itemAt(event.pos()) is None:
@@ -265,12 +276,16 @@ class CSMTablePanel(GuiPanel):
                                              dataFrame=pd.DataFrame(),
                                              guiModule = self.guiModule, grid=(0, 0))
 
+
     def setInputData(self, dataFrame):
         self.mainTable.dataFrame = dataFrame
 
+    def clearData(self):
+        self.mainTable.dataFrame = None
+        self.mainTable.clearTable()
 
     def updatePanel(self, *args, **kwargs):
         getLogger().info('Updating CSM table panel')
-        dataFrame = self.guiModule.backendHandler.getOutputDataFrame()
-        if dataFrame is not None:
-            self.setInputData(dataFrame)
+        dataFrame = self.guiModule.backendHandler._getOutputMergedDataFrame()
+        self.setInputData(dataFrame)
+

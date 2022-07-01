@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-30 14:25:24 +0100 (Thu, June 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-01 19:39:16 +0100 (Fri, July 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1540,7 +1540,7 @@ class ColourSelectionCompoundWidget(PulldownListCompoundWidget):
 
     def __init__(self, parent=None, vAlign='top', stretch=(0, 0), hAlign='left',
                  vPolicy='minimal', fixedWidths=(None, None, None), orientation='left',
-                 labelText=None, tipText=None,
+                 labelText=None, tipText=None, selectItem=None,
                  callback=None, compoundKwds=None,
                  **kwds):
 
@@ -1554,6 +1554,9 @@ class ColourSelectionCompoundWidget(PulldownListCompoundWidget):
         allowAuto = compoundKwds.get('allowAuto', False)
         pulldown = self.pulldownList
         fillColourPulldown(pulldown, allowAuto=allowAuto, includeGradients=includeGradients)
+        if selectItem:
+            with pulldown.blockWidgetSignals():
+                pulldown.select(selectItem)
 
 class CompoundViewCompoundWidget(CompoundBaseWidget):
     """

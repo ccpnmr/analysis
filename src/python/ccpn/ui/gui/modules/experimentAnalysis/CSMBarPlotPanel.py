@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 09:41:43 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-01 19:39:16 +0100 (Fri, July 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -53,10 +53,13 @@ class CSMBarPlotPanel(BarPlotPanel):
 
         self._defaultAboveThresholdBrushColour  = '#1020aa' # dark blue
         self._defaultBelowThresholdBrushColour  = '#b0b0b0' # light grey
-        self._defaultDisappearedBrushColour     = '#000000'  # black
+        self._defaultDisappearedBrushColour     = '#0000FF' # blue
 
-        # self._updateButton = self._toolbarPanel.getButton(guiNameSpaces.UpdateButton)
-        # self._updateButton.clicked.connect(self.updatePanel)
+        _thresholdValueW = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
+        if _thresholdValueW:
+            self.barGraphWidget.xLine.setPos(_thresholdValueW.getValue())
+            self.barGraphWidget.showThresholdLine(True)
+            _thresholdValueW.doubleSpinBox.valueChanged.connect(self._updateThresholdValueFromSettings)
 
     @property
     def thresholdValue(self):
@@ -100,6 +103,26 @@ class CSMBarPlotPanel(BarPlotPanel):
             if w:
                 w.select(colourName)
 
+    @property
+    def thresholdBrushColour(self):
+        """Returns selected colour name"""
+        value = None
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThrColour)
+            if w:
+                value = w.getText()
+        return value
+
+    @thresholdBrushColour.setter
+    def thresholdBrushColour(self, colourName):
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThrColour)
+            if w:
+                w.select(colourName)
+
+    def _updateThresholdValueFromSettings(self, value, *args):
+        self.thresholdValue = value
+
     def updatePanel(self, *args, **kwargs):
         getLogger().info('Updating CSM barPlot panel')
         dataFrame = self.guiModule.backendHandler._getOutputMergedDataFrame()
@@ -132,7 +155,7 @@ class CSMBarPlotPanel(BarPlotPanel):
         aboveBrush = colourNameToHexDict.get(self.aboveThresholdBrushColour, self._defaultAboveThresholdBrushColour)
         belowBrush = colourNameToHexDict.get(self.belowThresholdBrushColour, self._defaultBelowThresholdBrushColour)
         disappearedBrush = colourNameToHexDict.get(self.disappearedPeakBrush, self._defaultDisappearedBrushColour)
-
+        tresholdLineBrush = colourNameToHexDict.get(self.thresholdBrushColour, self._defaultDisappearedBrushColour)
         gradientName = self.aboveThresholdBrushColour
         brushes = colorSchemeTable.get(gradientName, [])
 
@@ -153,6 +176,7 @@ class CSMBarPlotPanel(BarPlotPanel):
                                        belowBrush=belowBrush,
                                        disappearedBrush=disappearedBrush,
                                        )
+        self.barGraphWidget.xLine.setPen(tresholdLineBrush)
 
     def _selectCurrentNmrResiduesNotifierCallback(self, *args):
         getLogger().info('Selected Current. Callback in BarPlot')

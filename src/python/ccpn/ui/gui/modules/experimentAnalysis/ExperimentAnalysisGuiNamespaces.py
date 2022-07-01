@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 09:41:43 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-01 19:39:16 +0100 (Fri, July 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -165,6 +165,10 @@ TipText_BelowThrColour                  = 'Select the colour for bars below a th
 WidgetVarName_UntraceableColour         = 'UntraceableColour'
 Label_UntraceableColour                 = 'Untraceable Perturbation Colour'
 TipText_UntraceableColour               = 'Select the colour for for Untraceable Perturbations.'
+
+WidgetVarName_ThrColour                 = 'ThresholdColour'
+Label_ThrColour                         = 'Threshold line Colour'
+TipText_ThrColour                       = 'Select the colour for the threshold line in the BarPlot'
 
 WidgetVarName_MolStrucSeparator         = 'MolStructureSeparator'
 Label_MolStrucSeparator                 = 'Molecular Structure'

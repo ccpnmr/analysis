@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 09:41:43 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-01 19:39:16 +0100 (Fri, July 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -576,27 +576,44 @@ class CSMAppearancePanel(GuiSettingPanel):
               'tipText': guiNameSpaces.TipText_AboveThrColour,
               'type': compoundWidget.ColourSelectionCompoundWidget,
               'kwds': {'labelText': guiNameSpaces.Label_AboveThrColour,
-                       'tipText': guiNameSpaces.TipText_PeakPropertySelectionWidget,
+                       'tipText': guiNameSpaces.TipText_AboveThrColour,
                        'fixedWidths': SettingsWidgetFixedWidths,
-                       'compoundKwds':{'includeGradients': True}}}),
+                       'selectItem': 'CCPNyellow',
+                       'compoundKwds':{'includeGradients': True,
+                                       }}}),
             (guiNameSpaces.WidgetVarName_BelowThrColour,
              {'label': guiNameSpaces.Label_BelowThrColour,
               'callBack': self._commonCallback,
+
               'tipText': guiNameSpaces.TipText_BelowThrColour,
               'type': compoundWidget.ColourSelectionCompoundWidget,
               'kwds': {'labelText': guiNameSpaces.Label_BelowThrColour,
                        'tipText': guiNameSpaces.TipText_BelowThrColour,
+                       'selectItem': 'CCPNgreen',
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'compoundKwds':{'includeGradients': True}}}),
             (guiNameSpaces.WidgetVarName_UntraceableColour,
              {'label': guiNameSpaces.Label_UntraceableColour,
               'callBack': self._commonCallback,
+
               'tipText': guiNameSpaces.TipText_UntraceableColour,
               'type': compoundWidget.ColourSelectionCompoundWidget,
               'kwds': {'labelText': guiNameSpaces.Label_UntraceableColour,
                        'tipText': guiNameSpaces.TipText_UntraceableColour,
                        'fixedWidths': SettingsWidgetFixedWidths,
+                       'selectItem': 'CCPNpurple',
                        'compoundKwds':{'includeGradients': True}}}),
+            (guiNameSpaces.WidgetVarName_ThrColour,
+             {'label': guiNameSpaces.Label_ThrColour,
+              'callBack': self._commonCallback,
+              'tipText': guiNameSpaces.TipText_ThrColour,
+              'type': compoundWidget.ColourSelectionCompoundWidget,
+              'kwds': {'labelText': guiNameSpaces.Label_ThrColour,
+                       'tipText': guiNameSpaces.TipText_ThrColour,
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'selectItem': 'blue',
+                       'compoundKwds': {'includeGradients': False,
+                                        }}}),
             (guiNameSpaces.WidgetVarName_MolStrucSeparator,
              {'label': guiNameSpaces.Label_MolStrucSeparator,
               'type': LabeledHLine,
@@ -630,7 +647,7 @@ class CSMAppearancePanel(GuiSettingPanel):
         thresholdValueW = self.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
         if thresholdValueW and value:
             thresholdValueW.setValue(round(value, 3))
-        # self._commonCallback()
+
 
     def _commonCallback(self, *args):
         """ _commonCallback to set the updateState icon"""

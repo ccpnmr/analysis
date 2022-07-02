@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 09:41:43 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-02 11:31:31 +0100 (Sat, July 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -51,8 +51,8 @@ class CSMFitPlotPanel(FitPlotPanel):
         FitPlotPanel.__init__(self, guiModule, *args , **Framekwargs)
         self.setXLabel(label='X')
         self.setYLabel(label=guiNameSpaces.RelativeDisplacement)
-        self._selectCurrentNRNotifier = Notifier(self.current, [Notifier.CURRENT], targetName='nmrResidues',
-                                                 callback=self._selectCurrentNmrResiduesNotifierCallback, onceOnly=True)
+        # self._selectCurrentNRNotifier = Notifier(self.current, [Notifier.CURRENT], targetName='nmrResidues',
+        #                                          callback=self._selectCurrentNmrResiduesNotifierCallback, onceOnly=True)
 
     def _selectCurrentNmrResiduesNotifierCallback(self, *args):
         getLogger().info('Selected Current. Callback in FitPlot')

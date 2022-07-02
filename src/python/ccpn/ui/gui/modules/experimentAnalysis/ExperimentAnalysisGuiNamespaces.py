@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 19:39:16 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-02 11:31:31 +0100 (Sat, July 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -143,6 +143,18 @@ WidgetVarName_GenAppearanceSeparator    = 'GeneralAppearanceSeparator'
 Label_GeneralAppearance                 = 'Appearance'
 TipText_GeneralAppearance               = 'General Appearance settings'
 
+WidgetVarName_SpectrumDisplSeparator    = 'SpectrumDisplaySeparator'
+Label_SpectrumDisplSeparator            = 'SpectrumDisplay'
+TipText_SpectrumDisplSeparator          = 'General Appearance settings for SpectrumDisplay'
+
+WidgetVarName_SpectrumDisplSelection    = 'SpectrumDisplaySelection'
+Label_SpectrumDisplSelection            = 'Navigate to SpectrumDisplay'
+TipText_SpectrumDisplSelection          = 'Navigate to Peaks/NmrResidues in the selected SpectrumDisplay(s)'
+
+WidgetVarName_BarGraphSeparator         = 'GeneralAppearanceSeparator'
+Label_BarGraphAppearance                = 'BarGraph'
+TipText_BarGraphAppearance              = 'General Appearance settings for the BarGraph'
+
 WidgetVarName_ThreshValue               = 'ThreshValue'
 Label_ThreshValue                       = 'Threshold Value'
 TipText_ThreshValue                     = 'Select the threshold line.'
@@ -167,7 +179,7 @@ Label_UntraceableColour                 = 'Untraceable Perturbation Colour'
 TipText_UntraceableColour               = 'Select the colour for for Untraceable Perturbations.'
 
 WidgetVarName_ThrColour                 = 'ThresholdColour'
-Label_ThrColour                         = 'Threshold line Colour'
+Label_ThrColour                         = 'Threshold Line Colour'
 TipText_ThrColour                       = 'Select the colour for the threshold line in the BarPlot'
 
 WidgetVarName_MolStrucSeparator         = 'MolStructureSeparator'
@@ -176,7 +188,7 @@ TipText_MolStrucSeparator               = ''
 
 WidgetVarName_MolStructureFile          = 'MolStructureFile'
 Label_MolStructureFile                  = 'Molecular Structure File'
-TipText_MolStructureFile                = 'Select the molecular structure file path.'
+TipText_MolStructureFile                = 'Select the molecular structure file path. (.pdb only)'
 
 
 

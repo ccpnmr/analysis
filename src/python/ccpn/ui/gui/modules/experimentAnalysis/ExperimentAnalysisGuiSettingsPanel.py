@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 19:39:16 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-02 11:31:31 +0100 (Sat, July 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -539,14 +539,34 @@ class CSMAppearancePanel(GuiSettingPanel):
     def initWidgets(self):
         mainWindow = self._guiModule.mainWindow
         settingsDict = od((
-            (guiNameSpaces.WidgetVarName_GenAppearanceSeparator,
-             {'label': guiNameSpaces.Label_GeneralAppearance,
+            (guiNameSpaces.WidgetVarName_SpectrumDisplSeparator,
+             {'label': guiNameSpaces.Label_SpectrumDisplSeparator,
               'type': LabeledHLine,
-              'kwds': {'text': guiNameSpaces.Label_GeneralAppearance,
+              'kwds': {'text': guiNameSpaces.Label_SpectrumDisplSeparator,
                        'height': 30,
                        'colour': DividerColour,
                        'gridSpan': (1, 2),
-                       'tipText': guiNameSpaces.TipText_GeneralAppearance}}),
+                       'tipText': guiNameSpaces.TipText_SpectrumDisplSeparator}}),
+            (guiNameSpaces.WidgetVarName_SpectrumDisplSelection,
+             {'label': guiNameSpaces.Label_SpectrumDisplSelection,
+              'callBack': None,
+              'enabled': False,
+              '_init': None,
+              'type': settingWidgets.SpectrumDisplaySelectionWidget,
+              'kwds': {'texts'        : ['Current'],
+                      'displayText'  : ['Current'],
+                      'defaults'     : ['Current'],
+                      'objectName'   : guiNameSpaces.WidgetVarName_SpectrumDisplSelection,
+                      'fixedWidths': SettingsWidgetFixedWidths,
+                       'tipText': guiNameSpaces.TipText_SpectrumDisplSelection}}),
+            (guiNameSpaces.WidgetVarName_BarGraphSeparator,
+             {'label': guiNameSpaces.Label_BarGraphAppearance,
+              'type': LabeledHLine,
+              'kwds': {'text': guiNameSpaces.Label_BarGraphAppearance,
+                       'height': 30,
+                       'colour': DividerColour,
+                       'gridSpan': (1, 2),
+                       'tipText': guiNameSpaces.TipText_BarGraphAppearance}}),
             (guiNameSpaces.WidgetVarName_ThreshValue,
              {'label': guiNameSpaces.Label_ThreshValue,
               'tipText': guiNameSpaces.TipText_ThreshValue,

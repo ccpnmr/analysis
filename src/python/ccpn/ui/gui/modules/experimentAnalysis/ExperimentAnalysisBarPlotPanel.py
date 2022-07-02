@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 19:39:16 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-02 11:31:31 +0100 (Sat, July 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -85,6 +85,68 @@ class BarPlotPanel(GuiPanel):
                 with w.blockWidgetSignals():
                     w.setValue(pos)
         self.updatePanel()
+
+    @property
+    def thresholdValue(self):
+        return self.barGraphWidget.xLine.pos().y()
+
+    @thresholdValue.setter
+    def thresholdValue(self, value):
+        self.barGraphWidget.xLine.setPos(value)
+
+    @property
+    def aboveThresholdBrushColour(self):
+        """Returns selected colour name """
+        value = None
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_AboveThrColour)
+            if w:
+                value = w.getText()
+        return value
+
+    @aboveThresholdBrushColour.setter
+    def aboveThresholdBrushColour(self, colourName):
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_AboveThrColour)
+            if w:
+                w.select(colourName)
+
+    @property
+    def belowThresholdBrushColour(self):
+        """Returns selected colour name"""
+        value = None
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BelowThrColour)
+            if w:
+                value = w.getText()
+        return value
+
+    @belowThresholdBrushColour.setter
+    def belowThresholdBrushColour(self, colourName):
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BelowThrColour)
+            if w:
+                w.select(colourName)
+
+    @property
+    def thresholdBrushColour(self):
+        """Returns selected colour name"""
+        value = None
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThrColour)
+            if w:
+                value = w.getText()
+        return value
+
+    @thresholdBrushColour.setter
+    def thresholdBrushColour(self, colourName):
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThrColour)
+            if w:
+                w.select(colourName)
+
+    def _updateThresholdValueFromSettings(self, value, *args):
+        self.thresholdValue = value
 
     def plotDataFrame(self, dataFrame):
         pass

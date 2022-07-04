@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 12:03:32 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 17:17:07 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -48,8 +48,8 @@ class CSMBarPlotPanel(BarPlotPanel):
         BarPlotPanel.__init__(self, guiModule, *args , **Framekwargs)
         self.setXLabel(label=guiNameSpaces.ColumnResidueCode)
         self.setYLabel(label=guiNameSpaces.ColumnDdelta)
-        # self._selectCurrentNRNotifier = Notifier(self.current, [Notifier.CURRENT], targetName='nmrResidues',
-        #                                          callback=self._selectCurrentNmrResiduesNotifierCallback, onceOnly=True)
+        self._selectCurrentNRNotifier = Notifier(self.current, [Notifier.CURRENT], targetName='nmrResidues',
+                                                 callback=self._selectCurrentNmrResiduesNotifierCallback, onceOnly=True)
 
         self._aboveX = []
         self._belowX = []

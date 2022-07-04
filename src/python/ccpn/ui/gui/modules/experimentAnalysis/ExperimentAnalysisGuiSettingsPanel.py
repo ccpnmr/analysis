@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 17:20:39 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 19:42:53 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -330,6 +330,7 @@ class CSMCalculationPanel(GuiSettingPanel):
               'kwds': {
                   'labelText': guiNameSpaces.Label_FollowAtoms,
                   'tipText': guiNameSpaces.TipText_FollowAtoms,
+                  'objectWidgetChangedCallback': self._setCalculationOptionsToBackend,
                   'pulldownCallback': self._setCalculationOptionsToBackend,
                   'texts': seriesVariables.DEFAULT_FILTERING_ATOMS,
                   'defaults': seriesVariables.DEFAULT_FILTERING_ATOMS,
@@ -346,6 +347,7 @@ class CSMCalculationPanel(GuiSettingPanel):
               'kwds': {
                   'labelText': guiNameSpaces.Label_ExcludeResType,
                   'tipText': guiNameSpaces.TipText_ExcludeResType,
+                  'objectWidgetChangedCallback': self._setCalculationOptionsToBackend,
                   'pulldownCallback': self._setCalculationOptionsToBackend,
                   'texts': [],
                   'defaults': [],

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-30 14:25:24 +0100 (Thu, June 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 19:42:53 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1612,7 +1612,7 @@ class UniqueNmrAtomNamesSelectionWidget(ObjectSelectionWidget):
         """Fill the pulldownList with the currently available objects
         """
         from ccpn.util.Common import sortByPriorityList
-        priorityAtomNames = ['H', 'HA', 'HB', 'C', 'CA', 'CB', 'N', 'NE', 'ND']
+        priorityAtomNames = ['H', 'Hn' 'HA', 'HB', 'C', 'CA', 'CB', 'N', 'Nh', 'NE', 'ND']
         ll = [SelectToAdd] + self.standardListItems
         uniqueNames = set()
         if self.project:

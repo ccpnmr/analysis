@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 17:13:53 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 17:20:39 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -610,7 +610,7 @@ class CSMAppearancePanel(GuiSettingPanel):
                        'tipText': guiNameSpaces.TipText_BelowThrColour,
                        'selectItem': guiNameSpaces.BAR_belowBrush,
                        'fixedWidths': SettingsWidgetFixedWidths,
-                       'compoundKwds':{'includeGradients': True}}}),
+                       'compoundKwds':{'includeGradients': False}}}),
             (guiNameSpaces.WidgetVarName_UntraceableColour,
              {'label': guiNameSpaces.Label_UntraceableColour,
               'callBack': self._commonCallback,
@@ -621,7 +621,7 @@ class CSMAppearancePanel(GuiSettingPanel):
                        'tipText': guiNameSpaces.TipText_UntraceableColour,
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'selectItem': guiNameSpaces.BAR_untracBrush,
-                       'compoundKwds':{'includeGradients': True}}}),
+                       'compoundKwds':{'includeGradients': False}}}),
             (guiNameSpaces.WidgetVarName_ThrColour,
              {'label': guiNameSpaces.Label_ThrColour,
               'callBack': self._commonCallback,

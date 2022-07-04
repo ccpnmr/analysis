@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 12:03:32 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -92,7 +92,7 @@ def r2_func(y, redchi):
         r2 = 1 - redchi / var
         return r2
 
-def euclideanDistance_func(array1, array2, alphaFactors, method='mean'):
+def euclideanDistance_func(array1, array2, alphaFactors):
     """
     Calculate the  Euclidean Distance of two set of coordinates using scaling factors. Used in CSM DeltaDeltas
     :param array1: (1d array), coordinate 1
@@ -101,13 +101,10 @@ def euclideanDistance_func(array1, array2, alphaFactors, method='mean'):
     :return: float
     Ref.: Eq.(9) from: M.P. Williamson Progress in Nuclear Magnetic Resonance Spectroscopy 73 (2013) 1–16
     """
-    if method not in ['sum', 'mean']:
-        getLogger().warn('Euclidean Distance method not available. Used Default.')
     deltas = []
     for a, b, factor in zip(array1, array2, alphaFactors):
         delta = a - b
         delta *= factor
         delta **= 2
         deltas.append(delta)
-    func = getattr(np, method, 'sum')
-    return np.sqrt(func(np.array(deltas)))
+    return np.sqrt(np.mean(np.array(deltas)))

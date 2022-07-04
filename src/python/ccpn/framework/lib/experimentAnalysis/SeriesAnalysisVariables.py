@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 18:35:08 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 12:03:32 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -123,7 +123,9 @@ _C = pu.C
 _OTHER = pu.OTHER
 
 ## Alpha Factors Definitions used in ChemicalShiftAnalysis DeltaDeltas
-
+uALPHA = '\u03B1'
+uDELTA = '\u0394'
+uDelta = '\u03B4'
 DELTA = 'Delta'
 DELTA_DELTA = f'{DELTA*2}'
 EUCLIDEAN_DISTANCE = 'Euclidean Distance'

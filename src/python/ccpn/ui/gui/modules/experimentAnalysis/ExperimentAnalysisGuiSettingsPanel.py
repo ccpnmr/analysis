@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-02 11:31:31 +0100 (Sat, July 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 12:03:33 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -352,15 +352,15 @@ class CSMCalculationPanel(GuiSettingPanel):
                   'fixedWidths': SettingsWidgetFixedWidths
               }}),
 
-            (guiNameSpaces.WidgetVarName_DisappearedPeak,
-             {'label': guiNameSpaces.Label_DisappearedPeak,
-              'tipText': guiNameSpaces.TipText_DisappearedPeak,
+            (guiNameSpaces.WidgetVarName_UntraceablePeak,
+             {'label': guiNameSpaces.Label_UntraceablePeak,
+              'tipText': guiNameSpaces.TipText_UntraceablePeak,
               'enabled': True,
               'type': compoundWidget.DoubleSpinBoxCompoundWidget,
               'callBack': self._setCalculationOptionsToBackend,
               '_init': None,
-              'kwds': {'labelText': guiNameSpaces.Label_DisappearedPeak,
-                       'tipText': guiNameSpaces.TipText_DisappearedPeak,
+              'kwds': {'labelText': guiNameSpaces.Label_UntraceablePeak,
+                       'tipText': guiNameSpaces.TipText_UntraceablePeak,
                        'value': 1,
                        'fixedWidths': SettingsWidgetFixedWidths}, }),
 
@@ -410,6 +410,7 @@ class CSMCalculationPanel(GuiSettingPanel):
         _filteringAtoms = calculationSettings.get(guiNameSpaces.WidgetVarName_FollowAtoms, [])
         _alphaFactors = calculationSettings.get(guiNameSpaces.ALPHA_FACTORS, {})
         _excludedTypes = calculationSettings.get(guiNameSpaces.WidgetVarName_ExcludeResType, [])
+        _untraceablePeakValue = calculationSettings.get(guiNameSpaces.WidgetVarName_UntraceablePeak, 1)
         useAlphaFactors = {} # could be done more efficiently
         for atom in _filteringAtoms:
             useAlphaFactors.update({atom:_alphaFactors.get(atom[0])})
@@ -418,6 +419,7 @@ class CSMCalculationPanel(GuiSettingPanel):
         backend._AlphaFactors = list(useAlphaFactors.values())
         backend._FilteringAtoms = list(useAlphaFactors.keys())
         backend._ExcludedResidues = _excludedTypes
+        backend._untraceableValue = _untraceablePeakValue
         #set update detected.
         self._setUpdatedDetectedState()
 
@@ -598,7 +600,7 @@ class CSMAppearancePanel(GuiSettingPanel):
               'kwds': {'labelText': guiNameSpaces.Label_AboveThrColour,
                        'tipText': guiNameSpaces.TipText_AboveThrColour,
                        'fixedWidths': SettingsWidgetFixedWidths,
-                       'selectItem': 'CCPNyellow',
+                       'selectItem': guiNameSpaces.BAR_aboveBrush,
                        'compoundKwds':{'includeGradients': True,
                                        }}}),
             (guiNameSpaces.WidgetVarName_BelowThrColour,
@@ -609,7 +611,7 @@ class CSMAppearancePanel(GuiSettingPanel):
               'type': compoundWidget.ColourSelectionCompoundWidget,
               'kwds': {'labelText': guiNameSpaces.Label_BelowThrColour,
                        'tipText': guiNameSpaces.TipText_BelowThrColour,
-                       'selectItem': 'CCPNgreen',
+                       'selectItem': guiNameSpaces.BAR_belowBrush,
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'compoundKwds':{'includeGradients': True}}}),
             (guiNameSpaces.WidgetVarName_UntraceableColour,
@@ -621,7 +623,7 @@ class CSMAppearancePanel(GuiSettingPanel):
               'kwds': {'labelText': guiNameSpaces.Label_UntraceableColour,
                        'tipText': guiNameSpaces.TipText_UntraceableColour,
                        'fixedWidths': SettingsWidgetFixedWidths,
-                       'selectItem': 'CCPNpurple',
+                       'selectItem': guiNameSpaces.BAR_untracBrush,
                        'compoundKwds':{'includeGradients': True}}}),
             (guiNameSpaces.WidgetVarName_ThrColour,
              {'label': guiNameSpaces.Label_ThrColour,
@@ -631,7 +633,7 @@ class CSMAppearancePanel(GuiSettingPanel):
               'kwds': {'labelText': guiNameSpaces.Label_ThrColour,
                        'tipText': guiNameSpaces.TipText_ThrColour,
                        'fixedWidths': SettingsWidgetFixedWidths,
-                       'selectItem': 'blue',
+                       'selectItem': guiNameSpaces.BAR_thresholdLine,
                        'compoundKwds': {'includeGradients': False,
                                         }}}),
             (guiNameSpaces.WidgetVarName_MolStrucSeparator,

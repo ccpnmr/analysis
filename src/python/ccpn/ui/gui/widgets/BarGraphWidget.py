@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 11:57:45 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 12:03:33 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -131,6 +131,13 @@ class BarGraphWidget(Widget):
             self.customViewBox.setLimits(xMin=min(self.xValues) / 2, xMax=max(self.xValues) + (max(self.xValues) * 0.5),
                                          yMin=min(self.yValues) / 2, yMax=max(self.yValues) + (max(self.yValues) * 0.5),
                                          )
+
+    def setXRange(self, xMin, xMax, padding=None, update=True):
+        self.customViewBox.setXRange(xMin, xMax, padding=padding, update=update)
+
+    def setYRange(self, yMin, yMax, padding=None, update=True):
+        self.customViewBox.setYRange(yMin, yMax, padding=padding, update=update)
+
 
     def clear(self):
 

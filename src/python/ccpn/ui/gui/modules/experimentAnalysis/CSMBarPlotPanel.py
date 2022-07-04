@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-02 11:31:31 +0100 (Sat, July 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 12:03:32 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -51,16 +51,28 @@ class CSMBarPlotPanel(BarPlotPanel):
         # self._selectCurrentNRNotifier = Notifier(self.current, [Notifier.CURRENT], targetName='nmrResidues',
         #                                          callback=self._selectCurrentNmrResiduesNotifierCallback, onceOnly=True)
 
-        self._defaultAboveThresholdBrushColour  = '#1020aa' # dark blue
-        self._defaultBelowThresholdBrushColour  = '#b0b0b0' # light grey
-        self._defaultDisappearedBrushColour     = '#0000FF' # blue
+        self._aboveX = []
+        self._belowX = []
+        self._untraceableX = []
+        ## Y
+        self._aboveY = []
+        self._belowY = []
+        self._untraceableY = []
+        ## Objects
+        self._aboveObjects = []
+        self._belowObjects = []
+        self._untraceableObjects = []
+        ## Brush
+        self._aboveBrush = guiNameSpaces.BAR_aboveBrushHex
+        self._belowBrush = guiNameSpaces.BAR_belowBrushHex
+        self._untraceableBrush = guiNameSpaces.BAR_untracBrushHex
+        self._gradientbrushes = []
 
         _thresholdValueW = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
         if _thresholdValueW:
             self.barGraphWidget.xLine.setPos(_thresholdValueW.getValue())
             self.barGraphWidget.showThresholdLine(True)
             _thresholdValueW.doubleSpinBox.valueChanged.connect(self._updateThresholdValueFromSettings)
-
 
 
     def updatePanel(self, *args, **kwargs):
@@ -71,52 +83,64 @@ class CSMBarPlotPanel(BarPlotPanel):
         else:
             self.barGraphWidget.clear()
 
-    def plotDataFrame(self, dataFrame, xColumnName=sv.RESIDUE_CODE, yColumnName=sv.DELTA_DELTA_MEAN):
-        """ Plot the given columns of dataframe as bars """
-        getLogger().warning('DEMO version of plotting')
-        self.barGraphWidget.clear()
+    def _setPlottingData(self, dataFrame, xColumnName, yColumnName):
+        """Set the plotting variables from the current Dataframe.\
+         # TODO excluded filter"""
         ## group by threshold value
         aboveDf = dataFrame[dataFrame[yColumnName] >= self.thresholdValue]
         belowDf = dataFrame[dataFrame[yColumnName] < self.thresholdValue]
-        self.aboveX = [int(i) for i in aboveDf[xColumnName]]
-        self.aboveY = aboveDf[yColumnName]
-        self.aboveObjects = [self.project.getByPid(x) for x in aboveDf[sv._ROW_UID]]
+        untraceableDd = dataFrame[dataFrame[yColumnName].isnull()]
+        self._aboveX = [int(i) for i in aboveDf[xColumnName]]
+        self._aboveY = aboveDf[yColumnName]
+        self._aboveObjects = [self.project.getByPid(x) for x in aboveDf[sv._ROW_UID]]
         ## below threshold values
-        self.belowX = [int(i) for i in belowDf[xColumnName]]
-        self.belowY = belowDf[yColumnName]
-        self.belowObjects = [self.project.getByPid(x) for x in belowDf[sv._ROW_UID]]
+        self._belowX = [int(i) for i in belowDf[xColumnName]]
+        self._belowY = belowDf[yColumnName]
+        self._belowObjects = [self.project.getByPid(x) for x in belowDf[sv._ROW_UID]]
+        ## untraceable values
+        self._untraceableX = [int(i) for i in untraceableDd[xColumnName]]
+        self._untraceableY = [self.guiModule.backendHandler.untraceableValue] * len(untraceableDd[yColumnName])
+        self._untraceableObjects = [self.project.getByPid(x) for x in untraceableDd[sv._ROW_UID]]
+        ## Brushes
+        self._aboveBrush = colourNameToHexDict.get(self.aboveThresholdBrushColour, guiNameSpaces.BAR_aboveBrushHex)
+        self._belowBrush = colourNameToHexDict.get(self.belowThresholdBrushColour, guiNameSpaces.BAR_belowBrushHex)
+        self._untraceableBrush = colourNameToHexDict.get(self.untraceableBrushColour, guiNameSpaces.BAR_untracBrushHex)
+        self._tresholdLineBrush = colourNameToHexDict.get(self.thresholdBrushColour, guiNameSpaces.BAR_thresholdLineHex)
+        self._gradientbrushes = colorSchemeTable.get(self.aboveThresholdBrushColour, []) #in case there is one.
 
-        # TODO disappeared and excluded filter
-        self.disappearedX = []
-        self.disappearedY = []
-        self.disappereadObjects = []
-        self.disappearedPeakBrush = ''
-
-        aboveBrush = colourNameToHexDict.get(self.aboveThresholdBrushColour, self._defaultAboveThresholdBrushColour)
-        belowBrush = colourNameToHexDict.get(self.belowThresholdBrushColour, self._defaultBelowThresholdBrushColour)
-        disappearedBrush = colourNameToHexDict.get(self.disappearedPeakBrush, self._defaultDisappearedBrushColour)
-        tresholdLineBrush = colourNameToHexDict.get(self.thresholdBrushColour, self._defaultDisappearedBrushColour)
-        gradientName = self.aboveThresholdBrushColour
-        brushes = colorSchemeTable.get(gradientName, [])
-
-        self.barGraphWidget._lineMoved(aboveX=self.aboveX,
-                                       belowX=self.belowX,
-                                       disappearedX=self.disappearedX,
+    def plotDataFrame(self, dataFrame, xColumnName=sv.RESIDUE_CODE, yColumnName=sv.DELTA_DELTA_MEAN):
+        """ Plot the given columns of dataframe as bars
+         """
+        getLogger().warning('DEMO version of plotting')
+        self.barGraphWidget.clear()
+        self._setPlottingData(dataFrame, xColumnName, yColumnName)
+        self.barGraphWidget._lineMoved(aboveX=self._aboveX,
+                                       belowX=self._belowX,
+                                       disappearedX=self._untraceableX,
                                        ## Y
-                                       aboveY=self.aboveY,
-                                       belowY=self.belowY,
-                                       disappearedY=self.disappearedY,
+                                       aboveY=self._aboveY,
+                                       belowY=self._belowY,
+                                       disappearedY=self._untraceableY,
                                        ## Objects
-                                       aboveObjects=self.aboveObjects,
-                                       belowObjects=self.belowObjects,
-                                       disappearedObjects=self.disappereadObjects,
+                                       aboveObjects=self._aboveObjects,
+                                       belowObjects=self._belowObjects,
+                                       disappearedObjects=self._untraceableObjects,
                                        ## Brush
-                                       aboveBrush=aboveBrush,
-                                       aboveBrushes=brushes,
-                                       belowBrush=belowBrush,
-                                       disappearedBrush=disappearedBrush,
+                                       aboveBrush=self._aboveBrush,
+                                       aboveBrushes=self._gradientbrushes,
+                                       belowBrush=self._belowBrush,
+                                       disappearedBrush=self._untraceableBrush,
                                        )
-        self.barGraphWidget.xLine.setPen(tresholdLineBrush)
+        self.barGraphWidget.xLine.setPen(self._tresholdLineBrush)
+        self._setBarGraphZoomFromData(dataFrame, xColumnName, yColumnName)
+
+
+    def _setBarGraphZoomFromData(self, dataFrame, xColumnName, yColumnName):
+        """ Set the zoom without  considering the untraceable values"""
+        ydata = dataFrame[yColumnName]
+        xdata = [int(i) for i in dataFrame[xColumnName]]
+        self.barGraphWidget.setXRange(np.min(xdata), np.max(xdata))
+        self.barGraphWidget.setYRange(ydata.min(), ydata.max())
 
     def _selectCurrentNmrResiduesNotifierCallback(self, *args):
         getLogger().info('Selected Current. Callback in BarPlot')

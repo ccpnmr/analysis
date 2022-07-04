@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 18:35:08 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 12:03:32 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -48,7 +48,7 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         self._FilteringAtoms = sv.DEFAULT_FILTERING_ATOMS
         self._AlphaFactors = [1, 0.142]
         self._ExcludedResidues = sv.DEFAULT_EXCLUDED_RESIDUES
-
+        self._untraceableValue = 1.0 # default value for replacing NaN values in the DeltaDeltas column
         _registerChemicalShiftMappingModels()
 
     @property
@@ -100,6 +100,17 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
                 getLogger().warning(f'ChemicalShiftMapping. Cannot set the AlphaFactor value:{v} for the Atom:{k}.')
                 dd.pop(k)
         self._AlphaFactors.update(dd)
+
+    @property
+    def untraceableValue(self) ->float:
+        return self._untraceableValue
+
+    @untraceableValue.setter
+    def untraceableValue(self, value):
+        if isinstance(value, (float,int)):
+            self._untraceableValue = value
+        else:
+            getLogger().warning(f'Impossible to set untraceableValue to {value}. Use type int or float.')
 
     def calculateDeltaDeltaShifts(self, inputData, **kwargs):
         """

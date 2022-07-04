@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-02 11:31:31 +0100 (Sat, July 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 12:03:33 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,16 +30,28 @@ ToolBar = 'ToolBar'
 DELTA = '\u0394'
 Delta = '\u03B4'
 
-# colours
+#### colours
 import ccpn.ui.gui.guiSettings as gs
 BackgroundColour = gs.getColours()[gs.CCPNGLWIDGET_HEXBACKGROUND]
+
+## Default fallback colours for BarGraph.
+BAR_aboveBrushHex       = '#1020aa'     # dark blue
+BAR_belowBrushHex       = '#FF0000'     # red
+BAR_untracBrushHex      = '#b0b0b0'     # light grey
+BAR_thresholdLineHex    = '#0000FF'     # blue
+
+## Startup colour-names for BarGraph-settings.
+BAR_aboveBrush          = 'CCPNgreen'
+BAR_belowBrush          = 'CCPNyellow'
+BAR_untracBrush         = 'CCPNpurple'
+BAR_thresholdLine       = 'blue'
 
 ##### SETTINGS  ######
 
 SETTINGS = 'settings'
-WidgetVarName_         = 'VarName'
-Label_                 = 'Label'
-tipText_               = 'tipText'
+WidgetVarName_          = 'VarName'
+Label_                  = 'Label'
+tipText_                = 'tipText'
 
 ####################################################
 ##########     TAB: GuiInputDataPanel     ##########
@@ -120,9 +132,10 @@ WidgetVarName_DDOtherCalculationMode    = 'DeltaDeltaCalculationOtherMode'
 Label_DDOtherCalculationMode            = f'{DELTA}{Delta} Height/Volume \nCalculation Mode'
 TipText_DDOtherCalculationMode          = f'Select the calculation mode for other {DELTA}{Delta} analysis. E.g.: Height and Volume.'
 
-WidgetVarName_DisappearedPeak           = 'DisappearedPeak'
-Label_DisappearedPeak                   = f'{DELTA}{Delta} for Untraceable Perturbations'
-TipText_DisappearedPeak                 = f'Set a fixed {DELTA}{Delta} value for Untraceable Perturbations. E.g.: when a peak in a series disappeared'
+WidgetVarName_UntraceablePeak           = 'UntraceablePeak'
+Label_UntraceablePeak                   = f'{DELTA}{Delta} for Untraceable Perturbations'
+TipText_UntraceablePeak                 = f'Set a fixed {DELTA}{Delta} value for Untraceable Perturbations.' \
+                                          f'This situation could happen when a peak in a series disappeared or is impossible to calculate the {DELTA}{Delta} '
 
 WidgetVarName_CalculateDeltaDelta       = 'CalculateDeltaDelta'
 Label_CalculateDeltaDelta               = f'Calculate {DELTA}{Delta}'

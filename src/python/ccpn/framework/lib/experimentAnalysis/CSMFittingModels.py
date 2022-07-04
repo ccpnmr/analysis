@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 18:35:07 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 12:03:32 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -107,7 +107,7 @@ class DeltaDeltaShiftsCalculation():
     ModelName = sv.EUCLIDEAN_DISTANCE
     Info        = 'Calculate The DeltaDelta shifts for a series using the average Euclidean Distance.'
     MaTex       = r'$\sqrt{\frac{1}{N}\sum_{i=0}^N (\alpha_i*\delta_i)^2}$'
-    Description = 'Alpha: the factor for each atom of interest.'
+    Description = f'{sv.uALPHA}: the factor for each atom of interest;\ni: atom;\nN atom count;\n{sv.uDelta}: delta shift per atom in the series'
     References  = '''
                     1) Eq. (9) M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
                     2) Mureddu, L. & Vuister, G. W. Simple high-resolution NMR spectroscopy as a tool in molecular biology.

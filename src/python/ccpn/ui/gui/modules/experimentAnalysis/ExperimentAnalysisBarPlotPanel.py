@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-02 11:31:31 +0100 (Sat, July 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 12:03:33 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -127,7 +127,22 @@ class BarPlotPanel(GuiPanel):
             w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BelowThrColour)
             if w:
                 w.select(colourName)
+    @property
+    def untraceableBrushColour(self):
+        """Returns selected colour name"""
+        value = None
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_UntraceableColour)
+            if w:
+                value = w.getText()
+        return value
 
+    @untraceableBrushColour.setter
+    def untraceableBrushColour(self, colourName):
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_UntraceableColour)
+            if w:
+                w.select(colourName)
     @property
     def thresholdBrushColour(self):
         """Returns selected colour name"""

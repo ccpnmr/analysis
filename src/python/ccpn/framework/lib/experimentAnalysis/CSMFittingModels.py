@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 17:13:53 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 19:32:52 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -167,16 +167,25 @@ class DeltaDeltaShiftsCalculation():
         :param inputData: CSMInputFrame
         :return: outputFrame
         """
+        from ccpn.util.isotopes import name2IsotopeCode
         outputDataDict = defaultdict(list)
         grouppingHeaders = [sv.CHAIN_CODE, sv.RESIDUE_CODE, sv.RESIDUE_TYPE]
         _filteringAtoms = self._filteringAtoms
-        _alphaFactors = self._alphaFactors[:len(_filteringAtoms)]
+        _alphaFactors = self._alphaFactors
         _excludedResidues = self._excludedResidueTypes
 
         for assignmentValues, grouppedDF in inputData.groupby(grouppingHeaders):        ## Group by Assignments except the atomName
             atomFiltered = grouppedDF[grouppedDF[sv.ATOM_NAME].isin(_filteringAtoms)]   ## filter by the specific atoms of interest
-            seriesValues4residue = atomFiltered[inputData.valuesHeaders].values.T       ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
-            deltaDeltas = DeltaDeltaShiftsCalculation._calculateDeltaDeltas(seriesValues4residue, _alphaFactors)  ## get the deltaDeltas
+            dataArrayPerIsotope = {}                                                    ## make sure we are using the right factor
+            for ii, _row in atomFiltered.iterrows():
+                atomName = _row[sv.ATOM_NAME]
+                isotopeCode = name2IsotopeCode(atomName)
+                _alphaFactor = _alphaFactors.get(isotopeCode, 1)
+                dataArrayPerIsotope[_alphaFactor] = _row[inputData.valuesHeaders].values
+            alphaFactors = dataArrayPerIsotope.keys()
+            values = np.array(list(dataArrayPerIsotope.values()))
+            seriesValues4residue = values.T                                             ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
+            deltaDeltas = DeltaDeltaShiftsCalculation._calculateDeltaDeltas(seriesValues4residue, alphaFactors)  ## get the deltaDeltas
             newUid = grouppedDF[grouppingHeaders].values[0].astype('str')
             newUid = createPid(NmrResidue.shortClassName, *newUid)
             outputDataDict[sv._ROW_UID].append(newUid)

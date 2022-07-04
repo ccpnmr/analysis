@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 17:13:53 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 19:32:52 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -124,7 +124,7 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         :return: outputFrame
         """
         from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import DeltaDeltaShiftsCalculation
-        ddc = DeltaDeltaShiftsCalculation(alphaFactors=list(self._alphaFactors.values()),
+        ddc = DeltaDeltaShiftsCalculation(alphaFactors=self._alphaFactors,
                                           filteringAtoms=self._filteringAtoms,
                                           excludedResidues=self._excludedResidueTypes)
         frame = ddc.calculateDeltaDeltaShift(inputData)

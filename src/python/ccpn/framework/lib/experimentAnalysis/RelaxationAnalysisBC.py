@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 18:35:08 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 17:13:53 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -95,7 +95,7 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
             inputDataTable = self.inputDataTables[-1]
             outputFrame = fittingModel.fitSeries(inputDataTable.data)
             outputName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'
-            outputDataTable = self._fetchOutputDataTable(name=outputName, seriesFrameType=sv.CSM_OUTPUT_FRAME,
+            outputDataTable = self._fetchOutputDataTable(name=outputName,
                                                    overrideExisting=ovverideOutputDataTable)
             outputDataTable.data = outputFrame
             self.addOutputData(outputDataTable)

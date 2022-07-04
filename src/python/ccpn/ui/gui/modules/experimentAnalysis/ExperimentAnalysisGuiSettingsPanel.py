@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 12:03:33 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 17:13:53 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ from collections import OrderedDict as od
 from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import ChemicalShiftCalculationModes, ChemicalShiftCalculationModels
 from ccpn.util.Logging import getLogger
 import numpy as np
-
+from ccpn.util.isotopes import name2IsotopeCode
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets, QtGui
 from ccpn.ui.gui.widgets.Label import Label, DividerLabel
@@ -86,7 +86,7 @@ class GuiSettingPanel(Frame):
             try:
                 settingsDict[varName] = widget._getSaveState()
             except Exception as e:
-                print('Could not find get for: varName, widget',  varName, widget, e)
+                getLogger().warn('Could not find get for: varName, widget',  varName, widget, e)
         return settingsDict
 
     def _setUpdatedDetectedState(self):
@@ -330,6 +330,7 @@ class CSMCalculationPanel(GuiSettingPanel):
               'kwds': {
                   'labelText': guiNameSpaces.Label_FollowAtoms,
                   'tipText': guiNameSpaces.TipText_FollowAtoms,
+                  'pulldownCallback': self._setCalculationOptionsToBackend,
                   'texts': seriesVariables.DEFAULT_FILTERING_ATOMS,
                   'defaults': seriesVariables.DEFAULT_FILTERING_ATOMS,
                   'objectName': guiNameSpaces.WidgetVarName_FollowAtoms,
@@ -345,6 +346,7 @@ class CSMCalculationPanel(GuiSettingPanel):
               'kwds': {
                   'labelText': guiNameSpaces.Label_ExcludeResType,
                   'tipText': guiNameSpaces.TipText_ExcludeResType,
+                  'pulldownCallback': self._setCalculationOptionsToBackend,
                   'texts': [],
                   'defaults': [],
                   'standardListItems': [],
@@ -394,7 +396,10 @@ class CSMCalculationPanel(GuiSettingPanel):
             att = guiNameSpaces.WidgetVarName_Factor.format(**{guiNameSpaces.AtomName:atomName})
             widget = self.getWidget(att)
             if widget is not None:
-                factors.update({atomName:widget.getValue()})
+                if atomName == seriesVariables._OTHER:
+                    factors.update({seriesVariables._OTHER: widget.getValue()})
+                else:
+                    factors.update({name2IsotopeCode(atomName):widget.getValue()})
         return factors
 
     def getSettingsAsDict(self):
@@ -406,21 +411,25 @@ class CSMCalculationPanel(GuiSettingPanel):
 
     def _setCalculationOptionsToBackend(self):
         """ Update the backend """
+        getLogger().info('_setCalculationOptionsToBackend...')
         calculationSettings = self.getSettingsAsDict()
         _filteringAtoms = calculationSettings.get(guiNameSpaces.WidgetVarName_FollowAtoms, [])
         _alphaFactors = calculationSettings.get(guiNameSpaces.ALPHA_FACTORS, {})
         _excludedTypes = calculationSettings.get(guiNameSpaces.WidgetVarName_ExcludeResType, [])
         _untraceablePeakValue = calculationSettings.get(guiNameSpaces.WidgetVarName_UntraceablePeak, 1)
-        useAlphaFactors = {} # could be done more efficiently
-        for atom in _filteringAtoms:
-            useAlphaFactors.update({atom:_alphaFactors.get(atom[0])})
+
         ## update the backend
         backend = self._guiModule.backendHandler
-        backend._AlphaFactors = list(useAlphaFactors.values())
-        backend._FilteringAtoms = list(useAlphaFactors.keys())
-        backend._ExcludedResidues = _excludedTypes
+        backend.setAlphaFactor(_1H=_alphaFactors.get(seriesVariables._1H),
+                               _15N=_alphaFactors.get(seriesVariables._15N),
+                               _13C=_alphaFactors.get(seriesVariables._13C),
+                               _Other=_alphaFactors.get(seriesVariables._OTHER))
+
+        backend._excludedResidueTypes = _excludedTypes
+        backend._filteringAtoms = _filteringAtoms
         backend._untraceableValue = _untraceablePeakValue
         #set update detected.
+        backend._needsRefitting = True
         self._setUpdatedDetectedState()
 
 TABPOS += 1
@@ -489,27 +498,15 @@ class CSMGuiFittingPanel(GuiSettingPanel):
                        'texts': ['parametric bootstrapping', 'non-parametric bootstrapping', 'Monte-Carlo',],
                        'fixedWidths': SettingsWidgetFixedWidths}}),
 
-            ('Fitting_separator',
-             {'label': 'Fitting_separator',
-              'type': LabeledHLine,
-              'kwds': {'text': '',
-                       # 'height': 30,
-                       'gridSpan': (1, 2),
-                       'colour': DividerColour,
-                       'tipText': ''}}),
+            # ('Fitting_separator',
+            #  {'label': 'Fitting_separator',
+            #   'type': LabeledHLine,
+            #   'kwds': {'text': '',
+            #            # 'height': 30,
+            #            'gridSpan': (1, 2),
+            #            'colour': DividerColour,
+            #            'tipText': ''}}),
 
-            (guiNameSpaces.WidgetVarName_CalculateFitting,
-             {'label': guiNameSpaces.Label_CalculateFitting,
-              'tipText': guiNameSpaces.TipText_CalculateFitting,
-              'callBack': None,
-              'type': compoundWidget.ButtonCompoundWidget,
-              '_init': None,
-              'kwds': {'labelText': guiNameSpaces.Label_CalculateFitting,
-                       'text': guiNameSpaces.Button_CalculateFitting,  # this is the Button name
-                       'callback': self._calculateFittingCallback,
-                       'hAlign': 'left',
-                       'tipText': guiNameSpaces.TipText_CalculateFitting,
-                       'fixedWidths': SettingsWidgetFixedWidths}}),
 
         ))
         # fittersDict = should be taken from guiModule.backend.fittingModels.

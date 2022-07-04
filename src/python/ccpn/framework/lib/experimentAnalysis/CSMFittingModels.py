@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 12:03:32 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 17:13:53 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -114,16 +114,14 @@ class DeltaDeltaShiftsCalculation():
                        FEBS J. 286, 2035–2042 (2019).
                   '''
     FullDescription = f'{Info} \n {Description}\nSee References: {References}'
-    _alphaFactors = [sv.DEFAULT_H_ALPHAFACTOR, sv.DEFAULT_N_ALPHAFACTOR]
-    _filteringAtoms = [sv._H, sv._N]
-    _excludedResidueTypes = []
+
     _euclideanCalculationMethod = 'mean' # mean or sum.
 
-    def __init__(self, alphaFactors=None, filteringAtoms=None, excludedResidues=None,):
+    def __init__(self, alphaFactors=None, filteringAtoms=None, excludedResidues=[]):
         super().__init__()
-        self._alphaFactors = alphaFactors or DeltaDeltaShiftsCalculation._alphaFactors
-        self._filteringAtoms = filteringAtoms or DeltaDeltaShiftsCalculation._filteringAtoms
-        self._excludedResidueTypes = excludedResidues or DeltaDeltaShiftsCalculation._excludedResidueTypes
+        self._alphaFactors = alphaFactors
+        self._filteringAtoms = filteringAtoms
+        self._excludedResidueTypes = excludedResidues
         self._euclideanCalculationMethod = 'mean'
 
     def setAlphaFactors(self, values):
@@ -135,23 +133,13 @@ class DeltaDeltaShiftsCalculation():
     def setExcludedResidueTypes(self, values):
         self._excludedResidueTypes = values
 
-    def calculateDeltaDeltaShift(self, inputData:TableFrame, **kwargs) -> TableFrame:
+    def calculateDeltaDeltaShift(self, inputData:TableFrame) -> TableFrame:
         """
         Calculate the DeltaDeltas for an input SeriesTable.
         :param inputData: CSMInputFrame
-        :param args:
-        :param kwargs:
-            FilteringAtoms   = ['H','N'],
-            AlphaFactors     = [1, 0.142],
-            ExcludedResidues = ['PRO'] # The string type as it appears in the NmrResidue type. These will be removed.
-            Defaults if not given
         :return: outputFrame
         """
-        _kwargs = { 'FilteringAtoms':self._filteringAtoms,
-                    'AlphaFactors': self._alphaFactors,
-                    'ExcludedResidues' : self._excludedResidueTypes}
-        _kwargs.update(kwargs)
-        outputFrame = DeltaDeltaShiftsCalculation._getDeltaDeltasOutputFrame(inputData, **_kwargs)
+        outputFrame = self._getDeltaDeltasOutputFrame(inputData)
         return outputFrame
 
     #########################
@@ -172,26 +160,19 @@ class DeltaDeltaShiftsCalculation():
             deltaDeltas.append(dd)
         return deltaDeltas
 
-    @staticmethod
-    def _getDeltaDeltasOutputFrame(inputData, **kwargs):
+
+    def _getDeltaDeltasOutputFrame(self, inputData):
         """
         Calculate the DeltaDeltas for an input SeriesTable.
         :param inputData: CSMInputFrame
-        :param args:
-        :param kwargs:
-            FilteringAtoms   = ['H','N'],
-            AlphaFactors     = [1, 0.142],
-            ExcludedResidues = ['PRO'] # The string type as it appears in the NmrResidue type. These will be removed.
-            Defaults if not given
         :return: outputFrame
         """
         outputDataDict = defaultdict(list)
         grouppingHeaders = [sv.CHAIN_CODE, sv.RESIDUE_CODE, sv.RESIDUE_TYPE]
-        _filteringAtoms = kwargs.get(sv.FILTERINGATOMS, DeltaDeltaShiftsCalculation._filteringAtoms)
-        _alphaFactors =  kwargs.get(sv.ALPHAFACTORS, DeltaDeltaShiftsCalculation._alphaFactors)
-        _excludedResidues = kwargs.get(sv.EXCLUDEDRESIDUETYPES, DeltaDeltaShiftsCalculation._excludedResidueTypes)
-        tobeDropped = inputData[inputData[sv.RESIDUE_TYPE].isin(_excludedResidues)]     ## drop rows with excluded ResidueTypes. Should just be set to NaN but keep in?.
-        inputData.drop(tobeDropped.index, axis=0, inplace=True)
+        _filteringAtoms = self._filteringAtoms
+        _alphaFactors = self._alphaFactors[:len(_filteringAtoms)]
+        _excludedResidues = self._excludedResidueTypes
+
         for assignmentValues, grouppedDF in inputData.groupby(grouppingHeaders):        ## Group by Assignments except the atomName
             atomFiltered = grouppedDF[grouppedDF[sv.ATOM_NAME].isin(_filteringAtoms)]   ## filter by the specific atoms of interest
             seriesValues4residue = atomFiltered[inputData.valuesHeaders].values.T       ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
@@ -202,12 +183,17 @@ class DeltaDeltaShiftsCalculation():
             for i, assignmentHeader in enumerate(grouppingHeaders):                     ## build new row for the output dataFrame as DefaultDict.
                 outputDataDict[assignmentHeader].append(list(assignmentValues)[i])      ## add common assignments definitions
             outputDataDict[sv.ATOM_NAMES].append(','.join(_filteringAtoms))             ## add atom names
-            # for colnam, oper in zip([sv.DELTA_DELTA_MEAN, sv.DELTA_DELTA_SUM, sv.DELTA_DELTA_STD],[np.mean, np.sum, np.std]):  ## add calculated values from Deltadeltas
             outputDataDict[sv.DELTA_DELTA_MEAN].append(np.mean(deltaDeltas[1:]))        ## first item is excluded from as it is always 0 by definition.
             for _dd, valueHeaderName in zip(deltaDeltas,inputData.valuesHeaders):       ## add single steps Deltadelta value
                 outputDataDict[valueHeaderName].append(_dd)
         outputFrame = CSMOutputFrame()
         DeltaDeltaShiftsCalculation._finaliseOutputFrame(grouppingHeaders, inputData, outputFrame, outputDataDict)
+        outputFrame[sv.FLAG] = [sv.FLAG_INCLUDED] * len(outputFrame)  # for set flag all included. This will be for user included/excluded flags
+        excludedData = outputFrame[outputFrame[sv.RESIDUE_TYPE].isin(_excludedResidues)]
+        outputFrame.loc[excludedData.index, sv.DELTA_DELTA_MEAN] = 0  ## Replace excluded residues with 0 but keep entries.
+        outputFrame.loc[excludedData.index, sv.FLAG] = sv.FLAG_EXCLUDED
+
+        outputFrame.set_index(sv._ROW_UID, inplace=True, drop=False)
         return outputFrame
 
     @staticmethod
@@ -235,21 +221,25 @@ class OneSiteBindingModel(FittingModelABC):
 
     def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
-        ddc = DeltaDeltaShiftsCalculation()
-        frame = ddc.calculateDeltaDeltaShift(inputData, **kwargs)
         xArray = np.array(inputData.SERIESSTEPS)
         #TODO Missing rescale option
         outputDataDict = defaultdict(list)
         fittingResults = []
-        for ix, row in frame.iterrows():
-            seriesValues = row[frame.valuesHeaders]
+        for ix, row in inputData.iterrows():
+            seriesValues = row[inputData.valuesHeaders]
             yArray = seriesValues.values
+            if row[sv.FLAG] == sv.FLAG_EXCLUDED:
+                yArray = np.full(seriesValues.values.shape, fill_value=np.nan)
             model = self.Minimiser()
-            params = model.guess(yArray, xArray)
             try:
+                params = model.guess(yArray, xArray)
                 result = model.fit(yArray, params, x=xArray)
             except:
-                getLogger().warning(f'Fitting Failed for: {row[sv._ROW_UID]} data.')
+                if row[sv.FLAG] == sv.FLAG_EXCLUDED:
+                    getLogger().warning(f'Fitting skipped for: {row[sv._ROW_UID]} data.')
+                else:
+                    getLogger().warning(f'Fitting Failed for: {row[sv._ROW_UID]} data.')
+                params = model.params
                 result = MinimiserResult(model, params)
             fittingResults.append(result)
             outputDataDict[sv._ROW_UID].append(row[sv._ROW_UID])

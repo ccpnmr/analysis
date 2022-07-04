@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 12:03:32 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 17:13:53 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 #=========================================================================================
 
 import numpy as np
+import pandas as pd
 from ccpn.util.Logging import getLogger
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
@@ -45,9 +46,9 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
     def __init__(self):
         super().__init__()
 
-        self._FilteringAtoms = sv.DEFAULT_FILTERING_ATOMS
-        self._AlphaFactors = [1, 0.142]
-        self._ExcludedResidues = sv.DEFAULT_EXCLUDED_RESIDUES
+        self._filteringAtoms = sv.DEFAULT_FILTERING_ATOMS
+        self._alphaFactors = sv.DEFAULT_ALPHA_FACTORS
+        self._excludedResidueTypes = sv.DEFAULT_EXCLUDED_RESIDUES
         self._untraceableValue = 1.0 # default value for replacing NaN values in the DeltaDeltas column
         _registerChemicalShiftMappingModels()
 
@@ -84,22 +85,26 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
 
         return dataTable
 
-    def getAlphaFactor(self, atomName):
-        """Get the Alpha Factor for the DeltaDeltas calculation """
-        return self._AlphaFactors.get(atomName, None)
+    def getAlphaFactor(self, isotopeCode):
+        """Get the Alpha Factor for the DeltaDeltas calculation
+        :param isotopeCode =  str, one of 1H, 15N, 13C or Other"""
+        if isotopeCode not in self._alphaFactors:
+            getLogger().warning(f'Cannot find alphaFactor for {isotopeCode}. Use one of "1H", "15N", "13C" or "Other"')
+            return 1
+        return self._alphaFactors.get(isotopeCode)
 
-    def setAlphaFactor(self, **kwargs):
-        """Set the Alpha Factor for the DeltaDeltas calculation.
-            E.g.: setAlphaFactor(H=1, N=0.14) or setAlphaFactor(**{'H':1, 'N':0.14}). Factors are values between 0.1-1
+    def setAlphaFactor(self, _1H=None, _15N=None, _13C=None, _Other=None):
+        """Set the Alpha Factor for the DeltaDeltas calculation by IsotopeCode.
+             Factors are usually values between 0.1-1
         """
-        dd = kwargs.copy()
-        for k,v in kwargs.items():
-            if v > 1:
-                getLogger().warning(f'ChemicalShiftMapping. Setting an unusual AlphaFactor value:{v} for the Atom:{k}.')
-            if v == 0:
-                getLogger().warning(f'ChemicalShiftMapping. Cannot set the AlphaFactor value:{v} for the Atom:{k}.')
-                dd.pop(k)
-        self._AlphaFactors.update(dd)
+        if isinstance(_1H, (float, int)):
+            self._alphaFactors.update({sv._1H:_1H})
+        if isinstance(_15N, (float, int)):
+            self._alphaFactors.update({sv._15N: _15N})
+        if isinstance(_13C, (float, int)):
+            self._alphaFactors.update({sv._13C:_13C})
+        if isinstance(_Other, (float, int)):
+            self._alphaFactors.update({sv._OTHER: _Other})
 
     @property
     def untraceableValue(self) ->float:
@@ -116,18 +121,13 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         """
         Calculate the DeltaDeltas Chemical shift distances for an input SeriesTable.
         :param inputData: CSMInputFrame
-        :param args:
-        :param kwargs:
-                    FilteringAtoms   = ['H','N'],
-                    AlphaFactors     = [1, 0.142],
-                    ExcludedResidues = ['PRO'] # The string type as it appears in the NmrResidue type. These residues
-                    will be removed from the table.
-                    - Use default values if kwargs not given -
         :return: outputFrame
         """
         from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import DeltaDeltaShiftsCalculation
-        ddc = DeltaDeltaShiftsCalculation()
-        frame = ddc.calculateDeltaDeltaShift(inputData, **kwargs)
+        ddc = DeltaDeltaShiftsCalculation(alphaFactors=list(self._alphaFactors.values()),
+                                          filteringAtoms=self._filteringAtoms,
+                                          excludedResidues=self._excludedResidueTypes)
+        frame = ddc.calculateDeltaDeltaShift(inputData)
         return frame
 
     def fitInputData(self, *args, **kwargs):
@@ -144,43 +144,45 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
                                     according to its definitions.
         :return: None
         """
+        getLogger().info('Started fitting InputData...')
         if not self.inputDataTables:
             raise RuntimeError('CSM. Cannot run any fitting models. Add a valid inputData first')
 
         fittingModels = self.fittingModels or kwargs.get(sv.FITTING_MODELS, [])
-        ovverideOutputDataTable = kwargs.get(sv.OVERRIDE_OUTPUT_DATATABLE, True)
+        ovverideOutputDataTable = True
         outputDataTableName = kwargs.get(sv.OUTPUT_DATATABLE_NAME, None)
         for model in fittingModels:
             fittingModel = model()
             inputDataTable = self.inputDataTables[-1]
-            outputFrame = fittingModel.fitSeries(inputDataTable.data)
+            deltasDF = self.calculateDeltaDeltaShifts(inputDataTable.data,
+                                                      filteringAtoms=self._filteringAtoms,
+                                                      alphaFactors=self._alphaFactors,
+                                                      excludedResidues=self._excludedResidueTypes)
+            outputFrame = fittingModel.fitSeries(deltasDF)
+            outputFrame.set_index(sv._ROW_UID, inplace=True, drop=False)
+            outputFrame[sv.DELTA_DELTA_MEAN] = deltasDF[sv.DELTA_DELTA_MEAN]
+            outputFrame[sv.ATOM_NAMES] = deltasDF[sv.ATOM_NAMES]
+            outputFrame[sv.FLAG] = deltasDF[sv.FLAG]
+            outputFrame[sv.SERIAL] = np.arange(1, len(outputFrame) + 1)
+
             if not outputDataTableName:
                 outputDataTableName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'.replace(" ", "")
-            outputDataTable = self._fetchOutputDataTable(name=outputDataTableName, seriesFrameType=sv.CSM_OUTPUT_FRAME,
-                                                   overrideExisting=ovverideOutputDataTable)
+            outputDataTable = self._fetchOutputDataTable(name=outputDataTableName,
+                                                         overrideExisting=ovverideOutputDataTable)
             outputDataTable.data = outputFrame
             self.addOutputData(outputDataTable)
+        self._needsRefitting = False
+        getLogger().info('Fitting InputData completed.')
 
     def _getOutputMergedDataFrame(self, *args):
         """ Return the outputDataFrame containing the fitting and deltaDeltas calculations"""
         if len(self.inputDataTables) == 0:
             return
-        inputDataTable = self.inputDataTables[0]
-        deltasDF = self.calculateDeltaDeltaShifts(inputDataTable.data,
-                                                     FilteringAtoms=self._FilteringAtoms,
-                                                     AlphaFactors=self._AlphaFactors,
-                                                     ExcludedResidues=self._ExcludedResidues)
         if not self.getOutputDataTables():
             return
         outData = self.getOutputDataTables()[-1]
         outDataFrame = outData.data
-        outDataFrame.set_index(sv._ROW_UID, inplace=True, drop=False)
-        deltasDF.set_index(sv._ROW_UID, inplace=True, drop=False)
-        outDataFrame[sv.DELTA_DELTA_MEAN] = deltasDF[sv.DELTA_DELTA_MEAN]
-        outDataFrame[sv.ATOM_NAMES] = deltasDF[sv.ATOM_NAMES]
-        outDataFrame[sv.RESIDUE_TYPE] = deltasDF[sv.RESIDUE_TYPE]
-        outDataFrame[sv.SERIAL] = np.arange(1, len(outDataFrame) + 1)
-        outDataFrame[sv.FLAG] = ['Included']*len(outDataFrame)
+
         return outDataFrame
 
     def getThresholdValueForData(self, stdFactor=1):

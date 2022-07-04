@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 19:39:16 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 17:13:53 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -129,9 +129,11 @@ class ListCompoundWidget(CompoundBaseWidget):
         self.maxItemSelection = maxItemSelection
         self.label = Label(parent=self, text=labelText, vAlign='center')
         self._addWidget(self.label)
+        compoundKwds = compoundKwds or {}
 
         # pulldown
         texts = ['> select-to-add <'] + list(texts) if texts else ['> select-to-add <']
+        self.pulldownListAdditionalCallback = kwds.get('pulldownCallback', None)
         self.pulldownList = PulldownList(parent=self, texts=texts, callback=self._addToListWidget, index=0)
         self.pulldownList.setObjectName(labelText)
         self._addWidget(self.pulldownList)
@@ -271,6 +273,8 @@ class ListCompoundWidget(CompoundBaseWidget):
         # reset to first > select-to-add < entry
         with self.blockWidgetSignals(recursive=False, additionalWidgets=[self.pulldownList, ]):
             self.pulldownList.setIndex(0)
+        if self.pulldownListAdditionalCallback:
+            self.pulldownListAdditionalCallback()
 
     def _getSaveState(self):
         """

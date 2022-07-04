@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 18:35:08 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 17:13:53 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -85,7 +85,7 @@ class SeriesAnalysisABC(ABC):
         else:
             return flattenLists(list(dataTablesByDataType.values()))
 
-    def _fetchOutputDataTable(self, name=None, seriesFrameType=None, overrideExisting=True):
+    def _fetchOutputDataTable(self, name=None, overrideExisting=True):
         """
         Interanl. Called after 'fit()' to get a valid Datatable to attach the fitting output SeriesFrame
         :param seriesFrameType: str,  A filtering serieFrameType.
@@ -94,9 +94,7 @@ class SeriesAnalysisABC(ABC):
         """
         dataTable = None
         if overrideExisting:
-            dataTables = self.getOutputDataTables(seriesFrameType)
-            if dataTables:
-                dataTable = dataTables[-1]
+            dataTable = self.project.getDataTable(name)
         if not dataTable:
             dataTable = self.project.newDataTable(name)
         return dataTable
@@ -243,6 +241,7 @@ class SeriesAnalysisABC(ABC):
         self.current = getCurrent()
         self._inputDataTables = OrderedSet()
         self._outputDataTables = OrderedSet()
+        self._needsRefitting = False
 
     def __str__(self):
         return f'<{self.__class__.__name__}: {self.seriesAnalysisName}>'

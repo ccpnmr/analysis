@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 12:03:32 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-04 17:13:53 +0100 (Mon, July 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -122,6 +122,13 @@ _N = pu.N
 _C = pu.C
 _OTHER = pu.OTHER
 
+## IsotopeCode Names
+
+_1H  = '1H'
+_15N = '15N'
+_13C = '13C'
+
+
 ## Alpha Factors Definitions used in ChemicalShiftAnalysis DeltaDeltas
 uALPHA = '\u03B1'
 uDELTA = '\u0394'
@@ -137,13 +144,13 @@ DEFAULT_N_ALPHAFACTOR = 0.142
 DEFAULT_C_ALPHAFACTOR = 0.25
 DEFAULT_OTHER_ALPHAFACTOR = 1
 DEFAULT_ALPHA_FACTORS = OrderedDict((
-                            (_H, DEFAULT_H_ALPHAFACTOR),
-                            (_N, DEFAULT_N_ALPHAFACTOR),
-                            (_C, DEFAULT_C_ALPHAFACTOR),
+                            (_1H, DEFAULT_H_ALPHAFACTOR),
+                            (_15N, DEFAULT_N_ALPHAFACTOR),
+                            (_13C, DEFAULT_C_ALPHAFACTOR),
                             (_OTHER, DEFAULT_OTHER_ALPHAFACTOR)
                             ))
 DEFAULT_FILTERING_ATOMS = (_H, _N)
-DEFAULT_EXCLUDED_RESIDUES = ('PRO')
+DEFAULT_EXCLUDED_RESIDUES = ['PRO']
 
 FILTERINGATOMS  = 'FilteringAtoms'
 ALPHAFACTORS    = 'AlphaFactors'
@@ -176,3 +183,8 @@ NIY_WARNING = f'''This functionality has not been implemented yet.'''
 # Errors
 OMIT_MODE = 'omit'
 RAISE_MODE = 'raise'
+
+
+# FLAG
+FLAG_EXCLUDED = 'Excluded'
+FLAG_INCLUDED = 'Included'

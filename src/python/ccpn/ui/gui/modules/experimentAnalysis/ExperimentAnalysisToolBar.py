@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-30 16:14:19 +0100 (Thu, June 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 17:30:48 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -89,8 +89,8 @@ class ToolBarPanel(GuiPanel):
                 'tipText': 'Show on Molecular Viewer',
                 'toggle': None,
                 'callback': f'_{guiNameSpaces.ShowStructureButton}{guiNameSpaces.Callback}',
-                'objectName':guiNameSpaces.UpdateButton,
-                'enabled': False,
+                'objectName':guiNameSpaces.ShowStructureButton,
+                'enabled': True,
             }}
 
         colPos = 0
@@ -139,4 +139,55 @@ class ToolBarPanel(GuiPanel):
             if updateButton:
                 iconValue = dataEnum.description
                 updateButton.setIcon(Icon(iconValue))
+
+
+
+class CSMToolBarPanel(ToolBarPanel):
+    """
+    A GuiPanel containing the ToolBar Widgets for the CSM Analysis Module
+    """
+
+    def _showStructureButtonCallback(self):
+        from ccpn.ui.gui.modules.PyMolUtil import _CSMSelection2PyMolFileNew
+        import json
+        import subprocess
+        import os
+        from ccpn.util.Path import aPath, fetchDir
+        from ccpn.ui.gui.widgets.MessageDialog import showOkCancelWarning, showWarning
+        scriptsPath = self.application.scriptsPath
+        pymolScriptsPath = fetchDir(scriptsPath, guiNameSpaces.PYMOL)
+        settingsDict = self.guiModule.settingsPanelHandler.getAllSettings().get(guiNameSpaces.Label_GeneralAppearance,{})
+        barPanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.CSMBarPlotPanel)
+        barGraph = barPanel.barGraphWidget
+        moleculeFilePath = settingsDict.get(guiNameSpaces.WidgetVarName_MolStructureFile, '')
+        moleculeFilePath = aPath(moleculeFilePath)
+        pymolScriptsPath = aPath(pymolScriptsPath)
+        scriptFilePath = pymolScriptsPath.joinpath(guiNameSpaces.PymolScriptName)
+
+        pymolPath = self.application.preferences.externalPrograms.pymol
+        moleculeFilePath.assureSuffix('.pdb')
+        if not os.path.exists(moleculeFilePath):
+            ok = showWarning('Molecular file not Set',
+                             f'Provide a {guiNameSpaces.Label_MolStructureFile} on the Settings - Appearance Panel')
+
+        if not os.path.exists(pymolPath):
+            ok = showOkCancelWarning('Molecular Viewer not Set', 'Select the executable file on preferences')
+            if ok:
+                from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
+                pp = PreferencesPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
+                pp.tabWidget.setCurrentIndex(pp.tabWidget.count() - 1)
+                pp.exec_()
+                return
+
+        coloursDict = barGraph.getPlottedColoursDict()
+        selection = "+".join([str(x.sequenceCode) for x in self.current.nmrResidues])
+        scriptPath = _CSMSelection2PyMolFileNew(scriptFilePath, moleculeFilePath, coloursDict, selection)
+        try:
+            self.pymolProcess = subprocess.Popen(str(pymolPath) + ' -r ' + str(scriptPath),
+                                                     shell=True,
+                                                     stdout=subprocess.PIPE,
+                                                     stderr=subprocess.PIPE)
+        except Exception as e:
+            getLogger().warning('Pymol not started. Check executable.', e)
+
 

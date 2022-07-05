@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 18:35:08 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 17:30:47 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,7 @@ from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import
     SettingsPanelHandler, IOHandler
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiSettingsPanel as settingsPanel
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import ToolBarPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import CSMToolBarPanel
 from ccpn.ui.gui.modules.experimentAnalysis.CSMGuiTable import CSMTablePanel
 from ccpn.ui.gui.modules.experimentAnalysis.CSMBarPlotPanel import CSMBarPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.CSMFitPlotPanel import CSMFitPlotPanel
@@ -69,7 +69,7 @@ class ChemicalShiftMappingGuiModule(ExperimentAnalysisGuiModuleBC):
         """ Add the Gui Panels to the panelHandler.
         Each Panel is a stand-alone frame with information where about to be added on the general GUI.
         Override in Subclasses"""
-        self.panelHandler.addToolBar(ToolBarPanel(self))
+        self.panelHandler.addToolBar(CSMToolBarPanel(self))
         self.panelHandler.addPanel(CSMTablePanel(self))
         self.panelHandler.addPanel(CSMFitPlotPanel(self))
         self.panelHandler.addPanel(CSMBarPlotPanel(self))

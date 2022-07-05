@@ -4,20 +4,20 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
 __dateModified__ = "$Date: 2021-04-26 12:13:48 +0100 (Mon, April 26, 2021) $"
-__dateModified__ = "$dateModified: 2021-11-09 18:38:41 +0000 (Tue, November 09, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-07-05 17:30:47 +0100 (Tue, July 05, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -206,6 +206,36 @@ def _CSMSelection2PyMolFile(filePath, pdbPath, aboveThresholdResidues, belowThre
                 cmd('cmd.select',    f'{cond}Threshold',      f'res {_mapDict.get(cond).get("residues")}')
                 cmd('cmd.set_color', f'{cond.upper()}Colour', f'{_mapDict.get(cond).get("colour")}')
                 cmd('cmd.color',     f'{cond.upper()}Colour', f'{cond}Threshold')
+        if len(selection) > 0:
+            cmd('cmd.select', 'Selected', f'res {selection}')
+        else:
+            cmd('cmd.deselect')
+
+        codeBlock.toFile(filePath)
+    return filePath
+
+def _CSMSelection2PyMolFileNew(filePath, pdbPath, coloursDict, selection):
+
+    """
+    _CCPNnmr Internal. Used in ChemicalShift mapping Module
+    This creates a file with a PyMol script to mirror the chemical shift mapping module selections etc..."""
+    from ccpn.util.Colour import spectrumColours, hexToRgb
+
+    if os.path.exists(pdbPath):
+        codeBlock = CodeBlock()
+        imp = codeBlock.addImport
+        cmd = codeBlock.addCmd
+        imp('from pymol import cmd')
+        cmd('cmd.load', pdbPath)
+        cmd('cmd.hide', 'lines')
+        cmd('cmd.show', 'cartoon')
+        cmd('cmd.color', 'white')
+
+        for sequenceCode, colourHex in coloursDict.items():
+            cmd('cmd.select',    f'{sequenceCode}',      f'res {sequenceCode}')
+            cmd('cmd.set_color', f'colour_{sequenceCode}', f'{hexToRgb(colourHex)}')
+            cmd('cmd.color',     f'colour_{sequenceCode}',f'{sequenceCode}',)
+            cmd('cmd.delete',   f'{sequenceCode}')
         if len(selection) > 0:
             cmd('cmd.select', 'Selected', f'res {selection}')
         else:

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 19:42:53 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 17:30:48 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -646,7 +646,7 @@ class CSMAppearancePanel(GuiSettingPanel):
             (guiNameSpaces.WidgetVarName_MolStructureFile,
              {'label': guiNameSpaces.Label_MolStructureFile,
               'tipText': guiNameSpaces.TipText_MolStructureFile,
-              'enabled': False,
+              'enabled': True,
               'type': compoundWidget.EntryPathCompoundWidget,
               '_init': None,
               'kwds': {

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 12:03:33 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 17:30:48 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -106,6 +106,13 @@ class BarGraphWidget(Widget):
     def _addExtraItems(self):
         # self.addLegend()
         self.setThresholdLine()
+
+    def getPlottedColoursDict(self):
+        dd = {}
+        for i in self.plotWidget.items():
+            if isinstance(i, BarGraph):
+               dd.update(i.barColoursDict)
+        return dict(sorted(dd.items()))
 
     def setData(self, viewBox, xValues, yValues, objects, colour, replace=True):
         if replace:

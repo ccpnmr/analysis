@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 11:57:45 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 17:30:48 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -68,6 +68,7 @@ class BarGraph(pg.BarGraphItem):
         self.clicked = None
         self.objects = objects or []
         self.application = application
+        self.barColoursDict = {}
 
         self.opts = dict(  # setting for BarGraphItem
                 x=self.xValues,
@@ -250,6 +251,7 @@ class BarGraph(pg.BarGraphItem):
 
         p.setPen(fn.mkPen(pen))
         p.setBrush(fn.mkBrush(brush))
+
         heightGroups = [[height]]
         if brushes and self.useGradient:
             count = len(brushes)
@@ -260,6 +262,7 @@ class BarGraph(pg.BarGraphItem):
             if brushes and not self.useGradient:
                 try:
                     p.setBrush(fn.mkBrush(brushes[i]))
+                    self.barColoursDict[x] = brushes[i]
                 except:
                     getLogger().warn(f'BarGraph error. Cannot find a brush for at position {i}')
 
@@ -267,6 +270,7 @@ class BarGraph(pg.BarGraphItem):
                 x = x0
             else:
                 x = x0[i]
+            self.barColoursDict[x] = brush
             if np.isscalar(y0):
                 y = y0
             else:
@@ -283,6 +287,7 @@ class BarGraph(pg.BarGraphItem):
                     for heightGroup, brush in zip(heightGroups, brushes):
                         if h in heightGroup:
                             p.setBrush(fn.mkBrush(brush))
+                            self.barColoursDict[x]=brush
                             break
 
             rect = QtCore.QRectF(x, y, w, h)

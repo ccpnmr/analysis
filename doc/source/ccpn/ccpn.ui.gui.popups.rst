@@ -17,6 +17,22 @@ ccpn.ui.gui.popups.AboutPopup module
    :undoc-members:
    :show-inheritance:
 
+ccpn.ui.gui.popups.AssignAmbiguousNmrAtomsPopup module
+------------------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.AssignAmbiguousNmrAtomsPopup
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.ui.gui.popups.AtomPopup module
+-----------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.AtomPopup
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ccpn.ui.gui.popups.AttributeEditorPopupABC module
 -------------------------------------------------
 
@@ -49,10 +65,26 @@ ccpn.ui.gui.popups.ChainPopup module
    :undoc-members:
    :show-inheritance:
 
+ccpn.ui.gui.popups.ChemicalShiftList2SpectrumPopup module
+---------------------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.ChemicalShiftList2SpectrumPopup
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ccpn.ui.gui.popups.ChemicalShiftListPopup module
 ------------------------------------------------
 
 .. automodule:: ccpn.ui.gui.popups.ChemicalShiftListPopup
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.ui.gui.popups.CollectionPopup module
+-----------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.CollectionPopup
    :members:
    :undoc-members:
    :show-inheritance:
@@ -113,10 +145,10 @@ ccpn.ui.gui.popups.CreateNmrChainPopup module
    :undoc-members:
    :show-inheritance:
 
-ccpn.ui.gui.popups.DataSetPopup module
---------------------------------------
+ccpn.ui.gui.popups.DataTablePopup module
+----------------------------------------
 
-.. automodule:: ccpn.ui.gui.popups.DataSetPopup
+.. automodule:: ccpn.ui.gui.popups.DataTablePopup
    :members:
    :undoc-members:
    :show-inheritance:
@@ -133,6 +165,14 @@ ccpn.ui.gui.popups.Dialog module
 --------------------------------
 
 .. automodule:: ccpn.ui.gui.popups.Dialog
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.ui.gui.popups.DistanceRestraintPopup module
+------------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.DistanceRestraintPopup
    :members:
    :undoc-members:
    :show-inheritance:
@@ -205,6 +245,14 @@ ccpn.ui.gui.popups.FeedbackPopup module
 ---------------------------------------
 
 .. automodule:: ccpn.ui.gui.popups.FeedbackPopup
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.ui.gui.popups.ImportNefPopup module
+----------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.ImportNefPopup
    :members:
    :undoc-members:
    :show-inheritance:
@@ -345,10 +393,18 @@ ccpn.ui.gui.popups.RegisterPopup module
    :undoc-members:
    :show-inheritance:
 
-ccpn.ui.gui.popups.RestraintListPopup module
---------------------------------------------
+ccpn.ui.gui.popups.ReorderPeakListAxes module
+---------------------------------------------
 
-.. automodule:: ccpn.ui.gui.popups.RestraintListPopup
+.. automodule:: ccpn.ui.gui.popups.ReorderPeakListAxes
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.ui.gui.popups.RestraintTablePopup module
+---------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.RestraintTablePopup
    :members:
    :undoc-members:
    :show-inheritance:
@@ -441,6 +497,14 @@ ccpn.ui.gui.popups.StripPlotPopup module
    :undoc-members:
    :show-inheritance:
 
+ccpn.ui.gui.popups.StructureDataPopup module
+--------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.StructureDataPopup
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ccpn.ui.gui.popups.StructureEnsemblePopup module
 ------------------------------------------------
 
@@ -473,6 +537,14 @@ ccpn.ui.gui.popups.ValidateSpectraPopup module
    :undoc-members:
    :show-inheritance:
 
+ccpn.ui.gui.popups.ViolationTablePopup module
+---------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.ViolationTablePopup
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ccpn.ui.gui.popups.ZoomPopup module
 -----------------------------------
 
@@ -496,4 +568,3 @@ ccpn.ui.gui.popups.testtabbed module
    :members:
    :undoc-members:
    :show-inheritance:
-

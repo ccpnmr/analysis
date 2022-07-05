@@ -6,6 +6,15 @@ ccpn.core.lib package
    :undoc-members:
    :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   ccpn.core.lib.PeakPickers
+   ccpn.core.lib.SpectrumDataSources
+
 Submodules
 ----------
 
@@ -13,6 +22,14 @@ ccpn.core.lib.AssignmentLib module
 ----------------------------------
 
 .. automodule:: ccpn.core.lib.AssignmentLib
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.core.lib.AxisCodeLib module
+--------------------------------
+
+.. automodule:: ccpn.core.lib.AxisCodeLib
    :members:
    :undoc-members:
    :show-inheritance:
@@ -33,10 +50,10 @@ ccpn.core.lib.CallBack module
    :undoc-members:
    :show-inheritance:
 
-ccpn.core.lib.CcpnNefIo module
-------------------------------
+ccpn.core.lib.CcpnDataSetParameters module
+------------------------------------------
 
-.. automodule:: ccpn.core.lib.CcpnNefIo
+.. automodule:: ccpn.core.lib.CcpnDataSetParameters
    :members:
    :undoc-members:
    :show-inheritance:
@@ -81,10 +98,18 @@ ccpn.core.lib.DataFrameObject module
    :undoc-members:
    :show-inheritance:
 
-ccpn.core.lib.DataIo module
----------------------------
+ccpn.core.lib.DataIo\-obsolete module
+-------------------------------------
 
-.. automodule:: ccpn.core.lib.DataIo
+.. automodule:: ccpn.core.lib.DataIo-obsolete
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.core.lib.DataStore module
+------------------------------
+
+.. automodule:: ccpn.core.lib.DataStore
    :members:
    :undoc-members:
    :show-inheritance:
@@ -129,10 +154,42 @@ ccpn.core.lib.OrderedSpectrumViews module
    :undoc-members:
    :show-inheritance:
 
+ccpn.core.lib.PeakClustering module
+-----------------------------------
+
+.. automodule:: ccpn.core.lib.PeakClustering
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.core.lib.PeakListLib module
+--------------------------------
+
+.. automodule:: ccpn.core.lib.PeakListLib
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ccpn.core.lib.Pid module
 ------------------------
 
 .. automodule:: ccpn.core.lib.Pid
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.core.lib.ProjectArchiver module
+------------------------------------
+
+.. automodule:: ccpn.core.lib.ProjectArchiver
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.core.lib.ProjectSaveHistory module
+---------------------------------------
+
+.. automodule:: ccpn.core.lib.ProjectSaveHistory
    :members:
    :undoc-members:
    :show-inheritance:
@@ -149,6 +206,14 @@ ccpn.core.lib.SpectrumLib module
 --------------------------------
 
 .. automodule:: ccpn.core.lib.SpectrumLib
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.core.lib.SpectrumPrototypes module
+---------------------------------------
+
+.. automodule:: ccpn.core.lib.SpectrumPrototypes
    :members:
    :undoc-members:
    :show-inheritance:
@@ -184,4 +249,3 @@ ccpn.core.lib.peakUtils module
    :members:
    :undoc-members:
    :show-inheritance:
-

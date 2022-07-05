@@ -9,18 +9,18 @@ ccpn.AnalysisScreen.lib package
 Submodules
 ----------
 
-ccpn.AnalysisScreen.lib.MixturesGeneration module
--------------------------------------------------
+ccpn.AnalysisScreen.lib.MixturesExporter module
+-----------------------------------------------
 
-.. automodule:: ccpn.AnalysisScreen.lib.MixturesGeneration
+.. automodule:: ccpn.AnalysisScreen.lib.MixturesExporter
    :members:
    :undoc-members:
    :show-inheritance:
 
-ccpn.AnalysisScreen.lib.ScreenLookup module
--------------------------------------------
+ccpn.AnalysisScreen.lib.MixturesGeneration module
+-------------------------------------------------
 
-.. automodule:: ccpn.AnalysisScreen.lib.ScreenLookup
+.. automodule:: ccpn.AnalysisScreen.lib.MixturesGeneration
    :members:
    :undoc-members:
    :show-inheritance:
@@ -32,4 +32,3 @@ ccpn.AnalysisScreen.lib.SimulatedAnnealing module
    :members:
    :undoc-members:
    :show-inheritance:
-

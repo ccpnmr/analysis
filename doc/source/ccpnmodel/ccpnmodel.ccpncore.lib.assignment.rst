@@ -24,4 +24,3 @@ ccpnmodel.ccpncore.lib.assignment.ChemicalShift module
    :members:
    :undoc-members:
    :show-inheritance:
-

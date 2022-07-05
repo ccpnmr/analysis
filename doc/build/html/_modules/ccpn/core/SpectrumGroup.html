@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.core.SpectrumGroup &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.SpectrumGroup</a></li> 
       </ul>
     </div>  
 
@@ -42,9 +43,10 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
@@ -52,8 +54,8 @@
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-02-06 18:27:16 +0000 (Thu, February 06, 2020) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.1 $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -64,46 +66,27 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.Nmr</span> <span class="kn">import</span> <span class="n">DataSource</span> <span class="k">as</span> <span class="n">ApiDataSource</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.Nmr</span> <span class="kn">import</span> <span class="n">SpectrumGroup</span> <span class="k">as</span> <span class="n">ApiSpectrumGroup</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span>
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
-<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.Nmr</span> <span class="kn">import</span> <span class="n">DataSource</span> <span class="k">as</span> <span class="n">ApiDataSource</span>
-<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.Nmr</span> <span class="kn">import</span> <span class="n">SpectrumGroup</span> <span class="k">as</span> <span class="n">ApiSpectrumGroup</span>
-<span class="kn">from</span> <span class="nn">ccpn.util.decorators</span> <span class="kn">import</span> <span class="n">logCommand</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">newObject</span><span class="p">,</span> <span class="n">ccpNmrV3CoreSetter</span><span class="p">,</span> <span class="n">renameObject</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.decorators</span> <span class="kn">import</span> <span class="n">logCommand</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.DataEnum</span> <span class="kn">import</span> <span class="n">DataEnum</span>
 
 
-<span class="n">SPECTRUMGROUPSERIES</span> <span class="o">=</span> <span class="s1">&#39;spectrumGroupSeries&#39;</span>
-<span class="n">SPECTRUMGROUPSERIESUNITS</span> <span class="o">=</span> <span class="s1">&#39;spectrumGroupSeriesUnits&#39;</span>
-<span class="n">SPECTRUMGROUPSERIESTYPE</span> <span class="o">=</span> <span class="s1">&#39;spectrumGroupSeriesType&#39;</span>
-
-<div class="viewcode-block" id="SERIESTYPES"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.SpectrumGroup.SERIESTYPES">[docs]</a><span class="k">class</span> <span class="nc">SERIESTYPES</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-    <span class="c1"># NOTE:ED - could make this a labelledEnum</span>
+<div class="viewcode-block" id="SeriesTypes"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.SpectrumGroup.SeriesTypes">[docs]</a><span class="k">class</span> <span class="nc">SeriesTypes</span><span class="p">(</span><span class="n">DataEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to handle series types in spectrumGroups</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">FLOAT</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;Float&#39;</span>
     <span class="n">INTEGER</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Integer&#39;</span>
     <span class="n">STRING</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;String&#39;</span>
-    <span class="n">PYTHONLITERAL</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;Python Literal&#39;</span>
-
-    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">_value_</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">obj</span>
-
-    <span class="c1"># ignore the first param since it&#39;s already set by __new__</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_description_</span> <span class="o">=</span> <span class="n">description</span>
-
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
-
-    <span class="c1"># this makes sure that the description is read-only</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_description_</span></div>
+    <span class="n">PYTHONLITERAL</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;Python Literal&#39;</span></div>
 
 
 <div class="viewcode-block" id="SpectrumGroup"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.SpectrumGroup.SpectrumGroup">[docs]</a><span class="k">class</span> <span class="nc">SpectrumGroup</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
@@ -129,7 +112,19 @@
     <span class="c1"># Qualified name of matching API class</span>
     <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiSpectrumGroup</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 
+    <span class="c1"># internal namespace</span>
+    <span class="n">_COMMENT</span> <span class="o">=</span> <span class="s1">&#39;comment&#39;</span>
+    <span class="n">_SERIES</span> <span class="o">=</span> <span class="s1">&#39;series&#39;</span>
+    <span class="n">_SERIESUNITS</span> <span class="o">=</span> <span class="s1">&#39;seriesUnits&#39;</span>
+    <span class="n">_SERIESTYPE</span> <span class="o">=</span> <span class="s1">&#39;seriesType&#39;</span>
+    <span class="n">_POSITIVECONTOURCOLOUR</span> <span class="o">=</span> <span class="s1">&#39;positiveContourColour&#39;</span>
+    <span class="n">_NEGATIVECONTOURCOLOUR</span> <span class="o">=</span> <span class="s1">&#39;negativeContourColour&#39;</span>
+    <span class="n">_SLICECOLOUR</span> <span class="o">=</span> <span class="s1">&#39;sliceColour&#39;</span>
+
+    <span class="c1">#=========================================================================================</span>
     <span class="c1"># CCPN properties</span>
+    <span class="c1">#=========================================================================================</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_apiSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiSpectrumGroup</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; CCPN Project SpectrumGroup&quot;&quot;&quot;</span>
@@ -154,7 +149,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
 
     <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;set name of SpectrumGroup.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
@@ -168,11 +163,76 @@
         <span class="sd">&quot;&quot;&quot;Parent (containing) object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
+        <span class="n">comment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_COMMENT</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">comment</span>
+
+    <span class="nd">@comment</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;set optional comment of SpectrumGroup.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;comment must be a string/None.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_COMMENT</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sliceColour</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;1D slice colour for group&quot;&quot;&quot;</span>
+        <span class="n">colour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_SLICECOLOUR</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">colour</span>
+
+    <span class="nd">@sliceColour</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">sliceColour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;1D slice colour for group&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sliceColour must be a string/None.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_SLICECOLOUR</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">positiveContourColour</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;nD positive contour colour for group&quot;&quot;&quot;</span>
+        <span class="n">colour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_POSITIVECONTOURCOLOUR</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">colour</span>
+
+    <span class="nd">@positiveContourColour</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">positiveContourColour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;nD positive contour colour for group&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;positiveContourColour must be a string/None.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_POSITIVECONTOURCOLOUR</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">negativeContourColour</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;nD negative contour colour for group&quot;&quot;&quot;</span>
+        <span class="n">colour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_NEGATIVECONTOURCOLOUR</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">colour</span>
+
+    <span class="nd">@negativeContourColour</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">negativeContourColour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;nD negative contour colour for group&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;negativeContourColour must be a string/None.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_NEGATIVECONTOURCOLOUR</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
     <span class="c1">#-------------------------------------------------------------------------------------------------------</span>
     <span class="c1"># GWV hack to alleviate (temporarily) the loss of order on spectra</span>
     <span class="c1">#-------------------------------------------------------------------------------------------------------</span>
 
     <span class="n">SPECTRUM_ORDER</span> <span class="o">=</span> <span class="s1">&#39;spectrum_order&#39;</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Spectrum</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Spectra that make up SpectrumGroup.&quot;&quot;&quot;</span>
@@ -182,9 +242,10 @@
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
     <span class="nd">@spectra</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span><span class="nb">list</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Expected a tuple or list&#39;</span><span class="p">)</span>
         <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
@@ -192,6 +253,25 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_saveObjectOrder</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SPECTRUM_ORDER</span><span class="p">)</span>
         <span class="c1"># Store the api objects</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataSources</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+
+<div class="viewcode-block" id="SpectrumGroup.addSpectrum"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.SpectrumGroup.SpectrumGroup.addSpectrum">[docs]</a>    <span class="k">def</span> <span class="nf">addSpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">seriesValue</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a spectrum Instance to the spectrum group</span>
+
+<span class="sd">        :param spectrum: a Spectrum instance to be added to the group</span>
+<span class="sd">        :param seriesValue: a value associated with this series</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">Spectrum</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Can only add Spectrum instances to a spectrumGroup; got </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="p">)</span>
+
+        <span class="c1"># For now: cumbersome; TODO the setter on self.spectra should disappear</span>
+        <span class="n">_spectra</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
+        <span class="n">_spectra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
+
+        <span class="n">_series</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">series</span><span class="p">)</span>
+        <span class="n">_series</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">seriesValue</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="n">_spectra</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">series</span> <span class="o">=</span> <span class="n">_series</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">series</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
@@ -202,13 +282,14 @@
 <span class="sd">        where val1-valN correspond to the series items in the attached spectra associated with this group</span>
 <span class="sd">        For a spectrum with no values, returns None in place of Item</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">series</span> <span class="o">=</span> <span class="p">()</span>
-        <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
-            <span class="n">series</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">_getSeriesItem</span><span class="p">(</span><span class="bp">self</span><span class="p">),)</span>
-
-        <span class="k">return</span> <span class="n">series</span>
+        <span class="c1"># series = ()</span>
+        <span class="c1"># for spectrum in self.spectra:</span>
+        <span class="c1">#     series += (spectrum._getSeriesItem(self),)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp</span><span class="o">.</span><span class="n">_getSeriesItem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
     <span class="nd">@series</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Setter for series</span>
@@ -230,33 +311,105 @@
     <span class="k">def</span> <span class="nf">seriesUnits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the seriesUnits for the spectrumGroup</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getParameter</span><span class="p">(</span><span class="n">SPECTRUMGROUPSERIES</span><span class="p">,</span> <span class="n">SPECTRUMGROUPSERIESUNITS</span><span class="p">)</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_SERIESUNITS</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">units</span>
 
     <span class="nd">@seriesUnits</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">seriesUnits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set the seriesUnits for the spectrumGroup</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;seriesUnits must be a string.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;seriesUnits must be a string or None.&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">setParameter</span><span class="p">(</span><span class="n">SPECTRUMGROUPSERIES</span><span class="p">,</span> <span class="n">SPECTRUMGROUPSERIESUNITS</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_SERIESUNITS</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">seriesType</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the seriesType for the spectrumGroup</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">seriesType</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getParameter</span><span class="p">(</span><span class="n">SPECTRUMGROUPSERIES</span><span class="p">,</span> <span class="n">SPECTRUMGROUPSERIESTYPE</span><span class="p">)</span>
+        <span class="n">seriesType</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_SERIESTYPE</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">seriesType</span>
 
     <span class="nd">@seriesType</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">seriesType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set the seriesType for the spectrumGroup</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;seriesType must be an int.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;seriesType must be an int or None.&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">setParameter</span><span class="p">(</span><span class="n">SPECTRUMGROUPSERIES</span><span class="p">,</span> <span class="n">SPECTRUMGROUPSERIESTYPE</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_SERIESTYPE</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">seriesPeakHeightForPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return: Pandas DataFrame with the following structure:</span>
+<span class="sd">                Index: multiIndex =&gt; axisCodes as levels;</span>
+<span class="sd">                Columns =&gt; NR_ID: ID for the nmrResidue(s) assigned to the peak if available</span>
+<span class="sd">                           Spectrum series values sorted by ascending values, if series values are not set, then the</span>
+<span class="sd">                           spectrum name is used instead.</span>
+
+<span class="sd">                        |  NR_ID  |   SP1     |    SP2    |   SP3</span>
+<span class="sd">            H     N     |         |           |           |</span>
+<span class="sd">           -------------+-------- +-----------+-----------+---------</span>
+<span class="sd">            7.5  104.3  | A.1.ARG |    10     |  100      | 1000</span>
+
+<span class="sd">            &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.lib.peakUtils</span> <span class="kn">import</span> <span class="n">getSpectralPeakHeights</span>
+
+        <span class="k">return</span> <span class="n">getSpectralPeakHeights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">seriesPeakHeightForNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return: Pandas DataFrame with the following structure:</span>
+<span class="sd">                Index:  ID for the nmrResidue(s) assigned to the peak ;</span>
+<span class="sd">                Columns =&gt; Spectrum series values sorted by ascending values, if series values are not set, then the</span>
+<span class="sd">                           spectrum name is used instead.</span>
+
+<span class="sd">                       |   SP1     |    SP2    |   SP3</span>
+<span class="sd">            NR_ID      |           |           |           |</span>
+<span class="sd">           ------------+-----------+-----------+-----------+---------</span>
+<span class="sd">            A.1.ARG    |    10     |  100      | 1000</span>
+
+<span class="sd">            &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.lib.peakUtils</span> <span class="kn">import</span> <span class="n">getSpectralPeakHeightForNmrResidue</span>
+
+        <span class="k">return</span> <span class="n">getSpectralPeakHeightForNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SpectrumGroup.sortSpectraBySeries"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.SpectrumGroup.SpectrumGroup.sortSpectraBySeries">[docs]</a>    <span class="k">def</span> <span class="nf">sortSpectraBySeries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">series</span><span class="p">:</span>
+            <span class="n">series</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">series</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">reverse</span><span class="p">:</span>
+                <span class="n">ind</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">argsort</span><span class="p">()[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ind</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">)[</span><span class="n">ind</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">series</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">series</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="SpectrumGroup.sortSpectraByName"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.SpectrumGroup.SpectrumGroup.sortSpectraByName">[docs]</a>    <span class="k">def</span> <span class="nf">sortSpectraByName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">sortObjectByName</span>
+
+        <span class="n">spectra</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
+        <span class="n">sortObjectByName</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="n">spectra</span></div>
+
+<div class="viewcode-block" id="SpectrumGroup.clone"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.SpectrumGroup.SpectrumGroup.clone">[docs]</a>    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># name = _incrementObjectName(self.project, self._pluralLinkName, self.name)</span>
+        <span class="n">newSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">newSpectrumGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">spectra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
+        <span class="n">attrNames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;series&#39;</span><span class="p">,</span> <span class="s1">&#39;seriesType&#39;</span><span class="p">,</span> <span class="s1">&#39;seriesUnits&#39;</span><span class="p">,</span> <span class="s1">&#39;sliceColour&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;positiveContourColour&#39;</span><span class="p">,</span> <span class="s1">&#39;negativeContourColour&#39;</span><span class="p">,</span> <span class="s1">&#39;comment&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">attrNames</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">newSpectrumGroup</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Error cloning: </span><span class="si">%s</span><span class="s1">. Invalid attr: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="n">newSpectrumGroup</span></div>
 
     <span class="c1">#=========================================================================================</span>
     <span class="c1"># Implementation functions</span>
@@ -275,30 +428,64 @@
     <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Rename SpectrumGroup, changing its name and Pid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_validateName</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">allowWhitespace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uniqueName</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
 
         <span class="c1"># rename functions from here</span>
         <span class="n">oldName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_oldPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+
         <span class="k">return</span> <span class="p">(</span><span class="n">oldName</span><span class="p">,)</span></div>
 
     <span class="k">def</span> <span class="nf">_finaliseAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Subclassed to handle associated seriesValues instances</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">oldPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="p">):</span>
+            <span class="k">return</span>
+
         <span class="c1"># propagate the rename to associated seriesValues</span>
         <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;rename&#39;</span><span class="p">]:</span>
             <span class="c1"># rename the items in _seriesValues as they are referenced by pid</span>
             <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
-                <span class="n">spectrum</span><span class="o">.</span><span class="n">_renameSeriesItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oldPid</span><span class="p">)</span></div>
+                <span class="n">spectrum</span><span class="o">.</span><span class="n">_renameSeriesItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oldPid</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_restoreObject</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">apiObj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Restore the object and update ccpnInternalData</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">SPECTRUMGROUP</span> <span class="o">=</span> <span class="s1">&#39;spectrumGroup&#39;</span>
+        <span class="n">SPECTRUMGROUPCOMMENT</span> <span class="o">=</span> <span class="s1">&#39;spectrumGroupComment&#39;</span>
+        <span class="n">SPECTRUMGROUPPOSITIVECONTOURCOLOUR</span> <span class="o">=</span> <span class="s1">&#39;spectrumGroupPositiveContourColour&#39;</span>
+        <span class="n">SPECTRUMGROUPNEGATIVECONTOURCOLOUR</span> <span class="o">=</span> <span class="s1">&#39;spectrumGroupNegativeContourColour&#39;</span>
+        <span class="n">SPECTRUMGROUPSLICECOLOUR</span> <span class="o">=</span> <span class="s1">&#39;spectrumGroupSliceColour&#39;</span>
+        <span class="n">SPECTRUMGROUPSERIES</span> <span class="o">=</span> <span class="s1">&#39;spectrumGroupSeries&#39;</span>
+        <span class="n">SPECTRUMGROUPSERIESUNITS</span> <span class="o">=</span> <span class="s1">&#39;spectrumGroupSeriesUnits&#39;</span>
+        <span class="n">SPECTRUMGROUPSERIESTYPE</span> <span class="o">=</span> <span class="s1">&#39;spectrumGroupSeriesType&#39;</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_restoreObject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">apiObj</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">newVar</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">SPECTRUMGROUP</span><span class="p">,</span> <span class="n">SPECTRUMGROUPCOMMENT</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_COMMENT</span><span class="p">),</span>
+                                         <span class="p">(</span><span class="n">SPECTRUMGROUP</span><span class="p">,</span> <span class="n">SPECTRUMGROUPPOSITIVECONTOURCOLOUR</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_POSITIVECONTOURCOLOUR</span><span class="p">),</span>
+                                         <span class="p">(</span><span class="n">SPECTRUMGROUP</span><span class="p">,</span> <span class="n">SPECTRUMGROUPNEGATIVECONTOURCOLOUR</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_NEGATIVECONTOURCOLOUR</span><span class="p">),</span>
+                                         <span class="p">(</span><span class="n">SPECTRUMGROUP</span><span class="p">,</span> <span class="n">SPECTRUMGROUPSLICECOLOUR</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_SLICECOLOUR</span><span class="p">),</span>
+                                         <span class="p">(</span><span class="n">SPECTRUMGROUPSERIES</span><span class="p">,</span> <span class="n">SPECTRUMGROUPSERIESUNITS</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_SERIESUNITS</span><span class="p">),</span>
+                                         <span class="p">(</span><span class="n">SPECTRUMGROUPSERIES</span><span class="p">,</span> <span class="n">SPECTRUMGROUPSERIESTYPE</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_SERIESTYPE</span><span class="p">),</span>
+                                         <span class="p">]:</span>
+            <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">hasParameter</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+                <span class="c1"># move the internal parameter to the correct namespace</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">getParameter</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">deleteParameter</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="n">newVar</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
 
     <span class="c1">#=========================================================================================</span>
     <span class="c1"># CCPN functions</span>
     <span class="c1">#=========================================================================================</span>
 
     <span class="c1">#===========================================================================================</span>
-    <span class="c1"># new&#39;Object&#39; and other methods</span>
+    <span class="c1"># new&lt;Object&gt; and other methods</span>
     <span class="c1"># Call appropriate routines in their respective locations</span>
     <span class="c1">#===========================================================================================</span>
 
@@ -308,19 +495,20 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="nd">@newObject</span><span class="p">(</span><span class="n">SpectrumGroup</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">_newSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Project</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">spectra</span><span class="o">=</span><span class="p">(),</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpectrumGroup</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_newSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Project</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">spectra</span><span class="o">=</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpectrumGroup</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Create new SpectrumGroup</span>
 
 <span class="sd">    See the SpectrumGroup class for details.</span>
 
 <span class="sd">    :param name: name for the new SpectrumGroup</span>
 <span class="sd">    :param spectra: optional list of spectra as objects or pids</span>
-<span class="sd">    :param serial: optional serial number</span>
 <span class="sd">    :return: a new SpectrumGroup instance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in ccpn.SpectrumGroup.name&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">SpectrumGroup</span><span class="o">.</span><span class="n">_uniqueName</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">spectra</span><span class="p">:</span>
         <span class="n">getByPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span>
@@ -331,15 +519,16 @@
     <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new SpectrumGroup item&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
-                                         <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">spectra</span><span class="p">:</span>
         <span class="n">result</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="n">spectra</span>
 
+    <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwds</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> does not have parameter &quot;</span><span class="si">%s</span><span class="s1">&quot;; unable to set&#39;</span> <span class="o">%</span>
+                                <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+                                <span class="p">)</span>
     <span class="k">return</span> <span class="n">result</span>
 
 
@@ -381,6 +570,7 @@
         <span class="p">)</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -390,7 +580,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -410,12 +600,13 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.SpectrumGroup</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.core.Substance &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.Substance</a></li> 
       </ul>
     </div>  
 
@@ -42,18 +43,19 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:31 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -65,7 +67,7 @@
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 <span class="kn">import</span> <span class="nn">typing</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Sample</span> <span class="kn">import</span> <span class="n">Sample</span>
@@ -125,6 +127,10 @@
 
     <span class="c1"># Qualified name of matching API class</span>
     <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiRefComponent</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+
+    <span class="c1"># CCPN internal</span>
+    <span class="n">_linkedSpectraPids</span> <span class="o">=</span> <span class="s1">&#39;_linkedSpectraPids&#39;</span>
+    <span class="n">_SPECIFICATOMLABELLING</span> <span class="o">=</span> <span class="s1">&#39;specificAtomLabelling&#39;</span>
 
     <span class="c1"># CCPN properties</span>
     <span class="nd">@property</span>
@@ -279,6 +285,10 @@
         <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
         <span class="k">return</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">seqString</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s1">&#39;seqString&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
 
+    <span class="nd">@sequenceString</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">sequenceString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">seqString</span> <span class="o">=</span> <span class="n">value</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">molecularMass</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Molecular mass - for substances that have one&quot;&quot;&quot;</span>
@@ -410,15 +420,6 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> type Substance has no attribute &#39;logPartitionCoefficient&#39;&quot;</span>
                             <span class="o">%</span> <span class="n">_apiClassNameMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
 
-    <span class="c1"># @property</span>
-    <span class="c1"># def comment(self) -&gt; str:</span>
-    <span class="c1">#     &quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
-    <span class="c1">#     return self._wrappedData.details</span>
-    <span class="c1">#</span>
-    <span class="c1"># @comment.setter</span>
-    <span class="c1"># def comment(self, value: str):</span>
-    <span class="c1">#     self._wrappedData.details = value</span>
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">specificAtomLabelling</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;Site-specific labelling for all chains matching Substance</span>
@@ -435,7 +436,7 @@
 <span class="sd">          | &#39;B.211.ALA.CB&#39;:{&#39;12C&#39;:0.32, &#39;13C&#39;:0.68},}&quot;&quot;&quot;</span>
 
         <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ccpnInternalData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_specificAtomLabelling&#39;</span><span class="p">)</span>
+        <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_SPECIFICATOMLABELLING</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dd</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">:</span>
                 <span class="c1"># NBNB this relies on residues being sorted by seqId, and so being</span>
@@ -469,13 +470,13 @@
         <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">chain</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and its chain do not match the Substance&quot;</span> <span class="o">%</span> <span class="n">atom</span><span class="o">.</span><span class="n">longPid</span><span class="p">)</span>
 
-        <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ccpnInternalData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_specificAtomLabelling&#39;</span><span class="p">)</span>
-
+        <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_SPECIFICATOMLABELLING</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dd</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ccpnInternalData</span><span class="p">[</span><span class="s1">&#39;_specificAtomLabelling&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">dd</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">residue</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">residue</span>
         <span class="n">residueIndex</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">residue</span><span class="p">)</span>
-        <span class="n">dd</span><span class="p">[(</span><span class="n">residueIndex</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">isotopeLabels</span></div>
+        <span class="n">dd</span><span class="p">[(</span><span class="n">residueIndex</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">isotopeLabels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_SPECIFICATOMLABELLING</span><span class="p">,</span> <span class="n">dd</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Substance.removeSpecificAtomLabelling"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Substance.Substance.removeSpecificAtomLabelling">[docs]</a>    <span class="k">def</span> <span class="nf">removeSpecificAtomLabelling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;Atom&#39;</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;Remove specificAtomLabelling for atom designated by atomId</span>
@@ -493,7 +494,7 @@
         <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">chain</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and its chain do not match the Substance&quot;</span> <span class="o">%</span> <span class="n">atom</span><span class="o">.</span><span class="n">longPid</span><span class="p">)</span>
 
-        <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ccpnInternalData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_specificAtomLabelling&#39;</span><span class="p">)</span>
+        <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_SPECIFICATOMLABELLING</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">dd</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot remove - no atom labelling data present.&quot;</span><span class="p">)</span>
@@ -524,7 +525,7 @@
         <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">chain</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Atom </span><span class="si">%s</span><span class="s2"> and its chain do not match the Substance&quot;</span> <span class="o">%</span> <span class="n">atom</span><span class="p">)</span>
 
-        <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ccpnInternalData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_specificAtomLabelling&#39;</span><span class="p">)</span>
+        <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_SPECIFICATOMLABELLING</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dd</span><span class="p">:</span>
             <span class="n">residue</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">residue</span>
             <span class="n">residueIndex</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">residue</span><span class="p">)</span>
@@ -532,7 +533,7 @@
 
 <div class="viewcode-block" id="Substance.clearSpecificAtomLabelling"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Substance.Substance.clearSpecificAtomLabelling">[docs]</a>    <span class="k">def</span> <span class="nf">clearSpecificAtomLabelling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Clear specificAtomLabelling&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ccpnInternalData</span><span class="p">[</span><span class="s1">&#39;_specificAtomLabelling&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_SPECIFICATOMLABELLING</span><span class="p">,</span> <span class="p">{})</span></div>
 
 <div class="viewcode-block" id="Substance.updateSpecificAtomLabelling"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Substance.Substance.updateSpecificAtomLabelling">[docs]</a>    <span class="k">def</span> <span class="nf">updateSpecificAtomLabelling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictionary</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]):</span>
         <span class="sd">&quot;&quot;&quot;Update Site-specific labelling for all chains matching Substance.</span>
@@ -549,6 +550,20 @@
 
         <span class="k">for</span> <span class="n">atomId</span><span class="p">,</span> <span class="n">dd</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setSpecificAtomLabelling</span><span class="p">(</span><span class="n">atomId</span><span class="p">,</span> <span class="n">dd</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_getChemComps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        CCPN internal</span>
+<span class="sd">        :param substance:</span>
+<span class="sd">        :return: a ChemComp Obj if available</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">chemComps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">molecule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">getMolecule</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">molecule</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">molResidue</span> <span class="ow">in</span> <span class="n">molecule</span><span class="o">.</span><span class="n">findAllMolResidues</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">molResidue</span><span class="o">.</span><span class="n">chemComp</span><span class="p">:</span>
+                    <span class="n">chemComps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molResidue</span><span class="o">.</span><span class="n">chemComp</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">chemComps</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sampleComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">SampleComponent</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
@@ -569,22 +584,24 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">referenceSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Spectrum</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Reference Spectra acquired for Substance.</span>
-<span class="sd">        There should be only one reference spectrum for each experiment type&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Reference Spectra acquired for Substance&quot;&quot;&quot;</span>
+        <span class="n">_referenceSpectra</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">sp</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span> <span class="k">if</span> <span class="bp">self</span> <span class="ow">in</span> <span class="n">sp</span><span class="o">.</span><span class="n">referenceSubstances</span><span class="p">])</span>
+        <span class="c1"># _referenceSpectra = tuple(filter(lambda sp: self in sp.referenceSubstances, self.project.spectra)) # just an alternative way to a loop</span>
 
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
-        <span class="n">data2Obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
-        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">data2Obj</span><span class="p">[</span><span class="n">y</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_apiNmrProject</span><span class="o">.</span><span class="n">experiments</span>
-                            <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">dataSources</span>
-                            <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">refComponentName</span> <span class="o">==</span> <span class="n">name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">_referenceSpectra</span>
+
 
     <span class="nd">@referenceSpectra</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">referenceSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">:</span>
-            <span class="n">spectrum</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">refComponentName</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-            <span class="n">spectrum</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">refComponentName</span> <span class="o">=</span> <span class="n">name</span>
+    <span class="k">def</span> <span class="nf">referenceSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
+            <span class="n">spectrum</span><span class="o">.</span><span class="n">referenceSubstances</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_molecule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the attached molecule</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molecule</span>
 
     <span class="c1">#=========================================================================================</span>
     <span class="c1"># Implementation functions</span>
@@ -602,14 +619,15 @@
     <span class="k">def</span> <span class="nf">_finaliseAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Subclassed to notify changes to associated integralListViews</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="p">):</span>
+            <span class="k">return</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;rename&#39;</span><span class="p">]:</span>
                 <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">spectrumHit</span> <span class="ow">in</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">spectrumHits</span><span class="p">:</span>
-                        <span class="n">spectrumHit</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">)</span>
-                    <span class="n">sampleComponent</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">)</span>
+                        <span class="n">spectrumHit</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+                    <span class="n">sampleComponent</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Error _finalising Substance.spectrumHits: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
@@ -621,21 +639,21 @@
 <span class="sd">        SampleComponents and SpectrumHits with matching names. If name is None, the existing value</span>
 <span class="sd">        will be used. Labelling &#39;None&#39;  means &#39;Natural abundance&#39;&quot;&quot;&quot;</span>
 
-        <span class="c1"># ejb - name should always be passed in, strange not to</span>
-
-        <span class="n">oldName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">oldName</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_validateName</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">allowWhitespace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">oldName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_oldPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validateStringValue</span><span class="p">(</span><span class="n">attribName</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="c1"># name = self._uniqueName(project=self.project, name=name)</span>
 
         <span class="n">oldLabelling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelling</span>
-        <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">labelling</span>
-        <span class="k">if</span> <span class="n">labelling</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">DEFAULT_LABELLING</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="n">labelling</span><span class="p">:</span>
-            <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">DEFAULT_LABELLING</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_validateName</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">labelling</span><span class="p">,</span> <span class="n">attribName</span><span class="o">=</span><span class="s1">&#39;Labelling&#39;</span><span class="p">,</span>
-                           <span class="n">allowWhitespace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allowEmpty</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allowNone</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">labelling</span> <span class="o">=</span> <span class="n">labelling</span> <span class="ow">or</span> <span class="n">DEFAULT_LABELLING</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validateStringValue</span><span class="p">(</span><span class="n">attribName</span><span class="o">=</span><span class="s1">&#39;labelling&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">labelling</span><span class="p">,</span> <span class="n">allowNone</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">apiNmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span>
+        <span class="n">_molComponent</span> <span class="o">=</span> <span class="n">apiNmrProject</span><span class="o">.</span><span class="n">sampleStore</span><span class="o">.</span><span class="n">refSampleComponentStore</span><span class="o">.</span><span class="n">findFirstComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="o">=</span><span class="n">apiLabeling</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_molComponent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_molComponent</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> already exists&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">labelling</span> <span class="k">if</span> <span class="n">labelling</span> <span class="o">!=</span> <span class="n">DEFAULT_LABELLING</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
 
         <span class="c1"># rename functions from here</span>
         <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
@@ -665,14 +683,34 @@
     <span class="c1"># CCPN functions</span>
     <span class="c1">#=========================================================================================</span>
 
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_uniqueName</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return a unique name based on name (set to defaultName if None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">apiComponentStore</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sampleStore</span><span class="o">.</span><span class="n">refSampleComponentStore</span>
+        <span class="n">apiProject</span> <span class="o">=</span> <span class="n">apiComponentStore</span><span class="o">.</span><span class="n">root</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_defaultName</span><span class="p">()</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_validateStringValue</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">sib</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">sib</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">)]</span>
+        <span class="k">while</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span> <span class="ow">or</span> <span class="p">(</span><span class="n">apiProject</span><span class="o">.</span><span class="n">findFirstMolecule</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span>
+               <span class="n">apiComponentStore</span><span class="o">.</span><span class="n">findFirstComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">incrementName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">name</span>
+
     <span class="c1">#===========================================================================================</span>
-    <span class="c1"># new&#39;Object&#39; and other methods</span>
+    <span class="c1"># new&lt;Object&gt; and other methods</span>
     <span class="c1"># Call appropriate routines in their respective locations</span>
     <span class="c1">#===========================================================================================</span>
 
 <div class="viewcode-block" id="Substance.createChain"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Substance.Substance.createChain">[docs]</a>    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">createChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">role</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+                    <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">expandFromAtomSets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="n">addPseudoAtoms</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">addNonstereoAtoms</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create new Chain that matches Substance</span>
 
 <span class="sd">        See the Chain class for details.</span>
@@ -686,7 +724,28 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">_createChainFromSubstance</span>
 
-        <span class="k">return</span> <span class="n">_createChainFromSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortName</span><span class="o">=</span><span class="n">shortName</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">_createChainFromSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortName</span><span class="o">=</span><span class="n">shortName</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span>
+                                         <span class="n">expandFromAtomSets</span><span class="o">=</span><span class="n">expandFromAtomSets</span><span class="p">,</span> <span class="n">addPseudoAtoms</span><span class="o">=</span><span class="n">addPseudoAtoms</span><span class="p">,</span>
+                                         <span class="n">addNonstereoAtoms</span><span class="o">=</span><span class="n">addNonstereoAtoms</span><span class="p">,</span>
+                                         <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Substance.getChain"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Substance.Substance.getChain">[docs]</a>    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">getChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">role</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get existing Chain that matches Substance</span>
+
+<span class="sd">        See the Chain class for details.</span>
+
+<span class="sd">        Optional keyword arguments can be passed in; see Chain._createChainFromSubstance for details.</span>
+
+<span class="sd">        :param shortName:</span>
+<span class="sd">        :param role:</span>
+<span class="sd">        :param comment: optional comment string</span>
+<span class="sd">        :return: a new Chain instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">_getChainFromSubstance</span>
+
+        <span class="k">return</span> <span class="n">_getChainFromSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortName</span><span class="o">=</span><span class="n">shortName</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div></div>
 
 
 <span class="c1">#=========================================================================================</span>
@@ -699,7 +758,7 @@
                   <span class="n">empiricalFormula</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">molecularMass</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                   <span class="n">synonyms</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">atomCount</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bondCount</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                   <span class="n">ringCount</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">hBondDonorCount</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">hBondAcceptorCount</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                  <span class="n">polarSurfaceArea</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">logPartitionCoefficient</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+                  <span class="n">polarSurfaceArea</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">logPartitionCoefficient</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Substance</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Create new substance WITHOUT storing the sequence internally</span>
 <span class="sd">    (and hence not suitable for making chains). SubstanceType defaults to &#39;Molecule&#39;.</span>
@@ -726,38 +785,24 @@
 <span class="sd">    :param hBondAcceptorCount:</span>
 <span class="sd">    :param polarSurfaceArea:</span>
 <span class="sd">    :param logPartitionCoefficient:</span>
-<span class="sd">    :param serial: optional serial number.</span>
 <span class="sd">    :return: a new Substance instance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="n">labelling</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">DEFAULT_LABELLING</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">labelling</span>
+    <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">_labelling</span> <span class="o">=</span> <span class="n">labelling</span> <span class="ow">or</span> <span class="n">DEFAULT_LABELLING</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="c1"># raise TypeError(&quot;ccpn.Substance name must be a string&quot;)</span>
-    <span class="k">elif</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ccpn.Substance name must be set&quot;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in ccpn.Substance id: </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
-                         <span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">labelling</span><span class="p">))</span>
-
-    <span class="k">if</span> <span class="n">labelling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># &#39;None&#39; caught by below as default</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">labelling</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;ccpn.Substance &#39;labelling&#39; name must be a string&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="n">labelling</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ccpn.Substance &#39;labelling&#39; name must be set&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">labelling</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in ccpn.Substance labelling, id: </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
-                             <span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">labelling</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">Substance</span><span class="o">.</span><span class="n">_uniqueName</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_validateStringValue</span><span class="p">(</span><span class="n">attribName</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">allowNone</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_validateStringValue</span><span class="p">(</span><span class="n">attribName</span><span class="o">=</span><span class="s1">&#39;labelling&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">_labelling</span><span class="p">,</span> <span class="n">allowNone</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">apiNmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
     <span class="n">apiComponentStore</span> <span class="o">=</span> <span class="n">apiNmrProject</span><span class="o">.</span><span class="n">sampleStore</span><span class="o">.</span><span class="n">refSampleComponentStore</span>
-
     <span class="k">if</span> <span class="n">apiComponentStore</span><span class="o">.</span><span class="n">findFirstComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="o">=</span><span class="n">apiLabeling</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Substance </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> already exists&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">labelling</span><span class="p">))</span>
+        <span class="c1"># name = commonUtil._incrementObjectName(self.project, Substance._pluralLinkName, name)</span>
+        <span class="c1"># oldSubstance = apiComponentStore.findFirstComponent(name=name)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1"> already exists&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">_labelling</span> <span class="k">if</span> <span class="n">_labelling</span> <span class="o">!=</span> <span class="n">DEFAULT_LABELLING</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="n">oldSubstance</span> <span class="o">=</span> <span class="n">apiComponentStore</span><span class="o">.</span><span class="n">findFirstComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
@@ -802,13 +847,6 @@
     <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new Substance item&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
-                                         <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
-
     <span class="k">return</span> <span class="n">result</span>
 
 
@@ -818,7 +856,7 @@
 
 
 <span class="nd">@newObject</span><span class="p">(</span><span class="n">Substance</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">_fetchNefSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Project</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_fetchNefSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Project</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Fetch Substance that matches sequence of NEF rows and/or name</span>
 
 <span class="sd">    :param self:</span>
@@ -842,13 +880,29 @@
     <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new Nef Substance item&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
-                                <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">_getNefSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Project</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get existing Substance that matches sequence of NEF rows and/or name</span>
+
+<span class="sd">    :param self:</span>
+<span class="sd">    :param sequence:</span>
+<span class="sd">    :param name:</span>
+<span class="sd">    :return: an existing Nef Substance instance or None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">apiNmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="s1">&#39;Molecule_1&#39;</span>
+    <span class="n">apiMolecule</span> <span class="o">=</span> <span class="n">apiNmrProject</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">findFirstMolecule</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">apiMolecule</span><span class="p">:</span>
+        <span class="n">apiMolComponent</span> <span class="o">=</span> <span class="n">apiNmrProject</span><span class="o">.</span><span class="n">sampleStore</span><span class="o">.</span><span class="n">refSampleComponentStore</span><span class="o">.</span><span class="n">getMolComponent</span><span class="p">(</span><span class="n">apiMolecule</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">apiMolComponent</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">apiMolComponent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiMolComponent</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Error getting Nef Substance </span><span class="si">{}</span><span class="s1"> - </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">apiMolComponent</span><span class="p">))</span>
 
 
 <span class="c1">#EJB 20181206: moved to Project</span>
@@ -861,7 +915,7 @@
                             <span class="n">labelling</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">userCode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                             <span class="n">synonyms</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                             <span class="n">startNumber</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">molType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">isCyclic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                            <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Substance</span><span class="p">:</span>
+                            <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Substance</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Make new Substance from sequence of residue codes, using default linking and variants</span>
 
 <span class="sd">    NB: For more complex substances, you must use advanced, API-level commands.</span>
@@ -881,31 +935,24 @@
 <span class="sd">    :return: a new Substance instance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="n">labelling</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">DEFAULT_LABELLING</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">labelling</span>
+    <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">labelling</span> <span class="o">=</span> <span class="n">labelling</span> <span class="ow">or</span> <span class="n">DEFAULT_LABELLING</span>
 
-    <span class="n">apiNmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">Substance</span><span class="o">.</span><span class="n">_uniqueName</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_validateStringValue</span><span class="p">(</span><span class="n">attribName</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">allowNone</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_validateStringValue</span><span class="p">(</span><span class="n">attribName</span><span class="o">=</span><span class="s1">&#39;labelling&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">labelling</span><span class="p">,</span> <span class="n">allowNone</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">sequence</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;createPolymerSubstance requires non-empty sequence&quot;</span><span class="p">)</span>
 
-    <span class="k">elif</span> <span class="n">apiNmrProject</span><span class="o">.</span><span class="n">sampleStore</span><span class="o">.</span><span class="n">refSampleComponentStore</span><span class="o">.</span><span class="n">findFirstComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                                                                              <span class="n">labeling</span><span class="o">=</span><span class="n">apiLabeling</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Substance </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> already exists&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">labelling</span><span class="p">))</span>
+    <span class="n">apiNmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">if</span> <span class="n">apiNmrProject</span><span class="o">.</span><span class="n">sampleStore</span><span class="o">.</span><span class="n">refSampleComponentStore</span><span class="o">.</span><span class="n">findFirstComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="o">=</span><span class="n">apiLabeling</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> already exists&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">labelling</span> <span class="k">if</span> <span class="n">labelling</span> <span class="o">!=</span> <span class="n">DEFAULT_LABELLING</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
 
     <span class="k">elif</span> <span class="n">apiNmrProject</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">findFirstMolecule</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Molecule name </span><span class="si">%s</span><span class="s2"> is already in use for API Molecule&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">labelling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">labelling</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;ccpn.Substance &#39;labelling&#39; name must be a string&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="n">labelling</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ccpn.Substance &#39;labelling&#39; name must be set&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">labelling</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in ccpn.Substance labelling, id: </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
-                             <span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">labelling</span><span class="p">))</span>
 
     <span class="c1"># NOTE: ED I need to open the undoStack here so this adds to the list</span>
     <span class="n">apiMolecule</span> <span class="o">=</span> <span class="n">MoleculeModify</span><span class="o">.</span><span class="n">createMolecule</span><span class="p">(</span><span class="n">apiNmrProject</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">molType</span><span class="o">=</span><span class="n">molType</span><span class="p">,</span>
@@ -920,18 +967,8 @@
     <span class="n">mol</span> <span class="o">=</span> <span class="n">apiNmrProject</span><span class="o">.</span><span class="n">sampleStore</span><span class="o">.</span><span class="n">refSampleComponentStore</span><span class="o">.</span><span class="n">fetchMolComponent</span><span class="p">(</span><span class="n">apiMolecule</span><span class="p">,</span> <span class="n">labeling</span><span class="o">=</span><span class="n">apiLabeling</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">mol</span><span class="p">]</span>
 
-    <span class="c1"># print(&#39;&gt;&gt;&gt;create substance:&#39;, apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule))</span>
-    <span class="c1"># print(&#39;&gt;&gt;&gt;result          :&#39;, result)</span>
-
     <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new PolymerSubstance item&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
-                                <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
 
     <span class="n">result</span><span class="o">.</span><span class="n">userCode</span> <span class="o">=</span> <span class="n">userCode</span>
 
@@ -1030,8 +1067,8 @@
 <span class="c1"># del _fetchSubstance</span>
 
 
-<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">SampleComponent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">Substance</span><span class="p">]:</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getSubstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">)</span>
+<div class="viewcode-block" id="getter"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Substance.getter">[docs]</a><span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">SampleComponent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">Substance</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getSubstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">)</span></div>
 
     <span class="c1"># relativeId = &#39;.&#39;.join(Pid.remapSeparators(self.na) for x in (self))</span>
     <span class="c1"># apiRefComponentStore = self._parent._apiSample.sampleStore.refSampleComponentStore</span>
@@ -1043,31 +1080,49 @@
     <span class="c1">#   return self._project._data2Obj[apiComponent]</span>
 
 
-<span class="c1">#</span>
+<span class="k">def</span> <span class="nf">_getSubstanceByName</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Project</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">Substance</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param self: project instance</span>
+<span class="sd">    :param kwargs: any substance attribute, e.g.: name, labelling etc</span>
+<span class="sd">    :return: substance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">apiNmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="n">apiComponentStore</span> <span class="o">=</span> <span class="n">apiNmrProject</span><span class="o">.</span><span class="n">sampleStore</span><span class="o">.</span><span class="n">refSampleComponentStore</span>
+    <span class="n">apiComponent</span> <span class="o">=</span> <span class="n">apiComponentStore</span><span class="o">.</span><span class="n">findFirstComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">apiComponent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiComponent</span><span class="p">]</span>
+
+
 <span class="n">SampleComponent</span><span class="o">.</span><span class="n">substance</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
                                      <span class="s2">&quot;Substance corresponding to SampleComponent&quot;</span><span class="p">)</span>
 
+<span class="c1">####### Moved to spectrum as referenceSubstances.</span>
+<span class="c1">####### ReferenceSubstance is Deprecated from 3.0.3.</span>
 
-<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Substance</span><span class="p">:</span>
-    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">refComponent</span>
-    <span class="c1"># return apiRefComponent and self._project._data2Obj[apiRefComponent]</span>
-
-    <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">apiRefComponent</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">setter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Substance</span><span class="p">):</span>
-    <span class="c1"># apiRefComponent = value and value._apiSubstance</span>
-
-    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">value</span><span class="o">.</span><span class="n">_apiSubstance</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">refComponent</span> <span class="o">=</span> <span class="n">apiRefComponent</span>
-
-
+<span class="c1"># def getter(self: Spectrum) -&gt; Substance:</span>
+<span class="c1">#     apiRefComponent = self._apiDataSource.experiment.refComponent</span>
+<span class="c1">#     # return apiRefComponent and self._project._data2Obj[apiRefComponent]</span>
 <span class="c1">#</span>
-<span class="n">Spectrum</span><span class="o">.</span><span class="n">referenceSubstance</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">setter</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
-                                       <span class="s2">&quot;Substance that has this Spectrum as a reference spectrum&quot;</span><span class="p">)</span>
-<span class="k">del</span> <span class="n">getter</span>
-<span class="k">del</span> <span class="n">setter</span>
+<span class="c1">#     return None if apiRefComponent is None else self._project._data2Obj.get(apiRefComponent)</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># def setter(self: Spectrum, value: Substance):</span>
+<span class="c1">#     # apiRefComponent = value and value._apiSubstance</span>
+<span class="c1">#</span>
+<span class="c1">#     apiRefComponent = None if value is None else value._apiSubstance</span>
+<span class="c1">#</span>
+<span class="c1">#     self._apiDataSource.experiment.refComponent = apiRefComponent</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># #</span>
+<span class="c1"># Spectrum.referenceSubstance = property(getter, setter, None,</span>
+<span class="c1">#                                        &quot;Substance that has this Spectrum as a reference spectrum&quot;)</span>
+<span class="c1"># del getter</span>
+<span class="c1"># del setter</span>
+<span class="c1">####### End referenceSubstance link ####</span>
 
 <span class="c1"># Notifiers:</span>
 
@@ -1080,6 +1135,7 @@
         <span class="p">)</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -1089,7 +1145,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -1109,12 +1165,13 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.Substance</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

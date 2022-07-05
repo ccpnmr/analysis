@@ -32,4 +32,3 @@ ccpnmodel.ccpncore.lib.molecule.MoleculeQuery module
    :members:
    :undoc-members:
    :show-inheritance:
-

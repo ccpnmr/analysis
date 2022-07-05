@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.ui.gui.widgets.Frame &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
-    <script src="../../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.Frame</a></li> 
       </ul>
     </div>  
 
@@ -96,8 +97,8 @@
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.1 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -110,9 +111,11 @@
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ScrollArea</span> <span class="kn">import</span> <span class="n">ScrollArea</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ScrollBarVisibilityWatcher</span> <span class="kn">import</span> <span class="n">ScrollBarVisibilityWatcher</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">textFontLarge</span><span class="p">,</span> \
-    <span class="n">CCPNGLWIDGET_HEXFOREGROUND</span><span class="p">,</span> <span class="n">CCPNGLWIDGET_HEXBACKGROUND</span><span class="p">,</span> <span class="n">CCPNGLWIDGET_HEXHIGHLIGHT</span><span class="p">,</span> <span class="n">getColours</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Font</span> <span class="kn">import</span> <span class="n">setWidgetFont</span><span class="p">,</span> <span class="n">getFont</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">CCPNGLWIDGET_HEXFOREGROUND</span><span class="p">,</span> <span class="n">CCPNGLWIDGET_HEXBACKGROUND</span><span class="p">,</span> <span class="n">CCPNGLWIDGET_HEXHIGHLIGHT</span><span class="p">,</span> \
+    <span class="n">getColours</span><span class="p">,</span> <span class="n">BORDERNOFOCUS_COLOUR</span>
 
 
 <div class="viewcode-block" id="Frame"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.Frame">[docs]</a><span class="k">class</span> <span class="nc">Frame</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
@@ -155,7 +158,7 @@
             <span class="n">styleSheet</span> <span class="o">+=</span> <span class="s2">&quot;foreground-color: rgb(</span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">); &quot;</span> <span class="o">%</span> <span class="n">kwds</span><span class="p">[</span><span class="s2">&quot;fgColor&quot;</span><span class="p">]</span>
             <span class="k">del</span> <span class="p">(</span><span class="n">kwds</span><span class="p">[</span><span class="s1">&#39;fgColor&#39;</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">showBorder</span><span class="p">:</span>
-            <span class="n">styleSheet</span> <span class="o">+=</span> <span class="s2">&quot;border: 1px solid black; &quot;</span>
+            <span class="n">styleSheet</span> <span class="o">+=</span> <span class="s2">&quot;border: 1px solid </span><span class="si">%s</span><span class="s2">; &quot;</span> <span class="o">%</span> <span class="n">BORDERNOFOCUS_COLOUR</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">styleSheet</span> <span class="o">+=</span> <span class="s2">&quot;border: 0px; &quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">styleSheet</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -200,9 +203,9 @@
 
         <span class="c1"># initialise the frame</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="n">setLayout</span><span class="p">,</span>
-                       <span class="n">showBorder</span><span class="o">=</span><span class="n">showBorder</span><span class="p">,</span> <span class="n">fShape</span><span class="o">=</span><span class="n">fShape</span><span class="p">,</span> <span class="n">fShadow</span><span class="o">=</span><span class="n">fShadow</span><span class="p">,</span>
-                       <span class="o">**</span><span class="n">kwds</span>
-                       <span class="p">)</span>
+                         <span class="n">showBorder</span><span class="o">=</span><span class="n">showBorder</span><span class="p">,</span> <span class="n">fShape</span><span class="o">=</span><span class="n">fShape</span><span class="p">,</span> <span class="n">fShadow</span><span class="o">=</span><span class="n">fShadow</span><span class="p">,</span>
+                         <span class="o">**</span><span class="n">kwds</span>
+                         <span class="p">)</span>
 
         <span class="c1"># make a new scrollArea</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span>
@@ -231,11 +234,15 @@
     <span class="k">def</span> <span class="nf">scrollArea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the scrollbar widget; for external usage</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span>
+
+<div class="viewcode-block" id="ScrollableFrame.insertCornerWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.ScrollableFrame.insertCornerWidget">[docs]</a>    <span class="k">def</span> <span class="nf">insertCornerWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Insert a corner widget into the target widget with the correct borders</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cornerDisplay</span> <span class="o">=</span> <span class="n">ScrollBarVisibilityWatcher</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scrollArea</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="OpenGLOverlayFrame"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.OpenGLOverlayFrame">[docs]</a><span class="k">class</span> <span class="nc">OpenGLOverlayFrame</span><span class="p">(</span><span class="n">Frame</span><span class="p">):</span>
-
     <span class="n">AUTOFILLBACKGROUND</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">showBorder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fShape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fShadow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -295,6 +302,11 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_setMask</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_setStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sl</span><span class="p">,</span> <span class="n">foregroundColour</span><span class="o">=</span><span class="n">CCPNGLWIDGET_HEXFOREGROUND</span><span class="p">,</span> <span class="n">backgroundColour</span><span class="o">=</span><span class="n">CCPNGLWIDGET_HEXBACKGROUND</span><span class="p">):</span>
+
+        <span class="c1"># from ccpn.framework.Application import getApplication</span>
+        <span class="c1"># textFontLarge = getApplication()._fontSettings.textFontLarge</span>
+        <span class="n">textFontLarge</span> <span class="o">=</span> <span class="n">getFont</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="s1">&#39;MEDIUM&#39;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backgroundColour</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">AUTOFILLBACKGROUND</span><span class="p">:</span>
             <span class="n">sl</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;QLabel {&#39;</span>
                              <span class="s1">&#39;padding: 0; &#39;</span>
@@ -329,6 +341,10 @@
                                 <span class="n">highlightColour</span><span class="o">=</span><span class="n">CCPNGLWIDGET_HEXHIGHLIGHT</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Update the background colour when changing colour themes, keeping the same foreground highlighting</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># from ccpn.framework.Application import getApplication</span>
+        <span class="c1"># textFontLarge = getApplication()._fontSettings.textFontLarge</span>
+        <span class="n">textFontLarge</span> <span class="o">=</span> <span class="n">getFont</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="s1">&#39;MEDIUM&#39;</span><span class="p">)</span>
+
         <span class="n">sl</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;QLabel {&#39;</span>
                          <span class="s1">&#39;padding: 0; &#39;</span>
                          <span class="s1">&#39;margin: 0px 0px 0px 0px;&#39;</span>
@@ -357,6 +373,7 @@
 
                 <span class="c1"># just in case I&#39;ve missed subclassing the above method</span>
                 <span class="k">pass</span></div></div>
+
 
 <div class="viewcode-block" id="ScrollOpenGLOverlayFrame"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Frame.ScrollOpenGLOverlayFrame">[docs]</a><span class="k">class</span> <span class="nc">ScrollOpenGLOverlayFrame</span><span class="p">(</span><span class="n">OpenGLOverlayFrame</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -454,6 +471,7 @@
     <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -463,7 +481,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -483,12 +501,13 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.Frame</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

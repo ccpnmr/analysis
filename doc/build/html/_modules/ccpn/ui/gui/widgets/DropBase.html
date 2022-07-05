@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.ui.gui.widgets.DropBase &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
-    <script src="../../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.DropBase</a></li> 
       </ul>
     </div>  
 
@@ -48,8 +49,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
@@ -58,8 +60,8 @@
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-01-28 10:04:26 +0000 (Tue, January 28, 2020) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2021-10-01 19:35:36 +0100 (Fri, October 01, 2021) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.4 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -72,13 +74,13 @@
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.Pid</span> <span class="kn">import</span> <span class="n">Pid</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
-<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtWidgets</span>
 
-<span class="c1"># GST maybe this too high level but because of the way drag events are handled cooperativley</span>
+<span class="c1"># GST maybe this too high level but because of the way drag events are handled cooperatively</span>
 <span class="c1"># at the moment it needs to be here...</span>
 <span class="c1">#</span>
 <span class="c1"># so what should happen (from my reading of the omens / Qt &#39;Documentation&#39;) is all widgets should reject events they</span>
-<span class="c1"># can&#39;t handle, this will then cause the event to pecolate out through the visual hierachy till it finds a module and</span>
+<span class="c1"># can&#39;t handle, this will then cause the event to percolate out through the visual hierarchy till it finds a module and</span>
 <span class="c1"># then gets handled, Currently any widget that inherits drop base will pass all events upto drop base which is</span>
 <span class="c1"># then handling module events which ought i guess be handled by the module after visual hierarchy percolation</span>
 <span class="c1">#</span>
@@ -88,7 +90,6 @@
 <span class="c1">#</span>
 <span class="c1"># if this analysis is wrong do tell me why, i am curious to understand whats going on</span>
 
-<span class="kn">from</span> <span class="nn">traceback</span> <span class="kn">import</span> <span class="n">print_stack</span>
 
 <div class="viewcode-block" id="DropBase"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.DropBase.DropBase">[docs]</a><span class="k">class</span> <span class="nc">DropBase</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -101,9 +102,11 @@
     <span class="n">TEXT</span> <span class="o">=</span> <span class="s1">&#39;text&#39;</span>
     <span class="n">PIDS</span> <span class="o">=</span> <span class="s1">&#39;pids&#39;</span>
     <span class="n">IDS</span> <span class="o">=</span> <span class="s1">&#39;ids&#39;</span>
-    <span class="n">_dropTargets</span> <span class="o">=</span> <span class="p">(</span><span class="n">URLS</span><span class="p">,</span> <span class="n">TEXT</span><span class="p">,</span> <span class="n">PIDS</span><span class="p">,</span> <span class="n">IDS</span><span class="p">)</span>
+    <span class="n">DFS</span> <span class="o">=</span> <span class="s1">&#39;dfs&#39;</span>
+    <span class="n">_dropTargets</span> <span class="o">=</span> <span class="p">(</span><span class="n">URLS</span><span class="p">,</span> <span class="n">TEXT</span><span class="p">,</span> <span class="n">PIDS</span><span class="p">,</span> <span class="n">IDS</span><span class="p">,</span> <span class="n">DFS</span><span class="p">)</span>
 
     <span class="kn">from</span> <span class="nn">ccpn.util.Constants</span> <span class="kn">import</span> <span class="n">ccpnmrJsonData</span> <span class="k">as</span> <span class="n">JSONDATA</span>
+    <span class="kn">from</span> <span class="nn">ccpn.util.Constants</span> <span class="kn">import</span> <span class="n">ccpnmrModelDataList</span> <span class="k">as</span> <span class="n">MODELDATALIST</span>
 
     <span class="k">def</span> <span class="nf">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
@@ -121,7 +124,7 @@
 
 <div class="viewcode-block" id="DropBase.dragEnterEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.DropBase.DropBase.dragEnterEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dragEnterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">checkForBadDragEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="c1"># self.checkForBadDragEvent(event)</span>
 
         <span class="n">parentModule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findModule</span><span class="p">()</span>
 
@@ -155,7 +158,6 @@
     <span class="c1">#   print(&#39;&gt;&gt;&gt;dragMoveEvent&#39;)</span>
 
     <span class="c1"># super().dragMoveEvent(event)</span>
-
 
 <div class="viewcode-block" id="DropBase.isDragToMaximisedModule"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.DropBase.DropBase.isDragToMaximisedModule">[docs]</a>    <span class="k">def</span> <span class="nf">isDragToMaximisedModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CcpnModuleArea</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
@@ -194,16 +196,15 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_target</span> <span class="o">=</span> <span class="n">target</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_statusBar</span> <span class="o">=</span> <span class="n">statusBar</span>
 
-            <span class="k">def</span> <span class="nf">eventFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">obj</span><span class="p">,</span><span class="n">event</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">eventFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QEvent</span><span class="o">.</span><span class="n">DragLeave</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_target</span><span class="o">.</span><span class="n">inDragToMaximisedModule</span> <span class="o">=</span> <span class="kc">False</span>
                         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_statusBar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">_statusBar</span><span class="o">.</span><span class="n">clearMessage</span><span class="p">()</span>
 
-
                         <span class="bp">self</span><span class="o">.</span><span class="n">_target</span><span class="o">.</span><span class="n">removeEventFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_target</span><span class="o">.</span><span class="n">cleanupFilter</span> <span class="o">=</span>  <span class="kc">None</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_target</span><span class="o">.</span><span class="n">cleanupFilter</span> <span class="o">=</span> <span class="kc">None</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">deleteLater</span><span class="p">()</span>
 
 
@@ -211,15 +212,15 @@
                     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;exception during event filter cleanup, deleting myself&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">deleteLater</span><span class="p">()</span>
 
-                <span class="n">result</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">eventFilter</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">event</span><span class="p">)</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">eventFilter</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">result</span>
 
 
-        <span class="n">parentModule</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_findModule</span><span class="p">()</span>
+        <span class="n">parentModule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findModule</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">inDragToMaximisedModule</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ev</span><span class="p">,</span> <span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDragEnterEvent</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDragMoveEvent</span><span class="p">)):</span>
 
-            <span class="n">message</span>  <span class="o">=</span> <span class="s2">&quot;Can&#39;t drag to a maximised window&quot;</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Can&#39;t drag to a maximised window&quot;</span>
 
             <span class="n">statusBar</span> <span class="o">=</span> <span class="n">parentModule</span><span class="o">.</span><span class="n">findWindow</span><span class="p">()</span><span class="o">.</span><span class="n">statusBar</span><span class="p">()</span>
 
@@ -230,12 +231,11 @@
             <span class="c1"># GST this cleanup filter is because its is not guarunteed that the DragLeaveEvent will come via</span>
             <span class="c1"># the same widget so this is safer</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cleanupFilter</span> <span class="o">=</span> <span class="n">MyEventFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">statusBar</span><span class="p">)</span>
-            <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">installEventFilter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cleanupFilter</span><span class="p">)</span>
+            <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">installEventFilter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cleanupFilter</span><span class="p">)</span>
 
             <span class="n">ev</span><span class="o">.</span><span class="n">setDropAction</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">IgnoreAction</span><span class="p">)</span>
             <span class="n">ev</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inDragToMaximisedModule</span> <span class="o">=</span> <span class="kc">True</span></div>
-
 
 <div class="viewcode-block" id="DropBase.dropEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.DropBase.DropBase.dropEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dropEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -279,29 +279,32 @@
 <span class="sd">          - (type, data) key,value pairs,</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-            <span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span>
-            <span class="n">source</span><span class="o">=</span><span class="kc">None</span>
-        <span class="p">)</span>
+                <span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span>
+                <span class="n">source</span><span class="o">=</span><span class="kc">None</span>
+                <span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">event</span><span class="p">,</span><span class="s1">&#39;source&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="s1">&#39;source&#39;</span><span class="p">):</span>
             <span class="n">data</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">source</span><span class="p">()</span>
 
-
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">event</span><span class="p">,</span><span class="s1">&#39;mimeData&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="s1">&#39;mimeData&#39;</span><span class="p">):</span>
             <span class="n">mimeData</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="n">mimeData</span><span class="o">.</span><span class="n">hasFormat</span><span class="p">(</span><span class="n">DropBase</span><span class="o">.</span><span class="n">JSONDATA</span><span class="p">):</span>
                 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;isCcpnJson&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="n">jsonData</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">mimeData</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-                <span class="k">if</span> <span class="n">jsonData</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">jsonData</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">jsonData</span><span class="p">)</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">PIDS</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-                    <span class="n">newPids</span> <span class="o">=</span> <span class="p">[</span><span class="n">Pid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span> <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">PIDS</span><span class="p">]]</span>
-                    <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">PIDS</span><span class="p">]</span> <span class="o">=</span> <span class="n">newPids</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">jsonData</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">mimeData</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                    <span class="k">if</span> <span class="n">jsonData</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">jsonData</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">jsonData</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">PIDS</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                        <span class="n">newPids</span> <span class="o">=</span> <span class="p">[</span><span class="n">Pid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span> <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">PIDS</span><span class="p">]]</span>
+                        <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">PIDS</span><span class="p">]</span> <span class="o">=</span> <span class="n">newPids</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
 
             <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">hasUrls</span><span class="p">():</span>
-                <span class="n">filePaths</span> <span class="o">=</span> <span class="p">[</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">()</span> <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">urls</span><span class="p">()]</span>
+                <span class="c1"># NOTE:ED - not sure which is correct</span>
+                <span class="c1"># filePaths = [url.path() for url in event.mimeData().urls()]</span>
+                <span class="n">filePaths</span> <span class="o">=</span> <span class="p">[</span><span class="n">url</span><span class="o">.</span><span class="n">toLocalFile</span><span class="p">()</span> <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">urls</span><span class="p">()]</span>
                 <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">URLS</span><span class="p">]</span> <span class="o">=</span> <span class="n">filePaths</span>
 
             <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">hasText</span><span class="p">():</span>
@@ -309,29 +312,29 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="DropBase.checkForBadDragEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.DropBase.DropBase.checkForBadDragEvent">[docs]</a>    <span class="k">def</span> <span class="nf">checkForBadDragEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ev</span><span class="p">):</span>
-
-        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CcpnModuleArea</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
-
-        <span class="n">parentModule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findModule</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">source</span><span class="p">(),</span><span class="n">CcpnModule</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">parentModule</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;badDragEnter&#39;</span><span class="p">):</span>
-                <span class="n">className</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
-
-                <span class="n">eventType</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ev</span><span class="p">,</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDragMoveEvent</span><span class="p">):</span>
-                    <span class="n">eventType</span> <span class="o">=</span>  <span class="s1">&#39;move&#39;</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ev</span><span class="p">,</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDragEnterEvent</span><span class="p">):</span>
-                    <span class="n">eventType</span> <span class="o">=</span><span class="s1">&#39;enter&#39;</span>
-
-                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;recieved drag </span><span class="si">%s</span><span class="s1"> from </span><span class="si">%s</span><span class="s1"> which is not a module </span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">eventType</span><span class="p">,</span><span class="n">className</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
-
-                <span class="bp">self</span><span class="o">.</span><span class="n">badDragEnter</span> <span class="o">=</span> <span class="kc">True</span></div>
+    <span class="c1"># def checkForBadDragEvent(self, ev):</span>
+    <span class="c1">#</span>
+    <span class="c1">#     from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModule</span>
+    <span class="c1">#</span>
+    <span class="c1">#     parentModule = self._findModule()</span>
+    <span class="c1">#     if isinstance(ev.source(), CcpnModule) and self is not parentModule:</span>
+    <span class="c1">#         if not hasattr(self, &#39;badDragEnter&#39;):</span>
+    <span class="c1">#             className = self.__class__.__name__</span>
+    <span class="c1">#</span>
+    <span class="c1">#             eventType = &#39;&#39;</span>
+    <span class="c1">#             if isinstance(ev, QtGui.QDragMoveEvent):</span>
+    <span class="c1">#                 eventType = &#39;move&#39;</span>
+    <span class="c1">#             elif isinstance(ev, QtGui.QDragEnterEvent):</span>
+    <span class="c1">#                 eventType = &#39;enter&#39;</span>
+    <span class="c1">#</span>
+    <span class="c1">#             getLogger().debug(&#39;received drag %s from %s which is not a module %i&#39; % (eventType, className, id(self)))</span>
+    <span class="c1">#</span>
+    <span class="c1">#             self.badDragEnter = True</span>
 
 <div class="viewcode-block" id="DropBase.dragMoveEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.DropBase.DropBase.dragMoveEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dragMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;drag move event that propagates through all the widgets</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">checkForBadDragEvent</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span>
+        <span class="c1"># self.checkForBadDragEvent(ev)</span>
 
         <span class="n">parentModule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findModule</span><span class="p">()</span>
 
@@ -383,6 +386,10 @@
                 <span class="n">parentModule</span><span class="o">.</span><span class="n">dropArea</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="c1"># ev.ignore()</span>
 
+            <span class="k">if</span> <span class="s1">&#39;urls&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="c1"># override the drop area overlay if coming from outside</span>
+                <span class="n">parentModule</span><span class="o">.</span><span class="n">dropArea</span> <span class="o">=</span> <span class="kc">None</span>
+
             <span class="c1"># else:</span>
             <span class="c1">#     #print &quot;  ok&quot;</span>
             <span class="c1">#     ev.accept()</span>
@@ -420,9 +427,9 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="n">CcpnModule</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">par</span>
             <span class="n">par</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>  <span class="c1"># getParent() may be used for CCPN widgets, not for other QWidgets</span></div>
-
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -432,7 +439,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -452,12 +459,13 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.DropBase</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

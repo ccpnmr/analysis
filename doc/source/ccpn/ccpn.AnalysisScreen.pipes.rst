@@ -9,10 +9,18 @@ ccpn.AnalysisScreen.pipes package
 Submodules
 ----------
 
-ccpn.AnalysisScreen.pipes.CPMG module
--------------------------------------
+ccpn.AnalysisScreen.pipes.AnnotatePeaks module
+----------------------------------------------
 
-.. automodule:: ccpn.AnalysisScreen.pipes.CPMG
+.. automodule:: ccpn.AnalysisScreen.pipes.AnnotatePeaks
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.AnalysisScreen.pipes.CopyPeakListsBetweenSG module
+-------------------------------------------------------
+
+.. automodule:: ccpn.AnalysisScreen.pipes.CopyPeakListsBetweenSG
    :members:
    :undoc-members:
    :show-inheritance:
@@ -25,51 +33,58 @@ ccpn.AnalysisScreen.pipes.CreateSTD module
    :undoc-members:
    :show-inheritance:
 
-ccpn.AnalysisScreen.pipes.HitsOutput module
+ccpn.AnalysisScreen.pipes.HitFinder module
+------------------------------------------
+
+.. automodule:: ccpn.AnalysisScreen.pipes.HitFinder
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.AnalysisScreen.pipes.LinkSubstancesToSpectrum module
+---------------------------------------------------------
+
+.. automodule:: ccpn.AnalysisScreen.pipes.LinkSubstancesToSpectrum
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.AnalysisScreen.pipes.OutputHits module
 -------------------------------------------
 
-.. automodule:: ccpn.AnalysisScreen.pipes.HitsOutput
+.. automodule:: ccpn.AnalysisScreen.pipes.OutputHits
    :members:
    :undoc-members:
    :show-inheritance:
 
-ccpn.AnalysisScreen.pipes.PeakBroadeningFinder module
------------------------------------------------------
+ccpn.AnalysisScreen.pipes.PropagateFromReferences module
+--------------------------------------------------------
 
-.. automodule:: ccpn.AnalysisScreen.pipes.PeakBroadeningFinder
+.. automodule:: ccpn.AnalysisScreen.pipes.PropagateFromReferences
    :members:
    :undoc-members:
    :show-inheritance:
 
-ccpn.AnalysisScreen.pipes.STDefficiency module
-----------------------------------------------
+ccpn.AnalysisScreen.pipes.SetPeaksFigureOfMerit module
+------------------------------------------------------
 
-.. automodule:: ccpn.AnalysisScreen.pipes.STDefficiency
+.. automodule:: ccpn.AnalysisScreen.pipes.SetPeaksFigureOfMerit
    :members:
    :undoc-members:
    :show-inheritance:
 
-ccpn.AnalysisScreen.pipes.STDhits module
-----------------------------------------
+ccpn.AnalysisScreen.pipes.SetupNmrAtomsPipeFromSG module
+--------------------------------------------------------
 
-.. automodule:: ccpn.AnalysisScreen.pipes.STDhits
+.. automodule:: ccpn.AnalysisScreen.pipes.SetupNmrAtomsPipeFromSG
    :members:
    :undoc-members:
    :show-inheritance:
 
-ccpn.AnalysisScreen.pipes.WaterLogsyHits module
------------------------------------------------
+ccpn.AnalysisScreen.pipes.setupScreeningDataset module
+------------------------------------------------------
 
-.. automodule:: ccpn.AnalysisScreen.pipes.WaterLogsyHits
+.. automodule:: ccpn.AnalysisScreen.pipes.setupScreeningDataset
    :members:
    :undoc-members:
    :show-inheritance:
-
-ccpn.AnalysisScreen.pipes.hitsOutputPipe module
------------------------------------------------
-
-.. automodule:: ccpn.AnalysisScreen.pipes.hitsOutputPipe
-   :members:
-   :undoc-members:
-   :show-inheritance:
-

@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.ui.gui.widgets.Font &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
-    <script src="../../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.Font</a></li> 
       </ul>
     </div>  
 
@@ -43,7 +44,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
@@ -52,9 +53,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-10-16 14:38:52 +0100 (Fri, October 16, 2020) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.1 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -64,12 +65,31 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">ccpn.framework.Application</span> <span class="kn">import</span> <span class="n">getApplication</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+
+
+<span class="n">DEFAULTFONT</span> <span class="o">=</span> <span class="s1">&#39;defaultFont&#39;</span>
+<span class="n">CONSOLEFONT</span> <span class="o">=</span> <span class="s1">&#39;fixedFont&#39;</span>
+<span class="n">SIDEBARFONT</span> <span class="o">=</span> <span class="s1">&#39;sidebarFont&#39;</span>
+<span class="n">TABLEFONT</span> <span class="o">=</span> <span class="s1">&#39;tableFont&#39;</span>
+<span class="n">SEQUENCEGRAPHFONT</span> <span class="o">=</span> <span class="s1">&#39;sequenceGraphFont&#39;</span>
+<span class="n">DEFAULTFONTNAME</span> <span class="o">=</span> <span class="s1">&#39;Helvetica&#39;</span>
+<span class="n">DEFAULTFONTSIZE</span> <span class="o">=</span> <span class="mi">12</span>
+<span class="n">DEFAULTFONTREGULAR</span> <span class="o">=</span> <span class="s1">&#39;Regular&#39;</span>
 
 
 <span class="c1"># This only works when we have a QtApp instance working; hence it need to go somewhere else.</span>
 <span class="c1">#from ccpn.framework.PathsAndUrls import fontsPath</span>
 <span class="c1">#QtGui.QFontDatabase.addApplicationFont(os.path.join(fontsPath, &#39;open-sans/OpenSans-Regular.ttf&#39;))</span>
+
+
+<span class="k">def</span> <span class="nf">_readFontFromAppearances</span><span class="p">(</span><span class="n">fontRequest</span><span class="p">,</span> <span class="n">preferences</span><span class="p">):</span>
+    <span class="c1"># read font name from the preferences file</span>
+    <span class="n">fontName</span> <span class="o">=</span> <span class="n">preferences</span><span class="o">.</span><span class="n">appearance</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fontRequest</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">fontName</span>
 
 
 <div class="viewcode-block" id="Font"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Font.Font">[docs]</a><span class="k">class</span> <span class="nc">Font</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">):</span>
@@ -96,8 +116,86 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setItalic</span><span class="p">(</span><span class="n">italic</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUnderline</span><span class="p">(</span><span class="n">underline</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setStrikeOut</span><span class="p">(</span><span class="n">strikeout</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="setWidgetFont"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Font.setWidgetFont">[docs]</a><span class="k">def</span> <span class="nf">setWidgetFont</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">DEFAULTFONT</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;MEDIUM&#39;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">italic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set the font in the specified widget</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">getApp</span> <span class="o">=</span> <span class="n">getApplication</span><span class="p">()</span>
+        <span class="n">font</span> <span class="o">=</span> <span class="n">getApp</span><span class="o">.</span><span class="n">_fontSettings</span><span class="o">.</span><span class="n">getFont</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">bold</span><span class="p">,</span> <span class="n">italic</span><span class="p">)</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Cannot set font&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="getWidgetFontHeight"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Font.getWidgetFontHeight">[docs]</a><span class="k">def</span> <span class="nf">getWidgetFontHeight</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">DEFAULTFONT</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;MEDIUM&#39;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">italic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the font height form the specified font</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">getApp</span> <span class="o">=</span> <span class="n">getApplication</span><span class="p">()</span>
+        <span class="n">font</span> <span class="o">=</span> <span class="n">getApp</span><span class="o">.</span><span class="n">_fontSettings</span><span class="o">.</span><span class="n">getFont</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">bold</span><span class="p">,</span> <span class="n">italic</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFontMetrics</span><span class="p">(</span><span class="n">font</span><span class="p">)</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Cannot get font, returning default </span><span class="si">{}</span><span class="s1">pt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DEFAULTFONTSIZE</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">DEFAULTFONTSIZE</span></div>
+
+
+<div class="viewcode-block" id="getFontHeight"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Font.getFontHeight">[docs]</a><span class="k">def</span> <span class="nf">getFontHeight</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">DEFAULTFONT</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;MEDIUM&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the font height form the specified font</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">getApp</span> <span class="o">=</span> <span class="n">getApplication</span><span class="p">()</span>
+        <span class="n">font</span> <span class="o">=</span> <span class="n">getApp</span><span class="o">.</span><span class="n">_fontSettings</span><span class="o">.</span><span class="n">getFont</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFontMetrics</span><span class="p">(</span><span class="n">font</span><span class="p">)</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Cannot get font, returning default </span><span class="si">{}</span><span class="s1">pt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DEFAULTFONTSIZE</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">DEFAULTFONTSIZE</span></div>
+
+
+<div class="viewcode-block" id="getFont"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Font.getFont">[docs]</a><span class="k">def</span> <span class="nf">getFont</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">DEFAULTFONT</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;MEDIUM&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the specified font from the fonts dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">getApp</span> <span class="o">=</span> <span class="n">getApplication</span><span class="p">()</span>
+        <span class="n">font</span> <span class="o">=</span> <span class="n">getApp</span><span class="o">.</span><span class="n">_fontSettings</span><span class="o">.</span><span class="n">getFont</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">font</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Cannot get font, returning default font&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DEFAULTFONTSIZE</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">Font</span><span class="p">(</span><span class="n">DEFAULTFONTNAME</span><span class="p">,</span> <span class="n">DEFAULTFONTSIZE</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="getTextDimensionsFromFont"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Font.getTextDimensionsFromFont">[docs]</a><span class="k">def</span> <span class="nf">getTextDimensionsFromFont</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">DEFAULTFONT</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;MEDIUM&#39;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">italic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">textList</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the bounding box for the specified text</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">getApp</span> <span class="o">=</span> <span class="n">getApplication</span><span class="p">()</span>
+        <span class="n">font</span> <span class="o">=</span> <span class="n">getApp</span><span class="o">.</span><span class="n">_fontSettings</span><span class="o">.</span><span class="n">getFont</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">bold</span><span class="p">,</span> <span class="n">italic</span><span class="p">)</span>
+
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Cannot get font, returning default </span><span class="si">{}</span><span class="s1">pt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DEFAULTFONTSIZE</span><span class="p">))</span>
+        <span class="n">font</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="n">DEFAULTFONTNAME</span><span class="p">,</span> <span class="n">DEFAULTFONTSIZE</span><span class="p">)</span>
+
+    <span class="n">fontMetrics</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFontMetrics</span><span class="p">(</span><span class="n">font</span><span class="p">,</span> <span class="p">)</span>
+    <span class="n">wPoints</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">hPoints</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">textList</span><span class="p">:</span>
+        <span class="c1"># best estimate for the width of the text, plus a lit extra</span>
+        <span class="n">bRect</span> <span class="o">=</span> <span class="n">fontMetrics</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">(</span><span class="n">text</span> <span class="o">+</span> <span class="s1">&#39;__&#39;</span><span class="p">)</span>
+        <span class="n">wPoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bRect</span><span class="o">.</span><span class="n">width</span><span class="p">())</span>
+        <span class="n">hPoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bRect</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">textList</span><span class="p">:</span>
+        <span class="n">minDimensions</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">wPoints</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">hPoints</span><span class="p">))</span>
+        <span class="n">maxDimensions</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">wPoints</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">hPoints</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">minDimensions</span><span class="p">,</span> <span class="n">maxDimensions</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -107,7 +205,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -127,12 +225,13 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.Font</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

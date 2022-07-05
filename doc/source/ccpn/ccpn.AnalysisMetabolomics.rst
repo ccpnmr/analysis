@@ -10,6 +10,7 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
    ccpn.AnalysisMetabolomics.lib
    ccpn.AnalysisMetabolomics.ui
@@ -48,4 +49,3 @@ ccpn.AnalysisMetabolomics.Integration module
    :members:
    :undoc-members:
    :show-inheritance:
-

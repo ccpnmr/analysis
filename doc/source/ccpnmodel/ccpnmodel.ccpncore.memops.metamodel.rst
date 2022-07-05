@@ -96,4 +96,3 @@ ccpnmodel.ccpncore.memops.metamodel.XmlModelIo module
    :members:
    :undoc-members:
    :show-inheritance:
-

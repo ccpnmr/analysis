@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.util.Path &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.util.Path</a></li> 
       </ul>
     </div>  
 
@@ -45,18 +46,19 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Wayne Boucher $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:59 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Geerten Vuister $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-03-08 16:35:02 +0000 (Tue, March 08, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -65,7 +67,6 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
-<span class="sd">&quot;&quot;&quot;General path handling utilities. NB must be python 2.1 compliant!!!&quot;&quot;&quot;</span>
 
 <span class="c1">#</span>
 <span class="c1"># Convenient I/O functions</span>
@@ -81,21 +82,23 @@
 <span class="c1"># note, cannot just use os.sep below because can have window file names cropping up on unix machines</span>
 <span class="n">winsep</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span>
 
-<span class="c1">#This does not belong here and should go to PathsAndUrls;</span>
-<span class="c1"># However, the &#39;Api.py&#39; and Implementation relies on this so it should stay</span>
+<span class="c1"># This does not belong here and should go to PathsAndUrls;</span>
+<span class="c1"># However, the &#39;Api.py&#39; and Implementation relies on this, so it should stay</span>
+<span class="c1"># DO NOT USE!</span>
 <span class="n">CCPN_API_DIRECTORY</span> <span class="o">=</span> <span class="s1">&#39;ccpnv3&#39;</span>
 <span class="n">CCPN_DIRECTORY_SUFFIX</span> <span class="o">=</span> <span class="s1">&#39;.ccpn&#39;</span>
 <span class="n">CCPN_BACKUP_SUFFIX</span> <span class="o">=</span> <span class="s1">&#39;_backup&#39;</span>
 <span class="n">CCPN_ARCHIVES_DIRECTORY</span> <span class="o">=</span> <span class="s1">&#39;archives&#39;</span>
 <span class="n">CCPN_SUMMARIES_DIRECTORY</span> <span class="o">=</span> <span class="s1">&#39;summaries&#39;</span>
 <span class="n">CCPN_LOGS_DIRECTORY</span> <span class="o">=</span> <span class="s1">&#39;logs&#39;</span>
-
 <span class="n">CCPN_PYTHON</span> <span class="o">=</span> <span class="s1">&#39;miniconda/bin/python&#39;</span>
+
+<span class="c1"># Can&#39;t do because of circular imports:</span>
 <span class="c1"># from ccpn.framework.PathsAndUrls import CCPN_API_DIRECTORY, CCPN_DIRECTORY_SUFFIX, \</span>
-<span class="c1">#     CCPN_BACKUP_SUFFIX, CCPN_ARCHIVES_DIRECTORY, CCPN_LOGS_DIRECTORY,  CCPN_SUMMARIES_DIRECTORY</span>
+<span class="c1">#       CCPN_BACKUP_SUFFIX, CCPN_ARCHIVES_DIRECTORY, CCPN_LOGS_DIRECTORY,  CCPN_SUMMARIES_DIRECTORY</span>
 
-
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span> <span class="k">as</span> <span class="n">_Path_</span><span class="p">,</span> <span class="n">_windows_flavour</span><span class="p">,</span> <span class="n">_posix_flavour</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span> <span class="k">as</span> <span class="n">_Path_</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">_windows_flavour</span><span class="p">,</span> <span class="n">_posix_flavour</span>
 
 
 <div class="viewcode-block" id="Path"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path">[docs]</a><span class="k">class</span> <span class="nc">Path</span><span class="p">(</span><span class="n">_Path_</span><span class="p">):</span>
@@ -108,16 +111,26 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">basename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;the name of self without any suffixes&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;the name of self without any suffixes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">filepath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the folder without the filename&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span>
+
 <div class="viewcode-block" id="Path.addTimeStamp"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.addTimeStamp">[docs]</a>    <span class="k">def</span> <span class="nf">addTimeStamp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return a Path instance with path.timeStamp.suffix profile&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Return a Path instance with path.timeStamp-suffix profile</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">-%H%M%S&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stem</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">now</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stem</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">now</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Parse self to yield a version integer, presumably generated with the incrementVersion method</span>
+<span class="sd">        Return 0 if not found</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">suffixes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffixes</span>
         <span class="n">version</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">suffixes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -128,7 +141,8 @@
         <span class="k">return</span> <span class="n">version</span>
 
 <div class="viewcode-block" id="Path.incrementVersion"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.incrementVersion">[docs]</a>    <span class="k">def</span> <span class="nf">incrementVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return a Path instance with path.version.suffix profile&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Return a Path instance with path.version.suffix profile</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">suffixes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffixes</span>
         <span class="n">version</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">suffixes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -141,55 +155,134 @@
         <span class="n">suffixes</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">version</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basename</span> <span class="o">+</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">suffixes</span><span class="p">))</span></div>
 
+<div class="viewcode-block" id="Path.uniqueVersion"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.uniqueVersion">[docs]</a>    <span class="k">def</span> <span class="nf">uniqueVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a Path instance which is unique by incrementing version index</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">result</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">incrementVersion</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
 <div class="viewcode-block" id="Path.normalise"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.normalise">[docs]</a>    <span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return normalised path</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">asString</span><span class="p">()))</span>  <span class="c1"># python &lt;= 3.4; strings only</span></div>
 
 <div class="viewcode-block" id="Path.open"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.open">[docs]</a>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Subclassing to catch any long file name errors that allegedly can occur on windows&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Subclassing to catch any long file name errors that allegedly can occur on Windows</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">fp</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">asString</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">256</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s1">&#39;file &quot;</span><span class="si">%s</span><span class="s1">&quot; not found; potentially path length (</span><span class="si">%d</span><span class="s1">) is too large. Consider moving the file&#39;</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s1">&#39;Error opening file &quot;</span><span class="si">%s</span><span class="s1">&quot;; potentially path length (</span><span class="si">%d</span><span class="s1">) is too large. Consider moving the file&#39;</span>
                                         <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">asString</span><span class="p">()))</span>
                                         <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s1">&#39;file &quot;</span><span class="si">%s</span><span class="s1">&quot; not found&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s1">&#39;Error opening file &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">fp</span></div>
 
+<div class="viewcode-block" id="Path.globList"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.globList">[docs]</a>    <span class="k">def</span> <span class="nf">globList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a list rather than a generator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="n">pattern</span><span class="p">)]</span></div>
+
 <div class="viewcode-block" id="Path.removeDir"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.removeDir">[docs]</a>    <span class="k">def</span> <span class="nf">removeDir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Recursively remove content of self and sub-directories</span>
+        <span class="sd">&quot;&quot;&quot;Recursively remove content of self and subdirectories</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> is not a directory&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
         <span class="n">_rmdirs</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Path.fetchDir"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.fetchDir">[docs]</a>    <span class="k">def</span> <span class="nf">fetchDir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirName</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return and if needed create dirName in self</span>
-<span class="sd">        :return: Path instance of self / dirName</span>
+<div class="viewcode-block" id="Path.fetchDir"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.fetchDir">[docs]</a>    <span class="k">def</span> <span class="nf">fetchDir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">dirNames</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return and (if needed) create all dirNames relative to self</span>
+<span class="sd">        :return: Path instance of self / dirName[0] / dirName[1] ...</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> is not a directory&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span> <span class="o">/</span> <span class="n">dirName</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">for</span> <span class="n">dirName</span> <span class="ow">in</span> <span class="n">dirNames</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="o">/</span> <span class="n">dirName</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="Path.removeFile"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.removeFile">[docs]</a>    <span class="k">def</span> <span class="nf">removeFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove file represented by self.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> is a directory&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> is a directory&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Path.assureSuffix"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.assureSuffix">[docs]</a>    <span class="k">def</span> <span class="nf">assureSuffix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">suffix</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return Path instance with an assured suffix; adds suffic if not present.</span>
-<span class="sd">        NB: does not change suffix if there is one (like with_suffix does)</span>
+<div class="viewcode-block" id="Path.copyfile"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.copyfile">[docs]</a>    <span class="k">def</span> <span class="nf">copyfile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Copy file represented by self to destination.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">shutil</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> is a directory&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Path.assureSuffix"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.assureSuffix">[docs]</a>    <span class="k">def</span> <span class="nf">assureSuffix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">suffix</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return Path instance with an assured suffix; adds suffix if not present.</span>
+<span class="sd">        .prefix to suffix is ignored if present.</span>
+<span class="sd">        Does not change suffix if there is one (like with_suffix does).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">suffix</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;suffix </span><span class="si">%s</span><span class="s1"> must be a str&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">suffix</span><span class="p">))</span>
+
+        <span class="c1"># strip leading .&#39;s e.g. suffix is &#39;.zip&#39;</span>
+        <span class="n">suffix</span> <span class="o">=</span> <span class="n">suffix</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span> <span class="o">!=</span> <span class="n">suffix</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span> <span class="o">+</span> <span class="n">suffix</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+                <span class="n">_name</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stem</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">suffix</span><span class="p">)])</span>
+                <span class="k">return</span> <span class="n">aPath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">),</span> <span class="n">_name</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Path.withoutSuffix"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.withoutSuffix">[docs]</a>    <span class="k">def</span> <span class="nf">withoutSuffix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return self without suffix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">suffixes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Path.withSuffix"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.withSuffix">[docs]</a>    <span class="k">def</span> <span class="nf">withSuffix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">suffix</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return self with suffix; inverse of withoutSuffix()</span>
+<span class="sd">        partially copies with_suffix, but does not allow for empty argument</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">suffix</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">suffix</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No suffix defined&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Path.listDirFiles"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.listDirFiles">[docs]</a>    <span class="k">def</span> <span class="nf">listDirFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Obsolete; extension is without a &quot;.&quot;</span>
+<span class="sd">        use listdir instead</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">extension</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;*.</span><span class="si">{</span><span class="n">extension</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Path.listdir"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.listdir">[docs]</a>    <span class="k">def</span> <span class="nf">listdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">suffix</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">excludeDotFiles</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If self is a directory path, return a list of its files as Path instance.</span>
+<span class="sd">        If the suffix is given (e.g.: .pdf, .jpeg...), returns only files of that pattern.</span>
+<span class="sd">        Non recursive.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;listdir: </span><span class="si">%s</span><span class="s1">: not a directory&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">suffix</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;*</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)]</span>
+
+        <span class="k">if</span> <span class="n">excludeDotFiles</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">result</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="Path.split3"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.split3">[docs]</a>    <span class="k">def</span> <span class="nf">split3</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a tuple of (.parent, .stem, .suffix) strings</span>
@@ -202,13 +295,23 @@
         <span class="k">return</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="Path.asString"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.asString">[docs]</a>    <span class="k">def</span> <span class="nf">asString</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return self as a string&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Path.startswith"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.startswith">[docs]</a>    <span class="k">def</span> <span class="nf">startswith</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return True if self starts with prefix&quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">asString</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">asString</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="c1"># No longer needed in Python 3.x</span>
+    <span class="c1"># def __ne__(self, other):</span>
+    <span class="c1">#     return not (str(self).strip() == str(other).strip())</span>
 
     <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">asString</span><span class="p">()</span> <span class="o">+</span> <span class="n">other</span><span class="p">)</span></div>
@@ -232,7 +335,6 @@
 <div class="viewcode-block" id="aPath"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.aPath">[docs]</a><span class="k">def</span> <span class="nf">aPath</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return a ~-expanded, left/right spaces-stripped, normalised Path instance&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span></div>
-
 
 
 <div class="viewcode-block" id="normalisePath"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.normalisePath">[docs]</a><span class="k">def</span> <span class="nf">normalisePath</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">makeAbsolute</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -449,12 +551,11 @@
 
 
 <div class="viewcode-block" id="fetchDir"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.fetchDir">[docs]</a><span class="k">def</span> <span class="nf">fetchDir</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dirName</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :param path: string of parent path where to add a new subdir</span>
 <span class="sd">    :param dirName: str of the new sub dir</span>
 <span class="sd">    :return: if not already existing, creates a new folder with the given name, return the full path as str</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">newPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dirName</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">newPath</span><span class="p">):</span>
@@ -462,8 +563,31 @@
             <span class="k">return</span> <span class="n">newPath</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">newPath</span></div>
+
+<span class="c1"># Original in util.Common</span>
+<span class="n">defaultFileNameChar</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span>
+<span class="n">separatorFileNameChar</span> <span class="o">=</span> <span class="s1">&#39;+&#39;</span>
+<span class="n">validFileNamePartChars</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;abcdefghijklmnopqrstuvwxyz&#39;</span>
+                          <span class="s1">&#39;ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789&#39;</span>
+                          <span class="o">+</span> <span class="n">defaultFileNameChar</span><span class="p">)</span>
+<span class="n">validCcpnFileNameChars</span> <span class="o">=</span> <span class="n">validFileNamePartChars</span> <span class="o">+</span> <span class="s1">&#39;-.&#39;</span> <span class="o">+</span> <span class="n">separatorFileNameChar</span>
+
+<div class="viewcode-block" id="makeValidCcpnFilePath"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.makeValidCcpnFilePath">[docs]</a><span class="k">def</span> <span class="nf">makeValidCcpnFilePath</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Replace invalid chars in path to assure Python 2.1 (used in ObjectDomain) compatibility</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># used in ApiPath.py</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">char</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">validFileNamePartChars</span><span class="p">:</span>
+            <span class="n">char</span> <span class="o">=</span> <span class="n">defaultFileNameChar</span>
+        <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">char</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span></div>
+
+<span class="n">makeValidCcpnPath</span> <span class="o">=</span> <span class="n">makeValidCcpnFilePath</span>
+<span class="c1"># used in ccpnmodel/ccpncore/lib/chemComp/Io.py&quot;</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -473,7 +597,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -493,12 +617,13 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.util.Path</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

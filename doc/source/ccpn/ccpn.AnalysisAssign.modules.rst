@@ -64,4 +64,3 @@ ccpn.AnalysisAssign.modules.SideChainAssignmentModule module
    :members:
    :undoc-members:
    :show-inheritance:
-

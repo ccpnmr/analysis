@@ -10,6 +10,7 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
    ccpn.ui.gui
 
@@ -23,4 +24,3 @@ ccpn.ui.Ui module
    :members:
    :undoc-members:
    :show-inheritance:
-

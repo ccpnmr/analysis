@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.ui.gui.popups.SubmitMacroPopup &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
-    <script src="../../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.popups.SubmitMacroPopup</a></li> 
       </ul>
     </div>  
 
@@ -43,8 +44,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
@@ -52,9 +54,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:50 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2021-12-09 11:37:20 +0000 (Thu, December 09, 2021) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.4 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -64,27 +66,18 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
-
-
-<span class="n">Qt</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span>
-
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">urllib</span>
-
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">metaUtil</span>
-
 <span class="kn">from</span> <span class="nn">ccpn.framework.PathsAndUrls</span> <span class="kn">import</span> <span class="n">ccpn2Url</span>
-
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Entry</span> <span class="kn">import</span> <span class="n">Entry</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">FileDialog</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">MacrosFileDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets</span> <span class="kn">import</span> <span class="n">MessageDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.TextEditor</span> <span class="kn">import</span> <span class="n">TextEditor</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>  <span class="c1"># ejb</span>
-
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Font</span> <span class="kn">import</span> <span class="n">getFontHeight</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialogMainWidget</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Register</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Url</span>
 
@@ -94,39 +87,51 @@
 
 <span class="c1"># code below has to be synchronised with code in SCRIPT_URL</span>
 
-<div class="viewcode-block" id="SubmitMacroPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SubmitMacroPopup.SubmitMacroPopup">[docs]</a><span class="k">class</span> <span class="nc">SubmitMacroPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
+<div class="viewcode-block" id="SubmitMacroPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SubmitMacroPopup.SubmitMacroPopup">[docs]</a><span class="k">class</span> <span class="nc">SubmitMacroPopup</span><span class="p">(</span><span class="n">CcpnDialogMainWidget</span><span class="p">):</span>
+
+    <span class="n">FIXEDHEIGHT</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">FIXEDWIDTH</span> <span class="o">=</span> <span class="kc">False</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Submit Macro Form&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-        <span class="n">CcpnDialog</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;This Popup is deprecated. To submit a macro, please visit the CcpnForum instead&#39;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_registrationDict</span> <span class="o">=</span> <span class="n">Register</span><span class="o">.</span><span class="n">loadDict</span><span class="p">()</span>
 
+        <span class="n">_height</span> <span class="o">=</span> <span class="n">getFontHeight</span><span class="p">()</span>
+
         <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;organisation&#39;</span><span class="p">,</span> <span class="s1">&#39;email&#39;</span><span class="p">):</span>
-            <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: &#39;</span> <span class="o">%</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">upperFirst</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-            <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_registrationDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: &#39;</span> <span class="o">%</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">upperFirst</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_registrationDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
             <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Macro path:&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectMacro</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pathEntry</span> <span class="o">=</span> <span class="n">Entry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxLength</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="s1">&#39;Macro path:&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectMacro</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pathEntry</span> <span class="o">=</span> <span class="n">Entry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">maxLength</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
         <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Keywords: &#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">keywordsEntry</span> <span class="o">=</span> <span class="n">Entry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Keywords: &#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywordsEntry</span> <span class="o">=</span> <span class="n">Entry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
         <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Description: &#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span> <span class="o">=</span> <span class="n">TextEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Description: &#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span> <span class="o">=</span> <span class="n">TextEditor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="n">_height</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
 
-        <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Submit&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_submitMacro</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+        <span class="c1"># enable the buttons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setOkButton</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_submitMacro</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Submit&#39;</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Submit Macro&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCloseButton</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Close Popup&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setDefaultButton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CLOSEBUTTON</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__postInit__</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_selectMacro</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getParent</span><span class="p">(),</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">ExistingFile</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Select Macro&#39;</span><span class="p">,</span>
-                            <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getParent</span><span class="p">()</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">)</span>
+        <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getParent</span><span class="p">()</span>
+        <span class="n">dialog</span> <span class="o">=</span> <span class="n">MacrosFileDialog</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">acceptMode</span><span class="o">=</span><span class="s1">&#39;select&#39;</span><span class="p">)</span>
+        <span class="n">dialog</span><span class="o">.</span><span class="n">_show</span><span class="p">()</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pathEntry</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
@@ -195,6 +200,7 @@
     <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -204,7 +210,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -224,12 +230,13 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.popups.SubmitMacroPopup</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

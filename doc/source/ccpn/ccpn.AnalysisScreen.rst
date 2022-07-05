@@ -10,6 +10,7 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
    ccpn.AnalysisScreen.lib
    ccpn.AnalysisScreen.pipes
@@ -24,4 +25,3 @@ ccpn.AnalysisScreen.AnalysisScreen module
    :members:
    :undoc-members:
    :show-inheritance:
-

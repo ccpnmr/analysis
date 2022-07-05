@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.util.nef.Specification &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
     <script src="../../../../_static/jquery.js"></script>
     <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.util.nef.Specification</a></li> 
       </ul>
     </div>  
 
@@ -43,8 +44,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
@@ -53,8 +55,8 @@
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2019-12-13 19:01:25 +0000 (Fri, December 13, 2019) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2021-05-10 18:47:35 +0100 (Mon, May 10, 2021) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.4 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -126,21 +128,28 @@
 <span class="sd">           (if empty it belongs directly inside the saveframe)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputText</span><span class="p">,</span> <span class="n">skipExamples</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">additionalBlocks</span><span class="o">=</span><span class="p">()):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputText</span><span class="p">,</span> <span class="n">skipExamples</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">additionalBlocks</span><span class="o">=</span><span class="p">(),</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">specification</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">inputText</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">additionalBlocks</span> <span class="o">=</span> <span class="n">additionalBlocks</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">keyTags</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">skipExamples</span> <span class="o">=</span> <span class="n">skipExamples</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_category2SaveFrame</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">logger</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">logger</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;logger must be callable&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logFunc</span> <span class="o">=</span> <span class="n">logger</span> <span class="k">if</span> <span class="n">logger</span> <span class="k">else</span> <span class="nb">print</span>
 
     <span class="k">def</span> <span class="nf">_logging</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Log messages as required</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_logFunc</span><span class="p">:</span>
+            <span class="k">return</span>
+
         <span class="k">try</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">INFOPREFIX</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">])))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logFunc</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">INFOPREFIX</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">])))</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&gt;&gt;&gt; Error during logging: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">INFOPREFIX</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logFunc</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&gt;&gt;&gt; Error during logging: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">INFOPREFIX</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">)))</span>
 
 <div class="viewcode-block" id="CifDicConverter.convertToNef"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.Specification.CifDicConverter.convertToNef">[docs]</a>    <span class="k">def</span> <span class="nf">convertToNef</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert RCSB .cif file into a nef specification summary file</span>
@@ -263,6 +272,8 @@
         <span class="k">if</span> <span class="n">parentCategory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_logging</span><span class="p">(</span><span class="s2">&quot;loop is missing _category.parent_category_id:&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
+
+            <span class="c1"># NOTE:ED now need to search the previous categories for the container</span>
             <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_category2SaveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">parentCategory</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_logging</span><span class="p">(</span><span class="s2">&quot;loop is missing parent saveFrame:&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parentCategory</span><span class="p">,</span>
@@ -326,7 +337,7 @@
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">keyTags</span><span class="p">[(</span><span class="n">category</span><span class="p">,</span> <span class="n">name</span><span class="p">)]</span>
         <span class="n">saveFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_category2SaveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">saveFrame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;SAvFrame named </span><span class="si">%s</span><span class="s2"> not found in list: </span><span class="si">%s</span><span class="s2">&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;SaveFrame named </span><span class="si">%s</span><span class="s2"> not found in list: </span><span class="si">%s</span><span class="s2">&quot;</span>
                              <span class="o">%</span> <span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_category2SaveFrame</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span>
         <span class="k">if</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;nef_saveframe_&#39;</span> <span class="o">+</span> <span class="n">category</span><span class="p">:</span>
             <span class="c1"># item lives in a saveframe, not a loop</span>
@@ -346,7 +357,7 @@
         <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
-        <span class="c1"># Add iten to loop, making it if necessary</span>
+        <span class="c1"># Add item to loop, making it if necessary</span>
         <span class="n">specificationLoop</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nef_item&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">specificationLoop</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">specificationLoop</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">newLoop</span><span class="p">(</span><span class="s1">&#39;nef_item&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;loop_category&#39;</span><span class="p">,</span> <span class="s1">&#39;type_code&#39;</span><span class="p">,</span>
@@ -383,7 +394,7 @@
 
 
 <div class="viewcode-block" id="transferLoop"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.Specification.transferLoop">[docs]</a><span class="k">def</span> <span class="nf">transferLoop</span><span class="p">(</span><span class="n">genericContainer</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">,</span> <span class="n">inputTags</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Transfer _category.tag_x, ... to loop named category with tags tag_x etc.</span>
+    <span class="sd">&quot;&quot;&quot;Transfer category.tag_x, ... to loop named category with tags tag_x etc.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">set1</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
@@ -425,6 +436,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="n">converter</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">toString</span><span class="p">())</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -434,7 +446,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -454,12 +466,13 @@
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.util.nef.Specification</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.core.lib.MoleculeLib &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
     <script src="../../../../_static/jquery.js"></script>
     <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.lib.MoleculeLib</a></li> 
       </ul>
     </div>  
 
@@ -43,7 +44,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
@@ -52,9 +53,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:32 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2021-04-09 10:45:12 +0100 (Fri, April 09, 2021) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -71,6 +72,27 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">Chain</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 
+
+<span class="n">NamingSystems</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;PDB_REMED&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;DIANA&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;MOLMOL&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;UCSF&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;MSI&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CING&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;PDB&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;MSD&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;DISMAN&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;GROMOS&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CYANA2.1&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;BMRB&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;XPLOR&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SYBYL&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CIF&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;IUPAC&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;DISGEO&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;AQUA&#39;</span>
+    <span class="p">]</span>
 
 <span class="k">def</span> <span class="nf">_incrementedSequenceCode</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">seqOffset</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;get sequenceCode of Residue or NmrResidue incremented by seqOffset.</span>
@@ -178,9 +200,6 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-<span class="o">.</span><span class="mi">0</span>
-
-
 <div class="viewcode-block" id="sequenceMatchOffset"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.MoleculeLib.sequenceMatchOffset">[docs]</a><span class="k">def</span> <span class="nf">sequenceMatchOffset</span><span class="p">(</span><span class="n">reference</span><span class="p">:</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">OrderedDict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Check if residues in sequence match those in reference, directly or with an offset.</span>
 <span class="sd">    Reference and sequence are OrderedDict(sequenceCode:residueType)</span>
@@ -223,8 +242,279 @@
 
         <span class="c1"># No offset matched. Result is failure</span>
         <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="expandChainAtoms"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.MoleculeLib.expandChainAtoms">[docs]</a><span class="k">def</span> <span class="nf">expandChainAtoms</span><span class="p">(</span><span class="n">chain</span><span class="p">,</span>
+                     <span class="n">replaceStarWithPercent</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                     <span class="n">addPseudoAtoms</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                     <span class="n">addNonstereoAtoms</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                     <span class="n">setBoundsForAtomGroups</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                     <span class="n">atomNamingSystem</span> <span class="o">=</span> <span class="s1">&#39;PDB_REMED&#39;</span><span class="p">,</span>
+                     <span class="n">pseudoNamingSystem</span> <span class="o">=</span> <span class="s1">&#39;AQUA&#39;</span>
+                     <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Called after creating a new chain.</span>
+<span class="sd">    </span>
+<span class="sd">    Create new atoms corresponding to the ChemComp AtomSets.</span>
+<span class="sd">    Eg.</span>
+<span class="sd">        -  A simple AtomSet named H1% consisting of H1, H2, H3 atoms</span>
+<span class="sd">        will give a new V3 Atom called H1% of atomType=&#39;equivalent&#39; and its components are the atomSet.atoms.</span>
+
+<span class="sd">        -  A nested atomSets such as H% consisting of H1%, H2%, H3% atomSets</span>
+<span class="sd">        will give a new V3 Atom called H% of atomType=&#39;equivalent&#39; and its components are the V3 atoms H1%, H2%, H3%</span>
+
+<span class="sd">    Use atom.componentAtoms to get the children atoms as a tuple:</span>
+<span class="sd">        H1% --&gt; (H1, H2, H3)</span>
+<span class="sd">        HG% --&gt; (HG1%, HG2%)</span>
+
+<span class="sd">    From any &quot;real&quot; atom, use atom.compoundAtoms to get the parent atoms as a tuple.</span>
+<span class="sd">         H1 --&gt; (H1%)</span>
+
+<span class="sd">    :param chain:  V3 Chain object,</span>
+<span class="sd">    :return extended chain</span>
+<span class="sd">    </span>
+<span class="sd">    Extra arguments:</span>
+<span class="sd">        :param replaceStarWithPercent: bool: True. Default</span>
+<span class="sd">                Replace * with % if the char is in the atom name.</span>
+<span class="sd">                E.g. H1* to become H1%.</span>
+
+<span class="sd">        :param addPseudoAtoms: bool: True. Default</span>
+<span class="sd">                Add new atoms with alternative names to the one derived from the atomSets.</span>
+<span class="sd">                E.g.  MD, QG, MG. This will create a atom with same atom components</span>
+<span class="sd">                as the standard from the chemComp atomSet. Therefore it&#39;s a duplicated!</span>
+<span class="sd">                These atoms might not be present in the original ChemComp definitions</span>
+
+<span class="sd">        :param addNonstereoAtoms: bool: True. Default</span>
+<span class="sd">                Add new atoms for Non-stereoAtoms E.g. for a VAL, HGx%, HGy%</span>
+<span class="sd">                These atoms might not be present in the original ChemComp definition</span>
+
+<span class="sd">        :param setBoundsForAtomGroups: bool: True. Default</span>
+<span class="sd">                set the newly created atoms from the AtomSets to be &quot;bound&quot; as the real atoms</span>
+<span class="sd">                E.g. H1%-C1 to be like H1-C1</span>
+<span class="sd">                and atoms derived from nested AtomSet like HG*-CG* etc.</span>
+
+<span class="sd">        :param atomNamingSystem: str: &#39;PDB_REMED&#39;. Default</span>
+<span class="sd">                To be deprecated. Will be only NEF atomNamingSystem</span>
+
+<span class="sd">        :param pseudoNamingSystem: str: &#39;AQUA&#39;. Default</span>
+<span class="sd">                To be deprecated. Will be only NEF atomNamingSystem</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">apiChain</span> <span class="o">=</span> <span class="n">chain</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="n">molSystem</span> <span class="o">=</span> <span class="n">apiChain</span><span class="o">.</span><span class="n">molSystem</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">atomNamingSystem</span> <span class="ow">in</span> <span class="n">NamingSystems</span><span class="p">:</span>
+        <span class="n">atomNamingSystem</span> <span class="o">=</span> <span class="s1">&#39;PDB_REMED&#39;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pseudoNamingSystem</span> <span class="ow">in</span> <span class="n">NamingSystems</span><span class="p">:</span>
+        <span class="n">pseudoNamingSystem</span> <span class="o">=</span> <span class="s1">&#39;AQUA&#39;</span>
+
+    <span class="c1"># Set elementSymbol and add missing atoms (lest something breaks lower down)</span>
+    <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="n">apiChain</span><span class="o">.</span><span class="n">sortedResidues</span><span class="p">():</span>
+        <span class="n">chemCompVar</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">chemCompVar</span>
+        <span class="n">namingSystem</span> <span class="o">=</span> <span class="n">chemCompVar</span><span class="o">.</span><span class="n">chemComp</span><span class="o">.</span><span class="n">findFirstNamingSystem</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">atomNamingSystem</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">chemAtom</span> <span class="ow">in</span> <span class="n">chemCompVar</span><span class="o">.</span><span class="n">findAllChemAtoms</span><span class="p">(</span><span class="n">className</span><span class="o">=</span><span class="s1">&#39;ChemAtom&#39;</span><span class="p">):</span>
+            <span class="n">atom</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">chemAtom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">atom</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">namingSystem</span><span class="p">:</span>
+                <span class="c1"># Special case - atoms may be named after PDB_REMED sysNAme rather than name</span>
+                <span class="n">atomSysName</span> <span class="o">=</span> <span class="n">namingSystem</span><span class="o">.</span><span class="n">findFirstAtomSysName</span><span class="p">(</span><span class="n">atomName</span><span class="o">=</span><span class="n">chemAtom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">atomSysName</span><span class="p">:</span>
+                    <span class="n">atom</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">atomSysName</span><span class="o">.</span><span class="n">sysName</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">atom</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">residue</span><span class="o">.</span><span class="n">newAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">chemAtom</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">atomType</span><span class="o">=</span><span class="s1">&#39;single&#39;</span><span class="p">,</span>
+                                <span class="n">elementSymbol</span><span class="o">=</span><span class="n">chemAtom</span><span class="o">.</span><span class="n">elementSymbol</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">atom</span><span class="o">.</span><span class="n">elementSymbol</span> <span class="o">=</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">elementSymbol</span>
+
+    <span class="c1"># Add boundAtoms for MolResLinks - Now add as GenericBond</span>
+    <span class="k">for</span> <span class="n">molResLink</span> <span class="ow">in</span> <span class="n">apiChain</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">molResLinks</span><span class="p">:</span>
+        <span class="n">ff</span> <span class="o">=</span> <span class="n">apiChain</span><span class="o">.</span><span class="n">findFirstResidue</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span>
+                <span class="n">ff</span><span class="p">(</span><span class="n">seqId</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">molResidue</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">linkEnd</span><span class="o">.</span><span class="n">boundChemAtom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">molResLink</span><span class="o">.</span><span class="n">molResLinkEnds</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="n">molSystem</span><span class="o">.</span><span class="n">findFirstGenericBond</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">molSystem</span><span class="o">.</span><span class="n">newGenericBond</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">)</span>
+    <span class="c1">#     if atoms[1] not in atoms[0].boundAtoms:</span>
+    <span class="c1">#       atoms[0].addBoundAtom(atoms[1])</span>
+
+    <span class="c1"># Set boundAtoms for existing atoms within residue</span>
+    <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="n">apiChain</span><span class="o">.</span><span class="n">sortedResidues</span><span class="p">():</span>
+        <span class="n">chemCompVar</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">chemCompVar</span>
+        <span class="n">namingSystem</span> <span class="o">=</span> <span class="n">chemCompVar</span><span class="o">.</span><span class="n">chemComp</span><span class="o">.</span><span class="n">findFirstNamingSystem</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">atomNamingSystem</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">residue</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+            <span class="n">chemAtom</span> <span class="o">=</span> <span class="n">chemCompVar</span><span class="o">.</span><span class="n">findFirstChemAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;ChemAtom&#39;</span><span class="p">)</span>
+            <span class="n">atomSysName</span> <span class="o">=</span> <span class="n">boundChemAtoms</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">chemAtom</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">namingSystem</span><span class="p">:</span>
+                <span class="c1"># Check for ChemAtom where match is in PDB_REMED rather than atom name (e.g. OXT, HXT)</span>
+                <span class="n">atomSysName</span> <span class="o">=</span> <span class="n">namingSystem</span><span class="o">.</span><span class="n">findFirstAtomSysName</span><span class="p">(</span><span class="n">sysName</span><span class="o">=</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">atomSysName</span><span class="p">:</span>
+                    <span class="n">chemAtom</span> <span class="o">=</span> <span class="n">chemCompVar</span><span class="o">.</span><span class="n">findFirstChemAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">atomSysName</span><span class="o">.</span><span class="n">atomName</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;ChemAtom&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">chemAtom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">boundChemAtoms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">chemBonds</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">chemAtoms</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">boundChemAtom</span> <span class="ow">in</span> <span class="n">boundChemAtoms</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">boundChemAtom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">chemAtom</span> <span class="ow">and</span> <span class="n">boundChemAtom</span><span class="o">.</span><span class="n">className</span> <span class="o">==</span> <span class="s1">&#39;ChemAtom&#39;</span><span class="p">:</span>
+                        <span class="n">boundAtom</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">boundChemAtom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">boundAtom</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">namingSystem</span><span class="p">:</span>
+                            <span class="c1"># Check for ChemAtom where match is in PDB_REMED rather than atom name (e.g. OXT, HXT)</span>
+                            <span class="n">atomSysName</span> <span class="o">=</span> <span class="n">namingSystem</span><span class="o">.</span><span class="n">findFirstAtomSysName</span><span class="p">(</span><span class="n">atomName</span><span class="o">=</span><span class="n">boundChemAtom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">atomSysName</span><span class="p">:</span>
+                                <span class="n">boundAtom</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">atomSysName</span><span class="o">.</span><span class="n">sysName</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">boundAtom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">boundAtom</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">atom</span><span class="o">.</span><span class="n">boundAtoms</span><span class="p">:</span>
+                            <span class="n">atom</span><span class="o">.</span><span class="n">addBoundAtom</span><span class="p">(</span><span class="n">boundAtom</span><span class="p">)</span>
+                <span class="c1">#</span>
+        <span class="c1"># Add boundAtoms for MolSystemLinks - Now add as GenericBond</span>
+        <span class="k">for</span> <span class="n">linkEnd</span> <span class="ow">in</span> <span class="n">residue</span><span class="o">.</span><span class="n">sortedMolSystemLinkEnds</span><span class="p">():</span>
+            <span class="n">molSystemLink</span> <span class="o">=</span> <span class="n">linkEnd</span><span class="o">.</span><span class="n">molSystemLink</span>
+            <span class="n">atoms</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">linkEnd</span><span class="o">.</span><span class="n">boundChemAtom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                              <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">molSystemLink</span><span class="o">.</span><span class="n">molSystemLinkEnds</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">molSystem</span><span class="o">.</span><span class="n">findFirstGenericBond</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">molSystem</span><span class="o">.</span><span class="n">newGenericBond</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">)</span>
+        <span class="c1">#   if atoms[1] not in  atoms[0].boundAtoms:</span>
+        <span class="c1">#     atoms[0].addBoundAtom(atoms[1])</span>
+
+        <span class="c1"># NB we do NOT add boundAtoms for NonCovalentBonds</span>
+
+        <span class="c1"># Add extra atoms corresponding to ChemAtomSets</span>
+        <span class="n">chemCompVar</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">chemCompVar</span>
+
+        <span class="n">pseudoNamingSystem</span> <span class="o">=</span> <span class="n">chemCompVar</span><span class="o">.</span><span class="n">chemComp</span><span class="o">.</span><span class="n">findFirstNamingSystem</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">pseudoNamingSystem</span><span class="p">)</span>
+
+        <span class="c1"># Map from chemAtomSet to equivalent Atom</span>
+        <span class="n">casMap</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># map from chemAtomSet.name to nonStereo names</span>
+        <span class="n">nonStereoNames</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">chemAtomSet</span> <span class="ow">in</span> <span class="n">chemCompVar</span><span class="o">.</span><span class="n">chemAtomSets</span><span class="p">:</span>
+
+            <span class="c1"># get nests of connected chemAtomSets</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">chemAtomSet</span><span class="o">.</span><span class="n">chemAtomSet</span><span class="p">:</span>
+                <span class="c1"># get nested chemAtomSets, starting at topmost set</span>
+                <span class="n">localSets</span> <span class="o">=</span> <span class="p">[</span><span class="n">chemAtomSet</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">cas</span> <span class="ow">in</span> <span class="n">localSets</span><span class="p">:</span>
+                    <span class="n">localSets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">cas</span><span class="o">.</span><span class="n">chemAtomSets</span><span class="p">)</span>
+
+                <span class="c1"># Process in reverse order, guaranteeing that contained sets are always ready</span>
+                <span class="k">for</span> <span class="n">cas</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">localSets</span><span class="p">):</span>
+                    <span class="n">chemContents</span> <span class="o">=</span> <span class="n">cas</span><span class="o">.</span><span class="n">sortedChemAtoms</span><span class="p">()</span>
+                    <span class="c1"># NB the fact that chemAtoms and chemAtomSets are sorted (by name) is used lower down</span>
+                    <span class="k">if</span> <span class="n">chemContents</span><span class="p">:</span>
+                        <span class="c1"># contents are real atoms</span>
+                        <span class="n">components</span> <span class="o">=</span> <span class="p">[</span><span class="n">residue</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chemContents</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">chemContents</span> <span class="o">=</span> <span class="n">cas</span><span class="o">.</span><span class="n">sortedChemAtomSets</span><span class="p">()</span>
+                        <span class="n">components</span> <span class="o">=</span> <span class="p">[</span><span class="n">casMap</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chemContents</span><span class="p">]</span>
+                    <span class="n">elementSymbol</span> <span class="o">=</span> <span class="n">chemContents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">elementSymbol</span>
+
+                    <span class="n">commonBound</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">boundAtoms</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">components</span><span class="p">))</span>
+
+                    <span class="c1"># Add &#39;equivalent&#39; atom</span>
+                    <span class="k">if</span> <span class="n">replaceStarWithPercent</span><span class="p">:</span>
+                        <span class="n">newName</span> <span class="o">=</span> <span class="n">cas</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;%&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">newName</span> <span class="o">=</span> <span class="n">cas</span><span class="o">.</span><span class="n">name</span>
+                    <span class="n">newAtom</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">newAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">newName</span><span class="p">,</span> <span class="n">atomType</span><span class="o">=</span><span class="s1">&#39;equivalent&#39;</span><span class="p">,</span>
+                                              <span class="n">elementSymbol</span><span class="o">=</span><span class="n">elementSymbol</span><span class="p">,</span> <span class="n">atomSetName</span><span class="o">=</span><span class="n">cas</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                              <span class="n">components</span><span class="o">=</span><span class="n">components</span><span class="p">,</span> <span class="n">boundAtoms</span><span class="o">=</span><span class="n">commonBound</span><span class="p">)</span>
+                    <span class="n">casMap</span><span class="p">[</span><span class="n">cas</span><span class="p">]</span> <span class="o">=</span> <span class="n">newAtom</span>
+
+                    <span class="c1"># NBNB the test on &#39;#&#39; count is a hack to exclude Tyr/Phe HD#|HE#</span>
+                    <span class="n">hackExclude</span> <span class="o">=</span> <span class="n">newName</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;%&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span>
+
+                    <span class="c1"># Add &#39;pseudo&#39; atom for proton</span>
+                    <span class="k">if</span> <span class="n">addPseudoAtoms</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">elementSymbol</span> <span class="o">==</span> <span class="s1">&#39;H&#39;</span><span class="p">:</span>
+                            <span class="n">newName</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="k">if</span> <span class="n">pseudoNamingSystem</span><span class="p">:</span>
+                                <span class="n">atomSysName</span> <span class="o">=</span> <span class="n">pseudoNamingSystem</span><span class="o">.</span><span class="n">findFirstAtomSysName</span><span class="p">(</span><span class="n">atomName</span><span class="o">=</span><span class="n">cas</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                                                                      <span class="n">atomSubType</span><span class="o">=</span><span class="n">cas</span><span class="o">.</span><span class="n">subType</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">atomSysName</span><span class="p">:</span>
+                                    <span class="n">newName</span> <span class="o">=</span> <span class="n">atomSysName</span><span class="o">.</span><span class="n">sysName</span>
+
+                            <span class="k">if</span> <span class="n">newName</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="c1"># No systematic pseudoatom name found - make one.</span>
+                                <span class="c1"># NBNB this will give names like MD1, QG1, MD2 for cases like Ile delta,</span>
+                                <span class="c1"># where the standard says MD, QG, MG.</span>
+                                <span class="c1"># But all the standard cases are covered by the pseudoNamingSystem (pseudoNamingSystem)</span>
+                                <span class="c1"># Can we get away with this, or do we have to rename on a per-residue basis</span>
+                                <span class="c1"># for the special cases?</span>
+                                <span class="n">startChar</span> <span class="o">=</span> <span class="s1">&#39;Q&#39;</span>
+                                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cas</span><span class="o">.</span><span class="n">chemAtoms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">cas</span><span class="o">.</span><span class="n">isEquivalent</span>
+                                        <span class="ow">and</span> <span class="n">components</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">findFirstBoundAtom</span><span class="p">()</span><span class="o">.</span><span class="n">elementSymbol</span> <span class="o">==</span> <span class="s1">&#39;C&#39;</span><span class="p">):</span>
+                                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">findFirstBoundAtom</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">components</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                                        <span class="c1"># This is a methyl group</span>
+                                        <span class="c1"># The second &#39;if&#39; is likely unnecessary in practice, but let us be correct here</span>
+                                        <span class="n">startChar</span> <span class="o">=</span> <span class="s1">&#39;M&#39;</span>
+
+                                <span class="n">newName</span> <span class="o">=</span> <span class="n">startChar</span> <span class="o">+</span> <span class="n">cas</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">newName</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                                <span class="c1"># Make pseudoatom, except for &#39;H*&#39;</span>
+                                <span class="n">residue</span><span class="o">.</span><span class="n">newAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">newName</span><span class="p">,</span> <span class="n">atomType</span><span class="o">=</span><span class="s1">&#39;pseudo&#39;</span><span class="p">,</span> <span class="n">elementSymbol</span><span class="o">=</span><span class="n">elementSymbol</span><span class="p">,</span>
+                                                <span class="n">atomSetName</span><span class="o">=</span><span class="n">cas</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="n">components</span><span class="p">,</span> <span class="n">boundAtoms</span><span class="o">=</span><span class="n">commonBound</span><span class="p">)</span>
+
+                    <span class="c1"># Add &#39;nonstereo atoms</span>
+                    <span class="k">if</span> <span class="n">addNonstereoAtoms</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">cas</span><span class="o">.</span><span class="n">isEquivalent</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">components</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">hackExclude</span><span class="p">:</span>
+                            <span class="c1"># NB excludes cases with more than two non-equivalent components</span>
+                            <span class="c1"># But then I do not think there are any in practice.</span>
+                            <span class="c1"># and anyway we do not have a convention for them.</span>
+                            <span class="n">nonStereoNames</span><span class="p">[</span><span class="n">cas</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">newNames</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="n">starpos</span> <span class="o">=</span> <span class="n">cas</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">component</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">components</span><span class="p">):</span>
+                                <span class="c1"># NB components are sorted by key, which means by name</span>
+                                <span class="n">newChar</span> <span class="o">=</span> <span class="s1">&#39;xy&#39;</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+                                <span class="n">ll</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">component</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">starpos</span><span class="p">:</span>
+                                    <span class="n">ll</span><span class="p">[</span><span class="n">starpos</span><span class="p">]</span> <span class="o">=</span> <span class="n">newChar</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="c1"># Necessary for cases like H2&#39;/H2&#39;&#39;</span>
+                                    <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newChar</span><span class="p">)</span>
+                                <span class="n">newName</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span>
+                                <span class="n">newNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newName</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">residue</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">newName</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING, new atom already exists: </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
+                                          <span class="o">%</span> <span class="p">(</span><span class="n">residue</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">residue</span><span class="o">.</span><span class="n">seqId</span><span class="p">,</span> <span class="n">residue</span><span class="o">.</span><span class="n">ccpCode</span><span class="p">,</span> <span class="n">newName</span><span class="p">))</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">residue</span><span class="o">.</span><span class="n">newAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">newName</span><span class="p">,</span> <span class="n">atomType</span><span class="o">=</span><span class="s1">&#39;nonstereo&#39;</span><span class="p">,</span> <span class="n">elementSymbol</span><span class="o">=</span><span class="n">elementSymbol</span><span class="p">,</span>
+                                                    <span class="n">atomSetName</span><span class="o">=</span><span class="n">cas</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="n">components</span><span class="p">,</span> <span class="n">boundAtoms</span><span class="o">=</span><span class="n">commonBound</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">setBoundsForAtomGroups</span><span class="p">:</span>
+            <span class="c1"># NBNB Now we need to set boundAtoms for non-single Atoms.</span>
+            <span class="c1"># We need to set:</span>
+            <span class="c1"># HG*-CG* etc.</span>
+            <span class="c1"># HGX*-CGX etc. - can be done from previous by char substitution</span>
+            <span class="n">eqvTypeAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">residue</span><span class="o">.</span><span class="n">sortedAtoms</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">atomType</span> <span class="o">==</span> <span class="s1">&#39;equivalent&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">eqvAtom</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">eqvTypeAtoms</span><span class="p">):</span>
+                <span class="n">components</span> <span class="o">=</span> <span class="n">eqvAtom</span><span class="o">.</span><span class="n">sortedComponents</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">eqvAtom2</span> <span class="ow">in</span> <span class="n">eqvTypeAtoms</span><span class="p">:</span>
+                    <span class="n">components2</span> <span class="o">=</span> <span class="n">eqvAtom2</span><span class="o">.</span><span class="n">sortedComponents</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">components</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">components2</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="nb">all</span><span class="p">((</span><span class="n">x</span> <span class="ow">in</span> <span class="n">components2</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span><span class="o">.</span><span class="n">boundAtoms</span><span class="p">)</span> <span class="k">for</span> <span class="n">jj</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">components</span><span class="p">)):</span>
+                            <span class="c1"># All components of one are bound to a component of the other</span>
+                            <span class="c1"># NB this relies on the sorted components being ordered to match the bonds</span>
+                            <span class="c1"># but you should expect that both cases are sorted by branch index</span>
+                            <span class="c1"># CG1,CG2 matching HG1*,HG2* etc.</span>
+
+                            <span class="c1"># Add bond between equivalent atoms</span>
+                            <span class="k">if</span> <span class="n">eqvAtom2</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">eqvAtom</span><span class="o">.</span><span class="n">boundAtoms</span><span class="p">:</span>
+                                <span class="n">eqvAtom</span><span class="o">.</span><span class="n">addBoundAtom</span><span class="p">(</span><span class="n">eqvAtom2</span><span class="p">)</span>
+
+                            <span class="n">nsNames1</span> <span class="o">=</span> <span class="n">nonStereoNames</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">eqvAtom</span><span class="o">.</span><span class="n">atomSetName</span><span class="p">)</span>
+                            <span class="n">nsNames2</span> <span class="o">=</span> <span class="n">nonStereoNames</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">eqvAtom2</span><span class="o">.</span><span class="n">atomSetName</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">nsNames1</span> <span class="ow">and</span> <span class="n">nsNames2</span><span class="p">:</span>
+                                <span class="c1"># Non-stereoAtoms are defined for both - add x,y bonds</span>
+                                <span class="c1"># NB We rely on names being sorted (x then y in both cases)</span>
+                                <span class="k">for</span> <span class="n">kk</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nsNames1</span><span class="p">):</span>
+                                    <span class="n">atom1</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+                                    <span class="n">atom2</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">nsNames2</span><span class="p">[</span><span class="n">kk</span><span class="p">])</span>
+                                    <span class="k">if</span> <span class="n">atom2</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">atom1</span><span class="o">.</span><span class="n">boundAtoms</span><span class="p">:</span>
+                                        <span class="n">atom1</span><span class="o">.</span><span class="n">addBoundAtom</span><span class="p">(</span><span class="n">atom2</span><span class="p">)</span>
+                            <span class="k">break</span></div>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -234,7 +524,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -254,12 +544,13 @@
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.lib.MoleculeLib</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

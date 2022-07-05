@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.ui.gui.widgets.PlotWidget &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
-    <script src="../../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.PlotWidget</a></li> 
       </ul>
     </div>  
 
@@ -43,8 +44,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
@@ -52,14 +54,15 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:55 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Geerten Vuister $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-02-01 15:30:09 +0000 (Tue, February 01, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.4 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Geerten Vuister&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2020-12-03 18:45:05 +0000 (Thu, December 03, 2020) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
@@ -133,7 +136,7 @@
         <span class="c1">#TODO:GEERTEN: Fix with proper stylesheet</span>
         <span class="c1"># Also used in AxisTextItem</span>
         <span class="c1"># NOTE: self.highlightColour is also being used in GuiPeakListView for selected peaks</span>
-        <span class="k">if</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;light&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_colourScheme</span> <span class="o">==</span> <span class="s1">&#39;light&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">background</span> <span class="o">=</span> <span class="s1">&#39;#f7ffff&#39;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">foreground</span> <span class="o">=</span> <span class="s1">&#39;#080000&#39;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">gridColour</span> <span class="o">=</span> <span class="s1">&#39;#080000&#39;</span>
@@ -269,7 +272,7 @@
             <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">showDoubleCrosshair</span><span class="p">:</span>
                 <span class="c1">#if strip.spectrumDisplay.mainWindow.application.preferences.general.doubleCrossHair:</span>
                 <span class="n">offsets</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">doubleCrosshairOffsets</span>
-                <span class="n">displayIndices</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">_displayOrderSpectrumDimensionIndices</span>
+                <span class="n">displayIndices</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">dimensionIndices</span>
                 <span class="n">xOffset</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[</span><span class="n">displayIndices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
                 <span class="n">yOffset</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[</span><span class="n">displayIndices</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
                 <span class="k">if</span> <span class="n">xPos</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">xOffset</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -424,6 +427,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">axisCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span></div>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -433,7 +437,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -453,12 +457,13 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.PlotWidget</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

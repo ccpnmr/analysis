@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.ui.gui.lib.mouseEvents &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
-    <script src="../../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.lib.mouseEvents</a></li> 
       </ul>
     </div>  
 
@@ -43,7 +44,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
@@ -52,9 +53,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:42 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.1 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -68,12 +69,13 @@
 <span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 <span class="kn">from</span> <span class="nn">pyqtgraph.Point</span> <span class="kn">import</span> <span class="n">Point</span>
-<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
+<span class="c1"># from ccpn.util import Common as commonUtil</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">PeakList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Font</span> <span class="kn">import</span> <span class="n">setWidgetFont</span>
 
 
 <span class="c1"># mouse modes for single click:</span>
@@ -283,47 +285,94 @@
 
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DropBase</span> <span class="kn">import</span> <span class="n">DropBase</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">textFontLarge</span><span class="p">,</span> <span class="n">getColours</span><span class="p">,</span> <span class="n">LABEL_FOREGROUND</span>
+<span class="c1"># from ccpn.ui.gui.guiSettings import textFontLarge</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">getColours</span><span class="p">,</span> <span class="n">DRAG_BACKGROUND</span><span class="p">,</span> <span class="n">DRAG_FOREGROUND</span>
 
 
-<div class="viewcode-block" id="makeDragEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.mouseEvents.makeDragEvent">[docs]</a><span class="k">def</span> <span class="nf">makeDragEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataDict</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CopyAction</span><span class="p">):</span>
+<span class="c1"># small border to make the drag items look cleaner</span>
+<span class="n">DRAGBORDER</span> <span class="o">=</span> <span class="mi">2</span>
+
+
+<span class="k">def</span> <span class="nf">_setMimeQString</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a string to a stream</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QByteArray</span><span class="p">()</span>
+    <span class="n">stream</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QDataStream</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QIODevice</span><span class="o">.</span><span class="n">WriteOnly</span><span class="p">)</span>
+    <span class="n">stream</span><span class="o">.</span><span class="n">writeQString</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">_setMimeQVariant</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a python object into a stream</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QByteArray</span><span class="p">()</span>
+    <span class="n">stream</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QDataStream</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QIODevice</span><span class="o">.</span><span class="n">WriteOnly</span><span class="p">)</span>
+    <span class="n">stream</span><span class="o">.</span><span class="n">writeQVariant</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">_getMimeQVariant</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a stream QVariant back into a python object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">stream</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QDataStream</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QIODevice</span><span class="o">.</span><span class="n">ReadOnly</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">readQVariant</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<div class="viewcode-block" id="makeDragEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.mouseEvents.makeDragEvent">[docs]</a><span class="k">def</span> <span class="nf">makeDragEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataDict</span><span class="p">,</span> <span class="n">texts</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CopyAction</span><span class="p">,</span> <span class="n">alignCentre</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a new drag event with &#39;self&#39; as the source</span>
+
+<span class="sd">    :param self: source of the new drag event</span>
+<span class="sd">    :param dataDict: data to add as mimeData</span>
+<span class="sd">    :param texts: list of strings to copy/move to list widget types (if required)</span>
+<span class="sd">    :param label: string required to create the drag icon</span>
+<span class="sd">    :param action: QtCore.Qt.CopyAction or Move action - may be used by dropEvent</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">itemData</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">dataDict</span><span class="p">)</span>
 
     <span class="n">mimeData</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMimeData</span><span class="p">()</span>
-
-    <span class="c1"># ejb - added so that itemData works with PyQt5</span>
-    <span class="n">tempData</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QByteArray</span><span class="p">()</span>
-    <span class="n">stream</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QDataStream</span><span class="p">(</span><span class="n">tempData</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QIODevice</span><span class="o">.</span><span class="n">WriteOnly</span><span class="p">)</span>
-    <span class="n">stream</span><span class="o">.</span><span class="n">writeQString</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-    <span class="n">mimeData</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">DropBase</span><span class="o">.</span><span class="n">JSONDATA</span><span class="p">,</span> <span class="n">tempData</span><span class="p">)</span>
-
-    <span class="c1"># mimeData.setData(DropBase.JSONDATA, self.text())</span>
+    <span class="n">mimeData</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">DropBase</span><span class="o">.</span><span class="n">JSONDATA</span><span class="p">,</span> <span class="n">_setMimeQString</span><span class="p">(</span><span class="n">itemData</span><span class="p">))</span>
+    <span class="n">mimeData</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">DropBase</span><span class="o">.</span><span class="n">MODELDATALIST</span><span class="p">,</span> <span class="n">_setMimeQVariant</span><span class="p">(</span><span class="n">texts</span><span class="p">))</span>
     <span class="n">mimeData</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">itemData</span><span class="p">)</span>
+
+    <span class="c1"># create the new event with the mimeData - this does not contain internal application/x-qabstractitemmodeldatalist (INTERNALQTDATA)</span>
     <span class="n">drag</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDrag</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="n">drag</span><span class="o">.</span><span class="n">setMimeData</span><span class="p">(</span><span class="n">mimeData</span><span class="p">)</span>
 
     <span class="c1"># create a new temporary label the the dragged pixmap</span>
     <span class="c1"># fixes labels that are very big with small text</span>
     <span class="n">dragLabel</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">()</span>
-    <span class="n">dragLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-    <span class="n">dragLabel</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">textFontLarge</span><span class="p">)</span>
-    <span class="n">dragLabel</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;color: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">getColours</span><span class="p">()[</span><span class="n">LABEL_FOREGROUND</span><span class="p">]))</span>
+    <span class="n">dragLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
 
-    <span class="c1"># set the pixmap</span>
-    <span class="n">pixmap</span> <span class="o">=</span> <span class="n">dragLabel</span><span class="o">.</span><span class="n">grab</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">setWidgetFont</span><span class="p">(</span><span class="n">dragLabel</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;MEDIUM&#39;</span><span class="p">)</span>
 
-    <span class="c1"># make the label slightly transparent</span>
-    <span class="n">painter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="n">pixmap</span><span class="p">)</span>
-    <span class="n">painter</span><span class="o">.</span><span class="n">setCompositionMode</span><span class="p">(</span><span class="n">painter</span><span class="o">.</span><span class="n">CompositionMode_DestinationIn</span><span class="p">)</span>
-    <span class="n">painter</span><span class="o">.</span><span class="n">fillRect</span><span class="p">(</span><span class="n">pixmap</span><span class="o">.</span><span class="n">rect</span><span class="p">(),</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">240</span><span class="p">))</span>
-    <span class="n">painter</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
-    <span class="n">drag</span><span class="o">.</span><span class="n">setPixmap</span><span class="p">(</span><span class="n">pixmap</span><span class="p">)</span>
+        <span class="c1"># set the colours and margin for the drag icon</span>
+        <span class="n">dragLabel</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;color: </span><span class="si">{}</span><span class="s1">; background: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">getColours</span><span class="p">()[</span><span class="n">DRAG_FOREGROUND</span><span class="p">],</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">DRAG_BACKGROUND</span><span class="p">]))</span>
+        <span class="n">dragLabel</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="n">DRAGBORDER</span><span class="p">,</span> <span class="n">DRAGBORDER</span><span class="p">,</span> <span class="n">DRAGBORDER</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">DRAGBORDER</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
-    <span class="n">drag</span><span class="o">.</span><span class="n">setHotSpot</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">dragLabel</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dragLabel</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="c1"># set the pixmap</span>
+        <span class="n">pixmap</span> <span class="o">=</span> <span class="n">dragLabel</span><span class="o">.</span><span class="n">grab</span><span class="p">()</span>
 
+        <span class="c1"># make the label slightly transparent - not strictly necessary</span>
+        <span class="n">painter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="n">pixmap</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setCompositionMode</span><span class="p">(</span><span class="n">painter</span><span class="o">.</span><span class="n">CompositionMode_DestinationIn</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">fillRect</span><span class="p">(</span><span class="n">pixmap</span><span class="o">.</span><span class="n">rect</span><span class="p">(),</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">240</span><span class="p">))</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+
+        <span class="c1"># set pixmap if label is defined other defaults to mimeData.text</span>
+        <span class="n">drag</span><span class="o">.</span><span class="n">setPixmap</span><span class="p">(</span><span class="n">pixmap</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">alignCentre</span><span class="p">:</span>
+        <span class="c1"># set the hotspot as the centre</span>
+        <span class="n">drag</span><span class="o">.</span><span class="n">setHotSpot</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">dragLabel</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dragLabel</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="c1"># invoke the drag event</span>
     <span class="n">drag</span><span class="o">.</span><span class="n">exec_</span><span class="p">(</span><span class="n">action</span><span class="p">)</span></div>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -333,7 +382,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -353,12 +402,13 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.lib.mouseEvents</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

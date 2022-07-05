@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.util.Url &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.util.Url</a></li> 
       </ul>
     </div>  
 
@@ -42,9 +43,10 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
@@ -52,8 +54,8 @@
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-01-13 10:38:51 +0000 (Mon, January 13, 2020) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-07-05 13:20:42 +0100 (Tue, July 05, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -64,6 +66,7 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="n">BAD_DOWNLOAD</span> <span class="o">=</span> <span class="s1">&#39;Exception: &#39;</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 
 <div class="viewcode-block" id="fetchHttpResponse"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Url.fetchHttpResponse">[docs]</a><span class="k">def</span> <span class="nf">fetchHttpResponse</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proxySettings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -81,22 +84,26 @@
     <span class="n">context</span><span class="o">.</span><span class="n">check_hostname</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">context</span><span class="o">.</span><span class="n">verify_mode</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">CERT_NONE</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">headers</span><span class="p">:</span>
-        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Content-type&#39;</span><span class="p">:</span> <span class="s1">&#39;application/x-www-form-urlencoded;charset=UTF-8&#39;</span><span class="p">}</span>
-    <span class="n">body</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">quote_via</span><span class="o">=</span><span class="n">quote</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">data</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="c1"># if not headers:</span>
+    <span class="c1">#     headers = {&#39;Content-Type&#39;: &#39;application/x-www-form-urlencoded;charset=UTF-8&#39;}</span>
+    <span class="c1"># try:</span>
+    <span class="c1">#     body = urlencode(data or {}, quote_via=quote).encode(&#39;utf-8&#39;)</span>
+    <span class="c1"># except Exception as err:</span>
+    <span class="c1">#     body = urlencode({}, quote_via=quote).encode(&#39;utf-8&#39;)</span>
 
     <span class="n">urllib3</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">pyopenssl</span><span class="o">.</span><span class="n">inject_into_urllib3</span><span class="p">()</span>
 
     <span class="c1"># create the options list for creating an http connection</span>
-    <span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;cert_reqs&#39;</span><span class="p">:</span> <span class="s1">&#39;CERT_REQUIRED&#39;</span><span class="p">,</span>
-               <span class="s1">&#39;ca_certs&#39;</span> <span class="p">:</span> <span class="n">certifi</span><span class="o">.</span><span class="n">where</span><span class="p">(),</span>
-               <span class="s1">&#39;timeout&#39;</span>  <span class="p">:</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">Timeout</span><span class="p">(</span><span class="n">connect</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="mf">3.0</span><span class="p">),</span>
-               <span class="s1">&#39;retries&#39;</span>  <span class="p">:</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">Retry</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">redirect</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-               <span class="p">}</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;cert_reqs&#39;</span><span class="p">:</span> <span class="s1">&#39;CERT_REQUIRED&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ca_certs&#39;</span> <span class="p">:</span> <span class="n">certifi</span><span class="o">.</span><span class="n">where</span><span class="p">(),</span>
+        <span class="s1">&#39;timeout&#39;</span>  <span class="p">:</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">Timeout</span><span class="p">(</span><span class="n">connect</span><span class="o">=</span><span class="mf">3.0</span><span class="p">),</span>
+        <span class="s1">&#39;retries&#39;</span>  <span class="p">:</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">Retry</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">redirect</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="p">}</span>
 
     <span class="c1"># check whether a proxy is required</span>
     <span class="kn">from</span> <span class="nn">ccpn.util.UserPreferences</span> <span class="kn">import</span> <span class="n">UserPreferences</span><span class="p">,</span> <span class="n">USEPROXY</span><span class="p">,</span> <span class="n">USEPROXYPASSWORD</span><span class="p">,</span> <span class="n">PROXYADDRESS</span><span class="p">,</span> \
-        <span class="n">PROXYPORT</span><span class="p">,</span> <span class="n">PROXYUSERNAME</span><span class="p">,</span> <span class="n">PROXYPASSWORD</span><span class="p">,</span> <span class="n">USESYSTEMPROXY</span>
+        <span class="n">PROXYPORT</span><span class="p">,</span> <span class="n">PROXYUSERNAME</span><span class="p">,</span> <span class="n">PROXYPASSWORD</span><span class="p">,</span> <span class="n">USESYSTEMPROXY</span><span class="p">,</span> <span class="n">VERIFYSSL</span>
 
     <span class="k">def</span> <span class="nf">_getProxyIn</span><span class="p">(</span><span class="n">proxyDict</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the first occurrence of a proxy type in the supplied dict</span>
@@ -108,6 +115,15 @@
             <span class="k">if</span> <span class="n">proxyUrl</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">proxyUrl</span>
 
+    <span class="k">if</span> <span class="n">proxySettings</span><span class="p">:</span>
+        <span class="n">verifySSL</span> <span class="o">=</span> <span class="n">proxySettings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">VERIFYSSL</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verifySSL</span><span class="p">:</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">cert_reqs</span><span class="o">=</span><span class="n">ssl</span><span class="o">.</span><span class="n">CERT_REQUIRED</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">cert_reqs</span><span class="o">=</span><span class="n">ssl</span><span class="o">.</span><span class="n">CERT_NONE</span><span class="p">)</span>
+            <span class="n">urllib3</span><span class="o">.</span><span class="n">disable_warnings</span><span class="p">()</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;SSL certificates validity check skipped.&#39;</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">proxySettings</span> <span class="ow">and</span> <span class="n">proxySettings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">USEPROXY</span><span class="p">):</span>
 
         <span class="c1"># Use the user settings if set</span>
@@ -116,7 +132,6 @@
         <span class="n">proxyPort</span> <span class="o">=</span> <span class="n">proxySettings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">PROXYPORT</span><span class="p">)</span>
         <span class="n">proxyUsername</span> <span class="o">=</span> <span class="n">proxySettings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">PROXYUSERNAME</span><span class="p">)</span>
         <span class="n">proxyPassword</span> <span class="o">=</span> <span class="n">proxySettings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">PROXYPASSWORD</span><span class="p">)</span>
-
         <span class="k">if</span> <span class="n">useProxyPassword</span><span class="p">:</span>
             <span class="c1"># grab the decode from the userPreferences</span>
             <span class="n">_userPreferences</span> <span class="o">=</span> <span class="n">UserPreferences</span><span class="p">(</span><span class="n">readPreferences</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -124,7 +139,6 @@
             <span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;headers&#39;</span><span class="p">:</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">make_headers</span><span class="p">(</span><span class="n">proxy_basic_auth</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
                                                                              <span class="p">(</span><span class="n">proxyUsername</span><span class="p">,</span>
                                                                               <span class="n">_userPreferences</span><span class="o">.</span><span class="n">decodeValue</span><span class="p">(</span><span class="n">proxyPassword</span><span class="p">)))})</span>
-
         <span class="n">proxyUrl</span> <span class="o">=</span> <span class="s2">&quot;http://</span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">/&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">proxyAddress</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">proxyPort</span><span class="p">))</span> <span class="k">if</span> <span class="n">proxyAddress</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="k">else</span><span class="p">:</span>
@@ -142,40 +156,67 @@
 
     <span class="c1"># generate an http request</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">http</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span>
+                            <span class="n">fields</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
                             <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
-                            <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
-                            <span class="n">preload_content</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                            <span class="c1"># body=body,</span>
+                            <span class="c1"># preload_content=True,</span>
+                            <span class="c1"># decode_content=False</span>
+                            <span class="p">)</span>
 
     <span class="c1"># return the http response</span>
     <span class="k">return</span> <span class="n">response</span></div>
 
 
-<div class="viewcode-block" id="fetchUrl"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Url.fetchUrl">[docs]</a><span class="k">def</span> <span class="nf">fetchUrl</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">proxySettings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">decodeResponse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="fetchUrl"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Url.fetchUrl">[docs]</a><span class="k">def</span> <span class="nf">fetchUrl</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">proxySettings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">decodeResponse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Fetch url request from the server</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">logging</span>
+    <span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">Timeout</span> <span class="k">as</span> <span class="n">timer</span>
+    <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">isWindowsOS</span>
 
-    <span class="n">urllib3_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;urllib3&#39;</span><span class="p">)</span>
-    <span class="n">urllib3_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">CRITICAL</span><span class="p">)</span>
+    <span class="n">timeoutMessage</span> <span class="o">=</span> <span class="s1">&#39;Could not connect to server. Check connection&#39;</span>
+    <span class="k">if</span> <span class="n">isWindowsOS</span><span class="p">():</span>
+        <span class="c1"># Windows does not have signal.SIGALRM - temporary fix</span>
+        <span class="n">urllib3_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;urllib3&#39;</span><span class="p">)</span>
+        <span class="n">urllib3_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">CRITICAL</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">proxySettings</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">proxySettings</span><span class="p">:</span>
 
-        <span class="c1"># read the proxySettings from the preferences</span>
-        <span class="kn">from</span> <span class="nn">ccpn.util.UserPreferences</span> <span class="kn">import</span> <span class="n">UserPreferences</span>
+            <span class="c1"># read the proxySettings from the preferences</span>
+            <span class="kn">from</span> <span class="nn">ccpn.util.UserPreferences</span> <span class="kn">import</span> <span class="n">UserPreferences</span>
 
-        <span class="n">_userPreferences</span> <span class="o">=</span> <span class="n">UserPreferences</span><span class="p">(</span><span class="n">readPreferences</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">_userPreferences</span><span class="o">.</span><span class="n">proxyDefined</span><span class="p">:</span>
-            <span class="n">proxyNames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;useProxy&#39;</span><span class="p">,</span> <span class="s1">&#39;proxyAddress&#39;</span><span class="p">,</span> <span class="s1">&#39;proxyPort&#39;</span><span class="p">,</span> <span class="s1">&#39;useProxyPassword&#39;</span><span class="p">,</span>
-                          <span class="s1">&#39;proxyUsername&#39;</span><span class="p">,</span> <span class="s1">&#39;proxyPassword&#39;</span><span class="p">]</span>
-            <span class="n">proxySettings</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">proxyNames</span><span class="p">:</span>
-                <span class="n">proxySettings</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_userPreferences</span><span class="o">.</span><span class="n">_getPreferencesParameter</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">_userPreferences</span> <span class="o">=</span> <span class="n">UserPreferences</span><span class="p">(</span><span class="n">readPreferences</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">_userPreferences</span><span class="o">.</span><span class="n">proxyDefined</span><span class="p">:</span>
+                <span class="n">proxyNames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;useProxy&#39;</span><span class="p">,</span> <span class="s1">&#39;proxyAddress&#39;</span><span class="p">,</span> <span class="s1">&#39;proxyPort&#39;</span><span class="p">,</span> <span class="s1">&#39;useProxyPassword&#39;</span><span class="p">,</span>
+                              <span class="s1">&#39;proxyUsername&#39;</span><span class="p">,</span> <span class="s1">&#39;proxyPassword&#39;</span><span class="p">,</span> <span class="s1">&#39;verifySSL&#39;</span><span class="p">]</span>
+                <span class="n">proxySettings</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">proxyNames</span><span class="p">:</span>
+                    <span class="n">proxySettings</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_userPreferences</span><span class="o">.</span><span class="n">_getPreferencesParameter</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
-    <span class="n">response</span> <span class="o">=</span> <span class="n">fetchHttpResponse</span><span class="p">(</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">proxySettings</span><span class="o">=</span><span class="n">proxySettings</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">fetchHttpResponse</span><span class="p">(</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                                     <span class="n">proxySettings</span><span class="o">=</span><span class="n">proxySettings</span><span class="p">)</span>
 
-    <span class="c1"># if response:</span>
-    <span class="c1">#     ll = len(response.data)</span>
-    <span class="c1">#     print(&#39;&gt;&gt;&gt;&gt;&gt;&gt;responseUrl&#39;, proxySettings, response.data[0:min(ll, 20)])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># use the timeout limited call</span>
+        <span class="k">with</span> <span class="n">timer</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">timeout</span> <span class="ow">or</span> <span class="mi">5</span><span class="p">,</span> <span class="n">timeoutMessage</span><span class="o">=</span><span class="n">timeoutMessage</span><span class="p">):</span>
+            <span class="n">urllib3_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;urllib3&#39;</span><span class="p">)</span>
+            <span class="n">urllib3_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">CRITICAL</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">proxySettings</span><span class="p">:</span>
+
+                <span class="c1"># read the proxySettings from the preferences</span>
+                <span class="kn">from</span> <span class="nn">ccpn.util.UserPreferences</span> <span class="kn">import</span> <span class="n">UserPreferences</span>
+
+                <span class="n">_userPreferences</span> <span class="o">=</span> <span class="n">UserPreferences</span><span class="p">(</span><span class="n">readPreferences</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">_userPreferences</span><span class="o">.</span><span class="n">proxyDefined</span><span class="p">:</span>
+                    <span class="n">proxyNames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;useProxy&#39;</span><span class="p">,</span> <span class="s1">&#39;proxyAddress&#39;</span><span class="p">,</span> <span class="s1">&#39;proxyPort&#39;</span><span class="p">,</span> <span class="s1">&#39;useProxyPassword&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;proxyUsername&#39;</span><span class="p">,</span> <span class="s1">&#39;proxyPassword&#39;</span><span class="p">,</span> <span class="s1">&#39;verifySSL&#39;</span><span class="p">]</span>
+                    <span class="n">proxySettings</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">proxyNames</span><span class="p">:</span>
+                        <span class="n">proxySettings</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_userPreferences</span><span class="o">.</span><span class="n">_getPreferencesParameter</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="n">response</span> <span class="o">=</span> <span class="n">fetchHttpResponse</span><span class="p">(</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                                         <span class="n">proxySettings</span><span class="o">=</span><span class="n">proxySettings</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">decodeResponse</span> <span class="k">else</span> <span class="n">response</span></div>
 
@@ -208,9 +249,11 @@
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">es</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -220,7 +263,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -240,12 +283,13 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.util.Url</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

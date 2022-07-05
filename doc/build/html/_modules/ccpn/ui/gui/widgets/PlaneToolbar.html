@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.ui.gui.widgets.PlaneToolbar &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
-    <script src="../../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.PlaneToolbar</a></li> 
       </ul>
     </div>  
 
@@ -46,9 +47,10 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
@@ -56,8 +58,8 @@
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-01-29 09:03:04 +0000 (Wed, January 29, 2020) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -68,30 +70,31 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="kn">import</span> <span class="n">pyqtSignal</span><span class="p">,</span> <span class="n">pyqtSlot</span>
-<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="kn">import</span> <span class="n">pyqtSlot</span>
+<span class="c1"># import json</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DoubleSpinbox</span> <span class="kn">import</span> <span class="n">DoubleSpinbox</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span><span class="p">,</span> <span class="n">VerticalLabel</span><span class="p">,</span> <span class="n">ActiveLabel</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span><span class="p">,</span> <span class="n">ActiveLabel</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spinbox</span> <span class="kn">import</span> <span class="n">Spinbox</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ToolBar</span> <span class="kn">import</span> <span class="n">ToolBar</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
+<span class="c1"># from ccpn.ui.gui.widgets.ToolBar import ToolBar</span>
+<span class="c1"># from ccpn.ui.gui.widgets.Widget import Widget</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span><span class="p">,</span> <span class="n">OpenGLOverlayFrame</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">textFont</span><span class="p">,</span> <span class="n">getColours</span><span class="p">,</span> <span class="n">STRIPHEADER_BACKGROUND</span><span class="p">,</span> \
-    <span class="n">STRIPHEADER_FOREGROUND</span><span class="p">,</span> <span class="n">GUINMRRESIDUE</span><span class="p">,</span> <span class="n">CCPNGLWIDGET_BACKGROUND</span><span class="p">,</span> <span class="n">textFontLarge</span><span class="p">,</span> \
-    <span class="n">CCPNGLWIDGET_HEXHIGHLIGHT</span><span class="p">,</span> <span class="n">CCPNGLWIDGET_HEXFOREGROUND</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">CCPNGLWIDGET_HEXHIGHLIGHT</span><span class="p">,</span> <span class="n">CCPNGLWIDGET_HEXFOREGROUND</span><span class="p">,</span> <span class="n">ZPlaneNavigationModes</span>
+<span class="c1"># from ccpn.ui.gui.guiSettings import textFont, textFontLarge</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Font</span> <span class="kn">import</span> <span class="n">getFontHeight</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DropBase</span> <span class="kn">import</span> <span class="n">DropBase</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.mouseEvents</span> <span class="kn">import</span> <span class="n">getMouseEventDict</span>
-<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.NmrResidue</span> <span class="kn">import</span> <span class="n">NmrResidue</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.Notifiers</span> <span class="kn">import</span> <span class="n">Notifier</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiNotifier</span> <span class="kn">import</span> <span class="n">GuiNotifier</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.mouseEvents</span> <span class="kn">import</span> <span class="n">makeDragEvent</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spacer</span> <span class="kn">import</span> <span class="n">Spacer</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.mouseEvents</span> <span class="kn">import</span> <span class="n">makeDragEvent</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Constants</span> <span class="kn">import</span> <span class="n">AXISUNIT_POINT</span>
 
 
 <span class="n">STRIPLABEL_CONNECTDIR</span> <span class="o">=</span> <span class="s1">&#39;_connectDir&#39;</span>
@@ -143,7 +146,7 @@
             <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> is not a draggable object&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
             <span class="k">return</span>
 
-        <span class="n">mimeData</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMimeData</span><span class="p">()</span>
+        <span class="c1"># mimeData = QtCore.QMimeData()</span>
         <span class="c1"># create the dataDict</span>
         <span class="n">dataDict</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_dragKey</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">()],</span>
                     <span class="n">DropBase</span><span class="o">.</span><span class="n">TEXT</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
@@ -151,10 +154,10 @@
         <span class="n">connectDir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connectDir</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">STRIPLABEL_CONNECTDIR</span><span class="p">)</span> <span class="k">else</span> <span class="n">STRIPLABEL_CONNECTNONE</span>
         <span class="n">dataDict</span><span class="p">[</span><span class="n">STRIPLABEL_CONNECTDIR</span><span class="p">]</span> <span class="o">=</span> <span class="n">connectDir</span>
 
-        <span class="c1"># update the dataDict with all mouseEvents﻿{&quot;controlRightMouse&quot;: false, &quot;text&quot;: &quot;NR:@-.@27.&quot;, &quot;leftMouse&quot;: true, &quot;controlShiftMiddleMouse&quot;: false, &quot;middleMouse&quot;: false, &quot;controlMiddleMouse&quot;: false, &quot;controlShiftLeftMouse&quot;: false, &quot;controlShiftRightMouse&quot;: false, &quot;shiftMiddleMouse&quot;: false, &quot;_connectDir&quot;: &quot;isRight&quot;, &quot;controlLeftMouse&quot;: false, &quot;rightMouse&quot;: false, &quot;shiftLeftMouse&quot;: false, &quot;shiftRightMouse&quot;: false}</span>
+        <span class="c1"># update the dataDict with all mouseEvents{&quot;controlRightMouse&quot;: false, &quot;text&quot;: &quot;NR:@-.@27.&quot;, &quot;leftMouse&quot;: true, &quot;controlShiftMiddleMouse&quot;: false, &quot;middleMouse&quot;: false, &quot;controlMiddleMouse&quot;: false, &quot;controlShiftLeftMouse&quot;: false, &quot;controlShiftRightMouse&quot;: false, &quot;shiftMiddleMouse&quot;: false, &quot;_connectDir&quot;: &quot;isRight&quot;, &quot;controlLeftMouse&quot;: false, &quot;rightMouse&quot;: false, &quot;shiftLeftMouse&quot;: false, &quot;shiftRightMouse&quot;: false}</span>
         <span class="n">dataDict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mouseDict</span><span class="p">)</span>
 
-        <span class="n">makeDragEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataDict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="n">makeDragEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataDict</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">()],</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -189,7 +192,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lastClick</span> <span class="o">==</span> <span class="n">SINGLECLICK</span><span class="p">:</span>
             <span class="n">mouseDict</span> <span class="o">=</span> <span class="n">getMouseEventDict</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
 
-            <span class="c1"># set up a singleshot event, but a bit quicker than the normal interval (which seems a little long)</span>
+            <span class="c1"># set up a singleShot event, but a bit quicker than the normal interval (which seems a little long)</span>
             <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">doubleClickInterval</span><span class="p">()</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span>
                                      <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_handleMouseClicked</span><span class="p">,</span> <span class="n">mouseDict</span><span class="p">))</span>
 
@@ -282,8 +285,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qtParent</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-        <span class="s2">&quot;Setup the buttons and callbacks for axis&quot;</span>
-
+        <span class="sd">&quot;&quot;&quot;Setup the buttons and callbacks for axis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">qtParent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
@@ -294,31 +297,28 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_linkedSpinBox</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_linkedPlaneCount</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="n">width</span> <span class="o">=</span> <span class="mi">20</span>
-        <span class="n">height</span> <span class="o">=</span> <span class="mi">20</span>
+        <span class="n">_size</span> <span class="o">=</span> <span class="n">getFontHeight</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="s1">&#39;MEDIUM&#39;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">previousPlaneButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mainWidget</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">showBorder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">previousPlaneButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mainWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
                                           <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_previousPlane</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">previousPlaneButton</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">previousPlaneButton</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span> <span class="o">=</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">showButtons</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-                                     <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_spinBoxChanged</span><span class="p">,</span> <span class="n">objectName</span><span class="o">=</span><span class="s1">&#39;PlaneSelectorWidget_planeDepth&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span> <span class="o">=</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mainWidget</span><span class="p">,</span> <span class="n">showButtons</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                     <span class="n">objectName</span><span class="o">=</span><span class="s1">&#39;PlaneSelectorWidget_planeDepth&#39;</span><span class="p">,</span>
+                                     <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="n">_size</span> <span class="o">*</span> <span class="mi">5</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">nextPlaneButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">returnPressed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spinBoxChanged</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">wheelChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spinBoxChanged</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nextPlaneButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mainWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
                                       <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nextPlane</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nextPlaneButton</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nextPlaneButton</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">planeCountSpinBox</span> <span class="o">=</span> <span class="n">Spinbox</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">showButtons</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">planeCountSpinBox</span> <span class="o">=</span> <span class="n">Spinbox</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mainWidget</span><span class="p">,</span> <span class="n">showButtons</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
                                          <span class="n">objectName</span><span class="o">=</span><span class="s1">&#39;PlaneSelectorWidget_planeCount&#39;</span>
                                          <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">planeCountSpinBox</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">planeCountSpinBox</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">planeCountSpinBox</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">planeCountSpinBox</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="n">_size</span> <span class="o">*</span> <span class="mf">2.5</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">planeCountSpinBox</span><span class="o">.</span><span class="n">returnPressed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_planeCountChanged</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">planeCountSpinBox</span><span class="o">.</span><span class="n">wheelChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_planeCountChanged</span><span class="p">)</span>
@@ -328,7 +328,7 @@
     <span class="k">def</span> <span class="nf">_initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set the initial values for the plane selector</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Strip</span> <span class="kn">import</span> <span class="n">GuiStrip</span>
+        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiStrip</span> <span class="kn">import</span> <span class="n">GuiStrip</span>
 
         <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">strip</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">strip</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">GuiStrip</span><span class="p">):</span>
@@ -344,36 +344,33 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">]))</span>
 
 <div class="viewcode-block" id="PlaneSelectorWidget.setCallbacks"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.PlaneSelectorWidget.setCallbacks">[docs]</a>    <span class="k">def</span> <span class="nf">setCallbacks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callbacks</span><span class="p">):</span>
+        <span class="s2">&quot;callbacks a dict with (key, callbackFunction) items&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_callbacks</span> <span class="o">=</span> <span class="n">callbacks</span></div>
 
     <span class="k">def</span> <span class="nf">_planeCountChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Changes the number of planes displayed simultaneously.</span>
+        <span class="sd">&quot;&quot;&quot;Changes the number of planes displayed simultaneously.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_callbacks</span><span class="p">[</span><span class="mi">3</span><span class="p">](</span><span class="n">value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_callbacks</span><span class="p">[</span><span class="s1">&#39;_planeCountChanged&#39;</span><span class="p">](</span><span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_nextPlane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Increases axis ppm position by one plane</span>
+        <span class="sd">&quot;&quot;&quot;Increases axis ppm position by one plane</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_buildWithProfile</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_buildWithProfile</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_callbacks</span><span class="p">[</span><span class="mi">2</span><span class="p">](</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_callbacks</span><span class="p">[</span><span class="s1">&#39;_nextPlane&#39;</span><span class="p">](</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_previousPlane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Decreases axis ppm position by one plane</span>
+        <span class="sd">&quot;&quot;&quot;Decreases axis ppm position by one plane</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_callbacks</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_callbacks</span><span class="p">[</span><span class="s1">&#39;_previousPlane&#39;</span><span class="p">](</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_spinBoxChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the value of the axis plane position box if the specified value is within the displayable limits.</span>
+        <span class="sd">&quot;&quot;&quot;Sets the value of the axis plane position box if the specified value is within the displayable limits.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_callbacks</span><span class="p">[</span><span class="mi">1</span><span class="p">](</span><span class="n">value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_callbacks</span><span class="p">[</span><span class="s1">&#39;_spinBoxChanged&#39;</span><span class="p">](</span><span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_wheelEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">angleDelta</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -385,38 +382,31 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
 
-<div class="viewcode-block" id="PlaneSelectorWidget.updatePosition"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.PlaneSelectorWidget.updatePosition">[docs]</a>    <span class="k">def</span> <span class="nf">updatePosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set new axis position</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">]</span>
-
-        <span class="n">ppmPosition</span> <span class="o">=</span> <span class="n">axis</span><span class="o">.</span><span class="n">position</span>
-        <span class="n">ppmWidth</span> <span class="o">=</span> <span class="n">axis</span><span class="o">.</span><span class="n">width</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="n">ppmPosition</span><span class="p">,</span> <span class="n">ppmWidth</span><span class="p">)</span></div>
-
 <div class="viewcode-block" id="PlaneSelectorWidget.setPosition"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.PlaneSelectorWidget.setPosition">[docs]</a>    <span class="k">def</span> <span class="nf">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ppmPosition</span><span class="p">,</span> <span class="n">ppmWidth</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set the new ppmPosition/ppmWidth</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">blockWidgetSignals</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">ppmPosition</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PlaneSelectorWidget.setPlaneValues"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.PlaneSelectorWidget.setPlaneValues">[docs]</a>    <span class="k">def</span> <span class="nf">setPlaneValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minZPlaneSize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">minAliasedFrequency</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxAliasedFrequency</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ppmPosition</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PlaneSelectorWidget.setPlaneValues"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.PlaneSelectorWidget.setPlaneValues">[docs]</a>    <span class="k">def</span> <span class="nf">setPlaneValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">planeSize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">minValue</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxValue</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set new values for the plane selector</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">blockWidgetSignals</span><span class="p">():</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">blockWidgetSignals</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mainWidget</span><span class="p">):</span>
+            <span class="c1"># block signals while setting contents</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="n">planeSize</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">maxValue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="n">maxValue</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">minValue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="n">minValue</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="n">minZPlaneSize</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">maxAliasedFrequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="n">maxAliasedFrequency</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">minAliasedFrequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="n">minAliasedFrequency</span><span class="p">)</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">ppmPosition</span><span class="p">)</span></div>
+            <span class="c1"># override the spinBox to only allow integer points</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">setDecimals</span><span class="p">(</span><span class="mi">0</span> <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="n">AXISUNIT_POINT</span> <span class="k">else</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PlaneSelectorWidget.getPlaneValues"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.PlaneSelectorWidget.getPlaneValues">[docs]</a>    <span class="k">def</span> <span class="nf">getPlaneValues</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the current settings for this axis</span>
-<span class="sd">        :returns: ppmValue, maximum ppmValue, ppmStepSize, ppmPosition, planeCount</span>
+<span class="sd">        :returns: (minValue, maxValue, stepSize, value, planeCount) tuple</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">minimum</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">maximum</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">singleStep</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">value</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">planeCount</span></div>
 
@@ -499,6 +489,23 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">_attachButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buttonName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reattach a button to the parent widget</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">buttonDef</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">BUTTONS</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">buttonDef</span><span class="p">:</span>
+                <span class="n">widgetName</span><span class="p">,</span> <span class="n">widgetType</span><span class="p">,</span> <span class="n">initFunc</span><span class="p">,</span> <span class="n">setFunc</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">gridSpan</span> <span class="o">=</span> <span class="n">buttonDef</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">widgetType</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Error: button widget not defined&#39;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">widgetName</span> <span class="o">==</span> <span class="n">buttonName</span><span class="p">:</span>
+                    <span class="n">button</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buttonName</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">button</span><span class="p">:</span>
+                        <span class="n">button</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">button</span><span class="o">.</span><span class="n">_mainWidget</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                        <span class="n">button</span><span class="o">.</span><span class="n">_mainWidget</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="n">button</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">_populate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">pp</span><span class="p">,</span> <span class="n">klass</span><span class="p">,</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setFuncList</span><span class="p">:</span>
             <span class="n">pp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">klass</span><span class="p">,</span> <span class="n">widget</span><span class="p">)</span>
@@ -578,6 +585,7 @@
 
         <span class="c1"># connect strip changed events to here</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">optionsChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_optionsChanged</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
 
     <span class="k">def</span> <span class="nf">__postInit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">strip</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Seems an awkward way of getting a generic post init function but can&#39;t think of anything else yet</span>
@@ -586,21 +594,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_axisSelector</span><span class="o">.</span><span class="n">_initialise</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_axisLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_axisLabel</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">[</span><span class="n">axis</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_axisSelector</span><span class="o">.</span><span class="n">setCallbacks</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_previousPlane</span><span class="p">,</span>
-                                         <span class="bp">self</span><span class="o">.</span><span class="n">_spinBoxChanged</span><span class="p">,</span>
-                                         <span class="bp">self</span><span class="o">.</span><span class="n">_nextPlane</span><span class="p">,</span>
-                                         <span class="bp">self</span><span class="o">.</span><span class="n">_planeCountChanged</span><span class="p">,</span>
-                                         <span class="bp">self</span><span class="o">.</span><span class="n">_wheelEvent</span>
-                                         <span class="p">))</span>
-
+        <span class="n">callbacks</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;_previousPlane&#39;</span>    <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_previousPlane</span><span class="p">,</span>
+            <span class="s1">&#39;_spinBoxChanged&#39;</span>   <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spinBoxChanged</span><span class="p">,</span>
+            <span class="s1">&#39;_nextPlane&#39;</span>        <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nextPlane</span><span class="p">,</span>
+            <span class="s1">&#39;_planeCountChanged&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_planeCountChanged</span><span class="p">,</span>
+            <span class="s1">&#39;_wheelEvent&#39;</span>       <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wheelEvent</span>
+            <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axisSelector</span><span class="o">.</span><span class="n">setCallbacks</span><span class="p">(</span><span class="n">callbacks</span><span class="p">)</span>
+        <span class="c1"># self._axisSelector.setCallbacks((self._previousPlane,</span>
+        <span class="c1">#                                  self._spinBoxChanged,</span>
+        <span class="c1">#                                  self._nextPlane,</span>
+        <span class="c1">#                                  self._planeCountChanged,</span>
+        <span class="c1">#                                  self._wheelEvent</span>
+        <span class="c1">#                                  ))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_resize</span><span class="p">()</span>
-
-    <span class="c1"># def eventFilter(self, source, event):</span>
-    <span class="c1">#     &quot;&quot;&quot;Filter to get wheel mousepress events to set the current activePlane</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     if event.type() in [QtCore.QEvent.Wheel, QtCore.QEvent.KeyPress, QtCore.QEvent.FocusIn]:</span>
-    <span class="c1">#         self.strip._activePlane = source.parent().axis</span>
-    <span class="c1">#     return False</span>
 
 <div class="viewcode-block" id="PlaneAxisWidget.scrollPpmPosition"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.PlaneAxisWidget.scrollPpmPosition">[docs]</a>    <span class="k">def</span> <span class="nf">scrollPpmPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Pass the wheel mouse event to the ppmPosition widget</span>
@@ -626,12 +634,27 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_setStyle</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">foregroundColour</span><span class="o">=</span><span class="n">CCPNGLWIDGET_HEXFOREGROUND</span><span class="p">)</span>
             <span class="n">label</span><span class="o">.</span><span class="n">highlighted</span> <span class="o">=</span> <span class="n">value</span>
 
+    <span class="k">def</span> <span class="nf">_hideAxisSelector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">widgets</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_axisLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisPpmPosition</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisPlaneCount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisSelector</span><span class="p">)</span>
+        <span class="n">widgets</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">widgets</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">widgets</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resize</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_showAxisSelector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">widgets</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_axisLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisPpmPosition</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisPlaneCount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisSelector</span><span class="p">)</span>
+        <span class="n">widgets</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">widgets</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">widgets</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resize</span><span class="p">()</span>
+
     <span class="k">def</span> <span class="nf">_selectAxisCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widgets</span><span class="p">):</span>
         <span class="c1"># if the first widget is clicked then change the selected axis</span>
-        <span class="k">if</span> <span class="n">widgets</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
-            <span class="n">widgets</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-            <span class="n">widgets</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-            <span class="n">widgets</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">zPlaneNavigationMode</span> <span class="o">==</span> <span class="n">ZPlaneNavigationModes</span><span class="o">.</span><span class="n">INSTRIP</span><span class="o">.</span><span class="n">dataValue</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">widgets</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
+                <span class="n">widgets</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">widgets</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">widgets</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_setLabelBorder</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">activePlaneAxis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span>
@@ -642,14 +665,15 @@
 
     <span class="k">def</span> <span class="nf">_selectPositionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widgets</span><span class="p">):</span>
         <span class="c1"># if the other widgets are clicked then toggle the planeToolbar buttons</span>
-        <span class="k">if</span> <span class="n">widgets</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
-            <span class="n">widgets</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-            <span class="n">widgets</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-            <span class="n">widgets</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">widgets</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-            <span class="n">widgets</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-            <span class="n">widgets</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">zPlaneNavigationMode</span> <span class="o">==</span> <span class="n">ZPlaneNavigationModes</span><span class="o">.</span><span class="n">INSTRIP</span><span class="o">.</span><span class="n">dataValue</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">widgets</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
+                <span class="n">widgets</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">widgets</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">widgets</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">widgets</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">widgets</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">widgets</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_setLabelBorder</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">activePlaneAxis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span>
@@ -657,15 +681,6 @@
                                         <span class="n">EMITCLICKED</span>     <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
                                         <span class="n">EMITIGNORESOURCE</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_resize</span><span class="p">()</span>
-
-<div class="viewcode-block" id="PlaneAxisWidget.updatePosition"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.PlaneAxisWidget.updatePosition">[docs]</a>    <span class="k">def</span> <span class="nf">updatePosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set new axis position</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">]</span>
-        <span class="n">ppmPosition</span> <span class="o">=</span> <span class="n">axis</span><span class="o">.</span><span class="n">position</span>
-        <span class="n">ppmWidth</span> <span class="o">=</span> <span class="n">axis</span><span class="o">.</span><span class="n">width</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="n">ppmPosition</span><span class="p">,</span> <span class="n">ppmWidth</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PlaneAxisWidget.setPosition"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.PlaneAxisWidget.setPosition">[docs]</a>    <span class="k">def</span> <span class="nf">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ppmPosition</span><span class="p">,</span> <span class="n">ppmWidth</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set the new ppmPosition/ppmWidth</span>
@@ -677,64 +692,50 @@
         <span class="sd">&quot;&quot;&quot;Return the current settings for this axis</span>
 <span class="sd">        :returns: ppmValue, maximum ppmValue, ppmStepSize, ppmPosition, planeCount</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># self._axisSelector is a PlaneSelectorWidget</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisSelector</span><span class="o">.</span><span class="n">getPlaneValues</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="PlaneAxisWidget.setPlaneValues"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.PlaneAxisWidget.setPlaneValues">[docs]</a>    <span class="k">def</span> <span class="nf">setPlaneValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minZPlaneSize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">minAliasedFrequency</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxAliasedFrequency</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ppmPosition</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PlaneAxisWidget.setPlaneValues"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.PlaneAxisWidget.setPlaneValues">[docs]</a>    <span class="k">def</span> <span class="nf">setPlaneValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">planeSize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">minValue</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxValue</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set new values for the plane selector</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">planeBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisSelector</span>
-        <span class="n">planeBox</span><span class="o">.</span><span class="n">setPlaneValues</span><span class="p">(</span><span class="n">minZPlaneSize</span><span class="p">,</span> <span class="n">minAliasedFrequency</span><span class="p">,</span> <span class="n">maxAliasedFrequency</span><span class="p">,</span> <span class="n">ppmPosition</span><span class="p">)</span>
+        <span class="c1"># self._axisSelector is a PlaneSelectorWidget</span>
+        <span class="n">planeSelectorWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisSelector</span>
+        <span class="n">planeSelectorWidget</span><span class="o">.</span><span class="n">setPlaneValues</span><span class="p">(</span><span class="n">planeSize</span><span class="p">,</span> <span class="n">minValue</span><span class="p">,</span> <span class="n">maxValue</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_axisPpmPosition</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ppmPosition</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_axisPlaneCount</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;[&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">planeBox</span><span class="o">.</span><span class="n">planeCount</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axisPpmPosition</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axisPlaneCount</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;[&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">planeSelectorWidget</span><span class="o">.</span><span class="n">planeCount</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">planeCount</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisSelector</span><span class="o">.</span><span class="n">planeCount</span>
 
     <span class="k">def</span> <span class="nf">_planeCountChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Changes the number of planes displayed simultaneously.</span>
+        <span class="sd">&quot;&quot;&quot;Changes the number of planes displayed simultaneously.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
-            <span class="n">zAxis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">]</span>
-            <span class="n">zAxis</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">value</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisSelector</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">singleStep</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_axisPlaneCount</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;[&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_changePlane</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">,</span> <span class="n">planeIncrement</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">planeCount</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">planeCount</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_nextPlane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Increases axis ppm position by one plane</span>
+        <span class="sd">&quot;&quot;&quot;Increases axis position by one plane</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">changeZPlane</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">,</span> <span class="n">planeCount</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># -1 because ppm units are backwards</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;strip.nextZPlane()&quot;</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="p">)</span>
-            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.getByGid(</span><span class="si">%r</span><span class="s2">).nextZPlane()&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_changePlane</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">,</span> <span class="n">planeIncrement</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">planeCount</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">planeCount</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_previousPlane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Decreases axis ppm position by one plane</span>
+        <span class="sd">&quot;&quot;&quot;Decreases axis position by one plane</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">changeZPlane</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">,</span> <span class="n">planeCount</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;strip.prevZPlane()&quot;</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="p">)</span>
-            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.getByGid(</span><span class="si">%r</span><span class="s2">).prevZPlane()&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_changePlane</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">,</span> <span class="n">planeIncrement</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">planeCount</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">planeCount</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_spinBoxChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the value of the axis plane position box if the specified value is within the displayable limits.</span>
+        <span class="sd">&quot;&quot;&quot;Sets the value of the axis plane position box if the specified value is within the displayable limits.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
             <span class="n">planeLabel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisSelector</span><span class="o">.</span><span class="n">spinBox</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">planeLabel</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="n">planeLabel</span><span class="o">.</span><span class="n">minimum</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="n">planeLabel</span><span class="o">.</span><span class="n">maximum</span><span class="p">():</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">changeZPlane</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_setAxisPositionAndWidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_wheelEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">angleDelta</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -749,93 +750,202 @@
 <div class="viewcode-block" id="PlaneAxisWidget.hideWidgets"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.PlaneAxisWidget.hideWidgets">[docs]</a>    <span class="k">def</span> <span class="nf">hideWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Hide the planeToolbar if opened</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">axisButtons</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_axisLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisPpmPosition</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisPlaneCount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisSelector</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">zPlaneNavigationMode</span> <span class="o">==</span> <span class="n">ZPlaneNavigationModes</span><span class="o">.</span><span class="n">INSTRIP</span><span class="o">.</span><span class="n">dataValue</span><span class="p">:</span>
+            <span class="n">axisButtons</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_axisLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisPpmPosition</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisPlaneCount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axisSelector</span><span class="p">)</span>
 
-        <span class="c1"># if the other widgets are clicked then toggle the planeToolbar buttons</span>
-        <span class="k">if</span> <span class="n">axisButtons</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
-            <span class="n">axisButtons</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-            <span class="n">axisButtons</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-            <span class="n">axisButtons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="c1"># if the other widgets are clicked then toggle the planeToolbar buttons</span>
+            <span class="k">if</span> <span class="n">axisButtons</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
+                <span class="n">axisButtons</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">axisButtons</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">axisButtons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_resize</span><span class="p">()</span></div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_resize</span><span class="p">()</span></div></div>
 
 
-<span class="c1"># class PlaneToolbar(Frame):</span>
-<span class="c1">#     #TODO: undocumented and needs refactoring ;</span>
-<span class="c1">#     # GWV: Does not work as a Widget!?</span>
-<span class="c1">#     def __init__(self, qtParent, strip, callbacks, stripArrangement=None,</span>
-<span class="c1">#                  containers=None, **kwds):</span>
+<div class="viewcode-block" id="ZPlaneToolbar"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.ZPlaneToolbar">[docs]</a><span class="k">class</span> <span class="nc">ZPlaneToolbar</span><span class="p">(</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to contain the widgets for zPlane navigation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qtParent</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">displayOrStrip</span><span class="p">,</span> <span class="n">showHeader</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">showLabels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">qtParent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_strip</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">setSizeConstraint</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLayout</span><span class="o">.</span><span class="n">SetMinimumSize</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_header</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;zPlaneWidget&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_header</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">showHeader</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># axisCodes = spectrumDisplay.axisCodes</span>
+        <span class="c1"># _axisCount = len(axisCodes) - 2</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">displayOrStrip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">[</span><span class="mi">2</span><span class="p">:]):</span>
+            <span class="n">lbl</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">axisCode</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">ii</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">lbl</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">showLabels</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lbl</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ZPlaneToolbar.setHeaderText"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.ZPlaneToolbar.setHeaderText">[docs]</a>    <span class="k">def</span> <span class="nf">setHeaderText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the header text</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> is not a string&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_header</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ZPlaneToolbar.setLabels"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.ZPlaneToolbar.setLabels">[docs]</a>    <span class="k">def</span> <span class="nf">setLabels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the labels for the dimensions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> must be tuple/list&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> must be tuple/list of length </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_strip</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> must be tuple/list of strings&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">lbl</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+            <span class="n">lbl</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ZPlaneToolbar.setHeaderVisible"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.ZPlaneToolbar.setHeaderVisible">[docs]</a>    <span class="k">def</span> <span class="nf">setHeaderVisible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the visibility of the header</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> must be a True/False&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_header</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ZPlaneToolbar.setLabelsVisible"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.ZPlaneToolbar.setLabelsVisible">[docs]</a>    <span class="k">def</span> <span class="nf">setLabelsVisible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the visibility of the labels</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> must be a True/False&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">lbl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">:</span>
+            <span class="n">lbl</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ZPlaneToolbar.attachZPlaneWidgets"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.ZPlaneToolbar.attachZPlaneWidgets">[docs]</a>    <span class="k">def</span> <span class="nf">attachZPlaneWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strip</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Attach new widgets to the zPlane toolbar</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span>
+
+        <span class="c1"># if strip != self._strip: - causing it to skip on undo/redo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeZPlaneWidgets</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">fr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">planeAxisBars</span><span class="p">):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">indexOf</span><span class="p">(</span><span class="n">fr</span><span class="o">.</span><span class="n">_axisSelector</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">fr</span><span class="o">.</span><span class="n">_axisSelector</span><span class="o">.</span><span class="n">_mainWidget</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">col</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">fr</span><span class="o">.</span><span class="n">_axisSelector</span><span class="o">.</span><span class="n">_mainWidget</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="n">fr</span><span class="o">.</span><span class="n">_axisSelector</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">fr</span><span class="o">.</span><span class="n">_resize</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_header</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_strip</span> <span class="o">=</span> <span class="n">strip</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ZPlaneToolbar.removeZPlaneWidgets"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.ZPlaneToolbar.removeZPlaneWidgets">[docs]</a>    <span class="k">def</span> <span class="nf">removeZPlaneWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove existing widgets from the zPlane toolbar</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strip</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_strip</span><span class="p">,</span> <span class="s1">&#39;planeAxisBars&#39;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">pl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strip</span><span class="o">.</span><span class="n">planeAxisBars</span><span class="p">:</span>
+                <span class="c1"># reattach the widget to the in strip container</span>
+                <span class="n">pl</span><span class="o">.</span><span class="n">_attachButton</span><span class="p">(</span><span class="s1">&#39;_axisSelector&#39;</span><span class="p">)</span>
+                <span class="n">pl</span><span class="o">.</span><span class="n">_hideAxisSelector</span><span class="p">()</span></div></div>
+
+
+<span class="c1"># class ZPlaneToolbar(Frame):</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Class to contain the widgets for zPlane navigation</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#     def __init__(self, qtParent, mainWindow, strip, showHeader=False, showLabels=False, **kwds):</span>
 <span class="c1">#</span>
 <span class="c1">#         super().__init__(parent=qtParent, setLayout=True, **kwds)</span>
 <span class="c1">#</span>
-<span class="c1">#         self.strip = strip</span>
-<span class="c1">#         self.planeLabels = []</span>
-<span class="c1">#         self.planeCounts = []</span>
-<span class="c1">#         row = 0</span>
-<span class="c1">#         for i in range(len(strip.orderedAxes) - 2):</span>
-<span class="c1">#             if not containers:</span>
-<span class="c1">#                 _toolbar = ToolBar(self, grid=(0, row))</span>
-<span class="c1">#             else:</span>
-<span class="c1">#                 cFrame, cWidgets = list(containers.items())[i]</span>
-<span class="c1">#                 _toolbar = ToolBar(cFrame, grid=(0, 3))</span>
+<span class="c1">#         self._strip = None</span>
+<span class="c1">#         self.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)</span>
+<span class="c1">#         self.setVisible(False)</span>
+<span class="c1">#         self.mainWindow = mainWindow</span>
+<span class="c1">#         self._header = Label(self, text=&#39;zPlaneWidget&#39;, grid=(0, 0))</span>
+<span class="c1">#         self._header.setVisible(showHeader)</span>
 <span class="c1">#</span>
-<span class="c1">#                 # add the new toolbar to the popup display</span>
-<span class="c1">#                 cWidgets += (_toolbar,)</span>
-<span class="c1">#                 cWidgets[2].setVisible(False)</span>
-<span class="c1">#                 cWidgets[3].setVisible(False)</span>
+<span class="c1">#         self.labels = []</span>
+<span class="c1">#         axisCodes = strip.axisCodes</span>
+<span class="c1">#         _axisCount = len(axisCodes) - 2</span>
+<span class="c1">#         for ii in range(_axisCount):</span>
+<span class="c1">#             lbl = Label(self, text=axisCodes[ii + 2], grid=(0, 1 + (ii * 2)), bold=True)</span>
+<span class="c1">#             lbl.setVisible(showLabels)</span>
+<span class="c1">#             self.labels.append(lbl)</span>
 <span class="c1">#</span>
-<span class="c1">#                 # set the axisCode</span>
-<span class="c1">#                 cWidgets[0].setText(str(strip.axisCodes[i + 2]) + &quot;:&quot;)</span>
+<span class="c1">#     def setHeaderText(self, value):</span>
+<span class="c1">#         &quot;&quot;&quot;Set the header text</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         if not isinstance(value, str):</span>
+<span class="c1">#             raise TypeError(&#39;{} is not a string&#39;.format(value))</span>
+<span class="c1">#         self._header.setText(value)</span>
 <span class="c1">#</span>
-<span class="c1">#             self.prevPlaneButton = Button(_toolbar, &#39;&lt;&#39;, callback=partial(callbacks[0], i))</span>
-<span class="c1">#             self.prevPlaneButton.setFixedWidth(19)</span>
-<span class="c1">#             self.prevPlaneButton.setFixedHeight(19)</span>
-<span class="c1">#             planeLabel = DoubleSpinbox(_toolbar, showButtons=False, objectName=&quot;PlaneToolbar_planeLabel&quot; + str(i),</span>
-<span class="c1">#                                        )</span>
-<span class="c1">#             planeLabel.setToolTip(str(strip.axisCodes[i + 2]))</span>
+<span class="c1">#     def setLabels(self, value):</span>
+<span class="c1">#         &quot;&quot;&quot;Set the labels for the dimensions</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         if not isinstance(value, (tuple, list)):</span>
+<span class="c1">#             raise TypeError(&#39;{} must be tuple/list&#39;.format(value))</span>
+<span class="c1">#         if len(value) != len(self._strip.axisCodes) - 2:</span>
+<span class="c1">#             raise TypeError(&#39;{} must be tuple/list of length {}&#39;.format(value, len(self._strip) - 2))</span>
+<span class="c1">#         if not all(isinstance(val, str) for val in value):</span>
+<span class="c1">#             raise TypeError(&#39;{} must be tuple/list of strings&#39;.format(value))</span>
 <span class="c1">#</span>
-<span class="c1">#             # planeLabel.setFixedHeight(19)</span>
+<span class="c1">#         for lbl, val in zip(self.labels, value):</span>
+<span class="c1">#             lbl.setText(value)</span>
 <span class="c1">#</span>
-<span class="c1">#             # force the minimum width of the planeLabel</span>
-<span class="c1">#             planeLabel.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,</span>
-<span class="c1">#                                      QtWidgets.QSizePolicy.MinimumExpanding)</span>
-<span class="c1">#             planeLabel.setMinimumWidth(55)</span>
+<span class="c1">#     def setHeaderVisible(self, value):</span>
+<span class="c1">#         &quot;&quot;&quot;Set the visibility of the header</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         if not isinstance(value, bool):</span>
+<span class="c1">#             raise TypeError(&#39;{} must be a True/False&#39;)</span>
+<span class="c1">#         self._header.setVisible(value)</span>
 <span class="c1">#</span>
-<span class="c1">#             # below does not work because it allows wheel events to behave but not manual text entry (some Qt stupidity)</span>
-<span class="c1">#             # so instead use a wheelEvent to deal with the wheel events and editingFinished (in GuiStripNd) to do text</span>
-<span class="c1">#             #planeLabel.valueChanged.connect(partial(callbacks[2], i))</span>
-<span class="c1">#             if callbacks[2]:</span>
-<span class="c1">#                 planeLabel.wheelEvent = partial(self._wheelEvent, i)</span>
-<span class="c1">#                 self.prevPlaneCallback = callbacks[0]</span>
-<span class="c1">#                 self.nextPlaneCallback = callbacks[1]</span>
-<span class="c1">#             self.nextPlaneButton = Button(_toolbar, &#39;&gt;&#39;, callback=partial(callbacks[1], i))</span>
-<span class="c1">#             self.nextPlaneButton.setFixedWidth(19)</span>
-<span class="c1">#             self.nextPlaneButton.setFixedHeight(19)</span>
-<span class="c1">#             planeCount = Spinbox(_toolbar, showButtons=False, hAlign=&#39;c&#39;)</span>
-<span class="c1">#             planeCount.setMinimum(1)</span>
-<span class="c1">#             planeCount.setMaximum(1000)</span>
-<span class="c1">#             planeCount.setValue(1)</span>
-<span class="c1">#             planeCount.oldValue = 1</span>
-<span class="c1">#             planeCount.returnPressed.connect(partial(callbacks[3], i))</span>
-<span class="c1">#             planeCount.wheelChanged.connect(partial(callbacks[3], i))</span>
+<span class="c1">#     def setLabelsVisible(self, value):</span>
+<span class="c1">#         &quot;&quot;&quot;Set the visibility of the labels</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         if not isinstance(value, bool):</span>
+<span class="c1">#             raise TypeError(&#39;{} must be a True/False&#39;)</span>
+<span class="c1">#         for lbl in self.labels:</span>
+<span class="c1">#             lbl.setVisible(value)</span>
 <span class="c1">#</span>
-<span class="c1">#             _toolbar.addWidget(self.prevPlaneButton)</span>
-<span class="c1">#             _toolbar.addWidget(planeLabel)</span>
-<span class="c1">#             _toolbar.addWidget(self.nextPlaneButton)</span>
-<span class="c1">#             _toolbar.addWidget(planeCount)</span>
-<span class="c1">#             self.planeLabels.append(planeLabel)</span>
-<span class="c1">#             self.planeCounts.append(planeCount)</span>
-<span class="c1">#             row += 1</span>
+<span class="c1">#     def attachZPlaneWidgets(self, strip):</span>
+<span class="c1">#         &quot;&quot;&quot;Attach new widgets to the zPlane toolbar</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         layout = self.getLayout()</span>
 <span class="c1">#</span>
-<span class="c1">#     def _wheelEvent(self, n, event):</span>
-<span class="c1">#         if event.angleDelta().y() &gt; 0:  # note that in Qt5 this becomes angleDelta().y()</span>
-<span class="c1">#             if self.prevPlaneCallback:</span>
-<span class="c1">#                 self.prevPlaneCallback(n)</span>
-<span class="c1">#         else:</span>
-<span class="c1">#             if self.nextPlaneCallback:</span>
-<span class="c1">#                 self.nextPlaneCallback(n)</span>
+<span class="c1">#         # if strip != self._strip: - causing it to skip on undo/redo</span>
+<span class="c1">#         self.removeZPlaneWidgets()</span>
 <span class="c1">#</span>
-<span class="c1">#         self.strip._rebuildStripContours()</span>
+<span class="c1">#         for col, fr in enumerate(strip.planeAxisBars):</span>
+<span class="c1">#             index = layout.indexOf(fr._axisSelector)</span>
+<span class="c1">#             if index == -1:</span>
+<span class="c1">#                 layout.addWidget(fr._axisSelector._mainWidget, 0, 2 + col * 2, 1, 1)</span>
+<span class="c1">#                 fr._axisSelector._mainWidget.setParent(self)</span>
+<span class="c1">#                 fr._axisSelector.setVisible(True)</span>
+<span class="c1">#                 fr._resize()</span>
+<span class="c1">#</span>
+<span class="c1">#         self._header.setText(strip.pid)</span>
+<span class="c1">#         self._strip = strip</span>
+<span class="c1">#</span>
+<span class="c1">#         self.setVisible(True)</span>
+<span class="c1">#         self.update()</span>
+<span class="c1">#</span>
+<span class="c1">#     def removeZPlaneWidgets(self):</span>
+<span class="c1">#         &quot;&quot;&quot;Remove existing widgets from the zPlane toolbar</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         layout = self.getLayout()</span>
+<span class="c1">#</span>
+<span class="c1">#         if self._strip and hasattr(self._strip, &#39;planeAxisBars&#39;):</span>
+<span class="c1">#             for pl in self._strip.planeAxisBars:</span>
+<span class="c1">#                 # reattach the widget to the in strip container</span>
+<span class="c1">#                 pl._attachButton(&#39;_axisSelector&#39;)</span>
+<span class="c1">#                 pl._hideAxisSelector()</span>
 
 
 <span class="n">STRIPCONNECT_LEFT</span> <span class="o">=</span> <span class="s1">&#39;isLeft&#39;</span>
@@ -850,7 +960,7 @@
 <span class="n">STRIPPOSITION_RIGHT</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span>
 <span class="n">STRIPPOSITIONS</span> <span class="o">=</span> <span class="p">(</span><span class="n">STRIPPOSITION_MINUS</span><span class="p">,</span> <span class="n">STRIPPOSITION_PLUS</span><span class="p">,</span> <span class="n">STRIPPOSITION_LEFT</span><span class="p">,</span> <span class="n">STRIPPOSITION_CENTRE</span><span class="p">,</span> <span class="n">STRIPPOSITION_RIGHT</span><span class="p">)</span>
 
-<span class="n">STRIPDICT</span> <span class="o">=</span> <span class="s1">&#39;stripHeaderDict&#39;</span>
+<span class="c1"># STRIPDICT = &#39;stripHeaderDict&#39;</span>
 <span class="n">STRIPTEXT</span> <span class="o">=</span> <span class="s1">&#39;stripText&#39;</span>
 <span class="n">STRIPCOLOUR</span> <span class="o">=</span> <span class="s1">&#39;stripColour&#39;</span>
 <span class="n">STRIPLABELPOS</span> <span class="o">=</span> <span class="s1">&#39;StripLabelPos&#39;</span>
@@ -939,7 +1049,7 @@
                                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nmrChainLeft</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nmrChainRight</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stripLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stripDirection</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stripPercent</span><span class="p">)))</span>
 
         <span class="c1"># set the visible state of the header</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">setParameter</span><span class="p">(</span><span class="n">STRIPDICT</span><span class="p">,</span> <span class="n">STRIPHEADERVISIBLE</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="n">STRIPHEADERVISIBLE</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># labelsVisible = False</span>
@@ -1001,7 +1111,10 @@
     <span class="k">def</span> <span class="nf">_setPositionParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stripPos</span><span class="p">,</span> <span class="n">subParameterName</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set the item in the position dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">getParameter</span><span class="p">(</span><span class="n">STRIPDICT</span><span class="p">,</span> <span class="n">stripPos</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_getInternalParameter</span><span class="p">(</span><span class="n">stripPos</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">params</span><span class="p">:</span>
             <span class="n">params</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -1014,12 +1127,12 @@
 
         <span class="c1"># currently writes directly into _ccpnInternal</span>
         <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">subParameterName</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">setParameter</span><span class="p">(</span><span class="n">STRIPDICT</span><span class="p">,</span> <span class="n">stripPos</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="n">stripPos</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_getPositionParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stripPos</span><span class="p">,</span> <span class="n">subParameterName</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the item from the position dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">getParameter</span><span class="p">(</span><span class="n">STRIPDICT</span><span class="p">,</span> <span class="n">stripPos</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_getInternalParameter</span><span class="p">(</span><span class="n">stripPos</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">params</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">subParameterName</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subParameterName</span><span class="p">)</span>
@@ -1056,8 +1169,8 @@
                       <span class="n">STRIPVISIBLE</span> <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="n">STRIPENABLED</span> <span class="p">:</span> <span class="kc">True</span>
                       <span class="p">}</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">setParameter</span><span class="p">(</span><span class="n">STRIPDICT</span><span class="p">,</span> <span class="n">stripPos</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">setParameter</span><span class="p">(</span><span class="n">STRIPDICT</span><span class="p">,</span> <span class="n">STRIPHANDLE</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="n">stripPos</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="n">STRIPHANDLE</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_resize</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="StripHeaderWidget.getLabelObject"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.StripHeaderWidget.getLabelObject">[docs]</a>    <span class="k">def</span> <span class="nf">getLabelObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">STRIPPOSITION_CENTRE</span><span class="p">):</span>
@@ -1137,7 +1250,7 @@
 
         <span class="n">lv</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_getPositionParameter</span><span class="p">(</span><span class="n">pp</span><span class="p">,</span> <span class="n">STRIPVISIBLE</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">pp</span> <span class="ow">in</span> <span class="n">STRIPPOSITIONS</span><span class="p">]</span>
         <span class="n">headerVisible</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">lv</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">setParameter</span><span class="p">(</span><span class="n">STRIPDICT</span><span class="p">,</span> <span class="n">STRIPHEADERVISIBLE</span><span class="p">,</span> <span class="n">headerVisible</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="n">STRIPHEADERVISIBLE</span><span class="p">,</span> <span class="n">headerVisible</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">headerVisible</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_resize</span><span class="p">()</span></div>
 
@@ -1195,10 +1308,13 @@
     <span class="k">def</span> <span class="nf">_processNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Process the notifiers for the strip header</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">:</span>
+            <span class="k">return</span>
+
         <span class="n">trigger</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">TRIGGER</span><span class="p">]</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="n">trigger</span> <span class="o">==</span> <span class="s1">&#39;rename&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">trigger</span> <span class="o">==</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">RENAME</span><span class="p">:</span>
             <span class="n">oldPid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">OLDPID</span><span class="p">]</span>
 
             <span class="k">for</span> <span class="n">stripPos</span> <span class="ow">in</span> <span class="n">STRIPPOSITIONS</span><span class="p">:</span>
@@ -1212,21 +1328,21 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">headerVisible</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">getParameter</span><span class="p">(</span><span class="n">STRIPDICT</span><span class="p">,</span> <span class="n">STRIPHEADERVISIBLE</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_getInternalParameter</span><span class="p">(</span><span class="n">STRIPHEADERVISIBLE</span><span class="p">)</span>
 
     <span class="nd">@headerVisible</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">headerVisible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visible</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">setParameter</span><span class="p">(</span><span class="n">STRIPDICT</span><span class="p">,</span> <span class="n">STRIPHEADERVISIBLE</span><span class="p">,</span> <span class="n">visible</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="n">STRIPHEADERVISIBLE</span><span class="p">,</span> <span class="n">visible</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">visible</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_resize</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">getParameter</span><span class="p">(</span><span class="n">STRIPDICT</span><span class="p">,</span> <span class="n">STRIPHANDLE</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_getInternalParameter</span><span class="p">(</span><span class="n">STRIPHANDLE</span><span class="p">)</span>
 
     <span class="nd">@handle</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handle</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">setParameter</span><span class="p">(</span><span class="n">STRIPDICT</span><span class="p">,</span> <span class="n">STRIPHANDLE</span><span class="p">,</span> <span class="n">handle</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="n">STRIPHANDLE</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_resize</span><span class="p">()</span></div>
 
 
@@ -1268,18 +1384,18 @@
     <span class="k">def</span> <span class="nf">_setPositionParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subParameterName</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set the item in the position dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">getParameter</span><span class="p">(</span><span class="n">STRIPDICT</span><span class="p">,</span> <span class="n">STRIPLABELPOS</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_getInternalParameter</span><span class="p">(</span><span class="n">STRIPLABELPOS</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">params</span><span class="p">:</span>
             <span class="n">params</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># currently writes directly into _ccpnInternal</span>
         <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">subParameterName</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">setParameter</span><span class="p">(</span><span class="n">STRIPDICT</span><span class="p">,</span> <span class="n">STRIPLABELPOS</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="n">STRIPLABELPOS</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_getPositionParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subParameterName</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the item from the position dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">getParameter</span><span class="p">(</span><span class="n">STRIPDICT</span><span class="p">,</span> <span class="n">STRIPLABELPOS</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_getInternalParameter</span><span class="p">(</span><span class="n">STRIPLABELPOS</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">params</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">subParameterName</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subParameterName</span><span class="p">)</span>
@@ -1293,7 +1409,7 @@
         <span class="c1"># clear the store</span>
         <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="n">STRIPTEXT</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
                   <span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">setParameter</span><span class="p">(</span><span class="n">STRIPDICT</span><span class="p">,</span> <span class="n">STRIPLABELPOS</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_setInternalParameter</span><span class="p">(</span><span class="n">STRIPLABELPOS</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_resize</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="StripLabelWidget.setLabel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.StripLabelWidget.setLabel">[docs]</a>    <span class="k">def</span> <span class="nf">setLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="n">DEFAULTCOLOUR</span><span class="p">):</span>
@@ -1317,6 +1433,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_resize</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="StripLabelWidget.setLabelColour"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.StripLabelWidget.setLabelColour">[docs]</a>    <span class="k">def</span> <span class="nf">setLabelColour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="n">DEFAULTCOLOUR</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the colour for stripLabel</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setStyle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stripLabel</span><span class="p">,</span> <span class="n">foregroundColour</span><span class="o">=</span><span class="n">colour</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setPositionParameter</span><span class="p">(</span><span class="n">STRIPCOLOUR</span><span class="p">,</span> <span class="n">colour</span><span class="p">)</span>
@@ -1348,6 +1466,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">oldPos</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span></div></div>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -1357,7 +1476,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -1377,12 +1496,13 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.PlaneToolbar</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

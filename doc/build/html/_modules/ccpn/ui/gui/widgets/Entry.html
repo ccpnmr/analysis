@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.ui.gui.widgets.Entry &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
-    <script src="../../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.Entry</a></li> 
       </ul>
     </div>  
 
@@ -43,8 +44,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
@@ -52,9 +54,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:54 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2021-07-30 20:44:26 +0100 (Fri, July 30, 2021) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.4 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -64,14 +66,14 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">helveticaItalic12</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Font</span> <span class="kn">import</span> <span class="n">setWidgetFont</span><span class="p">,</span> <span class="n">getFontHeight</span>
 
 <span class="c1"># Width?</span>
-<span class="c1"># Allow setting of max lengh based on data model?</span>
+<span class="c1"># Allow setting of max length based on data model?</span>
 
 <span class="kn">import</span> <span class="nn">re</span>
 
@@ -84,7 +86,7 @@
 
 <div class="viewcode-block" id="Entry"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Entry.Entry">[docs]</a><span class="k">class</span> <span class="nc">Entry</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxLength</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxLength</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
                  <span class="n">listener</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripEndWhitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">editable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">backgroundText</span><span class="o">=</span><span class="s1">&#39;&lt;default&gt;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
@@ -99,10 +101,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">callback</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_changed</span><span class="p">)</span>
-
-        <span class="c1"># self.connect(self, QtCore.SIGNAL(&#39;returnPressed()&#39;), self._callback)</span>
-        <span class="c1"># self.connect(self, QtCore.SIGNAL(&#39;editingFinished()&#39;), self._callback)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">returnPressed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">)</span>
 
@@ -114,7 +112,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">listener</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;padding: 3px 3px 3px 3px;&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">backgroundText</span> <span class="o">=</span> <span class="n">backgroundText</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backgroundText</span><span class="p">:</span>
@@ -123,7 +121,6 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">editable</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">helveticaItalic12</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -160,7 +157,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">convertInput</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">doCallback</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">()</span></div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span></div>
 
 
 <div class="viewcode-block" id="IntEntry"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Entry.IntEntry">[docs]</a><span class="k">class</span> <span class="nc">IntEntry</span><span class="p">(</span><span class="n">Entry</span><span class="p">):</span>
@@ -222,15 +222,15 @@
         <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;0.0&#39;</span>
         <span class="k">elif</span> <span class="nb">abs</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">999999</span> <span class="ow">or</span> <span class="nb">abs</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.00001</span><span class="p">:</span>
-            <span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%%</span><span class="s1">.</span><span class="si">%d</span><span class="s1">e&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decimals</span><span class="p">)</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="nb">format</span> <span class="o">%</span> <span class="n">value</span>
+            <span class="n">textFormat</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%%</span><span class="s1">.</span><span class="si">%d</span><span class="s1">e&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decimals</span><span class="p">)</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">textFormat</span> <span class="o">%</span> <span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%%</span><span class="s1">.</span><span class="si">%d</span><span class="s1">f&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decimals</span><span class="p">)</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="nb">format</span> <span class="o">%</span> <span class="n">value</span>
+            <span class="n">textFormat</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%%</span><span class="s1">.</span><span class="si">%d</span><span class="s1">f&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decimals</span><span class="p">)</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">textFormat</span> <span class="o">%</span> <span class="n">value</span>
 
         <span class="k">return</span> <span class="n">text</span></div>
 
-<div class="viewcode-block" id="FloatEntry.setRange"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Entry.FloatEntry.setRange">[docs]</a>    <span class="k">def</span> <span class="nf">setRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minValue</span><span class="o">=-</span><span class="n">INFINITY</span><span class="p">,</span> <span class="n">maxValue</span><span class="o">=</span><span class="n">INFINITY</span><span class="p">):</span>
+<div class="viewcode-block" id="FloatEntry.setRange"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Entry.FloatEntry.setRange">[docs]</a>    <span class="k">def</span> <span class="nf">setRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minValue</span><span class="o">=-</span><span class="n">MAXINT</span><span class="p">,</span> <span class="n">maxValue</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">):</span>
 
         <span class="n">valid</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIntValidator</span><span class="p">(</span><span class="n">minValue</span><span class="p">,</span> <span class="n">maxValue</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setValidator</span><span class="p">(</span><span class="n">valid</span><span class="p">)</span></div></div>
@@ -250,7 +250,8 @@
         <span class="n">Entry</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ArrayEntry.convertText"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Entry.ArrayEntry.convertText">[docs]</a>    <span class="k">def</span> <span class="nf">convertText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">SPLIT_REG_EXP</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span></div>
+        <span class="c1"># return re.split(SPLIT_REG_EXP, text) or []</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span></div>
 
 <div class="viewcode-block" id="ArrayEntry.convertInput"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Entry.ArrayEntry.convertInput">[docs]</a>    <span class="k">def</span> <span class="nf">convertInput</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">SEPARATOR</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">array</span><span class="p">)</span></div></div>
@@ -262,7 +263,8 @@
         <span class="n">IntEntry</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
 <div class="viewcode-block" id="IntArrayEntry.convertText"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Entry.IntArrayEntry.convertText">[docs]</a>    <span class="k">def</span> <span class="nf">convertText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
-        <span class="n">array</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">SPLIT_REG_EXP</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="c1"># array = re.split(SPLIT_REG_EXP, text) or []</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">IntEntry</span><span class="o">.</span><span class="n">convertText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">array</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="IntArrayEntry.convertInput"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Entry.IntArrayEntry.convertInput">[docs]</a>    <span class="k">def</span> <span class="nf">convertInput</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
@@ -276,7 +278,8 @@
         <span class="n">FloatEntry</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
 <div class="viewcode-block" id="FloatArrayEntry.convertText"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Entry.FloatArrayEntry.convertText">[docs]</a>    <span class="k">def</span> <span class="nf">convertText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
-        <span class="n">array</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">SPLIT_REG_EXP</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="c1"># array = re.split(SPLIT_REG_EXP, text) or []</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">FloatEntry</span><span class="o">.</span><span class="n">convertText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">array</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="FloatArrayEntry.convertInput"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Entry.FloatArrayEntry.convertInput">[docs]</a>    <span class="k">def</span> <span class="nf">convertInput</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
@@ -336,36 +339,38 @@
     <span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="s1">&#39;test1&#39;</span><span class="p">)</span>
 
     <span class="n">window</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 
     <span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Callback&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
 
-    <span class="n">Entry</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="s1">&#39;Start Text&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+    <span class="n">Entry</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s1">&#39;Start Text&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
-    <span class="n">ArrayEntry</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">],</span> <span class="n">callback</span><span class="p">)</span>
+    <span class="n">ArrayEntry</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">],</span> <span class="n">callback</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
-    <span class="n">IntEntry</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="mi">123</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+    <span class="n">IntEntry</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="mi">123</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
-    <span class="n">IntArrayEntry</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">callback</span><span class="p">)</span>
+    <span class="n">IntArrayEntry</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">callback</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
-    <span class="n">FloatEntry</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="mf">2.818</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+    <span class="n">FloatEntry</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="mf">2.818</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
-    <span class="n">e</span> <span class="o">=</span> <span class="n">FloatArrayEntry</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="n">callback</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">FloatArrayEntry</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="n">callback</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="n">e</span><span class="o">.</span><span class="n">set</span><span class="p">([</span><span class="mf">1e12</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.7e-5</span><span class="p">,</span> <span class="mf">9.75</span><span class="p">])</span>
 
-    <span class="n">LabelledEntry</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="s1">&#39;Text:&#39;</span><span class="p">,</span> <span class="s1">&#39;Initial val&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+    <span class="n">LabelledEntry</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s1">&#39;Text:&#39;</span><span class="p">,</span> <span class="s1">&#39;Initial val&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
-    <span class="n">LabelledIntEntry</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="s1">&#39;Int:&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+    <span class="n">LabelledIntEntry</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s1">&#39;Int:&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
-    <span class="n">LabelledFloatEntry</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="s1">&#39;Float:&#39;</span><span class="p">,</span> <span class="mf">0.7295</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">LabelledFloatEntry</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s1">&#39;Float:&#39;</span><span class="p">,</span> <span class="mf">0.7295</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
     <span class="n">window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
     <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -375,7 +380,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -395,12 +400,13 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.Entry</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

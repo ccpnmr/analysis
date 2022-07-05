@@ -10,6 +10,7 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
    ccpnmodel.ccpncore.memops.baseDataTypes
    ccpnmodel.ccpncore.memops.format
@@ -59,4 +60,3 @@ ccpnmodel.ccpncore.memops.Version module
    :members:
    :undoc-members:
    :show-inheritance:
-

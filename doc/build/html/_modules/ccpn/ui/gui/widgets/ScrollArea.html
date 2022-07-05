@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.ui.gui.widgets.ScrollArea &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
-    <script src="../../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.ScrollArea</a></li> 
       </ul>
     </div>  
 
@@ -43,7 +44,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
@@ -53,8 +54,8 @@
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-02-10 16:59:38 +0000 (Mon, February 10, 2020) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.1 $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2021-03-26 17:49:29 +0000 (Fri, March 26, 2021) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -66,6 +67,8 @@
 
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Colour</span> <span class="kn">import</span> <span class="n">rgbRatioToHex</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs</span> <span class="kn">import</span> <span class="n">BOTTOMAXIS</span>
 
 
 <span class="n">SCROLLBAR_POLICY_DICT</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
@@ -78,7 +81,7 @@
 <div class="viewcode-block" id="ScrollArea"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ScrollArea.ScrollArea">[docs]</a><span class="k">class</span> <span class="nc">ScrollArea</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QScrollArea</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">,</span> <span class="s1">&#39;asNeeded&#39;</span><span class="p">),</span>
-                 <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">minimumSizes</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+                 <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">minimumSizes</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="n">scrollDirections</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="s1">&#39;vertical&#39;</span><span class="p">),</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
         <span class="c1"># kwds[&#39;setLayout&#39;] = True  # A scrollable area always needs a layout to function</span>
@@ -86,6 +89,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setScrollBarPolicies</span><span class="p">(</span><span class="n">scrollBarPolicies</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumSizes</span><span class="p">(</span><span class="n">minimumSizes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scrollDirections</span> <span class="o">=</span> <span class="n">scrollDirections</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_minimumSizes</span> <span class="o">=</span> <span class="n">minimumSizes</span>
 
 <div class="viewcode-block" id="ScrollArea.setMinimumSizes"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ScrollArea.ScrollArea.setMinimumSizes">[docs]</a>    <span class="k">def</span> <span class="nf">setMinimumSizes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minimumSizes</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set (minimumWidth, minimumHeight)</span>
@@ -105,7 +110,17 @@
         <span class="sd">&quot;&quot;&quot;Set the scroll area contents</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ScrollArea</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_scrollContents</span> <span class="o">=</span> <span class="n">widget</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scrollContents</span> <span class="o">=</span> <span class="n">widget</span></div>
+
+<div class="viewcode-block" id="ScrollArea.resizeEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ScrollArea.ScrollArea.resizeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QResizeEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">resizeEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scrollDirections</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scrollDirections</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span>
+            <span class="k">if</span> <span class="s1">&#39;horizontal&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scrollDirections</span><span class="p">:</span>
+                <span class="n">widget</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewport</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">())</span>
+
+            <span class="k">if</span> <span class="s1">&#39;vertical&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scrollDirections</span><span class="p">:</span>
+                <span class="n">widget</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewport</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">())</span></div></div>
 
 
 <div class="viewcode-block" id="SpectrumDisplayScrollArea"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ScrollArea.SpectrumDisplayScrollArea">[docs]</a><span class="k">class</span> <span class="nc">SpectrumDisplayScrollArea</span><span class="p">(</span><span class="n">ScrollArea</span><span class="p">):</span>
@@ -114,11 +129,25 @@
 <span class="sd">    The margins are defined to accommodate the axis widgets within the scroll bars</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">,</span> <span class="s1">&#39;asNeeded&#39;</span><span class="p">),</span>
-                 <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">minimumSizes</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+                 <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">minimumSizes</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span>
+                 <span class="n">spectrumDisplay</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cornerWidget</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialise the widget</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="n">scrollBarPolicies</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="n">setLayout</span><span class="p">,</span> <span class="n">minimumSizes</span><span class="o">=</span><span class="n">minimumSizes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumDisplay</span> <span class="o">=</span> <span class="n">spectrumDisplay</span>
+
+        <span class="c1"># grab the background from the container</span>
+        <span class="n">palette</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumDisplay</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span>
+        <span class="n">role</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumDisplay</span><span class="o">.</span><span class="n">backgroundRole</span><span class="p">()</span>
+        <span class="n">_col</span> <span class="o">=</span> <span class="n">palette</span><span class="o">.</span><span class="n">color</span><span class="p">(</span><span class="n">role</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cornerWidget</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cornerWidget</span> <span class="o">=</span> <span class="n">_ScrollWidgetCorner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="n">_col</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_cornerWidget</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cornerWidget</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="SpectrumDisplayScrollArea.resizeEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ScrollArea.SpectrumDisplayScrollArea.resizeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Handle resize event to re-position the axis widgets and corner widget as required</span>
@@ -131,45 +160,105 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">rect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewport</span><span class="p">()</span><span class="o">.</span><span class="n">geometry</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.GLWidgets</span> <span class="kn">import</span> <span class="n">Gui1dWidgetAxis</span><span class="p">,</span> <span class="n">GuiNdWidgetAxis</span>
-            <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">WidgetCorner</span>
+            <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.GLAxis</span> <span class="kn">import</span> <span class="n">GuiNdWidgetAxis</span>
+            <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.GLAxis</span> <span class="kn">import</span> <span class="n">Gui1dWidgetAxis</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spectrumDisplay</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_stripToolBarWidget</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="n">_width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">rect</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minimumSizes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">_height</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">rect</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minimumSizes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">offset</span>
+            <span class="n">margins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_viewportMargins</span>
 
             <span class="c1"># search for the axis widgets</span>
             <span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findChildren</span><span class="p">((</span><span class="n">Gui1dWidgetAxis</span><span class="p">,</span> <span class="n">GuiNdWidgetAxis</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">children</span><span class="p">:</span>
-                <span class="n">margins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_viewportMargins</span>
-
                 <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">_axisType</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">_axisType</span> <span class="o">==</span> <span class="n">BOTTOMAXIS</span><span class="p">:</span>
                         <span class="c1"># resize the X axis widgets</span>
-                        <span class="n">child</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">rect</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span> <span class="n">rect</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="n">margins</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                        <span class="n">child</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">rect</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span> <span class="n">_width</span><span class="p">,</span> <span class="n">margins</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="c1"># resize the Y axis widgets</span>
-                        <span class="n">child</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">rect</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">margins</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">rect</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
+                        <span class="n">child</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">rect</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">margins</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">_height</span><span class="p">)</span>
 
-                    <span class="n">child</span><span class="o">.</span><span class="n">_updateAxes</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="n">child</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
-
-            <span class="c1"># search for the corner widget</span>
-            <span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findChildren</span><span class="p">(</span><span class="n">WidgetCorner</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">children</span><span class="p">:</span>
-
-                <span class="n">margins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_viewportMargins</span>
-                <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
-                    <span class="n">child</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">rect</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="n">rect</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span> <span class="n">margins</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">margins</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
-                    <span class="n">child</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cornerWidget</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_cornerWidget</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">_width</span><span class="p">,</span> <span class="n">_height</span><span class="p">,</span> <span class="n">margins</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">offset</span><span class="p">)</span>
 
         <span class="k">except</span><span class="p">:</span>
             <span class="k">pass</span>
+
+<div class="viewcode-block" id="SpectrumDisplayScrollArea.refreshViewPort"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ScrollArea.SpectrumDisplayScrollArea.refreshViewPort">[docs]</a>    <span class="k">def</span> <span class="nf">refreshViewPort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.GLAxis</span> <span class="kn">import</span> <span class="n">GuiNdWidgetAxis</span>
+        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.GLAxis</span> <span class="kn">import</span> <span class="n">Gui1dWidgetAxis</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updateAxisWidgets</span><span class="p">()</span>
+
+        <span class="c1"># search for the axis widgets</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findChildren</span><span class="p">((</span><span class="n">Gui1dWidgetAxis</span><span class="p">,</span> <span class="n">GuiNdWidgetAxis</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">children</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">_updateAxes</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="SpectrumDisplayScrollArea.setViewportMargins"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ScrollArea.SpectrumDisplayScrollArea.setViewportMargins">[docs]</a>    <span class="k">def</span> <span class="nf">setViewportMargins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">margins</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set the viewport margins and keep a local copy</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setViewportMargins</span><span class="p">(</span><span class="o">*</span><span class="n">margins</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_viewportMargins</span> <span class="o">=</span> <span class="n">margins</span></div>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_viewportMargins</span> <span class="o">=</span> <span class="n">margins</span></div></div>
+<div class="viewcode-block" id="SpectrumDisplayScrollArea.setCornerBackground"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ScrollArea.SpectrumDisplayScrollArea.setCornerBackground">[docs]</a>    <span class="k">def</span> <span class="nf">setCornerBackground</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colour</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the background colour (or None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cornerWidget</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cornerWidget</span><span class="o">.</span><span class="n">setBackGround</span><span class="p">(</span><span class="n">colour</span><span class="p">)</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">_ScrollWidgetCorner</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to handle a simple widget item with a constant painted background</span>
+<span class="sd">    Item is to be resized by parent handler</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialise the widget</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_background</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">background</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setBackground</span><span class="p">(</span><span class="n">background</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">setBackground</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colour</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the background colour (or None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># try a QColor first</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_background</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">colour</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># otherwise assume to be a tuple (0..1, 0..1, 0..1, 0..1, 0..1)</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">colour</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">tuple</span> <span class="ow">or</span> \
+                    <span class="nb">len</span><span class="p">(</span><span class="n">colour</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span> <span class="ow">or</span> \
+                    <span class="nb">any</span><span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">colour</span><span class="p">)</span> <span class="ow">or</span> \
+                    <span class="nb">any</span><span class="p">(</span><span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">col</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">colour</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;colour must be a tuple(r, g, b, alpha)&quot;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_background</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">rgbRatioToHex</span><span class="p">(</span><span class="o">*</span><span class="n">colour</span><span class="p">[:</span><span class="mi">3</span><span class="p">]))</span>
+
+    <span class="k">def</span> <span class="nf">paintEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a0</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPaintEvent</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Paint the background in the required colour</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_background</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">rgn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">()</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">fillRect</span><span class="p">(</span><span class="n">rgn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_background</span><span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -179,7 +268,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -199,12 +288,13 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.ScrollArea</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

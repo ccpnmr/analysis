@@ -24,4 +24,3 @@ ccpn.framework.update.UpdatePopup module
    :members:
    :undoc-members:
    :show-inheritance:
-

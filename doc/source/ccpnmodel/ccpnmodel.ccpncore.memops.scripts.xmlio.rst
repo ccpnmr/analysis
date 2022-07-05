@@ -32,4 +32,3 @@ ccpnmodel.ccpncore.memops.scripts.xmlio.XmlMapWrite module
    :members:
    :undoc-members:
    :show-inheritance:
-

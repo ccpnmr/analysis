@@ -1,23 +1,24 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>ccpn.pipes.lib package &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="ccpn.plugins package" href="ccpn.plugins.html" />
-    <link rel="prev" title="ccpn.pipes.examples package" href="ccpn.pipes.examples.html" /> 
+    <link rel="prev" title="ccpn.pipes package" href="ccpn.pipes.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -32,12 +33,13 @@
           <a href="ccpn.plugins.html" title="ccpn.plugins package"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="ccpn.pipes.examples.html" title="ccpn.pipes.examples package"
+          <a href="ccpn.pipes.html" title="ccpn.pipes package"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &#187;</li>
-          <li class="nav-item nav-item-3"><a href="ccpn.pipes.html" accesskey="U">ccpn.pipes package</a> &#187;</li> 
+          <li class="nav-item nav-item-3"><a href="ccpn.pipes.html" accesskey="U">ccpn.pipes package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.pipes.lib package</a></li> 
       </ul>
     </div>  
 
@@ -46,43 +48,100 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-ccpn.pipes.lib">
+  <section id="module-ccpn.pipes.lib">
 <span id="ccpn-pipes-lib-package"></span><h1>ccpn.pipes.lib package<a class="headerlink" href="#module-ccpn.pipes.lib" title="Permalink to this headline">¶</a></h1>
 <p>Module documentation here</p>
-<div class="section" id="submodules">
+<section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-ccpn.pipes.lib.AreaCalculation">
+</section>
+<section id="module-ccpn.pipes.lib.AreaCalculation">
 <span id="ccpn-pipes-lib-areacalculation-module"></span><h2>ccpn.pipes.lib.AreaCalculation module<a class="headerlink" href="#module-ccpn.pipes.lib.AreaCalculation" title="Permalink to this headline">¶</a></h2>
 <p>Automatic Area calculation</p>
 <p>Calculate the area under the peak curve. To calculate the peak limits is used an arbitrary line that will cross the
 spectrum in each peak. The intersecting line will be by default the estimated noise level threshold for the spectrum.
 Eg the standard deviation of all the peaks height. The intersecting points will be the peak’s limits.</p>
 <p>The area is calculated using the composite trapezoidal rule.</p>
-</div>
-</div>
+</section>
+<section id="module-ccpn.pipes.lib.Scale1Dspectra">
+<span id="ccpn-pipes-lib-scale1dspectra-module"></span><h2>ccpn.pipes.lib.Scale1Dspectra module<a class="headerlink" href="#module-ccpn.pipes.lib.Scale1Dspectra" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.pipes.lib.Scale1Dspectra.getAutoScalingFactor1D">
+<span class="sig-prename descclassname"><span class="pre">ccpn.pipes.lib.Scale1Dspectra.</span></span><span class="sig-name descname"><span class="pre">getAutoScalingFactor1D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controlSpectrum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targetSpectrum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">controlSpectrumWeight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/lib/Scale1Dspectra.html#getAutoScalingFactor1D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.pipes.lib.Scale1Dspectra.getAutoScalingFactor1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>#Screening-specific.
+This factor will scale the spectra in a way  to have the Control-Spectrum (e.g. without a protein-target)
+with higher intensities than a Target-Spectrum (recorded with a protein-target).
+:param controlSpectrum: Spectrum object
+:param targetSpectrum: Spectrum object
+:param controlSpectrumWeight: a weighting factor for the control spectrum intensities. Default 1.1 (arbitrary)
+:return: float. a scaling factor from the intensities std-ratio</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.pipes.lib.Scale1Dspectra.resetSpectraScale">
+<span class="sig-prename descclassname"><span class="pre">ccpn.pipes.lib.Scale1Dspectra.</span></span><span class="sig-name descname"><span class="pre">resetSpectraScale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/lib/Scale1Dspectra.html#resetSpectraScale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.pipes.lib.Scale1Dspectra.resetSpectraScale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.pipes.lib.Scale1Dspectra.scaleSpectraByRegion">
+<span class="sig-prename descclassname"><span class="pre">ccpn.pipes.lib.Scale1Dspectra.</span></span><span class="sig-name descname"><span class="pre">scaleSpectraByRegion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resetScale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/lib/Scale1Dspectra.html#scaleSpectraByRegion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.pipes.lib.Scale1Dspectra.scaleSpectraByRegion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scale 1D spectra intensities by a region of interest.
+eg a region between a peak, so that the spectra are scaled relative to that peak.
+engine =    ‘mean’:  heights will be the median of the two</p>
+<blockquote>
+<div><p>‘min’ :  heights will be relative to the lower
+‘max’ :  heights will be relative to the highest</p>
+</div></blockquote>
+<p>resetScale: always start with a scale of 1 (original spectrum data)
+limits = list of 1d regions in ppm, eg [1,3]</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.pipes.lib.Scale1Dspectra.scaleSpectraByStandardScaler">
+<span class="sig-prename descclassname"><span class="pre">ccpn.pipes.lib.Scale1Dspectra.</span></span><span class="sig-name descname"><span class="pre">scaleSpectraByStandardScaler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/lib/Scale1Dspectra.html#scaleSpectraByStandardScaler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.pipes.lib.Scale1Dspectra.scaleSpectraByStandardScaler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scale spectra busing the StandardScaler from sklearn.
+Standardise features by removing the mean and scaling to unit variance.
+See docs <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html">https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.pipes.lib.Scale1Dspectra.scaleSpectraByStd">
+<span class="sig-prename descclassname"><span class="pre">ccpn.pipes.lib.Scale1Dspectra.</span></span><span class="sig-name descname"><span class="pre">scaleSpectraByStd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/lib/Scale1Dspectra.html#scaleSpectraByStd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.pipes.lib.Scale1Dspectra.scaleSpectraByStd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scale 1D spectra intensities by the mean of stds for the first selected pts
+so that all spectra have (roughly the same baseline noise)</p>
+</dd></dl>
+
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">ccpn.pipes.lib package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-ccpn.pipes.lib.AreaCalculation">ccpn.pipes.lib.AreaCalculation module</a></li>
+<li><a class="reference internal" href="#module-ccpn.pipes.lib.Scale1Dspectra">ccpn.pipes.lib.Scale1Dspectra module</a></li>
 </ul>
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="ccpn.pipes.examples.html"
-                        title="previous chapter">ccpn.pipes.examples package</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="ccpn.plugins.html"
-                        title="next chapter">ccpn.plugins package</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="ccpn.pipes.html"
+                          title="previous chapter">ccpn.pipes package</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="ccpn.plugins.html"
+                          title="next chapter">ccpn.plugins package</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -94,7 +153,7 @@ Eg the standard deviation of all the peaks height. The intersecting points will 
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -117,17 +176,18 @@ Eg the standard deviation of all the peaks height. The intersecting points will 
           <a href="ccpn.plugins.html" title="ccpn.plugins package"
              >next</a> |</li>
         <li class="right" >
-          <a href="ccpn.pipes.examples.html" title="ccpn.pipes.examples package"
+          <a href="ccpn.pipes.html" title="ccpn.pipes package"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &#187;</li>
-          <li class="nav-item nav-item-3"><a href="ccpn.pipes.html" >ccpn.pipes package</a> &#187;</li> 
+          <li class="nav-item nav-item-3"><a href="ccpn.pipes.html" >ccpn.pipes package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.pipes.lib package</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

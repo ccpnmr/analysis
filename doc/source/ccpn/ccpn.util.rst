@@ -10,8 +10,10 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
    ccpn.util.nef
+   ccpn.util.traits
    ccpn.util.v2io
 
 Submodules
@@ -29,6 +31,14 @@ ccpn.util.AttrDict module
 -------------------------
 
 .. automodule:: ccpn.util.AttrDict
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.util.AttributeDict module
+------------------------------
+
+.. automodule:: ccpn.util.AttributeDict
    :members:
    :undoc-members:
    :show-inheritance:
@@ -65,10 +75,26 @@ ccpn.util.Data module
    :undoc-members:
    :show-inheritance:
 
+ccpn.util.DataEnum module
+-------------------------
+
+.. automodule:: ccpn.util.DataEnum
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ccpn.util.ExcelReader module
 ----------------------------
 
 .. automodule:: ccpn.util.ExcelReader
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.util.FrozenDict module
+---------------------------
+
+.. automodule:: ccpn.util.FrozenDict
    :members:
    :undoc-members:
    :show-inheritance:
@@ -85,22 +111,6 @@ ccpn.util.Graph module
 ----------------------
 
 .. automodule:: ccpn.util.Graph
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ccpn.util.Hdf5 module
----------------------
-
-.. automodule:: ccpn.util.Hdf5
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ccpn.util.Layout module
------------------------
-
-.. automodule:: ccpn.util.Layout
    :members:
    :undoc-members:
    :show-inheritance:
@@ -137,6 +147,14 @@ ccpn.util.OrderedSet module
    :undoc-members:
    :show-inheritance:
 
+ccpn.util.Parabole module
+-------------------------
+
+.. automodule:: ccpn.util.Parabole
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ccpn.util.Path module
 ---------------------
 
@@ -157,6 +175,14 @@ ccpn.util.PrintFile module
 --------------------------
 
 .. automodule:: ccpn.util.PrintFile
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.util.PrintFormatter module
+-------------------------------
+
+.. automodule:: ccpn.util.PrintFormatter
    :members:
    :undoc-members:
    :show-inheritance:
@@ -249,10 +275,42 @@ ccpn.util.Time module
    :undoc-members:
    :show-inheritance:
 
+ccpn.util.UnitConverters module
+-------------------------------
+
+.. automodule:: ccpn.util.UnitConverters
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ccpn.util.Update module
 -----------------------
 
 .. automodule:: ccpn.util.Update
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.util.UpdateQueue module
+----------------------------
+
+.. automodule:: ccpn.util.UpdateQueue
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.util.UpdateScheduler module
+--------------------------------
+
+.. automodule:: ccpn.util.UpdateScheduler
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.util.UpdateTracker module
+------------------------------
+
+.. automodule:: ccpn.util.UpdateTracker
    :members:
    :undoc-members:
    :show-inheritance:
@@ -297,18 +355,18 @@ ccpn.util.floatUtils module
    :undoc-members:
    :show-inheritance:
 
-ccpn.util.jsonIo module
------------------------
+ccpn.util.isotopes module
+-------------------------
 
-.. automodule:: ccpn.util.jsonIo
+.. automodule:: ccpn.util.isotopes
    :members:
    :undoc-members:
    :show-inheritance:
 
-ccpn.util.pluginManager module
-------------------------------
+ccpn.util.jsonIo module
+-----------------------
 
-.. automodule:: ccpn.util.pluginManager
+.. automodule:: ccpn.util.jsonIo
    :members:
    :undoc-members:
    :show-inheritance:
@@ -328,4 +386,3 @@ ccpn.util.updateHeader module
    :members:
    :undoc-members:
    :show-inheritance:
-

@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.util.nef.GenericStarParser &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
     <script src="../../../../_static/jquery.js"></script>
     <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.util.nef.GenericStarParser</a></li> 
       </ul>
     </div>  
 
@@ -152,18 +153,19 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:33:01 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Geerten Vuister $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-02-17 19:09:51 +0000 (Thu, February 17, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -223,26 +225,30 @@
 <span class="n">_defaultSeparator</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="mi">2</span>
 
 <span class="c1"># Options corresponding to the supported parser modes: &#39;standard&#39;, &#39;lenient&#39;, &#39;strict&#39;, and &#39;IUCr&#39;</span>
+<span class="n">PARSER_MODE_LENIENT</span> <span class="o">=</span> <span class="s1">&#39;lenient&#39;</span>
+<span class="n">PARSER_MODE_STANDARD</span> <span class="o">=</span> <span class="s1">&#39;standard&#39;</span>
+<span class="n">PARSER_MODE_STRICT</span> <span class="o">=</span> <span class="s1">&#39;strict&#39;</span>
+<span class="n">PARSER_MODE_IUCR</span> <span class="o">=</span> <span class="s1">&#39;IUCr&#39;</span>
 <span class="n">_parserModeOptions</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;lenient&#39;</span> <span class="p">:</span> <span class="p">{</span>
+    <span class="n">PARSER_MODE_LENIENT</span> <span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;enforceSaveFrameStop&#39;</span>     <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="s1">&#39;enforceLoopStop&#39;</span>          <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="s1">&#39;padIncompleteLoops&#39;</span>       <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="s1">&#39;allowSquareBracketStrings&#39;</span><span class="p">:</span> <span class="kc">True</span>
         <span class="p">},</span>
-    <span class="s1">&#39;strict&#39;</span>  <span class="p">:</span> <span class="p">{</span>
+    <span class="n">PARSER_MODE_STRICT</span>  <span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;enforceSaveFrameStop&#39;</span>     <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="s1">&#39;enforceLoopStop&#39;</span>          <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="s1">&#39;padIncompleteLoops&#39;</span>       <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="s1">&#39;allowSquareBracketStrings&#39;</span><span class="p">:</span> <span class="kc">False</span>
         <span class="p">},</span>
-    <span class="s1">&#39;standard&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="n">PARSER_MODE_STANDARD</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;enforceSaveFrameStop&#39;</span>     <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="s1">&#39;enforceLoopStop&#39;</span>          <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="s1">&#39;padIncompleteLoops&#39;</span>       <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="s1">&#39;allowSquareBracketStrings&#39;</span><span class="p">:</span> <span class="kc">True</span>
         <span class="p">},</span>
-    <span class="s1">&#39;IUCr&#39;</span>    <span class="p">:</span> <span class="p">{</span>
+    <span class="n">PARSER_MODE_IUCR</span>    <span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;enforceSaveFrameStop&#39;</span>     <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="s1">&#39;enforceLoopStop&#39;</span>          <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="s1">&#39;padIncompleteLoops&#39;</span>       <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
@@ -250,7 +256,7 @@
     <span class="p">}</span>
 
 
-<div class="viewcode-block" id="parse"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.parse">[docs]</a><span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="parse"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.parse">[docs]</a><span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">PARSER_MODE_STANDARD</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Parse STAR text string &#39;text&#39;.</span>
 <span class="sd">    Standard settings allow skipping &#39;stop_&#39; tags and strings starting with &#39;[&#39; or &#39;]&#39;,</span>
 <span class="sd">    but require &#39;save_&#39; termination of SaveFrames and throw an error if the number of loop</span>
@@ -264,17 +270,15 @@
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">options</span> <span class="o">=</span> <span class="n">_parserModeOptions</span><span class="p">[</span><span class="n">mode</span><span class="p">]</span>
-    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;illegal parser mode : </span><span class="si">%s</span><span class="s2">  Only modes &#39;lenient&#39;, &#39;strict&#39;, &#39;standard&#39;, &#39;IUCr&#39; allowed&quot;</span>
-                <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
-                <span class="p">)</span>
 
-    <span class="c1">#</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">_modes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_parserModeOptions</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;illegal parser mode : </span><span class="si">%s</span><span class="s2">  Only modes </span><span class="si">%r</span><span class="s2"> allowed&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">mode</span><span class="p">),</span> <span class="n">_modes</span><span class="p">))</span>
+
     <span class="k">return</span> <span class="n">GeneralStarParser</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="parseFile"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.parseFile">[docs]</a><span class="k">def</span> <span class="nf">parseFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="parseFile"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.parseFile">[docs]</a><span class="k">def</span> <span class="nf">parseFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">PARSER_MODE_STANDARD</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;load generic STAR file and parse the contents&quot;&quot;&quot;</span>
 
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
@@ -1103,6 +1107,7 @@
     <span class="n">result</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">cif</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -1112,7 +1117,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -1132,12 +1137,13 @@
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.util.nef.GenericStarParser</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

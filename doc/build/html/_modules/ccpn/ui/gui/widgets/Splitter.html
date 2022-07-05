@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.ui.gui.widgets.Splitter &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
-    <script src="../../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.Splitter</a></li> 
       </ul>
     </div>  
 
@@ -43,9 +44,10 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
@@ -53,8 +55,8 @@
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-01-13 10:38:51 +0000 (Mon, January 13, 2020) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-03-03 23:47:27 +0000 (Thu, March 03, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -64,9 +66,11 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtWidgets</span>
-
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtWidgets</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Font</span> <span class="kn">import</span> <span class="n">getFontHeight</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Path</span> <span class="kn">import</span> <span class="n">aPath</span>
 
 
 <div class="viewcode-block" id="Splitter"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Splitter.Splitter">[docs]</a><span class="k">class</span> <span class="nc">Splitter</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSplitter</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
@@ -76,7 +80,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">horizontal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">collapsible</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
-        <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">horizontal</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setOrientation</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">)</span>
@@ -85,6 +89,17 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setChildrenCollapsible</span><span class="p">(</span><span class="n">collapsible</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">doResize</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">_height</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="p">(</span><span class="n">getFontHeight</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="s1">&#39;SMALL&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">15</span><span class="p">)</span> <span class="o">//</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">_vName</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/vertical-split&#39;</span><span class="p">)</span>
+        <span class="n">_hName</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/horizontal-split&#39;</span><span class="p">)</span>
+        <span class="n">path1</span> <span class="o">=</span> <span class="n">aPath</span><span class="p">(</span><span class="n">_vName</span><span class="o">.</span><span class="n">_filePath</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+        <span class="n">path2</span> <span class="o">=</span> <span class="n">aPath</span><span class="p">(</span><span class="n">_hName</span><span class="o">.</span><span class="n">_filePath</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;QSplitter {background-color: transparent; }</span>
+<span class="s2">                            QSplitter::handle:vertical {background-color: transparent; height: </span><span class="si">%d</span><span class="s2">px; image: url(</span><span class="si">%s</span><span class="s2">); }</span>
+<span class="s2">                            QSplitter::handle:horizontal {background-color: transparent; width: </span><span class="si">%d</span><span class="s2">px; image: url(</span><span class="si">%s</span><span class="s2">); }</span>
+<span class="s2">                            &quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">_height</span><span class="p">,</span> <span class="n">path1</span><span class="p">,</span> <span class="n">_height</span><span class="p">,</span> <span class="n">path2</span><span class="p">))</span>
 
 <div class="viewcode-block" id="Splitter.createHandle"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Splitter.Splitter.createHandle">[docs]</a>    <span class="k">def</span> <span class="nf">createHandle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -120,6 +135,7 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">mouseReleaseEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div></div>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -129,7 +145,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -149,12 +165,13 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.Splitter</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

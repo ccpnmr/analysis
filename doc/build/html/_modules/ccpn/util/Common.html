@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.util.Common &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.util.Common</a></li> 
       </ul>
     </div>  
 
@@ -50,18 +51,19 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-01-10 11:21:56 +0000 (Fri, January 10, 2020) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-06-29 15:35:39 +0100 (Wed, June 29, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -70,18 +72,23 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
-<span class="sd">&quot;&quot;&quot;Common utilities</span>
-<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">string</span>
-<span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Iterable</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Constants</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">string</span> <span class="kn">import</span> <span class="n">whitespace</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.AxisCodeLib</span> <span class="kn">import</span> <span class="n">_axisCodeMapIndices</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.OrderedSet</span> <span class="kn">import</span> <span class="n">OrderedSet</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Constants</span>
+
+
+<span class="c1"># from ccpn.util.isotopes import isotopeRecords</span>
 
 
 <span class="c1"># Max value used for random integer. Set to be expressible as a signed 32-bit integer.</span>
@@ -89,52 +96,64 @@
 
 <span class="n">WHITESPACE_AND_NULL</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x0b</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x0c</span><span class="s1">&#39;</span><span class="p">}</span>
 
-<span class="c1"># valid characters for file names</span>
-<span class="c1"># NB string.ascii_letters and string.digits are not compatible</span>
-<span class="c1"># with Python 2.1 (used in ObjectDomain)</span>
-<span class="n">defaultFileNameChar</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span>
-<span class="n">separatorFileNameChar</span> <span class="o">=</span> <span class="s1">&#39;+&#39;</span>
-<span class="n">validFileNamePartChars</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;abcdefghijklmnopqrstuvwxyz&#39;</span>
-                          <span class="s1">&#39;ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789&#39;</span>
-                          <span class="o">+</span> <span class="n">defaultFileNameChar</span><span class="p">)</span>
-<span class="n">validCcpnFileNameChars</span> <span class="o">=</span> <span class="n">validFileNamePartChars</span> <span class="o">+</span> <span class="s1">&#39;-.&#39;</span> <span class="o">+</span> <span class="n">separatorFileNameChar</span>
 
+<span class="c1"># # valid characters for file names</span>
+<span class="c1"># # NB string.ascii_letters and string.digits are not compatible</span>
+<span class="c1"># # with Python 2.1 (used in ObjectDomain)</span>
+<span class="c1"># defaultFileNameChar = &#39;_&#39;</span>
+<span class="c1"># separatorFileNameChar = &#39;+&#39;</span>
+<span class="c1"># validFileNamePartChars = (&#39;abcdefghijklmnopqrstuvwxyz&#39;</span>
+<span class="c1">#                           &#39;ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789&#39;</span>
+<span class="c1">#                           + defaultFileNameChar)</span>
+<span class="c1"># validCcpnFileNameChars = validFileNamePartChars + &#39;-.&#39; + separatorFileNameChar</span>
 
 <span class="c1"># # Not used - Rasmus 20/2/2017</span>
 <span class="c1"># Sentinel = collections.namedtuple(&#39;Sentinel&#39;, [&#39;value&#39;])</span>
 
 
-<div class="viewcode-block" id="convertStringToFileName"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.convertStringToFileName">[docs]</a><span class="k">def</span> <span class="nf">convertStringToFileName</span><span class="p">(</span><span class="n">fileNameString</span><span class="p">,</span> <span class="n">validChars</span><span class="o">=</span><span class="n">validCcpnFileNameChars</span><span class="p">,</span>
-                            <span class="n">defaultChar</span><span class="o">=</span><span class="n">defaultFileNameChar</span><span class="p">):</span>
-    <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fileNameString</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ll</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">char</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">validChars</span><span class="p">:</span>
-            <span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaultChar</span>
-    <span class="c1">#</span>
-    <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span></div>
+<span class="c1"># def convertStringToFileName(fileNameString, validChars=validCcpnFileNameChars,</span>
+<span class="c1">#                             defaultChar=defaultFileNameChar):</span>
+<span class="c1">#     ll = [x for x in fileNameString]</span>
+<span class="c1">#     for ii, char in enumerate(ll):</span>
+<span class="c1">#         if char not in validChars:</span>
+<span class="c1">#             ll[ii] = defaultChar</span>
+<span class="c1">#     #</span>
+<span class="c1">#     return &#39;&#39;.join(ll)</span>
+
+<span class="c1">#</span>
+<span class="c1"># def getCcpFileString(fileNameString):</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Changes an input string to the one used for a component of file names.</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#     return convertStringToFileName(fileNameString, validFileNamePartChars,</span>
+<span class="c1">#                                    defaultFileNameChar)</span>
 
 
-<div class="viewcode-block" id="getCcpFileString"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getCcpFileString">[docs]</a><span class="k">def</span> <span class="nf">getCcpFileString</span><span class="p">(</span><span class="n">fileNameString</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Changes an input string to the one used for a component of file names.</span>
+<div class="viewcode-block" id="incrementName"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.incrementName">[docs]</a><span class="k">def</span> <span class="nf">incrementName</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">split</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add &#39;_1&#39; to name or change suffix &#39;_n&#39; to &#39;_(n+1)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">return</span> <span class="n">convertStringToFileName</span><span class="p">(</span><span class="n">fileNameString</span><span class="p">,</span> <span class="n">validFileNamePartChars</span><span class="p">,</span>
-                                   <span class="n">defaultFileNameChar</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="incrementName"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.incrementName">[docs]</a><span class="k">def</span> <span class="nf">incrementName</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Add &#39;_1&#39; to name or change suffix &#39;_n&#39; to &#39;_(n+1) &quot;&quot;&quot;</span>
-    <span class="n">ll</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">ll</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="k">return</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">split</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span>
 
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="k">pass</span>
 
-    <span class="k">return</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_1&#39;</span></div>
+    <span class="k">return</span> <span class="n">name</span> <span class="o">+</span> <span class="n">split</span> <span class="o">+</span> <span class="s1">&#39;1&#39;</span></div>
+
+
+<span class="c1"># def _incrementObjectName(project, pluralLinkName, name):</span>
+<span class="c1">#     &quot;&quot;&quot; fetch an incremented name if an object in list (project.xs) has already taken it. &quot;&quot;&quot;</span>
+<span class="c1">#     originalName = name</span>
+<span class="c1">#     names = [d.name for d in getattr(project, pluralLinkName) if hasattr(d, &#39;name&#39;)]</span>
+<span class="c1">#     while name in names:</span>
+<span class="c1">#         name = incrementName(name)</span>
+<span class="c1">#     if originalName != name:</span>
+<span class="c1">#         getLogger().info(&#39;Name:% already assigned. Renamed to %s&#39; % (originalName, name))</span>
+<span class="c1">#     return name</span>
 
 
 <div class="viewcode-block" id="recursiveImport"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.recursiveImport">[docs]</a><span class="k">def</span> <span class="nf">recursiveImport</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">modname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ignoreModules</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -204,9 +223,13 @@
     <span class="k">return</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;win&#39;</span></div>
 
 
-<div class="viewcode-block" id="parseSequenceCode"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.parseSequenceCode">[docs]</a><span class="k">def</span> <span class="nf">parseSequenceCode</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;split sequence code into (seqCode,seqInsertCode, offset) tuple&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="isMacOS"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.isMacOS">[docs]</a><span class="k">def</span> <span class="nf">isMacOS</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;darwin&#39;</span></div>
 
+
+<div class="viewcode-block" id="parseSequenceCode"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.parseSequenceCode">[docs]</a><span class="k">def</span> <span class="nf">parseSequenceCode</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;split sequence code into (seqCode,seqInsertCode, offset) tuple</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># sequenceCodePattern = re.compile(&#39;(\d+)?(.*?)(\+\d+|\-\d+)?$&#39;)</span>
 
     <span class="n">tt</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">sequenceCodePattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
@@ -224,8 +247,8 @@
 
 <div class="viewcode-block" id="splitIntFromChars"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.splitIntFromChars">[docs]</a><span class="k">def</span> <span class="nf">splitIntFromChars</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;convert a string with a leading integer optionally followed by characters</span>
-<span class="sd">    into an (integer,string) tuple&quot;&quot;&quot;</span>
-
+<span class="sd">    into an (integer,string) tuple</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
     <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
@@ -241,34 +264,57 @@
 
     <span class="k">return</span> <span class="n">number</span><span class="p">,</span> <span class="n">chars</span></div>
 
+<div class="viewcode-block" id="groupIntoChunks"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.groupIntoChunks">[docs]</a><span class="k">def</span> <span class="nf">groupIntoChunks</span><span class="p">(</span><span class="n">aList</span><span class="p">,</span> <span class="n">chunkSize</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Yield successive n-sized chunks from list.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">aList</span><span class="p">),</span> <span class="n">chunkSize</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">aList</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">chunkSize</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="dictionaryProduct"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.dictionaryProduct">[docs]</a><span class="k">def</span> <span class="nf">dictionaryProduct</span><span class="p">(</span><span class="n">dict1</span><span class="p">,</span> <span class="n">dict2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;multiply input {a:x}, {b:y} to result {(a,b):x*y} dictionary&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;multiply input {a:x}, {b:y} to result {(a,b):x*y} dictionary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">key1</span><span class="p">,</span> <span class="n">val1</span> <span class="ow">in</span> <span class="n">dict1</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">key2</span><span class="p">,</span> <span class="n">val2</span> <span class="ow">in</span> <span class="n">dict2</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">result</span><span class="p">[(</span><span class="n">key1</span><span class="p">,</span> <span class="n">key2</span><span class="p">)]</span> <span class="o">=</span> <span class="n">val1</span> <span class="o">*</span> <span class="n">val2</span>
-    <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span></div>
 
 
 <div class="viewcode-block" id="uniquify"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.uniquify">[docs]</a><span class="k">def</span> <span class="nf">uniquify</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get list of unique elements in sequence, in order of first appearance&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Get list of unique elements in sequence, in order of first appearance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">seen_add</span> <span class="o">=</span> <span class="n">seen</span><span class="o">.</span><span class="n">add</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sequence</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">seen_add</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span></div>
+    <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sequence</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">seen_add</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span>  <span class="c1"># NB: not seen.add(x) is always True; i.e. this</span></div>
+    <span class="c1"># part just adds the element during the list comprehension</span>
+
+
+<div class="viewcode-block" id="flatten"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.flatten">[docs]</a><span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Yield items from any nested iterable; see Reference.</span>
+<span class="sd">    Here is a general approach that applies to numbers, strings, nested lists and mixed containers.</span>
+<span class="sd">    From: https://stackoverflow.com/questions/952914/how-to-make-a-flat-list-out-of-list-of-lists/952952#952952</span>
+<span class="sd">    ref: This solution is modified from a recipe in Beazley, D. and B. Jones. Recipe 4.14, Python Cookbook 3rd</span>
+<span class="sd">         Ed., O&#39;Reilly Media Inc. Sebastopol, CA: 2013.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">sub_x</span> <span class="ow">in</span> <span class="n">flatten</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">sub_x</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">x</span></div>
 
 
 <div class="viewcode-block" id="isClose"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.isClose">[docs]</a><span class="k">def</span> <span class="nf">isClose</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">relTolerance</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span> <span class="n">absTolerance</span><span class="o">=</span><span class="mf">1e-08</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Are a and b identical within reasonable floating point tolerance?</span>
 <span class="sd">    Uses sum of relative (relTolerance) and absolute (absTolerance) difference</span>
 
-<span class="sd">    Inspired by numpy.isclose()&quot;&quot;&quot;</span>
+<span class="sd">    Inspired by numpy.isclose()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">absTolerance</span> <span class="o">+</span> <span class="n">relTolerance</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)))</span></div>
 
 
 <div class="viewcode-block" id="isIterable"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.isIterable">[docs]</a><span class="k">def</span> <span class="nf">isIterable</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="s2">&quot;Returns True if obj is iterable&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Returns True if obj is iterable</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="nb">iter</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
@@ -277,140 +323,44 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
+<div class="viewcode-block" id="indexOfMaxValue"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.indexOfMaxValue">[docs]</a><span class="k">def</span> <span class="nf">indexOfMaxValue</span><span class="p">(</span><span class="n">theList</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the index of the item in theList with the maximum value</span>
+<span class="sd">    :param theList: an iterable</span>
+<span class="sd">    :return index value or -1 for an empty list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isIterable</span><span class="p">(</span><span class="n">theList</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;indexOfMaxValue: theList is not iterable&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">theList</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">val</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">theList</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">idx</span></div>
+
+
+<div class="viewcode-block" id="indexOfMinValue"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.indexOfMinValue">[docs]</a><span class="k">def</span> <span class="nf">indexOfMinValue</span><span class="p">(</span><span class="n">theList</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the index of the item in theList with the minimum value</span>
+<span class="sd">    :param theList: an iterable</span>
+<span class="sd">    :return index value or -1 for an empty list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isIterable</span><span class="p">(</span><span class="n">theList</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;indexOfMaxValue: theList is not iterable&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">theList</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="nb">min</span><span class="p">((</span><span class="n">val</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">theList</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">idx</span></div>
+
+
 <div class="viewcode-block" id="getTimeStamp"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getTimeStamp">[docs]</a><span class="k">def</span> <span class="nf">getTimeStamp</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Get iso-formtted timestamp&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Get iso-formtted timestamp</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="getUuid"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getUuid">[docs]</a><span class="k">def</span> <span class="nf">getUuid</span><span class="p">(</span><span class="n">programName</span><span class="p">,</span> <span class="n">timeStamp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get UUid following the NEF convention&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Get UUid following the NEF convention</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">timeStamp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">timeStamp</span> <span class="o">=</span> <span class="n">getTimeStamp</span><span class="p">()</span>
     <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">-</span><span class="si">%s</span><span class="s1">-</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">programName</span><span class="p">,</span> <span class="n">timeStamp</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxRandomInt</span><span class="p">))</span></div>
-
-
-<div class="viewcode-block" id="name2IsotopeCode"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.name2IsotopeCode">[docs]</a><span class="k">def</span> <span class="nf">name2IsotopeCode</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get standard isotope code matching atom name or axisCode string</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="n">result</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
-            <span class="n">ss</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">isotopeRecords</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">ss</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">name</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span><span class="o">.</span><span class="n">isupper</span><span class="p">():</span>
-                        <span class="n">result</span> <span class="o">=</span> <span class="n">key</span>
-                    <span class="k">break</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
-    <span class="c1">#</span>
-    <span class="k">return</span> <span class="n">result</span></div>
-
-
-<div class="viewcode-block" id="isotopeCode2Nucleus"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.isotopeCode2Nucleus">[docs]</a><span class="k">def</span> <span class="nf">isotopeCode2Nucleus</span><span class="p">(</span><span class="n">isotopeCode</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">isotopeCode</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="n">record</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">isotopeRecords</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">record</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span></div>
-
-    <span class="c1"># for tag,val in sorted(Constants.DEFAULT_ISOTOPE_DICT.items()):</span>
-    <span class="c1">#   if val == isotopeCode:</span>
-    <span class="c1">#     return tag</span>
-    <span class="c1"># else:</span>
-    <span class="c1">#   return None</span>
-
-
-<div class="viewcode-block" id="name2ElementSymbol"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.name2ElementSymbol">[docs]</a><span class="k">def</span> <span class="nf">name2ElementSymbol</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get standard element symbol matching name or axisCode</span>
-
-<span class="sd">    NB, the first letter takes precedence, so e.g. &#39;CD&#39; returns &#39;C&#39; (carbon)</span>
-<span class="sd">    rather than &#39;CD&#39; (Cadmium)&quot;&quot;&quot;</span>
-
-    <span class="c1"># NB, We deliberately do NOT use &#39;value in Constants.DEFAULT_ISOTOPE_DICT&#39;</span>
-    <span class="c1"># We want to avoid elements that are in the dict but have value None.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">elif</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">elif</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">name</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
-    <span class="k">elif</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
-        <span class="n">ss</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">isotopeRecords</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">ss</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">name</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span><span class="o">.</span><span class="n">isupper</span><span class="p">():</span>
-                    <span class="k">return</span> <span class="n">record</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-                <span class="k">break</span>
-    <span class="c1">#</span>
-    <span class="k">return</span> <span class="kc">None</span></div>
-
-
-<div class="viewcode-block" id="checkIsotope"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.checkIsotope">[docs]</a><span class="k">def</span> <span class="nf">checkIsotope</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Convert isotope specifier string to most probable isotope code - defaulting to &#39;1H&#39;</span>
-
-<span class="sd">    This function is intended for external format isotope specifications, *not* for</span>
-<span class="sd">    axisCodes or atom names, hence the difference to name2ElementSymbol.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">defaultIsotope</span> <span class="o">=</span> <span class="s1">&#39;1H&#39;</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">defaultIsotope</span>
-
-    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">isotopeRecords</span><span class="p">:</span>
-        <span class="c1"># Superfluous but should speed things up</span>
-        <span class="k">return</span> <span class="n">name</span>
-
-    <span class="k">for</span> <span class="n">isotopeCode</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">isotopeRecords</span><span class="p">:</span>
-        <span class="c1"># NB checking this first means that e.g. &#39;H13C&#39; returns &#39;13C&#39; rather than &#39;1H&#39;</span>
-        <span class="k">if</span> <span class="n">isotopeCode</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">isotopeCode</span>
-
-    <span class="c1"># NB order of checking means that e.g. &#39;CA&#39; returns Calcium rather than Carbon</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
-              <span class="ow">or</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-
-    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span>
-            <span class="c1"># special case</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;2H&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="n">defaultIsotope</span>
-    <span class="c1">#</span>
-    <span class="k">return</span> <span class="n">result</span></div>
-
-
-<div class="viewcode-block" id="axisCodeMatch"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.axisCodeMatch">[docs]</a><span class="k">def</span> <span class="nf">axisCodeMatch</span><span class="p">(</span><span class="n">axisCode</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get refAxisCode that best matches axisCode &quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">indx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">_axisCodeMapIndices</span><span class="p">([</span><span class="n">axisCode</span><span class="p">],</span> <span class="n">refAxisCodes</span><span class="p">)):</span>
-        <span class="k">if</span> <span class="n">indx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># We have a match</span>
-            <span class="k">return</span> <span class="n">refAxisCodes</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span></div>
-
-
-<div class="viewcode-block" id="axisCodeMapping"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.axisCodeMapping">[docs]</a><span class="k">def</span> <span class="nf">axisCodeMapping</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;get {axisCode:refAxisCode} mapping dictionary</span>
-<span class="sd">    all axisCodes must match, or dictionary will be empty</span>
-<span class="sd">    NB a series of single-letter axisCodes (e.g. &#39;N&#39;, &#39;HCN&#39;) can be passed in as a string&quot;&quot;&quot;</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">mapIndices</span> <span class="o">=</span> <span class="n">_axisCodeMapIndices</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">mapIndices</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">refAxisCode</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">refAxisCodes</span><span class="p">):</span>
-            <span class="n">indx</span> <span class="o">=</span> <span class="n">mapIndices</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">indx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">axisCodes</span><span class="p">[</span><span class="n">indx</span><span class="p">]]</span> <span class="o">=</span> <span class="n">refAxisCode</span>
-    <span class="c1">#</span>
-    <span class="k">return</span> <span class="n">result</span></div>
 
 
 <div class="viewcode-block" id="reorder"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.reorder">[docs]</a><span class="k">def</span> <span class="nf">reorder</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">):</span>
@@ -427,129 +377,11 @@
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span></div>
 
-
-<span class="k">def</span> <span class="nf">_axisCodeMapIndices</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;get mapping tuple so that axisCodes[result[ii]] matches refAxisCodes[ii]</span>
-<span class="sd">    all axisCodes must match, but result can contain None if refAxisCodes is longer</span>
-<span class="sd">    if axisCodes contain duplicates, you will get one of possible matches&quot;&quot;&quot;</span>
-
-    <span class="c1">#CCPNINTERNAL - used in multiple places to map display order and spectrum order</span>
-
-    <span class="n">lenDifference</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">refAxisCodes</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">lenDifference</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="c1"># Set up match matrix</span>
-    <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">axisCodes</span><span class="p">:</span>
-        <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">axisCodesCompare</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">mismatch</span><span class="o">=-</span><span class="mi">999999</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">refAxisCodes</span><span class="p">])</span>
-
-    <span class="c1"># find best mapping</span>
-    <span class="n">maxScore</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">axisCodes</span><span class="p">)</span>
-    <span class="n">bestscore</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">)))</span> <span class="o">+</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">lenDifference</span>
-    <span class="k">for</span> <span class="n">permutation</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">permutations</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
-        <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">jj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">permutation</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">jj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">score</span> <span class="o">+=</span> <span class="n">matches</span><span class="p">[</span><span class="n">jj</span><span class="p">][</span><span class="n">ii</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="n">bestscore</span><span class="p">:</span>
-            <span class="n">bestscore</span> <span class="o">=</span> <span class="n">score</span>
-            <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">permutation</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">score</span> <span class="o">==</span> <span class="n">maxScore</span><span class="p">:</span>
-            <span class="c1"># it cannot get any higher</span>
-            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">permutation</span><span class="p">)</span>
-    <span class="c1">#</span>
-    <span class="k">if</span> <span class="n">results</span><span class="p">:</span>
-        <span class="c1"># Pick the first of the equally good matches as the default answer</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="c1"># Multiple matches - try to select on pairs of bound atoms</span>
-            <span class="c1"># NB we do not need to be rigorous as this is only used to resolve ambiguity</span>
-            <span class="c1"># NB this is necessary to do a correct match of e.g. Hc, Ch, H to Hc, Hc1, Ch1</span>
-            <span class="n">boundCodeDicts</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">tryCodes</span> <span class="ow">in</span> <span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">:</span>
-                <span class="n">boundCodes</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="n">boundCodeDicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">boundCodes</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">code</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tryCodes</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">code</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="k">for</span> <span class="n">jj</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tryCodes</span><span class="p">)):</span>
-                            <span class="n">code2</span> <span class="o">=</span> <span class="n">tryCodes</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span>
-                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">code2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                                <span class="k">if</span> <span class="p">(</span><span class="n">code</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isupper</span><span class="p">()</span> <span class="ow">and</span> <span class="n">code</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">code2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span>
-                                        <span class="n">code2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isupper</span><span class="p">()</span> <span class="ow">and</span> <span class="n">code2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">code</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span>
-                                        <span class="n">code</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">==</span> <span class="n">code2</span><span class="p">[</span><span class="mi">2</span><span class="p">:]):</span>
-                                    <span class="c1"># Matches pair of bound atoms - e.g. Hc1, Ch1</span>
-                                    <span class="n">boundCodes</span><span class="p">[</span><span class="n">tryCodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">code</span><span class="p">)]</span> <span class="o">=</span> <span class="n">tryCodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">code2</span><span class="p">)</span>
-                                    <span class="n">boundCodes</span><span class="p">[</span><span class="n">tryCodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">code2</span><span class="p">)]</span> <span class="o">=</span> <span class="n">tryCodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">boundCodeDicts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">boundCodeDicts</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-                <span class="c1"># bound pairs on both sides - check for matching pairs</span>
-                <span class="n">bestscore</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-                <span class="k">for</span> <span class="n">permutation</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
-                    <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
-                    <span class="k">for</span> <span class="n">idx1</span><span class="p">,</span> <span class="n">idx2</span> <span class="ow">in</span> <span class="n">boundCodeDicts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                        <span class="n">target</span> <span class="o">=</span> <span class="n">permutation</span><span class="p">[</span><span class="n">idx1</span><span class="p">]</span>
-                        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">target</span> <span class="o">==</span> <span class="n">boundCodeDicts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">permutation</span><span class="p">[</span><span class="n">idx2</span><span class="p">]):</span>
-                            <span class="n">score</span> <span class="o">+=</span> <span class="mi">1</span>
-                    <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="n">bestscore</span><span class="p">:</span>
-                        <span class="n">bestscore</span> <span class="o">=</span> <span class="n">score</span>
-                        <span class="n">result</span> <span class="o">=</span> <span class="n">permutation</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="c1">#</span>
-    <span class="k">return</span> <span class="n">result</span>
-
-
-<div class="viewcode-block" id="axisCodesCompare"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.axisCodesCompare">[docs]</a><span class="k">def</span> <span class="nf">axisCodesCompare</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">code2</span><span class="p">,</span> <span class="n">mismatch</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Score code, code2 for matching. Score is length of common prefix, or &#39;mismatch&#39; if None&quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">code</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">code2</span> <span class="ow">or</span> <span class="n">code</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">code2</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-        <span class="n">score</span> <span class="o">=</span> <span class="n">mismatch</span>
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="n">code2</span><span class="p">:</span>
-        <span class="n">score</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">code</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">islower</span><span class="p">():</span>
-        <span class="c1"># &#39;fidX...&#39; &#39;delay&#39;, etc. must match exactly</span>
-        <span class="n">score</span> <span class="o">=</span> <span class="n">mismatch</span>
-    <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;MQ&#39;</span><span class="p">):</span>
-        <span class="c1"># &#39;MQxy...&#39; must match exactly</span>
-        <span class="n">score</span> <span class="o">=</span> <span class="n">mismatch</span>
-    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">code</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">code</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">code2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">code2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
-        <span class="c1"># Match against a single upper-case letter on one side. Always OK</span>
-        <span class="n">score</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Partial match of two strings with at least two significant chars each</span>
-        <span class="n">score</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">((</span><span class="n">code</span><span class="p">,</span> <span class="n">code2</span><span class="p">)))</span> <span class="ow">or</span> <span class="n">mismatch</span>
-        <span class="k">if</span> <span class="n">score</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="c1"># Only first letter matches, second does not</span>
-            <span class="k">if</span> <span class="p">((</span><span class="n">code</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Hn&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">code2</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Hcn&#39;</span><span class="p">))</span> <span class="ow">or</span>
-                    <span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Hcn&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">code2</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Hn&#39;</span><span class="p">))):</span>
-                <span class="c1"># Hn must matches Hcn</span>
-                <span class="n">score</span> <span class="o">=</span> <span class="mi">2</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># except as above we need at least two char match</span>
-
-                <span class="c1"># TODO:ED check matching codes when each contain more than 1 character; dict?</span>
-                <span class="n">score</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1">#mismatch</span>
-        <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;J&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">score</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="c1"># &#39;Jab&#39; matches &#39;J&#39; or &#39;Jab...&#39;, but NOT &#39;Ja...&#39;</span>
-            <span class="n">score</span> <span class="o">=</span> <span class="n">mismatch</span>
-    <span class="c1">#</span>
-    <span class="k">return</span> <span class="n">score</span></div>
-
-
-<div class="viewcode-block" id="doAxisCodesMatch"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.doAxisCodesMatch">[docs]</a><span class="k">def</span> <span class="nf">doAxisCodesMatch</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return True if axisCodes match refAxisCodes else False&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">refAxisCodes</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">code</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">axisCodesCompare</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">[</span><span class="n">ii</span><span class="p">]):</span>
-            <span class="k">return</span> <span class="kc">False</span>
-    <span class="c1">#</span>
-    <span class="k">return</span> <span class="kc">True</span></div>
-
+<span class="k">def</span> <span class="nf">_getShortUniqueID</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">uuid</span>
+    <span class="n">_id</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span>
+    <span class="n">shortID</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">_id</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">shortID</span><span class="p">)</span>
 
 <div class="viewcode-block" id="stringifier"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.stringifier">[docs]</a><span class="k">def</span> <span class="nf">stringifier</span><span class="p">(</span><span class="o">*</span><span class="n">fields</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get stringifier function, that will format an object x according to</span>
@@ -584,7 +416,8 @@
     <span class="n">formatString</span> <span class="o">=</span> <span class="s1">&#39;&lt;</span><span class="si">{_obj.pid!s}</span><span class="s1">| &#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fieldFormats</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&gt;&#39;</span>
 
     <span class="k">def</span> <span class="nf">formatter</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">localFormatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">format_string</span><span class="o">=</span><span class="n">formatString</span><span class="p">,</span> <span class="n">_obj</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+        <span class="c1"># return localFormatter.format(format_string=formatString, _obj=x)</span>
+        <span class="k">return</span> <span class="n">localFormatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">formatString</span><span class="p">,</span> <span class="n">_obj</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">formatter</span></div>
 
@@ -593,51 +426,33 @@
     <span class="k">return</span> <span class="kc">True</span> <span class="ow">in</span> <span class="p">[</span><span class="n">c</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">whitespace</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="resetSerial"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.resetSerial">[docs]</a><span class="k">def</span> <span class="nf">resetSerial</span><span class="p">(</span><span class="n">apiObject</span><span class="p">,</span> <span class="n">newSerial</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;ADVANCED Reset serial of object to newSerial, resetting parent link</span>
-<span class="sd">    and the nextSerial of the parent.</span>
+<div class="viewcode-block" id="contains_whitespace_nospace"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.contains_whitespace_nospace">[docs]</a><span class="k">def</span> <span class="nf">contains_whitespace_nospace</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="k">return</span> <span class="kc">True</span> <span class="ow">in</span> <span class="p">[</span><span class="n">c</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">whitespace</span> <span class="k">if</span> <span class="n">c</span> <span class="o">!=</span> <span class="s1">&#39; &#39;</span><span class="p">]</span></div>
 
-<span class="sd">    Raises ValueError for objects that do not have a serial</span>
-<span class="sd">    (or, more precisely, where the _wrappedData does not have a serial).&quot;&quot;&quot;</span>
-
-    <span class="c1"># NB, needed both from V2 NefIo and V3, hence putting nit here,</span>
-    <span class="c1"># even though it uses V2 objects</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiObject</span><span class="p">,</span> <span class="s1">&#39;serial&#39;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot reset serial, </span><span class="si">%s</span><span class="s2"> does not have a &#39;serial&#39; attribute&quot;</span>
-                         <span class="o">%</span> <span class="n">apiObject</span><span class="p">)</span>
-    <span class="n">downlink</span> <span class="o">=</span> <span class="n">apiObject</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">parentRole</span><span class="o">.</span><span class="n">otherRole</span><span class="o">.</span><span class="n">name</span>
-
-    <span class="n">parentDict</span> <span class="o">=</span> <span class="n">apiObject</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="vm">__dict__</span>
-    <span class="n">downdict</span> <span class="o">=</span> <span class="n">parentDict</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span>
-    <span class="n">oldSerial</span> <span class="o">=</span> <span class="n">apiObject</span><span class="o">.</span><span class="n">serial</span>
-    <span class="n">serialDict</span> <span class="o">=</span> <span class="n">parentDict</span><span class="p">[</span><span class="s1">&#39;_serialDict&#39;</span><span class="p">]</span>
-
-    <span class="k">if</span> <span class="n">newSerial</span> <span class="o">==</span> <span class="n">oldSerial</span><span class="p">:</span>
-        <span class="k">return</span>
-
-    <span class="k">elif</span> <span class="n">newSerial</span> <span class="ow">in</span> <span class="n">downdict</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot reset serial to </span><span class="si">%s</span><span class="s2"> - value already in use&quot;</span> <span class="o">%</span> <span class="n">newSerial</span><span class="p">)</span>
-
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">maxSerial</span> <span class="o">=</span> <span class="n">serialDict</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span>
-        <span class="n">apiObject</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newSerial</span>
-        <span class="n">downdict</span><span class="p">[</span><span class="n">newSerial</span><span class="p">]</span> <span class="o">=</span> <span class="n">apiObject</span>
-        <span class="k">del</span> <span class="n">downdict</span><span class="p">[</span><span class="n">oldSerial</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">newSerial</span> <span class="o">&gt;</span> <span class="n">maxSerial</span><span class="p">:</span>
-            <span class="n">serialDict</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span> <span class="o">=</span> <span class="n">newSerial</span>
-        <span class="k">elif</span> <span class="n">oldSerial</span> <span class="o">==</span> <span class="n">maxSerial</span><span class="p">:</span>
-            <span class="n">serialDict</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">downdict</span><span class="p">)</span></div>
-
+<div class="viewcode-block" id="sortByPriorityList"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.sortByPriorityList">[docs]</a><span class="k">def</span> <span class="nf">sortByPriorityList</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">initialSort</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">initialSortReverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sorts an iterable according to a list of priority items.</span>
+<span class="sd">    Usage:</span>
+<span class="sd">        sort_by_priority_list(values=[1,2,2,3], priority=[2,3,1])</span>
+<span class="sd">        [2, 2, 3, 1]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">initialSort</span><span class="p">:</span>
+        <span class="n">values</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="n">initialSortReverse</span><span class="p">)</span>
+    <span class="n">priority_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">priority</span><span class="p">)}</span>
+    <span class="k">def</span> <span class="nf">priority_getter</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">priority_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">priority_getter</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="makeIterableList"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.makeIterableList">[docs]</a><span class="k">def</span> <span class="nf">makeIterableList</span><span class="p">(</span><span class="n">inList</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Take a list of lists and concatenate into a single list.</span>
-<span class="sd">    Remove any Nones from the list</span>
-<span class="sd">    :param inList:</span>
-<span class="sd">    :return single list:</span>
+<span class="sd">    Take a nested collection of (tuples, lists or sets) and concatenate into a single list.</span>
+<span class="sd">    Also changes a single item into a list.</span>
+<span class="sd">    Removes any Nones from the list</span>
+<span class="sd">    :param inList: list of tuples, lists, sets or single items</span>
+<span class="sd">    :return: a single list</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inList</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inList</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="c1"># if isinstance(inList, Iterable) and not isinstance(inList, str):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inList</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">)):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">y</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">inList</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">makeIterableList</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="n">inList</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">inList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -646,8 +461,18 @@
             <span class="k">return</span> <span class="p">[]</span></div>
 
 
+<div class="viewcode-block" id="flattenLists"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.flattenLists">[docs]</a><span class="k">def</span> <span class="nf">flattenLists</span><span class="p">(</span><span class="n">lists</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Take a list of lists and concatenate into a single list.</span>
+<span class="sd">    Remove any Nones from the list</span>
+<span class="sd">    :param lists: a list of lists</span>
+<span class="sd">    :return: list.  a single list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">makeIterableList</span><span class="p">(</span><span class="n">lists</span><span class="p">)</span></div>
+
+
 <span class="k">def</span> <span class="nf">_truncateText</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">splitter</span><span class="o">=</span><span class="s1">&#39; , &#39;</span><span class="p">,</span> <span class="n">maxWords</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
-    <span class="s2">&quot;Splits the text by the given splitter. If more then maxWords, it return the maxWord plus dots, otherwise just the text&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Splits the text by the given splitter. If more then maxWords, it return the maxWord plus dots, otherwise just the text&quot;&quot;&quot;</span>
     <span class="n">words</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">splitter</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">words</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maxWords</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">splitter</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">words</span><span class="p">[:</span><span class="n">maxWords</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; ...&#39;</span>
@@ -667,25 +492,19 @@
         <span class="k">yield</span> <span class="n">obj</span>
 
 
-<span class="k">def</span> <span class="nf">_getChildren</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Walks in a tree like obj and put all children/parents in list of list eg: [[Parent,child...,],...]</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">_childClasses</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">att</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">_childClasses</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">att</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">):</span>
-                <span class="n">children</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_getChildren</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">path</span><span class="p">[:]))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">children</span>
-
-
 <div class="viewcode-block" id="percentage"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.percentage">[docs]</a><span class="k">def</span> <span class="nf">percentage</span><span class="p">(</span><span class="n">percent</span><span class="p">,</span> <span class="n">whole</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">percent</span> <span class="o">*</span> <span class="n">whole</span><span class="p">)</span> <span class="o">/</span> <span class="mf">100.0</span></div>
+
+
+<span class="k">def</span> <span class="nf">_fillListToLenght</span><span class="p">(</span><span class="n">aList</span><span class="p">,</span> <span class="n">desiredLength</span><span class="p">,</span> <span class="n">fillingValue</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Appends Nones to list to get length of list equal to the desiredLength.</span>
+<span class="sd">    If the starting list is longer than the desiredLength: raise AttributeError</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">diffLenght</span> <span class="o">=</span> <span class="n">desiredLength</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">aList</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">diffLenght</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;The given list has a longer length than the desiredLength.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">aList</span> <span class="o">+</span> <span class="p">[</span><span class="n">fillingValue</span><span class="p">]</span> <span class="o">*</span> <span class="n">diffLenght</span>
 
 
 <div class="viewcode-block" id="splitDataFrameWithinRange"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.splitDataFrameWithinRange">[docs]</a><span class="k">def</span> <span class="nf">splitDataFrameWithinRange</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">column1</span><span class="p">,</span> <span class="n">column2</span><span class="p">,</span> <span class="n">minX</span><span class="p">,</span> <span class="n">maxX</span><span class="p">,</span> <span class="n">minY</span><span class="p">,</span> <span class="n">maxY</span><span class="p">):</span>
@@ -751,176 +570,308 @@
 <span class="n">stdLocalFormatter</span> <span class="o">=</span> <span class="n">LocalFormatter</span><span class="p">()</span>
 
 
-<span class="c1">#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="c1"># 20190507:ED new routines to match axis codes and return dict or indices</span>
-
-<span class="k">def</span> <span class="nf">_matchSingleAxisCode</span><span class="p">(</span><span class="n">code1</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">code2</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">exactMatch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">allowLowercase</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;number of matching characters</span>
-<span class="sd">    code1, code2 = strings</span>
-<span class="sd">    e.g. &#39;Hn1&#39;, &#39;H1&#39;</span>
-
-<span class="sd">    Compare single axis codes</span>
-
-<span class="sd">    Must always be upper case first letter</span>
-
-<span class="sd">    more matching letters = higher code</span>
-<span class="sd">    difference in length reduces match</span>
-
-<span class="sd">    &#39;Jab&#39; matches &#39;J&#39; or &#39;Jab...&#39;, but NOT &#39;Ja...&#39;      ie, 1 or 3 or more letter match</span>
-
-<span class="sd">    MQ gets no match</span>
-
-<span class="sd">    Hn* always matches Hcn*</span>
-
-<span class="sd">    :param code1: first axis code to compare</span>
-<span class="sd">    :param code2: second axis code to compare</span>
-<span class="sd">    :param exactMatch: only allow exact matches, True/False</span>
-<span class="sd">    :return: score based on the match</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># undefined codes</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">code1</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">code2</span> <span class="ow">or</span> <span class="p">(</span><span class="n">code1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">islower</span><span class="p">()</span> <span class="ow">and</span> <span class="n">code2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">islower</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">allowLowercase</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mi">0</span>
-
-    <span class="c1"># if exactMatch is True then only test for exact match</span>
-    <span class="k">if</span> <span class="n">exactMatch</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">code1</span> <span class="o">==</span> <span class="n">code2</span>
-
-    <span class="n">ms</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">code1</span><span class="p">,</span> <span class="n">code2</span><span class="p">)]</span>  <span class="c1"># zips to the shortest string</span>
-    <span class="n">ss</span> <span class="o">=</span> <span class="mi">0</span>
-
-    <span class="c1"># add extra tests from v2.4</span>
-    <span class="k">if</span> <span class="n">code1</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;MQ&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">code2</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;MQ&#39;</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mi">0</span>
-    <span class="c1"># char followed by digit already accounted for</span>
-
-    <span class="c1"># get count of matching characters - more characters -&gt; higher score</span>
-    <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">ms</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">a</span> <span class="o">!=</span> <span class="n">b</span><span class="p">:</span>
-            <span class="k">break</span>
-        <span class="n">ss</span> <span class="o">+=</span> <span class="mi">1</span>
-
-    <span class="c1"># another v2.4 test</span>
-    <span class="k">if</span> <span class="n">ss</span><span class="p">:</span>
-        <span class="k">if</span> <span class="p">((</span><span class="n">code1</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Hn&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">code2</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Hcn&#39;</span><span class="p">))</span> <span class="ow">or</span>
-                <span class="p">(</span><span class="n">code1</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Hcn&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">code2</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Hn&#39;</span><span class="p">))):</span>
-            <span class="c1"># Hn must always match Hcn, give it a high score</span>
-            <span class="n">ss</span> <span class="o">+=</span> <span class="mi">500</span>
-
-        <span class="k">if</span> <span class="n">code1</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;J&#39;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">ss</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># must be a 1, or (3 or more) letter match</span>
-                <span class="k">return</span> <span class="mi">0</span>
-
-        <span class="n">ss</span> <span class="o">+=</span> <span class="n">_matchSingleAxisCodeLength</span><span class="p">(</span><span class="n">code1</span><span class="p">,</span> <span class="n">code2</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">+</span> <span class="n">ss</span><span class="p">)</span> <span class="k">if</span> <span class="n">ss</span> <span class="k">else</span> <span class="mi">0</span>
-
-
-<span class="k">def</span> <span class="nf">_matchSingleAxisCodeLength</span><span class="p">(</span><span class="n">code1</span><span class="p">,</span> <span class="n">code2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;return a score based on the mismatch in length</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">lenDiff</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">code1</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">code2</span><span class="p">))</span>
-
-    <span class="k">return</span> <span class="p">(</span><span class="mi">100</span> <span class="o">+</span> <span class="mi">800</span> <span class="o">//</span> <span class="p">(</span><span class="n">lenDiff</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
-
-
 <span class="k">def</span> <span class="nf">_SortByMatch</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;quick sorting key for axisCode match tuples</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="o">-</span><span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>  <span class="c1"># sort from high to low</span>
 
 
-<div class="viewcode-block" id="getAxisCodeMatch"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getAxisCodeMatch">[docs]</a><span class="k">def</span> <span class="nf">getAxisCodeMatch</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">,</span> <span class="n">exactMatch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allMatches</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderedDict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Return an OrderedDict containing the mapping from the refAxisCodes to axisCodes</span>
+<span class="k">def</span> <span class="nf">_atoi</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="k">else</span> <span class="n">text</span>
 
-<span class="sd">    There may be multiple matches, or None for each axis code.</span>
 
-<span class="sd">    Set allMatches to True to return all, or False for only the best match in each case</span>
+<span class="k">def</span> <span class="nf">_naturalKeyObjs</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">theProperty</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">):</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">theProperty</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">_atoi</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(\d+)&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)]</span>
 
-<span class="sd">    e.g. for unique axis codes:</span>
 
-<span class="sd">        getAxisCodeMatch((&#39;Hn&#39;, &#39;Nh&#39;, &#39;C&#39;), (&#39;Nh&#39;, &#39;Hn&#39;), allMatches=False)</span>
-
-<span class="sd">        -&gt;  { &#39;Hn&#39;:   &#39;Hn&#39;</span>
-<span class="sd">              &#39;Nh&#39;:   &#39;Nh&#39;</span>
-<span class="sd">              &#39;C&#39; :   None</span>
-<span class="sd">            }</span>
-
-<span class="sd">        getAxisCodeMatch((&#39;Hn&#39;, &#39;Nh&#39;, &#39;C&#39;), (&#39;Nh&#39;, &#39;Hn&#39;), allMatches=True)</span>
-
-<span class="sd">        -&gt;  { &#39;Hn&#39;:   (&#39;Hn&#39;,)</span>
-<span class="sd">              &#39;Nh&#39;:   (&#39;Nh&#39;,)</span>
-<span class="sd">              &#39;C&#39; :   ()</span>
-<span class="sd">            }</span>
-
-<span class="sd">    for similar repeated axis codes, possibly from matching isotopeCodes:</span>
-
-<span class="sd">        getAxisCodeMatch((&#39;Nh&#39;, &#39;H&#39;), (&#39;H&#39;, &#39;H1&#39;, &#39;N&#39;), allMatches=True)</span>
-
-<span class="sd">        -&gt;  { &#39;Nh&#39;:   &#39;N&#39;</span>
-<span class="sd">              &#39;H&#39; :   &#39;H&#39;</span>
-<span class="sd">            }</span>
-
-<span class="sd">        getAxisCodeMatch((&#39;Nh&#39;, &#39;H&#39;), (&#39;H&#39;, &#39;H1&#39;, &#39;N&#39;), allMatches=True)</span>
-
-<span class="sd">        -&gt;  { &#39;Nh&#39;:   (&#39;N&#39;,)</span>
-<span class="sd">              &#39;H&#39; :   (&#39;H&#39;, &#39;H1&#39;)       &lt;- in this case the first match is always the highest</span>
-<span class="sd">            }</span>
+<div class="viewcode-block" id="naturalSortList"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.naturalSortList">[docs]</a><span class="k">def</span> <span class="nf">naturalSortList</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param ll: a list of strings</span>
+<span class="sd">    :return: a sorted list by natural sort</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">found</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">code1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">):</span>
-        <span class="n">foundCodes</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">jj</span><span class="p">,</span> <span class="n">code2</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">refAxisCodes</span><span class="p">):</span>
-
-            <span class="n">match</span> <span class="o">=</span> <span class="n">_matchSingleAxisCode</span><span class="p">(</span><span class="n">code1</span><span class="p">,</span> <span class="n">code2</span><span class="p">,</span> <span class="n">exactMatch</span><span class="o">=</span><span class="n">exactMatch</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
-                <span class="n">foundCodes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">code2</span><span class="p">,</span> <span class="n">jj</span><span class="p">,</span> <span class="n">match</span><span class="p">))</span>
-
-        <span class="k">if</span> <span class="n">allMatches</span><span class="p">:</span>
-            <span class="n">found</span><span class="p">[</span><span class="n">code1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">mm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">mm</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">foundCodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">_SortByMatch</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">found</span><span class="p">[</span><span class="n">code1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">foundCodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">_SortByMatch</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">foundCodes</span> <span class="k">else</span> <span class="kc">None</span>
-
-    <span class="k">return</span> <span class="n">found</span></div>
+    <span class="n">convert</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">text</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="k">else</span> <span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">alphanumKey</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">key</span><span class="p">:</span> <span class="p">[</span><span class="n">convert</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;([0-9]+)&#39;</span><span class="p">,</span> <span class="n">key</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">alphanumKey</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="getAxisCodeMatchIndices"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getAxisCodeMatchIndices">[docs]</a><span class="k">def</span> <span class="nf">getAxisCodeMatchIndices</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">,</span> <span class="n">exactMatch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allMatches</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return a tuple containing the indices for each axis code in axisCodes in refAxisCodes</span>
-
-<span class="sd">    Only the best match is returned for each code, elements not found in refAxisCodes will be marked as &#39;None&#39;</span>
-
-<span class="sd">    e.g. for unique axis codes:</span>
-
-<span class="sd">        indices = getAxisCodeMatchIndices((&#39;Hn&#39;, &#39;Nh&#39;, &#39;C&#39;), (&#39;Nh&#39;, &#39;Hn&#39;))</span>
-
-<span class="sd">        -&gt;  (1, 0, None)</span>
-
-<span class="sd">                i.e axisCodes[0] = &#39;Hn&#39; which maps to refAxisCodes[indices[0]] = &#39;Hn&#39;</span>
-
-<span class="sd">    for similar repeated axis codes, possibly from matching isotopeCodes:</span>
-
-<span class="sd">        getAxisCodeMatchIndices((&#39;Nh&#39;, &#39;H&#39;), (&#39;H&#39;, &#39;H1&#39;, &#39;N&#39;))</span>
-
-<span class="sd">        -&gt;  (2, 0)</span>
-
+<div class="viewcode-block" id="sortObjectByName"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.sortObjectByName">[docs]</a><span class="k">def</span> <span class="nf">sortObjectByName</span><span class="p">(</span><span class="n">objs</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param objs: list of objects that contains the property name. E.g. sample.name</span>
+<span class="sd">    :param reverse: bool. False: descending order.</span>
+<span class="sd">                          True: ascending order.</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    Sorts the objects by digit if present in the name, otherwise alphabetically.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">objs</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">_naturalKeyObjs</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">)</span></div>
 
-    <span class="n">found</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">code1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">):</span>
-        <span class="n">foundCodes</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">jj</span><span class="p">,</span> <span class="n">code2</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">refAxisCodes</span><span class="p">):</span>
 
-            <span class="n">match</span> <span class="o">=</span> <span class="n">_matchSingleAxisCode</span><span class="p">(</span><span class="n">code1</span><span class="p">,</span> <span class="n">code2</span><span class="p">,</span> <span class="n">exactMatch</span><span class="o">=</span><span class="n">exactMatch</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
-                <span class="n">foundCodes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">code2</span><span class="p">,</span> <span class="n">jj</span><span class="p">,</span> <span class="n">match</span><span class="p">))</span>
+<div class="viewcode-block" id="greekKey"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.greekKey">[docs]</a><span class="k">def</span> <span class="nf">greekKey</span><span class="p">(</span><span class="n">word</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sort key for sorting a list by the equivalent greek letter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">greekSort</span> <span class="o">=</span> <span class="s1">&#39;0123456789@ABGDEZHQIKLMNXOPRSTUFCYWabgdezhqiklmnxoprstufcyw&#39;</span>
+    <span class="n">greekLetterCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">greekSort</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">allMatches</span><span class="p">:</span>
-            <span class="n">found</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">mm</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">mm</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">foundCodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">_SortByMatch</span><span class="p">)))</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span>
+    <span class="k">if</span> <span class="n">word</span><span class="p">:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">word</span><span class="p">[</span><span class="mi">0</span><span class="p">]),)</span>
+        <span class="n">key</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">greekSort</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">greekSort</span> <span class="k">else</span> <span class="n">greekLetterCount</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">word</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">return</span> <span class="n">key</span></div>
+
+
+<div class="viewcode-block" id="getIsotopeListFromCode"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getIsotopeListFromCode">[docs]</a><span class="k">def</span> <span class="nf">getIsotopeListFromCode</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a list of defined atom names based on the isotopeCode</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">ccpn.core.lib.AssignmentLib</span> <span class="kn">import</span> <span class="n">NEF_ATOM_NAMES</span>
+
+    <span class="k">if</span> <span class="n">isotopeCode</span> <span class="ow">in</span> <span class="n">NEF_ATOM_NAMES</span><span class="p">:</span>
+        <span class="n">atomNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">atomName</span> <span class="k">for</span> <span class="n">atomName</span> <span class="ow">in</span> <span class="n">NEF_ATOM_NAMES</span><span class="p">[</span><span class="n">isotopeCode</span><span class="p">]]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">NEF_ATOM_NAMES</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">kk</span><span class="p">:</span> <span class="n">kk</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;0123456789&#39;</span><span class="p">))</span>
+        <span class="n">atomNames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">OrderedSet</span><span class="p">([</span><span class="n">atomName</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span> <span class="k">for</span> <span class="n">atomName</span> <span class="ow">in</span> <span class="n">NEF_ATOM_NAMES</span><span class="p">[</span><span class="n">key</span><span class="p">]]))</span>
+
+    <span class="k">return</span> <span class="n">atomNames</span></div>
+
+
+<span class="k">def</span> <span class="nf">_compareDict</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compare the keys in two dictionaries</span>
+<span class="sd">    Routine is recursive, empty dicts are ignored</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">d1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">d2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">d1</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">and</span> <span class="n">d1</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">d2</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">and</span> <span class="n">d2</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+                <span class="n">compare</span> <span class="o">=</span> <span class="n">_compareDict</span><span class="p">(</span><span class="n">d1</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">d2</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">compare</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">d2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">d1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">d2</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">and</span> <span class="n">d2</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">d1</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">and</span> <span class="n">d1</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+                <span class="n">compare</span> <span class="o">=</span> <span class="n">_compareDict</span><span class="p">(</span><span class="n">d1</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">d2</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">compare</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<span class="c1"># GWV 14/01/2021: replaced by near similar _validateStringValue classmethod on AbtractWrapper</span>
+<span class="c1"># def _validateName(project, cls, value: str, attribName: str = &#39;name&#39;, allowWhitespace: bool = False, allowEmpty: bool = False,</span>
+<span class="c1">#                   allowNone: bool = False, allowLeadingTrailingWhitespace: bool = False, allowSpace: bool = True,</span>
+<span class="c1">#                   checkExisting: bool = True):</span>
+<span class="c1">#     &quot;&quot;&quot;Check that the attribName is valid</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     from ccpn.core.lib import Pid  # avoids circular imports</span>
+<span class="c1">#</span>
+<span class="c1">#     if value is not None:</span>
+<span class="c1">#         if not isinstance(value, str):</span>
+<span class="c1">#             raise TypeError(&#39;{}.{} must be a string&#39;.format(cls.className, attribName))</span>
+<span class="c1">#         if not value and not allowEmpty:</span>
+<span class="c1">#             raise ValueError(&#39;{}.{} must be set&#39;.format(cls.className, attribName))</span>
+<span class="c1">#         if Pid.altCharacter in value:</span>
+<span class="c1">#             raise ValueError(&#39;Character {} not allowed in {}.{}&#39;.format(Pid.altCharacter, cls.className, attribName))</span>
+<span class="c1">#         if allowWhitespace:</span>
+<span class="c1">#             if not allowSpace and &#39; &#39; in value:</span>
+<span class="c1">#                 raise ValueError(&#39;space not allowed in {}.{}&#39;.format(cls.className, attribName))</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             if allowSpace and contains_whitespace_nospace(value):</span>
+<span class="c1">#                 raise ValueError(&#39;whitespace not allowed in {}.{}&#39;.format(cls.className, attribName))</span>
+<span class="c1">#             elif not allowSpace and contains_whitespace(value):</span>
+<span class="c1">#                 raise ValueError(&#39;whitespace not allowed in {}.{}&#39;.format(cls.className, attribName))</span>
+<span class="c1">#         if not allowLeadingTrailingWhitespace and value != value.strip():</span>
+<span class="c1">#             raise ValueError(&#39;{}.{} cannot contain leading/trailing whitespace&#39;.format(cls.className, attribName))</span>
+<span class="c1">#</span>
+<span class="c1">#     elif not allowNone:</span>
+<span class="c1">#         raise ValueError(&#39;None not allowed in {}.{}&#39;.format(cls.className, attribName))</span>
+<span class="c1">#</span>
+<span class="c1">#     # previous = project.getByRelativeId(value)</span>
+<span class="c1">#     # if previous not in (None, cls):</span>
+<span class="c1">#     #     raise ValueError(&#39;{} already exists&#39;.format(previous.longPid))</span>
+<span class="c1">#</span>
+<span class="c1">#     if checkExisting:</span>
+<span class="c1">#         # this is not valid for nmrAtoms</span>
+<span class="c1">#         found = [obj for obj in getattr(project, cls._pluralLinkName, []) if getattr(obj, attribName, None) == value]</span>
+<span class="c1">#         if found:</span>
+<span class="c1">#             raise ValueError(&#39;{} already exists&#39;.format(found[0].id))</span>
+<span class="c1">#</span>
+<span class="c1">#     # will only get here if all the tests pass</span>
+<span class="c1">#     return True</span>
+
+
+<div class="viewcode-block" id="stringToCamelCase"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.stringToCamelCase">[docs]</a><span class="k">def</span> <span class="nf">stringToCamelCase</span><span class="p">(</span><span class="n">label</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Change string to camelCase format</span>
+<span class="sd">    Removes whitespaces, and changes first character to lower case</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">attr</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">translate</span><span class="p">({</span><span class="nb">ord</span><span class="p">(</span><span class="n">c</span><span class="p">):</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">whitespace</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">attr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="n">attr</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span></div>
+
+
+<span class="n">CAMELCASEPTN</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;((?&lt;=[a-z])[A-Z]|(?&lt;!\A)[A-Z](?=[a-z]))&#39;</span>
+<span class="n">CAMELCASEREP</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39; \1&#39;</span>
+
+
+<span class="c1"># alternative camelCase split = r&#39;((?&lt;=[a-z])[A-Z]|(?&lt;=[A-Z])[A-Z](?=[a-z]))&#39;&#39;</span>
+
+<div class="viewcode-block" id="camelCaseToString"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.camelCaseToString">[docs]</a><span class="k">def</span> <span class="nf">camelCaseToString</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Change a camelCase string to string with spaces in front of capitals.</span>
+<span class="sd">    Groups of capitals are taken as acronyms and only the last letter of a group is separated.</span>
+<span class="sd">    The first letter is capitalised except in the special case of a camel case string beginning</span>
+<span class="sd">    &lt;lowerCase,uppercase&gt;, in which case the first lowercase letter is preserved.</span>
+<span class="sd">    e.g.</span>
+<span class="sd">    camelCase -&gt; Camel Case</span>
+<span class="sd">    TLAAcronym -&gt; TLA Acronym</span>
+<span class="sd">    pHValue -&gt; pH Value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">islower</span><span class="p">()</span> <span class="ow">and</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">isupper</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">CAMELCASEPTN</span><span class="p">,</span> <span class="n">CAMELCASEREP</span><span class="p">,</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">CAMELCASEPTN</span><span class="p">,</span> <span class="n">CAMELCASEREP</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">label</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="n">label</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span></div>
+
+
+<span class="c1"># GWV 20210113: moved to Project.py as only used there and was creating circular imports</span>
+
+<span class="c1"># def isValidPath(projectName, stripFullPath=True, stripExtension=True):</span>
+<span class="c1">#     &quot;&quot;&quot;Check whether the project name is valid after stripping fullpath and extension</span>
+<span class="c1">#     Can only contain alphanumeric characters and underscores</span>
+<span class="c1">#</span>
+<span class="c1">#     :param projectName: name of project to check</span>
+<span class="c1">#     :param stripFullPath: set to true to remove leading directory</span>
+<span class="c1">#     :param stripExtension: set to true to remove extension</span>
+<span class="c1">#     :return: True if valid else False</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     if not projectName:</span>
+<span class="c1">#         return</span>
+<span class="c1">#</span>
+<span class="c1">#     if isinstance(projectName, str):</span>
+<span class="c1">#</span>
+<span class="c1">#         name = os.path.basename(projectName) if stripFullPath else projectName</span>
+<span class="c1">#         name = os.path.splitext(name)[0] if stripExtension else name</span>
+<span class="c1">#</span>
+<span class="c1">#         STRIPCHARS = &#39;_&#39;</span>
+<span class="c1">#         for ss in STRIPCHARS:</span>
+<span class="c1">#             name = name.replace(ss, &#39;&#39;)</span>
+<span class="c1">#</span>
+<span class="c1">#         if name.isalnum():</span>
+<span class="c1">#             return True</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):</span>
+<span class="c1">#     &quot;&quot;&quot;Check whether the project name is valid after stripping fullpath and extension</span>
+<span class="c1">#     Can only contain alphanumeric characters and underscores</span>
+<span class="c1">#</span>
+<span class="c1">#     :param projectName: name of project to check</span>
+<span class="c1">#     :param stripFullPath: set to true to remove leading directory</span>
+<span class="c1">#     :param stripExtension: set to true to remove extension</span>
+<span class="c1">#     :return: True if length &lt;= 32 else False</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     if not projectName:</span>
+<span class="c1">#         return</span>
+<span class="c1">#</span>
+<span class="c1">#     if isinstance(projectName, str):</span>
+<span class="c1">#         name = os.path.basename(projectName) if stripFullPath else projectName</span>
+<span class="c1">#         name = os.path.splitext(name)[0] if stripExtension else name</span>
+<span class="c1">#</span>
+<span class="c1">#         return len(name) &lt;= 32</span>
+
+
+<div class="viewcode-block" id="zipCycle"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.zipCycle">[docs]</a><span class="k">def</span> <span class="nf">zipCycle</span><span class="p">(</span><span class="o">*</span><span class="n">iterables</span><span class="p">,</span> <span class="n">emptyDefault</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make an iterator returning elements from the iterable and saving a copy of each.</span>
+<span class="sd">    When the iterable is exhausted, return elements from the saved copy.</span>
+
+<span class="sd">    example:</span>
+<span class="sd">            for i in zipCycle(range(2), range(5), [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;], []):</span>
+<span class="sd">                print(i)</span>
+<span class="sd">            Outputs:</span>
+<span class="sd">            (0, 0, &#39;a&#39;, None)</span>
+<span class="sd">            (1, 1, &#39;b&#39;, None)</span>
+<span class="sd">            (0, 2, &#39;c&#39;, None)</span>
+<span class="sd">            (1, 3, &#39;a&#39;, None)</span>
+<span class="sd">            (0, 4, &#39;b&#39;, None)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">cycle</span><span class="p">,</span> <span class="n">zip_longest</span>
+
+    <span class="n">cycles</span> <span class="o">=</span> <span class="p">[</span><span class="n">cycle</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">iterables</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">zip_longest</span><span class="p">(</span><span class="o">*</span><span class="n">iterables</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">emptyDefault</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cycles</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_getObjectsByPids</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">pids</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">project</span><span class="o">.</span><span class="n">getObjectsByPids</span><span class="p">(</span><span class="n">pids</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_getPidsFromObjects</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">objs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">project</span><span class="o">.</span><span class="n">getPidsByObjects</span><span class="p">(</span><span class="n">objs</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="copyToClipboard"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.copyToClipboard">[docs]</a><span class="k">def</span> <span class="nf">copyToClipboard</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param items: a list of items to be copied to Clipboard.</span>
+<span class="sd">                  Each value is single quoted if a str (Pid if an AbstractWrapperObject instance),</span>
+<span class="sd">                  or preserved the format for other cases. All values are comma separated.</span>
+
+<span class="sd">    A very simple implementation of str to clipboard.</span>
+<span class="sd">    An ideal implementation should deal with AbstractWrapperObjects using some sort of parser to be able to perform</span>
+<span class="sd">    actions such as copy-paste peakLists via NEF etc.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+    <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+    <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+
+    <span class="n">texts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">AbstractWrapperObject</span><span class="p">):</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;&#39;</span><span class="si">{</span><span class="n">i</span><span class="o">.</span><span class="n">pid</span><span class="si">}</span><span class="s2">&#39;&quot;&quot;&quot;</span>  <span class="c1"># wrap a Pid with quotes if the format is of instance AbstractWrapperObject</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;pid&#39;</span><span class="p">):</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;&#39;</span><span class="si">{</span><span class="n">i</span><span class="o">.</span><span class="n">pid</span><span class="si">}</span><span class="s2">&#39;&quot;&quot;&quot;</span>  <span class="c1"># wrap a Pid with quotes if the format is of instance &lt;object&gt; with attribute pid</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;&#39;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&#39;&quot;&quot;&quot;</span>  <span class="c1"># wrap with quotes if the format is a string</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">found</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">foundCodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">_SortByMatch</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">foundCodes</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span>  <span class="c1"># otherwise preserve the format (e.g. floats, int...)</span>
+        <span class="n">texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">texts</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">texts</span><span class="o">.</span><span class="n">index</span><span class="p">)))</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">values</span><span class="p">])</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">to_clipboard</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Copied to clipboard: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">values</span><span class="p">)</span></div>
 
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">found</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="loadModules"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.loadModules">[docs]</a><span class="k">def</span> <span class="nf">loadModules</span><span class="p">(</span><span class="n">paths</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    dynamic module importer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">import</span> <span class="nn">pkgutil</span> <span class="k">as</span> <span class="nn">_pkgutil</span>
+    <span class="kn">import</span> <span class="nn">traceback</span>
+    <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+
+    <span class="n">modules</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># change to strings - pathlib objects don&#39;t work</span>
+    <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">loader</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">isPpkg</span> <span class="ow">in</span> <span class="n">_pkgutil</span><span class="o">.</span><span class="n">walk_packages</span><span class="p">(</span><span class="n">paths</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">find_module</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>  <span class="c1"># already loaded.</span>
+                        <span class="k">continue</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">module</span> <span class="o">=</span> <span class="n">found</span><span class="o">.</span><span class="n">load_module</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                        <span class="n">modules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">traceback</span><span class="o">.</span><span class="n">print_tb</span><span class="p">(</span><span class="n">err</span><span class="o">.</span><span class="n">__traceback__</span><span class="p">)</span>
+                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Error Loading Module </span><span class="si">%s</span><span class="s1">. </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">modules</span></div>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -930,7 +881,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -950,12 +901,13 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.util.Common</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

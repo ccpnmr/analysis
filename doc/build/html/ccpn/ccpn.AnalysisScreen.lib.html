@@ -1,18 +1,19 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>ccpn.AnalysisScreen.lib package &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -37,7 +38,8 @@
         <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &#187;</li>
-          <li class="nav-item nav-item-3"><a href="ccpn.AnalysisScreen.html" accesskey="U">ccpn.AnalysisScreen package</a> &#187;</li> 
+          <li class="nav-item nav-item-3"><a href="ccpn.AnalysisScreen.html" accesskey="U">ccpn.AnalysisScreen package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.AnalysisScreen.lib package</a></li> 
       </ul>
     </div>  
 
@@ -46,135 +48,399 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-ccpn.AnalysisScreen.lib">
+  <section id="module-ccpn.AnalysisScreen.lib">
 <span id="ccpn-analysisscreen-lib-package"></span><h1>ccpn.AnalysisScreen.lib package<a class="headerlink" href="#module-ccpn.AnalysisScreen.lib" title="Permalink to this headline">¶</a></h1>
 <p>Module Documentation here</p>
-<div class="section" id="submodules">
+<section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-ccpn.AnalysisScreen.lib.MixturesGeneration">
-<span id="ccpn-analysisscreen-lib-mixturesgeneration-module"></span><h2>ccpn.AnalysisScreen.lib.MixturesGeneration module<a class="headerlink" href="#module-ccpn.AnalysisScreen.lib.MixturesGeneration" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-ccpn.AnalysisScreen.lib.ScreenLookup">
-<span id="ccpn-analysisscreen-lib-screenlookup-module"></span><h2>ccpn.AnalysisScreen.lib.ScreenLookup module<a class="headerlink" href="#module-ccpn.AnalysisScreen.lib.ScreenLookup" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-ccpn.AnalysisScreen.lib.SimulatedAnnealing">
-<span id="ccpn-analysisscreen-lib-simulatedannealing-module"></span><h2>ccpn.AnalysisScreen.lib.SimulatedAnnealing module<a class="headerlink" href="#module-ccpn.AnalysisScreen.lib.SimulatedAnnealing" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.annealling">
-<code class="sig-prename descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="sig-name descname">annealling</code><span class="sig-paren">(</span><em class="sig-param">mixtures</em>, <em class="sig-param">coolingMethod='Linear'</em>, <em class="sig-param">startTemp=1000</em>, <em class="sig-param">finalTemp=0.01</em>, <em class="sig-param">maxSteps=1000</em>, <em class="sig-param">tempK=200</em>, <em class="sig-param">minDistance=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#annealling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.annealling" title="Permalink to this definition">¶</a></dt>
+</section>
+<section id="module-ccpn.AnalysisScreen.lib.MixturesExporter">
+<span id="ccpn-analysisscreen-lib-mixturesexporter-module"></span><h2>ccpn.AnalysisScreen.lib.MixturesExporter module<a class="headerlink" href="#module-ccpn.AnalysisScreen.lib.MixturesExporter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.BrukerMixtureExporter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.MixturesExporter.</span></span><span class="sig-name descname"><span class="pre">BrukerMixtureExporter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filePath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixturesExporter.html#BrukerMixtureExporter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.BrukerMixtureExporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC" title="ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.BrukerMixtureExporter.columnDefinitions">
+<span class="sig-name descname"><span class="pre">columnDefinitions</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'DMSO</span> <span class="pre">Container</span> <span class="pre">ID':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'Date</span> <span class="pre">Finished':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'Date</span> <span class="pre">Started':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'Destination</span> <span class="pre">Container</span> <span class="pre">ID':</span> <span class="pre">'the</span> <span class="pre">sample</span> <span class="pre">plate</span> <span class="pre">unique</span> <span class="pre">value.</span> <span class="pre">In</span> <span class="pre">the</span> <span class="pre">Format</span> <span class="pre">Prefix_PlateNumber.RowColumn.</span> <span class="pre">E.g.:</span> <span class="pre">Px_0001.A1,</span> <span class="pre">Px_0002.B4,</span> <span class="pre">Px_0010.AA48.',</span> <span class="pre">'Method':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'NMR</span> <span class="pre">Disk':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'NMR</span> <span class="pre">EXPNO':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'NMR</span> <span class="pre">Experiment':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'NMR</span> <span class="pre">P1':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'NMR</span> <span class="pre">P2':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'NMR</span> <span class="pre">P3':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'NMRLock</span> <span class="pre">Solvent':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'Sample</span> <span class="pre">ID':</span> <span class="pre">'The</span> <span class="pre">sample</span> <span class="pre">name.',</span> <span class="pre">'Sample/Workstep</span> <span class="pre">Title':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'SrcPosList':</span> <span class="pre">'List</span> <span class="pre">of</span> <span class="pre">singleton</span> <span class="pre">Substances</span> <span class="pre">UserCode</span> <span class="pre">that</span> <span class="pre">form</span> <span class="pre">the</span> <span class="pre">mixture,</span> <span class="pre">&quot;;&quot;</span> <span class="pre">separated.',</span> <span class="pre">'State</span> <span class="pre">Comment':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'User</span> <span class="pre">P1':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'User</span> <span class="pre">P2':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'User</span> <span class="pre">P3':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'Volume</span> <span class="pre">(SA1)':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'Volume</span> <span class="pre">(SD1)':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'WorkStep</span> <span class="pre">No':</span> <span class="pre">'The</span> <span class="pre">sample</span> <span class="pre">number.',</span> <span class="pre">'Workstep</span> <span class="pre">ID':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.',</span> <span class="pre">'Workstep</span> <span class="pre">State':</span> <span class="pre">'Check</span> <span class="pre">Bruker</span> <span class="pre">docs</span> <span class="pre">for</span> <span class="pre">more</span> <span class="pre">info.'}</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.BrukerMixtureExporter.columnDefinitions" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.calculateOverlapCount">
-<code class="sig-prename descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="sig-name descname">calculateOverlapCount</code><span class="sig-paren">(</span><em class="sig-param">compoundA</em>, <em class="sig-param">mixture</em>, <em class="sig-param">minimalOverlap</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#calculateOverlapCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.calculateOverlapCount" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.BrukerMixtureExporter.createDataFrame">
+<span class="sig-name descname"><span class="pre">createDataFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sortBy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sampleNumber'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixturesExporter.html#BrukerMixtureExporter.createDataFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.BrukerMixtureExporter.createDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the exporting table</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.BrukerMixtureExporter.info">
+<span class="sig-name descname"><span class="pre">info</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Export</span> <span class="pre">mixture</span> <span class="pre">with</span> <span class="pre">Bruker-formatting.</span> <span class="pre">Used</span> <span class="pre">to</span> <span class="pre">create</span> <span class="pre">an</span> <span class="pre">input</span> <span class="pre">file</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">Bruker</span> <span class="pre">SampleProTubeL</span> <span class="pre">(2022).'</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.BrukerMixtureExporter.info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.BrukerMixtureExporter.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Bruker_SampleProTube'</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.BrukerMixtureExporter.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.BrukerMixtureExporter.title">
+<span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'WorkstepList'</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.BrukerMixtureExporter.title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.MixturesExporter.</span></span><span class="sig-name descname"><span class="pre">MixtureExporterABC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filePath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixturesExporter.html#MixtureExporterABC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for exporting mixtures</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.columnDefinitions">
+<span class="sig-name descname"><span class="pre">columnDefinitions</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'ColumnName':</span> <span class="pre">'The</span> <span class="pre">Column</span> <span class="pre">docs.'}</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.columnDefinitions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.createDataFrame">
+<span class="sig-name descname"><span class="pre">createDataFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixturesExporter.html#MixtureExporterABC.createDataFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.createDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the dataFrame to be exported from the samples.
+:return: DataFrame</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.filePath">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">filePath</span></span><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.filePath" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> -</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.info">
+<span class="sig-name descname"><span class="pre">info</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MixtureExporterABC'</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.title">
+<span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.toCSV">
+<span class="sig-name descname"><span class="pre">toCSV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixturesExporter.html#MixtureExporterABC.toCSV"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.toCSV" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.toFile">
+<span class="sig-name descname"><span class="pre">toFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixturesExporter.html#MixtureExporterABC.toFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.toFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic exporter to file from Pandas.
+:param extension: one of [‘csv’,’tsv’,’json’, ‘xlxs’]
+:param kwargs: any supported for the Pandas DataFrame exporter.
+:return: dataFrame</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.toJSON">
+<span class="sig-name descname"><span class="pre">toJSON</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixturesExporter.html#MixtureExporterABC.toJSON"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.toJSON" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.toTSV">
+<span class="sig-name descname"><span class="pre">toTSV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixturesExporter.html#MixtureExporterABC.toTSV"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.toTSV" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.toXLSX">
+<span class="sig-name descname"><span class="pre">toXLSX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixturesExporter.html#MixtureExporterABC.toXLSX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC.toXLSX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export dataframe to an excel XLSX format.
+Sheet name: taken from the class title
+Header formatting: bold and black margin grid,
+Frozen Header (everything scroll except the first row).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SamplesLookupExporter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.MixturesExporter.</span></span><span class="sig-name descname"><span class="pre">SamplesLookupExporter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filePath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixturesExporter.html#SamplesLookupExporter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SamplesLookupExporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC" title="ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SamplesLookupExporter.columnDefinitions">
+<span class="sig-name descname"><span class="pre">columnDefinitions</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'amount':</span> <span class="pre">'',</span> <span class="pre">'amountUnit':</span> <span class="pre">'',</span> <span class="pre">'batchIdentifier':</span> <span class="pre">'',</span> <span class="pre">'columnNumber':</span> <span class="pre">'',</span> <span class="pre">'comment':</span> <span class="pre">'',</span> <span class="pre">'creationDate':</span> <span class="pre">'',</span> <span class="pre">'ionicStrength':</span> <span class="pre">'',</span> <span class="pre">'isHazardous':</span> <span class="pre">'',</span> <span class="pre">'pH':</span> <span class="pre">'',</span> <span class="pre">'plateIdentifier':</span> <span class="pre">'the</span> <span class="pre">sample</span> <span class="pre">plate</span> <span class="pre">unique</span> <span class="pre">value.</span> <span class="pre">In</span> <span class="pre">the</span> <span class="pre">Format</span> <span class="pre">Prefix_PlateNumber.RowColumn.</span> <span class="pre">E.g.:</span> <span class="pre">Px_0001.A1,</span> <span class="pre">Px_0002.B4,</span> <span class="pre">Px_0010.AA48.',</span> <span class="pre">'rowNumber':</span> <span class="pre">'',</span> <span class="pre">'sampleComponents':</span> <span class="pre">'All</span> <span class="pre">the</span> <span class="pre">sampleComponent/Substance</span> <span class="pre">names</span> <span class="pre">for</span> <span class="pre">a</span> <span class="pre">mixture,</span> <span class="pre">semicolon</span> <span class="pre">(;)</span> <span class="pre">separated.',</span> <span class="pre">'sampleName':</span> <span class="pre">'',</span> <span class="pre">'spectrumGroupName':</span> <span class="pre">'',</span> <span class="pre">'spectrumName':</span> <span class="pre">'',</span> <span class="pre">'spectrumPath':</span> <span class="pre">''}</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SamplesLookupExporter.columnDefinitions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SamplesLookupExporter.createDataFrame">
+<span class="sig-name descname"><span class="pre">createDataFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sortBy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sampleNumber'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixturesExporter.html#SamplesLookupExporter.createDataFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SamplesLookupExporter.createDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the exporting table</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SamplesLookupExporter.info">
+<span class="sig-name descname"><span class="pre">info</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Export</span> <span class="pre">mixture</span> <span class="pre">in</span> <span class="pre">format</span> <span class="pre">ready</span> <span class="pre">to</span> <span class="pre">be</span> <span class="pre">re-imported</span> <span class="pre">to</span> <span class="pre">CcpNmr</span> <span class="pre">Analysis</span> <span class="pre">for</span> <span class="pre">starting</span> <span class="pre">a</span> <span class="pre">screening</span> <span class="pre">workflow.'</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SamplesLookupExporter.info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SamplesLookupExporter.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CcpNmr_Samples_Lookup'</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SamplesLookupExporter.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SamplesLookupExporter.title">
+<span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SampleMixtures'</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SamplesLookupExporter.title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SimpleMixtureExporter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.MixturesExporter.</span></span><span class="sig-name descname"><span class="pre">SimpleMixtureExporter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filePath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixturesExporter.html#SimpleMixtureExporter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SimpleMixtureExporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC" title="ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SimpleMixtureExporter.columnDefinitions">
+<span class="sig-name descname"><span class="pre">columnDefinitions</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'SampleSpectralOverlaps':</span> <span class="pre">'The</span> <span class="pre">total</span> <span class="pre">spectral</span> <span class="pre">count</span> <span class="pre">overlap.',</span> <span class="pre">'SampleSpectralScore':</span> <span class="pre">'The</span> <span class="pre">total</span> <span class="pre">spectral</span> <span class="pre">overlap</span> <span class="pre">score.',</span> <span class="pre">'plateIdentifier':</span> <span class="pre">'the</span> <span class="pre">sample</span> <span class="pre">plate</span> <span class="pre">unique</span> <span class="pre">value.</span> <span class="pre">In</span> <span class="pre">the</span> <span class="pre">Format</span> <span class="pre">Prefix_PlateNumber.RowColumn.</span> <span class="pre">E.g.:</span> <span class="pre">Px_0001.A1,</span> <span class="pre">Px_0002.B4,</span> <span class="pre">Px_0010.AA48.',</span> <span class="pre">'sampleComponents':</span> <span class="pre">'All</span> <span class="pre">the</span> <span class="pre">sampleComponent/Substance</span> <span class="pre">names</span> <span class="pre">for</span> <span class="pre">a</span> <span class="pre">mixture,</span> <span class="pre">semicolon</span> <span class="pre">separated.',</span> <span class="pre">'sampleName':</span> <span class="pre">'The</span> <span class="pre">sample</span> <span class="pre">name.',</span> <span class="pre">'sampleNumber':</span> <span class="pre">'The</span> <span class="pre">sample</span> <span class="pre">number.'}</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SimpleMixtureExporter.columnDefinitions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SimpleMixtureExporter.createDataFrame">
+<span class="sig-name descname"><span class="pre">createDataFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sortBy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sampleNumber'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixturesExporter.html#SimpleMixtureExporter.createDataFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SimpleMixtureExporter.createDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the exporting table</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SimpleMixtureExporter.info">
+<span class="sig-name descname"><span class="pre">info</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Export</span> <span class="pre">mixture</span> <span class="pre">to</span> <span class="pre">Excel</span> <span class="pre">with</span> <span class="pre">names</span> <span class="pre">and</span> <span class="pre">general</span> <span class="pre">scores'</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SimpleMixtureExporter.info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SimpleMixtureExporter.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Simple_MixtureExporter'</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SimpleMixtureExporter.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SimpleMixtureExporter.title">
+<span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Mixture'</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SimpleMixtureExporter.title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SubstancesLookupExporter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.MixturesExporter.</span></span><span class="sig-name descname"><span class="pre">SubstancesLookupExporter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filePath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixturesExporter.html#SubstancesLookupExporter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SubstancesLookupExporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC" title="ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.AnalysisScreen.lib.MixturesExporter.MixtureExporterABC</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SubstancesLookupExporter.columnDefinitions">
+<span class="sig-name descname"><span class="pre">columnDefinitions</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'atomCount':</span> <span class="pre">'',</span> <span class="pre">'bondCount':</span> <span class="pre">'',</span> <span class="pre">'casNumber':</span> <span class="pre">'',</span> <span class="pre">'comment':</span> <span class="pre">'',</span> <span class="pre">'empiricalFormula':</span> <span class="pre">'',</span> <span class="pre">'hBondAcceptorCount':</span> <span class="pre">'',</span> <span class="pre">'hBondDonorCount':</span> <span class="pre">'',</span> <span class="pre">'logPartitionCoefficient':</span> <span class="pre">'',</span> <span class="pre">'molecularMass':</span> <span class="pre">'',</span> <span class="pre">'polarSurfaceArea':</span> <span class="pre">'',</span> <span class="pre">'ringCount':</span> <span class="pre">'',</span> <span class="pre">'sequenceString':</span> <span class="pre">'',</span> <span class="pre">'smiles':</span> <span class="pre">'',</span> <span class="pre">'spectrumGroupName':</span> <span class="pre">'',</span> <span class="pre">'spectrumName':</span> <span class="pre">'',</span> <span class="pre">'spectrumPath':</span> <span class="pre">'',</span> <span class="pre">'substanceName':</span> <span class="pre">'',</span> <span class="pre">'userCode':</span> <span class="pre">''}</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SubstancesLookupExporter.columnDefinitions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SubstancesLookupExporter.createDataFrame">
+<span class="sig-name descname"><span class="pre">createDataFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sortBy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixturesExporter.html#SubstancesLookupExporter.createDataFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SubstancesLookupExporter.createDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the exporting table</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SubstancesLookupExporter.info">
+<span class="sig-name descname"><span class="pre">info</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Export</span> <span class="pre">Substances</span> <span class="pre">in</span> <span class="pre">format</span> <span class="pre">ready</span> <span class="pre">to</span> <span class="pre">be</span> <span class="pre">re-imported</span> <span class="pre">to</span> <span class="pre">CcpNmr</span> <span class="pre">Analysis</span> <span class="pre">for</span> <span class="pre">starting</span> <span class="pre">a</span> <span class="pre">screening</span> <span class="pre">workflow.'</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SubstancesLookupExporter.info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SubstancesLookupExporter.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CcpNmr_Substances_Lookup'</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SubstancesLookupExporter.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesExporter.SubstancesLookupExporter.title">
+<span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Substance'</span></em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesExporter.SubstancesLookupExporter.title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-ccpn.AnalysisScreen.lib.MixturesGeneration">
+<span id="ccpn-analysisscreen-lib-mixturesgeneration-module"></span><h2>ccpn.AnalysisScreen.lib.MixturesGeneration module<a class="headerlink" href="#module-ccpn.AnalysisScreen.lib.MixturesGeneration" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.MixturesGeneration.getAlphanumWellPosition">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.MixturesGeneration.</span></span><span class="sig-name descname"><span class="pre">getAlphanumWellPosition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wellSize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">96</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columnSubgroup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subgroupSize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixturesGeneration.html#getAlphanumWellPosition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesGeneration.getAlphanumWellPosition" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wellSize</strong> – int: one of the common Well: [6, 12, 24, 48, 96, 384, 1536, 3456]</p></li>
+<li><p><strong>columnSubgroup</strong> – bool: False default. Only used for well &gt;= 1536.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>list of tuple (row value, column number)
+The alphanumeric well position on a plate:</p>
+<blockquote>
+<div><p>96-well plate coordinates range from A1 to H12
+384-well plates coordinates range from A1 to P24
+1536-well plates coordinates range in groups:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>A-H with 4 subgroup of rows  and 1-48 columns</dt><dd><p>AA01 to AA48, AB01 to AB48 …
+BA01 to BD48…</p>
+</dd>
+</dl>
+</li>
+</ul>
+<dl>
+<dt>-With columnSubgroup set to True:</dt><dd><p>A-H with 4 subgroup of rows  and 1-12 columns each of 4 subgroups:
+first row:</p>
+<blockquote>
+<div><p>AA11-AA14;  AA21-AA24; AA31-AB34 … AA121-AA124</p>
+</div></blockquote>
+<p>…
+last row:</p>
+<blockquote>
+<div><p>HA11-HA14; HA21-HA24; HA31-HA34 … HA121-HA124</p>
+</div></blockquote>
+</dd>
+</dl>
+</div></blockquote>
+</div></blockquote>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-ccpn.AnalysisScreen.lib.SimulatedAnnealing">
+<span id="ccpn-analysisscreen-lib-simulatedannealing-module"></span><h2>ccpn.AnalysisScreen.lib.SimulatedAnnealing module<a class="headerlink" href="#module-ccpn.AnalysisScreen.lib.SimulatedAnnealing" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.annealling">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">annealling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mixtures</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coolingMethod</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTemp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finalTemp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxSteps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tempK</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minDistance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#annealling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.annealling" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.calculateOverlapCount">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">calculateOverlapCount</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compoundA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixture</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimalOverlap</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#calculateOverlapCount"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.calculateOverlapCount" title="Permalink to this definition">¶</a></dt>
 <dd><p>called from score single sampleComponent and sample</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.calculateTotalScore">
-<code class="sig-prename descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="sig-name descname">calculateTotalScore</code><span class="sig-paren">(</span><em class="sig-param">mixturesDict</em>, <em class="sig-param">peaksDistance=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#calculateTotalScore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.calculateTotalScore" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.calculateTotalScore">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">calculateTotalScore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mixturesDict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peaksDistance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#calculateTotalScore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.calculateTotalScore" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.findBestMixtures">
-<code class="sig-prename descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="sig-name descname">findBestMixtures</code><span class="sig-paren">(</span><em class="sig-param">mixturesSteps</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#findBestMixtures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.findBestMixtures" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.divideChunks">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">divideChunks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#divideChunks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.divideChunks" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.getExponentialSteps">
-<code class="sig-prename descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="sig-name descname">getExponentialSteps</code><span class="sig-paren">(</span><em class="sig-param">startTemp=1000.0</em>, <em class="sig-param">finalTemp=0.1</em>, <em class="sig-param">maxSteps=100</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#getExponentialSteps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getExponentialSteps" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.findBestMixtures">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">findBestMixtures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mixturesSteps</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#findBestMixtures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.findBestMixtures" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.getLinearSteps">
-<code class="sig-prename descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="sig-name descname">getLinearSteps</code><span class="sig-paren">(</span><em class="sig-param">startTemp=1000.0</em>, <em class="sig-param">finalTemp=0.1</em>, <em class="sig-param">maxSteps=1000</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#getLinearSteps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getLinearSteps" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.getExponentialSteps">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">getExponentialSteps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">startTemp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finalTemp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxSteps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#getExponentialSteps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getExponentialSteps" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.getOverlappedCount">
-<code class="sig-prename descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="sig-name descname">getOverlappedCount</code><span class="sig-paren">(</span><em class="sig-param">mixtureCompounds</em>, <em class="sig-param">minDist=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#getOverlappedCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getOverlappedCount" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.getLinearSteps">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">getLinearSteps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">startTemp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finalTemp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxSteps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#getLinearSteps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getLinearSteps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.getOverlappedCount">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">getOverlappedCount</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mixtureCompounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minDist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#getOverlappedCount"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getOverlappedCount" title="Permalink to this definition">¶</a></dt>
 <dd><p>called from score single sample</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.getProbability">
-<code class="sig-prename descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="sig-name descname">getProbability</code><span class="sig-paren">(</span><em class="sig-param">scoreDiff</em>, <em class="sig-param">currentTemp</em>, <em class="sig-param">tempK</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#getProbability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getProbability" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.getProbability">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">getProbability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scoreDiff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">currentTemp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tempK</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#getProbability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getProbability" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.greedyMixtures">
-<code class="sig-prename descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="sig-name descname">greedyMixtures</code><span class="sig-paren">(</span><em class="sig-param">compounds</em>, <em class="sig-param">maxSize</em>, <em class="sig-param">minDistance</em>, <em class="sig-param">maxPeaksOverlapped=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#greedyMixtures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.greedyMixtures" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.greedyMixtures">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">greedyMixtures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxSize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minDistance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxPeaksOverlapped</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#greedyMixtures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.greedyMixtures" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.iterateAnnealing">
-<code class="sig-prename descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="sig-name descname">iterateAnnealing</code><span class="sig-paren">(</span><em class="sig-param">mixtures</em>, <em class="sig-param">startTemp=1000</em>, <em class="sig-param">finalTemp=0.01</em>, <em class="sig-param">maxSteps=1000</em>, <em class="sig-param">tempK=200</em>, <em class="sig-param">coolingMethod='linear'</em>, <em class="sig-param">nIterations=1</em>, <em class="sig-param">minDistance=0.01</em>, <em class="sig-param">minTotalScore=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#iterateAnnealing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.iterateAnnealing" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.iterateAnnealing">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">iterateAnnealing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mixtures</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTemp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finalTemp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxSteps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tempK</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coolingMethod</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nIterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minDistance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minTotalScore</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#iterateAnnealing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.iterateAnnealing" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.mixTwoMixturesDict">
-<code class="sig-prename descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="sig-name descname">mixTwoMixturesDict</code><span class="sig-paren">(</span><em class="sig-param">mixtures</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#mixTwoMixturesDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.mixTwoMixturesDict" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.mixTwoMixturesDict">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">mixTwoMixturesDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mixtures</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#mixTwoMixturesDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.mixTwoMixturesDict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.randomDictMixtures">
-<code class="sig-prename descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="sig-name descname">randomDictMixtures</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">compounds</em>, <em class="sig-param">nMixtures</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#randomDictMixtures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.randomDictMixtures" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.randomDictMixtures">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">randomDictMixtures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nMixtures</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#randomDictMixtures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.randomDictMixtures" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.runCooling">
-<code class="sig-prename descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="sig-name descname">runCooling</code><span class="sig-paren">(</span><em class="sig-param">type</em>, <em class="sig-param">startTemp=1000.0</em>, <em class="sig-param">finalTemp=0.1</em>, <em class="sig-param">maxSteps=1000</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#runCooling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.runCooling" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.randomDictMixturesByCompoundCount">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">randomDictMixturesByCompoundCount</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nCompoundsPerMixture</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#randomDictMixturesByCompoundCount"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.randomDictMixturesByCompoundCount" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreCompound">
-<code class="sig-prename descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="sig-name descname">scoreCompound</code><span class="sig-paren">(</span><em class="sig-param">compoundA</em>, <em class="sig-param">compoundB</em>, <em class="sig-param">minDist</em>, <em class="sig-param">scalingFactor=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#scoreCompound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreCompound" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.runCooling">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">runCooling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTemp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finalTemp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxSteps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#runCooling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.runCooling" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreCompound_OLD">
-<code class="sig-prename descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="sig-name descname">scoreCompound_OLD</code><span class="sig-paren">(</span><em class="sig-param">compoundA</em>, <em class="sig-param">compoundB</em>, <em class="sig-param">minDist</em>, <em class="sig-param">scalingFactor=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#scoreCompound_OLD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreCompound_OLD" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreCompound">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">scoreCompound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compoundA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compoundB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minDist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalingFactor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#scoreCompound"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreCompound" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreCompound_OLD">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">scoreCompound_OLD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compoundA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compoundB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minDist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalingFactor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#scoreCompound_OLD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreCompound_OLD" title="Permalink to this definition">¶</a></dt>
 <dd><p>OLD slow keep for backup</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreMixture">
-<code class="sig-prename descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="sig-name descname">scoreMixture</code><span class="sig-paren">(</span><em class="sig-param">mixture</em>, <em class="sig-param">minDist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#scoreMixture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreMixture" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreMixture">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">scoreMixture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mixture</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minDist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#scoreMixture"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreMixture" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreMixture_">
-<code class="sig-prename descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="sig-name descname">scoreMixture_</code><span class="sig-paren">(</span><em class="sig-param">mixture</em>, <em class="sig-param">minDist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#scoreMixture_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreMixture_" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreMixture_">
+<span class="sig-prename descclassname"><span class="pre">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</span></span><span class="sig-name descname"><span class="pre">scoreMixture_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mixture</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minDist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#scoreMixture_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreMixture_" title="Permalink to this definition">¶</a></dt>
 <dd><p>for refactoring</p>
 </dd></dl>
 
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">ccpn.AnalysisScreen.lib package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-ccpn.AnalysisScreen.lib.MixturesExporter">ccpn.AnalysisScreen.lib.MixturesExporter module</a></li>
 <li><a class="reference internal" href="#module-ccpn.AnalysisScreen.lib.MixturesGeneration">ccpn.AnalysisScreen.lib.MixturesGeneration module</a></li>
-<li><a class="reference internal" href="#module-ccpn.AnalysisScreen.lib.ScreenLookup">ccpn.AnalysisScreen.lib.ScreenLookup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.AnalysisScreen.lib.SimulatedAnnealing">ccpn.AnalysisScreen.lib.SimulatedAnnealing module</a></li>
 </ul>
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="ccpn.AnalysisScreen.html"
-                        title="previous chapter">ccpn.AnalysisScreen package</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="ccpn.AnalysisScreen.pipes.html"
-                        title="next chapter">ccpn.AnalysisScreen.pipes package</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="ccpn.AnalysisScreen.html"
+                          title="previous chapter">ccpn.AnalysisScreen package</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="ccpn.AnalysisScreen.pipes.html"
+                          title="next chapter">ccpn.AnalysisScreen.pipes package</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -186,7 +452,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -214,12 +480,13 @@
         <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &#187;</li>
-          <li class="nav-item nav-item-3"><a href="ccpn.AnalysisScreen.html" >ccpn.AnalysisScreen package</a> &#187;</li> 
+          <li class="nav-item nav-item-3"><a href="ccpn.AnalysisScreen.html" >ccpn.AnalysisScreen package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.AnalysisScreen.lib package</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.core.PseudoDimension &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.PseudoDimension</a></li> 
       </ul>
     </div>  
 
@@ -42,8 +43,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
@@ -51,9 +53,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:29 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-01-21 11:22:07 +0000 (Fri, January 21, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.4 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -63,21 +65,23 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span>
+
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+<span class="kn">from</span> <span class="nn">ccpn.core._implementation.SpectrumDimensionAttributes</span> <span class="kn">import</span> <span class="n">SpectrumDimensionAttributes</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.Nmr</span> <span class="kn">import</span> <span class="n">SampledDataDim</span> <span class="k">as</span> <span class="n">ApiSampledDataDim</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.Nmr</span> <span class="kn">import</span> <span class="n">ExpDimRef</span> <span class="k">as</span> <span class="n">ApiExpDimRef</span>
 
 
-<div class="viewcode-block" id="PseudoDimension"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PseudoDimension.PseudoDimension">[docs]</a><span class="k">class</span> <span class="nc">PseudoDimension</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;ADVANCED. A sampled Spectrum axis with non-gridded values. Used to describe</span>
+<div class="viewcode-block" id="PseudoDimension"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PseudoDimension.PseudoDimension">[docs]</a><span class="k">class</span> <span class="nc">PseudoDimension</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">,</span> <span class="n">SpectrumDimensionAttributes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A sampled Spectrum axis with non-gridded values. Can be used (V2 legacy) to describe</span>
 <span class="sd">    sampled-value axes in pseudo-2D and nD experiments, such as the time delay axis for T1</span>
 <span class="sd">    experiments.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Short class name, for PID.</span>
-    <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;SD&#39;</span>
+    <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;PD&#39;</span>
     <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
     <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;PseudoDimension&#39;</span>
 
@@ -95,11 +99,48 @@
     <span class="c1"># Qualified name of matching API class</span>
     <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiSampledDataDim</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 
+    <span class="c1">#-----------------------------------------------------------------------------------------</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span>
+
+    <span class="c1">#-----------------------------------------------------------------------------------------</span>
+    <span class="c1"># CCPN properties</span>
+    <span class="c1">#-----------------------------------------------------------------------------------------</span>
+
     <span class="c1"># CCPN properties</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_apiSampledDataDim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiSampledDataDim</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; CCPN DataSource matching Spectrum&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_dataDim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: dataDim instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_dataDimRef</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: dataDim instance; not present for SampledDataDim</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_expDim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: expDim instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataDim</span><span class="o">.</span><span class="n">expDim</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_expDimRef</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: expDimRef instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_expDim</span><span class="o">.</span><span class="n">expDimRefs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -108,7 +149,7 @@
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dim</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">_localCcpnSortKey</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_localCcpnSortKey</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Local sorting key, in context of parent.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dim</span><span class="p">,)</span>
 
@@ -119,28 +160,9 @@
 
     <span class="n">spectrum</span> <span class="o">=</span> <span class="n">_parent</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;dimension number&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dim</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">pointCount</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;dimension number&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">numPoints</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">axisCode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;PseudoDimension axisCode &quot;&quot;&quot;</span>
-
-        <span class="n">expDimRef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDim</span><span class="o">.</span><span class="n">findFirstExpDimRef</span><span class="p">(</span><span class="n">serial</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">expDimRef</span> <span class="ow">and</span> <span class="n">expDimRef</span><span class="o">.</span><span class="n">axisCode</span>
-
-    <span class="nd">@axisCode</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">axisCode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">expDimRef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDim</span><span class="o">.</span><span class="n">findFirstExpDimRef</span><span class="p">(</span><span class="n">serial</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">expDimRef</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">expDimRef</span><span class="o">.</span><span class="n">axisCode</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="c1">#-----------------------------------------------------------------------------------------</span>
+    <span class="c1"># Object properties; specific to PseudoDimension</span>
+    <span class="c1">#-----------------------------------------------------------------------------------------</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">axisParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -153,44 +175,199 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">conditionVaried</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">axisUnit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;unit for transformed data using the reference (most commonly &#39;ppm&#39;)&quot;&quot;&quot;</span>
-        <span class="n">expDimRef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDim</span><span class="o">.</span><span class="n">findFirstExpDimRef</span><span class="p">(</span><span class="n">serial</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">expDimRef</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">expDimRef</span><span class="o">.</span><span class="n">unit</span>
-
-    <span class="nd">@axisUnit</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">axisUnit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">expDimRef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">expDim</span><span class="o">.</span><span class="n">findFirstExpDimRef</span><span class="p">(</span><span class="n">serial</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">expDimRef</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">expDimRef</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">value</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">pointValues</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;point values for PseudoDimension).&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">pointValues</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;point values for PseudoDimension.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">pointValues</span><span class="p">)</span>
 
     <span class="nd">@pointValues</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">pointValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">pointValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">pointValues</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">pointErrors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">pointErrors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;point errors for PseudoDimension).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">pointErrors</span><span class="p">)</span>
 
     <span class="nd">@pointErrors</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">pointErrors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">pointErrors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">pointErrors</span> <span class="o">=</span> <span class="n">value</span>
 
-    <span class="c1"># @property</span>
-    <span class="c1"># def comment(self) -&gt; str:</span>
-    <span class="c1">#     &quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
-    <span class="c1">#     return self._wrappedData.details</span>
-    <span class="c1">#</span>
-    <span class="c1"># @comment.setter</span>
-    <span class="c1"># def comment(self, value: str):</span>
-    <span class="c1">#     self._wrappedData.details = value</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isAcquisition</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Always False&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@isAcquisition</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">isAcquisition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isReversed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Always False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@isReversed</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">isReversed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set whether the axis is reversed - isReversed implies that ppm values decrease as point values increase</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">maxAliasedFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;maximum possible peak frequency; emulated to be always ppmValue of</span>
+<span class="sd">        pointCounts +0.5</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pointToValue</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pointCount</span><span class="p">)</span><span class="o">+</span><span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="nd">@maxAliasedFrequency</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">maxAliasedFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">minAliasedFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;minimum possible frequency; emulated to be always ppmValue of</span>
+<span class="sd">        point 0.5</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pointToValue</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="nd">@minAliasedFrequency</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">minAliasedFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">spectrumLimits</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return the limits of this spectrum dimension as a tuple of floats&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pointToValue</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">pointToValue</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pointCount</span><span class="p">)))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">foldingLimits</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return the foldingLimits of this dimension as a tuple of floats.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pointToValue</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">pointToValue</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pointCount</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">referencePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;point used for axis (chemical shift) referencing.</span>
+<span class="sd">        emulated to always be 1.0</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mf">1.0</span>
+
+    <span class="nd">@referencePoint</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">referencePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">referenceValue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;ppm-value used for axis (chemical shift) referencing.</span>
+<span class="sd">        emulated to always be 1.0 (as axis is not reversed)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mf">1.0</span>
+
+    <span class="nd">@referenceValue</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">referenceValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">spectrometerFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Absolute frequency at carrier (or at splitting 0.0). In MHz or dimensionless.</span>
+<span class="sd">        Emulated to always be 1.0</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mf">1.0</span>
+
+    <span class="nd">@spectrometerFrequency</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">spectrometerFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">spectralWidthHz</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;spectral width in Hz</span>
+<span class="sd">        emulated to always be 1.0 * spectrometerFrequency</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectralWidth</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrometerFrequency</span>
+
+    <span class="nd">@spectralWidthHz</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">spectralWidthHz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">spectralWidth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;spectral width in ppm</span>
+<span class="sd">        emulated to always be self.pointCount</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pointCount</span><span class="p">)</span>
+
+    <span class="nd">@spectralWidth</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">spectralWidth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_valuePerPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Value per point in Hz for Frequency domain data, in secs for time/fid domain data&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectralWidthHz</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">pointCount</span>
+
+    <span class="nd">@_valuePerPoint</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">_valuePerPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">phase0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Zero-order phase; always None&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@phase0</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">phase0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">phase1</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;First-order phase; always None&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@phase1</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">phase1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">assignmentTolerance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Assignment Tolerance; Always 0.0</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+
+    <span class="nd">@assignmentTolerance</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">assignmentTolerance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">defaultAssignmentTolerance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Default assignment tolerance (in ppm);</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+
+    <span class="c1">#=========================================================================================</span>
+    <span class="c1"># CCPN functions</span>
+    <span class="c1">#=========================================================================================</span>
+<div class="viewcode-block" id="PseudoDimension.pointToValue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PseudoDimension.PseudoDimension.pointToValue">[docs]</a>    <span class="k">def</span> <span class="nf">pointToValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;:return ppm-value corresponding to point (float)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pointOffset</span> <span class="o">=</span> <span class="n">point</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">referencePoint</span>
+        <span class="n">ppmPerPoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valuePerPoint</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrometerFrequency</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isReversed</span> <span class="k">else</span> <span class="mf">1.0</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">referenceValue</span> <span class="o">+</span> <span class="n">factor</span> <span class="o">*</span> <span class="n">pointOffset</span> <span class="o">*</span>  <span class="n">ppmPerPoint</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+    <span class="n">pointToPpm</span> <span class="o">=</span> <span class="n">pointToValue</span>
+
+<div class="viewcode-block" id="PseudoDimension.valueToPoint"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PseudoDimension.PseudoDimension.valueToPoint">[docs]</a>    <span class="k">def</span> <span class="nf">valueToPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;:return point (float) corresponding to ppm-value&quot;&quot;&quot;</span>
+        <span class="n">ppmPerPoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valuePerPoint</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrometerFrequency</span>
+        <span class="n">valOffset</span> <span class="o">=</span> <span class="n">value</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">referenceValue</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isReversed</span> <span class="k">else</span> <span class="mf">1.0</span>
+        <span class="n">point</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">referencePoint</span> <span class="o">+</span> <span class="n">factor</span> <span class="o">*</span> <span class="n">valOffset</span> <span class="o">/</span> <span class="n">ppmPerPoint</span>
+        <span class="k">return</span> <span class="n">point</span></div>
+
+    <span class="n">ppmToPoint</span> <span class="o">=</span> <span class="n">valueToPoint</span>
 
     <span class="c1">#=========================================================================================</span>
     <span class="c1"># Implementation functions</span>
@@ -221,6 +398,7 @@
 <span class="k">del</span> <span class="n">_expDimRefHasChanged</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -230,7 +408,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -250,12 +428,13 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.PseudoDimension</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

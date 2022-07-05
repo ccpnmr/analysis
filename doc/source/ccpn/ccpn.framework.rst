@@ -10,6 +10,7 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
    ccpn.framework.languages
    ccpn.framework.lib
@@ -22,6 +23,14 @@ ccpn.framework.Application module
 ---------------------------------
 
 .. automodule:: ccpn.framework.Application
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.framework.AutoBackup module
+--------------------------------
+
+.. automodule:: ccpn.framework.AutoBackup
    :members:
    :undoc-members:
    :show-inheritance:
@@ -50,6 +59,14 @@ ccpn.framework.PathsAndUrls module
    :undoc-members:
    :show-inheritance:
 
+ccpn.framework.Preferences module
+---------------------------------
+
+.. automodule:: ccpn.framework.Preferences
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ccpn.framework.Translation module
 ---------------------------------
 
@@ -74,3 +91,10 @@ ccpn.framework.constants module
    :undoc-members:
    :show-inheritance:
 
+ccpn.framework.credits module
+-----------------------------
+
+.. automodule:: ccpn.framework.credits
+   :members:
+   :undoc-members:
+   :show-inheritance:

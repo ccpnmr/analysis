@@ -10,6 +10,7 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
    ccpnmodel.ccpncore.memops.scripts.core
    ccpnmodel.ccpncore.memops.scripts.docgen
@@ -58,3 +59,10 @@ ccpnmodel.ccpncore.memops.scripts.makePython module
    :undoc-members:
    :show-inheritance:
 
+ccpnmodel.ccpncore.memops.scripts.makePythonArgs module
+-------------------------------------------------------
+
+.. automodule:: ccpnmodel.ccpncore.memops.scripts.makePythonArgs
+   :members:
+   :undoc-members:
+   :show-inheritance:

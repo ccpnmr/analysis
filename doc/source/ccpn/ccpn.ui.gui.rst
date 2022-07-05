@@ -10,6 +10,7 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
    ccpn.ui.gui.lib
    ccpn.ui.gui.modules
@@ -27,6 +28,30 @@ ccpn.ui.gui.Gui module
    :undoc-members:
    :show-inheritance:
 
+ccpn.ui.gui.GuiBase module
+--------------------------
+
+.. automodule:: ccpn.ui.gui.GuiBase
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.ui.gui.Layout module
+-------------------------
+
+.. automodule:: ccpn.ui.gui.Layout
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.ui.gui.LayoutManager module
+--------------------------------
+
+.. automodule:: ccpn.ui.gui.LayoutManager
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ccpn.ui.gui.guiSettings module
 ------------------------------
 
@@ -34,4 +59,3 @@ ccpn.ui.gui.guiSettings module
    :members:
    :undoc-members:
    :show-inheritance:
-

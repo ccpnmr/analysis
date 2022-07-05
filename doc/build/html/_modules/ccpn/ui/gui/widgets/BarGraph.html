@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.ui.gui.widgets.BarGraph &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
-    <script src="../../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.BarGraph</a></li> 
       </ul>
     </div>  
 
@@ -43,18 +44,19 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:29 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-06-29 11:57:45 +0100 (Wed, June 29, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -66,8 +68,9 @@
 
 <span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
-<span class="kn">from</span> <span class="nn">pyqtgraph.Point</span> <span class="kn">import</span> <span class="n">Point</span>
-
+<span class="kn">from</span> <span class="nn">pyqtgraph</span> <span class="kn">import</span> <span class="n">getConfigOption</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph</span> <span class="kn">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">fn</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.mouseEvents</span> <span class="kn">import</span> \
     <span class="n">leftMouse</span><span class="p">,</span> <span class="n">shiftLeftMouse</span><span class="p">,</span> <span class="n">controlLeftMouse</span><span class="p">,</span> <span class="n">controlShiftLeftMouse</span><span class="p">,</span> \
     <span class="n">middleMouse</span><span class="p">,</span> <span class="n">shiftMiddleMouse</span><span class="p">,</span> <span class="n">controlMiddleMouse</span><span class="p">,</span> <span class="n">controlShiftMiddleMouse</span><span class="p">,</span> \
@@ -76,36 +79,35 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CustomExportDialog</span> <span class="kn">import</span> <span class="n">CustomExportDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
-<span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">percentage</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">percentage</span><span class="p">,</span><span class="n">groupIntoChunks</span>
+
 
 
 <span class="n">current</span> <span class="o">=</span> <span class="p">[]</span>
 
-
-<span class="c1">#TODO:LUCA: this is most likely yours; update with documentation and check for ViewBox __init__ as it has changed</span>
-
 <div class="viewcode-block" id="BarGraph"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.BarGraph">[docs]</a><span class="k">class</span> <span class="nc">BarGraph</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">BarGraphItem</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">viewBox</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xValues</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yValues</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">objects</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">brush</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">labelDistanceRatio</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+                 <span class="n">objects</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">brush</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">brushes</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">useGradient</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drawLabels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">labelDistanceRatio</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This class allows top draw bars with or without objects.It Needs only xValues and yValues.</span>
 <span class="sd">        The bar width is by default set to 1.</span>
 <span class="sd">        The objects are linked to the bars through the label annotations (with setData).</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># TODO:</span>
         <span class="c1"># setObjects in a more general way. Initially implemented only for NmrResidues objects.</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">viewBox</span> <span class="o">=</span> <span class="n">viewBox</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trigger</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">xValues</span> <span class="o">=</span> <span class="n">xValues</span> <span class="ow">or</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">yValues</span> <span class="o">=</span> <span class="n">yValues</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">useGradient</span> <span class="o">=</span> <span class="n">useGradient</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xValues</span> <span class="o">=</span> <span class="n">xValues</span> <span class="k">if</span> <span class="n">xValues</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yValues</span> <span class="o">=</span> <span class="n">yValues</span> <span class="k">if</span> <span class="n">yValues</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">brush</span> <span class="o">=</span> <span class="n">brush</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">brushes</span> <span class="o">=</span> <span class="n">brushes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clicked</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="n">objects</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
-        <span class="c1"># self.application = QtCore.QCoreApplication.instance()._ccpnApplication</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>  <span class="c1"># setting for BarGraphItem</span>
                 <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xValues</span><span class="p">,</span>
@@ -113,17 +115,18 @@
                 <span class="n">x1</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xValues</span><span class="p">,</span>
                 <span class="n">height</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">yValues</span><span class="p">,</span>
                 <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                <span class="n">pen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">brush</span><span class="p">,</span>
+                <span class="n">pen</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">brush</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">brush</span><span class="p">,</span>
                 <span class="n">pens</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">brushes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">brushes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">brushes</span>
                 <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">allValues</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">getValueDict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">drawLabels</span><span class="p">(</span><span class="n">labelDistanceRatio</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">drawLabels</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">drawLabels</span><span class="p">(</span><span class="n">labelDistanceRatio</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">)</span>
 
@@ -137,32 +140,51 @@
                 <span class="n">pen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">brush</span><span class="p">,</span>
                 <span class="n">brush</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">brush</span><span class="p">,</span>
                 <span class="n">pens</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">brushes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">brushes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">brushes</span><span class="p">,</span>
                 <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BarGraph.setObjects"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.BarGraph.setObjects">[docs]</a>    <span class="k">def</span> <span class="nf">setObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objects</span><span class="p">):</span>
+<div class="viewcode-block" id="BarGraph.setObjects"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.BarGraph.setObjects">[docs]</a>    <span class="k">def</span> <span class="nf">setObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">objAttr</span><span class="o">=</span><span class="s1">&#39;pid&#39;</span><span class="p">):</span>
 
-        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">:</span>
-            <span class="k">for</span> <span class="nb">object</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">NmrResidue</span><span class="p">):</span>
-                    <span class="n">nmrResidue</span> <span class="o">=</span> <span class="nb">object</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">objects</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="n">objects</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">NmrResidue</span><span class="p">):</span>
+                    <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">obj</span>
                     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="s1">&#39;sequenceCode&#39;</span><span class="p">):</span>
-
                         <span class="k">if</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="p">:</span>
                             <span class="k">if</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                                 <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">)</span> <span class="o">==</span> <span class="n">label</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
-                                    <span class="n">label</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">),</span> <span class="nb">object</span><span class="p">)</span></div>
+                                    <span class="n">label</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">),</span> <span class="n">obj</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">label</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">objAttr</span> <span class="o">==</span> <span class="s1">&#39;pid&#39;</span><span class="p">:</span>
+                        <span class="n">label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">objAttr</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span></div>
 
-                        <span class="c1"># if nmrResidue.sequenceCode is not None:</span>
-                        <span class="c1">#   ind = nmrResidue.nmrChain.nmrResidues.index(nmrResidue)</span>
-                        <span class="c1">#   lbl = label.text()</span>
-                        <span class="c1">#   if str(ind) == lbl:</span>
-                        <span class="c1">#     label.setData(ind, object)</span>
-
-                <span class="c1"># else:</span>
-                <span class="c1"># pass</span>
-                <span class="c1"># print(&#39;Impossible to set this object to its label. Function implemented only for NmrResidue&#39;)</span>
+        <span class="c1"># for label in self.labels:</span>
+        <span class="c1">#     for object in objects:</span>
+        <span class="c1">#         if isinstance(object, NmrResidue):</span>
+        <span class="c1">#             nmrResidue = object</span>
+        <span class="c1">#             if hasattr(nmrResidue, &#39;sequenceCode&#39;):</span>
+        <span class="c1">#</span>
+        <span class="c1">#                 if nmrResidue.residue:</span>
+        <span class="c1">#                     if nmrResidue.sequenceCode is not None:</span>
+        <span class="c1">#                         if str(nmrResidue.sequenceCode) == label.text():</span>
+        <span class="c1">#                             label.setData(int(nmrResidue.sequenceCode), object)</span>
+        <span class="c1">#         if isinstance(object, Spectrum):</span>
+        <span class="c1">#             label.setData(str(object.name), object)</span>
+        <span class="c1">#</span>
+        <span class="c1">#</span>
+        <span class="c1">#                 # if nmrResidue.sequenceCode is not None:</span>
+        <span class="c1">#                 #   ind = nmrResidue.nmrChain.nmrResidues.index(nmrResidue)</span>
+        <span class="c1">#                 #   lbl = label.text()</span>
+        <span class="c1">#                 #   if str(ind) == lbl:</span>
+        <span class="c1">#                 #     label.setData(ind, object)</span>
+        <span class="c1">#</span>
+        <span class="c1">#         # else:</span>
+        <span class="c1">#         # pass</span>
+        <span class="c1">#         # print(&#39;Impossible to set this object to its label. Function implemented only for NmrResidue&#39;)</span>
 
 <div class="viewcode-block" id="BarGraph.getValueDict"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.BarGraph.getValueDict">[docs]</a>    <span class="k">def</span> <span class="nf">getValueDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xValues</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yValues</span><span class="p">):</span>
@@ -193,19 +215,122 @@
         <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BarGraph.drawLabels"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.BarGraph.drawLabels">[docs]</a>    <span class="k">def</span> <span class="nf">drawLabels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        The label Text is the str of the x values and is used to find and set an object to it.</span>
 <span class="sd">        NB, changing the text to any other str may not set the objects correctly!</span>
 
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">allLabelsShown</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allValues</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">label</span> <span class="o">=</span> <span class="n">CustomLabel</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
-            <span class="n">label</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">value</span><span class="o">+</span><span class="n">ratio</span><span class="p">)</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">value</span> <span class="o">+</span> <span class="n">ratio</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
-            <span class="n">label</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">brush</span><span class="p">))</span></div></div>
+            <span class="n">label</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">brush</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="BarGraph.drawPicture"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.BarGraph.drawPicture">[docs]</a>    <span class="k">def</span> <span class="nf">drawPicture</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">picture</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPicture</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainterPath</span><span class="p">()</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">picture</span><span class="p">)</span>
+
+        <span class="n">pen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="p">[</span><span class="s1">&#39;pen&#39;</span><span class="p">]</span>
+        <span class="n">pens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="p">[</span><span class="s1">&#39;pens&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">pen</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pens</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pen</span> <span class="o">=</span> <span class="n">getConfigOption</span><span class="p">(</span><span class="s1">&#39;foreground&#39;</span><span class="p">)</span>
+
+        <span class="n">brush</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="p">[</span><span class="s1">&#39;brush&#39;</span><span class="p">]</span>
+        <span class="n">brushes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="p">[</span><span class="s1">&#39;brushes&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">brush</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">brushes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">brush</span> <span class="o">=</span> <span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">x</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">))</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;x0&#39;</span><span class="p">))</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;x1&#39;</span><span class="p">))</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;width&#39;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">x0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;must specify either x0 or width&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">x1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">x0</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">-</span> <span class="n">width</span>
+            <span class="k">elif</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">x0</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">width</span> <span class="o">/</span> <span class="mf">2.</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;must specify at least one of x, x0, or x1&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">x1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;must specify either x1 or width&#39;</span><span class="p">)</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">-</span> <span class="n">x0</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">))</span>
+        <span class="n">y0</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;y0&#39;</span><span class="p">))</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;y1&#39;</span><span class="p">))</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;height&#39;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">y0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">height</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">y0</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">elif</span> <span class="n">y1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">y0</span> <span class="o">=</span> <span class="n">y1</span> <span class="o">-</span> <span class="n">height</span>
+            <span class="k">elif</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">y0</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">height</span> <span class="o">/</span> <span class="mf">2.</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">y0</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">height</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">y1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;must specify either y1 or height&#39;</span><span class="p">)</span>
+            <span class="n">height</span> <span class="o">=</span> <span class="n">y1</span> <span class="o">-</span> <span class="n">y0</span>
+
+        <span class="n">p</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">mkPen</span><span class="p">(</span><span class="n">pen</span><span class="p">))</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">mkBrush</span><span class="p">(</span><span class="n">brush</span><span class="p">))</span>
+        <span class="n">heightGroups</span> <span class="o">=</span> <span class="p">[[</span><span class="n">height</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="n">brushes</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">useGradient</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">brushes</span><span class="p">)</span>
+            <span class="n">heightGroups</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">height</span><span class="p">),</span> <span class="n">count</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x0</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span> <span class="k">else</span> <span class="n">y0</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">pens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">mkPen</span><span class="p">(</span><span class="n">pens</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="n">brushes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">useGradient</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">mkBrush</span><span class="p">(</span><span class="n">brushes</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;BarGraph error. Cannot find a brush for at position </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">x0</span><span class="p">):</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">x0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">x0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">y0</span><span class="p">):</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">y0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">y0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">width</span><span class="p">):</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">width</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">width</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">height</span><span class="p">):</span>
+                <span class="n">h</span> <span class="o">=</span> <span class="n">height</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">h</span> <span class="o">=</span> <span class="n">height</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">useGradient</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">heightGroup</span><span class="p">,</span> <span class="n">brush</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">heightGroups</span><span class="p">,</span> <span class="n">brushes</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">heightGroup</span><span class="p">:</span>
+                            <span class="n">p</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">mkBrush</span><span class="p">(</span><span class="n">brush</span><span class="p">))</span>
+                            <span class="k">break</span>
+
+            <span class="n">rect</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">drawRect</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="o">.</span><span class="n">addRect</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
+
+        <span class="n">p</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prepareGeometryChange</span><span class="p">()</span></div></div>
 
 
 <div class="viewcode-block" id="CustomLabel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.CustomLabel">[docs]</a><span class="k">class</span> <span class="nc">CustomLabel</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsSimpleTextItem</span><span class="p">):</span>
@@ -227,7 +352,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">isBelowThreshold</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">customObject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">()))</span>
-        <span class="c1"># self.application = QtCore.QCoreApplication.instance()._ccpnApplication</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
 
@@ -239,20 +363,21 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">customObject</span></div>
 
 <div class="viewcode-block" id="CustomLabel.paint"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.CustomLabel.paint">[docs]</a>    <span class="k">def</span> <span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_selectCurrentNmrResidue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selectCurrent</span><span class="p">()</span>
         <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsSimpleTextItem</span><span class="o">.</span><span class="n">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">widget</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_selectCurrentNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">()))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">()))</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">setSelected</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">_selectCurrent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">()))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">()))</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">setSelected</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+        <span class="c1">#  add other option to use pids/</span>
 
 
 <div class="viewcode-block" id="CustomViewBox"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.CustomViewBox">[docs]</a><span class="k">class</span> <span class="nc">CustomViewBox</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">ViewBox</span><span class="p">):</span>
+    <span class="n">itemsSelected</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="n">pg</span><span class="o">.</span><span class="n">ViewBox</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exportDialog</span> <span class="o">=</span> <span class="kc">None</span>
@@ -264,6 +389,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__xLine</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">InfiniteLine</span><span class="p">(</span><span class="n">angle</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">movable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xLine</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">xLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -351,6 +477,9 @@
                         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inYRange</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">(),</span> <span class="n">minY</span><span class="p">,</span> <span class="n">maxY</span><span class="p">,</span> <span class="p">):</span>
                             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                                 <span class="n">obj</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()))</span>
+                                <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                                    <span class="c1"># new mode of setting object.</span>
+                                    <span class="n">obj</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
                                 <span class="n">selected</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">_resetBoxes</span><span class="p">()</span>
@@ -361,12 +490,14 @@
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">currentSelected</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="n">selected</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">)</span>
-                <span class="n">selected</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">currentSelected</span><span class="p">)</span>
-                <span class="n">currentObjs</span> <span class="o">=</span> <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="n">selected</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">,</span> <span class="n">selected</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">updateSelectionFromCurrent</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">itemsSelected</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">selected</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="p">:</span>  <span class="c1"># replace this bit</span>
+                    <span class="n">currentSelected</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="n">selected</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">)</span>
+                    <span class="n">selected</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">currentSelected</span><span class="p">)</span>
+                    <span class="n">currentObjs</span> <span class="o">=</span> <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="n">selected</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">,</span> <span class="n">selected</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">updateSelectionFromCurrent</span><span class="p">()</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Error in setting current objects. &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Error in setting current objects. TODO: Replace with itemsSelected Notifier &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="CustomViewBox.inYRange"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.CustomViewBox.inYRange">[docs]</a>    <span class="k">def</span> <span class="nf">inYRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">yValue</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">round</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">round</span><span class="p">(</span><span class="n">yValue</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">round</span><span class="p">(</span><span class="n">y2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
@@ -375,6 +506,17 @@
 
 <div class="viewcode-block" id="CustomViewBox.getLabels"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.CustomViewBox.getLabels">[docs]</a>    <span class="k">def</span> <span class="nf">getLabels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">label</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">childGroup</span><span class="o">.</span><span class="n">childItems</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">CustomLabel</span><span class="p">)]</span></div>
+
+    <span class="k">def</span> <span class="nf">_selectLabelsByTexts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLabels</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLabels</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">text</span> <span class="o">==</span> <span class="n">label</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
+                        <span class="n">label</span><span class="o">.</span><span class="n">setSelected</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CustomViewBox.clearSelection"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.CustomViewBox.clearSelection">[docs]</a>    <span class="k">def</span> <span class="nf">clearSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLabels</span><span class="p">():</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">setSelected</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CustomViewBox.updateSelectionFromCurrent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.CustomViewBox.updateSelectionFromCurrent">[docs]</a>    <span class="k">def</span> <span class="nf">updateSelectionFromCurrent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLabels</span><span class="p">():</span>
@@ -396,13 +538,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rbScaleBox</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_raiseContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
-
+    <span class="k">def</span> <span class="nf">_getContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">isFloatWidget</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Reset View&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoRange</span><span class="p">)</span>
 
         <span class="c1">## ThresholdLine</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">thresholdLineAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Threshold Line&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleThresholdLine</span><span class="p">,</span> <span class="n">checkable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thresholdLineAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Threshold Line&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleThresholdLine</span><span class="p">,</span>
+                                                 <span class="n">checkable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_checkThresholdAction</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thresholdLineAction</span><span class="p">)</span>
 
@@ -412,7 +554,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelsAction</span><span class="p">)</span>
 
         <span class="c1">## Labels: Show Above Threshold</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">showAboveThresholdAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Show Labels Above Threshold&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">showAboveThreshold</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showAboveThresholdAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Show Labels Above Threshold&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span>
+                                                      <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">showAboveThreshold</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showAboveThresholdAction</span><span class="p">)</span>
 
         <span class="c1">## Selection: Select Above Threshold</span>
@@ -422,6 +565,11 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Export&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showExportDialog</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span>
+
+    <span class="k">def</span> <span class="nf">_raiseContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getContextMenu</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span><span class="o">.</span><span class="n">exec_</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">screenPos</span><span class="p">()</span><span class="o">.</span><span class="n">toPoint</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">_checkThresholdAction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -489,7 +637,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;NOT FOUND&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CustomViewBox.selectAboveThreshold"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.CustomViewBox.selectAboveThreshold">[docs]</a>    <span class="k">def</span> <span class="nf">selectAboveThreshold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Reimplement this in the module subclass&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;Reimplement this in the module subclass&quot;&quot;&quot;</span>
 
         <span class="k">pass</span></div>
 
@@ -503,112 +651,154 @@
 <span class="c1">###################################      Mock DATA    ################################################</span>
 <span class="c1">######################################################################################################</span>
 
-<span class="c1"># from collections import namedtuple</span>
-<span class="c1"># import random</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="n">nmrResidues</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">30</span><span class="p">):</span>
+  <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;nmrResidue&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;sequenceCode&#39;</span><span class="p">])</span>
+  <span class="n">nmrResidue</span><span class="o">.</span><span class="fm">__new__</span><span class="o">.</span><span class="vm">__defaults__</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span>
+  <span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">300</span><span class="p">))</span>
+  <span class="n">nmrResidues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">)</span>
+
+<span class="n">x1</span> <span class="o">=</span> <span class="p">[</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">nmrResidues</span><span class="p">]</span>
+<span class="n">y1</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="o">**</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">())</span><span class="o">/</span><span class="mi">10</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x1</span><span class="p">))]</span>
+
+
+<span class="n">xLows</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">yLows</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="n">xMids</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">yMids</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="n">xHighs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">yHighs</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">y1</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="mf">0.5</span><span class="p">:</span>
+        <span class="n">xLows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">yLows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">y</span> <span class="o">&gt;</span> <span class="mf">0.5</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">xMids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">yMids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">y</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">xHighs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">yHighs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+<span class="c1">######################################################################################################</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">mkQApp</span><span class="p">()</span>
+
+<span class="n">customViewBox</span> <span class="o">=</span> <span class="n">CustomViewBox</span><span class="p">()</span>
 <span class="c1">#</span>
-<span class="c1"># nmrResidues = []</span>
-<span class="c1"># for i in range(30):</span>
-<span class="c1">#   nmrResidue = namedtuple(&#39;nmrResidue&#39;, [&#39;sequenceCode&#39;])</span>
-<span class="c1">#   nmrResidue.__new__.__defaults__ = (0,)</span>
-<span class="c1">#   nmrResidue.sequenceCode = int(random.randint(1,300))</span>
-<span class="c1">#   nmrResidues.append(nmrResidue)</span>
-<span class="c1">#</span>
-<span class="c1"># x1 = [nmrResidue.sequenceCode for nmrResidue in nmrResidues]</span>
-<span class="c1"># y1 = [(i**random.random())/10 for i in range(len(x1))]</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1"># xLows = []</span>
-<span class="c1"># yLows = []</span>
-<span class="c1">#</span>
-<span class="c1"># xMids = []</span>
-<span class="c1"># yMids = []</span>
-<span class="c1">#</span>
-<span class="c1"># xHighs = []</span>
-<span class="c1"># yHighs = []</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1"># for x, y in zip(x1,y1):</span>
-<span class="c1">#     if y &lt;= 0.5:</span>
-<span class="c1">#         xLows.append(x)</span>
-<span class="c1">#         yLows.append(y)</span>
-<span class="c1">#     if y &gt; 0.5 and y &lt;= 1:</span>
-<span class="c1">#         xMids.append(x)</span>
-<span class="c1">#         yMids.append(y)</span>
-<span class="c1">#     if y &gt; 1:</span>
-<span class="c1">#         xHighs.append(x)</span>
-<span class="c1">#         yHighs.append(y)</span>
-<span class="c1">#</span>
-<span class="c1"># ######################################################################################################</span>
-<span class="c1">#</span>
-<span class="c1"># app = pg.mkQApp()</span>
-<span class="c1">#</span>
-<span class="c1"># customViewBox = CustomViewBox()</span>
-<span class="c1"># #</span>
-<span class="c1"># plotWidget = pg.PlotWidget(viewBox=customViewBox, background=&#39;w&#39;)</span>
-<span class="c1"># customViewBox.setParent(plotWidget)</span>
-<span class="c1">#</span>
-<span class="c1"># x=[6,</span>
-<span class="c1">#     8,</span>
-<span class="c1">#     10,</span>
-<span class="c1">#     12,</span>
-<span class="c1">#     14,</span>
-<span class="c1">#     16,</span>
-<span class="c1">#     18,</span>
-<span class="c1">#     20]</span>
-<span class="c1"># y = [</span>
-<span class="c1"># 1.731,</span>
-<span class="c1"># 10.809,</span>
-<span class="c1"># 10.658,</span>
-<span class="c1"># 4.831,</span>
-<span class="c1"># 11.406,</span>
-<span class="c1"># 5.287,</span>
-<span class="c1"># 2.971,</span>
-<span class="c1"># 4.412,</span>
-<span class="c1"># ]</span>
-<span class="c1">#</span>
-<span class="c1"># xLow = BarGraph(viewBox=customViewBox, xValues=x, yValues=y, objects=[], brush=&#39;r&#39;, widht=1)</span>
-<span class="c1"># # xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush=&#39;b&#39;,widht=1)</span>
-<span class="c1"># # xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush=&#39;g&#39;,widht=1)</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1"># customViewBox.addItem(xLow)</span>
-<span class="c1"># # customViewBox.addItem(xMid)</span>
-<span class="c1"># # customViewBox.addItem(xHigh)</span>
-<span class="c1">#</span>
-<span class="c1"># # xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen=&#39;b&#39;)</span>
-<span class="c1"># # customViewBox.addItem(xLine)</span>
-<span class="c1">#</span>
-<span class="c1"># l = pg.LegendItem((100,60), offset=(70,30))  # args are (size, offset)</span>
-<span class="c1"># l.setParentItem(customViewBox.graphicsItem())</span>
-<span class="c1">#</span>
-<span class="c1"># c1 = plotWidget.plot(pen=&#39;r&#39;, name=&#39;low&#39;)</span>
-<span class="c1"># # c2 = plotWidget.plot(pen=&#39;b&#39;, name=&#39;mid&#39;)</span>
-<span class="c1"># # c3 = plotWidget.plot(pen=&#39;g&#39;, name=&#39;high&#39;)</span>
-<span class="c1">#</span>
-<span class="c1"># l.addItem(c1, &#39;low&#39;)</span>
-<span class="c1"># # l.addItem(c2, &#39;mid&#39;)</span>
-<span class="c1"># # l.addItem(c3, &#39;high&#39;)</span>
-<span class="c1">#</span>
-<span class="c1"># # customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))</span>
-<span class="c1"># customViewBox.setRange(xRange=[10,200], yRange=[0.01,1000],)</span>
-<span class="c1"># customViewBox.setMenuEnabled(enableMenu=False)</span>
-<span class="c1"># print(customViewBox.xLine._viewBox)</span>
-<span class="c1"># plotWidget.show()</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
+<span class="n">plotWidget</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">PlotWidget</span><span class="p">(</span><span class="n">viewBox</span><span class="o">=</span><span class="n">customViewBox</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+<span class="n">customViewBox</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="n">plotWidget</span><span class="p">)</span>
+
+<span class="n">x</span><span class="o">=</span><span class="p">[</span>
+    <span class="mi">6</span><span class="p">,</span>
+    <span class="mi">8</span><span class="p">,</span>
+    <span class="mi">10</span><span class="p">,</span>
+    <span class="mi">12</span><span class="p">,</span>
+    <span class="mi">14</span><span class="p">,</span>
+    <span class="mi">16</span><span class="p">,</span>
+    <span class="mi">18</span><span class="p">,</span>
+    <span class="mi">20</span><span class="p">,</span>
+    <span class="mi">22</span><span class="p">,</span>
+    <span class="mi">24</span><span class="p">,</span>
+    <span class="mi">26</span><span class="p">,</span>
+    <span class="mi">28</span><span class="p">,</span>
+    <span class="mi">30</span><span class="p">,</span>
+    <span class="mi">36</span><span class="p">,</span>
+    <span class="mi">48</span><span class="p">,</span>
+    <span class="mi">60</span>
+   <span class="p">]</span>
+
+<span class="n">y</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="mf">1.731</span><span class="p">,</span>
+    <span class="mf">20.809</span><span class="p">,</span>
+    <span class="mf">10.658</span><span class="p">,</span>
+    <span class="mf">400.831</span><span class="p">,</span>
+    <span class="mf">11.406</span><span class="p">,</span>
+    <span class="mf">5.287</span><span class="p">,</span>
+    <span class="mf">2.971</span><span class="p">,</span>
+    <span class="mf">400.412</span><span class="p">,</span>
+    <span class="mf">10.731</span><span class="p">,</span>
+    <span class="mf">20.809</span><span class="p">,</span>
+    <span class="mf">100.658</span><span class="p">,</span>
+    <span class="mf">400.831</span><span class="p">,</span>
+    <span class="mf">110.406</span><span class="p">,</span>
+    <span class="mf">50.287</span><span class="p">,</span>
+    <span class="mf">20.971</span><span class="p">,</span>
+    <span class="mf">400.412</span><span class="p">,</span>
+    <span class="p">]</span>
+
+
+<span class="n">L</span> <span class="o">=</span> <span class="s1">&#39;abcdefghilmnopqrstuvz&#39;</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">L</span><span class="p">))</span>
+<span class="n">ticks</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">L</span><span class="p">))]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">L</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+<span class="n">gradientName</span> <span class="o">=</span> <span class="s1">&#39;gray-black&#39;</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Colour</span> <span class="kn">import</span> <span class="n">colorSchemeTable</span>
+<span class="n">brushes</span> <span class="o">=</span> <span class="n">colorSchemeTable</span><span class="p">[</span><span class="n">gradientName</span><span class="p">]</span>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
+    <span class="n">window</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
+    <span class="n">window</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">())</span>
+
+    <span class="n">xLow</span> <span class="o">=</span> <span class="n">BarGraph</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">viewBox</span><span class="o">=</span><span class="n">customViewBox</span><span class="p">,</span> <span class="n">xValues</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">yValues</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="p">[],</span> <span class="n">brushes</span><span class="o">=</span><span class="n">brushes</span><span class="p">,</span> <span class="n">useGradient</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">widht</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush=&#39;b&#39;,widht=1)</span>
+    <span class="c1"># xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush=&#39;g&#39;,widht=1)</span>
+
+    <span class="n">xax</span> <span class="o">=</span> <span class="n">plotWidget</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
+    <span class="c1"># xax.setTicks(ticks)</span>
+
+    <span class="n">customViewBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">xLow</span><span class="p">)</span>
+    <span class="c1"># customViewBox.addItem(xMid)</span>
+    <span class="c1"># customViewBox.addItem(xHigh)</span>
+
+    <span class="c1"># xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen=&#39;b&#39;)</span>
+    <span class="c1"># customViewBox.addItem(xLine)</span>
+
+    <span class="n">l</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">LegendItem</span><span class="p">((</span><span class="mi">100</span><span class="p">,</span><span class="mi">60</span><span class="p">),</span> <span class="n">offset</span><span class="o">=</span><span class="p">(</span><span class="mi">70</span><span class="p">,</span><span class="mi">30</span><span class="p">))</span>  <span class="c1"># args are (size, offset)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">setParentItem</span><span class="p">(</span><span class="n">customViewBox</span><span class="o">.</span><span class="n">graphicsItem</span><span class="p">())</span>
+
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">plotWidget</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pen</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;low&#39;</span><span class="p">)</span>
+    <span class="c1"># c2 = plotWidget.plot(pen=&#39;b&#39;, name=&#39;mid&#39;)</span>
+    <span class="c1"># c3 = plotWidget.plot(pen=&#39;g&#39;, name=&#39;high&#39;)</span>
+
+    <span class="n">l</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="s1">&#39;low&#39;</span><span class="p">)</span>
+    <span class="c1"># l.addItem(c2, &#39;mid&#39;)</span>
+    <span class="c1"># l.addItem(c3, &#39;high&#39;)</span>
+
+    <span class="c1"># customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))</span>
+    <span class="n">customViewBox</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="n">xRange</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">200</span><span class="p">],</span> <span class="n">yRange</span><span class="o">=</span><span class="p">[</span><span class="mf">0.01</span><span class="p">,</span><span class="mi">1000</span><span class="p">],)</span>
+    <span class="n">customViewBox</span><span class="o">.</span><span class="n">setMenuEnabled</span><span class="p">(</span><span class="n">enableMenu</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">plotWidget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="n">window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">window</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+
+    <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+
 <span class="c1">#</span>
 <span class="c1"># # Start Qt event</span>
 <span class="c1"># if __name__ == &#39;__main__&#39;:</span>
 <span class="c1">#   import sys</span>
 <span class="c1">#   if (sys.flags.interactive != 1) or not hasattr(QtCore, &#39;PYQT_VERSION&#39;):</span>
 <span class="c1">#     QtWidgets.QApplication.instance().exec_()</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
+
+
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -618,7 +808,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -638,12 +828,13 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.BarGraph</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

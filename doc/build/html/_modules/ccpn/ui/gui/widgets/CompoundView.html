@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.ui.gui.widgets.CompoundView &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
-    <script src="../../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.CompoundView</a></li> 
       </ul>
     </div>  
 
@@ -44,7 +45,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
@@ -53,9 +54,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:52 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2021-03-08 16:27:02 +0000 (Mon, March 08, 2021) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -65,17 +66,18 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="n">PI</span> <span class="o">=</span> <span class="mf">3.1415926535898</span>
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtSvg</span><span class="p">,</span> <span class="n">QtPrintSupport</span>
 <span class="kn">from</span> <span class="nn">PyQt5.QtWidgets</span> <span class="kn">import</span> <span class="n">QGraphicsView</span><span class="p">,</span> <span class="n">QGraphicsScene</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">atan2</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">degrees</span><span class="p">,</span> <span class="n">radians</span><span class="p">,</span> <span class="n">hypot</span><span class="p">,</span> <span class="n">pi</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">PDFFileDialog</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">getColours</span><span class="p">,</span> <span class="n">BORDERFOCUS</span><span class="p">,</span> <span class="n">BORDERNOFOCUS</span>
 
 
 <span class="n">Qt</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span>
 <span class="n">QPointF</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPointF</span>
 <span class="n">QRectF</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">atan2</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">degrees</span><span class="p">,</span> <span class="n">radians</span><span class="p">,</span> <span class="n">hypot</span><span class="p">,</span> <span class="n">pi</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">FileDialog</span>
+<span class="n">PI</span> <span class="o">=</span> <span class="mf">3.1415926535898</span>
 
 
 <div class="viewcode-block" id="CompoundView"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView">[docs]</a><span class="k">class</span> <span class="nc">CompoundView</span><span class="p">(</span><span class="n">QGraphicsView</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
@@ -93,18 +95,9 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="n">preferences</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">colourScheme</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;light&#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">backgroundColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;background-color: #bd8413&#39;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">backgroundColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;background-color: #020F31&#39;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">setAtomColorWhite</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">bondColor</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">white</span>
-        <span class="c1">#</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">backgroundColor</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">bondColor</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">black</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">backgroundColor</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bondColor</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">black</span>
 
         <span class="c1"># self.setCompound = self.setCompound</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rotatePos</span> <span class="o">=</span> <span class="kc">None</span>
@@ -179,7 +172,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">updateAll</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">smiles</span> <span class="o">=</span> <span class="n">smiles</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setSmiles</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smiles</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">smiles</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setSmiles</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smiles</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setFocusColour</span><span class="p">()</span>
 
 <div class="viewcode-block" id="CompoundView.setSmiles"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView.setSmiles">[docs]</a>    <span class="k">def</span> <span class="nf">setSmiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smiles</span><span class="p">):</span>
         <span class="s1">&#39;set the smiles&#39;</span>
@@ -192,6 +187,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">resetView</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">updateAll</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_setFocusColour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">focusColour</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">noFocusColour</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the focus/noFocus colours for the widget</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">focusColour</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">BORDERFOCUS</span><span class="p">]</span>
+        <span class="n">noFocusColour</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">BORDERNOFOCUS</span><span class="p">]</span>
+        <span class="n">styleSheet</span> <span class="o">=</span> <span class="s2">&quot;QGraphicsView { &quot;</span> \
+                     <span class="s2">&quot;border: 1px solid;&quot;</span> \
+                     <span class="s2">&quot;border-radius: 1px;&quot;</span> \
+                     <span class="s2">&quot;border-color: </span><span class="si">%s</span><span class="s2">;&quot;</span> \
+                     <span class="s2">&quot;} &quot;</span> \
+                     <span class="s2">&quot;QGraphicsView:focus { &quot;</span> \
+                     <span class="s2">&quot;border: 1px solid </span><span class="si">%s</span><span class="s2">; &quot;</span> \
+                     <span class="s2">&quot;border-radius: 1px; &quot;</span> \
+                     <span class="s2">&quot;}&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">noFocusColour</span><span class="p">,</span> <span class="n">focusColour</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">styleSheet</span><span class="p">)</span>
 
 <div class="viewcode-block" id="CompoundView.resizeEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView.resizeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 
@@ -224,6 +235,52 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">editAtom</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">editWidget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateAll</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CompoundView.setCompound"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView.setCompound">[docs]</a>    <span class="k">def</span> <span class="nf">setCompound</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compound</span><span class="p">,</span> <span class="n">variantInd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the compound on the graphic scene. &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">compound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">compound</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">replace</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">compound</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">compound</span> <span class="o">=</span> <span class="n">compound</span>
+                <span class="k">if</span> <span class="n">variantInd</span><span class="p">:</span>
+                    <span class="n">variant</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compound</span><span class="o">.</span><span class="n">variants</span><span class="p">)[</span><span class="n">variantInd</span><span class="p">]</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">variants</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compound</span><span class="o">.</span><span class="n">variants</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">variants</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">variant2</span> <span class="ow">in</span> <span class="n">variants</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="n">variant2</span><span class="o">.</span><span class="n">polyLink</span> <span class="o">==</span> <span class="s1">&#39;none&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">variant2</span><span class="o">.</span><span class="n">descriptor</span> <span class="o">==</span> <span class="s1">&#39;neutral&#39;</span><span class="p">):</span>
+                                <span class="n">variant</span> <span class="o">=</span> <span class="n">variant2</span>
+                                <span class="k">break</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">variant2</span> <span class="ow">in</span> <span class="n">variants</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">variant2</span><span class="o">.</span><span class="n">polyLink</span> <span class="o">==</span> <span class="s1">&#39;none&#39;</span><span class="p">:</span>
+                                    <span class="n">variant</span> <span class="o">=</span> <span class="n">variant2</span>
+                                    <span class="k">break</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">variant</span> <span class="o">=</span> <span class="n">variants</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">variant</span> <span class="o">=</span> <span class="n">Variant</span><span class="p">(</span><span class="n">compound</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">setVariant</span><span class="p">(</span><span class="n">variant</span><span class="p">)</span>
+                <span class="n">variant</span><span class="o">.</span><span class="n">snapAtomsToGrid</span><span class="p">(</span><span class="n">ignoreHydrogens</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="n">variant</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">centerView</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">resetView</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">updateAll</span><span class="p">()</span>
+                <span class="c1"># self.show()</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">variant</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compound</span><span class="o">.</span><span class="n">variants</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAddPoint</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">compound</span><span class="o">.</span><span class="n">copyVarAtoms</span><span class="p">(</span><span class="n">variant</span><span class="o">.</span><span class="n">varAtoms</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">centerView</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">resetView</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">updateAll</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">centerView</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetView</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">updateAll</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="CompoundView.queryAtomName"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView.queryAtomName">[docs]</a>    <span class="k">def</span> <span class="nf">queryAtomName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atomLabel</span><span class="p">):</span>
@@ -524,9 +581,10 @@
             <span class="n">printer</span><span class="o">.</span><span class="n">setResolution</span><span class="p">(</span><span class="n">newRes</span><span class="p">)</span>
 
             <span class="n">fType</span> <span class="o">=</span> <span class="s1">&#39;PDF (*.pdf)&#39;</span>
-            <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceptMode</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="n">fType</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="p">)</span>
+            <span class="n">dialog</span> <span class="o">=</span> <span class="n">PDFFileDialog</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceptMode</span><span class="o">=</span><span class="s1">&#39;export&#39;</span><span class="p">,</span> <span class="n">fileFilter</span><span class="o">=</span><span class="n">fType</span><span class="p">)</span>
+            <span class="n">dialog</span><span class="o">.</span><span class="n">_show</span><span class="p">()</span>
             <span class="n">filePaths</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filePaths</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">filePaths</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">filePaths</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">filePath</span> <span class="o">=</span> <span class="n">filePaths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
                 <span class="k">if</span> <span class="n">filePath</span><span class="p">:</span>
@@ -817,7 +875,7 @@
 
 
 <span class="c1"># def getAddPoint(self):</span>
-<span class="c1">#     &#39;&#39;&#39; Set the compound on the specific position on the graphic scene. &#39;&#39;&#39;</span>
+<span class="c1">#     &quot;&quot;&quot; Set the compound on the specific position on the graphic scene. &quot;&quot;&quot;</span>
 <span class="c1">#     compoundView = CompoundView</span>
 <span class="c1">#     globalPos = QtGui.QCursor.pos()</span>
 <span class="c1">#     pos = compoundView.mapFromGlobal(globalPos)</span>
@@ -3436,45 +3494,6 @@
     <span class="k">return</span> <span class="n">compound</span></div>
 
 
-<div class="viewcode-block" id="setCompound"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.setCompound">[docs]</a><span class="k">def</span> <span class="nf">setCompound</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compound</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39; Set the compound on the graphic scene. &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">compound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">compound</span><span class="p">:</span>
-
-        <span class="k">if</span> <span class="n">replace</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">compound</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">compound</span> <span class="o">=</span> <span class="n">compound</span>
-            <span class="n">variants</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compound</span><span class="o">.</span><span class="n">variants</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">variants</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">variant2</span> <span class="ow">in</span> <span class="n">variants</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="n">variant2</span><span class="o">.</span><span class="n">polyLink</span> <span class="o">==</span> <span class="s1">&#39;none&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">variant2</span><span class="o">.</span><span class="n">descriptor</span> <span class="o">==</span> <span class="s1">&#39;neutral&#39;</span><span class="p">):</span>
-                        <span class="n">variant</span> <span class="o">=</span> <span class="n">variant2</span>
-                        <span class="k">break</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">variant2</span> <span class="ow">in</span> <span class="n">variants</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">variant2</span><span class="o">.</span><span class="n">polyLink</span> <span class="o">==</span> <span class="s1">&#39;none&#39;</span><span class="p">:</span>
-                            <span class="n">variant</span> <span class="o">=</span> <span class="n">variant2</span>
-                            <span class="k">break</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">variant</span> <span class="o">=</span> <span class="n">variants</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">variant</span> <span class="o">=</span> <span class="n">Variant</span><span class="p">(</span><span class="n">compound</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="n">variant</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">centerView</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">resetView</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">updateAll</span><span class="p">()</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">variant</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compound</span><span class="o">.</span><span class="n">variants</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAddPoint</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">compound</span><span class="o">.</span><span class="n">copyVarAtoms</span><span class="p">(</span><span class="n">variant</span><span class="o">.</span><span class="n">varAtoms</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">centerView</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">resetView</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">updateAll</span><span class="p">()</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">centerView</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">resetView</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">updateAll</span><span class="p">()</span></div>
-
-
 <div class="viewcode-block" id="VarAtom"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.VarAtom">[docs]</a><span class="k">class</span> <span class="nc">VarAtom</span><span class="p">:</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variantA</span><span class="p">,</span> <span class="n">atom</span><span class="p">,</span> <span class="n">freeValences</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -4294,7 +4313,7 @@
         <span class="n">branchLens</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">neighbours</span><span class="p">:</span>
             <span class="n">branchLens</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findAtomsInBranch</span><span class="p">(</span><span class="n">a</span><span class="p">)),</span> <span class="n">a</span><span class="p">])</span>
-        <span class="n">branchLens</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">branchLens</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">branchLens</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
         <span class="n">branches</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">branchLens</span><span class="p">]</span>
 
@@ -6903,6 +6922,258 @@
         <span class="k">return</span> <span class="n">hydrogens</span></div></div>
 
 
+<div class="viewcode-block" id="importChemComp"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.importChemComp">[docs]</a><span class="k">def</span> <span class="nf">importChemComp</span><span class="p">(</span><span class="n">chemComp</span><span class="p">,</span> <span class="n">variantInd</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="c1"># Main Compound</span>
+
+    <span class="n">ccpCode</span> <span class="o">=</span> <span class="n">chemComp</span><span class="o">.</span><span class="n">ccpCode</span>
+    <span class="n">molType</span> <span class="o">=</span> <span class="n">chemComp</span><span class="o">.</span><span class="n">molType</span>
+    <span class="n">memopsRoot</span> <span class="o">=</span> <span class="n">chemComp</span><span class="o">.</span><span class="n">root</span>
+    <span class="n">chemCompCoord</span> <span class="o">=</span> <span class="n">memopsRoot</span><span class="o">.</span><span class="n">findFirstChemCompCoord</span><span class="p">(</span><span class="n">molType</span><span class="o">=</span><span class="n">molType</span><span class="p">,</span> <span class="n">ccpCode</span><span class="o">=</span><span class="n">ccpCode</span><span class="p">)</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">chemComp</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">molType</span><span class="p">,</span> <span class="n">ccpCode</span><span class="p">)</span>
+
+    <span class="n">compound</span> <span class="o">=</span> <span class="n">Compound</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">compound</span><span class="o">.</span><span class="n">ccpCode</span> <span class="o">=</span> <span class="n">ccpCode</span>
+    <span class="n">compound</span><span class="o">.</span><span class="n">ccpMolType</span> <span class="o">=</span> <span class="n">molType</span>
+
+    <span class="c1"># Main Atoms</span>
+
+    <span class="n">atomMap</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">aromaticAtoms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">chemAtom</span> <span class="ow">in</span> <span class="n">chemComp</span><span class="o">.</span><span class="n">chemAtoms</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">className</span> <span class="o">==</span> <span class="s1">&#39;LinkAtom&#39;</span><span class="p">:</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="n">LINK</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;prev&#39;</span> <span class="ow">in</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;next&#39;</span> <span class="ow">in</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">name</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">linkEnd</span> <span class="o">=</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">boundLinkEnd</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;link_&#39;</span> <span class="o">+</span> <span class="n">linkEnd</span><span class="o">.</span><span class="n">boundChemAtom</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">chemElement</span><span class="o">.</span><span class="n">symbol</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">atomMap</span><span class="p">:</span>
+            <span class="n">atom</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="n">compound</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">atomMap</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">atom</span>
+
+    <span class="c1"># Vars and VarAtoms</span>
+    <span class="k">if</span> <span class="n">chemCompCoord</span><span class="p">:</span>
+        <span class="n">getVarCoord</span> <span class="o">=</span> <span class="n">chemCompCoord</span><span class="o">.</span><span class="n">findFirstChemCompVarCoord</span>
+
+    <span class="k">for</span> <span class="n">chemCompVar</span> <span class="ow">in</span> <span class="n">chemComp</span><span class="o">.</span><span class="n">chemCompVars</span><span class="p">:</span>
+        <span class="n">varAtomMap</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">variant</span> <span class="o">=</span> <span class="n">Variant</span><span class="p">(</span><span class="n">compound</span><span class="p">)</span>
+        <span class="n">variant</span><span class="o">.</span><span class="n">polyLink</span> <span class="o">=</span> <span class="n">chemCompVar</span><span class="o">.</span><span class="n">linking</span>
+
+        <span class="k">if</span> <span class="n">chemCompVar</span><span class="o">.</span><span class="n">isDefaultVar</span><span class="p">:</span>
+            <span class="n">variant</span><span class="o">.</span><span class="n">setDefault</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">descriptor</span> <span class="o">=</span> <span class="n">chemCompVar</span><span class="o">.</span><span class="n">descriptor</span>
+        <span class="n">descs</span> <span class="o">=</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)</span>
+
+        <span class="n">varProts</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">desc</span> <span class="ow">in</span> <span class="n">descs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;prot&#39;</span> <span class="ow">in</span> <span class="n">desc</span><span class="p">:</span>
+                <span class="n">hNames</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">varProts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">hNames</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">chemCompCoord</span><span class="p">:</span>
+            <span class="n">chemCompVarCoord</span> <span class="o">=</span> <span class="n">getVarCoord</span><span class="p">(</span><span class="n">linking</span><span class="o">=</span><span class="n">chemCompVar</span><span class="o">.</span><span class="n">linking</span><span class="p">,</span>
+                                           <span class="n">descriptor</span><span class="o">=</span><span class="n">chemCompVar</span><span class="o">.</span><span class="n">descriptor</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">chemCompVarCoord</span><span class="p">:</span>
+                <span class="n">chemCompVarCoord</span> <span class="o">=</span> <span class="n">getVarCoord</span><span class="p">(</span><span class="n">linking</span><span class="o">=</span><span class="n">chemCompVar</span><span class="o">.</span><span class="n">linking</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">chemCompVarCoord</span><span class="p">:</span>
+                <span class="n">chemCompVarCoord</span> <span class="o">=</span> <span class="n">getVarCoord</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">chemCompVarCoord</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">chemAtoms</span> <span class="o">=</span> <span class="n">chemCompVar</span><span class="o">.</span><span class="n">chemAtoms</span>
+        <span class="k">for</span> <span class="n">chemAtom</span> <span class="ow">in</span> <span class="n">chemAtoms</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">className</span> <span class="o">==</span> <span class="s1">&#39;LinkAtom&#39;</span><span class="p">:</span>
+                <span class="n">labile</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">chirality</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;prev&#39;</span> <span class="ow">in</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;next&#39;</span> <span class="ow">in</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">name</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">linkEnd</span> <span class="o">=</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">boundLinkEnd</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;link_&#39;</span> <span class="o">+</span> <span class="n">linkEnd</span><span class="o">.</span><span class="n">boundChemAtom</span><span class="o">.</span><span class="n">name</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">name</span>
+                <span class="n">labile</span> <span class="o">=</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">waterExchangeable</span>
+                <span class="n">chirality</span> <span class="o">=</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">chirality</span>
+
+                <span class="k">if</span> <span class="n">chirality</span> <span class="o">==</span> <span class="s1">&#39;unknown&#39;</span><span class="p">:</span>
+                    <span class="n">chirality</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">chirality</span><span class="p">:</span>
+                    <span class="n">subTypes</span> <span class="o">=</span> <span class="n">chemComp</span><span class="o">.</span><span class="n">findAllChemAtoms</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">chemAtom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subTypes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">stereoTag</span> <span class="o">=</span> <span class="s1">&#39;stereo_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">subType</span>
+
+                        <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">descs</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">stereoTag</span><span class="p">):</span>
+
+                                <span class="k">if</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">tag</span><span class="p">:</span>
+
+                                    <span class="k">if</span> <span class="p">(</span><span class="n">chemAtom</span><span class="o">.</span><span class="n">subType</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                                        <span class="n">chirality</span> <span class="o">=</span> <span class="s1">&#39;a&#39;</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">chirality</span> <span class="o">=</span> <span class="s1">&#39;b&#39;</span>
+
+                                <span class="k">break</span>
+
+            <span class="n">coords</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">chemCompVarCoord</span><span class="p">:</span>
+                <span class="n">chemAtomCoord</span> <span class="o">=</span> <span class="n">chemCompVarCoord</span><span class="o">.</span><span class="n">findFirstChemAtomCoord</span><span class="p">(</span><span class="n">chemAtom</span><span class="o">=</span><span class="n">chemAtom</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">chemAtomCoord</span><span class="p">:</span>
+                    <span class="n">coords</span> <span class="o">=</span> <span class="p">(</span><span class="n">chemAtomCoord</span><span class="o">.</span><span class="n">x</span> <span class="o">*</span> <span class="mi">50</span><span class="p">,</span>
+                              <span class="n">chemAtomCoord</span><span class="o">.</span><span class="n">y</span> <span class="o">*</span> <span class="mi">50</span><span class="p">,</span>
+                              <span class="n">chemAtomCoord</span><span class="o">.</span><span class="n">z</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+
+            <span class="n">atom</span> <span class="o">=</span> <span class="n">atomMap</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">atom</span><span class="o">.</span><span class="n">isVariable</span><span class="p">:</span>
+                <span class="n">atom</span><span class="o">.</span><span class="n">isVariable</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">varProts</span>
+
+            <span class="n">varAtom</span> <span class="o">=</span> <span class="n">VarAtom</span><span class="p">(</span><span class="n">variant</span><span class="p">,</span> <span class="n">atom</span><span class="p">,</span> <span class="n">chirality</span><span class="o">=</span><span class="n">chirality</span><span class="p">,</span>
+                              <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> <span class="n">isLabile</span><span class="o">=</span><span class="n">labile</span><span class="p">)</span>
+            <span class="n">varAtomMap</span><span class="p">[</span><span class="n">chemAtom</span><span class="p">]</span> <span class="o">=</span> <span class="n">varAtom</span>
+
+        <span class="c1"># Make bond for each var</span>
+
+        <span class="k">for</span> <span class="n">chemBond</span> <span class="ow">in</span> <span class="n">chemComp</span><span class="o">.</span><span class="n">chemBonds</span><span class="p">:</span>
+            <span class="n">varAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">varAtomMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">chemBond</span><span class="o">.</span><span class="n">chemAtoms</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">varAtoms</span><span class="p">:</span>
+                <span class="c1"># Bond only in different var</span>
+                <span class="k">continue</span>
+
+            <span class="n">bond</span> <span class="o">=</span> <span class="n">Bond</span><span class="p">(</span><span class="n">varAtoms</span><span class="p">,</span> <span class="n">chemBond</span><span class="o">.</span><span class="n">bondType</span><span class="p">,</span> <span class="n">autoVar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">chemBond</span><span class="o">.</span><span class="n">bondType</span> <span class="o">==</span> <span class="s1">&#39;aromatic&#39;</span><span class="p">:</span>
+                <span class="n">atomsA</span> <span class="o">=</span> <span class="p">[</span><span class="n">atomMap</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">chemBond</span><span class="o">.</span><span class="n">chemAtoms</span><span class="p">]</span>
+                <span class="n">aromaticAtoms</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">atomsA</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">chemBond</span><span class="o">.</span><span class="n">bondType</span> <span class="o">==</span> <span class="s1">&#39;dative&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">varAtoms</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">element</span> <span class="ow">in</span> <span class="s1">&#39;CNPOSFClI&#39;</span><span class="p">:</span>
+                    <span class="n">bond</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="n">varAtoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">bond</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="n">varAtoms</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">variant</span><span class="o">.</span><span class="n">updateDescriptor</span><span class="p">()</span>
+
+    <span class="c1"># AtomGroups</span>
+
+    <span class="c1"># Simple first</span>
+
+    <span class="k">for</span> <span class="n">chemAtomSet</span> <span class="ow">in</span> <span class="n">chemComp</span><span class="o">.</span><span class="n">chemAtomSets</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">chemAtomSet</span><span class="o">.</span><span class="n">chemAtomSets</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">chemAtomsB</span> <span class="o">=</span> <span class="n">chemAtomSet</span><span class="o">.</span><span class="n">chemAtoms</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">atomMap</span><span class="p">[</span><span class="n">ca</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">ca</span> <span class="ow">in</span> <span class="n">chemAtomsB</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">compound</span><span class="o">.</span><span class="n">variants</span><span class="p">:</span>
+            <span class="n">varAtoms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">var</span><span class="o">.</span><span class="n">atomDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">varAtoms</span><span class="p">:</span>
+                <span class="c1"># This var cannot hold the group</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">chemAtomSet</span><span class="o">.</span><span class="n">isEquivalent</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">groupType</span> <span class="o">=</span> <span class="n">EQUIVALENT</span>
+            <span class="k">elif</span> <span class="n">chemAtomSet</span><span class="o">.</span><span class="n">isProchiral</span><span class="p">:</span>
+                <span class="n">groupType</span> <span class="o">=</span> <span class="n">NONSTEREO</span>
+            <span class="k">elif</span> <span class="n">chemAtomSet</span><span class="o">.</span><span class="n">isEquivalent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">groupType</span> <span class="o">=</span> <span class="n">EQUIVALENT</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">AtomGroup</span><span class="p">(</span><span class="n">compound</span><span class="p">,</span> <span class="n">varAtoms</span><span class="p">,</span> <span class="n">groupType</span><span class="p">)</span>
+
+    <span class="c1"># Compound second</span>
+
+    <span class="k">for</span> <span class="n">chemAtomSet</span> <span class="ow">in</span> <span class="n">chemComp</span><span class="o">.</span><span class="n">chemAtomSets</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">chemAtomSet</span><span class="o">.</span><span class="n">chemAtomSets</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">chemAtomsB</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">chemAtomSetB</span> <span class="ow">in</span> <span class="n">chemAtomSet</span><span class="o">.</span><span class="n">chemAtomSets</span><span class="p">:</span>
+            <span class="n">chemAtomsB</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">chemAtomSetB</span><span class="o">.</span><span class="n">chemAtoms</span><span class="p">)</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">atomMap</span><span class="p">[</span><span class="n">ca</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">ca</span> <span class="ow">in</span> <span class="n">chemAtomsB</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">compound</span><span class="o">.</span><span class="n">variants</span><span class="p">:</span>
+            <span class="n">varAtoms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">var</span><span class="o">.</span><span class="n">atomDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">varAtoms</span><span class="p">:</span>
+                <span class="c1"># This var cannot hold the group</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">chemAtomSet</span><span class="o">.</span><span class="n">isEquivalent</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">groupType</span> <span class="o">=</span> <span class="n">EQUIVALENT</span>
+            <span class="k">elif</span> <span class="n">chemAtomSet</span><span class="o">.</span><span class="n">isProchiral</span><span class="p">:</span>
+                <span class="n">groupType</span> <span class="o">=</span> <span class="n">NONSTEREO</span>
+            <span class="k">elif</span> <span class="n">chemAtomSet</span><span class="o">.</span><span class="n">isEquivalent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">groupType</span> <span class="o">=</span> <span class="n">EQUIVALENT</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Automatically fills subGroups that were defined first</span>
+            <span class="n">AtomGroup</span><span class="p">(</span><span class="n">compound</span><span class="p">,</span> <span class="n">varAtoms</span><span class="p">,</span> <span class="n">groupType</span><span class="p">)</span>
+
+    <span class="c1"># Curate charges and link names</span>
+
+    <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">compound</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">element</span>
+
+        <span class="k">if</span> <span class="n">elem</span> <span class="ow">in</span> <span class="p">(</span><span class="n">LINK</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="n">elem</span> <span class="o">==</span> <span class="n">LINK</span> <span class="ow">and</span> <span class="s1">&#39;prev&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">name</span> <span class="ow">and</span> <span class="s1">&#39;next&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">varAtoms</span><span class="p">:</span>
+                    <span class="n">varAtom</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">varAtoms</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">varAtom</span><span class="o">.</span><span class="n">neighbours</span><span class="p">:</span>
+                        <span class="n">bound</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">varAtom</span><span class="o">.</span><span class="n">neighbours</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">atom</span><span class="o">.</span><span class="n">setName</span><span class="p">(</span><span class="s1">&#39;link_&#39;</span> <span class="o">+</span> <span class="n">bound</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="k">continue</span>
+
+        <span class="n">defaultVal</span> <span class="o">=</span> <span class="n">ELEMENT_DATA</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">ELEMENT_DEFAULT</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">varAtom</span> <span class="ow">in</span> <span class="n">atom</span><span class="o">.</span><span class="n">varAtoms</span><span class="p">:</span>
+
+            <span class="k">for</span> <span class="n">varAtomB</span> <span class="ow">in</span> <span class="n">varAtom</span><span class="o">.</span><span class="n">neighbours</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">varAtomB</span><span class="o">.</span><span class="n">freeValences</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nVal</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">BOND_TYPE_VALENCES</span><span class="p">[</span><span class="n">b</span><span class="o">.</span><span class="n">bondType</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">varAtom</span><span class="o">.</span><span class="n">bonds</span><span class="p">])</span>
+                <span class="n">charge</span> <span class="o">=</span> <span class="n">nVal</span> <span class="o">-</span> <span class="n">defaultVal</span>
+
+                <span class="k">if</span> <span class="n">charge</span><span class="p">:</span>
+                    <span class="n">varAtom</span><span class="o">.</span><span class="n">setCharge</span><span class="p">(</span><span class="n">charge</span><span class="p">,</span> <span class="n">autoVar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Aromatics</span>
+
+    <span class="k">if</span> <span class="n">aromaticAtoms</span><span class="p">:</span>
+        <span class="n">compound</span><span class="o">.</span><span class="n">setAromatic</span><span class="p">(</span><span class="n">aromaticAtoms</span><span class="p">)</span>
+
+    <span class="n">compound</span><span class="o">.</span><span class="n">center</span><span class="p">((</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">compound</span><span class="o">.</span><span class="n">variants</span><span class="p">:</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">checkBaseValences</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">compound</span></div>
+
+
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
     <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
@@ -6926,6 +7197,7 @@
     <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -6935,7 +7207,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -6955,12 +7227,13 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.CompoundView</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

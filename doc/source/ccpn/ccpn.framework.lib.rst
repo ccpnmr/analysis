@@ -6,32 +6,18 @@ ccpn.framework.lib package
    :undoc-members:
    :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   ccpn.framework.lib.NTdb
+   ccpn.framework.lib.ccpnNef
+   ccpn.framework.lib.ccpnNmrStarIo
+
 Submodules
 ----------
-
-ccpn.framework.lib.ExtensionLoader module
------------------------------------------
-
-.. automodule:: ccpn.framework.lib.ExtensionLoader
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ccpn.framework.lib.Pipe module
-------------------------------
-
-.. automodule:: ccpn.framework.lib.Pipe
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ccpn.framework.lib.Pipeline module
-----------------------------------
-
-.. automodule:: ccpn.framework.lib.Pipeline
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 ccpn.framework.lib.Plugin module
 --------------------------------
@@ -56,4 +42,3 @@ ccpn.framework.lib.misc module
    :members:
    :undoc-members:
    :show-inheritance:
-

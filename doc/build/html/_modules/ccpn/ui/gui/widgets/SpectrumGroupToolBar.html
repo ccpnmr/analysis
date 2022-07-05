@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.ui.gui.widgets.SpectrumGroupToolBar &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
-    <script src="../../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.SpectrumGroupToolBar</a></li> 
       </ul>
     </div>  
 
@@ -43,18 +44,19 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:56 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-05-19 11:39:59 +0100 (Thu, May 19, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -64,11 +66,14 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ToolBar</span> <span class="kn">import</span> <span class="n">ToolBar</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ToolBar</span> <span class="kn">import</span> <span class="n">ToolBar</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
-<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Font</span> <span class="kn">import</span> <span class="n">setWidgetFont</span><span class="p">,</span> <span class="n">getFontHeight</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.Notifiers</span> <span class="kn">import</span> <span class="n">Notifier</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.OrderedSet</span> <span class="kn">import</span> <span class="n">OrderedSet</span>
 
 
 <div class="viewcode-block" id="SpectrumGroupToolBar"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumGroupToolBar.SpectrumGroupToolBar">[docs]</a><span class="k">class</span> <span class="nc">SpectrumGroupToolBar</span><span class="p">(</span><span class="n">ToolBar</span><span class="p">):</span>
@@ -76,6 +81,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span> <span class="o">=</span> <span class="n">spectrumDisplay</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">project</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setToolButtonStyle</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ToolButtonTextUnderIcon</span><span class="p">)</span>
 
         <span class="c1"># self._spectrumGroups = []</span>
 
@@ -97,7 +103,7 @@
     <span class="c1">#     AbstractWrapperObject.setParameter(self.spectrumDisplay,</span>
     <span class="c1">#                                        SPECTRUMGROUPS, SPECTRUMGROUPLIST, groups)</span>
 
-    <span class="k">def</span> <span class="nf">_addAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_addAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">,</span> <span class="n">oldAction</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="n">_spectrumGroups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">_getSpectrumGroups</span><span class="p">()</span>
 
@@ -105,28 +111,55 @@
             <span class="c1"># _spectrumGroups.append(spectrumGroup)</span>
             <span class="n">_spectrumGroups</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">,)</span>
 
-            <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleSpectrumGroup</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">))</span>
-            <span class="n">action</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="n">action</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_setupButton</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">oldAction</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">oldAction</span><span class="p">)</span>
+                <span class="n">oldAction</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleSpectrumGroup</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">))</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+                <span class="n">setWidgetFont</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;SMALL&#39;</span><span class="p">)</span>
+
+                <span class="n">action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_setupButton</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">_setSpectrumGroups</span><span class="p">(</span><span class="n">_spectrumGroups</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_removeAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
+        <span class="n">_spectrumGroups</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">_getSpectrumGroups</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span> <span class="ow">in</span> <span class="n">_spectrumGroups</span><span class="p">:</span>
+            <span class="n">_spectrumGroups</span> <span class="o">=</span> <span class="n">_spectrumGroups</span> <span class="o">-</span> <span class="p">{</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">,}</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">removeAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="n">action</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">_setSpectrumGroups</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">_spectrumGroups</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">_forceAddAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
 
         <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleSpectrumGroup</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">))</span>
         <span class="n">action</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">action</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+        <span class="n">setWidgetFont</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;SMALL&#39;</span><span class="p">)</span>
+
         <span class="n">action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">action</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setupButton</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_setupButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
         <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetForAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-        <span class="n">widget</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
-        <span class="n">widget</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="mi">75</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+        <span class="n">_height1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">getFontHeight</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="s1">&#39;SMALL&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+        <span class="n">_height2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">getFontHeight</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="s1">&#39;VLARGE&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="n">_height1</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="n">_height1</span><span class="p">))</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="n">_height2</span> <span class="o">*</span> <span class="mf">2.5</span><span class="p">,</span> <span class="n">_height2</span><span class="p">)</span>
+        <span class="c1"># widget.setIconSize(QtCore.QSize(120, 10))</span>
+        <span class="c1"># widget.setFixedSize(75, 30)</span>
+
+        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiSpectrumView</span> <span class="kn">import</span> <span class="n">_addActionIcon</span>
+        <span class="n">_addActionIcon</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SpectrumGroupToolBar.mousePressEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumGroupToolBar.SpectrumGroupToolBar.mousePressEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -183,21 +216,59 @@
     <span class="k">def</span> <span class="nf">_deleteSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
         <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getStrip</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">removeAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
-                    <span class="n">spectrumView</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">spectrumGroup</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroups</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroups</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span>
+            <span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoBlockWithoutSideBar</span><span class="p">,</span> <span class="n">undoStackBlocking</span>
+
+            <span class="k">with</span> <span class="n">undoBlockWithoutSideBar</span><span class="p">():</span>
+
+                <span class="n">_spectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="p">[</span><span class="n">strip</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">gr</span><span class="p">)</span> <span class="k">for</span> <span class="n">gr</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">_getSpectrumGroups</span><span class="p">()</span> <span class="k">if</span> <span class="n">strip</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">gr</span><span class="p">)]</span>
+                            <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">spectra</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">sp</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">]</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_removeAction</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">)</span>
+
+                <span class="k">with</span> <span class="n">undoStackBlocking</span><span class="p">()</span> <span class="k">as</span> <span class="n">addUndoItem</span><span class="p">:</span>
+                    <span class="c1"># need to undo the removal of action</span>
+                    <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">strip</span><span class="o">.</span><span class="n">_CcpnGLWidget</span><span class="o">.</span><span class="n">updateVisibleSpectrumViews</span><span class="p">,</span>
+                                <span class="n">redo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_removeAction</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">))</span>
+
+                <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
+                    <span class="c1"># NOTE:ED - can only delete those that are not duplicated</span>
+                    <span class="c1">#           need count in all spectrumDisplay._getSpectrumGroups</span>
+                    <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span> <span class="ow">and</span> <span class="n">_spectra</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">spectrumView</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+
+                <span class="k">with</span> <span class="n">undoStackBlocking</span><span class="p">()</span> <span class="k">as</span> <span class="n">addUndoItem</span><span class="p">:</span>
+                    <span class="c1"># keep a handle to the action for reinserting</span>
+                    <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_addAction</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">,</span> <span class="n">oldAction</span><span class="o">=</span><span class="n">action</span><span class="p">),</span>
+                                <span class="n">redo</span><span class="o">=</span><span class="n">strip</span><span class="o">.</span><span class="n">_CcpnGLWidget</span><span class="o">.</span><span class="n">updateVisibleSpectrumViews</span><span class="p">)</span>
+
+                <span class="c1"># if spectrumGroup in self._spectrumGroups:</span>
+                <span class="c1">#     self._spectrumGroups.remove(spectrumGroup)</span>
+                <span class="c1"># if len(strip.spectra) == 0:</span>
+                <span class="c1">#     self.spectrumDisplay._closeModule()</span>
+
+    <span class="k">def</span> <span class="nf">_spectrumGroupRename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Rename the spectrumGroup in the toolbar from a notifier callback</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">spectrumGroup</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+        <span class="n">trigger</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">TRIGGER</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">spectrumGroup</span> <span class="ow">and</span> <span class="n">trigger</span> <span class="ow">in</span> <span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">RENAME</span><span class="p">]:</span>
+            <span class="n">oldPid</span> <span class="o">=</span> <span class="n">Pid</span><span class="o">.</span><span class="n">Pid</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">OLDPID</span><span class="p">])</span>
+
+            <span class="n">validActions</span> <span class="o">=</span> <span class="p">[</span><span class="n">action</span> <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">()</span> <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="n">oldPid</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">validActions</span><span class="p">:</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+                <span class="c1"># setWidgetFont(action, size=&#39;SMALL&#39;)</span>
 
     <span class="c1"># LM: Fixme the code for peakList views below needs refactoring</span>
 
     <span class="k">def</span> <span class="nf">_showHidePeakListView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">plv</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPeakListViews</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">plv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">plv</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">plv</span><span class="o">.</span><span class="n">isDisplayed</span><span class="p">:</span>
                     <span class="n">plv</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">plv</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
@@ -219,8 +290,37 @@
     <span class="k">def</span> <span class="nf">_getPeakListViews</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
         <span class="n">spectrumGroupPeakLists</span> <span class="o">=</span> <span class="p">[</span><span class="n">peakList</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span> <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">]</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">plv</span> <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">spectrumGroupPeakLists</span> <span class="k">for</span> <span class="n">plv</span> <span class="ow">in</span> <span class="n">peakList</span><span class="o">.</span><span class="n">peakListViews</span><span class="p">]</span></div>
+
+
+<span class="k">def</span> <span class="nf">_spectrumGroupViewHasChanged</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="bp">self</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiSpectrumView</span> <span class="kn">import</span> <span class="n">_addActionIcon</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.OpenGL.CcpnOpenGL</span> <span class="kn">import</span> <span class="n">GLNotifier</span>
+
+    <span class="n">specDisplays</span> <span class="o">=</span> <span class="p">[</span><span class="n">sd</span> <span class="k">for</span> <span class="n">sd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumDisplays</span> <span class="k">if</span> <span class="n">sd</span> <span class="ow">and</span> <span class="n">sd</span><span class="o">.</span><span class="n">isGrouped</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">sd</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">specDisplay</span> <span class="ow">in</span> <span class="n">specDisplays</span><span class="p">:</span>
+        <span class="n">_actions</span> <span class="o">=</span> <span class="p">[</span><span class="n">action</span> <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">specDisplay</span><span class="o">.</span><span class="n">spectrumGroupToolBar</span><span class="o">.</span><span class="n">actions</span><span class="p">()</span> <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">_actions</span><span class="p">:</span>
+            <span class="c1"># add spectrum action for grouped action</span>
+            <span class="n">_addActionIcon</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">specDisplay</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.OpenGL.CcpnOpenGL</span> <span class="kn">import</span> <span class="n">GLNotifier</span>
+
+    <span class="n">GLSignals</span> <span class="o">=</span> <span class="n">GLNotifier</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">buildContoursOnly</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># repaint</span>
+    <span class="n">GLSignals</span><span class="o">.</span><span class="n">emitPaintEvent</span><span class="p">()</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -230,7 +330,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -250,12 +350,13 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.SpectrumGroupToolBar</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

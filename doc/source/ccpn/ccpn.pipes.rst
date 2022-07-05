@@ -10,12 +10,20 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
-   ccpn.pipes.examples
    ccpn.pipes.lib
 
 Submodules
 ----------
+
+ccpn.pipes.APSPipe module
+-------------------------
+
+.. automodule:: ccpn.pipes.APSPipe
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 ccpn.pipes.AlignSpectra module
 ------------------------------
@@ -49,6 +57,14 @@ ccpn.pipes.BaselinePipe module
    :undoc-members:
    :show-inheritance:
 
+ccpn.pipes.DIPipe module
+------------------------
+
+.. automodule:: ccpn.pipes.DIPipe
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ccpn.pipes.DuplicateSpectraPipe module
 --------------------------------------
 
@@ -73,6 +89,14 @@ ccpn.pipes.ExcludeSolventRegions module
    :undoc-members:
    :show-inheritance:
 
+ccpn.pipes.FFTPipe module
+-------------------------
+
+.. automodule:: ccpn.pipes.FFTPipe
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ccpn.pipes.IntegrationPipe module
 ---------------------------------
 
@@ -85,6 +109,14 @@ ccpn.pipes.NoiseThresholdPipe module
 ------------------------------------
 
 .. automodule:: ccpn.pipes.NoiseThresholdPipe
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.pipes.OLD\_PeakPicker1DPipe module
+---------------------------------------
+
+.. automodule:: ccpn.pipes.OLD_PeakPicker1DPipe
    :members:
    :undoc-members:
    :show-inheritance:
@@ -137,11 +169,34 @@ ccpn.pipes.ReferencingSpectra1Dpipe module
    :undoc-members:
    :show-inheritance:
 
-ccpn.pipes.SimplifiedPeakPicker1DPipe module
---------------------------------------------
+ccpn.pipes.RefitPeaks module
+----------------------------
 
-.. automodule:: ccpn.pipes.SimplifiedPeakPicker1DPipe
+.. automodule:: ccpn.pipes.RefitPeaks
    :members:
    :undoc-members:
    :show-inheritance:
 
+ccpn.pipes.RevPipe module
+-------------------------
+
+.. automodule:: ccpn.pipes.RevPipe
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.pipes.Scale1D module
+-------------------------
+
+.. automodule:: ccpn.pipes.Scale1D
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.pipes.ZfPipe module
+------------------------
+
+.. automodule:: ccpn.pipes.ZfPipe
+   :members:
+   :undoc-members:
+   :show-inheritance:

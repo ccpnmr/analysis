@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.ui.gui.widgets.MessageDialog &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
-    <script src="../../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.MessageDialog</a></li> 
       </ul>
     </div>  
 
@@ -43,9 +44,10 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
@@ -53,8 +55,8 @@
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-01-28 09:52:40 +0000 (Tue, January 28, 2020) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -64,33 +66,95 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">import</span> <span class="nn">textwrap</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Font</span> <span class="kn">import</span> <span class="n">setWidgetFont</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="kn">import</span> <span class="n">QEvent</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">messageFont</span><span class="p">,</span> <span class="n">messageFontBold</span>
+
+<span class="c1"># from ccpn.ui.gui.guiSettings import messageFont, messageFontBold</span>
 
 <span class="k">def</span> <span class="nf">_isDarwin</span><span class="p">():</span>
     <span class="k">return</span> <span class="s1">&#39;darwin&#39;</span> <span class="ow">in</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QSysInfo</span><span class="p">()</span><span class="o">.</span><span class="n">kernelType</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
-<span class="n">Ok</span>            <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Ok</span>
-<span class="n">Cancel</span>        <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Cancel</span>
-<span class="n">Yes</span>           <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span>
-<span class="n">No</span>            <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">No</span>
-<span class="n">Retry</span>         <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Retry</span>
-<span class="n">Ignore</span>        <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Ignore</span>
-<span class="n">Abort</span>         <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Abort</span>
-<span class="n">Close</span>         <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Close</span>
-<span class="n">Information</span>   <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Information</span>
-<span class="ne">Warning</span>       <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Warning</span>
-<span class="n">Question</span>      <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Question</span>
-<span class="n">Critical</span>      <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Critical</span>
-<span class="n">Save</span>          <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Save</span>
-<span class="n">Discard</span>       <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Discard</span>
 
-<span class="n">default_icons</span> <span class="o">=</span> <span class="p">(</span><span class="n">Information</span><span class="p">,</span><span class="n">Question</span><span class="p">,</span><span class="ne">Warning</span><span class="p">,</span><span class="n">Critical</span><span class="p">)</span>
+<span class="n">Ok</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Ok</span>
+<span class="n">Cancel</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Cancel</span>
+<span class="n">Yes</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span>
+<span class="n">No</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">No</span>
+<span class="n">Retry</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Retry</span>
+<span class="n">Ignore</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Ignore</span>
+<span class="n">Abort</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Abort</span>
+<span class="n">Close</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Close</span>
+<span class="n">Information</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Information</span>
+<span class="ne">Warning</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Warning</span>
+<span class="n">Question</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Question</span>
+<span class="n">Critical</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Critical</span>
+<span class="n">Save</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Save</span>
+<span class="n">Discard</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Discard</span>
 
+<span class="n">default_icons</span> <span class="o">=</span> <span class="p">(</span><span class="n">Information</span><span class="p">,</span> <span class="n">Question</span><span class="p">,</span> <span class="ne">Warning</span><span class="p">,</span> <span class="n">Critical</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="n">_isDarwin</span><span class="p">():</span>
     <span class="n">Question</span> <span class="o">=</span> <span class="ne">Warning</span>
+
+<span class="n">LINELENGTH</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">WRAPBORDER</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">WRAPSCALE</span> <span class="o">=</span> <span class="mf">1.01</span>
+
+
+<span class="k">def</span> <span class="nf">_wrapString</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">lineLength</span><span class="o">=</span><span class="n">LINELENGTH</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wrap a line of text to the desired width of the dialog</span>
+<span class="sd">    Returns list of individual lines and the concatenated string for dialog</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">newWrapped</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">_text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">_text</span><span class="p">:</span>
+        <span class="n">wrapped</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">lineLength</span><span class="p">,</span> <span class="n">replace_whitespace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">break_long_words</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">newWrapped</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">mm</span> <span class="ow">in</span> <span class="n">wrapped</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mm</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">LINELENGTH</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">chPos</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">mm</span><span class="p">),</span> <span class="n">lineLength</span><span class="p">):</span>
+                    <span class="n">newWrapped</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mm</span><span class="p">[</span><span class="n">chPos</span><span class="p">:</span><span class="n">chPos</span> <span class="o">+</span> <span class="n">lineLength</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">newWrapped</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mm</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">newWrapped</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newWrapped</span><span class="p">)</span>
+
+    <span class="c1"># # merge lines that have now been created by splitting longer lines (if no newlines in first line)</span>
+    <span class="c1"># newWrapped2 = []</span>
+    <span class="c1"># if len(newWrapped) &gt; 1:</span>
+    <span class="c1">#     lineNum = 0</span>
+    <span class="c1">#     while lineNum &lt; len(newWrapped):</span>
+    <span class="c1">#         l1 = newWrapped[lineNum]</span>
+    <span class="c1">#         if lineNum == len(newWrapped) - 1:</span>
+    <span class="c1">#             newWrapped2.append(l1)</span>
+    <span class="c1">#             break</span>
+    <span class="c1">#</span>
+    <span class="c1">#         l2 = newWrapped[lineNum + 1]</span>
+    <span class="c1">#         if not l2:</span>
+    <span class="c1">#             newWrapped2.append(l1)</span>
+    <span class="c1">#             newWrapped2.append(l2)</span>
+    <span class="c1">#             lineNum += 1</span>
+    <span class="c1">#         elif (len(l1) + len(l2) &lt; LINELENGTH) and &#39;\n&#39; not in l1:</span>
+    <span class="c1">#             # not sure it will get here now</span>
+    <span class="c1">#             newWrapped2.append(l1 + &#39; &#39; + l2)</span>
+    <span class="c1">#             lineNum += 1</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             newWrapped2.append(l1)</span>
+    <span class="c1">#             if lineNum == len(newWrapped) - 2:</span>
+    <span class="c1">#                 newWrapped2.append(l2)</span>
+    <span class="c1">#</span>
+    <span class="c1">#         lineNum += 1</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     newWrapped2 = newWrapped</span>
+    <span class="c1">#</span>
+    <span class="c1"># return newWrapped2, &#39;\n&#39;.join(newWrapped2)</span>
+
 
 <div class="viewcode-block" id="MessageDialog"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.MessageDialog">[docs]</a><span class="k">class</span> <span class="nc">MessageDialog</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -98,14 +162,21 @@
 <span class="sd">    Using the &#39;multiline&#39; to emulate the windowTitle, as on Mac the windows do not get their title</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">basicText</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="n">Information</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">basicText</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="n">Information</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scrollableMessage</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowModality</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WindowModal</span><span class="p">)</span>
+
+        <span class="c1"># set modality to take control</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowModality</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ApplicationModal</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+
+        <span class="n">basicTextWrap</span><span class="p">,</span> <span class="n">basicText</span> <span class="o">=</span> <span class="n">_wrapString</span><span class="p">(</span><span class="n">basicText</span><span class="p">)</span>
+        <span class="n">messageWrap</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="n">_wrapString</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">basicText</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setInformativeText</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">icon</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
 
@@ -115,22 +186,43 @@
         <span class="c1"># Adapted from best solution so far from: http://apocalyptech.com/linux/qt/qmessagebox/</span>
         <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span>
 
-        <span class="n">item</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">itemAtPosition</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">item</span><span class="p">:</span>
-            <span class="n">widget</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span>
-            <span class="c1"># GWV: setting font of basicText widget</span>
-            <span class="n">widget</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">messageFontBold</span><span class="p">)</span>
-            <span class="c1"># GWV: setting font and width of message</span>
+        <span class="c1"># set the fonts for the labels (pushButtons are set later)</span>
+        <span class="k">for</span> <span class="n">widgetLabel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">findChildren</span><span class="p">((</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QTextEdit</span><span class="p">)):</span>
+            <span class="n">setWidgetFont</span><span class="p">(</span><span class="n">widgetLabel</span><span class="p">,</span> <span class="p">)</span>
 
-        <span class="n">item</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">itemAtPosition</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">maxTextWidth</span> <span class="o">=</span> <span class="mi">50</span>
+        <span class="n">widgetBasic</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">itemAtPosition</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># grid position of basic text item</span>
         <span class="k">if</span> <span class="n">item</span><span class="p">:</span>
-            <span class="n">widget</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span>
-            <span class="c1"># GWV: Estimating minimumwidth</span>
-            <span class="n">widget</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="o">*</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">200</span><span class="p">))</span>
-            <span class="n">widget</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">messageFont</span><span class="p">)</span>
+            <span class="n">widgetBasic</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span>
+            <span class="n">setWidgetFont</span><span class="p">(</span><span class="n">widgetBasic</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="c1"># textEdit = self.findChild(QtGui.QTextEdit)</span>
-        <span class="c1"># textEdit.setFont(messageFont)</span>
+            <span class="c1"># get the bounding rectangle for each line of basicText</span>
+            <span class="k">for</span> <span class="n">wrapLine</span> <span class="ow">in</span> <span class="n">basicTextWrap</span><span class="p">:</span>
+                <span class="n">tWidth</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFontMetrics</span><span class="p">(</span><span class="n">widgetBasic</span><span class="o">.</span><span class="n">font</span><span class="p">())</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">(</span><span class="n">wrapLine</span><span class="p">)</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">+</span> <span class="n">WRAPBORDER</span><span class="p">)</span> <span class="o">*</span> <span class="n">WRAPSCALE</span><span class="p">)</span>
+                <span class="n">maxTextWidth</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">maxTextWidth</span><span class="p">,</span> <span class="n">tWidth</span><span class="p">)</span>
+
+        <span class="n">widgetMessage</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">itemAtPosition</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># grid position of informative text item</span>
+        <span class="k">if</span> <span class="n">item</span><span class="p">:</span>
+            <span class="n">widgetMessage</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span>
+
+            <span class="c1"># get the bounding rectangle for each line of informativeText</span>
+            <span class="k">for</span> <span class="n">wrapLine</span> <span class="ow">in</span> <span class="n">messageWrap</span><span class="p">:</span>
+                <span class="n">tWidth</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFontMetrics</span><span class="p">(</span><span class="n">widgetMessage</span><span class="o">.</span><span class="n">font</span><span class="p">())</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">(</span><span class="n">wrapLine</span><span class="p">)</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">+</span> <span class="n">WRAPBORDER</span><span class="p">)</span> <span class="o">*</span> <span class="n">WRAPSCALE</span><span class="p">)</span>
+                <span class="n">maxTextWidth</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">maxTextWidth</span><span class="p">,</span> <span class="n">tWidth</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">widgetBasic</span><span class="p">:</span>
+            <span class="n">widgetBasic</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="n">maxTextWidth</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">widgetMessage</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">scrollableMessage</span><span class="p">:</span>  <span class="c1"># insert the Label widgetMessage inside a scrollArea. Could be done automatically if len(text) &gt; someValue...</span>
+                <span class="n">scrollArea</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">widgetMessage</span><span class="o">.</span><span class="n">setWordWrap</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="n">widgetMessage</span><span class="p">)</span>
+                <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">scrollArea</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">widgetMessage</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="n">maxTextWidth</span><span class="p">)</span>
 
         <span class="n">palette</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPalette</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setPalette</span><span class="p">(</span><span class="n">palette</span><span class="p">)</span>
@@ -140,10 +232,69 @@
             <span class="n">scaledImage</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">scaled</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">KeepAspectRatio</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setIconPixmap</span><span class="p">(</span><span class="n">scaledImage</span><span class="p">)</span>
 
+        <span class="c1"># self.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)</span>
+
+<div class="viewcode-block" id="MessageDialog.event"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.MessageDialog.event">[docs]</a>    <span class="k">def</span> <span class="nf">event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        handler to make dialogs proely modal but at the sametime accept the correct keys for default actions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># accepted events apple-delete, apple-c apple-v, esc, return, spacebar, command period, apple-z apple-y,</span>
+        <span class="c1"># apple-shift-z  apple-h, apple-option-h, control tab, tab, shift tab, arrow keys, contol arrow keys</span>
+        <span class="c1"># control-shift-arrows, apple-a</span>
+
+        <span class="n">ACCEPTED_MODAL_KEYS</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Space</span><span class="p">,),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Delete</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Backspace</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_C</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_V</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Escape</span><span class="p">,),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Return</span><span class="p">,),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Space</span><span class="p">,),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Period</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Z</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Y</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span> <span class="o">|</span> <span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Z</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_H</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span> <span class="o">|</span> <span class="n">Qt</span><span class="o">.</span><span class="n">AltModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_H</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">MetaModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Tab</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Tab</span><span class="p">,),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Tab</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Left</span><span class="p">,),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Right</span><span class="p">,),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Up</span><span class="p">,),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Down</span><span class="p">,),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">MetaModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Left</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">MetaModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Right</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">MetaModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Up</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">MetaModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Down</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">MetaModifier</span> <span class="o">|</span> <span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Left</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">MetaModifier</span> <span class="o">|</span> <span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Right</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">MetaModifier</span> <span class="o">|</span> <span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Up</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">MetaModifier</span> <span class="o">|</span> <span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Down</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_A</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="n">QEvent</span><span class="o">.</span><span class="n">ShortcutOverride</span><span class="p">:</span>
+            <span class="n">test</span> <span class="o">=</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">test</span> <span class="ow">in</span> <span class="n">ACCEPTED_MODAL_KEYS</span><span class="p">:</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">MessageDialog</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
 <div class="viewcode-block" id="MessageDialog.resizeEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.MessageDialog.resizeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        required to set the initial position of the message box on the centre of the screen</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># set the font of the push buttons, must be here after __init__ has completed</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">findChildren</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">):</span>
+            <span class="n">setWidgetFont</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="p">)</span>
+
         <span class="c1"># must be the first event outside of the __init__ otherwise frameGeometries are not valid</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">MessageDialog</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">resizeEvent</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span>
 
@@ -231,8 +382,9 @@
         <span class="k">return</span> <span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="showWarning"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showWarning">[docs]</a><span class="k">def</span> <span class="nf">showWarning</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="n">dialog</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="p">(</span><span class="s1">&#39;Warning&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="ne">Warning</span><span class="p">,</span> <span class="n">iconPath</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+<div class="viewcode-block" id="showWarning"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showWarning">[docs]</a><span class="k">def</span> <span class="nf">showWarning</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scrollableMessage</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">dialog</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Warning&#39;</span><span class="p">,</span> <span class="n">basicText</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="ne">Warning</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="n">iconPath</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span>
+                           <span class="n">scrollableMessage</span><span class="o">=</span><span class="n">scrollableMessage</span><span class="p">)</span>
 
     <span class="n">dialog</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">Close</span><span class="p">)</span>
     <span class="n">dialog</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
@@ -271,7 +423,6 @@
     <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">:</span>
         <span class="n">lower_text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
-
         <span class="k">if</span> <span class="n">checkbox</span> <span class="ow">and</span> <span class="p">(</span><span class="n">lower_text</span> <span class="ow">in</span> <span class="n">checkbox</span> <span class="ow">or</span> <span class="n">checkbox</span> <span class="ow">in</span> <span class="n">lower_text</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Checkboxes and buttons cannot have the same name!&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -295,29 +446,25 @@
             <span class="k">if</span> <span class="n">lower_text</span> <span class="o">==</span> <span class="s1">&#39;ok&#39;</span> <span class="ow">or</span> <span class="n">lower_text</span> <span class="o">==</span> <span class="n">okText</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
                 <span class="n">dialog</span><span class="o">.</span><span class="n">setDefaultButton</span><span class="p">(</span><span class="n">button</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">checkbox</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">_checkbox</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">(</span><span class="n">checkbox</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">dialog</span><span class="p">)</span>
-            <span class="n">_checkbox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">checked</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">checkbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_checkbox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">dialog</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">checkbox</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="n">checked</span><span class="p">)</span>
             <span class="n">dialog</span><span class="o">.</span><span class="n">setCheckBox</span><span class="p">(</span><span class="n">_checkbox</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">_checkbox</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">_checkbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">_checkbox</span><span class="o">.</span><span class="n">setFocus</span><span class="p">()</span>
 
-    <span class="n">dialog</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
     <span class="n">index</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
 
-
     <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">dialog</span><span class="o">.</span><span class="n">clickedButton</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">dialog</span><span class="o">.</span><span class="n">clickedButton</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">objects</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">objects</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">texts</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">checkbox</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">_checkbox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39; </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">checkbox</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">checkbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_checkbox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39; </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">checkbox</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">result</span></div>
 
@@ -345,7 +492,6 @@
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span>
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 <span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="kn">import</span> <span class="n">pyqtSlot</span>
-<span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
@@ -373,7 +519,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">busyFunc</span> <span class="o">=</span> <span class="n">busyFunc</span>
 
         <span class="c1"># progress bar</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">progressbar</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QProgressBar</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progressbar</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QProgressBar</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">progressbar</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>  <span class="c1"># resets the progress bar</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">progressbar</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignCenter</span><span class="p">)</span>  <span class="c1"># centers the text</span>
         <span class="c1"># &#39;valueChanged()&#39; signal</span>
@@ -391,7 +537,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">progress_simulation</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">messageFont</span><span class="p">)</span>
+
+        <span class="c1"># from ccpn.framework.Application import getApplication</span>
+        <span class="c1"># getApp = getApplication()</span>
+        <span class="c1"># if getApp and hasattr(getApp, &#39;_fontSettings&#39;):</span>
+        <span class="c1">#     self.label.setFont(getApp._fontSettings.messageFont)</span>
+        <span class="c1">#     self.setFont(getApp._fontSettings.messageFont)</span>
+        <span class="n">setWidgetFont</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">)</span>
+
         <span class="c1"># self.layout().addWidget(self.progressbar)</span>
 
         <span class="c1"># vlayout.addWidget(self.btn_start)</span>
@@ -440,17 +593,22 @@
     <span class="k">finally</span><span class="p">:</span>
         <span class="n">thisProg</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
         <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>  <span class="c1"># hopefully it will redraw the popup</span>
-        <span class="n">thisProg</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+        <span class="n">thisProg</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># return correct focus control to the parent</span>
+        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">setActiveWindow</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">_stoppableProgressBar</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Calculating...&#39;</span><span class="p">,</span> <span class="n">buttonText</span><span class="o">=</span><span class="s1">&#39;Cancel&#39;</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39; Use this for opening a _stoppableProgressBar before time consuming operations. the cancel button allows</span>
+    <span class="sd">&quot;&quot;&quot; Use this for opening a _stoppableProgressBar before time-consuming operations. the cancel button allows</span>
 <span class="sd">     the user to stop the loop manually.</span>
 <span class="sd">    eg:</span>
 <span class="sd">    for i in _stoppableProgressBar(range(10), title, buttonText):</span>
 <span class="sd">        # do stuff</span>
 <span class="sd">        pass</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    for use in a zip loop, wrap with &#39;list&#39;:</span>
+<span class="sd">    eg for (cs, ts) in _stoppableProgressBar(list(zip(controlSpectra, targetSpectra)))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">widget</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QProgressDialog</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">buttonText</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>  <span class="c1"># starts = 0, ends = len(data)</span>
     <span class="n">widget</span><span class="o">.</span><span class="n">setAutoClose</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
@@ -549,13 +707,27 @@
     <span class="c1">#     time.sleep(0.2)</span>
 
     <span class="k">def</span> <span class="nf">callback</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">showInfo</span><span class="p">(</span><span class="s1">&#39;My info window&#39;</span><span class="p">,</span> <span class="s1">&#39;test info&#39;</span><span class="p">))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">showMulti</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;Multi Choice&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Apples&#39;</span><span class="p">,</span> <span class="s1">&#39;Bananas&#39;</span><span class="p">,</span> <span class="s1">&#39;Pears&#39;</span><span class="p">]))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;This is a test error message&#39;</span><span class="p">))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">showYesNo</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;Yes or No message&#39;</span><span class="p">))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">showOkCancel</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;Ok or Cancel message&#39;</span><span class="p">))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">showRetryIgnoreCancel</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;Some message&#39;</span><span class="p">))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;Warning message&#39;</span><span class="p">))</span>
+        <span class="c1"># print(showInfo(&#39;My info window&#39;, &#39;test info&#39;))</span>
+        <span class="c1"># print(showMulti(&#39;Test&#39;, &#39;Multi Choice&#39;, [&#39;Apples&#39;, &#39;Bananas&#39;, &#39;Pears&#39;]))</span>
+        <span class="c1"># print(showError(&#39;Test&#39;, &#39;This is a test error message&#39;))</span>
+        <span class="c1"># print(showYesNo(&#39;Test&#39;, &#39;Yes or No message&#39;))</span>
+        <span class="c1"># # print(showOkCancel(&#39;Test&#39;, &#39;Ok or Cancel message&#39;))</span>
+        <span class="c1"># # print(showRetryIgnoreCancel(&#39;Test&#39;, &#39;Some message&#39;))</span>
+        <span class="c1"># # print(showWarning(&#39;Test&#39;, &#39;Warning message&#39;))</span>
+        <span class="c1"># print(showWarning(</span>
+        <span class="c1">#     &#39;Test for a basic popup with a long line of text as the basic text and a path: /Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt&#39;,</span>
+        <span class="c1">#     &#39;Warning message&#39;))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Another Warning&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;Test for a basic popup with a long line of text as the basic text and a path:</span><span class="se">\n</span><span class="s1">/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt&#39;</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Another Warning and Test for a basic popup with a long line of text as the basic text&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;Test for a basic popup with a long line of text as the basic text and a path</span><span class="se">\n</span><span class="s1">/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt &#39;</span>
+                          <span class="s1">&#39;and text with no spaces qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789&#39;</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Another Warning and Test qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789</span><span class="se">\n</span><span class="s1"> for a basic popup with a long line of text as the basic text&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;Test for a basic popup with a long line of text as the basic text and a path</span><span class="se">\n</span><span class="s1">/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt &#39;</span>
+                          <span class="s1">&#39;and text with no spaces qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789 something</span><span class="se">\n</span><span class="s1"> else&#39;</span><span class="p">))</span>
 
 
     <span class="c1"># app = TestApplication()</span>
@@ -572,6 +744,7 @@
     <span class="n">callback</span><span class="p">()</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -581,7 +754,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -601,12 +774,13 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.MessageDialog</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

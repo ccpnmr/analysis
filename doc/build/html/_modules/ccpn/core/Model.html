@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.core.Model &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.Model</a></li> 
       </ul>
     </div>  
 
@@ -42,18 +43,19 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:28 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-07-05 13:20:37 +0100 (Tue, July 05, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -66,6 +68,7 @@
 <span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">collections</span>
+
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.StructureEnsemble</span> <span class="kn">import</span> <span class="n">StructureEnsemble</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.StructureData</span> <span class="kn">import</span> <span class="n">EnsembleData</span>
@@ -261,22 +264,13 @@
         <span class="c1">#</span>
         <span class="k">return</span> <span class="n">result</span>
 
-    <span class="c1"># @property</span>
-    <span class="c1"># def comment(self) -&gt; str:</span>
-    <span class="c1">#     &quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
-    <span class="c1">#     return self._wrappedData.details</span>
-    <span class="c1">#</span>
-    <span class="c1"># @comment.setter</span>
-    <span class="c1"># def comment(self, value: str):</span>
-    <span class="c1">#     self._wrappedData.details = value</span>
-
 <div class="viewcode-block" id="Model.clearData"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Model.Model.clearData">[docs]</a>    <span class="k">def</span> <span class="nf">clearData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove all data for model by successively calling the deleteRow method</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structureEnsemble</span><span class="o">.</span><span class="n">data</span>
         <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
-            <span class="n">containingObject</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">_containingObject</span>  <span class="c1"># supresses the creation of intermediate</span>
+            <span class="n">containingObject</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">_containingObject</span>  <span class="c1"># suppresses the creation of intermediate</span>
             <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
 
                 <span class="k">if</span> <span class="s1">&#39;modelNumber&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
@@ -298,7 +292,7 @@
         <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedModels</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Model.delete"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Model.Model.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Delete should notify structureEnsemble of a delete.</span>
+        <span class="sd">&quot;&quot;&quot;Delete should notify structureEnsemble of delete.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">clearData</span><span class="p">()</span>
@@ -309,7 +303,7 @@
     <span class="c1">#=========================================================================================</span>
 
     <span class="c1">#===========================================================================================</span>
-    <span class="c1"># new&#39;Object&#39; and other methods</span>
+    <span class="c1"># new&lt;Object&gt; and other methods</span>
     <span class="c1"># Call appropriate routines in their respective locations</span>
     <span class="c1">#===========================================================================================</span>
 
@@ -319,14 +313,13 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="nd">@newObject</span><span class="p">(</span><span class="n">Model</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">_newModel</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">StructureEnsemble</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Model</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_newModel</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">StructureEnsemble</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Model</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Create new Model.</span>
 
 <span class="sd">    See the Model class for details.</span>
 
 <span class="sd">    :param label:</span>
 <span class="sd">    :param comment:</span>
-<span class="sd">    :param serial: optional serial number.</span>
 <span class="sd">    :return: a new Model instance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -336,13 +329,6 @@
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">newApiModel</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new Model item&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
-                                         <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">result</span>
 
@@ -392,6 +378,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__f</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span></div>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -401,7 +388,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -421,12 +408,13 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.Model</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

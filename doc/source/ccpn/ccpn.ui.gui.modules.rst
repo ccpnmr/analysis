@@ -6,6 +6,14 @@ ccpn.ui.gui.modules package
    :undoc-members:
    :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   ccpn.ui.gui.modules.macroEditorUtil
+
 Submodules
 ----------
 
@@ -41,6 +49,22 @@ ccpn.ui.gui.modules.ChemicalShiftsMappingModule module
    :undoc-members:
    :show-inheritance:
 
+ccpn.ui.gui.modules.DataTableModule module
+------------------------------------------
+
+.. automodule:: ccpn.ui.gui.modules.DataTableModule
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.ui.gui.modules.DataTableModuleABC module
+---------------------------------------------
+
+.. automodule:: ccpn.ui.gui.modules.DataTableModuleABC
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ccpn.ui.gui.modules.IntegralTable module
 ----------------------------------------
 
@@ -57,18 +81,18 @@ ccpn.ui.gui.modules.MacroEditor module
    :undoc-members:
    :show-inheritance:
 
-ccpn.ui.gui.modules.MultipletListTable module
----------------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.MultipletListTable
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 ccpn.ui.gui.modules.MultipletPeakTable module
 ---------------------------------------------
 
 .. automodule:: ccpn.ui.gui.modules.MultipletPeakTable
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ccpn.ui.gui.modules.MultipletTable module
+-----------------------------------------
+
+.. automodule:: ccpn.ui.gui.modules.MultipletTable
    :members:
    :undoc-members:
    :show-inheritance:
@@ -145,26 +169,10 @@ ccpn.ui.gui.modules.ReferenceChemicalShifts module
    :undoc-members:
    :show-inheritance:
 
-ccpn.ui.gui.modules.ReferenceChemicalShiftsModule copy module
--------------------------------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.ReferenceChemicalShiftsModule copy
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 ccpn.ui.gui.modules.ResidueInformation module
 ---------------------------------------------
 
 .. automodule:: ccpn.ui.gui.modules.ResidueInformation
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ccpn.ui.gui.modules.ResidueInformationModule copy module
---------------------------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.ResidueInformationModule copy
    :members:
    :undoc-members:
    :show-inheritance:
@@ -177,18 +185,18 @@ ccpn.ui.gui.modules.ResidueTable module
    :undoc-members:
    :show-inheritance:
 
-ccpn.ui.gui.modules.RestraintTable module
------------------------------------------
+ccpn.ui.gui.modules.RestraintAnalysisTable module
+-------------------------------------------------
 
-.. automodule:: ccpn.ui.gui.modules.RestraintTable
+.. automodule:: ccpn.ui.gui.modules.RestraintAnalysisTable
    :members:
    :undoc-members:
    :show-inheritance:
 
-ccpn.ui.gui.modules.SequenceModule module
------------------------------------------
+ccpn.ui.gui.modules.RestraintTableModule module
+-----------------------------------------------
 
-.. automodule:: ccpn.ui.gui.modules.SequenceModule
+.. automodule:: ccpn.ui.gui.modules.RestraintTableModule
    :members:
    :undoc-members:
    :show-inheritance:
@@ -217,3 +225,10 @@ ccpn.ui.gui.modules.StructureTable module
    :undoc-members:
    :show-inheritance:
 
+ccpn.ui.gui.modules.ViolationTableModule module
+-----------------------------------------------
+
+.. automodule:: ccpn.ui.gui.modules.ViolationTableModule
+   :members:
+   :undoc-members:
+   :show-inheritance:

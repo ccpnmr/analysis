@@ -17,3 +17,10 @@ ccpn.pipes.lib.AreaCalculation module
    :undoc-members:
    :show-inheritance:
 
+ccpn.pipes.lib.Scale1Dspectra module
+------------------------------------
+
+.. automodule:: ccpn.pipes.lib.Scale1Dspectra
+   :members:
+   :undoc-members:
+   :show-inheritance:

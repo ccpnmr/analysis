@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.ui.Ui &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.Ui</a></li> 
       </ul>
     </div>  
 
@@ -43,18 +44,19 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:40 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -68,6 +70,8 @@
 <span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.framework.Version</span> <span class="kn">import</span> <span class="n">applicationVersion</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui._implementation</span> <span class="kn">import</span> <span class="n">_uiImportOrder</span>
 <span class="kn">from</span> <span class="nn">ccpn.core</span> <span class="kn">import</span> <span class="n">_coreClassMap</span>
@@ -90,42 +94,42 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pluginModules</span> <span class="o">=</span> <span class="p">[]</span>
 
-<div class="viewcode-block" id="Ui.addMenu"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.addMenu">[docs]</a>    <span class="k">def</span> <span class="nf">addMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Add a menu specification for the top menu bar.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">if</span> <span class="n">position</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">position</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_menuSpec</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_menuSpec</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="p">[]))</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setUpGraphicsDataClasses</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Ui.setUp"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.setUp">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set up graphics data classes, cleaning up previous settings&quot;&quot;&quot;</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
 
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_setUpGraphicsDataClasses</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set up graphics data classes, cleaning up previous settings</span>
+<span class="sd">        GWV: This is daft and will be refactored in 3.2.x</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">className</span> <span class="ow">in</span> <span class="n">_uiImportOrder</span><span class="p">:</span>
             <span class="c1"># Remove ui-specific settings. Will be reset as necessary in subclasses</span>
-            <span class="n">_coreClassMap</span><span class="p">[</span><span class="n">className</span><span class="p">]</span><span class="o">.</span><span class="n">_factoryFunction</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_factoryFunctions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">className</span><span class="p">)</span></div>
+            <span class="n">_coreClassMap</span><span class="p">[</span><span class="n">className</span><span class="p">]</span><span class="o">.</span><span class="n">_factoryFunction</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_factoryFunctions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">className</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Ui.initialize"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;UI operations done after every project load/create&quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="Ui.start"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Start the program execution&quot;&quot;&quot;</span>
-
-        <span class="c1"># self._checkRegistered()</span>
-        <span class="c1"># Register.updateServer(Register.loadDict(), self.application.applicationVersion)</span>
-
+<div class="viewcode-block" id="Ui.startUi"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.startUi">[docs]</a>    <span class="k">def</span> <span class="nf">startUi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Start the ui execution</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; </span><span class="si">%s</span><span class="s1"> interface is ready</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_checkRegistration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Check if registered and if not popup registration and if still no good then exit&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_checkRegistration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Check if registered and if not popup registration and if still</span>
+<span class="sd">        no good then exit</span>
+<span class="sd">        :return True if properly registered</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># checking the registration; need to have the app running, but before the splashscreen, as it will hang</span>
         <span class="c1"># in case the popup is needed.</span>
         <span class="c1"># We want to give some feedback; sometimes this takes a while (e.g. poor internet)</span>
         <span class="c1"># sys.stderr.write(&#39;==&gt; Checking registration ... \n&#39;)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>  <span class="c1"># It seems to be necessary as without the output comes after the registration screen</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; Checking registration on server</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="c1"># check local registration details</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_termsConditions</span><span class="p">):</span>
@@ -136,7 +140,7 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span><span class="p">:</span>
                     <span class="n">days</span> <span class="o">=</span> <span class="n">Register</span><span class="o">.</span><span class="n">_graceCounter</span><span class="p">(</span><span class="n">Register</span><span class="o">.</span><span class="n">_fetchGraceFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">))</span>
                     <span class="k">if</span> <span class="n">days</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">### Please register within </span><span class="si">%s</span><span class="s1"> day(s)</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span><span class="n">days</span><span class="p">)</span>
+                        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">### Please register within </span><span class="si">%s</span><span class="s1"> day(s)</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">days</span><span class="p">)</span>
                         <span class="k">return</span> <span class="kc">True</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">### INVALID REGISTRATION, terminating</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -164,23 +168,21 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">commands</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div>
+            <span class="n">logger</span><span class="o">.</span><span class="n">echoInfo</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_execUpdates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="p">(</span><span class="s1">&#39;ERROR: ..to be subclassed by ui types&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;ERROR: ..to be subclassed by ui types&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_checkUpdates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">ccpn.framework.Version</span> <span class="kn">import</span> <span class="n">applicationVersion</span>
+    <span class="k">def</span> <span class="nf">_checkForUpdates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check for updates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># applicationVersion = __version__.split()[1]  # ejb - read from the header</span>
-
-        <span class="n">updateAgent</span> <span class="o">=</span> <span class="n">UpdateAgent</span><span class="p">(</span><span class="n">applicationVersion</span><span class="p">,</span> <span class="n">dryRun</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">_version</span> <span class="o">=</span> <span class="n">applicationVersion</span>  <span class="c1"># .withoutRelease()</span>
+        <span class="n">updateAgent</span> <span class="o">=</span> <span class="n">UpdateAgent</span><span class="p">(</span><span class="n">_version</span><span class="p">,</span> <span class="n">dryRun</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">numUpdates</span> <span class="o">=</span> <span class="n">updateAgent</span><span class="o">.</span><span class="n">checkNumberUpdates</span><span class="p">()</span>
-        <span class="c1"># sys.stderr.write(&#39;==&gt; Updates available: %s\n&#39; % str(numUpdates))</span>
-
-        <span class="k">if</span> <span class="n">numUpdates</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;_checkUpdates: </span><span class="si">%s</span><span class="s1"> updates available&#39;</span> <span class="o">%</span> <span class="n">numUpdates</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">numUpdates</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_execUpdates</span><span class="p">()</span>
-
-        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_isRegistered</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -219,8 +221,81 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">latestTerms</span><span class="p">:</span>
                 <span class="c1"># write the updated md5</span>
                 <span class="n">regDict</span><span class="p">[</span><span class="n">TERMSANDCONDITIONS</span><span class="p">]</span> <span class="o">=</span> <span class="n">md5</span>
-                <span class="n">Register</span><span class="o">.</span><span class="n">saveDict</span><span class="p">(</span><span class="n">regDict</span><span class="p">)</span></div>
+                <span class="n">Register</span><span class="o">.</span><span class="n">saveDict</span><span class="p">(</span><span class="n">regDict</span><span class="p">)</span>
 
+<div class="viewcode-block" id="Ui.loadProject"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.loadProject">[docs]</a>    <span class="k">def</span> <span class="nf">loadProject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Just a stub for now; calling MainWindow methods as it initialises the Gui</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadProject</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_loadProject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataLoader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load a project either from a dataLoader instance or from path;</span>
+<span class="sd">        build the project Gui elements</span>
+<span class="sd">        :returns project instance or None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.framework.lib.DataLoaders.DataLoaderABC</span> <span class="kn">import</span> <span class="n">checkPathForDataLoader</span>
+        <span class="kn">from</span> <span class="nn">ccpn.framework.Application</span> <span class="kn">import</span> <span class="n">getApplication</span>
+
+        <span class="n">_app</span> <span class="o">=</span> <span class="n">getApplication</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">dataLoader</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dataLoader</span> <span class="o">=</span> <span class="n">checkPathForDataLoader</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dataLoader</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;No suitable dataLoader found&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dataLoader</span><span class="o">.</span><span class="n">createNewProject</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">&quot; does not yield a new project&#39;</span> <span class="o">%</span> <span class="n">dataLoader</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">_app</span> <span class="ow">and</span> <span class="n">_app</span><span class="o">.</span><span class="n">project</span><span class="p">:</span>
+            <span class="c1"># Some error recovery; store info to re-open the current project (or a new default)</span>
+            <span class="n">oldProjectPath</span> <span class="o">=</span> <span class="n">_app</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">path</span>
+            <span class="n">oldProjectIsTemporary</span> <span class="o">=</span> <span class="n">_app</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">isTemporary</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">oldProjectPath</span> <span class="o">=</span> <span class="n">oldProjectIsTemporary</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">_loaded</span> <span class="o">=</span> <span class="n">dataLoader</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">_loaded</span><span class="p">:</span>
+                <span class="k">return</span>
+
+            <span class="n">newProject</span> <span class="o">=</span> <span class="n">_loaded</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># if the new project contains invalid spectra then open the popup to see them</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_checkForBadSpectra</span><span class="p">(</span><span class="n">newProject</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">&quot; did not yield a valid new project (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dataLoader</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">)))</span>
+
+            <span class="k">if</span> <span class="n">_app</span><span class="p">:</span>
+                <span class="c1"># First get to a defined state</span>
+                <span class="n">_app</span><span class="o">.</span><span class="n">_newProject</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">oldProjectIsTemporary</span><span class="p">:</span>
+                    <span class="n">_app</span><span class="o">.</span><span class="n">loadProject</span><span class="p">(</span><span class="n">oldProjectPath</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">newProject</span>
+
+    <span class="k">def</span> <span class="nf">_checkForBadSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Report bad spectra in a popup</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">badSpectra</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">spectra</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">hasValidPath</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="n">badSpectra</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;Detected invalid Spectrum file path(s) for:</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+            <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">badSpectra</span><span class="p">:</span>
+                <span class="n">text</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span>
+            <span class="n">text</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Use menu &quot;Spectrum --&gt; Validate paths..&quot; or &quot;VP&quot; shortcut to correct</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Spectrum file paths: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">text</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Ui.getProgressHandler"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.getProgressHandler">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">getProgressHandler</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;Return the context-manager to handle dsplaying progress-bar</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ProgressWidget</span> <span class="kn">import</span> <span class="n">ProgressDialog</span>
+
+        <span class="k">return</span> <span class="n">ProgressDialog</span></div></div>
 
 
 <div class="viewcode-block" id="NoUi"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.NoUi">[docs]</a><span class="k">class</span> <span class="nc">NoUi</span><span class="p">(</span><span class="n">Ui</span><span class="p">):</span>
@@ -314,11 +389,20 @@
         <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; NoUi update</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="kn">from</span> <span class="nn">ccpn.framework.Version</span> <span class="kn">import</span> <span class="n">applicationVersion</span>
+
         <span class="c1"># applicationVersion = __version__.split()[1]  # ejb - read from the header</span>
-        <span class="n">installUpdates</span><span class="p">(</span><span class="n">applicationVersion</span><span class="p">,</span> <span class="n">dryRun</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">installUpdates</span><span class="p">(</span><span class="n">applicationVersion</span><span class="p">)</span>  <span class="c1"># .withoutRelease(), dryRun=False)</span>
 
         <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Please restart the program to apply the updates</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<div class="viewcode-block" id="NoUi.getProgressHandler"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.NoUi.getProgressHandler">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">getProgressHandler</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;Return the context-manager to handle dsplaying progress-bar</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ProgressWidget</span> <span class="kn">import</span> <span class="n">ProgressTextBar</span>
+
+        <span class="k">return</span> <span class="n">ProgressTextBar</span></div></div>
 
 
 <div class="viewcode-block" id="TestUi"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.TestUi">[docs]</a><span class="k">class</span> <span class="nc">TestUi</span><span class="p">(</span><span class="n">NoUi</span><span class="p">):</span>
@@ -334,9 +418,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_consoleOutput</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">commands</span><span class="p">)</span>
         <span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">commands</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div></div>
+            <span class="n">logger</span><span class="o">.</span><span class="n">echoInfo</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div></div>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -346,7 +431,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -366,12 +451,13 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.Ui</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

@@ -40,4 +40,3 @@ ccpn.ui.gui.lib.chemometrics.transformations module
    :members:
    :undoc-members:
    :show-inheritance:
-

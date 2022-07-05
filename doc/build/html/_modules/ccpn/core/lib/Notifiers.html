@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.core.lib.Notifiers &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
     <script src="../../../../_static/jquery.js"></script>
     <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.lib.Notifiers</a></li> 
       </ul>
     </div>  
 
@@ -58,18 +59,19 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:32 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -83,14 +85,17 @@
 
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">permutations</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+<span class="kn">import</span> <span class="nn">weakref</span>
 
-
-<span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">()</span>
 
 <span class="n">DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">_debugIds</span> <span class="o">=</span> <span class="p">()</span>
+
+
+<span class="c1"># _debugIds = (75, 84, 92, 94,95,96)  # for these _id&#39;s, debug will be True. This allows for selective debugging</span>
 
 
 <div class="viewcode-block" id="skip"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Notifiers.skip">[docs]</a><span class="k">def</span> <span class="nf">skip</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -107,7 +112,7 @@
     <span class="c1"># needs subclassing</span>
     <span class="n">_triggerKeywords</span> <span class="o">=</span> <span class="p">()</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theObject</span><span class="p">,</span> <span class="n">triggers</span><span class="p">,</span> <span class="n">targetName</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theObject</span><span class="p">,</span> <span class="n">triggers</span><span class="p">,</span> <span class="n">targetName</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">setterObject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="c1"># Sanity checks</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_triggerKeywords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -116,6 +121,9 @@
         <span class="c1"># initialisations</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">NotifierABC</span><span class="o">.</span><span class="n">_currentIndex</span>
         <span class="n">NotifierABC</span><span class="o">.</span><span class="n">_currentIndex</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">theObject</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;NotifierABC: theObject is None&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span> <span class="o">=</span> <span class="n">theObject</span>  <span class="c1"># The object we are monitoring</span>
 
@@ -133,6 +141,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span> <span class="o">=</span> <span class="n">callback</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setterObject</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="n">setterObject</span><span class="p">)</span> <span class="k">if</span> <span class="n">setterObject</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span> <span class="o">=</span> <span class="n">debug</span> <span class="ow">or</span> <span class="n">DEBUG</span>  <span class="c1"># ability to report on individual instances</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_isBlanked</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># ability to blank notifier</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># flag indicating if any Notifier was registered</span>
@@ -140,6 +150,13 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the project</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># implemented as a weak reference</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">()</span>
 
 <div class="viewcode-block" id="NotifierABC.setDebug"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Notifiers.NotifierABC.setDebug">[docs]</a>    <span class="k">def</span> <span class="nf">setDebug</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
         <span class="s2">&quot;Set debug output on/off&quot;</span>
@@ -154,23 +171,36 @@
         <span class="k">return</span> <span class="n">trigger</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_triggers</span></div>
 
 <div class="viewcode-block" id="NotifierABC.unRegister"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Notifiers.NotifierABC.unRegister">[docs]</a>    <span class="k">def</span> <span class="nf">unRegister</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Reset the attributes&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Reset the attributes&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; unRegister </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_unregister</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_triggers</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span> <span class="o">=</span> <span class="kc">False</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unregister</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_triggers</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setterObject</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="NotifierABC.isRegistered"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Notifiers.NotifierABC.isRegistered">[docs]</a>    <span class="k">def</span> <span class="nf">isRegistered</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Return True if notifier is still registered; i.e. active&quot;</span>
+<div class="viewcode-block" id="NotifierABC.isRegistered"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Notifiers.NotifierABC.isRegistered">[docs]</a>    <span class="k">def</span> <span class="nf">isRegistered</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;:return True if notifier is still registered; i.e. active&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span></div>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="n">trigs</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">[(</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_targetName</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_triggers</span><span class="p">]</span>
-        <span class="k">return</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1"> (</span><span class="si">%d</span><span class="s1">): theObject:</span><span class="si">%s</span><span class="s1"> triggers:</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> \
-               <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="p">,</span> <span class="n">trigs</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isRegistered</span><span class="p">():</span>
+            <span class="n">trigs</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">[(</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_targetName</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_triggers</span><span class="p">]</span>
+            <span class="k">return</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1"> (</span><span class="si">%d</span><span class="s1">): theObject:</span><span class="si">%s</span><span class="s1"> triggers:</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> \
+                   <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="p">,</span>
+                    <span class="n">trigs</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1"> (</span><span class="si">%d</span><span class="s1">): not registered&gt;&#39;</span> <span class="o">%</span> \
+                   <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">id</span>
+                    <span class="p">)</span>
+
+    <span class="fm">__repr__</span> <span class="o">=</span> <span class="fm">__str__</span></div>
 
 
 <div class="viewcode-block" id="Notifier"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Notifiers.Notifier">[docs]</a><span class="k">class</span> <span class="nc">Notifier</span><span class="p">(</span><span class="n">NotifierABC</span><span class="p">):</span>
@@ -229,9 +259,11 @@
     <span class="n">CHANGE</span> <span class="o">=</span> <span class="s1">&#39;change&#39;</span>
     <span class="n">OBSERVE</span> <span class="o">=</span> <span class="s1">&#39;observe&#39;</span>
     <span class="n">CURRENT</span> <span class="o">=</span> <span class="s1">&#39;current&#39;</span>
+    <span class="n">_triggerKeywords</span> <span class="o">=</span> <span class="p">(</span><span class="n">CREATE</span><span class="p">,</span> <span class="n">DELETE</span><span class="p">,</span> <span class="n">RENAME</span><span class="p">,</span> <span class="n">CHANGE</span><span class="p">,</span> <span class="n">OBSERVE</span><span class="p">,</span> <span class="n">CURRENT</span><span class="p">)</span>
 
     <span class="n">ANY</span> <span class="o">=</span> <span class="s1">&#39;&lt;Any&gt;&#39;</span>
 
+    <span class="c1"># callback dict keywords</span>
     <span class="n">NOTIFIER</span> <span class="o">=</span> <span class="s1">&#39;notifier&#39;</span>
     <span class="n">THEOBJECT</span> <span class="o">=</span> <span class="s1">&#39;theObject&#39;</span>
     <span class="n">TRIGGER</span> <span class="o">=</span> <span class="s1">&#39;trigger&#39;</span>
@@ -242,12 +274,12 @@
     <span class="n">PREVIOUSVALUE</span> <span class="o">=</span> <span class="s1">&#39;previousValue&#39;</span>
     <span class="n">TARGETNAME</span> <span class="o">=</span> <span class="s1">&#39;targetName&#39;</span>
 
-    <span class="n">_triggerKeywords</span> <span class="o">=</span> <span class="p">(</span><span class="n">CREATE</span><span class="p">,</span> <span class="n">DELETE</span><span class="p">,</span> <span class="n">RENAME</span><span class="p">,</span> <span class="n">CHANGE</span><span class="p">,</span> <span class="n">OBSERVE</span><span class="p">,</span> <span class="n">CURRENT</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theObject</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">theObject</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
                  <span class="n">triggers</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
                  <span class="n">targetName</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                 <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+                 <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+                 <span class="n">setterObject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">onceOnly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                  <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -258,26 +290,44 @@
 <span class="sd">        :param theObject: valid V3 core object or current object to watch</span>
 <span class="sd">        :param triggers: list of trigger keywords callback</span>
 <span class="sd">        :param targetName: valid className, attributeName or ANY</span>
-<span class="sd">        :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])</span>
+<span class="sd">        :param callback: callback function with signature: callback(callbackDict, **kwargs])</span>
+<span class="sd">        :param setterObject: Object that was setting the Notifier</span>
 <span class="sd">        :param debug: set debug</span>
 <span class="sd">        :param **kwargs: optional keyword,value arguments to callback</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>  <span class="c1"># local import to avoid cycles</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core._implementation.V3CoreObjectABC</span> <span class="kn">import</span> <span class="n">V3CoreObjectABC</span>  <span class="c1"># local import to avoid cycles</span>
         <span class="kn">from</span> <span class="nn">ccpn.framework.Current</span> <span class="kn">import</span> <span class="n">Current</span>  <span class="c1"># local import to avoid cycles</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">theObject</span><span class="o">=</span><span class="n">theObject</span><span class="p">,</span> <span class="n">triggers</span><span class="o">=</span><span class="n">triggers</span><span class="p">,</span> <span class="n">targetName</span><span class="o">=</span><span class="n">targetName</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
+        <span class="k">if</span> <span class="n">theObject</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">theObject</span><span class="p">,</span> <span class="p">(</span><span class="n">Current</span><span class="p">,</span> <span class="n">AbstractWrapperObject</span><span class="p">,</span> <span class="n">V3CoreObjectABC</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Notifier: invalid object </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">theObject</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">theObject</span><span class="o">=</span><span class="n">theObject</span><span class="p">,</span>
+                         <span class="n">triggers</span><span class="o">=</span><span class="n">triggers</span><span class="p">,</span>
+                         <span class="n">targetName</span><span class="o">=</span><span class="n">targetName</span><span class="p">,</span>
+                         <span class="n">setterObject</span><span class="o">=</span><span class="n">setterObject</span><span class="p">,</span>
+                         <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
                          <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
                          <span class="p">)</span>
 
+        <span class="c1"># &gt;&gt;&gt;&gt;&gt;&gt;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="n">_debugIds</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span> <span class="o">=</span> <span class="kc">True</span>
+
         <span class="c1"># bit of a clutch for now</span>
+        <span class="n">_project</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">theObject</span><span class="p">,</span> <span class="n">Current</span><span class="p">):</span>
             <span class="c1"># assume we have current</span>
+            <span class="n">_project</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">_current</span> <span class="o">=</span> <span class="n">theObject</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_isProject</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_isCurrent</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">theObject</span><span class="p">,</span> <span class="n">AbstractWrapperObject</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="n">theObject</span><span class="o">.</span><span class="n">project</span>  <span class="c1"># toplevel Project instance for theObject</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_isProject</span> <span class="o">=</span> <span class="p">(</span><span class="n">theObject</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">)</span>  <span class="c1"># theObject is the toplevel Project instance</span>
+            <span class="n">_project</span> <span class="o">=</span> <span class="n">theObject</span><span class="o">.</span><span class="n">project</span>
+            <span class="n">_current</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="n">_project</span><span class="p">)</span>  <span class="c1"># toplevel Project instance for theObject</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_isProject</span> <span class="o">=</span> <span class="p">(</span><span class="n">theObject</span> <span class="o">==</span> <span class="n">_project</span><span class="p">)</span>  <span class="c1"># theObject is the toplevel Project instance</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_isCurrent</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Invalid object (</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">theObject</span><span class="p">)</span>
@@ -311,10 +361,10 @@
                 <span class="n">notifier</span> <span class="o">=</span> <span class="p">(</span><span class="n">trigger</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
                 <span class="c1"># current has its own notifier system</span>
 
-                <span class="c1">#TODO:RASMUS: change this and remove this hack</span>
+                <span class="c1">#TODO:change this and remove this hack</span>
                 <span class="c1"># to register strip, the keywords is strips!</span>
                 <span class="n">tName</span> <span class="o">=</span> <span class="n">targetName</span> <span class="o">+</span> <span class="s1">&#39;s&#39;</span> <span class="k">if</span> <span class="n">targetName</span> <span class="o">==</span> <span class="s1">&#39;strip&#39;</span> <span class="k">else</span> <span class="n">targetName</span>
-                <span class="n">func</span> <span class="o">=</span> <span class="n">theObject</span><span class="o">.</span><span class="n">registerNotify</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="o">=</span><span class="n">notifier</span><span class="p">),</span> <span class="n">tName</span><span class="p">)</span>
+                <span class="n">func</span> <span class="o">=</span> <span class="n">_current</span><span class="o">.</span><span class="n">registerNotify</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="o">=</span><span class="n">notifier</span><span class="p">),</span> <span class="n">tName</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_unregister</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">tName</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">CURRENT</span><span class="p">,</span> <span class="n">func</span><span class="p">))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -329,31 +379,35 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_previousValue</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">theObject</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
 
                 <span class="n">notifier</span> <span class="o">=</span> <span class="p">(</span><span class="n">trigger</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
-                <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="n">theObject</span><span class="o">.</span><span class="n">className</span><span class="p">,</span>
-                                                      <span class="n">Notifier</span><span class="o">.</span><span class="n">CHANGE</span><span class="p">,</span>
-                                                      <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="o">=</span><span class="n">notifier</span><span class="p">),</span>
-                                                      <span class="n">onceOnly</span><span class="o">=</span><span class="n">onceOnly</span><span class="p">)</span>
+                <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="n">className</span><span class="o">=</span><span class="n">theObject</span><span class="o">.</span><span class="n">className</span><span class="p">,</span>
+                                                     <span class="n">target</span><span class="o">=</span><span class="n">Notifier</span><span class="o">.</span><span class="n">CHANGE</span><span class="p">,</span>
+                                                     <span class="n">func</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="o">=</span><span class="n">notifier</span><span class="p">),</span>
+                                                     <span class="n">onceOnly</span><span class="o">=</span><span class="n">onceOnly</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_unregister</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">theObject</span><span class="o">.</span><span class="n">className</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">CHANGE</span><span class="p">,</span> <span class="n">func</span><span class="p">))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span> <span class="o">=</span> <span class="kc">True</span>
 
             <span class="c1"># All other triggers;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Projects allow all registering of all classes</span>
-                <span class="n">allowedClassNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">className</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">theObject</span><span class="o">.</span><span class="n">_getChildClasses</span><span class="p">(</span><span class="n">recursion</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_isProject</span><span class="p">)]</span>
-                <span class="k">if</span> <span class="n">targetName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowedClassNames</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">RuntimeWarning</span><span class="p">(</span><span class="s1">&#39;Notifier.__init__: invalid targetName &quot;</span><span class="si">%s</span><span class="s1">&quot; for class &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">targetName</span><span class="p">,</span> <span class="n">theObject</span><span class="o">.</span><span class="n">className</span><span class="p">))</span>
+                <span class="c1"># allowedClassNames = [c.className for c in theObject._getChildClasses(recursion=self._isProject)]</span>
+                <span class="c1"># if targetName not in allowedClassNames:</span>
+                <span class="c1">#     raise RuntimeWarning(&#39;Notifier.__init__: invalid targetName &quot;%s&quot; for class &quot;%s&quot;&#39; % (targetName, theObject.className))</span>
 
                 <span class="n">notifier</span> <span class="o">=</span> <span class="p">(</span><span class="n">trigger</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
-                <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="n">targetName</span><span class="p">,</span>
-                                                      <span class="n">trigger</span><span class="p">,</span>
-                                                      <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="o">=</span><span class="n">notifier</span><span class="p">),</span>
-                                                      <span class="n">onceOnly</span><span class="o">=</span><span class="n">onceOnly</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">_project</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># This should not happen</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Undefined project: cannot register notifier for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">theObject</span><span class="p">)</span>
+                <span class="n">func</span> <span class="o">=</span> <span class="n">_project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="n">className</span><span class="o">=</span><span class="n">targetName</span><span class="p">,</span>
+                                                 <span class="n">target</span><span class="o">=</span><span class="n">trigger</span><span class="p">,</span>
+                                                 <span class="n">func</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="o">=</span><span class="n">notifier</span><span class="p">),</span>
+                                                 <span class="n">onceOnly</span><span class="o">=</span><span class="n">onceOnly</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_unregister</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">targetName</span><span class="p">,</span> <span class="n">trigger</span><span class="p">,</span> <span class="n">func</span><span class="p">))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isRegistered</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">RuntimeWarning</span><span class="p">(</span><span class="s1">&#39;Notifier.__init__: no notifiers initialised for theObject=</span><span class="si">%s</span><span class="s1">, targetName=</span><span class="si">%r</span><span class="s1">, triggers=</span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> \
                                  <span class="p">(</span><span class="n">theObject</span><span class="p">,</span> <span class="n">targetName</span><span class="p">,</span> <span class="n">triggers</span><span class="p">))</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; registered </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
 
@@ -361,6 +415,11 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        unregister the notifiers</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># &gt;&gt;&gt;&gt;&gt;&gt;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="n">_debugIds</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; un-registering </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isRegistered</span><span class="p">():</span>
             <span class="k">return</span>
 
@@ -368,7 +427,7 @@
             <span class="k">if</span> <span class="n">trigger</span> <span class="o">==</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">CURRENT</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="o">.</span><span class="n">unRegisterNotify</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">unRegisterNotifier</span><span class="p">(</span><span class="n">targetName</span><span class="p">,</span> <span class="n">trigger</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">unRegisterNotifier</span><span class="p">(</span><span class="n">targetName</span><span class="p">,</span> <span class="n">trigger</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span>  <span class="c1"># the end as it clears all attributes</span></div>
 
@@ -378,7 +437,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isRegistered</span><span class="p">():</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Triggering unregistered notifier </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Triggering unregistered notifier </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isBlanked</span><span class="p">:</span>
@@ -388,29 +447,31 @@
             <span class="c1">#</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Notifier.__call__: obj is None&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isCurrent</span> <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">:</span>
-            <span class="c1"># It is a V3 core object notifier; check if obj is still around</span>
-            <span class="c1"># hack for now (20181127) until a better implementation</span>
-            <span class="k">return</span>
+        <span class="c1"># if not self._isCurrent and obj.isDeleted:</span>
+        <span class="c1">#     # It is a V3 core object notifier; check if obj is still around</span>
+        <span class="c1">#     # hack for now (20181127) until a better implementation</span>
+        <span class="c1">#     return</span>
 
         <span class="n">trigger</span><span class="p">,</span> <span class="n">targetName</span> <span class="o">=</span> <span class="n">notifier</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
             <span class="n">p2</span> <span class="o">=</span> <span class="s1">&#39;parameter2=</span><span class="si">%r</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">parameter2</span> <span class="k">if</span> <span class="n">parameter2</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;--&gt; </span><span class="si">%-25s</span><span class="s1"> obj=</span><span class="si">%-25s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> \
-                             <span class="p">(</span><span class="n">notifier</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;--&gt; &lt;</span><span class="si">%s</span><span class="s1"> (</span><span class="si">%d</span><span class="s1">)&gt; </span><span class="si">%-25s</span><span class="s1"> obj=</span><span class="si">%-25s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> \
+                             <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                              <span class="n">notifier</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
                              <span class="p">)</span>
 
         <span class="n">notifierFired</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">callbackDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-                <span class="n">notifier</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
-                <span class="n">trigger</span><span class="o">=</span><span class="n">trigger</span><span class="p">,</span>
-                <span class="n">theObject</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="p">,</span>
-                <span class="nb">object</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span>
-                <span class="n">targetName</span><span class="o">=</span><span class="n">targetName</span><span class="p">,</span>
-                <span class="n">previousValue</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="p">)</span>
+        <span class="n">callbackDict</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">NOTIFIER</span>     <span class="p">:</span> <span class="bp">self</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">TRIGGER</span>      <span class="p">:</span> <span class="n">trigger</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">THEOBJECT</span>    <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">OBJECT</span>       <span class="p">:</span> <span class="n">obj</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">TARGETNAME</span>   <span class="p">:</span> <span class="n">targetName</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">PREVIOUSVALUE</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">VALUE</span>        <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">OLDPID</span>       <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">GETPID</span>       <span class="p">:</span> <span class="kc">None</span>
+                        <span class="p">}</span>
 
         <span class="c1"># CURRENT special case</span>
         <span class="k">if</span> <span class="n">trigger</span> <span class="o">==</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">CURRENT</span><span class="p">:</span>
@@ -419,8 +480,6 @@
                 <span class="n">callbackDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span>
                 <span class="n">callbackDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">PREVIOUSVALUE</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_previousValue</span>
                 <span class="n">callbackDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">VALUE</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
-                    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%-9s</span><span class="s1"> *** </span><span class="si">%s</span><span class="s1"> func:</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;FIRE&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">(</span><span class="n">callbackDict</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
                 <span class="n">notifierFired</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_previousValue</span> <span class="o">=</span> <span class="n">value</span>
@@ -429,8 +488,6 @@
         <span class="k">elif</span> <span class="n">trigger</span> <span class="o">==</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">OBSERVE</span> <span class="ow">and</span> <span class="n">targetName</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ANY</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">pid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="o">.</span><span class="n">pid</span><span class="p">:</span>
                 <span class="n">callbackDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
-                    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%-9s</span><span class="s1"> *** </span><span class="si">%s</span><span class="s1"> func:</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;FIRE&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">(</span><span class="n">callbackDict</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
                 <span class="n">notifierFired</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -443,8 +500,6 @@
                 <span class="n">callbackDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span>
                 <span class="n">callbackDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">PREVIOUSVALUE</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_previousValue</span>
                 <span class="n">callbackDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">VALUE</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
-                    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%-9s</span><span class="s1"> *** </span><span class="si">%s</span><span class="s1"> func:</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;FIRE&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">(</span><span class="n">callbackDict</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
                 <span class="n">notifierFired</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_previousValue</span> <span class="o">=</span> <span class="n">value</span>
@@ -453,13 +508,12 @@
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isProject</span> <span class="ow">or</span> <span class="n">obj</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">pid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="o">.</span><span class="n">pid</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">trigger</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">RENAME</span> <span class="ow">and</span> <span class="n">parameter2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">callbackDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">OLDPID</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameter2</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%-9s</span><span class="s1"> *** </span><span class="si">%s</span><span class="s1"> func:</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;FIRE&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">(</span><span class="n">callbackDict</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
             <span class="n">notifierFired</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">notifierFired</span><span class="p">:</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%-9s</span><span class="s1"> *** </span><span class="si">%s</span><span class="s1"> func:</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;not-FIRED&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
+            <span class="n">_tmp</span> <span class="o">=</span> <span class="s1">&#39;FIRED&#39;</span> <span class="k">if</span> <span class="n">notifierFired</span> <span class="k">else</span> <span class="s1">&#39;not-FIRED&#39;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%-9s</span><span class="s1"> func:</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">_tmp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">))</span>
 
         <span class="k">return</span>
 
@@ -481,11 +535,14 @@
 <span class="c1">#                         callback=callback, onlyOnce=onlyOnce, debug=debug, **kwargs)</span>
 <span class="c1">#     return notifier</span>
 
+
 <span class="k">class</span> <span class="nc">_NotifiersDict</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A class to retain all notifiers of an object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">REGISTERED_WITH_OBJECT</span> <span class="o">=</span> <span class="s1">&#39;registeredWithObject&#39;</span>
-    <span class="n">INITIATED_FROM_OBJECT</span> <span class="o">=</span> <span class="s1">&#39;initiatedFromObject&#39;</span>
+
+    <span class="c1"># GWV: not yet used</span>
+    <span class="c1"># REGISTERED_WITH_OBJECT = &#39;registeredWithObject&#39;</span>
+    <span class="c1"># INITIATED_FROM_OBJECT = &#39;initiatedFromObject&#39;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -495,13 +552,13 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class confering notifier management routines</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">NOTIFIERSDICT</span> <span class="o">=</span> <span class="s1">&#39;_ccpNmrV3notifiersDict&#39;</span>  <span class="c1"># attribute name for storing notifiers in Ccpn objects</span>
+    <span class="n">_NOTIFIERSDICT</span> <span class="o">=</span> <span class="s1">&#39;_ccpNmrV3notifiersDict&#39;</span>  <span class="c1"># attribute name for storing notifiers in Ccpn objects</span>
 
     <span class="k">def</span> <span class="nf">_getObjectNotifiersDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Internal routine to get the object notifiers dict&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">NOTIFIERSDICT</span><span class="p">):</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">NOTIFIERSDICT</span><span class="p">,</span> <span class="n">_NotifiersDict</span><span class="p">())</span>
-        <span class="n">objNotifiers</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">NOTIFIERSDICT</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_NOTIFIERSDICT</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_NOTIFIERSDICT</span><span class="p">,</span> <span class="n">_NotifiersDict</span><span class="p">())</span>
+        <span class="n">objNotifiers</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_NOTIFIERSDICT</span><span class="p">)</span>
         <span class="c1"># check type</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objNotifiers</span><span class="p">,</span> <span class="n">_NotifiersDict</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Invalid NotifiersDict, got </span><span class="si">%s</span><span class="s1">, expected </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
@@ -509,7 +566,7 @@
                                <span class="p">)</span>
         <span class="k">return</span> <span class="n">objNotifiers</span>
 
-<div class="viewcode-block" id="NotifierBase.setNotifier"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Notifiers.NotifierBase.setNotifier">[docs]</a>    <span class="k">def</span> <span class="nf">setNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theObject</span><span class="p">:</span> <span class="s1">&#39;AbstractWrapperObject&#39;</span><span class="p">,</span> <span class="n">triggers</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">targetName</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Notifier</span><span class="p">:</span>
+<div class="viewcode-block" id="NotifierBase.setNotifier"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Notifiers.NotifierBase.setNotifier">[docs]</a>    <span class="k">def</span> <span class="nf">setNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theObject</span><span class="p">:</span> <span class="s1">&#39;AbstractWrapperObject&#39;</span><span class="p">,</span> <span class="n">triggers</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">targetName</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Notifier</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set Notifier for Ccpn V3 object theObject</span>
 
@@ -521,17 +578,21 @@
 <span class="sd">        :return: a Notifier instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">objNotifiers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getObjectNotifiersDict</span><span class="p">()</span>
-        <span class="n">notifier</span> <span class="o">=</span> <span class="n">Notifier</span><span class="p">(</span><span class="n">theObject</span><span class="o">=</span><span class="n">theObject</span><span class="p">,</span> <span class="n">triggers</span><span class="o">=</span><span class="n">triggers</span><span class="p">,</span> <span class="n">targetName</span><span class="o">=</span><span class="n">targetName</span><span class="p">,</span>
-                            <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="nb">id</span> <span class="o">=</span> <span class="n">notifier</span><span class="o">.</span><span class="n">id</span>
+        <span class="n">notifier</span> <span class="o">=</span> <span class="n">Notifier</span><span class="p">(</span><span class="n">theObject</span><span class="o">=</span><span class="n">theObject</span><span class="p">,</span>
+                            <span class="n">triggers</span><span class="o">=</span><span class="n">triggers</span><span class="p">,</span>
+                            <span class="n">targetName</span><span class="o">=</span><span class="n">targetName</span><span class="p">,</span>
+                            <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span>
+                            <span class="n">setterObject</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+                            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">_id</span> <span class="o">=</span> <span class="n">notifier</span><span class="o">.</span><span class="n">id</span>
         <span class="c1"># this should never happen; hence just a check</span>
-        <span class="k">if</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">objNotifiers</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: a notifier with id &quot;</span><span class="si">%s</span><span class="s1">&quot; already exists (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">objNotifiers</span><span class="p">[</span><span class="nb">id</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">_id</span> <span class="ow">in</span> <span class="n">objNotifiers</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: a notifier with id &quot;</span><span class="si">%s</span><span class="s1">&quot; already exists (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_id</span><span class="p">,</span> <span class="n">objNotifiers</span><span class="p">[</span><span class="n">_id</span><span class="p">]))</span>
         <span class="c1"># add the notifier</span>
-        <span class="n">objNotifiers</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">notifier</span>
+        <span class="n">objNotifiers</span><span class="p">[</span><span class="n">_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">notifier</span>
         <span class="k">return</span> <span class="n">notifier</span></div>
 
-<div class="viewcode-block" id="NotifierBase.setGuiNotifier"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Notifiers.NotifierBase.setGuiNotifier">[docs]</a>    <span class="k">def</span> <span class="nf">setGuiNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theObject</span><span class="p">:</span> <span class="s1">&#39;AbstractWrapperObject&#39;</span><span class="p">,</span> <span class="n">triggers</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">targetName</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Notifier</span><span class="p">:</span>
+<div class="viewcode-block" id="NotifierBase.setGuiNotifier"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Notifiers.NotifierBase.setGuiNotifier">[docs]</a>    <span class="k">def</span> <span class="nf">setGuiNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theObject</span><span class="p">:</span> <span class="s1">&#39;AbstractWrapperObject&#39;</span><span class="p">,</span> <span class="n">triggers</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">targetName</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Notifier</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set Notifier for Ccpn V3 object theObject</span>
 
@@ -547,14 +608,17 @@
         <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiNotifier</span> <span class="kn">import</span> <span class="n">GuiNotifier</span>  <span class="c1"># To avoid circular imports</span>
 
         <span class="n">objNotifiers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getObjectNotifiersDict</span><span class="p">()</span>
-        <span class="n">notifier</span> <span class="o">=</span> <span class="n">GuiNotifier</span><span class="p">(</span><span class="n">theObject</span><span class="o">=</span><span class="n">theObject</span><span class="p">,</span> <span class="n">triggers</span><span class="o">=</span><span class="n">triggers</span><span class="p">,</span> <span class="n">targetName</span><span class="o">=</span><span class="n">targetName</span><span class="p">,</span>
-                               <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="nb">id</span> <span class="o">=</span> <span class="n">notifier</span><span class="o">.</span><span class="n">id</span>
+        <span class="n">notifier</span> <span class="o">=</span> <span class="n">GuiNotifier</span><span class="p">(</span><span class="n">theObject</span><span class="o">=</span><span class="n">theObject</span><span class="p">,</span>
+                               <span class="n">triggers</span><span class="o">=</span><span class="n">triggers</span><span class="p">,</span>
+                               <span class="n">targetName</span><span class="o">=</span><span class="n">targetName</span><span class="p">,</span>
+                               <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span>
+                               <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">_id</span> <span class="o">=</span> <span class="n">notifier</span><span class="o">.</span><span class="n">id</span>
         <span class="c1"># this should never happen; hence just a check</span>
-        <span class="k">if</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">objNotifiers</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: a notifier with id &quot;</span><span class="si">%s</span><span class="s1">&quot; already exists (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">objNotifiers</span><span class="p">[</span><span class="nb">id</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">_id</span> <span class="ow">in</span> <span class="n">objNotifiers</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: a notifier with id &quot;</span><span class="si">%s</span><span class="s1">&quot; already exists (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_id</span><span class="p">,</span> <span class="n">objNotifiers</span><span class="p">[</span><span class="n">_id</span><span class="p">]))</span>
         <span class="c1"># add the notifier</span>
-        <span class="n">objNotifiers</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">notifier</span>
+        <span class="n">objNotifiers</span><span class="p">[</span><span class="n">_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">notifier</span>
         <span class="k">return</span> <span class="n">notifier</span></div>
 
 <div class="viewcode-block" id="NotifierBase.deleteNotifier"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Notifiers.NotifierBase.deleteNotifier">[docs]</a>    <span class="k">def</span> <span class="nf">deleteNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="p">:</span> <span class="n">Notifier</span><span class="p">):</span>
@@ -578,7 +642,7 @@
 <span class="sd">        :param notifier: Notifier instance or None</span>
 <span class="sd">        :return: True or False</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">NOTIFIERSDICT</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_NOTIFIERSDICT</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
 
         <span class="n">objNotifiers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getObjectNotifiersDict</span><span class="p">()</span>
@@ -605,7 +669,7 @@
 <span class="sd">        :param targetName: valid className, attributeName or ANY</span>
 <span class="sd">        :return: None or list of existing notifiers</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">NOTIFIERSDICT</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_NOTIFIERSDICT</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">()</span>
 
         <span class="n">objNotifiers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getObjectNotifiersDict</span><span class="p">()</span>
@@ -639,8 +703,74 @@
         <span class="n">objNotifiers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getObjectNotifiersDict</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">notifier</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">objNotifiers</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
             <span class="n">notifier</span><span class="o">.</span><span class="n">setBlanking</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_removeDuplicatedNotifiers</span><span class="p">(</span><span class="n">notifierQueue</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove any duplicated notifiers from the queue</span>
+
+<span class="sd">    Notifiers are filtered on (obj, trigger)</span>
+<span class="sd">    Notifier priority from high-low is: DELETE, CREATE, CHANGE</span>
+<span class="sd">    When one is encountered, the lower-priority are ignored</span>
+
+<span class="sd">    Return the condensed list of notifiers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># based on previous suspendNotification</span>
+    <span class="n">executeQueue</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">scheduledQueue</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="c1"># iterate through the queue in reverse order</span>
+    <span class="k">for</span> <span class="n">func</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">notifierQueue</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">obj</span><span class="p">,</span> <span class="n">trigger</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">TRIGGER</span><span class="p">]</span>
+
+        <span class="n">match</span> <span class="o">=</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">trigger</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">scheduledQueue</span><span class="p">:</span>
+            <span class="n">scheduledQueue</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">match</span><span class="p">)</span>
+
+            <span class="c1"># if True:</span>
+            <span class="c1">#     # NOTE:ED - still not sure about this, disabled for the minute</span>
+            <span class="c1">#     #   doesn&#39;t work correctly with SequenceGraph</span>
+            <span class="c1">#     if trigger == Notifier.DELETE:</span>
+            <span class="c1">#         # # can skip these two notifiers if DELETE found</span>
+            <span class="c1">#         # scheduledQueue |= {(obj, Notifier.CHANGE), (obj, Notifier.RENAME), (obj, Notifier.CREATE)}</span>
+            <span class="c1">#         #</span>
+            <span class="c1">#         # # discard ALL other notifiers, not needed with DELETE</span>
+            <span class="c1">#         # executeQueue = list(filter(lambda val: val[1][Notifier.OBJECT] != obj, executeQueue))</span>
+            <span class="c1">#</span>
+            <span class="c1">#         # can skip this notifier if CREATE found</span>
+            <span class="c1">#         scheduledQueue |= {(obj, Notifier.CHANGE), (obj, Notifier.RENAME)}</span>
+            <span class="c1">#</span>
+            <span class="c1">#         # discard CHANGE, RENAME notifiers</span>
+            <span class="c1">#         executeQueue = list(filter(lambda val: val[1][Notifier.OBJECT] != obj or</span>
+            <span class="c1">#                                                val[1][Notifier.TRIGGER] not in [Notifier.CHANGE, Notifier.RENAME],</span>
+            <span class="c1">#                                    executeQueue))</span>
+            <span class="c1">#</span>
+            <span class="c1">#     if trigger == Notifier.CREATE:</span>
+            <span class="c1">#         # can skip this notifier if CREATE found</span>
+            <span class="c1">#         scheduledQueue |= {(obj, Notifier.CHANGE), (obj, Notifier.RENAME)}</span>
+            <span class="c1">#</span>
+            <span class="c1">#         # discard CHANGE, RENAME notifiers</span>
+            <span class="c1">#         executeQueue = list(filter(lambda val: val[1][Notifier.OBJECT] != obj or</span>
+            <span class="c1">#                                                val[1][Notifier.TRIGGER] not in [Notifier.CHANGE, Notifier.RENAME],</span>
+            <span class="c1">#                                    executeQueue))</span>
+            <span class="c1">#</span>
+            <span class="c1">#     elif trigger == Notifier.CHANGE:</span>
+            <span class="c1">#         # can skip this notifier if RENAME found</span>
+            <span class="c1">#         scheduledQueue |= {(obj, Notifier.RENAME),}</span>
+            <span class="c1">#</span>
+            <span class="c1">#         # discard CHANGE notifiers</span>
+            <span class="c1">#         executeQueue = list(filter(lambda val: val[1][Notifier.OBJECT] != obj or</span>
+            <span class="c1">#                                                val[1][Notifier.TRIGGER] not in [Notifier.RENAME],</span>
+            <span class="c1">#                                    executeQueue))</span>
+
+            <span class="c1"># this is in reverse order</span>
+            <span class="n">executeQueue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">func</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">executeQueue</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">result</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -650,7 +780,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -670,12 +800,13 @@
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.lib.Notifiers</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

@@ -10,6 +10,7 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
    ccpnmodel.ccpncore.lib.Io
    ccpnmodel.ccpncore.lib.assignment
@@ -83,4 +84,3 @@ ccpnmodel.ccpncore.lib.updateHeader module
    :members:
    :undoc-members:
    :show-inheritance:
-

@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.core.RestraintContribution &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.RestraintContribution</a></li> 
       </ul>
     </div>  
 
@@ -42,18 +43,19 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:29 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-07-05 13:20:37 +0100 (Tue, July 05, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -64,6 +66,7 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span>
+
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Restraint</span> <span class="kn">import</span> <span class="n">Restraint</span>
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
@@ -279,8 +282,8 @@
 <span class="sd">        Example value: (&#39;A.127.ALA.HA&#39;,&#39;A.130.SER.H&#39;)</span>
 
 <span class="sd">        The optional _string2Item dictionary speeds up the generation of many restraintItems</span>
-<span class="sd">        in a single operation. It must be initialised with DataSet._getTempItemMap(),</span>
-<span class="sd">        and serves only for a single DataSet.</span>
+<span class="sd">        in a single operation. It must be initialised with StructureData._getTempItemMap(),</span>
+<span class="sd">        and serves only for a single StructureData.</span>
 <span class="sd">        On principle it must be used for a closed set of operations and then discarded,</span>
 <span class="sd">        since it is a cache of underlying FixedResonance objects</span>
 <span class="sd">        which are in theory mutable (don&#39;t ask)&quot;&quot;&quot;</span>
@@ -344,7 +347,9 @@
         <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedContributions</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_finaliseAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="p">):</span>
+            <span class="k">return</span>
+
         <span class="c1"># pass on any action in the list to the parent object</span>
         <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;change&#39;</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">restraint</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span></div>
@@ -354,7 +359,7 @@
     <span class="c1">#=========================================================================================</span>
 
     <span class="c1">#===========================================================================================</span>
-    <span class="c1"># new&#39;Object&#39; and other methods</span>
+    <span class="c1"># new&lt;Object&gt; and other methods</span>
     <span class="c1"># Call appropriate routines in their respective locations</span>
     <span class="c1">#===========================================================================================</span>
 
@@ -367,7 +372,8 @@
                               <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">upperLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lowerLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                               <span class="n">additionalUpperLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">additionalLowerLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                               <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">isDistanceDependent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">combinationId</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                              <span class="n">restraintItems</span><span class="p">:</span> <span class="n">Sequence</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RestraintContribution</span><span class="p">:</span>
+                              <span class="n">restraintItems</span><span class="p">:</span> <span class="n">Sequence</span> <span class="o">=</span> <span class="p">()</span>
+                              <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RestraintContribution</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Create new RestraintContribution within Restraint</span>
 
 <span class="sd">    See the RestraintContribution class for details.</span>
@@ -383,7 +389,6 @@
 <span class="sd">    :param isDistanceDependent:</span>
 <span class="sd">    :param combinationId:</span>
 <span class="sd">    :param restraintItems:</span>
-<span class="sd">    :param serial: optional serial number.</span>
 <span class="sd">    :return: a new RestraintContribution instance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newGenericContribution</span>
@@ -395,13 +400,6 @@
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new RestraintContribution item&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
-                                         <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
 
     <span class="n">result</span><span class="o">.</span><span class="n">restraintItems</span> <span class="o">=</span> <span class="n">restraintItems</span>
 
@@ -440,6 +438,7 @@
 <span class="c1">#                                          {&#39;pathToObject&#39;: &#39;restraint&#39;, &#39;action&#39;: &#39;change&#39;})</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -449,7 +448,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -469,12 +468,13 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.RestraintContribution</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

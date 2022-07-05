@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.core.Restraint &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.Restraint</a></li> 
       </ul>
     </div>  
 
@@ -42,18 +43,19 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:29 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-07-05 13:20:37 +0100 (Tue, July 05, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -65,9 +67,10 @@
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">collections</span>
+
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.RestraintList</span> <span class="kn">import</span> <span class="n">RestraintList</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.RestraintTable</span> <span class="kn">import</span> <span class="n">RestraintTable</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr</span> <span class="kn">import</span> <span class="n">NmrConstraint</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.decorators</span> <span class="kn">import</span> <span class="n">logCommand</span>
@@ -75,7 +78,7 @@
 
 
 <div class="viewcode-block" id="Restraint"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Restraint.Restraint">[docs]</a><span class="k">class</span> <span class="nc">Restraint</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Restraint. The type is defined in the containing RestraintList.</span>
+    <span class="sd">&quot;&quot;&quot;Restraint. The type is defined in the containing RestraintTable.</span>
 
 <span class="sd">    Most of the values are the consensus of the values in the contained</span>
 <span class="sd">    RestraintContributions. In the normal case, where you have only one</span>
@@ -87,7 +90,7 @@
     <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
     <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;Restraint&#39;</span>
 
-    <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">RestraintList</span>
+    <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">RestraintTable</span>
 
     <span class="c1">#: Name of plural link to instances of class</span>
     <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;restraints&#39;</span>
@@ -105,11 +108,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RestraintList</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;RestraintList object containing restraint.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RestraintTable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;RestraintTable object containing restraint.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">parentList</span><span class="p">]</span>
 
-    <span class="n">restraintList</span> <span class="o">=</span> <span class="n">_parent</span>
+    <span class="n">restraintTable</span> <span class="o">=</span> <span class="n">_parent</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -120,15 +123,6 @@
     <span class="k">def</span> <span class="nf">serial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;serial number of Restraint, used in Pid and to identify the Restraint. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span>
-
-    <span class="c1"># @property</span>
-    <span class="c1"># def comment(self) -&gt; str:</span>
-    <span class="c1">#     &quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
-    <span class="c1">#     return self._wrappedData.details</span>
-    <span class="c1">#</span>
-    <span class="c1"># @comment.setter</span>
-    <span class="c1"># def comment(self, value: str):</span>
-    <span class="c1">#     self._wrappedData.details = value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">peaks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Peak</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
@@ -268,7 +262,7 @@
     <span class="c1">#=========================================================================================</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">RestraintList</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">RestraintTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;get wrappedData - all Constraint children of parent ConstraintList&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedConstraints</span><span class="p">()</span>
 
@@ -277,7 +271,7 @@
     <span class="c1">#=========================================================================================</span>
 
     <span class="c1">#===========================================================================================</span>
-    <span class="c1"># new&#39;Object&#39; and other methods</span>
+    <span class="c1"># new&lt;Object&gt; and other methods</span>
     <span class="c1"># Call appropriate routines in their respective locations</span>
     <span class="c1">#===========================================================================================</span>
 
@@ -323,10 +317,12 @@
     <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
     <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">apiPeak</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-    <span class="k">for</span> <span class="n">restraintList</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">restraintLists</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">apiRestraint</span> <span class="ow">in</span> <span class="n">restraintList</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">apiPeak</span> <span class="ow">in</span> <span class="n">apiRestraint</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">apiRestraint</span><span class="p">))</span>
+    <span class="c1"># for restraintTable in self._project.restraintTables:</span>
+    <span class="c1">#     for apiRestraint in restraintTable._wrappedData.constraints:</span>
+    <span class="c1">#         if apiPeak in apiRestraint.peaks:</span>
+    <span class="c1">#             result.append(getDataObj(apiRestraint))</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">apiRestraint</span><span class="p">)</span> <span class="k">for</span> <span class="n">restraintTable</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">restraintTables</span>
+              <span class="k">for</span> <span class="n">apiRestraint</span> <span class="ow">in</span> <span class="n">restraintTable</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">constraints</span> <span class="k">if</span> <span class="n">apiPeak</span> <span class="ow">in</span> <span class="n">apiRestraint</span><span class="o">.</span><span class="n">peaks</span><span class="p">]</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
 
 
@@ -346,9 +342,9 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="nd">@newObject</span><span class="p">(</span><span class="n">Restraint</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">_newRestraint</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">RestraintList</span><span class="p">,</span> <span class="n">figureOfMerit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                  <span class="n">peaks</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">vectorLength</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Restraint</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Create new Restraint within RestraintList.</span>
+<span class="k">def</span> <span class="nf">_newRestraint</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">RestraintTable</span><span class="p">,</span> <span class="n">figureOfMerit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                  <span class="n">peaks</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">vectorLength</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Restraint</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create new Restraint within RestraintTable.</span>
 
 <span class="sd">    ADVANCED: Note that you just create at least one RestraintContribution afterwards in order to</span>
 <span class="sd">    have valid data. Use the simpler createSimpleRestraint instead, unless you have specific</span>
@@ -360,37 +356,31 @@
 <span class="sd">    :param comment: optional comment string</span>
 <span class="sd">    :param peaks: optional list of peaks as objects or pids</span>
 <span class="sd">    :param vectorLength:</span>
-<span class="sd">    :param serial: optional serial number.</span>
 <span class="sd">    :return: a new Restraint instance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;figureOfMerit&#39;</span><span class="p">:</span> <span class="n">figureOfMerit</span><span class="p">,</span> <span class="s1">&#39;vectorLength&#39;</span><span class="p">:</span> <span class="n">vectorLength</span><span class="p">,</span> <span class="s1">&#39;details&#39;</span><span class="p">:</span> <span class="n">comment</span><span class="p">,}</span>
+
     <span class="k">if</span> <span class="n">peaks</span><span class="p">:</span>
         <span class="n">getByPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span>
         <span class="n">peaks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">getByPid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">]</span>
-
-    <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;figureOfMerit&#39;</span><span class="p">:</span> <span class="n">figureOfMerit</span><span class="p">,</span> <span class="s1">&#39;vectorLength&#39;</span><span class="p">:</span> <span class="n">vectorLength</span><span class="p">,</span> <span class="s1">&#39;details&#39;</span><span class="p">:</span> <span class="n">comment</span><span class="p">,</span>
-          <span class="s1">&#39;peaks&#39;</span><span class="p">:</span> <span class="n">peaks</span><span class="p">}</span>
+        <span class="n">apiPeaks</span> <span class="o">=</span> <span class="p">[</span><span class="n">pk</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">for</span> <span class="n">pk</span> <span class="ow">in</span> <span class="n">peaks</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">Peak</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">apiPeaks</span><span class="p">:</span>
+            <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;peaks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">apiPeaks</span>
 
     <span class="n">apiRestraint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newGenericConstraint</span><span class="p">(</span><span class="o">**</span><span class="n">dd</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiRestraint</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new Restraint item&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
-                                         <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
-
     <span class="k">return</span> <span class="n">result</span>
 
 
-<span class="k">def</span> <span class="nf">_createSimpleRestraint</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">RestraintList</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">figureOfMerit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                          <span class="n">peaks</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Peak</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">targetValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                          <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">upperLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lowerLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                          <span class="n">additionalUpperLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">additionalLowerLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                          <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">vectorLength</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restraintItems</span><span class="p">:</span> <span class="n">Sequence</span> <span class="o">=</span> <span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Restraint</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Create a Restraint with a single RestraintContribution within the RestraintList.</span>
+<span class="k">def</span> <span class="nf">_createSimpleRestraint</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">RestraintTable</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">figureOfMerit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">peaks</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Peak</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">targetValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">upperLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lowerLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">additionalUpperLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">additionalLowerLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">vectorLength</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restraintItems</span><span class="p">:</span> <span class="n">Sequence</span> <span class="o">=</span> <span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Restraint</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create a Restraint with a single RestraintContribution within the RestraintTable.</span>
 <span class="sd">    The function takes all the information needed and creates the RestraintContribution as</span>
 <span class="sd">    well as the Restraint proper.</span>
 
@@ -415,21 +405,22 @@
 <span class="sd">    :return: a new Restraint instance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
-            <span class="p">(</span>
-                <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;figureOfMerit&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;peaks&#39;</span><span class="p">,</span> <span class="p">()),</span> <span class="p">(</span><span class="s1">&#39;targetValue&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;weight&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
-                <span class="p">(</span><span class="s1">&#39;upperLimit&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;lowerLimit&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;additionalUpperLimit&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-                <span class="p">(</span><span class="s1">&#39;additionalLowerLimit&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;vectorLength&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;restraintItems&#39;</span><span class="p">,</span> <span class="p">()),</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-    <span class="n">values</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">peaks</span><span class="p">:</span>
-        <span class="n">getByPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span>
-        <span class="n">peaks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">getByPid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">]</span>
-        <span class="n">values</span><span class="p">[</span><span class="s1">&#39;peaks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">)</span>
+    <span class="c1"># defaults = collections.OrderedDict(</span>
+    <span class="c1">#         (</span>
+    <span class="c1">#             (&#39;comment&#39;, None), (&#39;figureOfMerit&#39;, None), (&#39;peaks&#39;, ()), (&#39;targetValue&#39;, None), (&#39;error&#39;, None), (&#39;weight&#39;, 1.0),</span>
+    <span class="c1">#             (&#39;upperLimit&#39;, None), (&#39;lowerLimit&#39;, None), (&#39;additionalUpperLimit&#39;, None),</span>
+    <span class="c1">#             (&#39;additionalLowerLimit&#39;, None), (&#39;scale&#39;, 1.0), (&#39;vectorLength&#39;, None), (&#39;restraintItems&#39;, ()),</span>
+    <span class="c1">#             )</span>
+    <span class="c1">#         )</span>
+    <span class="c1"># values = locals().copy()</span>
+    <span class="c1"># if peaks:</span>
+    <span class="c1">#     getByPid = self._project.getByPid</span>
+    <span class="c1">#     peaks = [(getByPid(x) if isinstance(x, str) else x) for x in peaks]</span>
+        <span class="c1"># this doesn&#39;t appear to be used</span>
+        <span class="c1"># values[&#39;peaks&#39;] = tuple(pk.pid for pk in peaks if isinstance(pk, Peak))</span>
 
-    <span class="n">restraint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newRestraint</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="n">peaks</span><span class="o">=</span><span class="n">peaks</span><span class="p">,</span> <span class="n">figureOfMerit</span><span class="o">=</span><span class="n">figureOfMerit</span><span class="p">,</span>
-                                  <span class="n">vectorLength</span><span class="o">=</span><span class="n">vectorLength</span><span class="p">,</span> <span class="p">)</span>
+    <span class="n">restraint</span> <span class="o">=</span> <span class="n">_newRestraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="n">peaks</span><span class="o">=</span><span class="n">peaks</span><span class="p">,</span> <span class="n">figureOfMerit</span><span class="o">=</span><span class="n">figureOfMerit</span><span class="p">,</span>
+                              <span class="n">vectorLength</span><span class="o">=</span><span class="n">vectorLength</span><span class="p">,</span> <span class="p">)</span>
     <span class="n">restraint</span><span class="o">.</span><span class="n">newRestraintContribution</span><span class="p">(</span><span class="n">targetValue</span><span class="o">=</span><span class="n">targetValue</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">error</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span>
                                        <span class="n">upperLimit</span><span class="o">=</span><span class="n">upperLimit</span><span class="p">,</span> <span class="n">lowerLimit</span><span class="o">=</span><span class="n">lowerLimit</span><span class="p">,</span>
                                        <span class="n">additionalUpperLimit</span><span class="o">=</span><span class="n">additionalUpperLimit</span><span class="p">,</span>
@@ -439,10 +430,10 @@
     <span class="k">return</span> <span class="n">restraint</span>
 
 
-<span class="c1">#EJB 20181205: moved to RestraintList</span>
-<span class="c1"># RestraintList.newRestraint = _newRestraint</span>
+<span class="c1">#EJB 20181205: moved to RestraintTable</span>
+<span class="c1"># RestraintTable.newRestraint = _newRestraint</span>
 <span class="c1"># del _newRestraint</span>
-<span class="c1"># RestraintList.createSimpleRestraint = _createSimpleRestraint</span>
+<span class="c1"># RestraintTable.createSimpleRestraint = _createSimpleRestraint</span>
 
 <span class="c1"># Notifiers:</span>
 <span class="k">for</span> <span class="n">clazz</span> <span class="ow">in</span> <span class="n">NmrConstraint</span><span class="o">.</span><span class="n">ConstraintPeakContrib</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">getNonAbstractSubtypes</span><span class="p">():</span>
@@ -454,6 +445,7 @@
             <span class="p">)</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -463,7 +455,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -483,12 +475,13 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.Restraint</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

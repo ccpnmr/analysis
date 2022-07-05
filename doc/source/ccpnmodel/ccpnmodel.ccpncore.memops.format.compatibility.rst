@@ -16,4 +16,3 @@ ccpnmodel.ccpncore.memops.format.compatibility.Converters1 module
    :members:
    :undoc-members:
    :show-inheritance:
-

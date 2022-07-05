@@ -40,4 +40,3 @@ ccpnmodel.ccpncore.lib.chemComp.Util module
    :members:
    :undoc-members:
    :show-inheritance:
-

@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.ui.gui.widgets.RadioButton &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
-    <script src="../../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.RadioButton</a></li> 
       </ul>
     </div>  
 
@@ -37,66 +38,295 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.ui.gui.widgets.RadioButton</h1><div class="highlight"><pre>
-<span></span>
-<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module implements the Button class</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-05-18 18:40:28 +0100 (Wed, May 18, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Created</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
 
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">from</span> <span class="nn">ccpn.framework.Translation</span> <span class="kn">import</span> <span class="n">translator</span>
-
-
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span><span class="p">,</span> <span class="n">ScrollableFrame</span>
 
 <div class="viewcode-block" id="RadioButton"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButton">[docs]</a><span class="k">class</span> <span class="nc">RadioButton</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QRadioButton</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">textColor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">textSize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">textColor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">textSize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">squared</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
-    <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
-    <span class="n">text</span> <span class="o">=</span> <span class="n">translator</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">translator</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">textColor</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;QRadioButton {color: </span><span class="si">%s</span><span class="s1">; font-size: 12pt;}&#39;</span> <span class="o">%</span> <span class="n">textColor</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">textSize</span> <span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;QRadioButton {font-size: </span><span class="si">%s</span><span class="s1">;}&#39;</span> <span class="o">%</span> <span class="n">textSize</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">callback</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setCallback</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectName</span><span class="p">():</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">textColor</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;QRadioButton {color: </span><span class="si">{}</span><span class="s1">; font-size: 12pt;}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">textColor</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">textSize</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;QRadioButton {font-size: </span><span class="si">{}</span><span class="s1">;}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">textSize</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">callback</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setCallback</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectName</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
-<span class="s1">    RadioButton::disabled {</span>
-<span class="s1">                            color: #7f88ac;</span>
-<span class="s1">                            }</span>
-<span class="s1">                            &#39;&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;QRadioButton::disabled { color: #7f88ac; }&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">squared</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">                    QRadioButton::indicator {{</span>
+<span class="s1">                        border: </span><span class="si">{border}</span><span class="s1">px solid black; </span>
+<span class="s1">                        height: </span><span class="si">{size}</span><span class="s1">px;</span>
+<span class="s1">                        width: </span><span class="si">{size}</span><span class="s1">px;</span>
+<span class="s1">                        border-radius: </span><span class="si">{radius}</span><span class="s1">px;</span>
+<span class="s1">                    }}</span>
+<span class="s1">                    QRadioButton::indicator:checked {{</span>
+<span class="s1">                        color: black;</span>
+<span class="s1">                        background: black;</span>
+<span class="s1">                        border-width: </span><span class="si">{border}</span><span class="s1">px;</span>
+<span class="s1">                        border-style: solid;</span>
+<span class="s1">                        border-radius: </span><span class="si">{radius}</span><span class="s1">px;</span>
+<span class="s1">                        border-color: white;</span>
+<span class="s1">                    }}</span>
+<span class="s1">                    QRadioButton::disabled {{</span>
+<span class="s1">                        color: #7f88ac</span>
+<span class="s1">                    }}</span>
+<span class="s1">                &#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">border</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">0.1</span><span class="p">))</span>
 
-<div class="viewcode-block" id="RadioButton.get"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButton.get">[docs]</a>  <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">()</span></div>
+<div class="viewcode-block" id="RadioButton.get"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButton.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="RadioButton.set"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButton.set">[docs]</a>  <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="n">text</span> <span class="o">=</span> <span class="n">translator</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+<div class="viewcode-block" id="RadioButton.set"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButton.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">translator</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RadioButton.getText"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButton.getText">[docs]</a>    <span class="k">def</span> <span class="nf">getText</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Get the text of the button&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="RadioButton.setCallback"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButton.setCallback">[docs]</a>    <span class="k">def</span> <span class="nf">setCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">callback</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_getSaveState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Internal. Called for saving/restoring the widget state.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_setSavedState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Internal. Called for saving/restoring the widget state.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="RadioButton.getText"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButton.getText">[docs]</a>  <span class="k">def</span> <span class="nf">getText</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="s2">&quot;Get the text of the button&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">()</span></div>
+<div class="viewcode-block" id="EditableRadioButton"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.EditableRadioButton">[docs]</a><span class="k">class</span> <span class="nc">EditableRadioButton</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">backgroundText</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">editable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">callbackOneditingFinished</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;editingFinishedCallback = True. it will re-fired the radioButton callback</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="p">)</span>
+        <span class="c1"># Base._init(self, setLayout=True, **kwds)</span>
+        <span class="c1"># self.setEnabled(False)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radioButton</span> <span class="o">=</span> <span class="n">RadioButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="n">tipText</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">backgroundText</span><span class="o">=</span><span class="n">backgroundText</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>  <span class="c1">#  hAlign=&#39;l&#39;,)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editable</span> <span class="o">=</span> <span class="n">editable</span>
+        <span class="k">if</span> <span class="n">editable</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">radioButton</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="c1"># self.lineEdit.setContentsMargins(0,0,0,0)</span>
+        <span class="c1"># self.lineEdit.setMinimumWidth(250)</span>
+        <span class="c1"># self.setMinimumHeight(30)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callbackOneditingFinished</span> <span class="o">=</span> <span class="n">callbackOneditingFinished</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">callback</span>
+        <span class="c1"># self.radioButton.setText = self._setText</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">callbackOneditingFinished</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_editingFinishedCallback</span><span class="p">)</span>
+
+        <span class="c1"># self.__class__ = QtWidgets.QAbstractButton</span>
+
+<div class="viewcode-block" id="EditableRadioButton.text"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.EditableRadioButton.text">[docs]</a>    <span class="k">def</span> <span class="nf">text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">editable</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">radioButton</span><span class="o">.</span><span class="n">text</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="EditableRadioButton.get"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.EditableRadioButton.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="EditableRadioButton.set"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.EditableRadioButton.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EditableRadioButton.setText"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.EditableRadioButton.setText">[docs]</a>    <span class="k">def</span> <span class="nf">setText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">editable</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">radioButton</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EditableRadioButton.isChecked"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.EditableRadioButton.isChecked">[docs]</a>    <span class="k">def</span> <span class="nf">isChecked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">radioButton</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="EditableRadioButton.setChecked"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.EditableRadioButton.setChecked">[docs]</a>    <span class="k">def</span> <span class="nf">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">radioButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_editingFinishedCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radioButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="RadioButton.setCallback"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButton.setCallback">[docs]</a>  <span class="k">def</span> <span class="nf">setCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
-    <span class="c1">#</span>
-    <span class="c1"># if self.callback:</span>
-    <span class="c1">#   self.disconnect(self, QtCore.SIGNAL(&#39;clicked()&#39;), self.callback)</span>
+<span class="k">def</span> <span class="nf">_fillMissingValuesInSecondList</span><span class="p">(</span><span class="n">aa</span><span class="p">,</span> <span class="n">bb</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">bb</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bb</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">bb</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">bb</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">bb</span><span class="p">)</span>
+            <span class="n">bb</span> <span class="o">+=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span> <span class="o">*</span> <span class="n">m</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s1">&#39;Lists are not of same length.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">aa</span><span class="p">,</span> <span class="n">bb</span>
 
-    <span class="k">if</span> <span class="n">callback</span><span class="p">:</span>
-      <span class="c1"># self.connect(self, QtCore.SIGNAL(&#39;clicked()&#39;), callback)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span></div></div>
+
+<span class="n">CheckBoxTexts</span> <span class="o">=</span> <span class="s1">&#39;CheckBoxTexts&#39;</span>
+<span class="n">CheckBoxTipTexts</span> <span class="o">=</span> <span class="s1">&#39;CheckBoxTipTexts&#39;</span>
+<span class="n">CheckBoxCheckedText</span> <span class="o">=</span> <span class="s1">&#39;CheckBoxCheckedText&#39;</span>
+<span class="n">CheckBoxCallbacks</span> <span class="o">=</span> <span class="s1">&#39;CheckBoxCallbacks&#39;</span>
+
+<div class="viewcode-block" id="RadioButtonWithSubSelection"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButtonWithSubSelection">[docs]</a><span class="k">class</span> <span class="nc">RadioButtonWithSubSelection</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">checkBoxDictionary</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">autoHideCheckBoxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;A radioButton with a list of sub CheckBoxes</span>
+<span class="sd">        autoHideCheckBoxes: True to hide subcheckboxes if radioButton is not selected.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">radioButton</span> <span class="o">=</span> <span class="n">RadioButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="n">tipText</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radioButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">checked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxDictionary</span> <span class="o">=</span> <span class="n">checkBoxDictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxesFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxDictionary</span><span class="p">:</span>
+            <span class="n">checkBoxTexts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxDictionary</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">CheckBoxTexts</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="n">_checkBoxTipTexts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxDictionary</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">CheckBoxTipTexts</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="n">_checkBoxCallbacks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxDictionary</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">CheckBoxCallbacks</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="c1"># just make sure all lists are of same length</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">checkBoxTipTexts</span> <span class="o">=</span> <span class="n">_fillMissingValuesInSecondList</span><span class="p">(</span><span class="n">checkBoxTexts</span><span class="p">,</span> <span class="n">_checkBoxTipTexts</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">checkBoxCallbacks</span> <span class="o">=</span> <span class="n">_fillMissingValuesInSecondList</span><span class="p">(</span><span class="n">checkBoxTexts</span><span class="p">,</span> <span class="n">_checkBoxCallbacks</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+            <span class="n">checkBoxCheckedText</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxDictionary</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">CheckBoxCheckedText</span><span class="p">,</span> <span class="p">[])</span>
+
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">checkBoxText</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">checkBoxTexts</span><span class="p">):</span>
+                <span class="n">_callback</span> <span class="o">=</span> <span class="n">checkBoxCallbacks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">_tipText</span> <span class="o">=</span> <span class="n">checkBoxTipTexts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">_checked</span> <span class="o">=</span> <span class="n">checkBoxText</span> <span class="ow">in</span> <span class="n">checkBoxCheckedText</span>
+                <span class="n">checkBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkBoxesFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">checkBoxText</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span> <span class="n">_checked</span><span class="p">,</span>
+                                         <span class="n">callback</span><span class="o">=</span><span class="n">_callback</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="n">_tipText</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">checkBox</span><span class="p">)</span>
+
+        <span class="c1"># self._defaultCallback()</span>
+        <span class="c1"># self.radioButton.clicked.connect(self._defaultCallback)</span>
+
+    <span class="k">def</span> <span class="nf">_defaultCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># hide checkboxes frame if not selected</span>
+        <span class="n">checked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxesFrame</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">checked</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RadioButtonWithSubSelection.get"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButtonWithSubSelection.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">radioButton</span><span class="o">.</span><span class="n">text</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="RadioButtonWithSubSelection.set"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButtonWithSubSelection.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radioButton</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RadioButtonWithSubSelection.getText"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButtonWithSubSelection.getText">[docs]</a>    <span class="k">def</span> <span class="nf">getText</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="RadioButtonWithSubSelection.setText"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButtonWithSubSelection.setText">[docs]</a>    <span class="k">def</span> <span class="nf">setText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+       <span class="bp">self</span><span class="o">.</span><span class="n">radioButton</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RadioButtonWithSubSelection.isChecked"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButtonWithSubSelection.isChecked">[docs]</a>    <span class="k">def</span> <span class="nf">isChecked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">radioButton</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="RadioButtonWithSubSelection.setChecked"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButtonWithSubSelection.setChecked">[docs]</a>    <span class="k">def</span> <span class="nf">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">radioButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RadioButtonWithSubSelection.getSelectedCheckBoxesIndexes"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButtonWithSubSelection.getSelectedCheckBoxesIndexes">[docs]</a>    <span class="k">def</span> <span class="nf">getSelectedCheckBoxesIndexes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">checkBox</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkBoxes</span><span class="p">)</span> <span class="k">if</span> <span class="n">checkBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()]</span></div>
+
+<div class="viewcode-block" id="RadioButtonWithSubSelection.getSelectedCheckBoxes"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButtonWithSubSelection.getSelectedCheckBoxes">[docs]</a>    <span class="k">def</span> <span class="nf">getSelectedCheckBoxes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">checkBox</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="k">for</span> <span class="n">checkBox</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxes</span> <span class="k">if</span> <span class="n">checkBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()]</span></div>
+
+<div class="viewcode-block" id="RadioButtonWithSubSelection.setSelectedCheckBoxes"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButton.RadioButtonWithSubSelection.setSelectedCheckBoxes">[docs]</a>    <span class="k">def</span> <span class="nf">setSelectedCheckBoxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">checkBox</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">checkBox</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">:</span>
+                <span class="n">checkBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">checkBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span></div></div>
 
 
 
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
+
+
+    <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">callback</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;callback ~~~~&#39;</span><span class="p">)</span>
+
+
+
+    <span class="n">popup</span> <span class="o">=</span> <span class="n">CcpnDialog</span><span class="p">(</span><span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">checkBoxesDict</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">CheckBoxTexts</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="s1">&#39;B&#39;</span><span class="p">,</span><span class="s1">&#39;C&#39;</span><span class="p">],</span>
+                    <span class="n">CheckBoxTipTexts</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="s1">&#39;B&#39;</span><span class="p">,</span><span class="s1">&#39;C&#39;</span><span class="p">],</span>
+                    <span class="n">CheckBoxCheckedText</span><span class="p">:[</span><span class="s1">&#39;B&#39;</span><span class="p">],</span>
+                    <span class="n">CheckBoxCallbacks</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+                    <span class="p">}</span>
+    <span class="n">rb</span> <span class="o">=</span> <span class="n">RadioButtonWithSubSelection</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">popup</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">checkBoxDictionary</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                     <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">rb</span><span class="o">.</span><span class="n">getSelectedCheckBoxes</span><span class="p">())</span>
+    <span class="n">rb</span><span class="o">.</span><span class="n">setSelectedCheckBoxes</span><span class="p">([</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">])</span>
+    <span class="n">popup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -106,7 +336,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -126,12 +356,13 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.RadioButton</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

@@ -1,22 +1,23 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>ccpn.pipes package &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ccpn.pipes.examples package" href="ccpn.pipes.examples.html" />
+    <link rel="next" title="ccpn.pipes.lib package" href="ccpn.pipes.lib.html" />
     <link rel="prev" title="ccpn.framework.update package" href="ccpn.framework.update.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -29,14 +30,15 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="ccpn.pipes.examples.html" title="ccpn.pipes.examples package"
+          <a href="ccpn.pipes.lib.html" title="ccpn.pipes.lib package"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="ccpn.framework.update.html" title="ccpn.framework.update package"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="ccpn.html" accesskey="U">ccpn package</a> &#187;</li> 
+          <li class="nav-item nav-item-2"><a href="ccpn.html" accesskey="U">ccpn package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.pipes package</a></li> 
       </ul>
     </div>  
 
@@ -45,867 +47,146 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-ccpn.pipes">
+  <section id="module-ccpn.pipes">
 <span id="ccpn-pipes-package"></span><h1>ccpn.pipes package<a class="headerlink" href="#module-ccpn.pipes" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="subpackages">
+<section id="subpackages">
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="ccpn.pipes.examples.html">ccpn.pipes.examples package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ccpn.pipes.examples.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ccpn.pipes.examples.html#module-ccpn.pipes.examples.DemoNoGUI">ccpn.pipes.examples.DemoNoGUI module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ccpn.pipes.examples.html#module-ccpn.pipes.examples.DemoWithAutoGUI">ccpn.pipes.examples.DemoWithAutoGUI module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ccpn.pipes.examples.html#module-ccpn.pipes.examples.DemoWithGUI">ccpn.pipes.examples.DemoWithGUI module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ccpn.pipes.examples.html#module-ccpn.pipes.examples.autoGenerationParams">ccpn.pipes.examples.autoGenerationParams module</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="ccpn.pipes.lib.html">ccpn.pipes.lib package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.pipes.lib.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.pipes.lib.html#module-ccpn.pipes.lib.AreaCalculation">ccpn.pipes.lib.AreaCalculation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.pipes.lib.html#module-ccpn.pipes.lib.Scale1Dspectra">ccpn.pipes.lib.Scale1Dspectra module</a></li>
 </ul>
 </li>
 </ul>
 </div>
-</div>
-<div class="section" id="submodules">
+</section>
+<section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-ccpn.pipes.AlignSpectra">
-<span id="ccpn-pipes-alignspectra-module"></span><h2>ccpn.pipes.AlignSpectra module<a class="headerlink" href="#module-ccpn.pipes.AlignSpectra" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.pipes.AlignSpectra.AlignSpectra">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.AlignSpectra.</code><code class="sig-name descname">AlignSpectra</code><span class="sig-paren">(</span><em class="sig-param">application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/AlignSpectra.html#AlignSpectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.AlignSpectra.AlignSpectra" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe" title="ccpn.framework.lib.Pipe.SpectraPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.framework.lib.Pipe.SpectraPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.AlignSpectra.AlignSpectra.guiPipe">
-<code class="sig-name descname">guiPipe</code><a class="headerlink" href="#ccpn.pipes.AlignSpectra.AlignSpectra.guiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#ccpn.pipes.AlignSpectra.AlignSpectraGuiPipe" title="ccpn.pipes.AlignSpectra.AlignSpectraGuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlignSpectraGuiPipe</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.AlignSpectra.AlignSpectra.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Align Spectra'</em><a class="headerlink" href="#ccpn.pipes.AlignSpectra.AlignSpectra.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.pipes.AlignSpectra.AlignSpectra.runPipe">
-<code class="sig-name descname">runPipe</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/AlignSpectra.html#AlignSpectra.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.AlignSpectra.AlignSpectra.runPipe" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>spectra</strong> – inputData</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>aligned spectra</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.pipes.AlignSpectra.AlignSpectraGuiPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.AlignSpectra.</code><code class="sig-name descname">AlignSpectraGuiPipe</code><span class="sig-paren">(</span><em class="sig-param">name='Align Spectra'</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">project=None</em>, <em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/AlignSpectra.html#AlignSpectraGuiPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.AlignSpectra.AlignSpectraGuiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe" title="ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.AlignSpectra.AlignSpectraGuiPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Align Spectra'</em><a class="headerlink" href="#ccpn.pipes.AlignSpectra.AlignSpectraGuiPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.AlignSpectra.AlignSpectraGuiPipe.preferredPipe">
-<code class="sig-name descname">preferredPipe</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.pipes.AlignSpectra.AlignSpectraGuiPipe.preferredPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.pipes.AlignSpectra.addIndividualShiftToSpectra">
-<code class="sig-prename descclassname">ccpn.pipes.AlignSpectra.</code><code class="sig-name descname">addIndividualShiftToSpectra</code><span class="sig-paren">(</span><em class="sig-param">spectra</em>, <em class="sig-param">shifts</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/AlignSpectra.html#addIndividualShiftToSpectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.AlignSpectra.addIndividualShiftToSpectra" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="ccpn.pipes.AlignSpectra.addShiftToSpectra">
-<code class="sig-prename descclassname">ccpn.pipes.AlignSpectra.</code><code class="sig-name descname">addShiftToSpectra</code><span class="sig-paren">(</span><em class="sig-param">spectra</em>, <em class="sig-param">shift</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/AlignSpectra.html#addShiftToSpectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.AlignSpectra.addShiftToSpectra" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.pipes.AssignMultiplets">
-<span id="ccpn-pipes-assignmultiplets-module"></span><h2>ccpn.pipes.AssignMultiplets module<a class="headerlink" href="#module-ccpn.pipes.AssignMultiplets" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.pipes.AssignMultiplets.FindMultipletsGuiPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.AssignMultiplets.</code><code class="sig-name descname">FindMultipletsGuiPipe</code><span class="sig-paren">(</span><em class="sig-param">name='Find Multiplets'</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">project=None</em>, <em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/AssignMultiplets.html#FindMultipletsGuiPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.AssignMultiplets.FindMultipletsGuiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe" title="ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.AssignMultiplets.FindMultipletsGuiPipe.info">
-<code class="sig-name descname">info</code><em class="property"> = 'This Pipe will group existing peaks in Multiplets. Volume, lineWidths, and position will be calculated for new multiplets or derived from the peaks values.'</em><a class="headerlink" href="#ccpn.pipes.AssignMultiplets.FindMultipletsGuiPipe.info" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.AssignMultiplets.FindMultipletsGuiPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Find Multiplets'</em><a class="headerlink" href="#ccpn.pipes.AssignMultiplets.FindMultipletsGuiPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.AssignMultiplets.FindMultipletsGuiPipe.preferredPipe">
-<code class="sig-name descname">preferredPipe</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.pipes.AssignMultiplets.FindMultipletsGuiPipe.preferredPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.pipes.AssignMultiplets.FindMultipletsPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.AssignMultiplets.</code><code class="sig-name descname">FindMultipletsPipe</code><span class="sig-paren">(</span><em class="sig-param">application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/AssignMultiplets.html#FindMultipletsPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.AssignMultiplets.FindMultipletsPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe" title="ccpn.framework.lib.Pipe.SpectraPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.framework.lib.Pipe.SpectraPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.AssignMultiplets.FindMultipletsPipe.guiPipe">
-<code class="sig-name descname">guiPipe</code><a class="headerlink" href="#ccpn.pipes.AssignMultiplets.FindMultipletsPipe.guiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#ccpn.pipes.AssignMultiplets.FindMultipletsGuiPipe" title="ccpn.pipes.AssignMultiplets.FindMultipletsGuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">FindMultipletsGuiPipe</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.AssignMultiplets.FindMultipletsPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Find Multiplets'</em><a class="headerlink" href="#ccpn.pipes.AssignMultiplets.FindMultipletsPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.pipes.AssignMultiplets.FindMultipletsPipe.runPipe">
-<code class="sig-name descname">runPipe</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/AssignMultiplets.html#FindMultipletsPipe.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.AssignMultiplets.FindMultipletsPipe.runPipe" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> – </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.pipes.AutoAssignmentPipe">
-<span id="ccpn-pipes-autoassignmentpipe-module"></span><h2>ccpn.pipes.AutoAssignmentPipe module<a class="headerlink" href="#module-ccpn.pipes.AutoAssignmentPipe" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.pipes.AutoAssignmentPipe.AutomatedAssignmentGuiPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.AutoAssignmentPipe.</code><code class="sig-name descname">AutomatedAssignmentGuiPipe</code><span class="sig-paren">(</span><em class="sig-param">name='Automated Assignment'</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">project=None</em>, <em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/AutoAssignmentPipe.html#AutomatedAssignmentGuiPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.AutoAssignmentPipe.AutomatedAssignmentGuiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe" title="ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.AutoAssignmentPipe.AutomatedAssignmentGuiPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Automated Assignment'</em><a class="headerlink" href="#ccpn.pipes.AutoAssignmentPipe.AutomatedAssignmentGuiPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.AutoAssignmentPipe.AutomatedAssignmentGuiPipe.preferredPipe">
-<code class="sig-name descname">preferredPipe</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.pipes.AutoAssignmentPipe.AutomatedAssignmentGuiPipe.preferredPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.pipes.AutoAssignmentPipe.AutomatedAssignmentPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.AutoAssignmentPipe.</code><code class="sig-name descname">AutomatedAssignmentPipe</code><span class="sig-paren">(</span><em class="sig-param">application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/AutoAssignmentPipe.html#AutomatedAssignmentPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.AutoAssignmentPipe.AutomatedAssignmentPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe" title="ccpn.framework.lib.Pipe.SpectraPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.framework.lib.Pipe.SpectraPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.AutoAssignmentPipe.AutomatedAssignmentPipe.guiPipe">
-<code class="sig-name descname">guiPipe</code><a class="headerlink" href="#ccpn.pipes.AutoAssignmentPipe.AutomatedAssignmentPipe.guiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#ccpn.pipes.AutoAssignmentPipe.AutomatedAssignmentGuiPipe" title="ccpn.pipes.AutoAssignmentPipe.AutomatedAssignmentGuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutomatedAssignmentGuiPipe</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.AutoAssignmentPipe.AutomatedAssignmentPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Automated Assignment'</em><a class="headerlink" href="#ccpn.pipes.AutoAssignmentPipe.AutomatedAssignmentPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.pipes.AutoAssignmentPipe.AutomatedAssignmentPipe.runPipe">
-<code class="sig-name descname">runPipe</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/AutoAssignmentPipe.html#AutomatedAssignmentPipe.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.AutoAssignmentPipe.AutomatedAssignmentPipe.runPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.pipes.BaselinePipe">
-<span id="ccpn-pipes-baselinepipe-module"></span><h2>ccpn.pipes.BaselinePipe module<a class="headerlink" href="#module-ccpn.pipes.BaselinePipe" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.pipes.BaselinePipe.BaselineCorrection1DPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.BaselinePipe.</code><code class="sig-name descname">BaselineCorrection1DPipe</code><span class="sig-paren">(</span><em class="sig-param">application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/BaselinePipe.html#BaselineCorrection1DPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.BaselinePipe.BaselineCorrection1DPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe" title="ccpn.framework.lib.Pipe.SpectraPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.framework.lib.Pipe.SpectraPipe</span></code></a></p>
-<p>Apply  phasing to all the spectra in the pipeline</p>
-<dl class="attribute">
-<dt id="ccpn.pipes.BaselinePipe.BaselineCorrection1DPipe.guiPipe">
-<code class="sig-name descname">guiPipe</code><a class="headerlink" href="#ccpn.pipes.BaselinePipe.BaselineCorrection1DPipe.guiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#ccpn.pipes.BaselinePipe.BaselineCorrectionGuiPipe" title="ccpn.pipes.BaselinePipe.BaselineCorrectionGuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaselineCorrectionGuiPipe</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.BaselinePipe.BaselineCorrection1DPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Baseline Correction'</em><a class="headerlink" href="#ccpn.pipes.BaselinePipe.BaselineCorrection1DPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.pipes.BaselinePipe.BaselineCorrection1DPipe.runPipe">
-<code class="sig-name descname">runPipe</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/BaselinePipe.html#BaselineCorrection1DPipe.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.BaselinePipe.BaselineCorrection1DPipe.runPipe" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>spectra</strong> – inputData</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>aligned spectra</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.pipes.BaselinePipe.BaselineCorrectionGuiPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.BaselinePipe.</code><code class="sig-name descname">BaselineCorrectionGuiPipe</code><span class="sig-paren">(</span><em class="sig-param">name='Baseline Correction'</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">project=None</em>, <em class="sig-param">**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/BaselinePipe.html#BaselineCorrectionGuiPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.BaselinePipe.BaselineCorrectionGuiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe" title="ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.BaselinePipe.BaselineCorrectionGuiPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Baseline Correction'</em><a class="headerlink" href="#ccpn.pipes.BaselinePipe.BaselineCorrectionGuiPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.BaselinePipe.BaselineCorrectionGuiPipe.preferredPipe">
-<code class="sig-name descname">preferredPipe</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.pipes.BaselinePipe.BaselineCorrectionGuiPipe.preferredPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.pipes.DuplicateSpectraPipe">
-<span id="ccpn-pipes-duplicatespectrapipe-module"></span><h2>ccpn.pipes.DuplicateSpectraPipe module<a class="headerlink" href="#module-ccpn.pipes.DuplicateSpectraPipe" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.pipes.DuplicateSpectraPipe.DuplicateSpectrumGuiPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.DuplicateSpectraPipe.</code><code class="sig-name descname">DuplicateSpectrumGuiPipe</code><span class="sig-paren">(</span><em class="sig-param">name='Duplicate Spectra'</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">project=None</em>, <em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/DuplicateSpectraPipe.html#DuplicateSpectrumGuiPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.DuplicateSpectraPipe.DuplicateSpectrumGuiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe" title="ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.DuplicateSpectraPipe.DuplicateSpectrumGuiPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Duplicate Spectra'</em><a class="headerlink" href="#ccpn.pipes.DuplicateSpectraPipe.DuplicateSpectrumGuiPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.DuplicateSpectraPipe.DuplicateSpectrumGuiPipe.preferredPipe">
-<code class="sig-name descname">preferredPipe</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.pipes.DuplicateSpectraPipe.DuplicateSpectrumGuiPipe.preferredPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.pipes.DuplicateSpectraPipe.DuplicateSpectrumPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.DuplicateSpectraPipe.</code><code class="sig-name descname">DuplicateSpectrumPipe</code><span class="sig-paren">(</span><em class="sig-param">application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/DuplicateSpectraPipe.html#DuplicateSpectrumPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.DuplicateSpectraPipe.DuplicateSpectrumPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe" title="ccpn.framework.lib.Pipe.SpectraPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.framework.lib.Pipe.SpectraPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.DuplicateSpectraPipe.DuplicateSpectrumPipe.guiPipe">
-<code class="sig-name descname">guiPipe</code><a class="headerlink" href="#ccpn.pipes.DuplicateSpectraPipe.DuplicateSpectrumPipe.guiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#ccpn.pipes.DuplicateSpectraPipe.DuplicateSpectrumGuiPipe" title="ccpn.pipes.DuplicateSpectraPipe.DuplicateSpectrumGuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">DuplicateSpectrumGuiPipe</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.DuplicateSpectraPipe.DuplicateSpectrumPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Duplicate Spectra'</em><a class="headerlink" href="#ccpn.pipes.DuplicateSpectraPipe.DuplicateSpectrumPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.pipes.DuplicateSpectraPipe.DuplicateSpectrumPipe.runPipe">
-<code class="sig-name descname">runPipe</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/DuplicateSpectraPipe.html#DuplicateSpectrumPipe.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.DuplicateSpectraPipe.DuplicateSpectrumPipe.runPipe" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>spectra</strong> – inputData</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>new spectra</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.pipes.ExcludeRegionsFromSpectrum">
-<span id="ccpn-pipes-excluderegionsfromspectrum-module"></span><h2>ccpn.pipes.ExcludeRegionsFromSpectrum module<a class="headerlink" href="#module-ccpn.pipes.ExcludeRegionsFromSpectrum" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsGuiPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.ExcludeRegionsFromSpectrum.</code><code class="sig-name descname">ExcludeRegionsGuiPipe</code><span class="sig-paren">(</span><em class="sig-param">name='Exclude Regions'</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">project=None</em>, <em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/ExcludeRegionsFromSpectrum.html#ExcludeRegionsGuiPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsGuiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe" title="ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsGuiPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Exclude Regions'</em><a class="headerlink" href="#ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsGuiPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsGuiPipe.preferredPipe">
-<code class="sig-name descname">preferredPipe</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsGuiPipe.preferredPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsGuiPipe.restoreWidgetsState">
-<code class="sig-name descname">restoreWidgetsState</code><span class="sig-paren">(</span><em class="sig-param">**widgetsState</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/ExcludeRegionsFromSpectrum.html#ExcludeRegionsGuiPipe.restoreWidgetsState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsGuiPipe.restoreWidgetsState" title="Permalink to this definition">¶</a></dt>
-<dd><p>Restore the gui params.
-overide the default function first to recreate the correct number of boxes. Then call the super to restore values.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.ExcludeRegionsFromSpectrum.</code><code class="sig-name descname">ExcludeRegionsPipe</code><span class="sig-paren">(</span><em class="sig-param">application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/ExcludeRegionsFromSpectrum.html#ExcludeRegionsPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe" title="ccpn.framework.lib.Pipe.SpectraPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.framework.lib.Pipe.SpectraPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsPipe.guiPipe">
-<code class="sig-name descname">guiPipe</code><a class="headerlink" href="#ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsPipe.guiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsGuiPipe" title="ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsGuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExcludeRegionsGuiPipe</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Exclude Regions'</em><a class="headerlink" href="#ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsPipe.runPipe">
-<code class="sig-name descname">runPipe</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/ExcludeRegionsFromSpectrum.html#ExcludeRegionsPipe.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.ExcludeRegionsFromSpectrum.ExcludeRegionsPipe.runPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>get excluded region of the spectrum and add to the pipeline kwargs.
-Spectra is not really needed for this pipe. But is essential for the base class pipe.</p>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.pipes.ExcludeSolventRegions">
-<span id="ccpn-pipes-excludesolventregions-module"></span><h2>ccpn.pipes.ExcludeSolventRegions module<a class="headerlink" href="#module-ccpn.pipes.ExcludeSolventRegions" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.pipes.ExcludeSolventRegions.ExcludeRegionsGuiPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.ExcludeSolventRegions.</code><code class="sig-name descname">ExcludeRegionsGuiPipe</code><span class="sig-paren">(</span><em class="sig-param">name='Exclude Solvent Regions'</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">project=None</em>, <em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/ExcludeSolventRegions.html#ExcludeRegionsGuiPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.ExcludeSolventRegions.ExcludeRegionsGuiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe" title="ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.ExcludeSolventRegions.ExcludeRegionsGuiPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Exclude Solvent Regions'</em><a class="headerlink" href="#ccpn.pipes.ExcludeSolventRegions.ExcludeRegionsGuiPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.ExcludeSolventRegions.ExcludeRegionsGuiPipe.preferredPipe">
-<code class="sig-name descname">preferredPipe</code><em class="property"> = False</em><a class="headerlink" href="#ccpn.pipes.ExcludeSolventRegions.ExcludeRegionsGuiPipe.preferredPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.pipes.ExcludeSolventRegions.ExcludeRegionsPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.ExcludeSolventRegions.</code><code class="sig-name descname">ExcludeRegionsPipe</code><span class="sig-paren">(</span><em class="sig-param">application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/ExcludeSolventRegions.html#ExcludeRegionsPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.ExcludeSolventRegions.ExcludeRegionsPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe" title="ccpn.framework.lib.Pipe.SpectraPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.framework.lib.Pipe.SpectraPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.ExcludeSolventRegions.ExcludeRegionsPipe.guiPipe">
-<code class="sig-name descname">guiPipe</code><a class="headerlink" href="#ccpn.pipes.ExcludeSolventRegions.ExcludeRegionsPipe.guiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#ccpn.pipes.ExcludeSolventRegions.ExcludeRegionsGuiPipe" title="ccpn.pipes.ExcludeSolventRegions.ExcludeRegionsGuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExcludeRegionsGuiPipe</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.ExcludeSolventRegions.ExcludeRegionsPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Exclude Solvent Regions'</em><a class="headerlink" href="#ccpn.pipes.ExcludeSolventRegions.ExcludeRegionsPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.pipes.ExcludeSolventRegions.ExcludeRegionsPipe.runPipe">
-<code class="sig-name descname">runPipe</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/ExcludeSolventRegions.html#ExcludeRegionsPipe.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.ExcludeSolventRegions.ExcludeRegionsPipe.runPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>:get excluded region of the spectrum and add to the pipeline kwargs.
-Spectra is not really needed for this pipe. But is essential for the base class pipe.</p>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.pipes.IntegrationPipe">
-<span id="ccpn-pipes-integrationpipe-module"></span><h2>ccpn.pipes.IntegrationPipe module<a class="headerlink" href="#module-ccpn.pipes.IntegrationPipe" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.pipes.IntegrationPipe.CalculateAreaGuiPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.IntegrationPipe.</code><code class="sig-name descname">CalculateAreaGuiPipe</code><span class="sig-paren">(</span><em class="sig-param">name='Calculate Integrals'</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">project=None</em>, <em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/IntegrationPipe.html#CalculateAreaGuiPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.IntegrationPipe.CalculateAreaGuiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe" title="ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.IntegrationPipe.CalculateAreaGuiPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Calculate Integrals'</em><a class="headerlink" href="#ccpn.pipes.IntegrationPipe.CalculateAreaGuiPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.IntegrationPipe.CalculateAreaGuiPipe.preferredPipe">
-<code class="sig-name descname">preferredPipe</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.pipes.IntegrationPipe.CalculateAreaGuiPipe.preferredPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.pipes.IntegrationPipe.CalculateAreaPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.IntegrationPipe.</code><code class="sig-name descname">CalculateAreaPipe</code><span class="sig-paren">(</span><em class="sig-param">application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/IntegrationPipe.html#CalculateAreaPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.IntegrationPipe.CalculateAreaPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe" title="ccpn.framework.lib.Pipe.SpectraPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.framework.lib.Pipe.SpectraPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.IntegrationPipe.CalculateAreaPipe.guiPipe">
-<code class="sig-name descname">guiPipe</code><a class="headerlink" href="#ccpn.pipes.IntegrationPipe.CalculateAreaPipe.guiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#ccpn.pipes.IntegrationPipe.CalculateAreaGuiPipe" title="ccpn.pipes.IntegrationPipe.CalculateAreaGuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">CalculateAreaGuiPipe</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.IntegrationPipe.CalculateAreaPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Calculate Integrals'</em><a class="headerlink" href="#ccpn.pipes.IntegrationPipe.CalculateAreaPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.pipes.IntegrationPipe.CalculateAreaPipe.runPipe">
-<code class="sig-name descname">runPipe</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/IntegrationPipe.html#CalculateAreaPipe.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.IntegrationPipe.CalculateAreaPipe.runPipe" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> – </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.pipes.NoiseThresholdPipe">
-<span id="ccpn-pipes-noisethresholdpipe-module"></span><h2>ccpn.pipes.NoiseThresholdPipe module<a class="headerlink" href="#module-ccpn.pipes.NoiseThresholdPipe" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.pipes.NoiseThresholdPipe.NoiseThresholdGuiPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.NoiseThresholdPipe.</code><code class="sig-name descname">NoiseThresholdGuiPipe</code><span class="sig-paren">(</span><em class="sig-param">name='Noise Threshold'</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">project=None</em>, <em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/NoiseThresholdPipe.html#NoiseThresholdGuiPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.NoiseThresholdPipe.NoiseThresholdGuiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe" title="ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.NoiseThresholdPipe.NoiseThresholdGuiPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Noise Threshold'</em><a class="headerlink" href="#ccpn.pipes.NoiseThresholdPipe.NoiseThresholdGuiPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.NoiseThresholdPipe.NoiseThresholdGuiPipe.preferredPipe">
-<code class="sig-name descname">preferredPipe</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.pipes.NoiseThresholdPipe.NoiseThresholdGuiPipe.preferredPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.pipes.NoiseThresholdPipe.NoiseThresholdPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.NoiseThresholdPipe.</code><code class="sig-name descname">NoiseThresholdPipe</code><span class="sig-paren">(</span><em class="sig-param">application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/NoiseThresholdPipe.html#NoiseThresholdPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.NoiseThresholdPipe.NoiseThresholdPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe" title="ccpn.framework.lib.Pipe.SpectraPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.framework.lib.Pipe.SpectraPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.NoiseThresholdPipe.NoiseThresholdPipe.guiPipe">
-<code class="sig-name descname">guiPipe</code><a class="headerlink" href="#ccpn.pipes.NoiseThresholdPipe.NoiseThresholdPipe.guiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#ccpn.pipes.NoiseThresholdPipe.NoiseThresholdGuiPipe" title="ccpn.pipes.NoiseThresholdPipe.NoiseThresholdGuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoiseThresholdGuiPipe</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.NoiseThresholdPipe.NoiseThresholdPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Noise Threshold'</em><a class="headerlink" href="#ccpn.pipes.NoiseThresholdPipe.NoiseThresholdPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.pipes.NoiseThresholdPipe.NoiseThresholdPipe.runPipe">
-<code class="sig-name descname">runPipe</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/NoiseThresholdPipe.html#NoiseThresholdPipe.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.NoiseThresholdPipe.NoiseThresholdPipe.runPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>For Now this pipe is a special case because it doesn’t return a new inputData for the next pipe, but set
-_kwargs in the pipeline and will be available for the next pipes they might need more then once.
-If this is run twice, the pipeline will use only the last set.
-Spectra is not really needed for this pipe. But is essential for the base class pipe.</p>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.pipes.OutputPipeline">
-<span id="ccpn-pipes-outputpipeline-module"></span><h2>ccpn.pipes.OutputPipeline module<a class="headerlink" href="#module-ccpn.pipes.OutputPipeline" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.pipes.OutputPipeline.OutputPipelineGuiPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.OutputPipeline.</code><code class="sig-name descname">OutputPipelineGuiPipe</code><span class="sig-paren">(</span><em class="sig-param">name='Output Pipeline'</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">project=None</em>, <em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/OutputPipeline.html#OutputPipelineGuiPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.OutputPipeline.OutputPipelineGuiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe" title="ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.OutputPipeline.OutputPipelineGuiPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Output Pipeline'</em><a class="headerlink" href="#ccpn.pipes.OutputPipeline.OutputPipelineGuiPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.OutputPipeline.OutputPipelineGuiPipe.preferredPipe">
-<code class="sig-name descname">preferredPipe</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.pipes.OutputPipeline.OutputPipelineGuiPipe.preferredPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.pipes.OutputPipeline.OutputSpectraPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.OutputPipeline.</code><code class="sig-name descname">OutputSpectraPipe</code><span class="sig-paren">(</span><em class="sig-param">application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/OutputPipeline.html#OutputSpectraPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.OutputPipeline.OutputSpectraPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe" title="ccpn.framework.lib.Pipe.SpectraPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.framework.lib.Pipe.SpectraPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.OutputPipeline.OutputSpectraPipe.guiPipe">
-<code class="sig-name descname">guiPipe</code><a class="headerlink" href="#ccpn.pipes.OutputPipeline.OutputSpectraPipe.guiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#ccpn.pipes.OutputPipeline.OutputPipelineGuiPipe" title="ccpn.pipes.OutputPipeline.OutputPipelineGuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">OutputPipelineGuiPipe</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.OutputPipeline.OutputSpectraPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Output Pipeline'</em><a class="headerlink" href="#ccpn.pipes.OutputPipeline.OutputSpectraPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.pipes.OutputPipeline.OutputSpectraPipe.runPipe">
-<code class="sig-name descname">runPipe</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/OutputPipeline.html#OutputSpectraPipe.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.OutputPipeline.OutputSpectraPipe.runPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.pipes.PeakFilterNdPipe">
-<span id="ccpn-pipes-peakfilterndpipe-module"></span><h2>ccpn.pipes.PeakFilterNdPipe module<a class="headerlink" href="#module-ccpn.pipes.PeakFilterNdPipe" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.pipes.PeakFilterNdPipe.PeakFilterNdGuiPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.PeakFilterNdPipe.</code><code class="sig-name descname">PeakFilterNdGuiPipe</code><span class="sig-paren">(</span><em class="sig-param">name='Peak Filter ND'</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">project=None</em>, <em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/PeakFilterNdPipe.html#PeakFilterNdGuiPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.PeakFilterNdPipe.PeakFilterNdGuiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe" title="ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.PeakFilterNdPipe.PeakFilterNdGuiPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Peak Filter ND'</em><a class="headerlink" href="#ccpn.pipes.PeakFilterNdPipe.PeakFilterNdGuiPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.PeakFilterNdPipe.PeakFilterNdGuiPipe.preferredPipe">
-<code class="sig-name descname">preferredPipe</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.pipes.PeakFilterNdPipe.PeakFilterNdGuiPipe.preferredPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.pipes.PeakFilterNdPipe.PeakFilterNdPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.PeakFilterNdPipe.</code><code class="sig-name descname">PeakFilterNdPipe</code><span class="sig-paren">(</span><em class="sig-param">application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/PeakFilterNdPipe.html#PeakFilterNdPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.PeakFilterNdPipe.PeakFilterNdPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe" title="ccpn.framework.lib.Pipe.SpectraPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.framework.lib.Pipe.SpectraPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.PeakFilterNdPipe.PeakFilterNdPipe.guiPipe">
-<code class="sig-name descname">guiPipe</code><a class="headerlink" href="#ccpn.pipes.PeakFilterNdPipe.PeakFilterNdPipe.guiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#ccpn.pipes.PeakFilterNdPipe.PeakFilterNdGuiPipe" title="ccpn.pipes.PeakFilterNdPipe.PeakFilterNdGuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">PeakFilterNdGuiPipe</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.PeakFilterNdPipe.PeakFilterNdPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Peak Filter ND'</em><a class="headerlink" href="#ccpn.pipes.PeakFilterNdPipe.PeakFilterNdPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.pipes.PeakFilterNdPipe.PeakFilterNdPipe.runPipe">
-<code class="sig-name descname">runPipe</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/PeakFilterNdPipe.html#PeakFilterNdPipe.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.PeakFilterNdPipe.PeakFilterNdPipe.runPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.pipes.PeakPicker1DPipe">
-<span id="ccpn-pipes-peakpicker1dpipe-module"></span><h2>ccpn.pipes.PeakPicker1DPipe module<a class="headerlink" href="#module-ccpn.pipes.PeakPicker1DPipe" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.pipes.PeakPicker1DPipe.PeakPicker1DGuiPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.PeakPicker1DPipe.</code><code class="sig-name descname">PeakPicker1DGuiPipe</code><span class="sig-paren">(</span><em class="sig-param">name='Peak Picker 1D'</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">project=None</em>, <em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/PeakPicker1DPipe.html#PeakPicker1DGuiPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.PeakPicker1DPipe.PeakPicker1DGuiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe" title="ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.PeakPicker1DPipe.PeakPicker1DGuiPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Peak Picker 1D'</em><a class="headerlink" href="#ccpn.pipes.PeakPicker1DPipe.PeakPicker1DGuiPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.PeakPicker1DPipe.PeakPicker1DGuiPipe.preferredPipe">
-<code class="sig-name descname">preferredPipe</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.pipes.PeakPicker1DPipe.PeakPicker1DGuiPipe.preferredPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.pipes.PeakPicker1DPipe.PeakPicker1DPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.PeakPicker1DPipe.</code><code class="sig-name descname">PeakPicker1DPipe</code><span class="sig-paren">(</span><em class="sig-param">application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/PeakPicker1DPipe.html#PeakPicker1DPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.PeakPicker1DPipe.PeakPicker1DPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe" title="ccpn.framework.lib.Pipe.SpectraPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.framework.lib.Pipe.SpectraPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.PeakPicker1DPipe.PeakPicker1DPipe.guiPipe">
-<code class="sig-name descname">guiPipe</code><a class="headerlink" href="#ccpn.pipes.PeakPicker1DPipe.PeakPicker1DPipe.guiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#ccpn.pipes.PeakPicker1DPipe.PeakPicker1DGuiPipe" title="ccpn.pipes.PeakPicker1DPipe.PeakPicker1DGuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">PeakPicker1DGuiPipe</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.PeakPicker1DPipe.PeakPicker1DPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Peak Picker 1D'</em><a class="headerlink" href="#ccpn.pipes.PeakPicker1DPipe.PeakPicker1DPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.pipes.PeakPicker1DPipe.PeakPicker1DPipe.runPipe">
-<code class="sig-name descname">runPipe</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/PeakPicker1DPipe.html#PeakPicker1DPipe.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.PeakPicker1DPipe.PeakPicker1DPipe.runPipe" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> – </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.pipes.PeakPickerNdPipe">
-<span id="ccpn-pipes-peakpickerndpipe-module"></span><h2>ccpn.pipes.PeakPickerNdPipe module<a class="headerlink" href="#module-ccpn.pipes.PeakPickerNdPipe" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.pipes.PeakPickerNdPipe.PeakPickerNdGuiPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.PeakPickerNdPipe.</code><code class="sig-name descname">PeakPickerNdGuiPipe</code><span class="sig-paren">(</span><em class="sig-param">name='Peak Picker ND'</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">project=None</em>, <em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/PeakPickerNdPipe.html#PeakPickerNdGuiPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.PeakPickerNdPipe.PeakPickerNdGuiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe" title="ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.PeakPickerNdPipe.PeakPickerNdGuiPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Peak Picker ND'</em><a class="headerlink" href="#ccpn.pipes.PeakPickerNdPipe.PeakPickerNdGuiPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.PeakPickerNdPipe.PeakPickerNdGuiPipe.preferredPipe">
-<code class="sig-name descname">preferredPipe</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.pipes.PeakPickerNdPipe.PeakPickerNdGuiPipe.preferredPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.pipes.PeakPickerNdPipe.PeakPickerNdPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.PeakPickerNdPipe.</code><code class="sig-name descname">PeakPickerNdPipe</code><span class="sig-paren">(</span><em class="sig-param">application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/PeakPickerNdPipe.html#PeakPickerNdPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.PeakPickerNdPipe.PeakPickerNdPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe" title="ccpn.framework.lib.Pipe.SpectraPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.framework.lib.Pipe.SpectraPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.PeakPickerNdPipe.PeakPickerNdPipe.guiPipe">
-<code class="sig-name descname">guiPipe</code><a class="headerlink" href="#ccpn.pipes.PeakPickerNdPipe.PeakPickerNdPipe.guiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#ccpn.pipes.PeakPickerNdPipe.PeakPickerNdGuiPipe" title="ccpn.pipes.PeakPickerNdPipe.PeakPickerNdGuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">PeakPickerNdGuiPipe</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.PeakPickerNdPipe.PeakPickerNdPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Peak Picker ND'</em><a class="headerlink" href="#ccpn.pipes.PeakPickerNdPipe.PeakPickerNdPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.pipes.PeakPickerNdPipe.PeakPickerNdPipe.runPipe">
-<code class="sig-name descname">runPipe</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/PeakPickerNdPipe.html#PeakPickerNdPipe.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.PeakPickerNdPipe.PeakPickerNdPipe.runPipe" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> – </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.pipes.PhasingPipe">
-<span id="ccpn-pipes-phasingpipe-module"></span><h2>ccpn.pipes.PhasingPipe module<a class="headerlink" href="#module-ccpn.pipes.PhasingPipe" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.pipes.PhasingPipe.Phasing1DPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.PhasingPipe.</code><code class="sig-name descname">Phasing1DPipe</code><span class="sig-paren">(</span><em class="sig-param">application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/PhasingPipe.html#Phasing1DPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.PhasingPipe.Phasing1DPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe" title="ccpn.framework.lib.Pipe.SpectraPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.framework.lib.Pipe.SpectraPipe</span></code></a></p>
-<p>Apply  phasing to all the spectra in the pipeline</p>
-<dl class="attribute">
-<dt id="ccpn.pipes.PhasingPipe.Phasing1DPipe.guiPipe">
-<code class="sig-name descname">guiPipe</code><a class="headerlink" href="#ccpn.pipes.PhasingPipe.Phasing1DPipe.guiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#ccpn.pipes.PhasingPipe.PhasingSpectraGuiPipe" title="ccpn.pipes.PhasingPipe.PhasingSpectraGuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhasingSpectraGuiPipe</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.PhasingPipe.Phasing1DPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Phasing Spectra'</em><a class="headerlink" href="#ccpn.pipes.PhasingPipe.Phasing1DPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.pipes.PhasingPipe.Phasing1DPipe.runPipe">
-<code class="sig-name descname">runPipe</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/PhasingPipe.html#Phasing1DPipe.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.PhasingPipe.Phasing1DPipe.runPipe" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>spectra</strong> – inputData</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>aligned spectra</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.pipes.PhasingPipe.PhasingSpectraGuiPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.PhasingPipe.</code><code class="sig-name descname">PhasingSpectraGuiPipe</code><span class="sig-paren">(</span><em class="sig-param">name='Phasing Spectra'</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">project=None</em>, <em class="sig-param">**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/PhasingPipe.html#PhasingSpectraGuiPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.PhasingPipe.PhasingSpectraGuiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe" title="ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.PhasingPipe.PhasingSpectraGuiPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Phasing Spectra'</em><a class="headerlink" href="#ccpn.pipes.PhasingPipe.PhasingSpectraGuiPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.PhasingPipe.PhasingSpectraGuiPipe.preferredPipe">
-<code class="sig-name descname">preferredPipe</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.pipes.PhasingPipe.PhasingSpectraGuiPipe.preferredPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.pipes.PhasingPipe.autoPhasing">
-<code class="sig-prename descclassname">ccpn.pipes.PhasingPipe.</code><code class="sig-name descname">autoPhasing</code><span class="sig-paren">(</span><em class="sig-param">spectrum</em>, <em class="sig-param">engine='peak_minima'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/PhasingPipe.html#autoPhasing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.PhasingPipe.autoPhasing" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="ccpn.pipes.PhasingPipe.phasing1D">
-<code class="sig-prename descclassname">ccpn.pipes.PhasingPipe.</code><code class="sig-name descname">phasing1D</code><span class="sig-paren">(</span><em class="sig-param">spectrum</em>, <em class="sig-param">ph0</em>, <em class="sig-param">ph1</em>, <em class="sig-param">pivot</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/PhasingPipe.html#phasing1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.PhasingPipe.phasing1D" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>spectrum</strong> – </p></li>
-<li><p><strong>ph0</strong> – degrees</p></li>
-<li><p><strong>ph1</strong> – </p></li>
-<li><p><strong>pivot</strong> – in points</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>intensities</p>
-</dd>
-</dl>
-</dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.pipes.ReferencingSpectra1Dpipe">
-<span id="ccpn-pipes-referencingspectra1dpipe-module"></span><h2>ccpn.pipes.ReferencingSpectra1Dpipe module<a class="headerlink" href="#module-ccpn.pipes.ReferencingSpectra1Dpipe" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.pipes.ReferencingSpectra1Dpipe.ReferencingSpectra">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.ReferencingSpectra1Dpipe.</code><code class="sig-name descname">ReferencingSpectra</code><span class="sig-paren">(</span><em class="sig-param">application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/ReferencingSpectra1Dpipe.html#ReferencingSpectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.ReferencingSpectra1Dpipe.ReferencingSpectra" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe" title="ccpn.framework.lib.Pipe.SpectraPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.framework.lib.Pipe.SpectraPipe</span></code></a></p>
-<p>Add a shift value to all the spectra in the pipeline</p>
-<dl class="attribute">
-<dt id="ccpn.pipes.ReferencingSpectra1Dpipe.ReferencingSpectra.guiPipe">
-<code class="sig-name descname">guiPipe</code><a class="headerlink" href="#ccpn.pipes.ReferencingSpectra1Dpipe.ReferencingSpectra.guiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#ccpn.pipes.ReferencingSpectra1Dpipe.ReferencingSpectraGuiPipe" title="ccpn.pipes.ReferencingSpectra1Dpipe.ReferencingSpectraGuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReferencingSpectraGuiPipe</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.ReferencingSpectra1Dpipe.ReferencingSpectra.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Referencing Spectra'</em><a class="headerlink" href="#ccpn.pipes.ReferencingSpectra1Dpipe.ReferencingSpectra.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.pipes.ReferencingSpectra1Dpipe.ReferencingSpectra.runPipe">
-<code class="sig-name descname">runPipe</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/ReferencingSpectra1Dpipe.html#ReferencingSpectra.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.ReferencingSpectra1Dpipe.ReferencingSpectra.runPipe" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>spectra</strong> – inputData</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>aligned spectra</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.pipes.ReferencingSpectra1Dpipe.ReferencingSpectraGuiPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.ReferencingSpectra1Dpipe.</code><code class="sig-name descname">ReferencingSpectraGuiPipe</code><span class="sig-paren">(</span><em class="sig-param">name='Referencing Spectra'</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">project=None</em>, <em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/ReferencingSpectra1Dpipe.html#ReferencingSpectraGuiPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.ReferencingSpectra1Dpipe.ReferencingSpectraGuiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe" title="ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.ReferencingSpectra1Dpipe.ReferencingSpectraGuiPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'Referencing Spectra'</em><a class="headerlink" href="#ccpn.pipes.ReferencingSpectra1Dpipe.ReferencingSpectraGuiPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.ReferencingSpectra1Dpipe.ReferencingSpectraGuiPipe.preferredPipe">
-<code class="sig-name descname">preferredPipe</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.pipes.ReferencingSpectra1Dpipe.ReferencingSpectraGuiPipe.preferredPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.pipes.ReferencingSpectra1Dpipe.addShiftToSpectra">
-<code class="sig-prename descclassname">ccpn.pipes.ReferencingSpectra1Dpipe.</code><code class="sig-name descname">addShiftToSpectra</code><span class="sig-paren">(</span><em class="sig-param">spectra</em>, <em class="sig-param">shift</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/ReferencingSpectra1Dpipe.html#addShiftToSpectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.ReferencingSpectra1Dpipe.addShiftToSpectra" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.pipes.SimplifiedPeakPicker1DPipe">
-<span id="ccpn-pipes-simplifiedpeakpicker1dpipe-module"></span><h2>ccpn.pipes.SimplifiedPeakPicker1DPipe module<a class="headerlink" href="#module-ccpn.pipes.SimplifiedPeakPicker1DPipe" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.pipes.SimplifiedPeakPicker1DPipe.PeakDetector1DGuiPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.SimplifiedPeakPicker1DPipe.</code><code class="sig-name descname">PeakDetector1DGuiPipe</code><span class="sig-paren">(</span><em class="sig-param">name='STD Peak Detector 1D (experimental)'</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">project=None</em>, <em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/SimplifiedPeakPicker1DPipe.html#PeakDetector1DGuiPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.SimplifiedPeakPicker1DPipe.PeakDetector1DGuiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe" title="ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.ui.gui.widgets.PipelineWidgets.GuiPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.SimplifiedPeakPicker1DPipe.PeakDetector1DGuiPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'STD Peak Detector 1D (experimental)'</em><a class="headerlink" href="#ccpn.pipes.SimplifiedPeakPicker1DPipe.PeakDetector1DGuiPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.SimplifiedPeakPicker1DPipe.PeakDetector1DGuiPipe.preferredPipe">
-<code class="sig-name descname">preferredPipe</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.pipes.SimplifiedPeakPicker1DPipe.PeakDetector1DGuiPipe.preferredPipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.pipes.SimplifiedPeakPicker1DPipe.PeakPicker1DPipe">
-<em class="property">class </em><code class="sig-prename descclassname">ccpn.pipes.SimplifiedPeakPicker1DPipe.</code><code class="sig-name descname">PeakPicker1DPipe</code><span class="sig-paren">(</span><em class="sig-param">application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/SimplifiedPeakPicker1DPipe.html#PeakPicker1DPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.SimplifiedPeakPicker1DPipe.PeakPicker1DPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.framework.lib.html#ccpn.framework.lib.Pipe.SpectraPipe" title="ccpn.framework.lib.Pipe.SpectraPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.framework.lib.Pipe.SpectraPipe</span></code></a></p>
-<dl class="attribute">
-<dt id="ccpn.pipes.SimplifiedPeakPicker1DPipe.PeakPicker1DPipe.guiPipe">
-<code class="sig-name descname">guiPipe</code><a class="headerlink" href="#ccpn.pipes.SimplifiedPeakPicker1DPipe.PeakPicker1DPipe.guiPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#ccpn.pipes.SimplifiedPeakPicker1DPipe.PeakDetector1DGuiPipe" title="ccpn.pipes.SimplifiedPeakPicker1DPipe.PeakDetector1DGuiPipe"><code class="xref py py-class docutils literal notranslate"><span class="pre">PeakDetector1DGuiPipe</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.pipes.SimplifiedPeakPicker1DPipe.PeakPicker1DPipe.pipeName">
-<code class="sig-name descname">pipeName</code><em class="property"> = 'STD Peak Detector 1D (experimental)'</em><a class="headerlink" href="#ccpn.pipes.SimplifiedPeakPicker1DPipe.PeakPicker1DPipe.pipeName" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.pipes.SimplifiedPeakPicker1DPipe.PeakPicker1DPipe.runPipe">
-<code class="sig-name descname">runPipe</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/pipes/SimplifiedPeakPicker1DPipe.html#PeakPicker1DPipe.runPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.pipes.SimplifiedPeakPicker1DPipe.PeakPicker1DPipe.runPipe" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> – </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-</div>
-
-
+</section>
+<section id="ccpn-pipes-apspipe-module">
+<h2>ccpn.pipes.APSPipe module<a class="headerlink" href="#ccpn-pipes-apspipe-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-alignspectra-module">
+<h2>ccpn.pipes.AlignSpectra module<a class="headerlink" href="#ccpn-pipes-alignspectra-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-assignmultiplets-module">
+<h2>ccpn.pipes.AssignMultiplets module<a class="headerlink" href="#ccpn-pipes-assignmultiplets-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-autoassignmentpipe-module">
+<h2>ccpn.pipes.AutoAssignmentPipe module<a class="headerlink" href="#ccpn-pipes-autoassignmentpipe-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-baselinepipe-module">
+<h2>ccpn.pipes.BaselinePipe module<a class="headerlink" href="#ccpn-pipes-baselinepipe-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-dipipe-module">
+<h2>ccpn.pipes.DIPipe module<a class="headerlink" href="#ccpn-pipes-dipipe-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-duplicatespectrapipe-module">
+<h2>ccpn.pipes.DuplicateSpectraPipe module<a class="headerlink" href="#ccpn-pipes-duplicatespectrapipe-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-excluderegionsfromspectrum-module">
+<h2>ccpn.pipes.ExcludeRegionsFromSpectrum module<a class="headerlink" href="#ccpn-pipes-excluderegionsfromspectrum-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-excludesolventregions-module">
+<h2>ccpn.pipes.ExcludeSolventRegions module<a class="headerlink" href="#ccpn-pipes-excludesolventregions-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-fftpipe-module">
+<h2>ccpn.pipes.FFTPipe module<a class="headerlink" href="#ccpn-pipes-fftpipe-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-integrationpipe-module">
+<h2>ccpn.pipes.IntegrationPipe module<a class="headerlink" href="#ccpn-pipes-integrationpipe-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-noisethresholdpipe-module">
+<h2>ccpn.pipes.NoiseThresholdPipe module<a class="headerlink" href="#ccpn-pipes-noisethresholdpipe-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-old-peakpicker1dpipe-module">
+<h2>ccpn.pipes.OLD_PeakPicker1DPipe module<a class="headerlink" href="#ccpn-pipes-old-peakpicker1dpipe-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-outputpipeline-module">
+<h2>ccpn.pipes.OutputPipeline module<a class="headerlink" href="#ccpn-pipes-outputpipeline-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-peakfilterndpipe-module">
+<h2>ccpn.pipes.PeakFilterNdPipe module<a class="headerlink" href="#ccpn-pipes-peakfilterndpipe-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-peakpicker1dpipe-module">
+<h2>ccpn.pipes.PeakPicker1DPipe module<a class="headerlink" href="#ccpn-pipes-peakpicker1dpipe-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-peakpickerndpipe-module">
+<h2>ccpn.pipes.PeakPickerNdPipe module<a class="headerlink" href="#ccpn-pipes-peakpickerndpipe-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-phasingpipe-module">
+<h2>ccpn.pipes.PhasingPipe module<a class="headerlink" href="#ccpn-pipes-phasingpipe-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-referencingspectra1dpipe-module">
+<h2>ccpn.pipes.ReferencingSpectra1Dpipe module<a class="headerlink" href="#ccpn-pipes-referencingspectra1dpipe-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-refitpeaks-module">
+<h2>ccpn.pipes.RefitPeaks module<a class="headerlink" href="#ccpn-pipes-refitpeaks-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-revpipe-module">
+<h2>ccpn.pipes.RevPipe module<a class="headerlink" href="#ccpn-pipes-revpipe-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-scale1d-module">
+<h2>ccpn.pipes.Scale1D module<a class="headerlink" href="#ccpn-pipes-scale1d-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ccpn-pipes-zfpipe-module">
+<h2>ccpn.pipes.ZfPipe module<a class="headerlink" href="#ccpn-pipes-zfpipe-module" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">ccpn.pipes package</a><ul>
 <li><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-ccpn.pipes.AlignSpectra">ccpn.pipes.AlignSpectra module</a></li>
-<li><a class="reference internal" href="#module-ccpn.pipes.AssignMultiplets">ccpn.pipes.AssignMultiplets module</a></li>
-<li><a class="reference internal" href="#module-ccpn.pipes.AutoAssignmentPipe">ccpn.pipes.AutoAssignmentPipe module</a></li>
-<li><a class="reference internal" href="#module-ccpn.pipes.BaselinePipe">ccpn.pipes.BaselinePipe module</a></li>
-<li><a class="reference internal" href="#module-ccpn.pipes.DuplicateSpectraPipe">ccpn.pipes.DuplicateSpectraPipe module</a></li>
-<li><a class="reference internal" href="#module-ccpn.pipes.ExcludeRegionsFromSpectrum">ccpn.pipes.ExcludeRegionsFromSpectrum module</a></li>
-<li><a class="reference internal" href="#module-ccpn.pipes.ExcludeSolventRegions">ccpn.pipes.ExcludeSolventRegions module</a></li>
-<li><a class="reference internal" href="#module-ccpn.pipes.IntegrationPipe">ccpn.pipes.IntegrationPipe module</a></li>
-<li><a class="reference internal" href="#module-ccpn.pipes.NoiseThresholdPipe">ccpn.pipes.NoiseThresholdPipe module</a></li>
-<li><a class="reference internal" href="#module-ccpn.pipes.OutputPipeline">ccpn.pipes.OutputPipeline module</a></li>
-<li><a class="reference internal" href="#module-ccpn.pipes.PeakFilterNdPipe">ccpn.pipes.PeakFilterNdPipe module</a></li>
-<li><a class="reference internal" href="#module-ccpn.pipes.PeakPicker1DPipe">ccpn.pipes.PeakPicker1DPipe module</a></li>
-<li><a class="reference internal" href="#module-ccpn.pipes.PeakPickerNdPipe">ccpn.pipes.PeakPickerNdPipe module</a></li>
-<li><a class="reference internal" href="#module-ccpn.pipes.PhasingPipe">ccpn.pipes.PhasingPipe module</a></li>
-<li><a class="reference internal" href="#module-ccpn.pipes.ReferencingSpectra1Dpipe">ccpn.pipes.ReferencingSpectra1Dpipe module</a></li>
-<li><a class="reference internal" href="#module-ccpn.pipes.SimplifiedPeakPicker1DPipe">ccpn.pipes.SimplifiedPeakPicker1DPipe module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-apspipe-module">ccpn.pipes.APSPipe module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-alignspectra-module">ccpn.pipes.AlignSpectra module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-assignmultiplets-module">ccpn.pipes.AssignMultiplets module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-autoassignmentpipe-module">ccpn.pipes.AutoAssignmentPipe module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-baselinepipe-module">ccpn.pipes.BaselinePipe module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-dipipe-module">ccpn.pipes.DIPipe module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-duplicatespectrapipe-module">ccpn.pipes.DuplicateSpectraPipe module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-excluderegionsfromspectrum-module">ccpn.pipes.ExcludeRegionsFromSpectrum module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-excludesolventregions-module">ccpn.pipes.ExcludeSolventRegions module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-fftpipe-module">ccpn.pipes.FFTPipe module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-integrationpipe-module">ccpn.pipes.IntegrationPipe module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-noisethresholdpipe-module">ccpn.pipes.NoiseThresholdPipe module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-old-peakpicker1dpipe-module">ccpn.pipes.OLD_PeakPicker1DPipe module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-outputpipeline-module">ccpn.pipes.OutputPipeline module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-peakfilterndpipe-module">ccpn.pipes.PeakFilterNdPipe module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-peakpicker1dpipe-module">ccpn.pipes.PeakPicker1DPipe module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-peakpickerndpipe-module">ccpn.pipes.PeakPickerNdPipe module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-phasingpipe-module">ccpn.pipes.PhasingPipe module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-referencingspectra1dpipe-module">ccpn.pipes.ReferencingSpectra1Dpipe module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-refitpeaks-module">ccpn.pipes.RefitPeaks module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-revpipe-module">ccpn.pipes.RevPipe module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-scale1d-module">ccpn.pipes.Scale1D module</a></li>
+<li><a class="reference internal" href="#ccpn-pipes-zfpipe-module">ccpn.pipes.ZfPipe module</a></li>
 </ul>
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="ccpn.framework.update.html"
-                        title="previous chapter">ccpn.framework.update package</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="ccpn.pipes.examples.html"
-                        title="next chapter">ccpn.pipes.examples package</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="ccpn.framework.update.html"
+                          title="previous chapter">ccpn.framework.update package</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="ccpn.pipes.lib.html"
+                          title="next chapter">ccpn.pipes.lib package</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -917,7 +198,7 @@ Spectra is not really needed for this pipe. But is essential for the base class 
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -937,19 +218,20 @@ Spectra is not really needed for this pipe. But is essential for the base class 
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="ccpn.pipes.examples.html" title="ccpn.pipes.examples package"
+          <a href="ccpn.pipes.lib.html" title="ccpn.pipes.lib package"
              >next</a> |</li>
         <li class="right" >
           <a href="ccpn.framework.update.html" title="ccpn.framework.update package"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &#187;</li> 
+          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.pipes package</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

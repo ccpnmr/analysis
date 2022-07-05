@@ -10,6 +10,7 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
    ccpn.core.lib
 
@@ -56,6 +57,14 @@ ccpn.core.ChemicalShiftList module
    :undoc-members:
    :show-inheritance:
 
+ccpn.core.Collection module
+---------------------------
+
+.. automodule:: ccpn.core.Collection
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ccpn.core.Complex module
 ------------------------
 
@@ -72,10 +81,10 @@ ccpn.core.Data module
    :undoc-members:
    :show-inheritance:
 
-ccpn.core.DataSet module
-------------------------
+ccpn.core.DataTable module
+--------------------------
 
-.. automodule:: ccpn.core.DataSet
+.. automodule:: ccpn.core.DataTable
    :members:
    :undoc-members:
    :show-inheritance:
@@ -152,14 +161,6 @@ ccpn.core.Note module
    :undoc-members:
    :show-inheritance:
 
-ccpn.core.PMIListABC module
----------------------------
-
-.. automodule:: ccpn.core.PMIListABC
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 ccpn.core.Peak module
 ---------------------
 
@@ -224,10 +225,10 @@ ccpn.core.RestraintContribution module
    :undoc-members:
    :show-inheritance:
 
-ccpn.core.RestraintList module
-------------------------------
+ccpn.core.RestraintTable module
+-------------------------------
 
-.. automodule:: ccpn.core.RestraintList
+.. automodule:: ccpn.core.RestraintTable
    :members:
    :undoc-members:
    :show-inheritance:
@@ -280,6 +281,14 @@ ccpn.core.SpectrumReference module
    :undoc-members:
    :show-inheritance:
 
+ccpn.core.StructureData module
+------------------------------
+
+.. automodule:: ccpn.core.StructureData
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ccpn.core.StructureEnsemble module
 ----------------------------------
 
@@ -296,3 +305,10 @@ ccpn.core.Substance module
    :undoc-members:
    :show-inheritance:
 
+ccpn.core.ViolationTable module
+-------------------------------
+
+.. automodule:: ccpn.core.ViolationTable
+   :members:
+   :undoc-members:
+   :show-inheritance:

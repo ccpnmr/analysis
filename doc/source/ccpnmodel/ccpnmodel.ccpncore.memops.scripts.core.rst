@@ -72,4 +72,3 @@ ccpnmodel.ccpncore.memops.scripts.core.TypeInterface module
    :members:
    :undoc-members:
    :show-inheritance:
-

@@ -6,6 +6,15 @@ ccpn.AnalysisStructure package
    :undoc-members:
    :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   ccpn.AnalysisStructure.gui
+   ccpn.AnalysisStructure.lib
+
 Submodules
 ----------
 
@@ -16,4 +25,3 @@ ccpn.AnalysisStructure.AnalysisStructure module
    :members:
    :undoc-members:
    :show-inheritance:
-

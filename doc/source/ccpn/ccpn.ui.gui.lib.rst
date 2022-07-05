@@ -10,12 +10,21 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
    ccpn.ui.gui.lib.OpenGL
    ccpn.ui.gui.lib.chemometrics
 
 Submodules
 ----------
+
+ccpn.ui.gui.lib.ChangeStateHandler module
+-----------------------------------------
+
+.. automodule:: ccpn.ui.gui.lib.ChangeStateHandler
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 ccpn.ui.gui.lib.GuiGenerator module
 -----------------------------------
@@ -161,6 +170,14 @@ ccpn.ui.gui.lib.MenuActions module
    :undoc-members:
    :show-inheritance:
 
+ccpn.ui.gui.lib.NoUIModuleBase module
+-------------------------------------
+
+.. automodule:: ccpn.ui.gui.lib.NoUIModuleBase
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ccpn.ui.gui.lib.PeakList module
 -------------------------------
 
@@ -185,18 +202,18 @@ ccpn.ui.gui.lib.SpectrumDisplay module
    :undoc-members:
    :show-inheritance:
 
-ccpn.ui.gui.lib.Strip module
-----------------------------
+ccpn.ui.gui.lib.StripLib module
+-------------------------------
 
-.. automodule:: ccpn.ui.gui.lib.Strip
+.. automodule:: ccpn.ui.gui.lib.StripLib
    :members:
    :undoc-members:
    :show-inheritance:
 
-ccpn.ui.gui.lib.Window module
------------------------------
+ccpn.ui.gui.lib.Validators module
+---------------------------------
 
-.. automodule:: ccpn.ui.gui.lib.Window
+.. automodule:: ccpn.ui.gui.lib.Validators
    :members:
    :undoc-members:
    :show-inheritance:
@@ -216,4 +233,3 @@ ccpn.ui.gui.lib.mouseEvents module
    :members:
    :undoc-members:
    :show-inheritance:
-

@@ -24,4 +24,3 @@ ccpnmodel.ccpncore.memops.license.headers module
    :members:
    :undoc-members:
    :show-inheritance:
-

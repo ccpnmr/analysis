@@ -10,8 +10,9 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
-   ccpnmodel.ccpncore.lib.spectrum.formats
+   ccpnmodel.ccpncore.lib.spectrum.formats_noLongerUsed
 
 Submodules
 ----------
@@ -55,4 +56,3 @@ ccpnmodel.ccpncore.lib.spectrum.Spectrum module
    :members:
    :undoc-members:
    :show-inheritance:
-

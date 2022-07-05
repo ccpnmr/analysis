@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.util.nef.CompareNef &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
     <script src="../../../../_static/jquery.js"></script>
     <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.util.nef.CompareNef</a></li> 
       </ul>
     </div>  
 
@@ -171,8 +172,8 @@
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-01-14 11:49:36 +0000 (Tue, January 14, 2020) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-04-27 14:25:31 +0100 (Mon, April 27, 2020) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.1 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -193,17 +194,8 @@
 
 <div class="viewcode-block" id="import_parents"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.import_parents">[docs]</a><span class="k">def</span> <span class="nf">import_parents</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">__package__</span>
-
-    <span class="kn">import</span> <span class="nn">sys</span>
-    <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
-    <span class="kn">import</span> <span class="nn">importlib</span>
-
-    <span class="c1"># pathlib does all this a lot nicer, but don&#39;t think it&#39;s in python2.7</span>
-    <span class="n">top</span> <span class="o">=</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
-    <span class="n">package</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">level</span><span class="p">):</span>
-        <span class="n">package</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">top</span><span class="p">))</span>
-        <span class="n">top</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">top</span><span class="p">)</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="n">parent</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="n">level</span><span class="p">]</span>
 
     <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">top</span><span class="p">))</span>
     <span class="k">try</span><span class="p">:</span>
@@ -211,12 +203,16 @@
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>  <span class="c1"># already removed</span>
         <span class="k">pass</span>
 
-    <span class="n">__package__</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">package</span><span class="p">))</span>
-    <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">__package__</span><span class="p">)</span></div>
+    <span class="n">__package__</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">top</span><span class="o">.</span><span class="n">parts</span><span class="p">):])</span>
+    <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">__package__</span><span class="p">)</span>  <span class="c1"># won&#39;t be needed after that</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span> <span class="ow">and</span> <span class="n">__package__</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">import_parents</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="kn">import</span> <span class="nn">importlib</span>
+    <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+
+    <span class="n">import_parents</span><span class="p">()</span>
 <span class="c1">#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">GenericStarParser</span><span class="p">,</span> <span class="n">StarIo</span>
@@ -285,7 +281,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">list</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">if</span> <span class="n">cItem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">list</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cItem</span><span class="o">.</span><span class="n">list</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">list</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cItem</span><span class="o">.</span><span class="n">strList</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">=</span> <span class="n">cItem</span><span class="o">.</span><span class="n">inWhich</span></div>
 
 
@@ -364,12 +360,12 @@
     <span class="k">for</span> <span class="n">cCount</span><span class="p">,</span> <span class="n">cc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nefList</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">==</span> <span class="n">whichType</span><span class="p">:</span>
 
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  &#39;</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">list</span><span class="p">[:]))</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">strList</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  &#39;</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">strList</span><span class="p">[:]))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">outStr</span> <span class="o">=</span> <span class="s1">&#39;  &#39;</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">list</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;: contains --&gt; &#39;</span>
+                <span class="n">outStr</span> <span class="o">=</span> <span class="s1">&#39;  &#39;</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">strList</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;: contains --&gt; &#39;</span>
                 <span class="n">lineTab</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">outStr</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">outStr</span> <span class="o">+</span> <span class="n">lineTab</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span></div>
+                <span class="nb">print</span><span class="p">(</span><span class="n">outStr</span> <span class="o">+</span> <span class="n">lineTab</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">strList</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span></div>
 
 
 <span class="c1">#=========================================================================================</span>
@@ -445,7 +441,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inList</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">cItem3</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cItem</span><span class="p">)</span>
-        <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">inList</span><span class="p">))</span>  <span class="c1"># nest the list within the cItem</span>
+        <span class="n">cItem3</span><span class="o">.</span><span class="n">strList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">inList</span><span class="p">))</span>  <span class="c1"># nest the list within the cItem</span>
         <span class="n">nefList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nefItem</span><span class="p">(</span><span class="n">cItem</span><span class="o">=</span><span class="n">cItem3</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">nefList</span></div>
@@ -610,8 +606,8 @@
 
     <span class="c1"># iterate through existing items</span>
     <span class="k">for</span> <span class="n">itm</span> <span class="ow">in</span> <span class="n">nefList</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">zip_longest</span><span class="p">(</span><span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="p">[:]</span> <span class="o">+</span> <span class="p">[</span><span class="n">LOOP</span> <span class="o">+</span> <span class="n">loop1</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
-                                <span class="n">itm</span><span class="o">.</span><span class="n">list</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">zip_longest</span><span class="p">(</span><span class="n">cItem3</span><span class="o">.</span><span class="n">strList</span><span class="p">[:]</span> <span class="o">+</span> <span class="p">[</span><span class="n">LOOP</span> <span class="o">+</span> <span class="n">loop1</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
+                                <span class="n">itm</span><span class="o">.</span><span class="n">strList</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
 
             <span class="c1"># check that the tree of saveFrame names matches</span>
             <span class="k">if</span> <span class="n">a</span> <span class="o">!=</span> <span class="n">b</span><span class="p">:</span>
@@ -619,19 +615,19 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># check that it is the correct frame type (1=inleft only, 2=inRight only, 3=inBoth)</span>
             <span class="k">if</span> <span class="n">itm</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">==</span> <span class="n">inWhich</span><span class="p">:</span>
-                <span class="n">itm</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &lt;Column&gt;: &#39;</span> <span class="o">+</span> <span class="n">compName</span> <span class="o">+</span> <span class="s1">&#39;  &lt;rowIndex&gt;: &#39;</span> \
-                                    <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rowIndex</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;  --&gt;  &#39;</span> \
-                                    <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; != &#39;</span> \
-                                    <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue2</span><span class="p">))</span>
+                <span class="n">itm</span><span class="o">.</span><span class="n">strList</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &lt;Column&gt;: &#39;</span> <span class="o">+</span> <span class="n">compName</span> <span class="o">+</span> <span class="s1">&#39;  &lt;rowIndex&gt;: &#39;</span> \
+                                       <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rowIndex</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;  --&gt;  &#39;</span> \
+                                       <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; != &#39;</span> \
+                                       <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue2</span><span class="p">))</span>
                 <span class="k">break</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># create a new item</span>
-        <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LOOP</span> <span class="o">+</span> <span class="n">loop1</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39; &lt;Column&gt;: &#39;</span> <span class="o">+</span> <span class="n">compName</span> <span class="o">+</span> <span class="s1">&#39;  &lt;rowIndex&gt;: &#39;</span> \
-                            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rowIndex</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;  --&gt;  &#39;</span> \
-                            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; != &#39;</span> \
-                            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue2</span><span class="p">)])</span>
+        <span class="n">cItem3</span><span class="o">.</span><span class="n">strList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LOOP</span> <span class="o">+</span> <span class="n">loop1</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">cItem3</span><span class="o">.</span><span class="n">strList</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39; &lt;Column&gt;: &#39;</span> <span class="o">+</span> <span class="n">compName</span> <span class="o">+</span> <span class="s1">&#39;  &lt;rowIndex&gt;: &#39;</span> \
+                               <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rowIndex</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;  --&gt;  &#39;</span> \
+                               <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; != &#39;</span> \
+                               <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue2</span><span class="p">)])</span>
         <span class="n">cItem3</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">=</span> <span class="n">inWhich</span>
         <span class="n">nefList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nefItem</span><span class="p">(</span><span class="n">cItem</span><span class="o">=</span><span class="n">cItem3</span><span class="p">))</span>
 
@@ -962,8 +958,8 @@
         <span class="n">options</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([])</span>
 
         <span class="c1"># set the two files to compare</span>
-        <span class="n">inFile1</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;nef&#39;</span><span class="p">,</span> <span class="s1">&#39;testdata&#39;</span><span class="p">,</span> <span class="s1">&#39;Commented_Example.nef&#39;</span><span class="p">))</span>
-        <span class="n">inFile2</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;nef&#39;</span><span class="p">,</span> <span class="s1">&#39;testdata&#39;</span><span class="p">,</span> <span class="s1">&#39;Commented_Example_Change.nef&#39;</span><span class="p">))</span>
+        <span class="n">inFile1</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;nef&#39;</span><span class="p">,</span> <span class="s1">&#39;testdata&#39;</span><span class="p">,</span> <span class="s1">&#39;Commented_Example.nef&#39;</span><span class="p">)</span>
+        <span class="n">inFile2</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;nef&#39;</span><span class="p">,</span> <span class="s1">&#39;testdata&#39;</span><span class="p">,</span> <span class="s1">&#39;Commented_Example_Change.nef&#39;</span><span class="p">)</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">TEST COMPARISON&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;   file1 = &#39;</span> <span class="o">+</span> <span class="n">inFile1</span><span class="p">)</span>
@@ -983,9 +979,9 @@
         <span class="n">options</span><span class="o">.</span><span class="n">createDirs</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">options</span><span class="o">.</span><span class="n">overwriteExisting</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="n">inDir1</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;testdata&#39;</span><span class="p">,</span> <span class="s1">&#39;testinfolder1&#39;</span><span class="p">)</span>
-        <span class="n">inDir2</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;testdata&#39;</span><span class="p">,</span> <span class="s1">&#39;testinfolder2&#39;</span><span class="p">)</span>
-        <span class="n">outDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;testdata&#39;</span><span class="p">,</span> <span class="s1">&#39;testoutfolder&#39;</span><span class="p">)</span>
+        <span class="n">inDir1</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;nef&#39;</span><span class="p">,</span> <span class="s1">&#39;testdata&#39;</span><span class="p">,</span> <span class="s1">&#39;testinfolder1&#39;</span><span class="p">)</span>
+        <span class="n">inDir2</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;nef&#39;</span><span class="p">,</span> <span class="s1">&#39;testdata&#39;</span><span class="p">,</span> <span class="s1">&#39;testinfolder2&#39;</span><span class="p">)</span>
+        <span class="n">outDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;nef&#39;</span><span class="p">,</span> <span class="s1">&#39;testdata&#39;</span><span class="p">,</span> <span class="s1">&#39;testoutfolder&#39;</span><span class="p">)</span>
 
         <span class="n">batchCompareNefFiles</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">inDir2</span><span class="p">,</span> <span class="n">outDir</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span></div></div>
 
@@ -1077,6 +1073,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Incorrect arguments, use compareNef -h&#39;</span><span class="p">)</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -1086,7 +1083,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -1106,12 +1103,13 @@
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.util.nef.CompareNef</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

@@ -10,5 +10,6 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
    ccpn.AnalysisMetabolomics.ui.gui

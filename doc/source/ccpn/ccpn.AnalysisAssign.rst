@@ -10,6 +10,7 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
    ccpn.AnalysisAssign.modules
 
@@ -23,12 +24,3 @@ ccpn.AnalysisAssign.AnalysisAssign module
    :members:
    :undoc-members:
    :show-inheritance:
-
-ccpn.AnalysisAssign.GLTest module
----------------------------------
-
-.. automodule:: ccpn.AnalysisAssign.GLTest
-   :members:
-   :undoc-members:
-   :show-inheritance:
-

@@ -88,4 +88,3 @@ ccpnmodel.ccpncore.memops.baseDataTypes.String module
    :members:
    :undoc-members:
    :show-inheritance:
-

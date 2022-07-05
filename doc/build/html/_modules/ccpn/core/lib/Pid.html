@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.core.lib.Pid &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
     <script src="../../../../_static/jquery.js"></script>
     <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.lib.Pid</a></li> 
       </ul>
     </div>  
 
@@ -44,8 +45,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
@@ -53,9 +55,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:32 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Geerten Vuister $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2021-12-23 11:27:16 +0000 (Thu, December 23, 2021) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.4 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -66,11 +68,6 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
-
-<span class="c1"># try:</span>
-<span class="c1">#   from cing import __version__</span>
-<span class="c1"># except ImportError:</span>
-<span class="c1">#   __version__ = &#39;???&#39;</span>
 
 <span class="c1"># set separators</span>
 <span class="n">PREFIXSEP</span> <span class="o">=</span> <span class="s1">&#39;:&#39;</span>
@@ -250,10 +247,10 @@
 <span class="sd">    -&gt; False    # all pid elements are strings</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># name mapping dictionary</span>
-    <span class="n">nameMap</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-            <span class="n">MO</span><span class="o">=</span><span class="s1">&#39;Molecule&#39;</span>
-    <span class="p">)</span>
+    <span class="c1"># # name mapping dictionary</span>
+    <span class="c1"># nameMap = dict(</span>
+    <span class="c1">#         MO=&#39;Molecule&#39;</span>
+    <span class="c1"># )</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;First argument (&#39;string&#39; must be a valid pid string with at least one, non-initial PREFIXSEP</span>
@@ -287,12 +284,11 @@
     <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">PREFIXSEP</span> <span class="ow">in</span> <span class="n">text</span> <span class="ow">and</span> <span class="n">text</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">PREFIXSEP</span></div>
 
-    <span class="c1"># NBNB TODO function name &#39;str&#39; confuses Sphinx documentation and is bad for, Change it?</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">asString</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convenience: return as string rather than object;</span>
-<span class="sd">        allows to do things as obj.asPid.str rather then str(obj.asPid)</span>
+<span class="sd">        allows to do things as obj.pid.asString() rather then str(obj.pid)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
@@ -307,17 +303,26 @@
 <div class="viewcode-block" id="Pid.new"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.new">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">new</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Pid&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return Pid object from arguments</span>
+<span class="sd">        Return Pid object from arguments; args[0] can be a CoreClass object (e.g. Spectrum, Peak, etc)</span>
 <span class="sd">        Apply str() on all arguments</span>
 <span class="sd">        Have to use this as intermediate as str baseclass of Pid only accepts one argument</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># use str operator on all arguments</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Pid.new: Undefined arguments&#39;</span><span class="p">)</span>
+
         <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Pid.new: need at least a type and id argument (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">args</span><span class="p">)</span>
+
+        <span class="kn">from</span> <span class="nn">ccpn.core</span> <span class="kn">import</span> <span class="n">_coreClassMap</span>
+        <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_coreClassMap</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Pid.new: invalid Pid type (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
         <span class="c1"># could implement mapping here</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">Pid</span><span class="o">.</span><span class="n">nameMap</span><span class="p">):</span>
-            <span class="c1">#args = list(args) # don&#39;t know why I have to use the list operator</span>
-            <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Pid</span><span class="o">.</span><span class="n">nameMap</span><span class="p">[</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-        <span class="c1">#end if</span>
+        <span class="c1"># if (len(args) &gt; 0) and (args[0] in Pid.nameMap):</span>
+        <span class="c1">#     #args = list(args) # don&#39;t know why I have to use the list operator</span>
+        <span class="c1">#     args[0] = Pid.nameMap[args[0]]</span>
+        <span class="c1"># #end if</span>
         <span class="k">return</span> <span class="n">Pid</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">_join</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">))</span></div>
 
     <span class="nd">@staticmethod</span>
@@ -382,9 +387,15 @@
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="s1">&#39;className&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">klass</span><span class="o">.</span><span class="n">className</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">return</span> <span class="kc">False</span></div></div>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="Pid.toClipboard"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.toClipboard">[docs]</a>    <span class="k">def</span> <span class="nf">toClipboard</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Copy a single quoted Pid to clipboard. &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">copyToClipboard</span>
+        <span class="n">copyToClipboard</span><span class="p">([</span><span class="bp">self</span><span class="p">])</span></div></div>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -394,7 +405,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -414,12 +425,13 @@
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.core.lib.Pid</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

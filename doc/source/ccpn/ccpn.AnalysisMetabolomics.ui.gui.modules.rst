@@ -24,4 +24,3 @@ ccpn.AnalysisMetabolomics.ui.gui.modules.PcaModule module
    :members:
    :undoc-members:
    :show-inheritance:
-

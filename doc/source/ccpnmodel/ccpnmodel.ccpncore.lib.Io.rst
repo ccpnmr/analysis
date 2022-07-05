@@ -48,4 +48,3 @@ ccpnmodel.ccpncore.lib.Io.PyMMLibPDB module
    :members:
    :undoc-members:
    :show-inheritance:
-

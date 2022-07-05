@@ -1,18 +1,19 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>ccpnmodel.ccpncore.lib.molecule package &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -38,7 +39,8 @@
           <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="ccpnmodel.html" >ccpnmodel package</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="ccpnmodel.ccpncore.html" >ccpnmodel.ccpncore package</a> &#187;</li>
-          <li class="nav-item nav-item-4"><a href="ccpnmodel.ccpncore.lib.html" accesskey="U">ccpnmodel.ccpncore.lib package</a> &#187;</li> 
+          <li class="nav-item nav-item-4"><a href="ccpnmodel.ccpncore.lib.html" accesskey="U">ccpnmodel.ccpncore.lib package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpnmodel.ccpncore.lib.molecule package</a></li> 
       </ul>
     </div>  
 
@@ -47,93 +49,95 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-ccpnmodel.ccpncore.lib.molecule">
+  <section id="module-ccpnmodel.ccpncore.lib.molecule">
 <span id="ccpnmodel-ccpncore-lib-molecule-package"></span><h1>ccpnmodel.ccpncore.lib.molecule package<a class="headerlink" href="#module-ccpnmodel.ccpncore.lib.molecule" title="Permalink to this headline">¶</a></h1>
 <p>Module Documentation here</p>
-<div class="section" id="submodules">
+<section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-ccpnmodel.ccpncore.lib.molecule.Labeling">
+</section>
+<section id="module-ccpnmodel.ccpncore.lib.molecule.Labeling">
 <span id="ccpnmodel-ccpncore-lib-molecule-labeling-module"></span><h2>ccpnmodel.ccpncore.lib.molecule.Labeling module<a class="headerlink" href="#module-ccpnmodel.ccpncore.lib.molecule.Labeling" title="Permalink to this headline">¶</a></h2>
 <p>Library functions for molecule labeling</p>
-<dl class="function">
-<dt id="ccpnmodel.ccpncore.lib.molecule.Labeling.chemAtomLabelFractions">
-<code class="sig-prename descclassname">ccpnmodel.ccpncore.lib.molecule.Labeling.</code><code class="sig-name descname">chemAtomLabelFractions</code><span class="sig-paren">(</span><em class="sig-param">project</em>, <em class="sig-param">labeling: str</em>, <em class="sig-param">ccpCode: str</em>, <em class="sig-param">atomName: str</em><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/molecule/Labeling.html#chemAtomLabelFractions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.molecule.Labeling.chemAtomLabelFractions" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpnmodel.ccpncore.lib.molecule.Labeling.chemAtomLabelFractions">
+<span class="sig-prename descclassname"><span class="pre">ccpnmodel.ccpncore.lib.molecule.Labeling.</span></span><span class="sig-name descname"><span class="pre">chemAtomLabelFractions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labeling</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ccpCode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomName</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/molecule/Labeling.html#chemAtomLabelFractions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.molecule.Labeling.chemAtomLabelFractions" title="Permalink to this definition">¶</a></dt>
 <dd><p>get isotopeCode:percentage mapping for atom in ChemComp with given labeling</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="ccpnmodel.ccpncore.lib.molecule.Labeling.chemAtomPairLabelFractions">
-<code class="sig-prename descclassname">ccpnmodel.ccpncore.lib.molecule.Labeling.</code><code class="sig-name descname">chemAtomPairLabelFractions</code><span class="sig-paren">(</span><em class="sig-param">project</em>, <em class="sig-param">labeling: str</em>, <em class="sig-param">ccpCode: str</em>, <em class="sig-param">atomNamePair: Sequence</em><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/molecule/Labeling.html#chemAtomPairLabelFractions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.molecule.Labeling.chemAtomPairLabelFractions" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpnmodel.ccpncore.lib.molecule.Labeling.chemAtomPairLabelFractions">
+<span class="sig-prename descclassname"><span class="pre">ccpnmodel.ccpncore.lib.molecule.Labeling.</span></span><span class="sig-name descname"><span class="pre">chemAtomPairLabelFractions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labeling</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ccpCode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomNamePair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/molecule/Labeling.html#chemAtomPairLabelFractions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.molecule.Labeling.chemAtomPairLabelFractions" title="Permalink to this definition">¶</a></dt>
 <dd><p>get isotopeCode:percentage mapping for atom pair in ChemComp with given labeling
 Assumes that atoms are in the same residue</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="ccpnmodel.ccpncore.lib.molecule.Labeling.molAtomLabelFractions">
-<code class="sig-prename descclassname">ccpnmodel.ccpncore.lib.molecule.Labeling.</code><code class="sig-name descname">molAtomLabelFractions</code><span class="sig-paren">(</span><em class="sig-param">labeling: str</em>, <em class="sig-param">molResidue</em>, <em class="sig-param">atomName: str</em><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/molecule/Labeling.html#molAtomLabelFractions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.molecule.Labeling.molAtomLabelFractions" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpnmodel.ccpncore.lib.molecule.Labeling.molAtomLabelFractions">
+<span class="sig-prename descclassname"><span class="pre">ccpnmodel.ccpncore.lib.molecule.Labeling.</span></span><span class="sig-name descname"><span class="pre">molAtomLabelFractions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labeling</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molResidue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomName</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/molecule/Labeling.html#molAtomLabelFractions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.molecule.Labeling.molAtomLabelFractions" title="Permalink to this definition">¶</a></dt>
 <dd><p>get isotopeCode:percentage mapping for atom in molResidue, with given labeling
 Will use molecule specific labeling if one exists, otherwise general labeling scheme.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="ccpnmodel.ccpncore.lib.molecule.Labeling.molAtomLabelPairFractions">
-<code class="sig-prename descclassname">ccpnmodel.ccpncore.lib.molecule.Labeling.</code><code class="sig-name descname">molAtomLabelPairFractions</code><span class="sig-paren">(</span><em class="sig-param">labeling: str</em>, <em class="sig-param">molResiduePair: Sequence</em>, <em class="sig-param">atomNamePair: Sequence</em><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/molecule/Labeling.html#molAtomLabelPairFractions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.molecule.Labeling.molAtomLabelPairFractions" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpnmodel.ccpncore.lib.molecule.Labeling.molAtomLabelPairFractions">
+<span class="sig-prename descclassname"><span class="pre">ccpnmodel.ccpncore.lib.molecule.Labeling.</span></span><span class="sig-name descname"><span class="pre">molAtomLabelPairFractions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labeling</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molResiduePair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomNamePair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/molecule/Labeling.html#molAtomLabelPairFractions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.molecule.Labeling.molAtomLabelPairFractions" title="Permalink to this definition">¶</a></dt>
 <dd><p>get isotopeCode:percentage mapping for atom (molResidue, atomName) pair with given labeling
 Will use molecule specific labeling if one exists, otherwise general labeling scheme.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="ccpnmodel.ccpncore.lib.molecule.Labeling.sampleChainLabeling">
-<code class="sig-prename descclassname">ccpnmodel.ccpncore.lib.molecule.Labeling.</code><code class="sig-name descname">sampleChainLabeling</code><span class="sig-paren">(</span><em class="sig-param">sample</em>, <em class="sig-param">chainCode: str</em><span class="sig-paren">)</span> &#x2192; str<a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/molecule/Labeling.html#sampleChainLabeling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.molecule.Labeling.sampleChainLabeling" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpnmodel.ccpncore.lib.molecule.Labeling.sampleChainLabeling">
+<span class="sig-prename descclassname"><span class="pre">ccpnmodel.ccpncore.lib.molecule.Labeling.</span></span><span class="sig-name descname"><span class="pre">sampleChainLabeling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chainCode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/molecule/Labeling.html#sampleChainLabeling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.molecule.Labeling.sampleChainLabeling" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get labeling string for chain chainCode in sample
 If chainCode does not match a SampleComponent, look for unambiguous global labeling:
 Heuristics: If there is only one SampleComponent, use that labeling
 If all SampleComponents with explicit chainCodes have the same labeling, use that labeling</p>
 </dd></dl>
 
-</div>
-<div class="section" id="module-ccpnmodel.ccpncore.lib.molecule.MoleculeModify">
+</section>
+<section id="module-ccpnmodel.ccpncore.lib.molecule.MoleculeModify">
 <span id="ccpnmodel-ccpncore-lib-molecule-moleculemodify-module"></span><h2>ccpnmodel.ccpncore.lib.molecule.MoleculeModify module<a class="headerlink" href="#module-ccpnmodel.ccpncore.lib.molecule.MoleculeModify" title="Permalink to this headline">¶</a></h2>
 <p>API (data storage) level functionality for creating and modifying molecules</p>
-<dl class="function">
-<dt id="ccpnmodel.ccpncore.lib.molecule.MoleculeModify.createMolecule">
-<code class="sig-prename descclassname">ccpnmodel.ccpncore.lib.molecule.MoleculeModify.</code><code class="sig-name descname">createMolecule</code><span class="sig-paren">(</span><em class="sig-param">project</em>, <em class="sig-param">sequence: (list</em>, <em class="sig-param">str)</em>, <em class="sig-param">molType: str = 'protein'</em>, <em class="sig-param">name: str = 'Molecule'</em>, <em class="sig-param">startNumber: int = 1</em>, <em class="sig-param">isCyclic=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/molecule/MoleculeModify.html#createMolecule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.molecule.MoleculeModify.createMolecule" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpnmodel.ccpncore.lib.molecule.MoleculeModify.createMolecule">
+<span class="sig-prename descclassname"><span class="pre">ccpnmodel.ccpncore.lib.molecule.MoleculeModify.</span></span><span class="sig-name descname"><span class="pre">createMolecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molType</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'protein'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Molecule'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startNumber</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isCyclic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/molecule/MoleculeModify.html#createMolecule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.molecule.MoleculeModify.createMolecule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Descrn: Makes Molecule for a given sequence</p>
 <p>Inputs: Project,List of Words (ChemComp.CcpCode), Word (ChemComp.molType), 
 String ( Ccp.Molecule.Molecule.name) Int (first MolResidue.seqCode)</p>
 <p>Output: Molecule</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="ccpnmodel.ccpncore.lib.molecule.MoleculeModify.createMoleculeFromNef">
-<code class="sig-prename descclassname">ccpnmodel.ccpncore.lib.molecule.MoleculeModify.</code><code class="sig-name descname">createMoleculeFromNef</code><span class="sig-paren">(</span><em class="sig-param">project, name: str, sequence: Sequence[dict], defaultType: str = 'UNK'</em><span class="sig-paren">)</span> &#x2192; Molecule<a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/molecule/MoleculeModify.html#createMoleculeFromNef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.molecule.MoleculeModify.createMoleculeFromNef" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpnmodel.ccpncore.lib.molecule.MoleculeModify.createMoleculeFromNef">
+<span class="sig-prename descclassname"><span class="pre">ccpnmodel.ccpncore.lib.molecule.MoleculeModify.</span></span><span class="sig-name descname"><span class="pre">createMoleculeFromNef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaultType</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'UNK'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Molecule</span></span></span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/molecule/MoleculeModify.html#createMoleculeFromNef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.molecule.MoleculeModify.createMoleculeFromNef" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a Molecule from a sequence of NEF row dictionaries (or equivalent)</p>
 </dd></dl>
 
-</div>
-<div class="section" id="module-ccpnmodel.ccpncore.lib.molecule.MoleculeQuery">
+</section>
+<section id="module-ccpnmodel.ccpncore.lib.molecule.MoleculeQuery">
 <span id="ccpnmodel-ccpncore-lib-molecule-moleculequery-module"></span><h2>ccpnmodel.ccpncore.lib.molecule.MoleculeQuery module<a class="headerlink" href="#module-ccpnmodel.ccpncore.lib.molecule.MoleculeQuery" title="Permalink to this headline">¶</a></h2>
 <p>API (data storage) level functionality for querying molecules</p>
-<dl class="function">
-<dt id="ccpnmodel.ccpncore.lib.molecule.MoleculeQuery.fetchStdResNameMap">
-<code class="sig-prename descclassname">ccpnmodel.ccpncore.lib.molecule.MoleculeQuery.</code><code class="sig-name descname">fetchStdResNameMap</code><span class="sig-paren">(</span><em class="sig-param">project: MemopsRoot</em>, <em class="sig-param">reset: bool = False</em>, <em class="sig-param">debug: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/molecule/MoleculeQuery.html#fetchStdResNameMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.molecule.MoleculeQuery.fetchStdResNameMap" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ccpnmodel.ccpncore.lib.molecule.MoleculeQuery.fetchStdResNameMap">
+<span class="sig-prename descclassname"><span class="pre">ccpnmodel.ccpncore.lib.molecule.MoleculeQuery.</span></span><span class="sig-name descname"><span class="pre">fetchStdResNameMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MemopsRoot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/molecule/MoleculeQuery.html#fetchStdResNameMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.molecule.MoleculeQuery.fetchStdResNameMap" title="Permalink to this definition">¶</a></dt>
 <dd><p>fetch dict of {residueName:(molType,ccpCode)},
 using cached value if present and not reset.</p>
 <p>NBNB TBD Add naming variants from ChemComp naming systems</p>
 </dd></dl>
 
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">ccpnmodel.ccpncore.lib.molecule package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-ccpnmodel.ccpncore.lib.molecule.Labeling">ccpnmodel.ccpncore.lib.molecule.Labeling module</a></li>
@@ -143,12 +147,17 @@ using cached value if present and not reset.</p>
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="ccpnmodel.ccpncore.lib.chemComp.html"
-                        title="previous chapter">ccpnmodel.ccpncore.lib.chemComp package</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="ccpnmodel.ccpncore.lib.spectrum.html"
-                        title="next chapter">ccpnmodel.ccpncore.lib.spectrum package</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="ccpnmodel.ccpncore.lib.chemComp.html"
+                          title="previous chapter">ccpnmodel.ccpncore.lib.chemComp package</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="ccpnmodel.ccpncore.lib.spectrum.html"
+                          title="next chapter">ccpnmodel.ccpncore.lib.spectrum package</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -160,7 +169,7 @@ using cached value if present and not reset.</p>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -189,12 +198,13 @@ using cached value if present and not reset.</p>
           <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="ccpnmodel.html" >ccpnmodel package</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="ccpnmodel.ccpncore.html" >ccpnmodel.ccpncore package</a> &#187;</li>
-          <li class="nav-item nav-item-4"><a href="ccpnmodel.ccpncore.lib.html" >ccpnmodel.ccpncore.lib package</a> &#187;</li> 
+          <li class="nav-item nav-item-4"><a href="ccpnmodel.ccpncore.lib.html" >ccpnmodel.ccpncore.lib package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpnmodel.ccpncore.lib.molecule package</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

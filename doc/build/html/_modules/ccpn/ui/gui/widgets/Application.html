@@ -1,18 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ccpn.ui.gui.widgets.Application &#8212; Python  documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/classic.css" />
     
-    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
-    <script src="../../../../../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -27,7 +27,8 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.Application</a></li> 
       </ul>
     </div>  
 
@@ -43,18 +44,19 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Timothy J Ragan, Brian O Smith, Gary S Thompson &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See https://ccpn.ac.uk/software/licensing/&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis&quot;</span><span class="p">,</span>
                  <span class="s2">&quot;J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:51 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.1.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -65,10 +67,17 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="kn">import</span> <span class="n">QTimer</span>
+<span class="kn">import</span> <span class="nn">os</span>
 
+<span class="c1">##QT_MAC_WANTS_LAYER: Patch for MacOs &gt;= 11. Without this flag, Testing widgets/windows from PyQt5 don&#39;t show at all.</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;QT_MAC_WANTS_LAYER&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span>
 
 <div class="viewcode-block" id="Application"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Application.Application">[docs]</a><span class="k">class</span> <span class="nc">Application</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">):</span>
+
+    <span class="n">progressAboutToChangeSignal</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">progressChangedSignal</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">organizationName</span><span class="o">=</span><span class="s1">&#39;CCPN&#39;</span><span class="p">,</span> <span class="n">organizationDomain</span><span class="o">=</span><span class="s1">&#39;ccpn.ac.uk&#39;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([</span><span class="n">applicationName</span><span class="p">,</span> <span class="p">])</span>
@@ -78,13 +87,113 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setOrganizationDomain</span><span class="p">(</span><span class="n">organizationDomain</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Application.start"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Application.Application.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Application.runFunctionOnThread"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Application.Application.runFunctionOnThread">[docs]</a>    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">runFunctionOnThread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+        <span class="n">func</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Application.runFunctionOnThreadAtIdle"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Application.Application.runFunctionOnThreadAtIdle">[docs]</a>    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">runFunctionOnThreadAtIdle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+        <span class="n">timer</span> <span class="o">=</span> <span class="n">QTimer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">timer</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="n">timer</span><span class="o">.</span><span class="n">setSingleShot</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">timer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="TestApplication"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Application.TestApplication">[docs]</a><span class="k">class</span> <span class="nc">TestApplication</span><span class="p">(</span><span class="n">Application</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">Application</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;testApplication&#39;</span><span class="p">,</span> <span class="s1">&#39;1.0&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="newTestApplication"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Application.newTestApplication">[docs]</a><span class="k">def</span> <span class="nf">newTestApplication</span><span class="p">(</span><span class="n">projectPath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">useTestProjects</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                       <span class="n">nologging</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="s1">&#39;NoUi&#39;</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                       <span class="n">noApplication</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a full application for testing.</span>
+<span class="sd">    This will contain an empty project and preferences.</span>
+
+<span class="sd">    If interface is specified as &#39;NoUi&#39; no mainWindow will be created,</span>
+<span class="sd">    but a full application and project will be created.</span>
+
+<span class="sd">    if interface is specified as &#39;Gui&#39; a mainWindow will be created,</span>
+<span class="sd">    but the event execution loop will not be started.</span>
+
+<span class="sd">    Popups can be instantiated with exec_ which will automatically show the mainWindow.</span>
+
+<span class="sd">    The mainWindow can be instantiated manually with app.start(); however, any code after this cannot be guaranteed to</span>
+<span class="sd">    run after closing mainWindow.</span>
+
+<span class="sd">    Set noApplication=True for a basic test that only creates a QApplication; a Ccpn application will not be created.</span>
+
+<span class="sd">    :param projectPath: str or Path object, path of project to load on startup</span>
+<span class="sd">    :param useTestProjects: bool, True uses the Ccpn testing folder as the root for the project to load</span>
+<span class="sd">    :param nologging: bool, enable or disable lopgging</span>
+<span class="sd">    :param interface: &#39;NoUi&#39; or &#39;Gui&#39;, determines whether mainWindow is created</span>
+<span class="sd">    :param debug: bool, enable/disable debugging</span>
+<span class="sd">    :param noApplication: bool, enable/disable creation of CCpn application</span>
+<span class="sd">    :return: instance of new application</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_makeApp</span><span class="p">():</span>
+        <span class="c1"># create a new application</span>
+        <span class="n">_app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
+        <span class="n">_app</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="s1">&#39;light&#39;</span>
+
+        <span class="k">return</span> <span class="n">_app</span>
+
+    <span class="c1"># don&#39;t create anything else - for the fastest testing</span>
+    <span class="k">if</span> <span class="n">noApplication</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_makeApp</span><span class="p">()</span>
+
+    <span class="kn">from</span> <span class="nn">ccpn.framework</span> <span class="kn">import</span> <span class="n">Framework</span>
+    <span class="kn">from</span> <span class="nn">ccpn.util.Path</span> <span class="kn">import</span> <span class="n">Path</span><span class="p">,</span> <span class="n">aPath</span>
+    <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.testing.CoreTesting</span> <span class="kn">import</span> <span class="n">TEST_PROJECTS_PATH</span>
+
+    <span class="n">app</span> <span class="o">=</span> <span class="n">_makeApp</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">useTestProjects</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;useProjects must be a bool&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nologging</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;nologging must be a bool&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">interface</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;NoUi&#39;</span><span class="p">,</span> <span class="s1">&#39;Gui&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;interface must be NoUi|Gui&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">debug</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;debug must be a bool&#39;</span><span class="p">)</span>
+
+    <span class="c1"># check if a projectPath has been specified</span>
+    <span class="k">if</span> <span class="n">projectPath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">projectPath</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;projectPath must be str or Path object&#39;</span><span class="p">)</span>
+        <span class="n">projectPath</span> <span class="o">=</span> <span class="n">aPath</span><span class="p">(</span><span class="n">projectPath</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">useTestProjects</span><span class="p">:</span>
+            <span class="c1"># if useTestProjects is True then prefix with the test project folder</span>
+            <span class="n">projectPath</span> <span class="o">=</span> <span class="n">TEST_PROJECTS_PATH</span> <span class="o">/</span> <span class="n">projectPath</span>
+
+    <span class="k">if</span> <span class="n">interface</span> <span class="o">==</span> <span class="s1">&#39;Gui&#39;</span><span class="p">:</span>
+        <span class="c1"># store temporary variable so that the qtApp event execution loop can be skipped</span>
+        <span class="c1"># allows flow to continue after creation of mainWindow</span>
+        <span class="kn">import</span> <span class="nn">builtins</span>
+        <span class="n">builtins</span><span class="o">.</span><span class="n">_skipExecuteLoop</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># build new ccpn application/project</span>
+    <span class="n">_framework</span> <span class="o">=</span> <span class="n">Framework</span><span class="o">.</span><span class="n">createFramework</span><span class="p">(</span><span class="n">projectPath</span><span class="o">=</span><span class="n">projectPath</span><span class="p">,</span> <span class="n">nologging</span><span class="o">=</span><span class="n">nologging</span><span class="p">,</span> <span class="n">_skipUpdates</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                           <span class="n">interface</span><span class="o">=</span><span class="n">interface</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
+                                           <span class="n">lightColourScheme</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">darkColourScheme</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">_project</span> <span class="o">=</span> <span class="n">_framework</span><span class="o">.</span><span class="n">project</span>
+    <span class="k">if</span> <span class="n">_project</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No project found for project path </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">projectPath</span><span class="p">)</span>
+
+    <span class="c1"># initialise the undo stack</span>
+    <span class="n">_project</span><span class="o">.</span><span class="n">_resetUndo</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="n">_framework</span><span class="p">)</span>
+    <span class="n">_project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">app</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">_project</span>
+
+    <span class="c1"># return the new project</span>
+    <span class="k">return</span> <span class="n">app</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
@@ -98,6 +207,7 @@
     <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -107,7 +217,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -127,12 +237,13 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ccpn.ui.gui.widgets.Application</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>

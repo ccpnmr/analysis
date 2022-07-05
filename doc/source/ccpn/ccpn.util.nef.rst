@@ -81,3 +81,10 @@ ccpn.util.nef.Validator module
    :undoc-members:
    :show-inheritance:
 
+ccpn.util.nef.nef module
+------------------------
+
+.. automodule:: ccpn.util.nef.nef
+   :members:
+   :undoc-members:
+   :show-inheritance:

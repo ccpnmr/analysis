@@ -4,9 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-11 17:32:53 +0000 (Tue, February 11, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2022-07-05 14:23:16 +0100 (Tue, July 05, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,6 +35,7 @@ import re
 import shutil
 from sphinx.ext import apidoc
 from ccpn.framework import Version
+from ccpn.framework.credits import authors
 from ccpn.util import Path as corePath
 
 
@@ -106,7 +108,7 @@ def refreshSphinxDocumentation():
     # Put module documentation before submodule documentation:
     precommand.append('--module-first')
     # Project name header:
-    precommand.extend(('-A', Version.authors))
+    precommand.extend(('-A', authors))
     # Project name header:
     precommand.extend(('-V', Version.applicationVersion))
     # Project name header:

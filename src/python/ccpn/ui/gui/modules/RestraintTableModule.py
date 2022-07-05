@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-08 16:17:41 +0000 (Tue, March 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -251,7 +251,7 @@ class GuiRestraintTable(GuiTable):
         CallBack for Drop events
         """
         pids = data.get('pids', [])
-        self._handleDroppedItems(pids, GuiRestraintTable, self.rtWidget)
+        self._handleDroppedItems(pids, RestraintTable, self.rtWidget)
 
     def addWidgetToTop(self, widget, col=2, colSpan=1):
         """

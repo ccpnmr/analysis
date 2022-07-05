@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-20 19:34:52 +0100 (Mon, June 20, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,7 @@ import traceback
 from contextlib import contextmanager, nullcontext
 from collections.abc import Iterable
 from functools import partial
+from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtGui import QPainter
 from ccpn.core.lib import Util as coreUtil
 from inspect import signature, Parameter
@@ -41,6 +42,7 @@ import time
 import signal
 import sys
 import pandas as pd
+
 
 @contextmanager
 def echoCommand(obj, funcName, *params, values=None, defaults=None,
@@ -221,9 +223,11 @@ def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAs
 
         if application.hasGui and popupAsWarning:
             from ccpn.ui.gui.widgets import MessageDialog  # Local import: in case of no-gui, we never get here
+
             MessageDialog.showWarning('Warning', errorStringTemplate % str(es))
         # if application._isInDebugMode:
         #     raise es
+
 
 @contextmanager
 def rebuildSidebar(application):
@@ -462,27 +466,27 @@ def inactivity(application=None, project=None):
         project._apiNotificationBlanking -= 1
 
 
-@contextmanager
-def notificationUnblanking():
-    """
-    Unblock all notifiers, disable at the end of the function block.
-    Used inside notificationBlanking if a notifier is required for a single event
-    """
-
-    # get the current application
-    application = getApplication()
-
-    application.project.unblankNotification()
-    try:
-        # transfer control to the calling function
-        yield
-
-    except AttributeError as es:
-        raise es
-
-    finally:
-        # clean up after blocking notifications
-        application.project.blankNotification()
+# @contextmanager
+# def notificationUnblanking():
+#     """
+#     Unblock all notifiers, disable at the end of the function block.
+#     Used inside notificationBlanking if a notifier is required for a single event
+#     """
+#
+#     # get the current application
+#     application = getApplication()
+#
+#     application.project.unblankNotification()
+#     try:
+#         # transfer control to the calling function
+#         yield
+#
+#     except AttributeError as es:
+#         raise es
+#
+#     finally:
+#         # clean up after blocking notifications
+#         application.project.blankNotification()
 
 
 @contextmanager
@@ -641,6 +645,7 @@ def waypointBlocking(application=None):
         # clean up after blocking undo items
         undo.decreaseWaypointBlocking()
 
+
 class PandasChainedAssignment:
     """ Context manager to temporarily set pandas chained assignment warning. Usage:
         with ChainedAssignment():
@@ -681,7 +686,7 @@ class Timeout:
     def __init__(self, seconds: int = 60, timeoutMessage: str = "", loggingType='warning'):
         self.seconds = int(seconds)
         self.timeoutMessage = timeoutMessage
-        allowedLoggers = ['warning', 'debug','debug1','debug2','debug3', 'critical']
+        allowedLoggers = ['warning', 'debug', 'debug1', 'debug2', 'debug3', 'critical']
         loggingType = loggingType if loggingType in allowedLoggers else 'warning'
         self.loggingType = loggingType
 
@@ -1016,8 +1021,8 @@ def deleteV3Object():
     return theDecorator
 
 
-def renameObject():
-    """ A decorator to wrap the rename(self) method of the V3 core classes
+def renameObject(blockSidebar=False):
+    """ A decorator to wrap rename(self) method of the V3 core classes
     calls self._finaliseAction('rename') after the rename
 
     EJB 20191023: modified original contextManager to be decorator to match new/delete
@@ -1030,10 +1035,23 @@ def renameObject():
         self = args[0]
         application = getApplication()  # pass it in to reduce overhead
 
+        if blockSidebar:
+            # currently required for nmrChain and chain as these rename children in the sidebar
+            with undoBlockWithoutSideBar(application=application):
+                return _renameInner(application, args, func, kwds, self)
+        else:
+            return _renameInner(application, args, func, kwds, self)
+
+    def _renameInner(application, args, func, kwds, self) -> bool:
+        """Add items to the undo stack and fire _finaliseAction 'rename'
+        """
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
                 # call the wrapped rename function
                 result = func(*args, **kwds)
+
+                if result is None:
+                    return False
 
                 addUndoItem(undo=BlankedPartial(func, self, 'rename', False, self, *result),
                             redo=BlankedPartial(func, self, 'rename', False, *args, **kwds)
@@ -1048,7 +1066,7 @@ def renameObject():
 
 @contextmanager
 def renameObjectContextManager(self):
-    """ A decorator to wrap the rename(self) method of the V3 core classes
+    """ A decorator to wrap rename(self) method of the V3 core classes
     calls self._finaliseAction('rename', 'change') after the rename
     """
     # get the current application
@@ -1087,9 +1105,35 @@ def renameObjectNoBlanking(self):
     self._finaliseAction('rename')
 
 
+@contextmanager
+def progressHandler(text='busy...', minimum=0, maximum=100, delay=1000, closeDelay=250, autoClose=True):
+    """A context manager to wrap a method in a progress dialog defined by the current gui state.
+    """
+    from ccpn.framework.Application import getApplication
+
+    application = getApplication()
+    mainWindow = application.ui.mainWindow
+
+    handler = application.ui.getProgressHandler()
+
+    try:
+        # get the dialog handler from the gui state - use subclass
+        progress = handler(mainWindow, text=text,
+                           minimum=minimum, maximum=maximum,
+                           delay=delay, closeDelay=closeDelay,
+                           autoClose=autoClose)
+
+        # transfer control to the calling function
+        yield progress
+
+    except Exception as es:
+        if isinstance(es, RuntimeError):
+            raise es
+
+
 class BlankedPartial(object):
     """Wrapper (like partial) to call func(**kwds) with blanking
-    optionally trigger the notification of obj, either pre- or post execution.
+    optionally trigger the notification of obj, either pre- or post- execution.
     """
 
     def __init__(self, func, obj=None, trigger=None, preExecution=False, *args, **kwds):
@@ -1353,16 +1397,15 @@ class AntiAliasedPaintContext(PaintContext):
 #
 #         print('>>>close')
 
-if __name__ == '__main__':
-    from ccpn.ui.gui.widgets.Application import newTestApplication
 
+def main():
+    from ccpn.ui.gui.widgets.Application import newTestApplication
 
     # import at top
     # from ccpn.framework.Application import getApplication
 
     def _undoTest(value):
         pass
-
 
     app = newTestApplication()
     application = getApplication()
@@ -1392,3 +1435,7 @@ if __name__ == '__main__':
     print(f'>>> {application.project._undo}')
     for value in application.project._undo:
         print(f'>>>   {value}')
+
+
+if __name__ == '__main__':
+    main()

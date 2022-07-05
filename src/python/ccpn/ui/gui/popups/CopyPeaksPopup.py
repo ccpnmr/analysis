@@ -1,10 +1,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-10 11:37:27 +0000 (Fri, December 10, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -23,16 +23,21 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from PyQt5 import QtCore
+from functools import partial
 from ccpn.util.Logging import getLogger
 from ccpn.core.Spectrum import Spectrum
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier, _removeDuplicatedNotifiers
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+from ccpn.ui.gui.widgets.ProgressWidget import ProgressDialog
+from ccpn.util.UpdateScheduler import UpdateScheduler
+from ccpn.util.UpdateQueue import UpdateQueue
 
 
 class CopyPeaks(CcpnDialog):
@@ -49,6 +54,13 @@ class CopyPeaks(CcpnDialog):
         self._registerNotifiers()
 
         self._enableButtons()
+
+        # notifier queue handling
+        self._scheduler = UpdateScheduler(self.project, self._queueProcess, name='CopyPeaks',
+                                          startOnAdd=False, log=False, completeCallback=self.update)
+        self._queuePending = UpdateQueue()
+        self._queueActive = None
+        self._lock = QtCore.QMutex()
 
     def _createWidgets(self):
 
@@ -126,18 +138,45 @@ class CopyPeaks(CcpnDialog):
         try:
             peakLists = self.inputPeaksListWidget.getSelectedObjects()
             peaks = self.inputPeaksWidget.getSelectedObjects()
-            with undoBlockWithoutSideBar():
-                with notificationEchoBlocking():
-                    if len(peaks) > 0:
-                        if len(peakLists) > 0:
-                            for peak in peaks:
-                                for peakList in peakLists:
+
+            numPeaks = len(peaks)
+            numPeakLists = len(peakLists)
+            # use a larger step-size in the progress-bar if more peaks
+            pDiv = 10 if numPeaks * numPeakLists > 100 else 1
+            totalCopies = (numPeaks * numPeakLists) // pDiv
+
+            try:
+                if numPeaks > 0 and numPeakLists > 0:
+                    with undoBlockWithoutSideBar():
+                        with notificationEchoBlocking():
+                            progress = ProgressDialog(self.mainWindow, text='Copying Peaks...', maximum=totalCopies)
+
+                            # so the user gets some feedback that something happened
+                            progress.setMinimumDuration(0)
+                            progress.setModal(True)
+                            for peakNumber, peak in enumerate(peaks):
+                                for listNumber, peakList in enumerate(peakLists):
+                                    if progress.wasCanceled():
+                                        progress.setValue(totalCopies)
+                                        raise RuntimeError('Progress was cancelled')
+                                    progress.setValue((numPeaks * listNumber + peakNumber) // pDiv)
                                     peak.copyTo(peakList)
 
-            getLogger().info('Peaks copied. Finished')
-        except Exception as es:
-            getLogger().warning('Error copyin peaks: %s' % str(es))
-            showWarning(str(self.windowTitle()), str(es))
+                            progress.setValue(totalCopies)
+
+                    getLogger().info('Peaks copied. Finished')
+
+            except Exception as es:
+                if isinstance(es, RuntimeError):
+                    raise es
+                getLogger().warning('Error copying peaks: %s' % str(es))
+                showWarning(str(self.windowTitle()), str(es))
+
+        except RuntimeError:
+            getLogger().info('Copy peaks cancelled')
+            # undoManager = self._getUndo()
+            # undoManager.undo()
+
         # self._closePopup()
 
     def _selectPeaks(self, peaks):
@@ -169,11 +208,52 @@ class CopyPeaks(CcpnDialog):
 
     def _registerNotifiers(self):
 
-        self._peakNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME], 'Peak', self._refreshInputPeaksWidget)
-        self._peakListNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME], 'PeakList', self._refreshInputPeaksListWidget)
+        self._peakNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME], 'Peak',
+                                      partial(self._queueGeneralNotifier, self._refreshInputPeaksWidget),
+                                      )
+        self._peakListNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME], 'PeakList',
+                                          partial(self._queueGeneralNotifier, self._refreshInputPeaksListWidget),
+                                          )
 
     def _deregisterNotifiers(self):
         if self._peakNotifier:
             self._peakNotifier.unRegister()
         if self._peakListNotifier:
             self._peakListNotifier.unRegister()
+
+    #=========================================================================================
+    # Notifier queue handling
+    #=========================================================================================
+
+    def _queueGeneralNotifier(self, func, data):
+        """Add the notifier to the queue handler
+        """
+        self._queueAppend([func, data])
+
+    def _queueProcess(self):
+        """Process current items in the queue
+        """
+        with QtCore.QMutexLocker(self._lock):
+            # protect the queue switching
+            self._queueActive = self._queuePending
+            self._queuePending = UpdateQueue()
+
+        executeQueue = _removeDuplicatedNotifiers(self._queueActive)
+        for itm in executeQueue:
+            # process item if different from previous
+            try:
+                func, data = itm
+                func(data)
+            except Exception as es:
+                getLogger().debug(f'Error in {self.__class__.__name__} update - {es}')
+
+    def _queueAppend(self, itm):
+        """Append a new item to the queue
+        """
+        self._queuePending.put(itm)
+        if not self._scheduler.isActive and not self._scheduler.isBusy:
+            self._scheduler.start()
+
+        elif self._scheduler.isBusy:
+            # caught during the queue processing event, need to restart
+            self._scheduler.signalRestart()

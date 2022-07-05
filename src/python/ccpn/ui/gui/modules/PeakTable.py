@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-04 18:50:46 +0000 (Fri, March 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,111 +26,53 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
-from ccpn.ui.gui.widgets.GuiTable import GuiTable
-from ccpn.ui.gui.widgets.Column import ColumnClass
-from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.lib.GuiStripContextMenus import _selectedPeaksMenuItem, _addMenuItems, \
-    _getNdPeakMenuItems, _setEnabledAllItems
+from collections import OrderedDict
+
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
+from ccpn.core.lib.Notifiers import Notifier
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
+from ccpn.ui.gui.widgets.Column import ColumnClass
+from ccpn.ui.gui.lib.GuiStripContextMenus import _selectedPeaksMenuItem, _addMenuItems, \
+    _getNdPeakMenuItems, _setEnabledAllItems
+from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget
+from ccpn.ui.gui.lib._CoreTableFrame import _CoreTableWidgetABC, _CoreTableFrameABC
+from ccpn.util.Common import makeIterableList
 from ccpn.util.Logging import getLogger
 
 
 logger = getLogger()
 
 UNITS = ['ppm', 'Hz', 'point']
+ALL = '<all>'
+LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 
 
 class PeakTableModule(CcpnModule):
-    """
-    This class implements the module by wrapping a PeakListTable instance
+    """This class implements the module by wrapping a PeakListTable instance
     """
 
-    includeSettingsWidget = False
+    includeSettingsWidget = True
     maxSettingsState = 2
     settingsPosition = 'top'
+
+    activePulldownClass = PeakList
 
     className = 'PeakTableModule'
     _allowRename = True
 
     def __init__(self, mainWindow=None, name='Peak Table',
                  peakList=None, selectFirstItem=False):
+        """Initialise the Module widgets
+        """
         super().__init__(mainWindow=mainWindow, name=name)
 
-        # Derive application, project, and current from mainWindow
-        self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.project
-        self.current = mainWindow.application.current
-
-        # mainWidget
-        self.peakListTable = PeakListTableWidget(parent=self.mainWidget,
-                                                 mainWindow=self.mainWindow,
-                                                 moduleParent=self,
-                                                 setLayout=True,
-                                                 grid=(0, 0))
-
-        if peakList is not None:
-            self.selectPeakList(peakList)
-        elif selectFirstItem:
-            self.peakListTable.pLwidget.selectFirstItem()
-
-        self.installMaximiseEventHandler(self._maximise, self._closeModule)
-
-    @property
-    def _dataFrame(self):
-        if self.peakListTable._dataFrameObject:
-            return self.peakListTable._dataFrameObject.dataFrame
-
-    def _maximise(self):
-        """
-        Maximise the attached table
-        """
-        self.peakListTable._maximise()
-
-    def selectPeakList(self, peakList=None):
-        """
-        Manually select a peakList from the pullDown
-        """
-        self.peakListTable._selectPeakList(peakList)
-
-    def _closeModule(self):
-        """Re-implementation of closeModule function from CcpnModule to unregister notification """
-        self.peakListTable._close()
-        super()._closeModule()
-
-
-class PeakListTableWidget(GuiTable):
-    """
-    Class to present a peakList Table
-    """
-    className = 'PeakListTable'
-    attributeName = 'peakLists'
-
-    positionsUnit = UNITS[0]  #default
-
-    @staticmethod
-    def _setFigureOfMerit(obj, value):
-        """
-        CCPN-INTERNAL: Set figureOfMerit from table
-        Must be a floatRatio in range [0.0, 1.0]
-        """
-        # clip and set the figure of merit
-        obj.figureOfMerit = min(max(float(value), 0.0), 1.0) if value else None
-
-    def __init__(self, parent=None, mainWindow=None, moduleParent=None, peakList=None, multiSelect=True,
-                 actionCallback=None, selectionCallback=None, **kwds):
-        """
-        Initialise the table
-        """
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
         if mainWindow:
@@ -138,87 +80,195 @@ class PeakListTableWidget(GuiTable):
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
         else:
-            self.application = None
-            self.project = None
-            self.current = None
+            self.application = self.project = self.current = None
 
-        PeakListTableWidget.project = self.project
+        # set the widgets and callbacks
+        self._setWidgets(self.settingsWidget, self.mainWidget, peakList, selectFirstItem)
+        self._setCallbacks()
 
-        self.settingWidgets = None
-        self._selectedPeakList = None
-        kwds['setLayout'] = True  # Assure we have a layout with the widget
+    def _setWidgets(self, settingsWidget, mainWidget, peakList, selectFirstItem):
+        """Set up the widgets for the module
+        """
+        self._settings = None
+        if self.activePulldownClass:
+            # add to settings widget - see sequenceGraph for more detailed example
+            settingsDict = OrderedDict(((LINKTOPULLDOWNCLASS, {'label'   : 'Link to current %s' % self.activePulldownClass.className,
+                                                               'tipText' : 'Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
+                                                               'callBack': None,
+                                                               'enabled' : True,
+                                                               'checked' : False,
+                                                               '_init'   : None,
+                                                               }),
+                                        ))
+            self._settings = ModuleSettingsWidget(parent=settingsWidget, mainWindow=self.mainWindow,
+                                                  settingsDict=settingsDict,
+                                                  grid=(0, 0))
 
-        # Initialise the scroll widget and common settings
-        self._initTableCommonWidgets(parent, **kwds)
-
-        row = 0
-        self.spacer = Spacer(self._widget, 5, 5,
-                             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-                             grid=(row, 0), gridSpan=(1, 1))
-
-        row += 1
-        gridHPos = 0
-        self.pLwidget = PeakListPulldown(parent=self._widget,
+        # add the frame containing the pulldown and table
+        self._mainFrame = PeakTableFrame(parent=mainWidget,
                                          mainWindow=self.mainWindow,
-                                         grid=(row, gridHPos), gridSpan=(1, 1),
-                                         showSelectName=True,
-                                         minimumWidths=(0, 100),
-                                         sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
-                                         callback=self._pulldownPLcallback)
+                                         moduleParent=self,
+                                         peakList=peakList, selectFirstItem=selectFirstItem,
+                                         grid=(0, 0))
 
-        # create widgets for selection of position units
-        gridHPos += 1
-        self.posUnitPulldownLabel = Label(parent=self._widget, text=' Position Unit', grid=(row, gridHPos))
-        gridHPos += 1
-        self.posUnitPulldown = PulldownList(parent=self._widget, texts=UNITS, callback=self._pulldownUnitsCallback, grid=(row, gridHPos),
-                                            objectName='posUnits_PT')
+    @property
+    def tableFrame(self):
+        """Return the table frame
+        """
+        return self._mainFrame
 
-        row += 1
-        self.spacer = Spacer(self._widget, 5, 5,
-                             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
-                             grid=(row, gridHPos + 1), gridSpan=(1, 1))
-        self._widget.getLayout().setColumnStretch(gridHPos + 1, 2)
+    @property
+    def tableWidget(self):
+        """Return the table widget in the table frame
+        """
+        return self._mainFrame._tableWidget
 
-        self._hiddenColumns = ['Pid', 'Spectrum', 'PeakList', 'Id', 'HeightError', 'VolumeError']
+    def _setCallbacks(self):
+        """Set the active callbacks for the module
+        """
+        if self.activePulldownClass:
+            self._setCurrentPulldown = Notifier(self.current,
+                                                [Notifier.CURRENT],
+                                                targetName=self.activePulldownClass._pluralLinkName,
+                                                callback=self._mainFrame._selectCurrentPulldownClass)
 
-        self.dataFrameObject = None
-        selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
-        actionCallback = self._actionCallback if actionCallback is None else actionCallback
+            # set the active callback from the pulldown
+            self._mainFrame.setActivePulldownClass(coreClass=self.activePulldownClass,
+                                                   checkBox=self._settings.checkBoxes[LINKTOPULLDOWNCLASS]['widget'])
 
-        super().__init__(parent=parent,
-                         mainWindow=self.mainWindow,
-                         dataFrameObject=None,
-                         setLayout=True,
-                         autoResize=True, multiSelect=multiSelect,
-                         actionCallback=actionCallback,
-                         selectionCallback=selectionCallback,
-                         grid=(3, 0), gridSpan=(1, 6))
-        self.moduleParent = moduleParent
+        # set the dropped callback through mainWidget
+        self.mainWidget._dropEventCallback = self._mainFrame._processDroppedItems
 
-        # populate the table if there are peakLists in the project
-        if peakList is not None:
-            self._selectPeakList(peakList)
+    def selectTable(self, table):
+        """Select the object in the table
+        """
+        self._mainFrame.selectTable(table)
 
-        self.setTableNotifiers(tableClass=PeakList,
-                               rowClass=Peak,
-                               cellClassNames=(NmrAtom, 'assignedPeaks'),
-                               tableName='peakList', rowName='peak',
-                               changeFunc=self._updateAllModule,
-                               className=self.attributeName,
-                               updateFunc=self._updateAllModule,
-                               tableSelection='_selectedPeakList',
-                               pullDownWidget=self.pLwidget,
-                               callBackClass=Peak,
-                               selectCurrentCallBack=self._selectOnTableCurrentPeaksNotifierCallback,
-                               moduleParent=moduleParent)
+    def _closeModule(self):
+        """CCPN-INTERNAL: used to close the module
+        """
+        self.tableFrame._closeFrame()
+        super()._closeModule()
 
-        # Initialise the notifier for processing dropped items
-        self._postInitTableCommonWidgets()
+#=========================================================================================
+# _NewPeakTableWidget
+#=========================================================================================
+
+class _NewPeakTableWidget(_CoreTableWidgetABC):
+    """Class to present a peakList Table
+    """
+    className = 'PeakTable'
+    attributeName = 'peakLists'
+
+    defaultHidden = ['Pid', 'Spectrum', 'PeakList', 'Id', 'HeightError', 'VolumeError']
+    _internalColumns = ['isDeleted', '_object']  # columns that are always hidden
+
+    # define self._columns here
+    columnHeaders = {}
+    tipTexts = ()
+
+    # define the notifiers that are required for the specific table-type
+    tableClass = PeakList
+    rowClass = Peak
+    cellClass = None
+    tableName = tableClass.className
+    rowName = rowClass.className
+    cellClassNames = {NmrAtom: 'assignedPeaks'}
+    selectCurrent = True
+    callBackClass = Peak
+    search = False
+
+    # set the queue handling parameters
+    _maximumQueueLength = 25
+
+    positionsUnit = UNITS[0]  # default
+
+    #=========================================================================================
+    # Properties
+    #=========================================================================================
+
+    @property
+    def _sourceObjects(self):
+        """Get/set the list of source objects
+        """
+        return self._table.peaks
+
+    @_sourceObjects.setter
+    def _sourceObjects(self, value):
+        # shouldn't need this
+        self._table.peaks = value
+
+    @property
+    def _sourceCurrent(self):
+        """Get/set the associated list of current objects
+        """
+        return self.current.peaks
+
+    @_sourceCurrent.setter
+    def _sourceCurrent(self, value):
+        if value:
+            self.current.peaks = value
+        else:
+            self.current.clearPeaks()
+
+    #=========================================================================================
+    # Widget callbacks
+    #=========================================================================================
+
+    def actionCallback(self, data):
+        """If current strip contains the double-clicked peak will navigateToPositionInStrip
+        """
+        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
+
+        # multi-selection table will return a list of objects
+        objs = data[CallBack.OBJECT]
+        if not objs:
+            return
+        if isinstance(objs, (tuple, list)):
+            peak = objs[0]
+        else:
+            peak = objs
+
+        if self.current.strip is not None:
+            validPeakListViews = [pp.peakList for pp in self.current.strip.peakListViews if isinstance(pp.peakList, PeakList)]
+
+            if peak and peak.peakList in validPeakListViews:
+                widths = None
+
+                if peak.peakList.spectrum.dimensionCount <= 2:
+                    widths = _getCurrentZoomRatio(self.current.strip.viewRange())
+                navigateToPositionInStrip(strip=self.current.strip,
+                                          positions=peak.position,
+                                          axisCodes=peak.axisCodes,
+                                          widths=widths)
+        else:
+            logger.warning('Impossible to navigate to peak position. Set a current strip first')
+
+    #=========================================================================================
+    # Create table and row methods
+    #=========================================================================================
+
+    def getCellToRows(self, cellItem, attribute=None):
+        """Get the list of objects which cellItem maps to for this table
+        To be subclassed as required
+        """
+        # this is a step towards making guiTableABC and subclass for each table
+        # return makeIterableList(getattr(cellItem, attribute, [])), Notifier.CHANGE
+
+        return makeIterableList(cellItem._oldAssignedPeaks) if cellItem.isDeleted \
+                   else makeIterableList(cellItem.assignedPeaks), \
+               Notifier.CHANGE
+
+    #=========================================================================================
+    # Table context menu
+    #=========================================================================================
 
     def _setContextMenu(self, enableExport=True, enableDelete=True):
         """Subclass guiTable to add new items to context menu
         """
         super()._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
+
+        # add extra items to the menu
         _actions = self.tableMenu.actions()
         if _actions:
             # _topMenuItem = _actions[0]
@@ -245,62 +295,61 @@ class PeakListTableWidget(GuiTable):
         self._navigateToPeakMenuMain.setEnabled(False)
         _setEnabledAllItems(self._selectedPeaksMenu, True if self.current.peaks else False)
 
-        super(PeakListTableWidget, self)._raiseTableContextMenu(pos)
+        # raise the menu
+        super()._raiseTableContextMenu(pos)
 
-    def _processDroppedItems(self, data):
-        """CallBack for Drop events
-        """
-        pids = data.get('pids', [])
-        self._handleDroppedItems(pids, PeakList, self.pLwidget)
+    #=========================================================================================
+    # Table functions
+    #=========================================================================================
 
-    def _getTableColumns(self, peakList):
-        """Add default columns  plus the ones according with peakList.spectrum dimension
+    def _getTableColumns(self, peakList=None):
+        """Add default columns plus the ones according to peakList.spectrum dimension
         format of column = ( Header Name, value, tipText, editOption)
         editOption allows the user to modify the value content by doubleclick
         """
 
-        columnDefs = []
+        columnDefs = [('#', 'serial', 'Peak serial number', None, None),
+                      ('Pid', lambda pk: pk.pid, 'Pid of the Peak', None, None),
+                      ('_object', lambda pk: pk, 'Object', None, None),
+                      ('Spectrum', lambda pk: pk.peakList.spectrum.id, 'Spectrum containing the Peak', None, None),
+                      ('PeakList', lambda pk: pk.peakList.serial, 'PeakList containing the Peak', None, None),
+                      # ('Id', lambda pk: pk.serial, 'Peak serial', None, None)
+                      ]
 
         # Serial column
-        columnDefs.append(('#', 'serial', 'Peak serial number', None, None))
-        columnDefs.append(('Pid', lambda pk: pk.pid, 'Pid of the Peak', None, None))
-        columnDefs.append(('_object', lambda pk: pk, 'Object', None, None))
 
-        columnDefs.append(('Spectrum', lambda pk: pk.peakList.spectrum.id, 'Spectrum containing the Peak', None, None))
-        columnDefs.append(('PeakList', lambda pk: pk.peakList.serial, 'PeakList containing the Peak', None, None))
-        columnDefs.append(('Id', lambda pk: pk.serial, 'Peak serial', None, None))
+        if peakList:
+            # Assignment column
+            for i in range(peakList.spectrum.dimensionCount):
+                assignTipText = 'NmrAtom assignments of peak in dimension %s' % str(i + 1)
+                columnDefs.append(
+                        ('Assign F%s' % str(i + 1), lambda pk, dim=i: getPeakAnnotation(pk, dim), assignTipText, None, None)
+                        )
 
-        # Assignment column
-        for i in range(peakList.spectrum.dimensionCount):
-            assignTipText = 'NmrAtom assignments of peak in dimension %s' % str(i + 1)
-            columnDefs.append(
-                    ('Assign F%s' % str(i + 1), lambda pk, dim=i: getPeakAnnotation(pk, dim), assignTipText, None, None)
-                    )
+            # # Expanded Assignment columns
+            # for i in range(peakList.spectrum.dimensionCount):
+            #     assignTipText = 'NmrAtom assignments of peak in dimension %s' % str(i + 1)
+            #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getNmrChain(pk, dim), assignTipText, None, None))
+            #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getSequenceCode(pk, dim), assignTipText, None, None))
+            #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getResidueType(pk, dim), assignTipText, None, None))
+            #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getAtomType(pk, dim), assignTipText, None, None))
 
-        # # Expanded Assignment columns
-        # for i in range(peakList.spectrum.dimensionCount):
-        #     assignTipText = 'NmrAtom assignments of peak in dimension %s' % str(i + 1)
-        #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getNmrChain(pk, dim), assignTipText, None, None))
-        #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getSequenceCode(pk, dim), assignTipText, None, None))
-        #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getResidueType(pk, dim), assignTipText, None, None))
-        #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getAtomType(pk, dim), assignTipText, None, None))
+            # Peak positions column
+            for i in range(peakList.spectrum.dimensionCount):
+                positionTipText = 'Peak position in dimension %s' % str(i + 1)
+                columnDefs.append(
+                        ('Pos F%s' % str(i + 1),
+                         lambda pk, dim=i, unit=self.positionsUnit: getPeakPosition(pk, dim, unit),
+                         positionTipText, None, '%0.3f')
+                        )
 
-        # Peak positions column
-        for i in range(peakList.spectrum.dimensionCount):
-            positionTipText = 'Peak position in dimension %s' % str(i + 1)
-            columnDefs.append(
-                    ('Pos F%s' % str(i + 1),
-                     lambda pk, dim=i, unit=self.positionsUnit: getPeakPosition(pk, dim, unit),
-                     positionTipText, None, '%0.3f')
-                    )
-
-        # linewidth column TODO remove hardcoded Hz unit
-        for i in range(peakList.spectrum.dimensionCount):
-            linewidthTipTexts = 'Peak line width %s' % str(i + 1)
-            columnDefs.append(
-                    ('LW F%s (Hz)' % str(i + 1), lambda pk, dim=i: getPeakLinewidth(pk, dim), linewidthTipTexts,
-                     None, '%0.3f')
-                    )
+            # line-width column TODO remove hardcoded Hz unit
+            for i in range(peakList.spectrum.dimensionCount):
+                linewidthTipTexts = 'Peak line width %s' % str(i + 1)
+                columnDefs.append(
+                        ('LW F%s (Hz)' % str(i + 1), lambda pk, dim=i: getPeakLinewidth(pk, dim), linewidthTipTexts,
+                         None, '%0.3f')
+                        )
 
         # height column
         heightTipText = 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited'
@@ -312,7 +361,7 @@ class PeakListTableWidget(GuiTable):
         volumeTipText = 'Integral of spectrum intensity around peak location, according to chosen volume method'
         columnDefs.append(('Volume', lambda pk: pk.volume if pk.volume else 'None', volumeTipText, None, None))
         columnDefs.append(('VolumeError', lambda pk: pk.volumeError, 'Error of the volume', None, None))
-        
+
         # ClusterId column
         clusterIdTipText = 'The peak clusterId. ClusterIds are used for grouping peaks in fitting routines.'
         columnDefs.append(('ClusterId', lambda pk: pk.clusterId if pk.clusterId else 'None', clusterIdTipText,
@@ -336,105 +385,13 @@ class PeakListTableWidget(GuiTable):
 
         return ColumnClass(columnDefs)
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #=========================================================================================
     # Updates
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #=========================================================================================
 
-    def _maximise(self):
-        """Refresh the table on a maximise event
-        """
-        self._updateTable()
-
-    def _updateAllModule(self, data=None):
-        """Updates the table and the settings widgets
-        """
-        self._updateTable()
-
-    def _updateTable(self, useSelectedPeakList=True, peaks=None, peakList=None):
-        """Display the peaks on the table for the selected PeakList.
-        Obviously, If the peak has not been previously deleted and flagged isDeleted
-        """
-        self._selectedPeakList = self.project.getByPid(self.pLwidget.getText())
-
-        if useSelectedPeakList:
-            if self._selectedPeakList:
-                self.populateTable(rowObjects=self._selectedPeakList.peaks,
-                                   columnDefs=self._getTableColumns(self._selectedPeakList),
-                                   selectedObjects=self.current.peaks)
-            else:
-                self.clear()
-
-        else:
-            if peaks:
-                if peakList:
-                    self.populateTable(rowObjects=peaks,
-                                       columnDefs=self._getTableColumns(peakList),
-                                       selectedObjects=self.current.peaks)
-            else:
-                self.clear()
-
-    def _selectPeakList(self, peakList=None):
-        """Manually select a PeakList from the pullDown
-        """
-        if peakList is None:
-            # logger.warning('select: No PeakList selected')
-            # raise ValueError('select: No PeakList selected')
-            self.pLwidget.selectFirstItem()
-        else:
-            if not isinstance(peakList, PeakList):
-                logger.warning('select: Object is not of type PeakList')
-                raise TypeError('select: Object is not of type PeakList')
-            else:
-                for widgetObj in self.pLwidget.textList:
-                    if peakList.pid == widgetObj:
-                        self._selectedPeakList = peakList
-                        self.pLwidget.select(self._selectedPeakList.pid)
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #=========================================================================================
     # Widgets callbacks
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def _getPullDownSelection(self):
-        return self.pLwidget.getText()
-
-    def _actionCallback(self, data, *args):
-        """If current strip contains the double clicked peak will navigateToPositionInStrip
-        """
-        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
-
-        # multiselection table will return a list of objects
-        objs = data[CallBack.OBJECT]
-        if not objs:
-            return
-        if isinstance(objs, (tuple, list)):
-            peak = objs[0]
-        else:
-            peak = objs
-
-        if self.current.strip is not None:
-            validPeakListViews = [pp.peakList for pp in self.current.strip.peakListViews if isinstance(pp.peakList, PeakList)]
-
-            if peak and peak.peakList in validPeakListViews:
-                widths = None
-
-                if peak.peakList.spectrum.dimensionCount <= 2:
-                    widths = _getCurrentZoomRatio(self.current.strip.viewRange())
-                navigateToPositionInStrip(strip=self.current.strip,
-                                          positions=peak.position,
-                                          axisCodes=peak.axisCodes,
-                                          widths=widths)
-        else:
-            logger.warning('Impossible to navigate to peak position. Set a current strip first')
-
-    def _selectionCallback(self, data, *args):
-        """
-        set as current the selected peaks on the table
-        """
-        peaks = data[CallBack.OBJECT]
-        if peaks is None:
-            self.current.clearPeaks()
-        else:
-            self.current.peaks = peaks
+    #=========================================================================================
 
     def _pulldownUnitsCallback(self, unit):
         # update the table with new units
@@ -455,21 +412,112 @@ class PeakListTableWidget(GuiTable):
             popup._selectPeaks(self.current.peaks)
         popup.exec_()
 
-    def _selectOnTableCurrentPeaksNotifierCallback(self, data):
-        """
-        Callback from a notifier to highlight the peaks on the peak table
-        :param data:
-        """
-        currentPeaks = data['value']
-        self._selectOnTableCurrentPeaks(currentPeaks)
-
-    def _selectOnTableCurrentPeaks(self, currentPeaks):
-        """
-        Highlight the list of peaks on the table
-        :param currentPeaks:
-        """
-        self.highlightObjects(currentPeaks)
-
     def _setPositionUnit(self, value):
         if value in UNITS:
             self.positionsUnit = value
+
+    #=========================================================================================
+    # object properties
+    #=========================================================================================
+
+    @staticmethod
+    def _setFigureOfMerit(obj, value):
+        """CCPN-INTERNAL: Set figureOfMerit from table
+        Must be a floatRatio in range [0.0, 1.0]
+        """
+        # clip and set the figure of merit
+        obj.figureOfMerit = min(max(float(value), 0.0), 1.0) if value else None
+
+    @staticmethod
+    def _setClusterId(obj, value):
+        """CCPN-INTERNAL: Set clusterId from table
+        Must be a positive integer
+        """
+        try:
+            if value == '':
+                value = None
+            v = int(value) if value is not None else None
+            obj.clusterId = v
+        except Exception as err:
+            getLogger().warning('Could not set clusterID.', err)
+
+
+#=========================================================================================
+# PeakTableFrame
+#=========================================================================================
+
+class PeakTableFrame(_CoreTableFrameABC):
+    """Frame containing the pulldown and the table widget
+    """
+    _TableKlass = _NewPeakTableWidget
+    _PulldownKlass = PeakListPulldown
+
+    def __init__(self, parent, mainWindow=None, moduleParent=None,
+                 peakList=None, selectFirstItem=False, **kwds):
+        super().__init__(parent, mainWindow=mainWindow, moduleParent=moduleParent,
+                         obj=peakList, selectFirstItem=selectFirstItem, **kwds)
+
+        # create widgets for selection of position units
+        self.posUnitPulldownLabel = Label(parent=self, text=' Position Unit', )
+        self.posUnitPulldown = PulldownList(parent=self, texts=UNITS, callback=self._pulldownUnitsCallback,
+                                            objectName='posUnits_PT')
+
+        self.addWidgetToTop(self.posUnitPulldownLabel, 2)
+        self.addWidgetToTop(self.posUnitPulldown, 3)
+
+    #=========================================================================================
+    # Properties
+    #=========================================================================================
+
+    @property
+    def _tableCurrent(self):
+        """Return the list of source objects, e.g., _table.peaks/_table.nmrResidues
+        """
+        return self.current.peakList
+
+    @_tableCurrent.setter
+    def _tableCurrent(self, value):
+        self.current.peakList = value
+
+    #=========================================================================================
+    # Widgets callbacks
+    #=========================================================================================
+
+    def _pulldownUnitsCallback(self, unit):
+        """Pass units change callback to the table
+        """
+        self._tableWidget._pulldownUnitsCallback(unit)
+
+    def _setPositionUnit(self, value):
+        """Change the units in the table
+        """
+        self._tableWidget._setPositionUnit(value)
+
+
+#=========================================================================================
+# main
+#=========================================================================================
+
+def main():
+    """Show the PeakTable module
+    """
+    from ccpn.ui.gui.widgets.Application import newTestApplication
+    from ccpn.framework.Application import getApplication
+
+    # create a new test application
+    app = newTestApplication(interface='Gui')
+    application = getApplication()
+    mainWindow = application.ui.mainWindow
+
+    # add a module
+    _module = PeakTableModule(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(_module)
+
+    # show the mainWindow
+    app.start()
+
+
+if __name__ == '__main__':
+    """Call the test function
+    """
+    main()

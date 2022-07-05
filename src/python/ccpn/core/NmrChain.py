@@ -3,19 +3,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:15 +0000 (Thu, December 23, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:37 +0100 (Tue, July 05, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,19 +27,19 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import typing
 from functools import partial
-
-from ccpn.util import Common as commonUtil
 from ccpn.core.lib import MoleculeLib
 from ccpn.core.Chain import Chain
 from ccpn.core.Project import Project
 from ccpn.core.Residue import Residue
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
-from ccpnmodel.ccpncore.lib import Constants
-from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, renameObject, \
     undoBlock, ccpNmrV3CoreUndoBlock
+from ccpn.util.decorators import logCommand
+from ccpn.util.Logging import getLogger
+from ccpn.util import Common as commonUtil
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
+from ccpnmodel.ccpncore.lib import Constants
 
 
 class NmrChain(AbstractWrapperObject):
@@ -130,7 +130,7 @@ class NmrChain(AbstractWrapperObject):
 
     @property
     def isConnected(self) -> bool:
-        """True if this this NmrChain is a connected stretch
+        """True if this NmrChain is a connected stretch
         (in which case the mainNmrResidues are sequentially connected)."""
         return self._wrappedData.isConnected
 
@@ -334,12 +334,14 @@ class NmrChain(AbstractWrapperObject):
         """get wrappedData (Nmr.NmrChains) for all NmrChain children of parent Project"""
         return parent._wrappedData.sortedNmrChains()
 
-    @renameObject()
+    @renameObject(blockSidebar=True)
     @logCommand(get='self')
     def rename(self, value: str):
         """Rename NmrChain, changing its shortName and Pid.
         Use the 'deassign' function if you want to revert to the canonical name
         """
+        if self.chain:
+            getLogger().warning(f'{self.__class__.__name__}.rename will lose or change the assigned chain')
 
         wrappedData = self._apiNmrChain
 
@@ -375,7 +377,7 @@ class NmrChain(AbstractWrapperObject):
     #=========================================================================================
 
     #===========================================================================================
-    # new'Object' and other methods
+    # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
 

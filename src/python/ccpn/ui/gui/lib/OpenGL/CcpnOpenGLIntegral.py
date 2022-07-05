@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-01 17:39:46 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,21 +50,29 @@ class GLintegralListMethods():
     def _isSelected(self, integral):
         """return True if the obj in the defined object list
         """
-        if self.current.integrals:
-            return integral in self.current.integrals
-        return False
+        if getattr(self, '_caching', False):
+            if self._objCache is None:
+                self._objCache = list(id(obj) for obj in self.current.integrals)  # this is faster than using __eq__
+            return id(integral) in self._objCache
 
-    def objects(self, obj):
+        else:
+            objs = self.current.integrals
+            return integral in objs
+
+    @staticmethod
+    def objects(obj):
         """return the integrals attached to the object
         """
         return obj.integrals
 
-    def objectList(self, obj):
+    @staticmethod
+    def objectList(obj):
         """return the integralList attached to the integral
         """
         return obj.integralList
 
-    def listViews(self, integralList):
+    @staticmethod
+    def listViews(integralList):
         """Return the integralListViews attached to the integralList
         """
         return integralList.integralListViews
@@ -73,37 +81,44 @@ class GLintegralListMethods():
     # List specific routines
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def getLabelling(self, obj, labelType):
+    @staticmethod
+    def getLabelling(obj, labelType):
         """get the object label based on the current labelling method
         """
         return obj.id + '\n' + str(obj.value)
 
-    def extraIndicesCount(self, integral):
+    @staticmethod
+    def extraIndicesCount(integral):
         """Calculate how many indices to add
         """
         return 0
 
-    def appendExtraIndices(self, *args):
+    @staticmethod
+    def appendExtraIndices(*args):
         """Add extra indices to the index list
         """
         return 0, 0
 
-    def extraVerticesCount(self, integral):
+    @staticmethod
+    def extraVerticesCount(integral):
         """Calculate how many vertices to add
         """
         return 0
 
-    def appendExtraVertices(self, *args):
+    @staticmethod
+    def appendExtraVertices(*args):
         """Add extra vertices to the vertex list
         """
         return 0
 
-    def insertExtraIndices(self, *args):
+    @staticmethod
+    def insertExtraIndices(*args):
         """Insert extra indices into the vertex list
         """
         return 0, 0
 
-    def insertExtraVertices(self, *args):
+    @staticmethod
+    def insertExtraVertices(*args):
         """Insert extra vertices into the vertex list
         """
         return 0
@@ -265,17 +280,20 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
 
             drawList.defineIndexVBO()
 
-    def _deleteSymbol(self, integral):
+    def _deleteSymbol(self, integral, parentList, spectrum):
         for ils in self._GLSymbols.values():
 
-            # confusing as peakList and integralList share the same list :)
-            if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.integralList:
+            # if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.integralList:
+            if not ils.integralListView.isDeleted and parentList == ils.integralListView.integralList:
 
                 for reg in ils._regions:
 
                     if reg._object == integral:
                         ils._regions.remove(reg)
-                        ils._rebuild()
+                        try:
+                            ils._rebuild()
+                        except Exception as es:
+                            getLogger.warning(f'   ERROR HERE  {es}')
                         return
 
     def _createSymbol(self, integral):
@@ -397,7 +415,7 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
         # stringList[-1].axisIndex = 0
         # stringList[-1].axisPosition = pos or 0.0
 
-    def objIsInVisiblePlanes(self, spectrumView, obj):
+    def objIsInVisiblePlanes(self, spectrumView, obj, viewOutOfPlanePeaks=True):
         """Get the current object is in visible planes settings
         """
         return True, False, 0, 1.0
@@ -415,7 +433,7 @@ class GLintegral1dLabelling(GLintegralNdLabelling):
     #     """
     #     super(GLintegral1dLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
 
-    def objIsInVisiblePlanes(self, spectrumView, obj):
+    def objIsInVisiblePlanes(self, spectrumView, obj, viewOutOfPlanePeaks=True):
         """Get the current object is in visible planes settings
         """
         return True, False, 0, 1.0

@@ -50,8 +50,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-22 13:34:16 +0100 (Wed, June 22, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2543,7 +2543,7 @@ class Spectrum(AbstractWrapperObject):
         return _createPeak(self, peakList, height=height, **ppmPositions)
 
     @logCommand(get='self')
-    def pickPeaks(self, peakList=None, positiveThreshold=None, negativeThreshold=None, **ppmRegions) -> Tuple['Peak', ...]:
+    def pickPeaks(self, peakList=None, positiveThreshold=None, negativeThreshold=None, **ppmRegions) -> list:
         """Pick peaks in the region defined by the ppmRegions dict.
 
         Ppm regions are passed in as a dict containing the axis codes and the required limits.
@@ -2567,10 +2567,14 @@ class Spectrum(AbstractWrapperObject):
         :param ppmRegions: dict of (axisCode, tupleValue) key, value pairs
         :return: tuple of new Peak instances
         """
+        from ccpn.core.PeakList import PeakList
         from ccpn.core.lib.SpectrumLib import _pickPeaksByRegion
 
+        peakList = self.project.getByPid(peakList) if isinstance(peakList, str) else peakList
         if peakList is None:
             peakList = self.peakLists[-1]
+        if peakList is None or not isinstance(peakList, PeakList):
+            raise ValueError(f'{self.__class__.__name__}.pickPeaks: required peakList instance, got:{repr(peakList)}')
 
         # get the dimensions by mapping the keys of the ppmRegions dict
         _axisCodes = tuple([a for a in ppmRegions.keys()])
@@ -3103,7 +3107,7 @@ class Spectrum(AbstractWrapperObject):
             sv._finaliseAction(action)
 
     #-----------------------------------------------------------------------------------------
-    # new'Object' and other methods
+    # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #-----------------------------------------------------------------------------------------
 

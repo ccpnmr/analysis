@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-01 17:40:41 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -216,9 +216,11 @@ def _oneLiner(theString):
     """ Remove returns from string. E.g. the one in column Headers"""
     return theString.replace("\n", " ")
 
+
 def _makeTipText(columName, tipText):
     """Make a TipText by joining Column name and tipText to same string """
     return f'{_oneLiner(columName)}\n{tipText}'
+
 
 def _getHiddenColumns(table):
     hidden =[]
@@ -226,6 +228,7 @@ def _getHiddenColumns(table):
         if table._columnsDefs[i].get(HIDDEN):
             hidden.append(i)
     return hidden
+
 
 def _resizeColumnWidths(table):
     columnsWidths = {}
@@ -492,7 +495,11 @@ class GuiTable(TableWidget, Base):
         # add a widget handler to give a clean corner widget for the scroll area
         self._cornerDisplay = ScrollBarVisibilityWatcher(self)
 
-        self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
+        try:
+            # may refactor the remaining modules so this isn't needed
+            self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
+        except:
+            getLogger().debug2(f'{self.__class__.__name__} has no _widgetScrollArea')
 
     def _blockTableEvents(self, blanking=True, _disableScroll=False, _widgetState=None):
         """Block all updates/signals/notifiers in the table.
@@ -607,6 +614,13 @@ class GuiTable(TableWidget, Base):
     def setActionCallback(self, actionCallback):
         # enable callbacks
         self._actionCallback = actionCallback
+
+        for act in [self._doubleClickCallback, self._defaultDoubleClick]:
+            try:
+                self.doubleClicked.disconnect(act)
+            except Exception:
+                getLogger().debug2('nothing to disconnect')
+
         if self._actionCallback:
             self.doubleClicked.connect(self._doubleClickCallback)
         else:
@@ -615,6 +629,10 @@ class GuiTable(TableWidget, Base):
     def setSelectionCallback(self, selectionCallback):
         # enable callbacks
         self._selectionCallback = selectionCallback
+
+    def setCheckBoxCallback(self, checkBoxCallback):
+        # enable callback on the checkboxes
+        self._checkBoxCallback = checkBoxCallback
 
     def _handleDroppedItems(self, pids, objType, pulldown):
         """
@@ -1534,7 +1552,7 @@ class GuiTable(TableWidget, Base):
         objs = []
 
         if objectList:
-            # get the list of objects, exclude deleted and flagged for delete
+            # get the list of objects, exclude deleted
             for obj in objectList:
                 if isinstance(obj, str):
                     objFromPid = self.project.getByPid(obj)
@@ -2357,7 +2375,7 @@ class GuiTable(TableWidget, Base):
 
                 # concatenate the list - will always return a list
                 rowObjs = makeIterableList(rowObj)
-                # rowObjs = [obj for obj in rowObjs if obj and not (obj.isDeleted or obj._flaggedForDelete)]
+                # rowObjs = [obj for obj in rowObjs if obj and not obj.isDeleted]
 
                 # update the correct row by calling row handler
                 for rowObj in rowObjs:

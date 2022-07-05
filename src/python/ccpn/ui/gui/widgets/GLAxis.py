@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-19 11:39:58 +0100 (Thu, May 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2605,7 +2605,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 # ratios = None
                 # if self.spectrumDisplay and self.spectrumDisplay.strips and len(self.spectrumDisplay.strips) > 0:
                 #     strip = self.spectrumDisplay.strips[0]
-                #     if not (strip.isDeleted or strip._flaggedForDelete):
+                #     if not strip.isDeleted:
                 #         ratios = strip._CcpnGLWidget._lockedAspectRatios
                 try:
                     ratios = self.spectrumDisplay.strips[0]._CcpnGLWidget._lockedAspectRatios
@@ -2658,7 +2658,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 # ratios = None
                 # if self.spectrumDisplay and self.spectrumDisplay.strips and len(self.spectrumDisplay.strips) > 0:
                 #     strip = self.spectrumDisplay.strips[0]
-                #     if not (strip.isDeleted or strip._flaggedForDelete):
+                #     if not strip.isDeleted:
                 #         ratios = strip._CcpnGLWidget._lockedAspectRatios
                 try:
                     ratios = self.spectrumDisplay.strips[0]._CcpnGLWidget._lockedAspectRatios

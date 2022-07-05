@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-16 13:51:27 +0100 (Thu, June 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:42 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -44,12 +44,12 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
     context.check_hostname = False
     context.verify_mode = ssl.CERT_NONE
 
-    if not headers:
-        headers = {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'}
-    try:
-        body = urlencode(data or {}, quote_via=quote).encode('utf-8')
-    except Exception as err:
-        body = urlencode({}, quote_via=quote).encode('utf-8')
+    # if not headers:
+    #     headers = {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'}
+    # try:
+    #     body = urlencode(data or {}, quote_via=quote).encode('utf-8')
+    # except Exception as err:
+    #     body = urlencode({}, quote_via=quote).encode('utf-8')
 
     urllib3.contrib.pyopenssl.inject_into_urllib3()
 
@@ -116,10 +116,12 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
 
     # generate an http request
     response = http.request(method, url,
+                            fields=data,
                             headers=headers,
-                            body=body,
-                            preload_content=True,
-                            decode_content=False)
+                            # body=body,
+                            # preload_content=True,
+                            # decode_content=False
+                            )
 
     # return the http response
     return response

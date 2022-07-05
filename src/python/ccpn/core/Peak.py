@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-01 20:11:52 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:37 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -277,6 +277,7 @@ class Peak(AbstractWrapperObject):
 
     @annotation.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def annotation(self, value: Optional[str]):
         if not isinstance(value, (str, type(None))):
             raise ValueError("annotation must be a string or None")
@@ -1196,7 +1197,7 @@ class Peak(AbstractWrapperObject):
     #         spectrum.aliasingRange = alias
 
     #===========================================================================================
-    # new'Object' and other methods
+    # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
 

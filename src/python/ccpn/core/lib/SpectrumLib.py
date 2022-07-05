@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-01 17:51:32 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2053,11 +2053,13 @@ def _pickPeaksByRegion(spectrum, sliceTuples, peakList, positiveThreshold, negat
     preferences = application.preferences
     logger = getLogger()
 
+    spectrum = application.project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
     if spectrum is None or not isinstance(spectrum, Spectrum):
-        raise ValueError('_pickPeaksByRegion: required Spectrum instance, got:%r' % spectrum)
+        raise ValueError(f'_pickPeaksByRegion: required Spectrum instance, got:{repr(spectrum)}')
 
+    peakList = application.project.getByPid(peakList) if isinstance(peakList, str) else peakList
     if peakList is None or not isinstance(peakList, PeakList):
-        raise ValueError('_pickPeaksByRegion: required peakList instance, got:%r' % peakList)
+        raise ValueError(f'_pickPeaksByRegion: required peakList instance, got:{repr(peakList)}')
 
     # get the peakPicker
     if (peakPicker := spectrum.peakPicker) is None:

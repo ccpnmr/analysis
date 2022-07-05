@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-11 11:08:49 +0100 (Sat, June 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,6 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLREGIONTYPE, GLLINETYPE
 from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT
 
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_REGIONSHADE, CCPNGLWIDGET_INTEGRALSHADE
-
 
 
 REGION_COLOURS = {
@@ -782,6 +781,9 @@ class GLIntegralRegion(GLExternalRegion):
 
         self.clearArrays()
         for reg in self._regions:
+
+            if reg._object.isDeleted:
+                return
 
             axisIndex = 0
             for ps, psCode in enumerate(self._parent.axisOrder[0:2]):

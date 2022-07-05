@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-31 10:23:46 +0100 (Tue, May 31, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:42 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -223,13 +223,23 @@ class RadioButtons(QtWidgets.QWidget, Base):
                 if name:
                     return name
 
-    def setIndex(self, i):
-        if self.isExclusive:
-            self.deselectAll()
-        try:
-            self.radioButtons[i].setChecked(True)
-        except:
-            getLogger().debug(f'setIndex: could not set index {i}')
+    def setIndex(self, i, blockSignals=False):
+        if blockSignals:
+            with self.blockWidgetSignals():
+                if self.isExclusive:
+                    self.deselectAll()
+                try:
+                    self.radioButtons[i].setChecked(True)
+                except:
+                    getLogger().debug(f'setIndex: could not set index {i}')
+
+        else:
+            if self.isExclusive:
+                self.deselectAll()
+            try:
+                self.radioButtons[i].setChecked(True)
+            except:
+                getLogger().debug(f'setIndex: could not set index {i}')
 
     def deselectAll(self):
         self.buttonGroup.setExclusive(False)

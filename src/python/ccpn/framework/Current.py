@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-08 19:57:26 +0100 (Wed, June 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,6 @@ import json
 import operator
 import os
 from collections import OrderedDict
-from ccpn.util.Logging import getLogger
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
 from ccpn.core.NmrChain import NmrChain
@@ -41,16 +40,18 @@ from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.Sample import Sample
 from ccpn.core.Restraint import Restraint
 from ccpn.core.Substance import Substance
-from ccpn.core.Integral import Integral
+from ccpn.core.Integral import Integral, IntegralList
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.SpectrumHit import SpectrumHit
 from ccpn.core.Spectrum import Spectrum
-from ccpn.core.Peak import Peak
-from ccpn.core.Multiplet import Multiplet
+from ccpn.core.Peak import Peak, PeakList
+from ccpn.core.Multiplet import Multiplet, MultipletList
 from ccpn.core.DataTable import DataTable
 from ccpn.core.ViolationTable import ViolationTable
+from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.Collection import Collection
 from ccpn.ui._implementation.Strip import Strip
+from ccpn.util.Logging import getLogger
 
 
 SingularOnly = 'singularOnly'
@@ -63,6 +64,7 @@ _currentClasses = {
     Spectrum         : {},
     Peak             : {},
     Integral         : {},
+    Multiplet        : {},
     NmrChain         : {},
     NmrResidue       : {},
     NmrAtom          : {},
@@ -75,10 +77,13 @@ _currentClasses = {
     Sample           : {},
     SpectrumHit      : {SingularOnly: True},
     Substance        : {},
-    Multiplet        : {},
+    PeakList         : {},
+    IntegralList     : {},
+    MultipletList    : {},
     Restraint        : {},
     DataTable        : {},
     ViolationTable   : {},
+    StructureEnsemble: {},
     Collection       : {},
     }
 

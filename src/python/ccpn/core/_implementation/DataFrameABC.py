@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-16 11:02:55 +0000 (Wed, February 16, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,7 +50,7 @@ class DataFrameABC(pd.DataFrame):
     """
     Pandas DataFrame
 
-    The DataFrameABC is based on a Pandas DataFrame.  All of the functionality of DataFrames
+    The DataFrameABC is based on a Pandas DataFrame.  All the functionality of DataFrames
     is available, but we have added a number of convenience methods for working with the data.
 
       Functions taking a record and returning True or False can
@@ -119,7 +119,7 @@ class DataFrameABC(pd.DataFrame):
         for record in DataFrameABC.itertuples():
           print(record.x, record.y, record.z)
 
-      Finally, all of the standard Pandas methods for accessing the data are still available.
+      Finally, all the standard Pandas methods for accessing the data are still available.
       We leave it to the interested coder to investigate that.
 
       3. Writing data to the DataFrameABC is by far the most tricky operation.  There are two primary
@@ -199,10 +199,8 @@ class DataFrameABC(pd.DataFrame):
     def _finaliseParent(self, action: str):
         """finalise an action on the parent - should be a subclass of DataTable.
         """
-        if hasattr(self, '_containingObject'):
-            parent = self._containingObject
-            if parent is not None:
-                parent._finaliseAction(action)
+        if self._containerDataTable:
+            self._containerDataTable._finaliseAction(action)
 
     #=========================================================================================
     # Making selections
@@ -476,7 +474,7 @@ class DataFrameABC(pd.DataFrame):
         """
         Currently called by undo to re-insert a column.
         Add the **kwargs to the column across the index.
-        Currently *args are not checked for multiple values
+        Currently, *args are not checked for multiple values
         Only for use by deleteCol for undo/redo functionality
 
         :param *args: colIndex in args[0]
@@ -671,7 +669,7 @@ class DataFrameABC(pd.DataFrame):
         return self.__class__
 
     def __setattr__(self, name: str, value: typing.Any) -> None:
-        if name in self._reservedColumns:
+        if name in self._reservedColumns and name in self:
             # notification done at the __setitem__ level
             self[name] = value
         else:
@@ -790,7 +788,7 @@ class DataFrameABC(pd.DataFrame):
                 if oldValue is not None:
                     oldValue = oldValue.copy()
 
-                # Set the value using normal pandas behaviour.
+                # Set the value using normal Pandas behaviour.
                 # Anyway it is impossible to modify the input, as it could take so many forms
                 # We clean up the type castings etc. lower down
                 super().__setitem__(key, value)
@@ -827,60 +825,59 @@ class DataFrameABC(pd.DataFrame):
                     raise
 
             else:
-                with notificationBlanking():
-                    with undoBlockWithoutSideBar():
-                        with undoStackBlocking() as addUndoItem:
-                            # WE need a copy, not a view, as this is used for undoing etc.
-                            oldValue = self.get(key)
-                            if oldValue is not None:
-                                oldValue = oldValue.copy()
+                with undoBlockWithoutSideBar():
+                    with undoStackBlocking() as addUndoItem:
+                        # WE need a copy, not a view, as this is used for undoing etc.
+                        oldValue = self.get(key)
+                        if oldValue is not None:
+                            oldValue = oldValue.copy()
 
-                            # Set the value using normal pandas behaviour.
-                            # Anyway it is impossible to modify the input, as it could take so many forms
-                            # We clean up the type castings etc. lower down
-                            super().__setitem__(key, value)
+                        # Set the value using normal Pandas-behaviour.
+                        # Anyway it is impossible to modify the input, as it could take so many forms
+                        # We clean up the type castings etc. lower down
+                        super().__setitem__(key, value)
 
-                            dataType, typeConverterName = columnTypeData
-                            try:
+                        dataType, typeConverterName = columnTypeData
+                        try:
 
-                                if typeConverterName:
-                                    if hasattr(self, typeConverterName):
-                                        # get typeConverter and call it. It modifies self in place.
-                                        getattr(self, typeConverterName)()
-                                    else:
-                                        raise RuntimeError("Code Error. Invalid type converter name %s for column %s"
-                                                           % (typeConverterName, key))
-                                elif dataType:
-                                    # We set again to make sure of the dataType
-                                    ll = fitToDataType(self[key], dataType)
-                                    if dataType is int and None in ll:
-                                        super().__setitem__(key, pd.Series(ll, self.index, dtype=object))
-                                    else:
-                                        # not always guaranteed a .loc can change ints to floats :|
-                                        super().__setitem__(key, pd.Series(ll, self.index, dtype=dataType))
-
-                                if firstData:
-                                    self.reset_index(drop=True, inplace=True)
-
-                                # add item to the undo stack
-                                if oldValue is None:
-                                    # undo addition of new column
-                                    addUndoItem(undo=partial(self.drop, key, axis=1, inplace=True),
-                                                redo=partial(self.__setitem__, key, value))
+                            if typeConverterName:
+                                if hasattr(self, typeConverterName):
+                                    # get typeConverter and call it. It modifies self in place.
+                                    getattr(self, typeConverterName)()
                                 else:
-                                    # Undo overwrite of existing column
-                                    addUndoItem(undo=partial(super().__setitem__, key, oldValue),
-                                                redo=partial(self.__setitem__, key, value))
-
-                                self._finaliseParent('change')
-
-                            except Exception as es:
-                                # We set the new value before the try:, so we need to go back to the previous state
-                                if oldValue is None:
-                                    self.drop(key, axis=1, inplace=True)
+                                    raise RuntimeError("Code Error. Invalid type converter name %s for column %s"
+                                                       % (typeConverterName, key))
+                            elif dataType:
+                                # We set again to make sure of the dataType
+                                ll = fitToDataType(self[key], dataType)
+                                if dataType is int and None in ll:
+                                    super().__setitem__(key, pd.Series(ll, self.index, dtype=object))
                                 else:
-                                    super().__setitem__(key, oldValue)
-                                raise
+                                    # not always guaranteed a .loc can change ints to floats :|
+                                    super().__setitem__(key, pd.Series(ll, self.index, dtype=dataType))
+
+                            if firstData:
+                                self.reset_index(drop=True, inplace=True)
+
+                            # add item to the undo-stack
+                            if oldValue is None:
+                                # undo addition of new column
+                                addUndoItem(undo=partial(self.drop, key, axis=1, inplace=True),
+                                            redo=partial(self.__setitem__, key, value))
+                            else:
+                                # Undo overwrite of existing column
+                                addUndoItem(undo=partial(super().__setitem__, key, oldValue),
+                                            redo=partial(self.__setitem__, key, value))
+
+                            self._finaliseParent('change')
+
+                        except Exception as es:
+                            # We set the new value before the try:, so we need to go back to the previous state
+                            if oldValue is None:
+                                self.drop(key, axis=1, inplace=True)
+                            else:
+                                super().__setitem__(key, oldValue)
+                            raise
 
     @property
     def nefCompatibleColumns(self):

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-17 13:40:26 +0100 (Fri, June 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -169,7 +169,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     VERTICAL = 'vertical'
     labelOrientation = HORIZONTAL  # toplabel orientation
 
-    # overide in specific module implementations
+    # override in specific module implementations
     includeSettingsWidget = False
     maxSettingsState = 3  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     defaultSettingsState = 0  # default state of the settings widget

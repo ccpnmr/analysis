@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-17 17:46:09 +0100 (Tue, May 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
-from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 from ccpn.core.lib.AssignmentLib import _fetchNewPeakAssignments
 
 
@@ -101,11 +101,11 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
         self.assignmentCheckBox = CheckBox(self.mainWidget, text="Keep existing assignments", checked=True, grid=(1, 0), gridSpan=(1, 3))
 
     def _setupNmrResidues(self):
-        with undoBlock():
-            peakList = self.project.getByPid(self.peakListPulldown.currentText())
-            nmrChain = self.project.getByPid(self.nmrChainPulldown.currentText())
-            keepAssignments = self.assignmentCheckBox.isChecked()
+        peakList = self.project.getByPid(self.peakListPulldown.currentText())
+        nmrChain = self.project.getByPid(self.nmrChainPulldown.currentText())
+        keepAssignments = self.assignmentCheckBox.isChecked()
 
+        with notificationEchoBlocking():
             _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments)
 
         # remove if popup does not need to close

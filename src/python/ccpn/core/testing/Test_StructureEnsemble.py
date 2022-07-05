@@ -4,10 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 16:56:11 +0100 (Fri, October 29, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -401,3 +401,146 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
         Test that structureEnsemble attribute .comment is populated.
         """
         checkGetSetAttr(self, self.project.models[0], 'comment', 'ValidComment')
+
+    # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    # # add test structure Ensembles
+    # try:
+    #   StructureTableModule.defined
+    # except:
+    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    #   self.ensemble = self.project.newStructureEnsemble()
+    #   self.data = self.ensemble.data
+    #
+    #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H',
+    #      'CB', 'HB1', 'HB2', 'HB3',
+    #      'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23',
+    #      'CE', 'HE1', 'HE2', 'HE3',
+    #      'CG', 'HG1', 'HG2', 'HG3',
+    #      'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+    #   self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
+    #                                                                                                  'VAL'] * 8
+    #   self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
+    #   self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+    #   self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+    #   self.comment = ['Test'] * 33
+    #
+    #   self.data['atomName'] = self.testAtomName
+    #   self.data['residueName'] = self.testResidueName
+    #   self.data['chainCode'] = self.testChainCode
+    #   self.data['sequenceId'] = self.testSequenceId
+    #   self.data['modelNumber'] = self.testModelNumber
+    #   self.data['comment'] = self.comment
+    #
+    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    #   self.ensemble = self.project.newStructureEnsemble()
+    #   self.data = self.ensemble.data
+    #
+    #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H',
+    #      'CB', 'HB1', 'HB2', 'HB3',
+    #      'CE', 'HE1', 'HE2', 'HE3',
+    #      'CG', 'HG1', 'HG2', 'HG3',
+    #      'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23',
+    #      'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+    #   self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
+    #                                                                                                  'VAL'] * 8
+    #   self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
+    #   self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+    #   self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+    #
+    #   self.data['atomName'] = self.testAtomName
+    #   self.data['residueName'] = self.testResidueName
+    #   self.data['chainCode'] = self.testChainCode
+    #   self.data['sequenceId'] = self.testSequenceId
+    #   self.data['modelNumber'] = self.testModelNumber
+    #   self.data['comment'] = self.comment
+    #
+    #   self.ensemble = self.project.newStructureEnsemble()
+    #   self.ensemble.data = self.data.extract(index='1, 2, 6-7, 9')
+    #
+    #   # make a test dataset in here
+    #
+    #   self.structureData = self.project.newStructureData(self.ensemble.longPid)    # title - should be ensemble name/title/longPid
+    #
+    #   self.dataItem = self.structureData.newData('derivedConformers')
+    #   self.structureData.attachedObject = self.ensemble       # the newest object
+    #   self.dataItem.setParameter(name='backboneSelector', value=self.ensemble.data.backboneSelector)
+    #
+    #   StructureTableModule.defined=True
+    #   # should be a StructureData with the corresponding stuff in it
+    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    # finally:
+    #   pass
+
+    # tuples = structureEnsemble.data.as_namedtuples()
+    # self.setColumns(self.STcolumns)
+    # self.setObjects(tuples)
+    # self.show()
+
+    # import inspect
+    # attr = inspect.getmembers(StructureEnsemble, lambda a:not (inspect.isroutine(a)))
+    # filteredAttr = [a for a in attr if
+    #                 not (a[0].startswith('__') and a[0].endswith('__')) and not a[0].startswith(
+    #                   '_')]
+    # for i in filteredAttr:
+    #   att, val = i
+    #   try:
+    #     setattr(structureEnsemble, att, val)
+    #   except Exception as e:
+    #     # print(e, att)
+    #     del filteredAttr[att]       # remove the attribute
+    #
+    # data = np.array([
+    #   (1, 1.6, 'x'),
+    #   (3, 5.4, 'y'),
+    #   (8, 12.5, 'z'),
+    #   (443, 1e-12, 'w'),
+    # ], dtype=[('Column 1', int), ('Column 2', float), ('Column 3', object)])
+
+    # self.hide()
+    # tuples = structureEnsemble.data.as_namedtuples()
+    # headings = [head[0] for head in self.STcolumns]
+    # data = []
+    # for row in tuples:
+    #   data.append(list(row))
+    #
+    # df = pd.DataFrame(data[0], columns=headings)
+
+    # PandasData = np.dataFra([12,45,'help'], dtype=[('Index', int),
+    #                                       ('modelNumber', int),
+    #                                       ('chainCode', str)])
+
+    # xdata = np.array({'x':10,'y':13.34}, dtype=[('x', np.uint8), ('y', np.float64)])
+    # df = pd.DataFrame(xdata)
+
+    # x = np.empty((10,), dtype=[('x', np.uint8), ('y', np.float64)])
+    # df = pd.DataFrame(x)
+    # t = df.dtypes
+
+    # newArraydata = np.array( [(1, 1.6, 'x'),
+    #       (3, 5.4, 'y'),
+    #       (8, 12.5, 'z'),
+    #       (443, 1e-12, 'w')],
+    #                          dtype=[('Index', np.uint),
+    #                                       ('modelNumber', np.float32),
+    #                                       ('chainCode', np.str)])
+
+    # temp = [(1, 1.6, 'x'),
+    #         (3, 5.4, 'y'),
+    #         (8, 12.5, 'z'),
+    #         (443, 1e-12, 'w')]
+    # newArraydata = np.array(temp, dtype=[('Index', int),
+    #                                         ('modelNumber', float),
+    #                                         ('chainCode', str)])
+
+    # self._project.blankNotification()
+    #
+    # self.setData(structureEnsemble.data.values)
+    # self.setHorizontalHeaderLabels([head[0] for head in NewStructureTable.columnHeadings])
+    #
+    # self._project.unblankNotification()
+    # self.resizeColumnsToContents()
+    # self.show()
+
+    # add a comment field to the Pandas dataFrame?
+
+    # dataFrameObject = self.getDataFrameFromRows(structureEnsemble.data, self.STcolumns)

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-01 20:13:15 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1105,7 +1105,7 @@ class Gui1dWidget(CcpnGLWidget):
                                 if firstOnly:
                                     return peaks if peak in self.current.peaks else []
 
-                        except Exception as es:
+                        except Exception:
                             # NOTE:ED - skip for now
                             continue
 

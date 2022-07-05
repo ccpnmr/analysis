@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-17 10:25:32 +0000 (Thu, March 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -89,7 +89,7 @@ class Ui(NotifierBase):
         # We want to give some feedback; sometimes this takes a while (e.g. poor internet)
         # sys.stderr.write('==> Checking registration ... \n')
         sys.stderr.flush()  # It seems to be necessary as without the output comes after the registration screen
-        sys.stderr.write('==> Checking registration on server\n' )
+        sys.stderr.write('==> Checking registration on server\n')
 
         # check local registration details
         if not (self._isRegistered and self._termsConditions):
@@ -100,7 +100,7 @@ class Ui(NotifierBase):
                 if not self._isRegistered:
                     days = Register._graceCounter(Register._fetchGraceFile(self.application))
                     if days > 0:
-                        sys.stderr.write('\n### Please register within %s day(s)\n' %days)
+                        sys.stderr.write('\n### Please register within %s day(s)\n' % days)
                         return True
                     else:
                         sys.stderr.write('\n### INVALID REGISTRATION, terminating\n')
@@ -195,6 +195,7 @@ class Ui(NotifierBase):
         """
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
         from ccpn.framework.Application import getApplication
+
         _app = getApplication()
 
         if dataLoader is None and path is not None:
@@ -247,6 +248,14 @@ class Ui(NotifierBase):
                 text += '%s\n' % str(sp)
             text += '\nUse menu "Spectrum --> Validate paths.." or "VP" shortcut to correct\n'
             getLogger().warning('Spectrum file paths: %s' % text)
+
+    @staticmethod
+    def getProgressHandler():
+        """Return the context-manager to handle dsplaying progress-bar
+        """
+        from ccpn.ui.gui.widgets.ProgressWidget import ProgressDialog
+
+        return ProgressDialog
 
 
 class NoUi(Ui):
@@ -340,11 +349,20 @@ class NoUi(Ui):
         sys.stderr.write('==> NoUi update\n')
 
         from ccpn.framework.Version import applicationVersion
+
         # applicationVersion = __version__.split()[1]  # ejb - read from the header
         installUpdates(applicationVersion)  # .withoutRelease(), dryRun=False)
 
         sys.stderr.write('Please restart the program to apply the updates\n')
         sys.exit(1)
+
+    @staticmethod
+    def getProgressHandler():
+        """Return the context-manager to handle dsplaying progress-bar
+        """
+        from ccpn.ui.gui.widgets.ProgressWidget import ProgressTextBar
+
+        return ProgressTextBar
 
 
 class TestUi(NoUi):

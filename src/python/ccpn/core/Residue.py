@@ -3,19 +3,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:16 +0000 (Thu, December 23, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:37 +0100 (Tue, July 05, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -270,13 +270,6 @@ class Residue(AbstractWrapperObject):
         """
         chainFragment.__dict__['residues'] = tuple(residues)
 
-    # in baseclass
-    # @deleteObject()
-    # def _delete(self):
-    #     """Delete the Residue wrapped data.
-    #     """
-    #     self._wrappedData.delete()
-
     @logCommand(get='self')
     def delete(self):
         """delete residue.
@@ -307,29 +300,6 @@ class Residue(AbstractWrapperObject):
                     addUndoItem(undo=partial(self._setFragmentResidues, chainFragment, oldResidues),
                                 redo=partial(self._setFragmentResidues, chainFragment, newResidues))
 
-    #EJB 20181210: defined twice
-    # @property
-    # def nextResidue(self) -> 'Residue':
-    #     "Next sequentially connected Residue"
-    #     apiResidue = self._wrappedData
-    #     nextApiMolResidue = apiResidue.molResidue.nextMolResidue
-    #     if nextApiMolResidue is None:
-    #         return None
-    #     else:
-    #         return self._project._data2Obj.get(
-    #                 apiResidue.chain.findFirstResidue(seqId=nextApiMolResidue.serial))
-    #
-    # @property
-    # def previousResidue(self) -> 'Residue':
-    #     "Previous sequentially connected Residue"
-    #     apiResidue = self._wrappedData
-    #     previousApiMolResidue = apiResidue.molResidue.previousMolResidue
-    #     if previousApiMolResidue is None:
-    #         return None
-    #     else:
-    #         return self._project._data2Obj.get(
-    #                 apiResidue.chain.findFirstResidue(seqId=previousApiMolResidue.serial))
-
     @property
     def nmrResidue(self) -> typing.Optional['NmrResidue']:
         """NmrResidue to which Residue is assigned
@@ -341,18 +311,6 @@ class Residue(AbstractWrapperObject):
             return self._project.getNmrResidue(self._id)
         except:
             return None
-
-    # GWV 20181122: removed setters between Chain/NmrChain, Residue/NmrResidue, Atom/NmrAtom
-    # @nmrResidue.setter
-    # def nmrResidue(self, value:'NmrResidue'):
-    #   oldValue = self.nmrResidue
-    #   if oldValue is value:
-    #     return
-    #   elif oldValue is not None:
-    #     oldValue.assignTo()
-    #   #
-    #   if value is not None:
-    #     value.residue = self
 
     @property
     def allNmrResidues(self) -> typing.Tuple['NmrResidue']:
@@ -445,8 +403,22 @@ class Residue(AbstractWrapperObject):
 
         return (oldSequenceCode,)
 
+    def _finaliseAction(self, action: str):
+        """Subclassed to handle delete/create
+        """
+        if action == 'delete':
+            # store the old hierarchy information - required for deferred notifiers
+            self._oldChain = self.chain
+            self._oldAtoms = tuple(self.atoms)
+        elif action == 'create':
+            self._oldChain = None
+            self._oldAtoms = ()
+
+        if not super()._finaliseAction(action):
+            return
+
     #===========================================================================================
-    # new'Object' and other methods
+    # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
@@ -517,38 +489,3 @@ class Residue(AbstractWrapperObject):
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
-
-
-# GWV 20181122: Moved into class
-# def getter(self:Residue) -> Residue:
-#   apiResidue = self._wrappedData
-#   nextApiMolResidue = apiResidue.molResidue.nextMolResidue
-#   if nextApiMolResidue is None:
-#     return None
-#   else:
-#     return self._project._data2Obj.get(
-#       apiResidue.chain.findFirstResidue(seqId=nextApiMolResidue.serial))
-# Residue.nextResidue = property(getter, None, None, "Next sequentially connected Residue")
-
-# GWV 20181122: Moved into class
-# def getter(self:Residue) -> Residue:
-#   apiResidue = self._wrappedData
-#   previousApiMolResidue = apiResidue.molResidue.previousMolResidue
-#   if previousApiMolResidue is None:
-#     return None
-#   else:
-#     return self._project._data2Obj.get(
-#       apiResidue.chain.findFirstResidue(seqId=previousApiMolResidue.serial))
-# Residue.previousResidue = property(getter, None, None, "Previous sequentially connected Residue")
-#
-# del getter
-
-# No 'new' function - chains are made elsewhere
-
-# # Notifiers:
-# Project._apiNotifiers.extend(
-#         (
-#             ('_finaliseApiRename', {}, ApiResidue._metaclass.qualifiedName(), 'setSeqCode'),
-#             ('_finaliseApiRename', {}, ApiResidue._metaclass.qualifiedName(), 'setSeqInsertCode'),
-#             )
-#         )

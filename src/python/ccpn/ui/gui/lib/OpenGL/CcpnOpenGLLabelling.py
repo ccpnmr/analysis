@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-01 20:13:15 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,11 +27,13 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
-import sys
 import math
 import numpy as np
-from PyQt5 import QtWidgets
+
 from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.Multiplet import Multiplet
+from ccpn.core.MultipletList import MultipletList
+from ccpn.core.Integral import Integral
 from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Logging import getLogger
@@ -133,49 +135,55 @@ class GLLabelling():
         # and lv in self._GLSymbols.keys()]
         self._ordering = spectrumViews
 
-    def _handleNotifier(self, triggers, obj):
-        if Notifier.DELETE in triggers:
-            self._deleteSymbol(obj)
-            self._deleteLabel(obj)
-
-        if Notifier.CREATE in triggers:
-            self._createSymbol(obj)
-            self._createLabel(obj)
-
-        if Notifier.CHANGE in triggers:
-            self._changeSymbol(obj)
-            self._changeLabel(obj)
+    # def _handleNotifier(self, triggers, obj):
+    #     if Notifier.DELETE in triggers:
+    #         self._deleteSymbol(obj, None, None)
+    #         self._deleteLabel(obj, None, None)
+    #
+    #     if Notifier.CREATE in triggers:
+    #         self._createSymbol(obj)
+    #         self._createLabel(obj)
+    #
+    #     if Notifier.CHANGE in triggers:
+    #         self._changeSymbol(obj)
+    #         self._changeLabel(obj)
 
     def _processNotifier(self, data):
         """Process notifiers
         """
-        triggers = data[Notifier.TRIGGER]
+        trigger = data[Notifier.TRIGGER]
         obj = data[Notifier.OBJECT]
 
-        # update the multiplet labelling
-        if Notifier.DELETE in triggers:
-            self._deleteSymbol(obj)
-            self._deleteLabel(obj)
+        if isinstance(obj, (Multiplet, Integral)):
+            # update the multiplet labelling
+            if trigger == Notifier.DELETE:
+                self._deleteSymbol(obj, data.get('_list'), data.get('_spectrum'))
+                self._deleteLabel(obj, data.get('_list'), data.get('_spectrum'))
 
-        if Notifier.CREATE in triggers:
-            self._createSymbol(obj)
-            self._createLabel(obj)
+            if trigger == Notifier.CREATE:
+                self._createSymbol(obj)
+                self._createLabel(obj)
 
-        if Notifier.CHANGE in triggers:
-            if obj.isDeleted:
-                return
+            if trigger == Notifier.CHANGE and not obj.isDeleted:
+                self._changeSymbol(obj)
+                self._changeLabel(obj)
 
-            self._changeSymbol(obj)
-            self._changeLabel(obj)
+        elif isinstance(obj, MultipletList):
+            if trigger in [Notifier.DELETE]:
+
+                # clear the vertex arrays
+                for pList, glArray in self._GLSymbols.items():
+                    if pList.isDeleted:
+                        glArray.clearArrays()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Handle notifiers
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def _deleteSymbol(self, obj):
-        pls = self.objectList(obj)
+    def _deleteSymbol(self, obj, parentList, spectrum):
+        pls = parentList  # self.objectList(obj)
         if pls:
-            spectrum = pls.spectrum
+            # spectrum = pls.spectrum
 
             for objListView in self.listViews(pls):
                 if objListView in self._GLSymbols.keys():
@@ -229,7 +237,7 @@ class GLLabelling():
                             self._GLSymbols[objListView].updateAliasedIndexVBO()
                             break
 
-    def _deleteLabel(self, obj):
+    def _deleteLabel(self, obj, parentList, spectrum):
         for pll in self._GLLabels.keys():
             drawList = self._GLLabels[pll]
 
@@ -240,7 +248,7 @@ class GLLabelling():
 
     def _changeLabel(self, obj):
         # NOTE:ED - not the nicest way of changing a label - needs work
-        self._deleteLabel(obj)
+        self._deleteLabel(obj, None, None)
         self._createLabel(obj)
 
     def _createLabel(self, obj):

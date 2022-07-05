@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-20 15:10:33 +0100 (Mon, June 20, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:36 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -753,13 +753,12 @@ class ChemicalShiftList(AbstractWrapperObject):
 
         if data is None or data.empty:
             # set as the new subclassed DataFrameABC
-            self._wrappedData.data = _dfRow  # _ChemicalShiftListFrame(_dfRow)
+            _data = self._wrappedData.data = _dfRow  # _ChemicalShiftListFrame(_dfRow)
         else:
-            # self._wrappedData.data = self._wrappedData.data.append(_dfRow)  # deprecated
-            self._wrappedData.data = pd.concat([self._wrappedData.data, _dfRow], ignore_index=True)
-
-        _data = self._wrappedData.data
-        _data.set_index(_data[CS_UNIQUEID], inplace=True, )  # drop=False)
+            # not particularly fast, but no alternative for now
+            # _data = self._wrappedData.data = self._wrappedData.data.append(_dfRow)  # deprecated
+            _data = self._wrappedData.data = pd.concat([self._wrappedData.data, _dfRow], axis=0, ignore_index=True)
+        _data.set_index(_data[CS_UNIQUEID], inplace=True, )
 
         # create new shift object
         # new Shift only needs chemicalShiftList and uniqueId - properties are linked to dataframe

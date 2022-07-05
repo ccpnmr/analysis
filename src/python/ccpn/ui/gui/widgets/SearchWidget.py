@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-24 10:08:31 +0100 (Fri, June 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:42 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -368,6 +368,12 @@ class _TableFilterABC(ScrollArea):
         # initialise search list
         self._listRows = None
 
+    def searchRows(self, df, rows):
+        """Return the subset of the df based on rows
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
+
     @property
     def columns(self):
         """Return the full list of columns
@@ -467,7 +473,8 @@ class _TableFilterABC(ScrollArea):
             getLogger().debug('Error in comparing values for GuiTable filters, use debug2 for details')
 
         try:
-            self._searchedDataFrame = df.loc[list(rows)].copy()  # changed from iloc
+            # self._searchedDataFrame = df.iloc[list(rows)].copy()  # changed from iloc
+            self._searchedDataFrame = self.searchRows(df, rows)
         except Exception as es:
             getLogger().warning(f'Encountered a problem searching the table {es}')
 
@@ -503,6 +510,11 @@ class _TableFilterABC(ScrollArea):
 
 class _DFTableFilter(_TableFilterABC):
 
+    def searchRows(self, df, rows):
+        """Return the subset of the df based on rows
+        """
+        return df.iloc[list(rows)].copy()
+
     @property
     def columns(self):
         """Return the full list of columns
@@ -526,6 +538,11 @@ class _DFTableFilter(_TableFilterABC):
 #=========================================================================================
 
 class _SimplerDFTableFilter(_TableFilterABC):
+
+    def searchRows(self, df, rows):
+        """Return the subset of the df based on rows
+        """
+        return df.loc[list(rows)].copy()
 
     @property
     def columns(self):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-22 11:25:37 +0000 (Tue, March 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,8 +28,9 @@ __date__ = "$Date: 2021-10-29 16:38:09 +0100 (Fri, October 29, 2021) $"
 
 from PyQt5 import QtWidgets
 import pandas as pd
-from ccpn.core.ViolationTable import ViolationTable as KlassTable
+from collections import OrderedDict
 
+from ccpn.core.ViolationTable import ViolationTable as KlassTable
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.HLine import HLine
@@ -40,14 +41,16 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
+from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget
 from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableView, _updateSimplePandasTable
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
-
+from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Logging import getLogger
 
 
 ALL = '<all>'
 _RESTRAINTTABLE = 'restraintTable'
+LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 
 
 #=========================================================================================
@@ -55,27 +58,21 @@ _RESTRAINTTABLE = 'restraintTable'
 #=========================================================================================
 
 class ViolationTableModule(CcpnModule):
+    """This class implements the module by wrapping a ViolationTable instance
     """
-    This class implements the module by wrapping a ViolationTable instance
-    """
-    includeSettingsWidget = False
+    includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
-    settingsPosition = 'left'
-
-    includePeakLists = False
-    includeNmrChains = False
-    includeSpectrumTable = False
+    settingsPosition = 'top'
 
     className = f'{KlassTable.className}Module'
     _allowRename = True
 
-    activePulldownClass = None
+    activePulldownClass = KlassTable
     _includeInLastSeen = False
 
     def __init__(self, mainWindow=None, name=f'{KlassTable.className} Module',
                  table=None, selectFirstItem=False):
-        """
-        Initialise the Module widgets
+        """Initialise the Module widgets
         """
         super().__init__(mainWindow=mainWindow, name=name)
 
@@ -91,6 +88,7 @@ class ViolationTableModule(CcpnModule):
 
         # add the widgets
         self._setWidgets()
+        self._setCallbacks()
 
         if table is not None:
             self._selectTable(table)
@@ -100,6 +98,21 @@ class ViolationTableModule(CcpnModule):
     def _setWidgets(self):
         """Set up the widgets for the module
         """
+        self._settings = None
+        if self.activePulldownClass:
+            # add to settings widget - see sequenceGraph for more detailed example
+            settingsDict = OrderedDict(((LINKTOPULLDOWNCLASS, {'label'   : 'Link to current %s' % self.activePulldownClass.className,
+                                                               'tipText' : 'Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
+                                                               'callBack': None,
+                                                               'enabled' : True,
+                                                               'checked' : False,
+                                                               '_init'   : None,
+                                                               }),
+                                        ))
+            self._settings = ModuleSettingsWidget(parent=self.settingsWidget, mainWindow=self.mainWindow,
+                                                  settingsDict=settingsDict,
+                                                  grid=(0, 0))
+
         # make the main splitter
         self._splitter = Splitter(None, horizontal=False, grid=(0, 0), isFloatWidget=True)
         self._splitter.setContentsMargins(0, 0, 0, 0)
@@ -115,7 +128,7 @@ class ViolationTableModule(CcpnModule):
         self._splitter.setSizes([1000, 2000])
 
         # add the guiTable to the bottom
-        self._tableWidget = _tableWidget(parent=_bottomWidget,
+        self._tableWidget = _TableWidget(parent=_bottomWidget,
                                          mainWindow=self.mainWindow,
                                          moduleParent=self,
                                          setLayout=True,
@@ -168,6 +181,18 @@ class ViolationTableModule(CcpnModule):
                grid=(row, 3), gridSpan=(1, 1))
         _topWidget.getLayout().setColumnStretch(3, 1)
 
+    def _setCallbacks(self):
+        """Set the active callbacks for the module
+        """
+        if self.activePulldownClass:
+            self._setCurrentPulldown = Notifier(self.current,
+                                                [Notifier.CURRENT],
+                                                targetName=self.activePulldownClass._pluralLinkName,
+                                                callback=self._selectCurrentPulldownClass)
+
+            # set the active callback from the pulldown
+            self._activeCheckbox = self._settings.checkBoxes[LINKTOPULLDOWNCLASS]['widget']
+
     def _maximise(self):
         """
         Maximise the attached table
@@ -198,24 +223,22 @@ class ViolationTableModule(CcpnModule):
                     self._modulePulldown.select(self._table.pid)
 
     def _selectionPulldownCallback(self, item):
-        """
-        Notifier Callback for selecting violationTable from the pull down menu
+        """Notifier Callback for selecting violationTable from the pull down menu
         """
         if item is not None:
             self._table = self.project.getByPid(item)
             if self._table is not None:
-                self._update(self._table)
-            else:
-                _updateSimplePandasTable(self._tableWidget, pd.DataFrame({}))
-                self.lineEditComment.setText('')
+                self._update()
+                if self.activePulldownClass and self._activeCheckbox and self._activeCheckbox.isChecked():
+                    self._tableCurrent = self._table
 
-                _df = pd.DataFrame({'name'     : [],
-                                    'parameter': []})
-                _updateSimplePandasTable(self._metadata, _df, _resize=True)
+            else:
+                self._updateEmptyTable()
+                if self.activePulldownClass and self._activeCheckbox and self._activeCheckbox.isChecked():
+                    self._tableCurrent = None
 
     def _rtPulldownCallback(self, item):
-        """
-        Notifier Callback for selecting restraintTable from the pull down menu
+        """Notifier Callback for selecting restraintTable from the pull down menu
         """
         try:
             with undoBlockWithoutSideBar():
@@ -232,22 +255,36 @@ class ViolationTableModule(CcpnModule):
                             'parameter': self._table.metadata.values()})
         _updateSimplePandasTable(self._metadata, _df, _resize=True)
 
-    def _update(self, table):
+    def _update(self):
+        """Update the table
         """
-        Update the table
-        """
-        df = table.data
-        if len(table.data) > 0:
+        if not self._table:
+            getLogger().debug(f'no table to update {self}')
+            return
+
+        df = self._table.data
+        if df is not None and len(df) > 0:
             _updateSimplePandasTable(self._tableWidget, df, _resize=False)
         else:
             _updateSimplePandasTable(self._tableWidget, pd.DataFrame({}))
 
-        _rTablePid = table.getMetadata(_RESTRAINTTABLE)
+        _rTablePid = self._table.getMetadata(_RESTRAINTTABLE)
         self.rtWidget.select(_rTablePid)
-        self.lineEditComment.setText(table.comment if table.comment else '')
+        self.lineEditComment.setText(self._table.comment if self._table.comment else '')
 
-        _df = pd.DataFrame({'name'     : table.metadata.keys(),
-                            'parameter': table.metadata.values()})
+        _df = pd.DataFrame({'name'     : self._table.metadata.keys(),
+                            'parameter': self._table.metadata.values()})
+        _updateSimplePandasTable(self._metadata, _df, _resize=True)
+
+    def _updateEmptyTable(self):
+        """Update with an empty table
+        """
+        _updateSimplePandasTable(self._tableWidget, pd.DataFrame({}))
+        self.rtWidget.setIndex(0, blockSignals=True)
+        self.lineEditComment.setText('')
+
+        _df = pd.DataFrame({'name'     : [],
+                            'parameter': []})
         _updateSimplePandasTable(self._metadata, _df, _resize=True)
 
     def _applyComment(self):
@@ -263,16 +300,43 @@ class ViolationTableModule(CcpnModule):
                 # need to immediately set back to stop error on loseFocus which also fires editingFinished
                 showWarning('Data Table', str(es))
 
+    def _selectCurrentPulldownClass(self, data):
+        """Respond to change in current activePulldownClass
+        """
+        if self.activePulldownClass and self._activeCheckbox and self._activeCheckbox.isChecked():
+            _table = self._table = self._tableCurrent
+            if _table:
+                self._modulePulldown.select(_table.pid, blockSignals=True)
+                self._update()
+
+            else:
+                self._modulePulldown.setIndex(0, blockSignals=True)
+                self._updateEmptyTable()
+
+    #=========================================================================================
+    # Properties
+    #=========================================================================================
+
+    @property
+    def _tableCurrent(self):
+        """Return the current object, e.g., current.multiplet/current.nmrResidue
+        """
+        return self.current.violationTable
+
+    @_tableCurrent.setter
+    def _tableCurrent(self, value):
+        self.current.violationTable = value
+
 
 #=========================================================================================
-# _tableWidget
+# _TableWidget
 #=========================================================================================
 
-class _tableWidget(_SimplePandasTableView):
+class _TableWidget(_SimplePandasTableView):
     """
     Class to present a ViolationTable
     """
-    className = '_tableWidget'
+    className = '_TableWidget'
     attributeName = KlassTable._pluralLinkName
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, **kwds):
@@ -308,6 +372,9 @@ class _tableWidget(_SimplePandasTableView):
 
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
+
+        # may refactor the remaining modules so this isn't needed
+        self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
 
     def _processDroppedItems(self, data):
         """

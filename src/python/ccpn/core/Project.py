@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-06 11:44:42 +0100 (Wed, April 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:37 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -348,7 +348,6 @@ class Project(AbstractWrapperObject):
         backupPath = backupUrl.path
         return backupPath
 
-
     #-----------------------------------------------------------------------------------------
     # Implementation methods
     #-----------------------------------------------------------------------------------------
@@ -379,7 +378,7 @@ class Project(AbstractWrapperObject):
         self._resetIds()
 
         # Set up notification machinery
-        # Active notifiers - saved for later cleanup. CORER APPLICAATION ONLY
+        # Active notifiers - saved for later cleanup. CORE APPLICATION ONLY
         self._activeNotifiers = []
 
         # list or None. When set used to accumulate pending notifiers
@@ -388,6 +387,7 @@ class Project(AbstractWrapperObject):
 
         # Notification suspension level - to allow for nested notification suspension
         self._notificationSuspension = 0
+        self._progressSuspension = 0
 
         # Notification blanking level - to allow for nested notification disabling
         self._notificationBlanking = 0
@@ -1034,13 +1034,24 @@ class Project(AbstractWrapperObject):
 
     def suspendNotification(self):
         """Suspend notifier execution and accumulate notifiers for later execution"""
-        # return
+        if self.application.hasGui:
+            self.application.ui.qtApp.progressAboutToChangeSignal.emit(self._progressSuspension)
+        self._progressSuspension += 1
+
+        return
         # TODO suspension temporarily disabled
         self._notificationSuspension += 1
 
     def resumeNotification(self):
         """Execute accumulated notifiers and resume immediate notifier execution"""
-        # return
+        self._progressSuspension -= 1
+        if self._progressSuspension < 0:
+            raise RuntimeError("Code Error: _progressSuspension below zero")
+        if self.application.hasGui:
+            self.application.ui.qtApp.progressChangedSignal.emit(self._progressSuspension)
+
+        return
+
         # TODO suspension temporarily disabled
         # This was broken at one point, and we never found time to fix it
         # It is a time-saving measure, allowing you to e.g. execute a
@@ -1051,7 +1062,9 @@ class Project(AbstractWrapperObject):
         else:
             # Should not be necessary, but in this way we never get below 0 no matter what errors happen
             self._notificationSuspension = 0
+
             scheduledNotifiers = set()
+
             executeNotifications = []
             pendingNotifications = self._pendingNotifications
             while pendingNotifications:
@@ -1259,15 +1272,16 @@ class Project(AbstractWrapperObject):
         # Notification suspension postpones notifications (and removes duplicates)
         # It is broken and has been disabled for a long time.
         # There may be some accumulated bugs when (if)it is turned back on.
-        if False and self._notificationSuspension:
-            ll = self._pendingNotifications
-            for dd in iterator:
-                for notifier, onceOnly in dd.items():
-                    ll.append((notifier, onceOnly, self))
-        else:
-            for dd in iterator:
-                for notifier in dd:
-                    notifier(self)
+        # if False and self._notificationSuspension:
+        #     ll = self._pendingNotifications
+        #     for dd in iterator:
+        #         for notifier, onceOnly in dd.items():
+        #             ll.append((notifier, onceOnly, self))
+        # else:
+
+        for dd in iterator:
+            for notifier in dd:
+                notifier(self)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Library functions
@@ -1390,14 +1404,14 @@ class Project(AbstractWrapperObject):
                 newChain = self.createChain(sequence=sequence[1], compoundName=sequence[0],
                                             molType='protein')
                 chains.append(newChain)
-            #
+
         return chains
 
     def _loadPdbFile(self, path: (str, Path)) -> list:
         """Load data from pdb file path into new StructureEnsemble object(s)
         CCPNINTERNAL: called from pdb dataLoader
         """
-        from ccpn.util.StructureData import EnsembleData
+        from ccpn.util.StructureData import EnsembleData, averageStructure
 
         with logCommandManager('application.', 'loadData', path):
             path = aPath(path)
@@ -1405,6 +1419,10 @@ class Project(AbstractWrapperObject):
 
             ensemble = EnsembleData.from_pdb(str(path))
             se = self.newStructureEnsemble(name=name, data=ensemble)
+
+            # create a new ensemble-average in a dataTable
+            dTable = self.newDataTable(name=f'{name}-average', data=averageStructure(ensemble))
+            dTable.setMetadata('structureEnsemble', se.pid)
 
         return [se]
 
@@ -1729,7 +1747,6 @@ class Project(AbstractWrapperObject):
         from ccpn.core.DataTable import _fetchDataTable
 
         return _fetchDataTable(self, name=name)
-
 
     @logCommand('project.')
     def newPeakCluster(self, peaks: Sequence[Union['Peak', str]] = None, **kwds) -> Optional['PeakCluster']:

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-16 11:17:38 +0100 (Thu, June 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -144,6 +144,7 @@ def defineProgramArguments():
     # Ccpn logging options - traceback can sometimes be masked in undo/redo
     # --disable-<option>-exception removes the try:except to allow full traceback to occur
     parser.add_argument('--disable-undo-exception', dest='disableUndoException', action='store_true', help='Disable exception wrapping undo/redo actions, reserved for high-level debugging.')
+    parser.add_argument('--disable-module-exception', dest='disableModuleException', action='store_true', help='Disable exception wrapping in module updates, reserved for high-level debugging.')
     parser.add_argument('--disable-queue-exception', dest='disableQueueException', action='store_true', help='Disable exception wrapping undo/redo actions, reserved for high-level debugging.')
 
     # log information at end of undo/redo if exception occurs (not called if --disable-undo-exception set), calls _logObjects

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-21 19:01:26 +0100 (Tue, June 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,16 +30,20 @@ from typing import List, Tuple, Sequence
 from copy import deepcopy
 from functools import partial
 import numpy as np
+from time import time_ns
 from PyQt5 import QtWidgets, QtCore, QtGui
+
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier, _removeDuplicatedNotifiers
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlockWithoutSideBar
 from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME
 from ccpn.util.decorators import logCommand
 from ccpn.util.Colour import colorSchemeTable
+from ccpn.util.UpdateScheduler import UpdateScheduler
+from ccpn.util.UpdateQueue import UpdateQueue
 from ccpn.ui.gui.guiSettings import GUISTRIP_PIVOT, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -74,6 +78,10 @@ class GuiStrip(Frame):
     # MAXPEAKLABELTYPES = 6
     # MAXPEAKSYMBOLTYPES = 4
 
+    # set the queue handling parameters
+    _maximumQueueLength = 40
+    _logQueue = False
+
     def __init__(self, spectrumDisplay):
         """
         Basic graphics strip class; used in StripNd and Strip1d
@@ -107,8 +115,8 @@ class GuiStrip(Frame):
         #     openGLGrid = (1, 0)
         #     stripToolBarGrid = (2, 0)
 
-        headerGrid = (0, 0)
-        headerSpan = (1, 5)
+        # headerGrid = (0, 0)
+        # headerSpan = (1, 5)
         openGLGrid = (1, 0)
         openGlSpan = (10, 5)
         stripToolBarGrid = (11, 0)
@@ -253,6 +261,13 @@ class GuiStrip(Frame):
         # respond to values changed in the containing spectrumDisplay settings widget
         self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
 
+        # notifier queue handling
+        self._scheduler = UpdateScheduler(self.project, self._queueProcess, name=f'GuiStripNotifier-{self}',
+                                          startOnAdd=False, log=False, completeCallback=self.update)
+        self._queuePending = UpdateQueue()
+        self._queueActive = None
+        self._lock = QtCore.QMutex()
+
     def resizeEvent(self, ev):
         super().resizeEvent(ev)
         # call subclass _resize event
@@ -294,22 +309,43 @@ class GuiStrip(Frame):
         # self._stripNotifier = Notifier(self.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
 
         # Notifier for updating the peaks
-        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
-                         'Peak', self._updateDisplayedPeaks, onceOnly=True)
+        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE], 'Peak',
+                         # self._updateDisplayedPeaks,
+                         partial(self._queueGeneralNotifier, self._updateDisplayedPeaks, 'Peak'),
+                         onceOnly=True)
 
-        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                         'NmrAtom', self._updateDisplayedNmrAtoms, onceOnly=True)
+        self.setNotifier(self.project, [Notifier.DELETE], 'PeakList',
+                         # self._updateDisplayedPeakLists,
+                         partial(self._queueGeneralNotifier, self._updateDisplayedPeakLists, 'PeakList'),
+                         onceOnly=True)
+
+        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'NmrAtom',
+                         # self._updateDisplayedNmrAtoms,
+                         partial(self._queueGeneralNotifier, self._updateDisplayedNmrAtoms, None),
+                         onceOnly=True)
 
         # Notifier for updating the integrals
-        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
-                         'Integral', self._updateDisplayedIntegrals, onceOnly=True)
+        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE], 'Integral',
+                         # self._updateDisplayedIntegrals,
+                         partial(self._queueGeneralNotifier, self._updateDisplayedIntegrals, 'Integral'),
+                         onceOnly=True)
 
         # Notifier for updating the multiplets
-        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
-                         'Multiplet', self._updateDisplayedMultiplets, onceOnly=True)
+        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE], 'Multiplet',
+                         # self._updateDisplayedMultiplets,
+                         partial(self._queueGeneralNotifier, self._updateDisplayedMultiplets, 'Multiplet'),
+                         onceOnly=True)
+
+        # Notifier for updating the multiplets
+        self.setNotifier(self.project, [Notifier.DELETE], 'MultipletList',
+                         # self._updateDisplayedMultipletLists,
+                         partial(self._queueGeneralNotifier, self._updateDisplayedMultipletLists, 'MultipletList'),
+                         onceOnly=True)
 
         # Notifier for change of stripLabel
-        self.setNotifier(self.project, [Notifier.RENAME], 'Spectrum', self._updateSpectrumLabels)
+        self.setNotifier(self.project, [Notifier.RENAME], 'Spectrum',
+                         self._updateSpectrumLabels,
+                         onceOnly=True)
 
         # # Notifier for change of stripLabel
         # self.setNotifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)
@@ -317,6 +353,28 @@ class GuiStrip(Frame):
         # For now, all dropEvents are not strip specific, use spectrumDisplay's handling
         self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                             self.spectrumDisplay._processDroppedItems)
+
+    def _queueGeneralNotifier(self, func, objType, data):
+        """Add the notifier to the queue handler
+        """
+        try:
+            if data[Notifier.TRIGGER] == 'delete':
+                if objType == 'Peak':
+                    objList = data[Notifier.OBJECT].peakList
+                    spectrum = objList.spectrum
+                elif objType == 'Integral':
+                    objList = data[Notifier.OBJECT].integralList
+                    spectrum = objList.spectrum
+                elif objType == 'Multiplet':
+                    objList = data[Notifier.OBJECT].multipletList
+                    spectrum = objList.spectrum
+                else:
+                    objList = spectrum = None
+                data['_list'] = objList
+                data['_spectrum'] = spectrum
+        except Exception:
+            pass
+        self._queueAppend([func, data])
 
     def viewRange(self):
         return self._CcpnGLWidget.viewRange()
@@ -335,7 +393,7 @@ class GuiStrip(Frame):
             self.gridAction.setChecked(visible)
         self._CcpnGLWidget._gridVisible = visible
 
-        # spawn a redraw of the GL windows
+        # spawn a redraw event of the GL windows
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     # GWV 07/01/2022: removed
@@ -351,7 +409,7 @@ class GuiStrip(Frame):
     #     """
     #     self._CcpnGLWidget._xUnits = units
     #
-    #     # spawn a redraw of the GL windows
+    #     # spawn a redraw event of the GL windows
     #     self._CcpnGLWidget.GLSignals.emitPaintEvent()
     #
     # @property
@@ -366,7 +424,7 @@ class GuiStrip(Frame):
     #     """
     #     self._CcpnGLWidget._yUnits = units
     #
-    #     # spawn a redraw of the GL windows
+    #     # spawn a redraw event of the GL windows
     #     self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     @property
@@ -383,7 +441,7 @@ class GuiStrip(Frame):
             self.sideBandsAction.setChecked(visible)
         self._CcpnGLWidget._sideBandsVisible = visible
 
-        # spawn a redraw of the GL windows
+        # spawn a redraw event event of the GL windows
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     @property
@@ -400,7 +458,7 @@ class GuiStrip(Frame):
             self.spectrumBordersAction.setChecked(visible)
         self._CcpnGLWidget._spectrumBordersVisible = visible
 
-        # spawn a redraw of the GL windows
+        # spawn a redraw event event of the GL windows
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     def toggleGrid(self):
@@ -427,7 +485,7 @@ class GuiStrip(Frame):
             self.crosshairAction.setChecked(visible)
         self._CcpnGLWidget._crosshairVisible = visible
 
-        # spawn a redraw of the GL windows
+        # spawn a redraw event of the GL windows
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     def _toggleCrosshair(self):
@@ -562,6 +620,11 @@ class GuiStrip(Frame):
         """
         self._CcpnGLWidget._processPeakNotifier(data)
 
+    def _updateDisplayedPeakLists(self, data):
+        """Callback when peakLists are created/deleted
+        """
+        self._CcpnGLWidget._processPeakListNotifier(data)
+
     def _updateDisplayedNmrAtoms(self, data):
         """Callback when nmrAtoms have changed
         """
@@ -571,6 +634,11 @@ class GuiStrip(Frame):
         """Callback when multiplets have changed
         """
         self._CcpnGLWidget._processMultipletNotifier(data)
+
+    def _updateDisplayedMultipletLists(self, data):
+        """Callback when multipletLists are created/deleted
+        """
+        self._CcpnGLWidget._processMultipletListNotifier(data)
 
     def refreshDevicePixelRatio(self):
         """Set the devicePixel ratio in the GL window
@@ -702,7 +770,7 @@ class GuiStrip(Frame):
                             perm2 = [pp if pp is not None else -(cc + 1) for cc, pp in enumerate(perm)]
                             # print('>>>    ', perm, perm2)
 
-                            if len(set(perm2)) == len(perm2):  # ignore None's
+                            if len(set(perm2)) == len(perm2):  # ignore Nones
                                 self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip)
 
                         # menuFunc.addItem(text=' - ')
@@ -822,7 +890,7 @@ class GuiStrip(Frame):
                 self._createObjectMark(multiplet, axisIndex)
 
     def _addItemsToCopyAxisFromMenusMainView(self):
-        """Setup the menu for the main view
+        """Set up the menu for the main view
         """
         # self._addItemsToCopyAxisFromMenus([self.copyAllAxisFromMenu, self.copyXAxisFromMenu, self.copyYAxisFromMenu],
         #                                    ['All', 'X', 'Y'])
@@ -831,7 +899,7 @@ class GuiStrip(Frame):
                                            (self.copyYAxisFromMenu, 'Y')))
 
     def _addItemsToCopyAxisFromMenusAxes(self, viewPort, thisMenu, is1D):
-        """Setup the menu for the axis views
+        """Set up the menu for the axis views
         """
         from ccpn.ui.gui.lib.GuiStripContextMenus import _addCopyMenuItems
 
@@ -874,7 +942,7 @@ class GuiStrip(Frame):
                 axisName.setEnabled(True if count else False)
 
     def _addItemsToMarkAxesMenuAxesView(self, viewPort, thisMenu):
-        """Setup the menu for the main view for marking axis codes
+        """Set up the menu for the main view for marking axis codes
         """
         indices = {BOTTOMAXIS: (0,), RIGHTAXIS: (1,)}
         if viewPort in indices.keys():
@@ -928,7 +996,7 @@ class GuiStrip(Frame):
     #     axisName = self.markAxesMenu
 
     def _addItemsToMatchAxisCodesFromMenusMainView(self):
-        """Setup the menu for the main view
+        """Set up the menu for the main view
         """
         self._addItemsToCopyAxisCodesFromMenus(0, self.matchXAxisCodeToMenu)
         self._addItemsToCopyAxisCodesFromMenus(1, self.matchYAxisCodeToMenu)
@@ -1214,7 +1282,7 @@ class GuiStrip(Frame):
                     strip._updatePivotLine(self._newPosition)
 
     def _updatePivotLine(self, newPosition):
-        """Respond to changes in the other strips
+        """Respond to change in the other strips
         """
         if not self.isDeleted and self.pivotLine:
             self._newPosition = newPosition
@@ -1331,7 +1399,7 @@ class GuiStrip(Frame):
                     # peakListView.buildSymbols = True
                     peakListView.buildLabels = True
 
-            # spawn a redraw of the GL windows
+            # spawn a redraw event of the GL windows
             self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     @property
@@ -1365,7 +1433,7 @@ class GuiStrip(Frame):
         self.symbolLabelling = value
 
     def _emitSymbolChanged(self):
-        # spawn a redraw of the GL windows
+        # spawn a redraw event of the GL windows
         self._CcpnGLWidget.GLSignals._emitSymbolsChanged(source=None, strip=self,
                                                          symbolDict={SYMBOLTYPES           : self.symbolType,
                                                                      ANNOTATIONTYPES       : self.symbolLabelling,
@@ -1386,6 +1454,10 @@ class GuiStrip(Frame):
         if self.spectrumViews:
             for sV in self.spectrumViews:
 
+                # NOTE:ED - rebuild the peaks here?
+                #   ...and then notify the GL to copy the new lists to the graphics card
+                #   so rebuild will be inside the progress manager
+
                 for peakListView in sV.peakListViews:
                     peakListView.buildSymbols = True
                     peakListView.buildLabels = True
@@ -1394,7 +1466,7 @@ class GuiStrip(Frame):
                     multipletListView.buildSymbols = True
                     multipletListView.buildLabels = True
 
-            # spawn a redraw of the GL windows
+            # spawn a redraw event of the GL windows
             self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     @property
@@ -1440,7 +1512,7 @@ class GuiStrip(Frame):
                                                          ])
 
     def _symbolsChangedInSettings(self, aDict):
-        """Respond to changes in the symbol values in the settings widget
+        """Respond to change in the symbol values in the settings widget
         """
         _symbolType = aDict[SYMBOLTYPES]
         _annotationsType = aDict[ANNOTATIONTYPES]
@@ -1812,12 +1884,12 @@ class GuiStrip(Frame):
 
     def zoomX(self, x1: float, x2: float):
         """
-        Zooms x axis of strip to the specified region
+        Zooms x-axis of strip to the specified region
         """
         self._CcpnGLWidget.zoomX(x1, x2)
 
     def zoomY(self, y1: float, y2: float):
-        """Zooms y axis of strip to the specified region
+        """Zooms y-axis of strip to the specified region
         """
         self._CcpnGLWidget.zoomY(y1, y2)
 
@@ -2196,7 +2268,7 @@ class GuiStrip(Frame):
                 specView.setVisible(specView.spectrum in spectra)
 
     def report(self):
-        """Generate a drawing object that can be added to reports
+        """Generate a drawing object that can be added to report
         :return reportlab drawing object:
         """
         if self._CcpnGLWidget:
@@ -2326,7 +2398,7 @@ class GuiStrip(Frame):
     def navigateToPosition(self, positions: List[float],
                            axisCodes: List[str] = None,
                            widths: List[float] = None):
-        """Navigate to positions, optionally setting widths of this Strip
+        """Navigate to position, optionally setting widths of this Strip
         """
         from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
 
@@ -2671,6 +2743,66 @@ class GuiStrip(Frame):
         """
         # Only implemented for nD
         pass
+
+    #=========================================================================================
+    # Notifier queue handling
+    #=========================================================================================
+
+    def queueFull(self):
+        """Method that is called when the queue is deemed to be too big.
+        Apply overall operation instead of all individual notifiers.
+        """
+        self._setSymbolType()
+
+    def _queueProcess(self):
+        """Process current items in the queue
+
+        VERY simple queue handling
+            if the queue contains more than <_maximumQueueLength> items then call
+            method <self.queueFull> which must be subclassed - usually will rebuild everything
+        """
+        with QtCore.QMutexLocker(self._lock):
+            # protect the queue switching
+            self._queueActive = self._queuePending
+            self._queuePending = UpdateQueue()
+
+        _startTime = time_ns()
+        _useQueueFull = (self._maximumQueueLength not in [0, None] and len(self._queueActive) > self._maximumQueueLength)
+        if self._logQueue:
+            # log the queue-time if required
+            getLogger().debug(f'_queueProcess  {self}  len: {len(self._queueActive)}  useQueueFull: {_useQueueFull}')
+
+        if _useQueueFull:
+            # rebuild from scratch if the queue is too big
+            try:
+                self._queueActive = None
+                self.queueFull()
+            except Exception as es:
+                getLogger().debug(f'Error in {self.__class__.__name__} update queueFull: {es}')
+
+        else:
+            executeQueue = _removeDuplicatedNotifiers(self._queueActive)
+            for itm in executeQueue:
+                # process item if different from previous
+                try:
+                    func, data = itm
+                    func(data)
+                except Exception as es:
+                    getLogger().debug(f'Error in {self.__class__.__name__} update - {es}')
+
+        if self._logQueue:
+            getLogger().debug(f'elapsed time {(time_ns() - _startTime) / 1e9}')
+
+    def _queueAppend(self, itm):
+        """Append a new item to the queue
+        """
+        self._queuePending.put(itm)
+        if not self._scheduler.isActive and not self._scheduler.isBusy:
+            self._scheduler.start()
+
+        elif self._scheduler.isBusy:
+            # caught during the queue processing event, need to restart
+            self._scheduler.signalRestart()
 
 
 #=========================================================================================

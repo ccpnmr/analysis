@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-16 12:24:33 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:42 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -646,10 +646,6 @@ class SidebarClassABC(SidebarABC):
         # Now dynamically change the tree and add and build the children
         self.children = []
         for classObj in classObjs:
-
-            # # skip the objects if they are due to be deleted
-            # if classObj._flaggedForDelete:
-            #     continue
 
             if 'ClassTreeItems' in self.itemType:
                 # if isinstance(self, SidebarClassTreeItems):
@@ -1604,12 +1600,6 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
                 for elem in _pid2Obj[pid_key]:
                     elem_key = "%s:%s" % (key, str(elem))
 
-                    # wrapper = self.project._project._pid2Obj[pid_key][elem]
-                    # wrapper_has_flagged_for_delete = hasattr(wrapper, '_flaggedForDelete')
-                    # flagged_for_delete = False
-                    # if wrapper_has_flagged_for_delete:
-                    #     flagged_for_delete = self.project._project._pid2Obj[pid_key][elem]._flaggedForDelete
-                    # if not flagged_for_delete:
                     if not _pid2Obj[pid_key][elem].isDeleted:
                         if fnmatch.fnmatch(elem_key.lower(), lower_text):
                             if elem not in seen:

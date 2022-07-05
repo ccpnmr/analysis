@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 10:12:18 +0100 (Fri, July 01, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -220,6 +220,7 @@ class Framework(NotifierBase, GuiBase):
         self._experimentClassifications = None  # initialised in _startApplication once a project has loaded
 
         self._disableUndoException = getattr(self.args, 'disableUndoException', False)
+        self._disableModuleException = getattr(self.args, 'disableModuleException', False)
         self._disableQueueException = getattr(self.args, 'disableQueueException', False)
         self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 
@@ -1695,7 +1696,7 @@ class Framework(NotifierBase, GuiBase):
         chemicalShiftTableModule = ChemicalShiftTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(chemicalShiftTableModule, position=position, relativeTo=relativeTo)
         if chemicalShiftList:
-            chemicalShiftTableModule._selectTable(chemicalShiftList)
+            chemicalShiftTableModule.selectTable(chemicalShiftList)
         return chemicalShiftTableModule
 
     @logCommand('application.')
@@ -1711,7 +1712,7 @@ class Framework(NotifierBase, GuiBase):
         nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
         if nmrChain:
-            nmrResidueTableModule.selectNmrChain(nmrChain)
+            nmrResidueTableModule.selectTable(nmrChain)
         return nmrResidueTableModule
 
     @logCommand('application.')
@@ -1727,7 +1728,7 @@ class Framework(NotifierBase, GuiBase):
         residueTableModule = ResidueTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(residueTableModule, position=position, relativeTo=relativeTo)
         if chain:
-            residueTableModule.selectChain(chain)
+            residueTableModule.selectTable(chain)
         return residueTableModule
 
     @logCommand('application.')
@@ -1742,7 +1743,7 @@ class Framework(NotifierBase, GuiBase):
             relativeTo = mainWindow.moduleArea
         peakTableModule = PeakTableModule(mainWindow, selectFirstItem=selectFirstItem)
         if peakList:
-            peakTableModule.selectPeakList(peakList)
+            peakTableModule.selectTable(peakList)
         mainWindow.moduleArea.addModule(peakTableModule, position=position, relativeTo=relativeTo)
         return peakTableModule
 
@@ -1751,7 +1752,7 @@ class Framework(NotifierBase, GuiBase):
                            multipletList: MultipletList = None, selectFirstItem=False):
         """Displays multipletList table on left of main window with specified list selected.
         """
-        from ccpn.ui.gui.modules.MultipletListTable import MultipletTableModule
+        from ccpn.ui.gui.modules.MultipletTable import MultipletTableModule
 
         mainWindow = self.ui.mainWindow
         if not relativeTo:
@@ -1759,7 +1760,7 @@ class Framework(NotifierBase, GuiBase):
         multipletTableModule = MultipletTableModule(mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(multipletTableModule, position=position, relativeTo=relativeTo)
         if multipletList:
-            multipletTableModule.selectMultipletList(multipletList)
+            multipletTableModule.selectTable(multipletList)
         return multipletTableModule
 
     @logCommand('application.')
@@ -1775,7 +1776,7 @@ class Framework(NotifierBase, GuiBase):
         integralTableModule = IntegralTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(integralTableModule, position=position, relativeTo=relativeTo)
         if integralList:
-            integralTableModule.selectIntegralList(integralList)
+            integralTableModule.selectTable(integralList)
         return integralTableModule
 
     @logCommand('application.')
@@ -1807,7 +1808,7 @@ class Framework(NotifierBase, GuiBase):
         structureTableModule = StructureTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(structureTableModule, position=position, relativeTo=relativeTo)
         if structureEnsemble:
-            structureTableModule.selectStructureEnsemble(structureEnsemble)
+            structureTableModule.selectTable(structureEnsemble)
         return structureTableModule
 
     @logCommand('application.')
@@ -2097,13 +2098,17 @@ class Framework(NotifierBase, GuiBase):
 # code for testing purposes
 #-----------------------------------------------------------------------------------------
 
-class MyProgramme(Framework):
-    """My first app"""
-    applicationName = 'CcpNmr'
-    applicationVersion = Version.applicationVersion
-
-
 def createFramework(projectPath=None, **kwds):
+    # stop circular import when run from main entry point
+    from ccpn.AnalysisAssign.AnalysisAssign import Assign
+
+    class MyProgramme(Assign):
+        """My first app
+        """
+        applicationName = 'CcpNmr'
+        applicationVersion = Version.applicationVersion
+
+
     args = Arguments(projectPath=projectPath, **kwds)
     result = MyProgramme(args)
     result._startApplication()
@@ -2111,7 +2116,17 @@ def createFramework(projectPath=None, **kwds):
     return result
 
 
-def testMain():
+def main():
+    # stop circular import when run from main entry point
+    from ccpn.AnalysisAssign.AnalysisAssign import Assign
+
+    class MyProgramme(Assign):
+        """My first app
+        """
+        applicationName = 'CcpNmr'
+        applicationVersion = Version.applicationVersion
+
+
     _makeMainWindowVisible = False
 
     myArgs = Arguments()
@@ -2134,6 +2149,9 @@ def testMain():
     container.register(application)
     application.useFileLogger = True
 
+    # show the mainWindow
+    application.start()
+
 
 if __name__ == '__main__':
-    testMain()
+    main()

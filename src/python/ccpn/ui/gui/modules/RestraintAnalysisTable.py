@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-08 18:22:25 +0000 (Tue, March 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -510,7 +510,7 @@ class RestraintAnalysisTableWidget(GuiTable):
 
     def _updateTable(self, useSelectedPeakList=True, peaks=None, peakList=None):
         """Display the restraints on the table for the selected PeakList.
-        Obviously, If the restraint has not been previously deleted and flagged isDeleted
+        Obviously, If the restraint has not been previously deleted
         """
         self._selectedPeakList = self.project.getByPid(self.pLwidget.getText())
         self._groups = None

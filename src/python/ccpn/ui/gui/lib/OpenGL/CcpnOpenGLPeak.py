@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-04 18:50:46 +0000 (Fri, March 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2020-12-11 17:51:14 +0000 (Fri, December 11, 2020) $"
 
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.Peak import Peak
+from ccpn.core.PeakList import PeakList
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakId, _getPeakAnnotation, _getPeakClusterId
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs
@@ -48,21 +49,29 @@ class GLpeakListMethods():
     def _isSelected(self, peak):
         """return True if the obj in the defined object list
         """
-        if self.current.peaks:
-            return peak in self.current.peaks
-        return False
+        if getattr(self, '_caching', False):
+            if self._objCache is None:
+                self._objCache = list(id(obj) for obj in self.current.peaks)  # this is faster than using __eq__
+            return id(peak) in self._objCache
 
-    def objects(self, obj):
+        else:
+            objs = self.current.peaks
+            return peak in objs
+
+    @staticmethod
+    def objects(obj):
         """return the peaks attached to the object
         """
         return obj.peaks if obj else []
 
-    def objectList(self, obj):
+    @staticmethod
+    def objectList(obj):
         """return the peakList attached to the peak
         """
         return obj.peakList if obj else None
 
-    def listViews(self, peakList):
+    @staticmethod
+    def listViews(peakList):
         """Return the peakListViews attached to the peakList
         """
         return peakList.peakListViews
@@ -71,7 +80,8 @@ class GLpeakListMethods():
     # List specific routines
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def getLabelling(self, obj, labelType):
+    @staticmethod
+    def getLabelling(obj, labelType):
         """Get the object label based on the current labelling method
         For peaks, this is constructed from the pids of the attached nmrAtoms
         """
@@ -99,32 +109,38 @@ class GLpeakListMethods():
 
         return text
 
-    def extraIndicesCount(self, obj):
+    @staticmethod
+    def extraIndicesCount(obj):
         """Calculate how many indices to add
         """
         return 0
 
-    def appendExtraIndices(self, drawList, index, obj):
+    @staticmethod
+    def appendExtraIndices(drawList, index, obj):
         """Add extra indices to the index list
         """
         return 0, 0
 
-    def extraVerticesCount(self, obj):
+    @staticmethod
+    def extraVerticesCount(obj):
         """Calculate how many vertices to add
         """
         return 0
 
-    def appendExtraVertices(self, *args):
+    @staticmethod
+    def appendExtraVertices(*args):
         """Add extra vertices to the vertex list
         """
         return 0
 
-    def insertExtraIndices(self, *args):
+    @staticmethod
+    def insertExtraIndices(*args):
         """Insert extra indices into the vertex list
         """
         return 0, 0
 
-    def insertExtraVertices(self, *args):
+    @staticmethod
+    def insertExtraVertices(*args):
         """Insert extra vertices into the vertex list
         """
         return 0
@@ -132,32 +148,43 @@ class GLpeakListMethods():
     def _processNotifier(self, data):
         """Process notifiers
         """
-        triggers = data[Notifier.TRIGGER]
+        trigger = data[Notifier.TRIGGER]
         obj = data[Notifier.OBJECT]
-        if obj.isDeleted:
-            return
 
         if isinstance(obj, Peak):
 
             # update the peak labelling
-            if Notifier.DELETE in triggers:
-                self._deleteSymbol(obj)
-                self._deleteLabel(obj)
+            if trigger == Notifier.DELETE:
+                self._deleteSymbol(obj, data.get('_list'), data.get('_spectrum'))
+                self._deleteLabel(obj, data.get('_list'), data.get('_spectrum'))
 
-            if Notifier.CREATE in triggers:
+            if trigger == Notifier.CREATE:
                 self._createSymbol(obj)
                 self._createLabel(obj)
 
-            if Notifier.CHANGE in triggers:
+            if trigger == Notifier.CHANGE and not obj.isDeleted:
                 self._changeSymbol(obj)
                 self._changeLabel(obj)
 
-        elif isinstance(obj, NmrAtom):
+        elif isinstance(obj, NmrAtom):  # and not obj.isDeleted:
 
-            # update the labels on the peaks
-            for peak in obj.assignedPeaks:
-                self._changeSymbol(peak)
-                self._changeLabel(peak)
+            if obj.isDeleted:
+                # update the labels on the peaks
+                for peak in obj._oldAssignedPeaks:  # use the deleted attribute
+                    self._changeSymbol(peak)
+                    self._changeLabel(peak)
+            else:
+                for peak in obj.assignedPeaks:
+                    self._changeSymbol(peak)
+                    self._changeLabel(peak)
+
+        elif isinstance(obj, PeakList):
+            if trigger in [Notifier.DELETE]:
+
+                # clear the vertex arrays
+                for pList, glArray in self._GLSymbols.items():
+                    if pList.isDeleted:
+                        glArray.clearArrays()
 
 
 class GLpeakNdLabelling(GLpeakListMethods, GLLabelling):
@@ -260,7 +287,7 @@ class GLpeak1dLabelling(GL1dLabelling, GLpeakNdLabelling):
     """Class to handle symbol and symbol labelling for 1d peak displays
     """
 
-    def objIsInVisiblePlanes(self, spectrumView, obj):
+    def objIsInVisiblePlanes(self, spectrumView, obj, viewOutOfPlanePeaks=True):
         """Get the current object is in visible planes settings
         """
         return True, False, 0, 1.0

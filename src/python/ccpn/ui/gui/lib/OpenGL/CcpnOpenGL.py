@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-21 19:01:26 +0100 (Tue, June 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2869,6 +2869,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.update()
 
+    def _processPeakListNotifier(self, data):
+        self._updateVisibleSpectrumViews()
+        self._GLPeaks._processNotifier(data)
+
+        self.update()
+
     def _processNmrAtomNotifier(self, data):
         self._updateVisibleSpectrumViews()
         self._GLPeaks._processNotifier(data)
@@ -2888,8 +2894,14 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.update()
 
+    def _processMultipletListNotifier(self, data):
+        self._updateVisibleSpectrumViews()
+        self._GLMultiplets._processNotifier(data)
+
+        self.update()
+
     def _nmrAtomsNotifier(self, data):
-        """respond to a rename notifier on an nmrAtom, and update marks
+        """respond to a rename-notifier on an nmrAtom, and update marks
         """
         trigger = data[Notifier.TRIGGER]
 
@@ -3027,11 +3039,36 @@ class CcpnGLWidget(QOpenGLWidget):
 
             with self.glBlocking():
                 # simple profile of building all
+
+                # NOTE:ED - this should be updated to explicit build calls
+                #   and the _buildGL only moves it to the graphics card
+
                 if hasattr(self.project, '_buildWithProfile') and self.project._buildWithProfile is True:
                     self.project._buildWithProfile = False
+
+                    # create simple speed-caches for the current peaks/multiplets/integrals
+                    for objList in [self._GLPeaks, self._GLMultiplets, self._GLIntegrals]:
+                        objList._caching = True
+                        objList._objCache = None
+
                     self._buildGLWithProfile()
+
+                    for objList in [self._GLPeaks, self._GLMultiplets, self._GLIntegrals]:
+                        objList._caching = False
+                        objList._objCache = None
+
                 else:
+                    # create simple speed-caches for the current peaks/multiplets/integrals
+                    for objList in [self._GLPeaks, self._GLMultiplets, self._GLIntegrals]:
+                        objList._caching = True
+                        objList._objCache = None
+
                     self._buildGL()
+
+                    for objList in [self._GLPeaks, self._GLMultiplets, self._GLIntegrals]:
+                        objList._caching = False
+                        objList._objCache = None
+
                 self._paintGL()
 
             # make all following paint events into mouse only
@@ -6411,7 +6448,7 @@ class CcpnGLWidget(QOpenGLWidget):
                             if xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and y0 < height < y1:
                                 peaks.add(peak)
 
-                        except Exception as es:
+                        except Exception:
                             # NOTE:ED - skip for now
                             continue
 
@@ -6436,7 +6473,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                 else:
                                     peaks.add(peak)
 
-                        except Exception as es:
+                        except Exception:
                             # NOTE:ED - skip for now
                             continue
 

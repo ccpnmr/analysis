@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-08 11:25:43 +0100 (Fri, April 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:42 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,31 +30,24 @@ from functools import partial
 
 
 class UpdateQueue:
-    PRIORITY_RUN = 'RUN'
-    PRIORITY_WAIT = 'WAIT'
-    PRIORITIES = (PRIORITY_RUN, PRIORITY_WAIT)
+    PRIORITY_HIGH = 'HIGH'
+    PRIORITY_NORMAL = 'NORMAL'
+    PRIORITY_LOW = 'LOW'
+    PRIORITIES = (PRIORITY_HIGH, PRIORITY_NORMAL, PRIORITY_LOW)
 
     def __init__(self):
-        self._queue = {UpdateQueue.PRIORITY_RUN : [],
-                       UpdateQueue.PRIORITY_WAIT: []}  # ordered sets?
+        self._initQueue()
 
-    def put(self, newItem, priority=PRIORITY_WAIT):
+    def _initQueue(self):
+        self._queue = {UpdateQueue.PRIORITY_HIGH  : [],
+                       UpdateQueue.PRIORITY_NORMAL: [],
+                       UpdateQueue.PRIORITY_LOW   : []
+                       }
+
+    def put(self, newItem, priority=PRIORITY_NORMAL):
         """Add a new task to the specified queue
         """
         self._checkPriority(priority)
-
-        queue = self._queue[priority]
-        if isinstance(newItem, partial):
-            # for speed this could be an ordered dict of (func,args,keywords) keying the partial?
-            # each partial is a new object... compare with the last item in the queue
-            # note partials don't nest after 3.5 [python issue 3780]
-            if queue and (queuedItem := queue[-1]):
-                if newItem.func == queuedItem.func and newItem.args == queuedItem.args and newItem.keywords == queuedItem.keywords:
-                    return
-
-        else:
-            if queue and (queuedItem := queue[-1]) and queuedItem == newItem:
-                return
 
         # append the new task
         self._queue[priority].append(newItem)
@@ -74,18 +67,22 @@ class UpdateQueue:
 
         return False
 
-    def items(self):
+    def items(self, reverse=False):
         """Return a generator of the items in the queues
         """
-        for priority in self.PRIORITIES:
-            for itm in self._queue[priority]:
-                yield itm
+        if reverse:
+            for priority in reversed(self.PRIORITIES):
+                for itm in reversed(self._queue[priority]):
+                    yield itm
+        else:
+            for priority in self.PRIORITIES:
+                for itm in self._queue[priority]:
+                    yield itm
 
     def clearItems(self):
         """Clear the queues
         """
-        self._queue = {UpdateQueue.PRIORITY_RUN : [],
-                       UpdateQueue.PRIORITY_WAIT: []}  # ordered sets?
+        self._initQueue()
 
     def __len__(self):
         """Return the number of items in the queues

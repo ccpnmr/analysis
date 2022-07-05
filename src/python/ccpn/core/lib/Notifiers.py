@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:47:14 +0000 (Tue, February 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -53,6 +53,8 @@ import weakref
 
 DEBUG = False
 _debugIds = ()
+
+
 # _debugIds = (75, 84, 92, 94,95,96)  # for these _id's, debug will be True. This allows for selective debugging
 
 
@@ -221,7 +223,6 @@ class Notifier(NotifierABC):
 
     ANY = '<Any>'
 
-
     # callback dict keywords
     NOTIFIER = 'notifier'
     THEOBJECT = 'theObject'
@@ -233,15 +234,14 @@ class Notifier(NotifierABC):
     PREVIOUSVALUE = 'previousValue'
     TARGETNAME = 'targetName'
 
-
     def __init__(self,
                  theObject: Any,
                  triggers: list,
                  targetName: str,
                  callback: Callable[..., Optional[str]],
-                 setterObject = None,
-                 onceOnly = False,
-                 debug = False,
+                 setterObject=None,
+                 onceOnly=False,
+                 debug=False,
                  **kwargs):
         """
         Create Notifier object;
@@ -270,7 +270,7 @@ class Notifier(NotifierABC):
                          callback=callback, **kwargs
                          )
 
-# >>>>>>
+        # >>>>>>
         if self.id in _debugIds:
             self._debug = True
 
@@ -358,9 +358,9 @@ class Notifier(NotifierABC):
                     # This should not happen
                     raise RuntimeError('Undefined project: cannot register notifier for %s' % theObject)
                 func = _project.registerNotifier(className=targetName,
-                                                      target=trigger,
-                                                      func=partial(self, notifier=notifier),
-                                                      onceOnly=onceOnly)
+                                                 target=trigger,
+                                                 func=partial(self, notifier=notifier),
+                                                 onceOnly=onceOnly)
                 self._unregister.append((targetName, trigger, func))
                 self._isRegistered = True
 
@@ -376,7 +376,7 @@ class Notifier(NotifierABC):
         unregister the notifiers
         """
 
-# >>>>>>
+        # >>>>>>
         if self.id in _debugIds:
             sys.stderr.write('>>> un-registering %s\n' % self)
 
@@ -422,17 +422,16 @@ class Notifier(NotifierABC):
                              )
 
         notifierFired = False
-        callbackDict = {
-                self.NOTIFIER : self,
-                self.TRIGGER : trigger,
-                self.THEOBJECT : self._theObject,
-                self.OBJECT : obj,
-                self.TARGETNAME : targetName,
-                self.PREVIOUSVALUE : None,
-                self.VALUE : None,
-                self.OLDPID : None,
-                self.GETPID : None
-        }
+        callbackDict = {self.NOTIFIER     : self,
+                        self.TRIGGER      : trigger,
+                        self.THEOBJECT    : self._theObject,
+                        self.OBJECT       : obj,
+                        self.TARGETNAME   : targetName,
+                        self.PREVIOUSVALUE: None,
+                        self.VALUE        : None,
+                        self.OLDPID       : None,
+                        self.GETPID       : None
+                        }
 
         # CURRENT special case
         if trigger == Notifier.CURRENT:
@@ -500,6 +499,7 @@ class Notifier(NotifierABC):
 class _NotifiersDict(OrderedDict):
     """A class to retain all notifiers of an object
     """
+
     # GWV: not yet used
     # REGISTERED_WITH_OBJECT = 'registeredWithObject'
     # INITIATED_FROM_OBJECT = 'initiatedFromObject'
@@ -663,3 +663,68 @@ class NotifierBase(object):
         objNotifiers = self._getObjectNotifiersDict()
         for notifier in list(objNotifiers.values()):
             notifier.setBlanking(flag)
+
+
+def _removeDuplicatedNotifiers(notifierQueue):
+    """Remove any duplicated notifiers from the queue
+
+    Notifiers are filtered on (obj, trigger)
+    Notifier priority from high-low is: DELETE, CREATE, CHANGE
+    When one is encountered, the lower-priority are ignored
+
+    Return the condensed list of notifiers
+    """
+    # based on previous suspendNotification
+    executeQueue = []
+    scheduledQueue = set()
+
+    # iterate through the queue in reverse order
+    for func, data in notifierQueue.items(reverse=True):
+        obj, trigger = data[Notifier.OBJECT], data[Notifier.TRIGGER]
+
+        match = (obj, trigger)
+        if match not in scheduledQueue:
+            scheduledQueue.add(match)
+
+            # if True:
+            #     # NOTE:ED - still not sure about this, disabled for the minute
+            #     #   doesn't work correctly with SequenceGraph
+            #     if trigger == Notifier.DELETE:
+            #         # # can skip these two notifiers if DELETE found
+            #         # scheduledQueue |= {(obj, Notifier.CHANGE), (obj, Notifier.RENAME), (obj, Notifier.CREATE)}
+            #         #
+            #         # # discard ALL other notifiers, not needed with DELETE
+            #         # executeQueue = list(filter(lambda val: val[1][Notifier.OBJECT] != obj, executeQueue))
+            #
+            #         # can skip this notifier if CREATE found
+            #         scheduledQueue |= {(obj, Notifier.CHANGE), (obj, Notifier.RENAME)}
+            #
+            #         # discard CHANGE, RENAME notifiers
+            #         executeQueue = list(filter(lambda val: val[1][Notifier.OBJECT] != obj or
+            #                                                val[1][Notifier.TRIGGER] not in [Notifier.CHANGE, Notifier.RENAME],
+            #                                    executeQueue))
+            #
+            #     if trigger == Notifier.CREATE:
+            #         # can skip this notifier if CREATE found
+            #         scheduledQueue |= {(obj, Notifier.CHANGE), (obj, Notifier.RENAME)}
+            #
+            #         # discard CHANGE, RENAME notifiers
+            #         executeQueue = list(filter(lambda val: val[1][Notifier.OBJECT] != obj or
+            #                                                val[1][Notifier.TRIGGER] not in [Notifier.CHANGE, Notifier.RENAME],
+            #                                    executeQueue))
+            #
+            #     elif trigger == Notifier.CHANGE:
+            #         # can skip this notifier if RENAME found
+            #         scheduledQueue |= {(obj, Notifier.RENAME),}
+            #
+            #         # discard CHANGE notifiers
+            #         executeQueue = list(filter(lambda val: val[1][Notifier.OBJECT] != obj or
+            #                                                val[1][Notifier.TRIGGER] not in [Notifier.RENAME],
+            #                                    executeQueue))
+
+            # this is in reverse order
+            executeQueue.append((func, data))
+
+    result = list(reversed(executeQueue))
+
+    return result

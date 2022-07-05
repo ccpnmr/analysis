@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-16 11:14:14 +0100 (Thu, June 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -79,42 +79,62 @@ class GLmultipletListMethods():
     def _isSelected(self, multiplet):
         """return True if the obj in the defined object list
         """
-        if self.current.multiplets:
-            return multiplet in self.current.multiplets
-        return False
+        if getattr(self, '_caching', False):
+            if self._objCache is None:
+                self._objCache = list(id(obj) for obj in self.current.multiplets)  # this is faster than using __eq__
+            return id(multiplet) in self._objCache
 
-    def objects(self, obj):
+        else:
+            objs = self.current.multiplets
+            return multiplet in objs
+
+    @staticmethod
+    def objects(obj):
         """return the multiplets attached to the object
         """
         return obj.multiplets
 
-    def objectList(self, obj):
+    @staticmethod
+    def objectList(obj):
         """return the multipletList attached to the multiplet
         """
-        return obj.multipletList
+        if not obj.isDeleted:
+            return obj.multipletList
 
-    def listViews(self, multipletList):
+    @staticmethod
+    def listViews(multipletList):
         """Return the multipletListViews attached to the multipletList
         """
+        if multipletList.isDeleted:
+            return ()
+
         return multipletList.multipletListViews
 
-    def getLabelling(self, obj, labelType):
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # List specific routines
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @staticmethod
+    def getLabelling(obj, labelType):
         """get the object label based on the current labelling method
         """
         return obj.pid
 
-    def extraIndicesCount(self, multiplet):
+    @staticmethod
+    def extraIndicesCount(multiplet):
         """Calculate how many indices to add
         Returns the size of array needed to hold the indices, see insertExtraIndices
         """
         return 2 * len(multiplet.peaks) if multiplet.peaks else 0
 
-    def extraVerticesCount(self, multiplet):
+    @staticmethod
+    def extraVerticesCount(multiplet):
         """Calculate how many vertices to add
         """
         return (len(multiplet.peaks) + 1) if multiplet.peaks else 0
 
-    def appendExtraIndices(self, drawList, index, multiplet):
+    @staticmethod
+    def appendExtraIndices(drawList, index, multiplet):
         """Add extra indices to the index list
         Returns the number of unique indices NOT the length of the appended list
         """
@@ -126,7 +146,8 @@ class GLmultipletListMethods():
                                                                       for val in (index, 1 + index + ii)), dtype=np.uint32))
         return 2 * insertNum, insertNum + 1
 
-    def insertExtraIndices(self, drawList, indexPtr, index, multiplet):
+    @staticmethod
+    def insertExtraIndices(drawList, indexPtr, index, multiplet):
         """insert extra indices into the index list
         Returns (len, ind)
             len: length of the inserted array
@@ -553,7 +574,7 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
 
         return numVertices
 
-    def objIsInVisiblePlanes(self, spectrumView, obj):
+    def objIsInVisiblePlanes(self, spectrumView, obj, viewOutOfPlanePeaks=True):
         """Get the current object is in visible planes settings
         """
         return True, False, 0, 1.0

@@ -19,4 +19,4 @@ export CCPNMR_TOP_DIR
 ANALYSIS="${CCPNMR_TOP_DIR}"/src/python/ccpn/AnalysisStructure
 
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
-"${CONDA}"/bin/python -W ignore "${ANALYSIS}" "$@"
+"${CCPNMR_TOP_DIR}${CCPN_PYTHON}" -W ignore "${ANALYSIS}" "$@"

@@ -22,4 +22,4 @@ source "${CCPNMR_TOP_DIR}"/bin/paths.sh
 # redefine PYTHONPATH from default
 export PYTHONPATH="${CCPNMR_TOP_DIR}"/src/python/chemBuild:${CCPNMR_TOP_DIR}/src/c
 
-"${CONDA}"/bin/python -W ignore "${CHEMBUILD}" $*
+"${CCPNMR_TOP_DIR}${CCPN_PYTHON}" -W ignore "${CHEMBUILD}" "$@"

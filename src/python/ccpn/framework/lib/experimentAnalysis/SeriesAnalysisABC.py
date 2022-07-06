@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 17:13:53 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-06 10:57:47 +0100 (Wed, July 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -247,3 +247,44 @@ class SeriesAnalysisABC(ABC):
         return f'<{self.__class__.__name__}: {self.seriesAnalysisName}>'
 
     __repr__ = __str__
+
+
+class GroupingNmrAtomABC(ABC):
+    """
+    Class for defining grouping nmrAtoms in a seriesAnalysis
+    """
+
+    groupType = None
+    nmrAtomNames = []
+    excludeResidueTypes = []
+    includedResidueTypes = []
+
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        return f'<{self.__class__.__name__}: {self.groupType}>'
+
+    __repr__ = __str__
+
+
+class GroupingBackboneNmrAtoms(GroupingNmrAtomABC):
+
+    groupType = 'Backbone'
+    nmrAtomNames = ['H', 'N', 'Hn', 'Nh', 'CA', 'CB', 'C', 'HA', 'HB']
+    excludeResidueTypes = ['Proline']
+    includedResidueTypes = []
+
+class GroupingSideChainNmrAtoms(GroupingNmrAtomABC):
+
+    groupType = 'SideChain'
+    nmrAtomNames = []
+    excludeResidueTypes = ['Glycine']
+    includedResidueTypes = []
+
+class GroupingMethylNmrAtoms(GroupingNmrAtomABC):
+
+    groupType = 'Methyl'
+    nmrAtomNames = []
+    excludeResidueTypes = ['Proline']
+    includedResidueTypes = ['Alanine', 'Leucine', 'Valine', 'Isoleucine', 'Threonine', 'Methionine']

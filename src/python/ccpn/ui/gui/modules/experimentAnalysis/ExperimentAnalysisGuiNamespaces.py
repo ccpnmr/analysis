@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-05 17:30:48 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-06 10:57:47 +0100 (Wed, July 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -124,13 +124,13 @@ WidgetVarName_FollowAtoms               = 'FollowAtoms'
 Label_FollowAtoms                       = 'Follow (nmr)Atoms'
 TipText_FollowAtoms                     = 'Consider only the selected (nmr)Atoms in the calculation. E.g.: H, N'
 
-WidgetVarName_ExcludeResType            = 'ExcludeResidueType'
-Label_ExcludeResType                    = 'Exclude (Nmr)Residue Type'
-TipText_ExcludeResType                  = 'Exclude the selected (Nmr)Residue Type from the calculation. E.g.: Pro'
+WidgetVarName_FollowGroups              = 'FollowGroups'
+Label_FollowGroups                      = 'Follow Groups'
+TipText_FollowGroups                    = 'Follow grouped NmrAtoms in the calculation. E.g.: H, N for Backbone group'
 
-WidgetVarName_DDOtherCalculationMode    = 'DeltaDeltaCalculationOtherMode'
-Label_DDOtherCalculationMode            = f'{DELTA}{Delta} Height/Volume \nCalculation Mode'
-TipText_DDOtherCalculationMode          = f'Select the calculation mode for other {DELTA}{Delta} analysis. E.g.: Height and Volume.'
+WidgetVarName_ExcludeResType            = 'ExcludeResidueType'
+Label_ExcludeResType                    = 'Exclude NmrResidue Type'
+TipText_ExcludeResType                  = 'Exclude the selected NmrResidue Type from the calculation. E.g.: Pro'
 
 WidgetVarName_UntraceablePeak           = 'UntraceablePeak'
 Label_UntraceablePeak                   = f'{DELTA}{Delta} for Untraceable Perturbations'
@@ -141,7 +141,6 @@ WidgetVarName_CalculateDeltaDelta       = 'CalculateDeltaDelta'
 Label_CalculateDeltaDelta               = f'Calculate {DELTA}{Delta}'
 Button_CalculateDeltaDelta              = f'Re-Calculate '
 TipText_CalculateDeltaDelta             = f'Calculate {DELTA}{Delta} values based on current settings'
-
 
 WidgetVarName_CalculateFitting          = 'CalculateFitting'
 Label_CalculateFitting                  = f'Start Fitting'

@@ -16,6 +16,7 @@
 <br><a href="#V2toV3">Can I open Version 2 projects in Version 3?</a>
 <br><a href="#V3toV2">Can I open Version 3 projects in Version 2?</a>
 <br><a href="#RemoteWorking">Can I use CcpNmr Analysis remotely?</a>
+<br><a href="#DataTypes">What data types can I load?</a>
 <br><a href="#ChemBuildMol">How can I get a molecule from ChemBuild into CcpNmr Analysis V3?</a>
 
 <h3 id="V2Feat">What has happened to my favourite Version 2 features?</h3></p>
@@ -35,6 +36,27 @@
 <p>Yes and no. We strongly recommend that you have your project on a local disk. This is because Analysis regularly writes to your project files and is currently not set up to deal with temporary breaks in the connection. You could therefore easily end up with your project in a compromised state which will later make it unreadable. However, if your spectrum files (which are generally what takes up lots of disk space) are on a remote disk/server, then that is fine. Analysis only has to read these files and so there shouldn't be any issues.
 <br>Finally, you can of course also log into a different machine through VNC Viewer (e.g. to <a href="https://nmrbox.org/">NMRBox</a>), TeamViewer or some other such package and work on a remote workstation. In this case, it is simply the graphics which are being relayed back to your local computer. The important thing is that your project is stored on the same computer on which are running CcpNmr Analysis.</p>
 
+<h3 id="DataTypes">What data types can I load?</h3>
+<p>CcpNmr Analysis can read the following types of files:
+<p><span class="action">Bruker data</span>: in order to open Bruker data correctly, Analysis needs to be able to read several files and not just the 1r/2rr/3rrr/.../8rrrrrrrr file (please do not rename these files!). You can drag and drop the 1r/2rr/3rrr file (or the procs file) into Analysis to open the spectrum, but they must be contained within the Bruker file structure so that Analysis can access the other files it needs to read and display the data correctly.</p>
+<p><span class="action">.dat, .fid, .ft1, .ft2, .f3</span> or <span class="action">.ft4</span>: read in as an NmrPipe processed Spectrum</p>
+<p><span class="action">.ucsf</span>: read in as a ucsf format Spectrum</p>
+<p><span class="action">.spc</span> with <span class="action">.par</span>: read in as an Azara processed spectrum. Both files must be present, but either can be dragged and dropped or selected.</p>
+<p><span class="action">.dat</span> or <span class="action">.mat</span>: read in as a Felix processed Spectrum</p>
+<p><span class="action">.ndf5</span> or <span class="action">.hdf5</span>: read in as an Hdf5 format Spectrum</p>
+<p><span class="action">.nv</span>: read in an NmrView format Spectrum</p>
+<p><span class="action">.param</span> or <span class="action">.16</span>: read in as an Xeasy format Spectrum</p>
+<p><span class="action">.dx</span> or <span class="action">.DX</span>: read in as a JCAMP format Spectrum (currently only works for 1D spectra)</p>
+<p><span class="action">.save</span>: read in as a Sparky format saved Spectrum</p>
+<p><span class="action">.proj</span>: read in as a Sparky project</p>
+<p><span class="action">.nef</span>: read in as an NMR Exchange format file. Can be either used to open a new project or imported to the current project.</p>
+<p><span class="action">.str</span>: read in as an BMRB NmrStar file, but currently only loads the assignments as a ChemicalShiftList and NmrChain. Can be either used to open a new project or imported to the current project.</p>
+<p><span class="action">.fasta</span>: read in as a new Chain</p>
+<p><span class="action">.pdb</span>: read in as a StructureEnsemble</p>
+<p><span class="action">.py</span>: read in as a Macro</p>
+<p><span class="action">.xlsx</span>: if correctly formatted, then this can be used to read in many Spectra as well as other Screening related data (Substances and their properties etc.)</p>
+<p><span class="action">folder.ccpn</span>: a folder with .ccpn will be opened as a CCPN project</p>
+<p><span class="action">folder</span>: the program will check whether this is a V2 project folder or a folder from a Bruker file tree, alternatively if it contains any other types of files that can be loaded (spectrum, sequence, structure, text etc.), then all of these will be loaded.</p>
 
 <h3 id="ChemBuildMol">How can I get a molecule from ChemBuild into CcpNmr Analysis V3?</h3>
 <p>As yet, ChemBuild and Analysis V3 are not properly integrated and it may still take us a little while to get this done properly. There are one or two workarounds. Which one you should use (and indeed whether you should bother importing a molecule at all!)  depends on what your ultimate aim is (why are you trying to import what).</p>

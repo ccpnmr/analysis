@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 export CONDA="${CCPNMR_TOP_DIR}"/miniconda
+export CCPN_PYTHON="/bin/lib/CcpNmrAnalysis"
 export PYTHONPATH="${CCPNMR_TOP_DIR}"/src/python:"${CCPNMR_TOP_DIR}"/src/c
 export FONTCONFIG_FILE="${CONDA}"/etc/fonts/fonts.conf
 export FONTCONFIG_PATH="${CONDA}"/etc/fonts

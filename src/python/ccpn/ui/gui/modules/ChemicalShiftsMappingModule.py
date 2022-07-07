@@ -69,7 +69,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-07 12:47:41 +0100 (Thu, July 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1459,7 +1459,12 @@ class ChemicalShiftsMapping(CcpnModule):
         self.disappearedPeakBrush = 'b'
         # check if all values are none:
         if self.nmrResidueTable._dataFrameObject is None: return
-        shifts = [nmrResidue._delta for nmrResidue in self.nmrResidueTable._dataFrameObject.objects]
+
+        # shifts = [nmrResidue._delta for nmrResidue in self.nmrResidueTable._dataFrameObject.objects]
+
+        _objs = list(self.nmrResidueTable._dataFrameObject.dataFrame['_object'])
+        shifts = [nmrResidue._delta for nmrResidue in _objs]
+
         if not any(shifts):
             self.barGraphWidget.clear()
             return
@@ -1468,7 +1473,8 @@ class ChemicalShiftsMapping(CcpnModule):
             self.thresholdLinePos = self.barGraphWidget.xLine.pos().y()
 
             if self.nmrResidueTable._dataFrameObject:
-                for nmrResidue in self.nmrResidueTable._dataFrameObject.objects:
+                # for nmrResidue in self.nmrResidueTable._dataFrameObject.objects:
+                for nmrResidue in _objs:
                     if nmrResidue:
                         nmrResidue.missingPeaks = False
                         if hasattr(nmrResidue, '_spectraWithMissingPeaks'):

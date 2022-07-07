@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-07 12:47:57 +0100 (Thu, July 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -294,6 +294,18 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
         If multiple different obj instances, then asks first.
         """
         pass
+
+    def scrollToSelectedIndex(self):
+        h = self.horizontalHeader()
+        for i in range(h.count()):
+            if not h.isSectionHidden(i) and h.sectionViewportPosition(i) >= 0:
+                selection = self.selectionModel().selectedIndexes()
+
+                if selection:
+                    self.scrollTo(selection[0],
+                                  self.EnsureVisible)  # doesn't dance around so much
+                    # self.PositionAtCenter)
+                    break
 
 
 #=========================================================================================

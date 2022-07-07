@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 19:32:52 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-07 20:01:35 +0100 (Thu, July 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 
 import numpy as np
 import pandas as pd
+from scipy import stats
 from ccpn.util.Logging import getLogger
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
@@ -185,14 +186,19 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
 
         return outDataFrame
 
-    def getThresholdValueForData(self, stdFactor=1):
-        """ Get a Standard Deviation for the deltaDeltas  as a (default) Threshold value"""
-        stdFactor = stdFactor if stdFactor and stdFactor >0 else 1
+    def getThresholdValueForData(self, factor=1):
+        """ Get the Median absolute deviation for the deltaDeltas as a (default) Threshold value"""
+
+        factor = factor if factor and factor >0 else 1
         thresholdValue = None
         data = self._getOutputMergedDataFrame()
         if data is not None:
             if len(data[sv.DELTA_DELTA_MEAN])>0:
-                thresholdValue = data[sv.DELTA_DELTA_MEAN].std() * stdFactor
+                values = data[sv.DELTA_DELTA_MEAN].values
+                values = values[~np.isnan(values)]  # skip nans
+                thresholdValue = stats.median_absolute_deviation(values)
+        if thresholdValue:
+            thresholdValue *= factor
         return thresholdValue
 
     def plotResults(self, *args, **kwargs):

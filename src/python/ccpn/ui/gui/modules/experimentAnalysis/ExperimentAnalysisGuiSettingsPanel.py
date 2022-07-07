@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-05 17:30:48 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-07 20:01:35 +0100 (Thu, July 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ This module contains the GUI Settings panels.
 
 from collections import OrderedDict as od
 from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import ChemicalShiftCalculationModes, ChemicalShiftCalculationModels
+from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import ALL_GROUPINGNMRATOMS
 from ccpn.util.Logging import getLogger
 import numpy as np
 from ccpn.util.isotopes import name2IsotopeCode
@@ -321,12 +322,29 @@ class CSMCalculationPanel(GuiSettingPanel):
                     'fixedWidths': SettingsWidgetFixedWidths}}
         settingsDict.update(factorsDict)
         restOfWidgetDict = od((
+
+            (guiNameSpaces.WidgetVarName_FollowGroups,
+             {'label': guiNameSpaces.Label_FollowGroups,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': None,
+              'callBack': self._followGroupSelectionCallback,
+              'enabled':False,
+              'kwds': {'labelText': guiNameSpaces.Label_FollowGroups,
+                       'hAlign': 'l',
+                       'tipText': '',
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds': {'texts': [g.groupType for g in ALL_GROUPINGNMRATOMS.values()],
+                                        'tipTexts': [g.groupInfo for g in ALL_GROUPINGNMRATOMS.values()],
+                                        'direction': 'v',
+                                        }}}),
+
             (guiNameSpaces.WidgetVarName_FollowAtoms,
              {'label': guiNameSpaces.Label_FollowAtoms,
               'tipText': guiNameSpaces.TipText_FollowAtoms,
               'type': settingWidgets.UniqueNmrAtomNamesSelectionWidget,
               'postInit': self._followAtomsWidgetPostInit,
               'callBack': self._setCalculationOptionsToBackend,
+              'enabled': False,
               'kwds': {
                   'labelText': guiNameSpaces.Label_FollowAtoms,
                   'tipText': guiNameSpaces.TipText_FollowAtoms,
@@ -342,6 +360,7 @@ class CSMCalculationPanel(GuiSettingPanel):
              {'label': guiNameSpaces.Label_ExcludeResType,
               'tipText': guiNameSpaces.TipText_ExcludeResType,
               'postInit': self._excludeResiduesWidgetPostInit,
+              'enabled': False,
               'type': settingWidgets.UniqueNmrResidueTypeSelectionWidget,
               'callBack': self._setCalculationOptionsToBackend,
               'kwds': {
@@ -386,6 +405,12 @@ class CSMCalculationPanel(GuiSettingPanel):
         widget.listWidget.setFixedHeight(100)
         widget.setFixedWidths(SettingsWidgetFixedWidths)
         widget.getLayout().setAlignment(QtCore.Qt.AlignTop)
+
+    def _followGroupSelectionCallback(self, *args):
+        widget = self.getWidget(guiNameSpaces.WidgetVarName_FollowGroups)
+        value  = widget.getByText()
+        groupObj = ALL_GROUPINGNMRATOMS.get(value, None)
+        # to  be implemented: pre fill the nmrAtoms selection and Excluded nmrRes.
 
     def _calculationModePostInit(self, widget):
         pass
@@ -484,7 +509,7 @@ class CSMGuiFittingPanel(GuiSettingPanel):
               'callBack': None,
               'tipText': guiNameSpaces.TipText_PeakPropertySelectionWidget,
               'type': compoundWidget.PulldownListCompoundWidget,
-              'enabled': False,
+              'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_OptimiserMethod,
                        'tipText': guiNameSpaces.TipText_OptimiserMethod,
                        'texts': ['leastsq', 'differential_evolution', 'ampgo', 'newton'],
@@ -494,7 +519,7 @@ class CSMGuiFittingPanel(GuiSettingPanel):
               'callBack': None,
               'tipText': guiNameSpaces.TipText_ErrorMethod,
               'type': compoundWidget.PulldownListCompoundWidget,
-              'enabled': False,
+              'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_ErrorMethod,
                        'tipText': guiNameSpaces.TipText_ErrorMethod,
                        'texts': ['parametric bootstrapping', 'non-parametric bootstrapping', 'Monte-Carlo',],
@@ -578,6 +603,8 @@ class CSMAppearancePanel(GuiSettingPanel):
               'kwds': {'labelText': guiNameSpaces.Label_ThreshValue,
                        'tipText': guiNameSpaces.TipText_ThreshValue,
                        'value': 0.1,
+                       'step':0.01,
+                       'decimals': 4,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
             (guiNameSpaces.WidgetVarName_PredefThreshValue,
              {'label': guiNameSpaces.Label_PredefThreshValue,
@@ -587,8 +614,8 @@ class CSMAppearancePanel(GuiSettingPanel):
               'type': compoundWidget.ButtonCompoundWidget,
               '_init': None,
               'kwds': {'labelText': guiNameSpaces.Label_PredefThreshValue,
-                       'tipText': guiNameSpaces.TipText_PredefThreshValue,
-                       'text':guiNameSpaces.Label_StdThreshValue,
+                       'tipText': guiNameSpaces.TipText_setThreshValue,
+                       'text':guiNameSpaces.Label_setThreshValue,
                        'fixedWidths': SettingsWidgetFixedWidths
                        }}),
             (guiNameSpaces.WidgetVarName_AboveThrColour,

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-06 10:57:47 +0100 (Wed, July 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-07 20:01:35 +0100 (Thu, July 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -255,11 +255,15 @@ class GroupingNmrAtomABC(ABC):
     """
 
     groupType = None
-    nmrAtomNames = []
-    excludeResidueTypes = []
-    includedResidueTypes = []
+    groupInfo = None
+    nmrAtomNames = None
+    excludeResidueTypes = None
+    includedResidueTypes = None
 
     def __init__(self):
+        pass
+
+    def _getResidueFullName(self):
         pass
 
     def __str__(self):
@@ -271,20 +275,47 @@ class GroupingNmrAtomABC(ABC):
 class GroupingBackboneNmrAtoms(GroupingNmrAtomABC):
 
     groupType = 'Backbone'
-    nmrAtomNames = ['H', 'N', 'Hn', 'Nh', 'CA', 'CB', 'C', 'HA', 'HB']
+    groupInfo = 'Follow the backbone atoms in a series Analysis'
+    nmrAtomNames = ['H', 'N', 'CA', 'C', 'HA',]
     excludeResidueTypes = ['Proline']
-    includedResidueTypes = []
+    includedResidueTypes = None
 
 class GroupingSideChainNmrAtoms(GroupingNmrAtomABC):
 
     groupType = 'SideChain'
+    groupInfo = 'Follow the SideChain atoms in a series Analysis'
     nmrAtomNames = []
     excludeResidueTypes = ['Glycine']
-    includedResidueTypes = []
+    includedResidueTypes = None
+
+class GroupingBBandSSNmrAtoms(GroupingNmrAtomABC):
+
+    groupType = 'Backbone+SideChain'
+    groupInfo = 'Follow the Backbone and SideChain atoms in a series Analysis'
+    nmrAtomNames = GroupingBackboneNmrAtoms.nmrAtomNames+GroupingSideChainNmrAtoms.nmrAtomNames
+    excludeResidueTypes = GroupingBackboneNmrAtoms.excludeResidueTypes+GroupingSideChainNmrAtoms.excludeResidueTypes
+    includedResidueTypes = None
 
 class GroupingMethylNmrAtoms(GroupingNmrAtomABC):
 
     groupType = 'Methyl'
+    groupInfo = 'Follow the Methyl atoms in a series Analysis'
     nmrAtomNames = []
-    excludeResidueTypes = ['Proline']
+    excludeResidueTypes = None
     includedResidueTypes = ['Alanine', 'Leucine', 'Valine', 'Isoleucine', 'Threonine', 'Methionine']
+
+class GroupingCustomNmrAtoms(GroupingNmrAtomABC):
+
+    groupType = 'Custom'
+    groupInfo = 'Follow custom atoms in a series Analysis'
+    nmrAtomNames = []
+    excludeResidueTypes = None
+    includedResidueTypes = None
+
+ALL_GROUPINGNMRATOMS = {
+                        GroupingBackboneNmrAtoms.groupType:GroupingBackboneNmrAtoms,
+                        GroupingSideChainNmrAtoms.groupType:GroupingSideChainNmrAtoms,
+                        GroupingBBandSSNmrAtoms.groupType:GroupingBBandSSNmrAtoms,
+                        GroupingMethylNmrAtoms.groupType:GroupingMethylNmrAtoms,
+                        GroupingCustomNmrAtoms.groupType:GroupingCustomNmrAtoms
+                        }

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-06 10:57:47 +0100 (Wed, July 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-07 20:01:35 +0100 (Thu, July 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -175,8 +175,8 @@ WidgetVarName_PredefThreshValue         = 'PredefinedThreshValue'
 Label_PredefThreshValue                 = 'Predefined Threshold setter'
 TipText_PredefThreshValue               = 'Predefined threshold value setters based on the current data'
 
-Label_StdThreshValue                    = 'Set to 1 SD'
-TipText_StdThreshValue                  = 'Calculate 1 Standard Deviation of the current data and set the value to the Threshold Line'
+Label_setThreshValue                    = 'Set to 1 MAD'
+TipText_setThreshValue                  = 'Calculate 1 Median absolute deviation of the current data and set the value to the Threshold Line'
 
 WidgetVarName_AboveThrColour            = 'AboveThrColour'
 Label_AboveThrColour                    = 'Above Threshold Colour'

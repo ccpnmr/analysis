@@ -19,5 +19,4 @@ export CCPNMR_TOP_DIR
 ANALYSIS="${CCPNMR_TOP_DIR}"/src/python/ccpn/AnalysisAssign
 
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
-echo "${CCPNMR_TOP_DIR}${CCPN_PYTHON}"
 "${CCPNMR_TOP_DIR}${CCPN_PYTHON}" -W ignore "${ANALYSIS}" "$@"

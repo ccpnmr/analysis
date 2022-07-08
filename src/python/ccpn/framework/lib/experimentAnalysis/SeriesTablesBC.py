@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 18:35:08 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-08 19:10:45 +0100 (Fri, July 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -95,10 +95,12 @@ class SeriesFrameBC(TableFrame):
 
     _valuesHeaders      = []
     _assignmentHeaders  = sv.CONSTANT_TABLE_COLUMNS
+    _peakPidHeaders     = []
 
     _ROW_UIDs           = []
     _assignmentValues   = []
     _seriesValues       = []
+    _peakPidValues      = []
 
     _reservedColumns    = [sv._ROW_UID]
     _reservedColumns.extend(_assignmentHeaders)
@@ -121,6 +123,13 @@ class SeriesFrameBC(TableFrame):
         Together with seriesValues form the rows in the SeriesFrame.
         Return: list of lists. """
         return self._assignmentValues
+
+    @property
+    def peakPidValues(self):
+        """
+        The pid for the peak used to get the seriesValue
+        Return: list of lists. """
+        return self._peakPidValues
 
     @property
     def UIDs(self):
@@ -146,6 +155,16 @@ class SeriesFrameBC(TableFrame):
         """
         return self._assignmentHeaders
 
+    @property
+    def peakPidHeaders(self):
+        """
+        the list of column Headers for the peakPid values.
+        Can be used to filter the Table to get a new table with only the series values and index.
+        e.g.:  df[df.peakPidHeaders]
+        :return: list of str
+        """
+        return self._peakPidHeaders
+
     def setSeriesValues(self, seriesValues, *args):
         """
         Set the raw data of seriesValues used in ExperimentAnalyses.
@@ -159,6 +178,13 @@ class SeriesFrameBC(TableFrame):
         Use 'build' after setting the seriesValues.
         """
         self._assignmentValues = assignmentValues
+
+    def setPeakPidValues(self, peakPidValues, *args):
+        """
+        Set the peakPidValues for seriesValues used in ExperimentAnalyses.
+        Use 'build' after setting the values.
+        """
+        self._peakPidValues = peakPidValues
 
     def _setUIDs(self, UIDs):
         """
@@ -200,11 +226,55 @@ class SeriesFrameBC(TableFrame):
         Set the dataFrame from the _assignmentValues and seriesValues
         :return:
         """
-        dataDict = self.buildFrameDictionary(self.assignmentValues, self.seriesValues, UIDs=self.UIDs)
+        dataDict = self.buildFrameDictionary(assignmentValues=self.assignmentValues,
+                                             seriesValues=self.seriesValues,
+                                             peakPidValues=self.peakPidValues,
+                                             UIDs=self.UIDs)
         self.setDataFromDict(dataDict)
         return self
 
-    def buildFromSpectrumGroup(self, spectrumGroup, thePeakProperty:str):
+    def buildFromSpectrumGroup(self, spectrumGroup, peakListIndices=None):
+
+        # set the columns. to be moved
+        spectrumPropertyColumns = [sv.DIMENSION, sv.ISOTOPECODE, sv.SERIESUNIT, sv.SERIESSTEP]
+        assignmentPropertyColumns = [sv.CHAIN_CODE, sv.RESIDUE_CODE, sv.RESIDUE_TYPE, sv.ATOM_NAME]
+        peakPropertyColumns = [sv.CLUSTERID, sv._PPMPOSITION, sv._HEIGHT, sv._LINEWIDTH, sv._VOLUME]
+        columns = spectrumPropertyColumns+assignmentPropertyColumns+peakPropertyColumns
+        self.loc[0, columns] = None
+        self.dropna()
+        # build the frame
+        spectra = spectrumGroup.spectra
+        if peakListIndices is None or len(peakListIndices) != len(spectra):
+            peakListIndices = [-1] * len(spectra)
+        i = 0
+        while True:
+            for spectrum, peakListIndex in zip(spectra, peakListIndices):
+                for pk in spectrum.peakLists[-1].peaks:
+                    for dimension in spectrum.dimensions:
+                        try:
+                            ## build the spectrum Property Columns
+                            self.loc[i, sv.DIMENSION] = dimension
+                            self.loc[i, sv.ISOTOPECODE] = spectrum.getByDimensions('isotopeCodes', [dimension])[0]
+                            self.loc[i, sv.SERIESSTEP] = spectrum.getSeriesItem(spectrumGroup)
+                            self.loc[i, sv.SERIESUNIT] = spectrumGroup.seriesUnits
+                            ## build the assignment Property Columns
+                            for nmrAtom in pk.getByDimensions('assignedNmrAtoms', [dimension])[0]:
+                                self.loc[i, sv.CHAIN_CODE] = nmrAtom.nmrResidue.nmrChain.name
+                                self.loc[i, sv.RESIDUE_CODE] = nmrAtom.nmrResidue.sequenceCode
+                                self.loc[i, sv.RESIDUE_TYPE] = nmrAtom.nmrResidue.residueType
+                                self.loc[i, sv.ATOM_NAME] = nmrAtom.name
+                            ## build the peak Property Columns
+                            peakProperties = [sv.CLUSTERID, sv._HEIGHT, sv._VOLUME ]
+                            for peakProperty in peakProperties:
+                                self.loc[i, peakProperty] = getattr(pk, peakProperty, None)
+                            self.loc[i, sv._PPMPOSITION] = pk.getByDimensions(sv._PPMPOSITIONS, [dimension])[0]
+                            self.loc[i, sv._LINEWIDTH] = pk.getByDimensions(sv._LINEWIDTHS, [dimension])[0]
+                            i += 1
+                        except Exception as e:
+                            getLogger().warn(f'Cannot add row {i}. {e}, {pk.pid}')
+            break
+
+    def _buildFromSpectrumGroup(self, spectrumGroup, thePeakProperty:str, peakListIndex=-1):
         """
         :param spectrumGroup: Obj SpectrumGroup
         :param thePeakProperty: any of ppmPosition, lineWidth, volume, height
@@ -212,13 +282,16 @@ class SeriesFrameBC(TableFrame):
         """
         self.setSeriesSteps(spectrumGroup.series)
         self.setSeriesUnits(spectrumGroup.seriesUnits)
-        _ROW_UIDs, _assignmentValues, _seriesValues = _getValuesFromSpectrumGroup(spectrumGroup, thePeakProperty=thePeakProperty)
+        _ROW_UIDs, _assignmentValues, _seriesValues, peakPidValues = _getValuesFromSpectrumGroup(spectrumGroup,
+                                                                                  thePeakProperty=thePeakProperty,
+                                                                                  peakListIndex=peakListIndex)
         self.setAssignmentValues(_assignmentValues)
         self.setSeriesValues(_seriesValues)
+        self.setPeakPidValues(peakPidValues)
         self._setUIDs(_ROW_UIDs)
         self.build()
 
-    def buildFrameDictionary(self, assignmentValues, seriesValues, UIDs=None) -> dict:
+    def buildFrameDictionary(self, assignmentValues, seriesValues, peakPidValues, UIDs=None) -> dict:
         """
         Create a ordered Dict from a list of lists of assignmentValues and SeriesValues.
         Each set of Items of assignmentValues, seriesValues constitutes a row in the dataframe.
@@ -251,6 +324,8 @@ class SeriesFrameBC(TableFrame):
             return dataDict
         if not self._valuesHeaders:
             self._setDefaultValueHeaders()
+        if not self._peakPidHeaders:
+            self._setDefaultPeakPidHeaders()
 
         if UIDs is None or not len(assignmentValues) == len(UIDs):
             UIDs = [str(i) for i in range(len(assignmentValues))]
@@ -267,6 +342,8 @@ class SeriesFrameBC(TableFrame):
                 dataDict[a].append(b)
             for c, d in zip(self._valuesHeaders, _seriesValueItems):
                 dataDict[c].append(d)
+            for e, f in zip(self._peakPidHeaders, peakPidValues):
+                dataDict[e].append(f)
         return dataDict
 
     def setDataFromDict(self, dataDict):
@@ -284,6 +361,8 @@ class SeriesFrameBC(TableFrame):
         valueHeaders = []
         if not prefix:
             prefix = f'{self.SERIESUNITS}{sv.SEP}'
+        else:
+            prefix = f'{prefix}{sv.SEP}'
         if self.SERIESSTEPS:
             valueHeaders = [f'{prefix}{str(step)}' for step in self.SERIESSTEPS]
         elif not self.SERIESSTEPS:
@@ -295,7 +374,32 @@ class SeriesFrameBC(TableFrame):
             raise RuntimeError('Impossible to set DefaultValueHeaders. Set first the SERIESSTEPS')
         self.valuesHeaders = valueHeaders
         return valueHeaders
-
+    
+    def _setDefaultPeakPidHeaders(self, prefix='Pid'):
+        """
+        Set a default name for each series Peak Pid column.
+        E.g. for  SERIESSTEPS of [0, 5, 10, 15, 20, 25, 30]
+        the columns will be ['Pid_0', 'Pid_5', 'Pid_10', 'Pid_15', 'Pid_20', 'Pid_25', 'Pid_30']
+        :param prefix: str. Default PID + sv.SEP (underscore)
+        :return: list of str
+        """
+        _peakPidHeaders = []
+        if not prefix:
+            prefix = f'Pid{sv.SEP}'
+        else:
+            prefix = f'{prefix}{sv.SEP}'
+        if self.SERIESSTEPS:
+            _peakPidHeaders = [f'{prefix}{str(step)}' for step in self.SERIESSTEPS]
+        elif not self.SERIESSTEPS:
+            ## give a suffix from enumerated series values
+            if len(self.seriesValues)>0:
+                _peakPidHeaders = [f'{prefix}{str(i)}' for i, v in enumerate(self.seriesValues[0])]
+        else:
+            ## cannot proceed. Needs some minimal information on how to name the Series Columns
+            raise RuntimeError('Impossible to set DefaultPeakPidHeaders. Set first the SERIESSTEPS')
+        self._peakPidHeaders = _peakPidHeaders
+        return _peakPidHeaders
+    
     def loadFromFile(self, filePath, *args, **kwargs):
         pass
 
@@ -350,11 +454,20 @@ def _getValuesFromSpectrumGroup(spectrumGroup, thePeakProperty, peakListIndex=-1
     _ROW_UIDs = []
     _assignmentValues = []
     _seriesValues = []
+    _peakPidValues = []
+    _peakClusterIdsValues = []
     spectra = spectrumGroup.spectra
     nmrAtoms = _getAssignedNmrAtoms4Spectra(spectra, peakListIndex=peakListIndex)
+    if not _arePeaksClustered(spectra, peakListIndex=peakListIndex):
+        if len(nmrAtoms)>0:
+            _setPeakClusterIdFromAssignments(nmrAtoms)
+        else:
+            getLogger().warn('Cannot proceed without peakCluster ids or assigned NmrAtoms')
+    clusterIds = _getClusterIdFromPeaks(spectra)
     for nmrAtom in nmrAtoms:
         ## get the assignmnt Values
         nmrRes = nmrAtom.nmrResidue
+        assignedPeaks = nmrAtom.assignedPeaks
         _assignmentValues.append([nmrRes.nmrChain.name, nmrRes.sequenceCode, nmrRes.residueType, nmrAtom.name])
         ## get the series Peak-property values
         spectraValuesDict = nmrAtom._getAssignedPeakValues(spectra, theProperty=thePeakProperty)
@@ -363,17 +476,48 @@ def _getValuesFromSpectrumGroup(spectrumGroup, thePeakProperty, peakListIndex=-1
             values = spectraValuesDict.get(spectrum, [])
             if values: ## in series should be only 1 or None. If multiple take the mean.
                 _seriesValues4Atom.append(values[0] if len(values) == 1 else np.mean([v for v in values if v]))
+                for assignedPeak in assignedPeaks:
+                    if assignedPeak.spectrum == spectrum:
+                        _peakPidValues.append(assignedPeak.pid)
+                        _peakClusterIdsValues.append(assignedPeak.clusterId)
             else:
                 _seriesValues4Atom.append(None)
+                _peakPidValues.append(None)
+
         _seriesValues.append(_seriesValues4Atom)
         _ROW_UIDs.append(nmrAtom.pid)
-    return _ROW_UIDs, _assignmentValues, _seriesValues
+    return _ROW_UIDs, _assignmentValues, _seriesValues, _peakPidValues
 
 def _getAssignedNmrAtoms4Spectra(spectra, peakListIndex=-1):
     """Get a set of assigned nmrAtoms that appear in a list of spectra. Use last peakList only as default."""
     allPeaks = [pk for sp in spectra for pk in sp.peakLists[peakListIndex].peaks]
     nmrAtoms = set(flattenLists([peak.assignedNmrAtoms for peak in allPeaks]))
     return list(nmrAtoms)
+
+def _arePeaksClustered(spectra, peakListIndex=-1):
+    clusterIds = [pk.clusterId for sp in spectra for pk in sp.peakLists[peakListIndex].peaks]
+    return all(clusterIds) and len(clusterIds)
+
+def _getClusterIdFromPeaks(spectra, peakListIndex=-1):
+    clusterIds = [pk.clusterId for sp in spectra for pk in sp.peakLists[peakListIndex].peaks]
+    return sorted(list(set(clusterIds)))
+
+def getClusterPeaksDict(spectra, peakListIndices=None):
+    """
+    :param spectra:
+    :param peakListIndices: list of int, same length of spectra. Define which peakList to use. -1 as default
+    :return: dict, key: the clusterId; values: the peaks that form the cluster
+    """
+    dd = defaultdict(list)
+    if peakListIndices is None or len(peakListIndices)!= len(spectra):
+        peakListIndices = [-1]*len(spectra)
+    for spectrum, peakListIndex in zip(spectra, peakListIndices):
+        for peak in spectrum.peakLists[peakListIndex].peaks:
+            if peak.clusterId is None:
+                getLogger().warn(f'Cannot find a clusterId for peak: {peak}. Skipping')
+                continue
+            dd[peak.clusterId].append(peak)
+    return dd
 
 def _mergeRowsByHeaders(inputData, grouppingHeaders, dropColumnNames=[sv.ATOM_NAME],
                         rebuildUID=True, pidShortClass='NR', keep="first", ):
@@ -415,6 +559,25 @@ def _getOutputFrameFromInputFrame(inputFrame, outputFrameType=RelaxationOutputFr
     outputFrame._assignmentHeaders = inputFrame.assignmentHeaders
     outputFrame._valuesHeaders = inputFrame.valuesHeaders
     return outputFrame
+
+
+
+def _setPeakClusterIdFromAssignments(nmrAtoms):
+    """ Set an increasing clusterId for peaks which are assigned to same nmrAtoms"""
+    while True:
+        i = 1
+        lastNmrRes = None
+        for nmrAtom in nmrAtoms:
+            nmrRes = nmrAtom.nmrResidue
+            assignedPeaks = nmrAtom.assignedPeaks
+            for pk in assignedPeaks:
+                    pk.clusterId = i
+            if nmrRes != lastNmrRes:
+                i = i
+            else:
+                i += 1
+            lastNmrRes = nmrRes
+        break
 
 INPUT_CSM_SERIESFRAMES_DICT = {
                               sv.CSM_INPUT_FRAME: CSMInputFrame

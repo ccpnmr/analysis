@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 17:13:53 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-08 19:10:45 +0100 (Fri, July 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,11 +36,11 @@ from ccpn.core.lib.AssignmentLib import CCP_CODES_SORTED
 ##  SeriesDataTable common definitions. Used in I/O tables columns and throughtout modules
 ############################################################################################
 
-CHAIN_CODE      = 'chain_code'           # -> str   | Chain Code
-RESIDUE_CODE    = 'residue_code'         # -> str   | Residue Sequence Code (e.g.: '1', '1B')
-RESIDUE_TYPE    = 'residue_type'         # -> str   | Residue Type (e.g.: 'ALA')
-ATOM_NAME       = 'atom_name'            # -> str   | Atom name (e.g.: 'Hn')
-ATOM_NAMES      = f'{ATOM_NAME}s'        # -> str   | Atom names comma separated (e.g.: 'Hn, Nh'). Used in OutPut datarames instead of ATOM_NAME
+CHAIN_CODE       = 'chain_code'           # -> str   | Chain Code
+RESIDUE_CODE     = 'residue_code'         # -> str   | Residue Sequence Code (e.g.: '1', '1B')
+RESIDUE_TYPE     = 'residue_type'         # -> str   | Residue Type (e.g.: 'ALA')
+ATOM_NAME        = 'atom_name'            # -> str   | Atom name (e.g.: 'Hn')
+ATOM_NAMES       = f'{ATOM_NAME}s'        # -> str   | Atom names comma separated (e.g.: 'Hn, Nh'). Used in OutPut datarames instead of ATOM_NAME
 
 _ROW_UID         = '_ROW_UID'            # -> str   | Internal. Unique Identifier (e.g.: randomly generated 6 letters UUID)
 VALUE            = 'Value'               # -> str   | The column header  prefix in a SeriesTable. Used to store data after the CONSTANT_TABLE_COLUMNS
@@ -49,6 +49,13 @@ TIME             = 'Time'                # -> str   | A general prefix in a Seri
 SEP              =  '_'                  # the prefix-name-suffix global separator. E.g., used in Value columns: Value_height_at_0
 VALUE_           = f'{VALUE}{SEP}'
 TIME_            = f'{TIME}{SEP}'
+
+DIMENSION        = 'dimension'
+ISOTOPECODE      = 'isotopeCode'
+CLUSTERID        = 'clusterId'
+SERIESSTEP       = 'seriesStep'
+SERIESUNIT       = 'seriesUnit'
+PEAKPID          = 'peakPid'
 
 # fitting output Stat variables
 MINIMISER        = 'minimiser'
@@ -83,6 +90,7 @@ CSM_OUTPUT_FRAME        = 'CSMOutputFrame'
 SERIESFRAMETYPE         = 'SERIESFRAMETYPE'
 _assignmentHeaders      = '_assignmentHeaders'
 _valuesHeaders          = '_valuesHeaders'
+_peakPidHeaders         = '_peakPidHeaders'
 
 INPUT_SERIESFRAME_TYPES = [
                     CSM_INPUT_FRAME,
@@ -112,7 +120,9 @@ SERIES_UNITS = constants.ALL_SERIES_UNITS
 ## Peak properties. Used to get nmrAtom assigned-peak by dimension and build tables.
 _POINTPOSITION  = pu._POSITION
 _PPMPOSITION    = pu._PPMPOSITION
+_PPMPOSITIONS   = pu.PPMPOSITIONS
 _LINEWIDTH      = pu._LINEWIDTH
+_LINEWIDTHS     = pu.LINEWIDTHS
 _HEIGHT         = pu.HEIGHT
 _VOLUME         = pu.VOLUME
 

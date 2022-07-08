@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-07 20:01:35 +0100 (Thu, July 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-08 19:10:45 +0100 (Fri, July 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -66,7 +66,8 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
     @staticmethod
     def newDataTableFromSpectrumGroup(spectrumGroup, seriesTableType=sv.CSM_INPUT_FRAME,
                                       thePeakProperty=sv._PPMPOSITION,
-                                      dataTableName=sv.CSM_INPUT_FRAME, **kwargs):
+                                      dataTableName=sv.CSM_INPUT_FRAME,
+                                      peakListIndex=-1, **kwargs):
         """
         :param spectrumGroup: object of type SpectrumGroup
         :param seriesTableType: str, One of sv.INPUT_SERIESFRAME_TYPES e.g.: sv.CSM_INPUT_FRAME
@@ -80,9 +81,9 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         if not seriesFrameCLS:
             raise RuntimeError(f'Cannot find SeriesFrame for {seriesTableType}.')
         seriesFrame = seriesFrameCLS()
-        seriesFrame.buildFromSpectrumGroup(spectrumGroup=spectrumGroup, thePeakProperty=thePeakProperty)
+        seriesFrame.buildFromSpectrumGroup(spectrumGroup=spectrumGroup)
         dataTable = project.newDataTable(name=dataTableName, data=seriesFrame)
-        ChemicalShiftMappingAnalysisBC._setRestoringMetadata(dataTable, seriesFrame, spectrumGroup)
+        # ChemicalShiftMappingAnalysisBC._setRestoringMetadata(dataTable, seriesFrame, spectrumGroup)
 
         return dataTable
 

@@ -39,7 +39,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-07 20:00:50 +0100 (Thu, July 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-08 12:17:43 +0100 (Fri, July 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -101,10 +101,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 if not chemicalshiftList:
     showWarning('chemicalShift list not found', 'Set the chemicalShiftList pid in the macro.')
 df = chemicalshiftList._data
-
-
 filteredDf =  df[df[csl.CS_ATOMNAME].isin(filteringAtoms)]
-
 resultDf = pd.DataFrame(columns=[csl.CS_SEQUENCECODE, csl.CS_RESIDUETYPE, CA, CB])
 for ix, row in filteredDf.iterrows():
     residueType = row[csl.CS_RESIDUETYPE]
@@ -133,7 +130,6 @@ def plotCACBResults(resultDf):
     caAx = ax.bar(x - width/2, caValues, width, label=CA, align='center')
     cbAx = ax.bar(x + width/2, cbValues, width, label=CB, align='center')
     baseline = ax.plot(np.arange(*ax.get_xlim()), np.arange(*ax.get_xlim())*0, 'black')
-    # Change labels, title  etc.
     ax.set_ylabel('Delta shifts')
     ax.set_title('Secondary Shifts for CA-CB')
     ax.set_xticks(x, labels)
@@ -143,12 +139,13 @@ def plotCACBResults(resultDf):
     plt.xticks(rotation=90)
     plt.show()
 
-if plotResults:
-    plotCACBResults(resultDf)
-
 if doExport:
     exportingPath = aPath(savingPath)
     exportingPath = exportingPath.joinpath(savingFileName)
     exportingPath = exportingPath.assureSuffix('.csv')
     resultDf.to_csv(str(exportingPath))
+
+if plotResults:
+    plotCACBResults(resultDf)
+
 

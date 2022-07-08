@@ -50,8 +50,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-07-08 19:11:14 +0100 (Fri, July 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1549,6 +1549,11 @@ class Spectrum(AbstractWrapperObject):
 
         else:
             self._setInternalParameter(self._SERIESITEMS, None)
+
+    def getSeriesItem(self, spectrumGroup):
+        """Return the series item for the current spectrum for the selected spectrumGroup
+        """
+        return self._getSeriesItem(spectrumGroup)
 
     def _getSeriesItem(self, spectrumGroup):
         """Return the series item for the current spectrum for the selected spectrumGroup

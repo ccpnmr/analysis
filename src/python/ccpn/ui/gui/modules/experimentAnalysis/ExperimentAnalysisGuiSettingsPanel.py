@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-07 20:01:35 +0100 (Thu, July 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -174,7 +174,7 @@ class GuiInputDataPanel(GuiSettingPanel):
              {'label': guiNameSpaces.Label_SelectDataTable,
               'tipText': guiNameSpaces.TipText_DataTableSelection,
               # 'callBack': self._addInputDataCallback,
-              'type': settingWidgets.DataTableSelectionWidget,
+              'type': settingWidgets._SeriesInputDataTableSelectionWidget,
               'kwds': {
                   'objectWidgetChangedCallback':self._addInputDataCallback,
                   'labelText': guiNameSpaces.Label_SelectDataTable,
@@ -189,6 +189,7 @@ class GuiInputDataPanel(GuiSettingPanel):
                                                settingsDict=settingsDict,
                                                grid=(0, 0))
         self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
+
 
     def _addInputDataCallback(self, *args):
 
@@ -251,19 +252,17 @@ class CSMGuiInputDataPanel(GuiInputDataPanel):
             return
         spGroup = self._guiModule.project.getByPid(sgPids[-1])
         dataTableName = inputSettings.get(guiNameSpaces.WidgetVarName_DataTableName, None)
-        peakProperty = inputSettings.get(guiNameSpaces.WidgetVarName_PeakProperty, seriesVariables._PPMPOSITION)  #this should give a warning if wrong
         if not spGroup:
             getLogger().warn('Cannot create an input DataTable without a SpectrumGroup. Select one first')
             return
         backend = self._guiModule.backendHandler
-        newDataTable = backend.newDataTableFromSpectrumGroup(spGroup, dataTableName=dataTableName, thePeakProperty=peakProperty)
+        newDataTable = backend.newInputDataTableFromSpectrumGroup(spGroup, dataTableName=dataTableName)
         ## add as first selection in the datatable. clear first.
         dtSelectionWidget = self.getWidget(guiNameSpaces.WidgetVarName_DataTablesSelection)
         if dtSelectionWidget:
             dtSelectionWidget.clearList()
             dtSelectionWidget.updatePulldown()
             dtSelectionWidget.select(newDataTable.pid)
-
 
 TABPOS += 1
 

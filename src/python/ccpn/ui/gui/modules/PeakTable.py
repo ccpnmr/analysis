@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -364,7 +364,7 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
 
         # ClusterId column
         clusterIdTipText = 'The peak clusterId. ClusterIds are used for grouping peaks in fitting routines.'
-        columnDefs.append(('ClusterId', lambda pk: pk.clusterId if pk.clusterId else 'None', clusterIdTipText,
+        columnDefs.append(('ClusterId', lambda pk: pk.clusterId if pk.clusterId is not None else 'None', clusterIdTipText,
                            lambda pk, value: self._setClusterId(pk, value), None))
 
         # figureOfMerit column

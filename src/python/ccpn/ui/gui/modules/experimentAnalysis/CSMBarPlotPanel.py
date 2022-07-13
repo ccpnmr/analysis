@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 17:17:07 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -108,7 +108,7 @@ class CSMBarPlotPanel(BarPlotPanel):
         self._tresholdLineBrush = colourNameToHexDict.get(self.thresholdBrushColour, guiNameSpaces.BAR_thresholdLineHex)
         self._gradientbrushes = colorSchemeTable.get(self.aboveThresholdBrushColour, []) #in case there is one.
 
-    def plotDataFrame(self, dataFrame, xColumnName=sv.RESIDUE_CODE, yColumnName=sv.DELTA_DELTA_MEAN):
+    def plotDataFrame(self, dataFrame, xColumnName=sv.NMRRESIDUECODE, yColumnName=sv.DELTA_DELTA_MEAN):
         """ Plot the given columns of dataframe as bars
          """
         getLogger().warning('DEMO version of plotting')

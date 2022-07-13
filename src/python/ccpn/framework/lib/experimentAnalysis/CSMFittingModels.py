@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 19:32:52 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,7 @@ from ccpn.core.lib.Pid import createPid
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.DataTable import TableFrame
 from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult, _registerModels
-from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame, CSMOutputFrame, CSMBindingOutputFrame
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import  CSMOutputFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 
@@ -167,43 +167,45 @@ class DeltaDeltaShiftsCalculation():
         :param inputData: CSMInputFrame
         :return: outputFrame
         """
-        from ccpn.util.isotopes import name2IsotopeCode
-        outputDataDict = defaultdict(list)
-        grouppingHeaders = [sv.CHAIN_CODE, sv.RESIDUE_CODE, sv.RESIDUE_TYPE]
-        _filteringAtoms = self._filteringAtoms
-        _alphaFactors = self._alphaFactors
-        _excludedResidues = self._excludedResidueTypes
+        getLogger().warning('CSM Under implementation...')
 
-        for assignmentValues, grouppedDF in inputData.groupby(grouppingHeaders):        ## Group by Assignments except the atomName
-            atomFiltered = grouppedDF[grouppedDF[sv.ATOM_NAME].isin(_filteringAtoms)]   ## filter by the specific atoms of interest
-            dataArrayPerIsotope = {}                                                    ## make sure we are using the right factor
-            for ii, _row in atomFiltered.iterrows():
-                atomName = _row[sv.ATOM_NAME]
-                isotopeCode = name2IsotopeCode(atomName)
-                _alphaFactor = _alphaFactors.get(isotopeCode, 1)
-                dataArrayPerIsotope[_alphaFactor] = _row[inputData.valuesHeaders].values
-            alphaFactors = dataArrayPerIsotope.keys()
-            values = np.array(list(dataArrayPerIsotope.values()))
-            seriesValues4residue = values.T                                             ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
-            deltaDeltas = DeltaDeltaShiftsCalculation._calculateDeltaDeltas(seriesValues4residue, alphaFactors)  ## get the deltaDeltas
-            newUid = grouppedDF[grouppingHeaders].values[0].astype('str')
-            newUid = createPid(NmrResidue.shortClassName, *newUid)
-            outputDataDict[sv._ROW_UID].append(newUid)
-            for i, assignmentHeader in enumerate(grouppingHeaders):                     ## build new row for the output dataFrame as DefaultDict.
-                outputDataDict[assignmentHeader].append(list(assignmentValues)[i])      ## add common assignments definitions
-            outputDataDict[sv.ATOM_NAMES].append(','.join(_filteringAtoms))             ## add atom names
-            outputDataDict[sv.DELTA_DELTA_MEAN].append(np.mean(deltaDeltas[1:]))        ## first item is excluded from as it is always 0 by definition.
-            for _dd, valueHeaderName in zip(deltaDeltas,inputData.valuesHeaders):       ## add single steps Deltadelta value
-                outputDataDict[valueHeaderName].append(_dd)
-        outputFrame = CSMOutputFrame()
-        DeltaDeltaShiftsCalculation._finaliseOutputFrame(grouppingHeaders, inputData, outputFrame, outputDataDict)
-        outputFrame[sv.FLAG] = [sv.FLAG_INCLUDED] * len(outputFrame)  # for set flag all included. This will be for user included/excluded flags
-        excludedData = outputFrame[outputFrame[sv.RESIDUE_TYPE].isin(_excludedResidues)]
-        outputFrame.loc[excludedData.index, sv.DELTA_DELTA_MEAN] = 0  ## Replace excluded residues with 0 but keep entries.
-        outputFrame.loc[excludedData.index, sv.FLAG] = sv.FLAG_EXCLUDED
-
-        outputFrame.set_index(sv._ROW_UID, inplace=True, drop=False)
-        return outputFrame
+        # from ccpn.util.isotopes import name2IsotopeCode
+        # outputDataDict = defaultdict(list)
+        # grouppingHeaders = [sv.NMRCHAINCODE, sv.NMRRESIDUECODE, sv.NMRRESIDUETYPE]
+        # _filteringAtoms = self._filteringAtoms
+        # _alphaFactors = self._alphaFactors
+        # _excludedResidues = self._excludedResidueTypes
+        #
+        # for assignmentValues, grouppedDF in inputData.groupby(grouppingHeaders):        ## Group by Assignments except the atomName
+        #     atomFiltered = grouppedDF[grouppedDF[sv.NMRATOMNAME].isin(_filteringAtoms)]   ## filter by the specific atoms of interest
+        #     dataArrayPerIsotope = {}                                                    ## make sure we are using the right factor
+        #     for ii, _row in atomFiltered.iterrows():
+        #         atomName = _row[sv.NMRATOMNAME]
+        #         isotopeCode = name2IsotopeCode(atomName)
+        #         _alphaFactor = _alphaFactors.get(isotopeCode, 1)
+        #         dataArrayPerIsotope[_alphaFactor] = _row[inputData.valuesHeaders].values
+        #     alphaFactors = dataArrayPerIsotope.keys()
+        #     values = np.array(list(dataArrayPerIsotope.values()))
+        #     seriesValues4residue = values.T                                             ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
+        #     deltaDeltas = DeltaDeltaShiftsCalculation._calculateDeltaDeltas(seriesValues4residue, alphaFactors)  ## get the deltaDeltas
+        #     newUid = grouppedDF[grouppingHeaders].values[0].astype('str')
+        #     newUid = createPid(NmrResidue.shortClassName, *newUid)
+        #     outputDataDict[sv._ROW_UID].append(newUid)
+        #     for i, assignmentHeader in enumerate(grouppingHeaders):                     ## build new row for the output dataFrame as DefaultDict.
+        #         outputDataDict[assignmentHeader].append(list(assignmentValues)[i])      ## add common assignments definitions
+        #     outputDataDict[sv.NMRATOMNAMES].append(','.join(_filteringAtoms))             ## add atom names
+        #     outputDataDict[sv.DELTA_DELTA_MEAN].append(np.mean(deltaDeltas[1:]))        ## first item is excluded from as it is always 0 by definition.
+        #     for _dd, valueHeaderName in zip(deltaDeltas,inputData.valuesHeaders):       ## add single steps Deltadelta value
+        #         outputDataDict[valueHeaderName].append(_dd)
+        # outputFrame = CSMOutputFrame()
+        # DeltaDeltaShiftsCalculation._finaliseOutputFrame(grouppingHeaders, inputData, outputFrame, outputDataDict)
+        # outputFrame[sv.FLAG] = [sv.FLAG_INCLUDED] * len(outputFrame)  # for set flag all included. This will be for user included/excluded flags
+        # excludedData = outputFrame[outputFrame[sv.NMRRESIDUETYPE].isin(_excludedResidues)]
+        # outputFrame.loc[excludedData.index, sv.DELTA_DELTA_MEAN] = 0  ## Replace excluded residues with 0 but keep entries.
+        # outputFrame.loc[excludedData.index, sv.FLAG] = sv.FLAG_EXCLUDED
+        #
+        # outputFrame.set_index(sv._ROW_UID, inplace=True, drop=False)
+        # return outputFrame
 
     @staticmethod
     def _finaliseOutputFrame(grouppingHeaders, inputData, outputFrame, outputDataDict):
@@ -211,7 +213,7 @@ class DeltaDeltaShiftsCalculation():
         outputFrame.setDataFromDict(outputDataDict)
         outputFrame.setSeriesUnits(inputData.SERIESUNITS)
         outputFrame.setSeriesSteps(inputData.SERIESSTEPS)
-        outputFrame._assignmentHeaders = grouppingHeaders + [sv.ATOM_NAMES]
+        outputFrame._assignmentHeaders = grouppingHeaders + [sv.NMRATOMNAMES]
         outputFrame._valuesHeaders = inputData.valuesHeaders
 
 

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:37 +0100 (Tue, July 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1722,7 +1722,7 @@ class Project(AbstractWrapperObject):
 
         return _newStructureEnsemble(self, name=name, data=data, comment=comment, **kwds)
 
-    @logCommand('project.')
+
     def newDataTable(self, name: str = None, data=None, comment: str = None, **kwds):
         """Create new DataTable.
 
@@ -1736,7 +1736,7 @@ class Project(AbstractWrapperObject):
         :return: a new DataTable instance.
         """
         from ccpn.core.DataTable import _newDataTable
-
+        getLogger().info(f'project.newDataTable(name={name})') # don't log the full dataFrame. is not needed! Add exclusions on Decorator logCommand
         return _newDataTable(self, name=name, data=data, comment=comment, **kwds)
 
     @logCommand('project.')

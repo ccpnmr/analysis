@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-08 19:10:45 +0100 (Fri, July 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,484 +42,191 @@ from ccpn.util.Common import flattenLists
 class SeriesFrameBC(TableFrame):
     """
     A TableData used for the Series ExperimentsAnalysis, such as ChemicalShiftMapping or Relaxation I/O.
-    Columns names are created using the _assignmentHeaders followed by the _valuesHeaders.
-    The table resembles an extended ChemicalShiftList table.
-    This table is usually generated from a SpectrumGroup Series, but can be subclassed for building plugins etc.
-
-    :var SERIESUNITS: str,  E.g.: 's' (for seconds), 'g' (for grams) etc.
-    :var SERIESSTEPS: list, E.g.: list of floats defining the various Series steps, (time, concentration, etc).
-                                    Must be of same length of _seriesValues.
-
-    ### Columns definitions
-    :var _assignmentHeaders: list of str,
-                            Assignment header Columns, common to all SeriesTables. They are
-                            'chain_code'           
-                            'residue_code'        
-                            'residue_type'        
-                            'atom_name'       
-                            See SeriesAnalysisVariables.py.
-
-    :var _valuesHeaders: list of str,
-                        the Values Headers Columns are defined as default by combining the
-                        SERIESUNITS and Each value of the SERIESSTEPS.
-                        E.g., for a RelaxationSeries with a SERIESUNITS = 's'
-                        and SERIESSTEPS of [0, 5, 10, 15, 20, 25, 30]
-                        the _valuesHeaders will be ['s_0', 's_5', 's_10', 's_15', 's_20', 's_25', 's_30']
-
-    A common input SerieFrame will have the columns:
-    columns = ['_ROW_UID', 'chain_code', 'residue_code', 'residue_type', 'atom_name',
-               's_0', 's_5', 's_10', 's_15', 's_20', 's_25', 's_30']
-
-    ### Data
-    :var _assignmentValues: list of lists of floats, used to create the SeriesFrame rows.
-                            Must be of same length of _assignmentHeaders.
-    :var _seriesValues: list of lists of floats, used to create the SeriesFrame rows.
-                        Must be of same length of _valuesHeaders and SERIESSTEPS.
-    
-    ### Example of as SeriesFrame table
-    
-     category      uid    ||            assignmentHeaders                         ||        valuesHeaders
-     headers    |_ROW_UID || chain_code | residue_code | residue_type | atom_name || prefix_x | prefix_y | prefix_... |
-                |=========||============|==============|==============|===========||==========|==========|============|
-     types      |   str   ||   str      |    str       |   str        |    str    ||   float  |   float  |   float    |
-                |---------||------------|--------------|--------------|-----------||----------|----------|------------|
-     values     |   0     ||     A      |      1       |   ALA        |     H     ||    180   |     85   |     ...    |
-
-    See examples in .../testing/ExampleSeriesTables.py
-
+    Columns names are divided in following groups assignmentProperties, spectrumProperties, peakProperties.
     """
     SERIESFRAMENAME     = ''
     SERIESFRAMETYPE     = ''
-    SERIESUNITS         = 'u'
-    SERIESSTEPS         = []
-
-    _valuesHeaders      = []
-    _assignmentHeaders  = sv.CONSTANT_TABLE_COLUMNS
-    _peakPidHeaders     = []
-
-    _ROW_UIDs           = []
-    _assignmentValues   = []
-    _seriesValues       = []
-    _peakPidValues      = []
-
-    _reservedColumns    = [sv._ROW_UID]
-    _reservedColumns.extend(_assignmentHeaders)
-
-    def __init__(self,  *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    @property
-    def seriesValues(self):
-        """
-        The raw data of seriesValues used in ExperimentAnalysis.
-        Return: list of lists of floats. """
-        return self._seriesValues
-
-    @property
-    def assignmentValues(self):
-        """
-        The assignment metadata associated with seriesValues used in ExperimentAnalyses. See _assignmentHeaders or
-        sv.CONSTANT_TABLE_COLUMNS for header definitions.
-        Together with seriesValues form the rows in the SeriesFrame.
-        Return: list of lists. """
-        return self._assignmentValues
-
-    @property
-    def peakPidValues(self):
-        """
-        The pid for the peak used to get the seriesValue
-        Return: list of lists. """
-        return self._peakPidValues
-
-    @property
-    def UIDs(self):
-        return self._ROW_UIDs
-
-    @property
-    def valuesHeaders(self):
-        """
-        the list of column Headers for the series values.
-        Can be used to filter the Table to get a new table with only the series values and index.
-        e.g.:  df[df.valuesHeaders]
-        :return: list of str
-        """
-        return self._valuesHeaders
-
-    @property
-    def assignmentHeaders(self):
-        """
-        the list of column Headers for the assignment values.
-        Can be used to filter the Table to get a new table with only the series values and index.
-        e.g.:  df[df.assignmentHeaders]
-        :return: list of str
-        """
-        return self._assignmentHeaders
-
-    @property
-    def peakPidHeaders(self):
-        """
-        the list of column Headers for the peakPid values.
-        Can be used to filter the Table to get a new table with only the series values and index.
-        e.g.:  df[df.peakPidHeaders]
-        :return: list of str
-        """
-        return self._peakPidHeaders
-
-    def setSeriesValues(self, seriesValues, *args):
-        """
-        Set the raw data of seriesValues used in ExperimentAnalyses.
-        Use 'rebuild' after setting the seriesValues.
-        """
-        self._seriesValues = seriesValues
-
-    def setAssignmentValues(self, assignmentValues, *args):
-        """
-        Set the assignment for seriesValues used in ExperimentAnalyses.
-        Use 'build' after setting the seriesValues.
-        """
-        self._assignmentValues = assignmentValues
-
-    def setPeakPidValues(self, peakPidValues, *args):
-        """
-        Set the peakPidValues for seriesValues used in ExperimentAnalyses.
-        Use 'build' after setting the values.
-        """
-        self._peakPidValues = peakPidValues
-
-    def _setUIDs(self, UIDs):
-        """
-        Set a list of Unique Identifiers for the Table
-        :param UIDs:
-        """
-        self._ROW_UIDs = UIDs
-
-    @valuesHeaders.setter
-    def valuesHeaders(self, valuesHeaders:list):
-        """
-        Set the column definition for the valueHeaders.
-        """
-        self._valuesHeaders = valuesHeaders
-
-    def setSeriesSteps(self, seriesSteps:list):
-        self.SERIESSTEPS = seriesSteps
-
-    def setSeriesUnits(self, seriesUnits:str):
-        self.SERIESUNITS = seriesUnits
 
     def getRowByUID(self, uid):
         self.set_index(sv._ROW_UID, inplace=True, drop=False)
         if uid in self.index:
             return self.loc[uid]
 
-    def getSeriesValuesByUID(self, uid):
-        values = []
-        row = self.getRowByUID(uid)
-        if row is not None:
-            if self.valuesHeaders:
-                values = row[self.valuesHeaders]
-            else:
-                getLogger().warning('Values Headers not defined.')
-        return values
+    def _buildColumnHeaders(self):
+        pass
 
-    def build(self):
-        """
-        Set the dataFrame from the _assignmentValues and seriesValues
-        :return:
-        """
-        dataDict = self.buildFrameDictionary(assignmentValues=self.assignmentValues,
-                                             seriesValues=self.seriesValues,
-                                             peakPidValues=self.peakPidValues,
-                                             UIDs=self.UIDs)
-        self.setDataFromDict(dataDict)
-        return self
-
-    def buildFromSpectrumGroup(self, spectrumGroup, peakListIndices=None):
-
-        # set the columns. to be moved
-        spectrumPropertyColumns = [sv.DIMENSION, sv.ISOTOPECODE, sv.SERIESUNIT, sv.SERIESSTEP]
-        assignmentPropertyColumns = [sv.CHAIN_CODE, sv.RESIDUE_CODE, sv.RESIDUE_TYPE, sv.ATOM_NAME]
-        peakPropertyColumns = [sv.CLUSTERID, sv._PPMPOSITION, sv._HEIGHT, sv._LINEWIDTH, sv._VOLUME]
-        columns = spectrumPropertyColumns+assignmentPropertyColumns+peakPropertyColumns
-        self.loc[0, columns] = None
-        self.dropna()
-        # build the frame
-        spectra = spectrumGroup.spectra
-        if peakListIndices is None or len(peakListIndices) != len(spectra):
-            peakListIndices = [-1] * len(spectra)
-        i = 0
-        while True:
-            for spectrum, peakListIndex in zip(spectra, peakListIndices):
-                for pk in spectrum.peakLists[-1].peaks:
-                    for dimension in spectrum.dimensions:
-                        try:
-                            ## build the spectrum Property Columns
-                            self.loc[i, sv.DIMENSION] = dimension
-                            self.loc[i, sv.ISOTOPECODE] = spectrum.getByDimensions('isotopeCodes', [dimension])[0]
-                            self.loc[i, sv.SERIESSTEP] = spectrum.getSeriesItem(spectrumGroup)
-                            self.loc[i, sv.SERIESUNIT] = spectrumGroup.seriesUnits
-                            ## build the assignment Property Columns
-                            for nmrAtom in pk.getByDimensions('assignedNmrAtoms', [dimension])[0]:
-                                self.loc[i, sv.CHAIN_CODE] = nmrAtom.nmrResidue.nmrChain.name
-                                self.loc[i, sv.RESIDUE_CODE] = nmrAtom.nmrResidue.sequenceCode
-                                self.loc[i, sv.RESIDUE_TYPE] = nmrAtom.nmrResidue.residueType
-                                self.loc[i, sv.ATOM_NAME] = nmrAtom.name
-                            ## build the peak Property Columns
-                            peakProperties = [sv.CLUSTERID, sv._HEIGHT, sv._VOLUME ]
-                            for peakProperty in peakProperties:
-                                self.loc[i, peakProperty] = getattr(pk, peakProperty, None)
-                            self.loc[i, sv._PPMPOSITION] = pk.getByDimensions(sv._PPMPOSITIONS, [dimension])[0]
-                            self.loc[i, sv._LINEWIDTH] = pk.getByDimensions(sv._LINEWIDTHS, [dimension])[0]
-                            i += 1
-                        except Exception as e:
-                            getLogger().warn(f'Cannot add row {i}. {e}, {pk.pid}')
-            break
-
-    def _buildFromSpectrumGroup(self, spectrumGroup, thePeakProperty:str, peakListIndex=-1):
-        """
-        :param spectrumGroup: Obj SpectrumGroup
-        :param thePeakProperty: any of ppmPosition, lineWidth, volume, height
-        :return:
-        """
-        self.setSeriesSteps(spectrumGroup.series)
-        self.setSeriesUnits(spectrumGroup.seriesUnits)
-        _ROW_UIDs, _assignmentValues, _seriesValues, peakPidValues = _getValuesFromSpectrumGroup(spectrumGroup,
-                                                                                  thePeakProperty=thePeakProperty,
-                                                                                  peakListIndex=peakListIndex)
-        self.setAssignmentValues(_assignmentValues)
-        self.setSeriesValues(_seriesValues)
-        self.setPeakPidValues(peakPidValues)
-        self._setUIDs(_ROW_UIDs)
-        self.build()
-
-    def buildFrameDictionary(self, assignmentValues, seriesValues, peakPidValues, UIDs=None) -> dict:
-        """
-        Create a ordered Dict from a list of lists of assignmentValues and SeriesValues.
-        Each set of Items of assignmentValues, seriesValues constitutes a row in the dataframe.
-        Key-value dict is built using the definitions in  _assignmentColumnHeaders and _dataColumnsHeaders.
-        E.g.:
-            assignmentValues  =  [
-                            ['A', '1', 'ALA', 'H'], # row 1
-                            ['A', '2', 'ALA', 'H']  # row 2
-                            ]
-
-            seriesValues  =  [
-                            [1000, 550, 316, 180, 85, 56, 31], # row 1
-                            [1005, 553, 317, 182, 86, 55, 30],  # row 2
-                            ]
-
-        return: dict,  key:value (list)
-                Example returned dict:
-                {'_ROW_UID'     : ['0', '1'],
-                 'chain_code'   : ['A', 'A'],
-                 'residue_code' : ['1', '2'],
-                 'residue_type' : ['ALA', 'ALA'],
-                 'atom_name'    : ['H', 'H'],
-                 'Time_1'       : [1000, 1005],
-                 'Time_2'       : [550, 553],
-                 ...})
-         """
-        dataDict = defaultdict(list)
-        if not len(assignmentValues) == len(seriesValues):
-            getLogger().warn(f""" AssignmentValues and SeriesValues need to be of same length.""")
-            return dataDict
-        if not self._valuesHeaders:
-            self._setDefaultValueHeaders()
-        if not self._peakPidHeaders:
-            self._setDefaultPeakPidHeaders()
-
-        if UIDs is None or not len(assignmentValues) == len(UIDs):
-            UIDs = [str(i) for i in range(len(assignmentValues))]
-
-        for uid, _assignmentValueItems, _seriesValueItems in (zip(UIDs, assignmentValues, seriesValues)):
-            dataDict[sv._ROW_UID].append(str(uid))
-            if not len(self._assignmentHeaders) == len(_assignmentValueItems):
-                raise ValueError(f"""AssignmentValues and AssignmentHeaders Definitions need to be of same length.""")
-
-            if not len(self._valuesHeaders) == len(_seriesValueItems):
-                raise ValueError(f"""SeriesValues and SeriesHeaders Definitions need to be of same length.""")
-
-            for a, b in zip(self._assignmentHeaders, _assignmentValueItems):
-                dataDict[a].append(b)
-            for c, d in zip(self._valuesHeaders, _seriesValueItems):
-                dataDict[c].append(d)
-            for e, f in zip(self._peakPidHeaders, peakPidValues):
-                dataDict[e].append(f)
-        return dataDict
-
-    def setDataFromDict(self, dataDict):
-        for header in dataDict:
-            self[header] = dataDict[header]
-
-    def _setDefaultValueHeaders(self, prefix=None):
-        """
-        Set a default name for each series column.
-        E.g. for a Relaxation Series with a SERIESUNITS = 's' and SERIESSTEPS of [0, 5, 10, 15, 20, 25, 30]
-        the columns will be ['s_0', 's_5', 's_10', 's_15', 's_20', 's_25', 's_30']
-        :param prefix: str. Default SERIESUNITS + sv.SEP (underscore)
-        :return: list of str
-        """
-        valueHeaders = []
-        if not prefix:
-            prefix = f'{self.SERIESUNITS}{sv.SEP}'
-        else:
-            prefix = f'{prefix}{sv.SEP}'
-        if self.SERIESSTEPS:
-            valueHeaders = [f'{prefix}{str(step)}' for step in self.SERIESSTEPS]
-        elif not self.SERIESSTEPS:
-            ## give a suffix from enumerated series values
-            if len(self.seriesValues)>0:
-                valueHeaders = [f'{prefix}{str(i)}' for i, v in enumerate(self.seriesValues[0])]
-        else:
-            ## cannot proceed. Needs some minimal information on how to name the Series Columns
-            raise RuntimeError('Impossible to set DefaultValueHeaders. Set first the SERIESSTEPS')
-        self.valuesHeaders = valueHeaders
-        return valueHeaders
-    
-    def _setDefaultPeakPidHeaders(self, prefix='Pid'):
-        """
-        Set a default name for each series Peak Pid column.
-        E.g. for  SERIESSTEPS of [0, 5, 10, 15, 20, 25, 30]
-        the columns will be ['Pid_0', 'Pid_5', 'Pid_10', 'Pid_15', 'Pid_20', 'Pid_25', 'Pid_30']
-        :param prefix: str. Default PID + sv.SEP (underscore)
-        :return: list of str
-        """
-        _peakPidHeaders = []
-        if not prefix:
-            prefix = f'Pid{sv.SEP}'
-        else:
-            prefix = f'{prefix}{sv.SEP}'
-        if self.SERIESSTEPS:
-            _peakPidHeaders = [f'{prefix}{str(step)}' for step in self.SERIESSTEPS]
-        elif not self.SERIESSTEPS:
-            ## give a suffix from enumerated series values
-            if len(self.seriesValues)>0:
-                _peakPidHeaders = [f'{prefix}{str(i)}' for i, v in enumerate(self.seriesValues[0])]
-        else:
-            ## cannot proceed. Needs some minimal information on how to name the Series Columns
-            raise RuntimeError('Impossible to set DefaultPeakPidHeaders. Set first the SERIESSTEPS')
-        self._peakPidHeaders = _peakPidHeaders
-        return _peakPidHeaders
-    
     def loadFromFile(self, filePath, *args, **kwargs):
         pass
 
 
-########################################################################################################################
-################################           Relaxation I/O  Series Tables                ################################
-########################################################################################################################
+class InputSeriesFrameBC(SeriesFrameBC):
+    """
+    A TableData used for the Series ExperimentsAnalysis, such as ChemicalShiftMapping or Relaxation I/O.
+    Columns names are divided in following groups assignmentProperties, spectrumProperties, peakProperties.
 
-class RelaxationInputFrame(SeriesFrameBC):
-    SERIESUNITS = sv.SERIES_TIME_UNITS[0]
-    SERIESFRAMETYPE = sv.RELAXATION_INPUT_FRAME
+    ## --------- Columns definitions --------- ##
+        - _UID                  : str,   mandatory. Unique string used to index the DataFrame.
 
+        - spectrumProperties group:
+            - dimension         : int,   mandatory
+            - isotopeCode       : str,   mandatory
+            - seriesStep        : float, mandatory
+            - seriesUnit        : str,   mandatory
+
+        - peakProperties group:
+            - collectionId      : int,   mandatory
+            - height            : float, mandatory
+            - ppmPosition       : float, mandatory
+            - lineWidth         : float, optional
+            - volume            : float, optional
+
+        - assignmentProperties group:
+            - nmrChainCode      : str,   optional
+            - nmrResidueCode    : str,   optional
+            - nmrResidueType    : str,   optional
+            - nmrAtomName       : str,   optional
+            - nmrAtomPid        : str,   optional
+
+        - pids group: all optional.  If available, changes to core objects may dynamically update the Data
+            - spectrumPid       : str,   optional
+            - peakPid           : str,   optional
+            - nmrAtomPid        : str,   optional
+            - peakCollectionPid : str,   optional
+
+    """
+
+    SERIESFRAMENAME     = sv.SERIESANALYSISINPUTDATA
+    SERIESFRAMETYPE     = sv.SERIESANALYSISINPUTDATA
+
+    _spectrumPropertiesHeaders      = []
+    _peakPropertiesHeaders          = []
+    _assignmentPropertiesHeaders    = []
+    _pidHeaders                     = []
+
+    @property
+    def assignmentHeaders(self):
+        """
+        the list of column Headers for the assignment values.
+        Can be used to filter the Table to get a new table with only the values of interest and index.
+        e.g.:  df[df.assignmentHeaders]
+        :return: list of str
+        """
+        return self._assignmentPropertiesHeaders
+
+    @property
+    def peakPropertiesHeaders(self):
+        """
+        the list of column Headers for the peakProperties values.
+        Can be used to filter the Table to get a new table with only the values of interest and index.
+        :return: list of str
+        """
+        return self._peakPropertiesHeaders
+
+    @property
+    def spectrumPropertiesHeaders(self):
+        """
+        the list of column Headers for the spectrumProperties values.
+        Can be used to filter the Table to get a new table with only the values of interest and index.
+        :return: list of str
+        """
+        return self._spectrumPropertiesHeaders
+
+    @property
+    def pidHeaders(self):
+        """
+        the list of column Headers for the pid values.
+        :return: list of str
+        """
+        return self._pidHeaders
+
+    def _buildColumnHeaders(self):
+        """
+        Set the Column Headers and order of appearance in the dataframe.
+        :return: None
+        """
+        self._spectrumPropertiesHeaders = sv.SpectrumPropertiesHeaders
+        self._peakPropertiesHeaders = sv.PeakPropertiesHeaders
+        self._assignmentPropertiesHeaders = sv.AssignmentPropertiesHeaders
+        self._pidHeaders = sv.PidHeaders
+        columns = self._spectrumPropertiesHeaders   + \
+                  self._peakPropertiesHeaders       + \
+                  self._assignmentPropertiesHeaders + \
+                  self._pidHeaders
+        self.loc[-1, columns] = None # None value, because you must give a value when creating columns after init.
+        self.dropna(inplace=True)    # remove  None values that were created as a temporary spaceHolder
+
+    def buildFromSpectrumGroup(self, spectrumGroup, peakListIndices=None):
+        """
+        :param spectrumGroup: A core object containg the spectra ans series information
+        :param peakListIndices: list of int, same length of spectra. Define which peakList index to use.
+                               If None, use -1 (last created) as default for all spectra
+        :return: None
+        """
+        # build the frame
+        if self.columns.empty:
+            self._buildColumnHeaders()
+        spectra = spectrumGroup.spectra
+        if peakListIndices is None or len(peakListIndices) != len(spectra):
+            peakListIndices = [-1] * len(spectra)
+        i = 1
+        while True: ## This because we don't know how many rows we need
+            for spectrum, peakListIndex in zip(spectra, peakListIndices):
+                for pk in spectrum.peakLists[peakListIndex].peaks:
+                    for dimension in spectrum.dimensions:
+                        try:
+                            ## set the unique UID
+                            self.loc[i, sv._ROW_UID] = i
+                            ## build the spectrum Property Columns
+                            self.loc[i, sv.DIMENSION] = dimension
+                            self.loc[i, sv.ISOTOPECODE] = spectrum.getByDimensions(sv.ISOTOPECODES, [dimension])[0]
+                            self.loc[i, sv.SERIESSTEP] = spectrum.getSeriesItem(spectrumGroup)
+                            self.loc[i, sv.SERIESUNIT] = spectrumGroup.seriesUnits
+                            self.loc[i, sv.SPECTRUMPID] = spectrum.pid
+                            ## build the peak Property Columns
+                            for collection in pk.collections:
+                                self.loc[i, sv.COLLECTIONID] = collection.uniqueId
+                                self.loc[i, sv.COLLECTIONPID] = collection.pid
+                            for peakProperty in [sv._HEIGHT, sv._VOLUME]:
+                                self.loc[i, peakProperty] = getattr(pk, peakProperty, None)
+                            self.loc[i, sv._PPMPOSITION] = pk.getByDimensions(sv._PPMPOSITIONS, [dimension])[0]
+                            self.loc[i, sv._LINEWIDTH] = pk.getByDimensions(sv._LINEWIDTHS, [dimension])[0]
+                            self.loc[i, sv.PEAKPID] = pk.pid
+                            ## build the assignment Property Columns
+                            assignedNmrAtoms = flattenLists(pk.getByDimensions(sv.ASSIGNEDNMRATOMS, [dimension]))
+                            for nmrAtom in assignedNmrAtoms:
+                                self.loc[i, sv.NMRCHAINCODE] = nmrAtom.nmrResidue.nmrChain.name
+                                self.loc[i, sv.NMRRESIDUECODE] = nmrAtom.nmrResidue.sequenceCode
+                                self.loc[i, sv.NMRRESIDUETYPE] = nmrAtom.nmrResidue.residueType
+                                self.loc[i, sv.NMRATOMNAME] = nmrAtom.name
+                                self.loc[i, sv.NMRATOMPID] = nmrAtom.pid
+                            i += 1
+                        except Exception as e:
+                            getLogger().warn(f'Cannot add row {i} for peak {pk.pid}. Skipping with error: {e}')
+            break
+
+
+
+########################################################################################################################
+################################           Relaxation I/O  Series Output Table                 #########################
+########################################################################################################################
 
 class RelaxationOutputFrame(SeriesFrameBC):
     SERIESFRAMETYPE = sv.RELAXATION_OUTPUT_FRAME
 
 ########################################################################################################################
-################################   Chemical Shift Mapping  I/O Series Tables            ################################
+################################   Chemical Shift Mapping  I/O Series Output Table      ################################
 ########################################################################################################################
-
-class CSMInputFrame(SeriesFrameBC):
-    SERIESUNITS = sv.SERIES_CONCENTRATION_UNITS[0]
-    SERIESFRAMETYPE = sv.CSM_INPUT_FRAME
-
 
 class CSMOutputFrame(SeriesFrameBC):
     SERIESFRAMETYPE = sv.CSM_OUTPUT_FRAME
-    SERIESUNITS = None
-    SERIESSTEPS = None
-    _assignmentHeaders = sv.CONSTANT_OUTPUT_TABLE_COLUMNS
-    _reservedColumns = [sv.DELTA_DELTA_MEAN, sv.DELTA_DELTA_SUM]
-
-class CSMBindingOutputFrame(SeriesFrameBC):
-    SERIESFRAMETYPE = sv.CSM_OUTPUT_FRAME
-    SERIESUNITS = None
-    SERIESSTEPS = None
-    _assignmentHeaders = sv.CONSTANT_OUTPUT_TABLE_COLUMNS
-    _reservedColumns =  [sv.KD, sv.BMAX] + sv.CONSTANT_STATS_OUTPUT_TABLE_COLUMNS
 
 
 ########################################################################################################################
 ##################################        Private Library  functions                 ###################################
 ########################################################################################################################
 
-def _getValuesFromSpectrumGroup(spectrumGroup, thePeakProperty, peakListIndex=-1):
-    """
-    Internal
-    Get the assignmentValues and seriesValues from a spectrumGroup.
-    Values are used to build the  SeriesTable
-    :return assignmentValues and seriesValues, both are list of lists
-    """
-    _ROW_UIDs = []
-    _assignmentValues = []
-    _seriesValues = []
-    _peakPidValues = []
-    _peakClusterIdsValues = []
-    spectra = spectrumGroup.spectra
-    nmrAtoms = _getAssignedNmrAtoms4Spectra(spectra, peakListIndex=peakListIndex)
-    if not _arePeaksClustered(spectra, peakListIndex=peakListIndex):
-        if len(nmrAtoms)>0:
-            _setPeakClusterIdFromAssignments(nmrAtoms)
-        else:
-            getLogger().warn('Cannot proceed without peakCluster ids or assigned NmrAtoms')
-    clusterIds = _getClusterIdFromPeaks(spectra)
-    for nmrAtom in nmrAtoms:
-        ## get the assignmnt Values
-        nmrRes = nmrAtom.nmrResidue
-        assignedPeaks = nmrAtom.assignedPeaks
-        _assignmentValues.append([nmrRes.nmrChain.name, nmrRes.sequenceCode, nmrRes.residueType, nmrAtom.name])
-        ## get the series Peak-property values
-        spectraValuesDict = nmrAtom._getAssignedPeakValues(spectra, theProperty=thePeakProperty)
-        _seriesValues4Atom = []
-        for spectrum in spectra:
-            values = spectraValuesDict.get(spectrum, [])
-            if values: ## in series should be only 1 or None. If multiple take the mean.
-                _seriesValues4Atom.append(values[0] if len(values) == 1 else np.mean([v for v in values if v]))
-                for assignedPeak in assignedPeaks:
-                    if assignedPeak.spectrum == spectrum:
-                        _peakPidValues.append(assignedPeak.pid)
-                        _peakClusterIdsValues.append(assignedPeak.clusterId)
-            else:
-                _seriesValues4Atom.append(None)
-                _peakPidValues.append(None)
 
-        _seriesValues.append(_seriesValues4Atom)
-        _ROW_UIDs.append(nmrAtom.pid)
-    return _ROW_UIDs, _assignmentValues, _seriesValues, _peakPidValues
-
-def _getAssignedNmrAtoms4Spectra(spectra, peakListIndex=-1):
-    """Get a set of assigned nmrAtoms that appear in a list of spectra. Use last peakList only as default."""
-    allPeaks = [pk for sp in spectra for pk in sp.peakLists[peakListIndex].peaks]
-    nmrAtoms = set(flattenLists([peak.assignedNmrAtoms for peak in allPeaks]))
-    return list(nmrAtoms)
-
-def _arePeaksClustered(spectra, peakListIndex=-1):
-    clusterIds = [pk.clusterId for sp in spectra for pk in sp.peakLists[peakListIndex].peaks]
-    return all(clusterIds) and len(clusterIds)
-
-def _getClusterIdFromPeaks(spectra, peakListIndex=-1):
-    clusterIds = [pk.clusterId for sp in spectra for pk in sp.peakLists[peakListIndex].peaks]
-    return sorted(list(set(clusterIds)))
-
-def getClusterPeaksDict(spectra, peakListIndices=None):
-    """
-    :param spectra:
-    :param peakListIndices: list of int, same length of spectra. Define which peakList to use. -1 as default
-    :return: dict, key: the clusterId; values: the peaks that form the cluster
-    """
-    dd = defaultdict(list)
-    if peakListIndices is None or len(peakListIndices)!= len(spectra):
-        peakListIndices = [-1]*len(spectra)
-    for spectrum, peakListIndex in zip(spectra, peakListIndices):
-        for peak in spectrum.peakLists[peakListIndex].peaks:
-            if peak.clusterId is None:
-                getLogger().warn(f'Cannot find a clusterId for peak: {peak}. Skipping')
-                continue
-            dd[peak.clusterId].append(peak)
-    return dd
-
-def _mergeRowsByHeaders(inputData, grouppingHeaders, dropColumnNames=[sv.ATOM_NAME],
+def _mergeRowsByHeaders(inputData, grouppingHeaders, dropColumnNames=[sv.NMRATOMNAME],
                         rebuildUID=True, pidShortClass='NR', keep="first", ):
     """
     Merge rows by common columns.
@@ -562,33 +269,9 @@ def _getOutputFrameFromInputFrame(inputFrame, outputFrameType=RelaxationOutputFr
 
 
 
-def _setPeakClusterIdFromAssignments(nmrAtoms):
-    """ Set an increasing clusterId for peaks which are assigned to same nmrAtoms"""
-    while True:
-        i = 1
-        lastNmrRes = None
-        for nmrAtom in nmrAtoms:
-            nmrRes = nmrAtom.nmrResidue
-            assignedPeaks = nmrAtom.assignedPeaks
-            for pk in assignedPeaks:
-                    pk.clusterId = i
-            if nmrRes != lastNmrRes:
-                i = i
-            else:
-                i += 1
-            lastNmrRes = nmrRes
-        break
-
-INPUT_CSM_SERIESFRAMES_DICT = {
-                              sv.CSM_INPUT_FRAME: CSMInputFrame
-                              }
 
 OUTPUT_CSM_SERIESFRAMES_DICT = {
                               sv.CSM_OUTPUT_FRAME: CSMOutputFrame,
-                              }
-
-INPUT_RELAXATION_SERIESFRAMES_DICT = {
-                              sv.RELAXATION_INPUT_FRAME: RelaxationInputFrame
                               }
 
 OUTPUT_RELAXATION_SERIESFRAMES_DICT = {
@@ -598,8 +281,6 @@ OUTPUT_RELAXATION_SERIESFRAMES_DICT = {
 
 
 ALL_SERIES_DATA_TYPES = {
-                        **INPUT_CSM_SERIESFRAMES_DICT,
-                        **INPUT_RELAXATION_SERIESFRAMES_DICT,
                         **OUTPUT_CSM_SERIESFRAMES_DICT,
                         **OUTPUT_RELAXATION_SERIESFRAMES_DICT
                          }

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 19:42:53 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1647,6 +1647,22 @@ class RestraintTableSelectionWidget(ObjectSelectionWidget):
 class DataTableSelectionWidget(ObjectSelectionWidget):
     KLASS = DataTable
 
+
+class _SeriesInputDataTableSelectionWidget(ObjectSelectionWidget):
+    KLASS = DataTable
+
+    def _fillPulldownListWidget(self):
+        """ Override original behavior to allow only the right dataType """
+        from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import InputSeriesFrameBC
+        pulldown = self.pulldownList
+        ll = [SelectToAdd] + self.standardListItems
+        allowedDTs = []
+        if self.project:
+            for obj in getattr(self.project, self.KLASS._pluralLinkName, []):
+                if isinstance(obj.data, InputSeriesFrameBC):
+                    allowedDTs.append(obj.pid)
+        complete = ll + list(allowedDTs)
+        pulldown.setData(texts=complete)
 
 class ViolationTableSelectionWidget(ObjectSelectionWidget):
     KLASS = ViolationTable

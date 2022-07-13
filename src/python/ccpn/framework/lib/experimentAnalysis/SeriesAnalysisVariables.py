@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-08 19:10:45 +0100 (Fri, July 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,11 +36,11 @@ from ccpn.core.lib.AssignmentLib import CCP_CODES_SORTED
 ##  SeriesDataTable common definitions. Used in I/O tables columns and throughtout modules
 ############################################################################################
 
-CHAIN_CODE       = 'chain_code'           # -> str   | Chain Code
-RESIDUE_CODE     = 'residue_code'         # -> str   | Residue Sequence Code (e.g.: '1', '1B')
-RESIDUE_TYPE     = 'residue_type'         # -> str   | Residue Type (e.g.: 'ALA')
-ATOM_NAME        = 'atom_name'            # -> str   | Atom name (e.g.: 'Hn')
-ATOM_NAMES       = f'{ATOM_NAME}s'        # -> str   | Atom names comma separated (e.g.: 'Hn, Nh'). Used in OutPut datarames instead of ATOM_NAME
+NMRCHAINCODE     = 'nmrChainCode'           # -> str   | nmrChain Code
+NMRRESIDUECODE   = 'nmrResidueCode'         # -> str   | nmrResidue Sequence Code (e.g.: '1', '1B')
+NMRRESIDUETYPE   = 'nmrResidueType'         # -> str   | nmrResidue Type (e.g.: 'ALA')
+NMRATOMNAME      = 'nmrAtomName'            # -> str   | nmrAtom name (e.g.: 'Hn')
+NMRATOMNAMES     = f'{NMRATOMNAME}s'        # -> str   | nmrAtom names comma separated (e.g.: 'Hn, Nh'). Used in OutPut datarames instead of ATOMNAME
 
 _ROW_UID         = '_ROW_UID'            # -> str   | Internal. Unique Identifier (e.g.: randomly generated 6 letters UUID)
 VALUE            = 'Value'               # -> str   | The column header  prefix in a SeriesTable. Used to store data after the CONSTANT_TABLE_COLUMNS
@@ -53,9 +53,15 @@ TIME_            = f'{TIME}{SEP}'
 DIMENSION        = 'dimension'
 ISOTOPECODE      = 'isotopeCode'
 CLUSTERID        = 'clusterId'
+COLLECTIONID     = 'collectionId'
 SERIESSTEP       = 'seriesStep'
 SERIESUNIT       = 'seriesUnit'
 PEAKPID          = 'peakPid'
+SPECTRUMPID      = 'spectrumPid'
+NMRATOMPID       = 'nmrAtomPid'
+COLLECTIONPID    = 'collectionPid'
+PID              = 'pid'
+ASSIGNEDNMRATOMS = 'assignedNmrAtoms'
 
 # fitting output Stat variables
 MINIMISER        = 'minimiser'
@@ -66,56 +72,6 @@ AKAIKE           = 'Akaike'
 BAYESIAN         = 'Bayesian'
 MINIMISER_METHOD = 'Method'
 
-CONSTANT_TABLE_COLUMNS = [CHAIN_CODE, RESIDUE_CODE, RESIDUE_TYPE, ATOM_NAME]
-CONSTANT_OUTPUT_TABLE_COLUMNS = [CHAIN_CODE, RESIDUE_CODE, RESIDUE_TYPE, ATOM_NAMES]
-CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, R2, CHISQUARE, REDUCEDCHISQUARE, AKAIKE, BAYESIAN]
-GROUPPING_HEADERS = [CHAIN_CODE, RESIDUE_CODE, RESIDUE_TYPE]
-
-KD = 'Kd'
-BMAX = 'BMax'
-_ERR = '_err'
-ERROR = 'Error'
-
-FLAG = 'Flag'
-SERIAL = 'Serial'
-############################################################################################
-### Used in SeriesFrame tables ABCs
-############################################################################################
-
-RELAXATION_INPUT_FRAME  = 'RelaxationInputFrame'
-RELAXATION_OUTPUT_FRAME = 'RelaxationOutputFrame'
-CSM_INPUT_FRAME         = 'CSMInputFrame'
-CSM_OUTPUT_FRAME        = 'CSMOutputFrame'
-
-SERIESFRAMETYPE         = 'SERIESFRAMETYPE'
-_assignmentHeaders      = '_assignmentHeaders'
-_valuesHeaders          = '_valuesHeaders'
-_peakPidHeaders         = '_peakPidHeaders'
-
-INPUT_SERIESFRAME_TYPES = [
-                    CSM_INPUT_FRAME,
-                    RELAXATION_INPUT_FRAME,
-                    ]
-
-OUTPUT_SERIESFRAME_TYPES = [
-                    CSM_OUTPUT_FRAME,
-                    RELAXATION_OUTPUT_FRAME,
-                    ]
-
-SERIESFRAME_TYPES = INPUT_SERIESFRAME_TYPES + OUTPUT_SERIESFRAME_TYPES
-
-
-############################################################################################
-### Used in SeriesAnalyisBC
-############################################################################################
-ChemicalShiftMappingAnalysis = 'ChemicalShiftMappingAnalysis'  # used in SeriesName for the ChemicalShiftMappingAnalysis
-RelaxationAnalysis = 'RelaxationAnalysis'                      # used in SeriesName for the RelaxationAnalysisBC
-
-
-## Series Units
-SERIES_TIME_UNITS = constants.TIME_UNITS
-SERIES_CONCENTRATION_UNITS = constants.CONCENTRATION_UNITS
-SERIES_UNITS = constants.ALL_SERIES_UNITS
 
 ## Peak properties. Used to get nmrAtom assigned-peak by dimension and build tables.
 _POINTPOSITION  = pu._POSITION
@@ -134,9 +90,60 @@ _OTHER = pu.OTHER
 
 ## IsotopeCode Names
 
+ISOTOPECODES = 'isotopeCodes'
 _1H  = '1H'
 _15N = '15N'
 _13C = '13C'
+
+
+CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, R2, CHISQUARE, REDUCEDCHISQUARE, AKAIKE, BAYESIAN]
+
+SpectrumPropertiesHeaders = [DIMENSION, ISOTOPECODE, SERIESSTEP, SERIESUNIT]
+PeakPropertiesHeaders = [COLLECTIONID, _PPMPOSITION, _HEIGHT, _LINEWIDTH, _VOLUME]
+AssignmentPropertiesHeaders = [NMRCHAINCODE, NMRRESIDUECODE, NMRRESIDUETYPE, NMRATOMNAME]
+PidHeaders = [COLLECTIONPID, SPECTRUMPID, PEAKPID, NMRATOMPID]
+
+KD = 'Kd'
+BMAX = 'BMax'
+_ERR = '_err'
+ERROR = 'Error'
+
+FLAG = 'Flag'
+SERIAL = 'Serial'
+############################################################################################
+### Used in SeriesFrame tables ABCs
+############################################################################################
+SERIESANALYSISINPUTDATA = 'SeriesAnalysisInputData'
+RELAXATION_OUTPUT_FRAME = 'RelaxationOutputFrame'
+CSM_OUTPUT_FRAME        = 'CSMOutputFrame'
+
+SERIESFRAMETYPE         = 'SERIESFRAMETYPE'
+_assignmentHeaders      = '_assignmentHeaders'
+_valuesHeaders          = '_valuesHeaders'
+_peakPidHeaders         = '_peakPidHeaders'
+
+_SpectrumPropertiesHeaders = 'spectrumPropertiesHeaders'
+
+
+OUTPUT_SERIESFRAME_TYPES = [
+                    CSM_OUTPUT_FRAME,
+                    RELAXATION_OUTPUT_FRAME,
+                    ]
+
+
+
+############################################################################################
+### Used in SeriesAnalyisBC
+############################################################################################
+ChemicalShiftMappingAnalysis = 'ChemicalShiftMappingAnalysis'  # used in SeriesName for the ChemicalShiftMappingAnalysis
+RelaxationAnalysis = 'RelaxationAnalysis'                      # used in SeriesName for the RelaxationAnalysisBC
+
+
+## Series Units
+SERIES_TIME_UNITS = constants.TIME_UNITS
+SERIES_CONCENTRATION_UNITS = constants.CONCENTRATION_UNITS
+SERIES_UNITS = constants.ALL_SERIES_UNITS
+
 
 
 ## Alpha Factors Definitions used in ChemicalShiftAnalysis DeltaDeltas

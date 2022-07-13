@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 09:41:43 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -56,29 +56,29 @@ class _CSMGuiTableABC(gt.GuiTable):
                 gt.WIDTH: 30,
                 gt.HIDDEN: False
                 },
-        guiNameSpaces.ColumnChainCode: {gt.NAME: sv.CHAIN_CODE,
-              gt.GETTER: lambda row: _getValueByHeader(row, sv.CHAIN_CODE),
+        guiNameSpaces.ColumnChainCode: {gt.NAME: sv.NMRCHAINCODE,
+              gt.GETTER: lambda row: _getValueByHeader(row, sv.NMRCHAINCODE),
               gt.TIPTEXT: _makeTipText(guiNameSpaces.ColumnChainCode, "NmrChain code"),
               gt.WIDTH: 50,
               gt.HIDDEN: False
               },
 
-        guiNameSpaces.ColumnResidueCode: {gt.NAME: sv.RESIDUE_CODE,
-              gt.GETTER: lambda row: _getValueByHeader(row, sv.RESIDUE_CODE),
+        guiNameSpaces.ColumnResidueCode: {gt.NAME: sv.NMRRESIDUECODE,
+              gt.GETTER: lambda row: _getValueByHeader(row, sv.NMRRESIDUECODE),
               gt.TIPTEXT: _makeTipText(guiNameSpaces.ColumnResidueCode, "NmrResidue sequence code"),
               gt.WIDTH: 60,
               gt.HIDDEN: False
               },
 
-        guiNameSpaces.ColumnResidueType: {gt.NAME: sv.RESIDUE_TYPE,
-                                          gt.GETTER: lambda row: _getValueByHeader(row, sv.RESIDUE_TYPE),
+        guiNameSpaces.ColumnResidueType: {gt.NAME: sv.NMRRESIDUETYPE,
+                                          gt.GETTER: lambda row: _getValueByHeader(row, sv.NMRRESIDUETYPE),
                                           gt.TIPTEXT: _makeTipText(guiNameSpaces.ColumnResidueType, "NmrResidue Type"),
                                           gt.WIDTH: 50,
                                           gt.HIDDEN: False
                                           },
 
-        guiNameSpaces.ColumnAtoms: {gt.NAME: sv.ATOM_NAMES,
-              gt.GETTER: lambda row: _getValueByHeader(row, sv.ATOM_NAMES),
+        guiNameSpaces.ColumnAtoms: {gt.NAME: sv.NMRATOMNAMES,
+              gt.GETTER: lambda row: _getValueByHeader(row, sv.NMRATOMNAMES),
               gt.TIPTEXT: _makeTipText(guiNameSpaces.ColumnAtoms, "Nmr Atom names included in the calculation"),
               gt.WIDTH: 60,
               gt.HIDDEN: False

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-14 21:56:17 +0100 (Thu, July 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -56,8 +56,21 @@ class _CSMGuiTableABC(gt.GuiTable):
                 gt.WIDTH: 30,
                 gt.HIDDEN: False
                 },
-        guiNameSpaces.ColumnChainCode: {gt.NAME: sv.NMRCHAINCODE,
-              gt.GETTER: lambda row: _getValueByHeader(row, sv.NMRCHAINCODE),
+
+        guiNameSpaces.ColumnID: {gt.NAME: sv.COLLECTIONID,
+                                        gt.GETTER: lambda row: _getValueByHeader(row, sv.COLLECTIONID),
+                                        gt.TIPTEXT: _makeTipText(guiNameSpaces.ColumnID, "Collection ID"),
+                                        gt.WIDTH: 50,
+                                        gt.HIDDEN: False
+                                        },
+        sv.COLLECTIONPID: {gt.NAME: sv.COLLECTIONPID,
+                                 gt.GETTER: lambda row: _getValueByHeader(row, sv.COLLECTIONPID),
+                                 gt.TIPTEXT: _makeTipText(sv.COLLECTIONPID, "Pid for collection containg clustered peaks"),
+                                 gt.WIDTH: 50,
+                                 gt.HIDDEN: False
+                                 },
+        guiNameSpaces.ColumnChainCode: {gt.NAME: sv.NMRCHAINNAME,
+              gt.GETTER: lambda row: _getValueByHeader(row, sv.NMRCHAINNAME),
               gt.TIPTEXT: _makeTipText(guiNameSpaces.ColumnChainCode, "NmrChain code"),
               gt.WIDTH: 50,
               gt.HIDDEN: False
@@ -84,7 +97,7 @@ class _CSMGuiTableABC(gt.GuiTable):
               gt.HIDDEN: False
               },
         guiNameSpaces.ColumnDdelta: {gt.NAME: sv.DELTA_DELTA,
-              gt.GETTER: lambda row: _getValueByHeader(row, sv.DELTA_DELTA_MEAN),
+              gt.GETTER: lambda row: _getValueByHeader(row, sv.DELTA_DELTA),
               gt.TIPTEXT: _makeTipText(sv.DELTA_DELTA, "Perturbation value calculated as per Settings"),
               gt.FORMAT: guiNameSpaces._COLUM_FLOAT_FORM,
               gt.WIDTH: 70,
@@ -236,8 +249,6 @@ class _CSMGuiTableABC(gt.GuiTable):
             objs.add(obj)
         self.current.nmrResidues = list(objs)
 
-
-
     def action(self, *args):
         pass
 
@@ -286,6 +297,6 @@ class CSMTablePanel(GuiPanel):
 
     def updatePanel(self, *args, **kwargs):
         getLogger().info('Updating CSM table panel')
-        dataFrame = self.guiModule.backendHandler._getOutputMergedDataFrame()
+        dataFrame = self.guiModule.backendHandler._getGroupedOutputDataFrame()
         self.setInputData(dataFrame)
 

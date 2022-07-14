@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-26 10:27:10 +0100 (Thu, May 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-14 21:56:16 +0100 (Thu, July 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,21 +36,7 @@ from collections import defaultdict
 from lmfit.models import update_param_vals
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 
-######################################################
-############  Private local functions  ###############
-######################################################
 
-def _popuplateResultInOutputData(outputFrame):
-    outputDict = defaultdict(list)
-    minimisers = outputFrame.get(sv.MINIMISER)
-    for minimiser in minimisers:
-        for key, value in minimiser.getParametersResult().items():
-            outputDict[key].append(value)
-        for key, value in minimiser.getStatisticalResult().items():
-            outputDict[key].append(value)
-    ## updateDataFrame
-    for key in outputDict:
-        outputFrame[key] = outputDict[key]
 
 ###############################################################
 ###########  T2 Relaxation Minimiser/Fitting Models   #########
@@ -117,8 +103,7 @@ class T2FittingModel(FittingModelABC):
                 getLogger().warning(f'Fitting Failed for: {row[sv._ROW_UID]} data.')
                 minimiserResult = MinimiserResult(modelMinimiser, params, method=modelMinimiser.method)
             minimiserResults.append(minimiserResult)
-        outputFrame[sv.MINIMISER] = minimiserResults #save the minimisers temporarly in dataFrame, but this should not be necessesary and it is also bad idea.
-        _popuplateResultInOutputData(outputFrame)
+
         return outputFrame
 
 ###############################################################
@@ -182,8 +167,6 @@ class T1FittingModel(FittingModelABC):
                 getLogger().warning(f'Fitting Failed for: {row[sv._ROW_UID]} data.')
                 minimiserResult = MinimiserResult(modelMinimiser, params, method=modelMinimiser.method)
             minimiserResults.append(minimiserResult)
-        outputFrame[sv.MINIMISER] = minimiserResults #save the minimisers temporarly in dataFrame, but this should not be necessesary and it is also bad idea.
-        _popuplateResultInOutputData(outputFrame)
         return outputFrame
 
 

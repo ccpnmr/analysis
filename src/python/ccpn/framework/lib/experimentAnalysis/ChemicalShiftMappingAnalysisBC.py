@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-14 21:56:16 +0100 (Thu, July 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -122,46 +122,40 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
                                     according to its definitions.
         :return: None
         """
-        getLogger().warning('Fitting InputData under implementation...')
-        # getLogger().info('Started fitting InputData...')
-        # if not self.inputDataTables:
-        #     raise RuntimeError('CSM. Cannot run any fitting models. Add a valid inputData first')
-        #
-        # fittingModels = self.fittingModels or kwargs.get(sv.FITTING_MODELS, [])
-        # ovverideOutputDataTable = True
-        # outputDataTableName = kwargs.get(sv.OUTPUT_DATATABLE_NAME, None)
-        # for model in fittingModels:
-        #     fittingModel = model()
-        #     inputDataTable = self.inputDataTables[-1]
-        #     deltasDF = self.calculateDeltaDeltaShifts(inputDataTable.data,
-        #                                               filteringAtoms=self._filteringAtoms,
-        #                                               alphaFactors=self._alphaFactors,
-        #                                               excludedResidues=self._excludedResidueTypes)
-        #     outputFrame = fittingModel.fitSeries(deltasDF)
-        #     outputFrame.set_index(sv._ROW_UID, inplace=True, drop=False)
-        #     outputFrame[sv.DELTA_DELTA_MEAN] = deltasDF[sv.DELTA_DELTA_MEAN]
-        #     outputFrame[sv.NMRATOMNAMES] = deltasDF[sv.NMRATOMNAMES]
-        #     outputFrame[sv.FLAG] = deltasDF[sv.FLAG]
-        #     outputFrame[sv.SERIAL] = np.arange(1, len(outputFrame) + 1)
-        #
-        #     if not outputDataTableName:
-        #         outputDataTableName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'.replace(" ", "")
-        #     outputDataTable = self._fetchOutputDataTable(name=outputDataTableName,
-        #                                                  overrideExisting=ovverideOutputDataTable)
-        #     outputDataTable.data = outputFrame
-        #     self.addOutputData(outputDataTable)
-        # self._needsRefitting = False
-        # getLogger().info('Fitting InputData completed.')
+        getLogger().info('Started fitting InputData...')
+        if not self.inputDataTables:
+            raise RuntimeError('CSM. Cannot run any fitting models. Add a valid inputData first')
 
-    def _getOutputMergedDataFrame(self, *args):
+        fittingModels = self.fittingModels or kwargs.get(sv.FITTING_MODELS, [])
+        ovverideOutputDataTable = True
+        outputDataTableName = kwargs.get(sv.OUTPUT_DATATABLE_NAME, None)
+        for model in fittingModels:
+            fittingModel = model()
+            inputDataTable = self.inputDataTables[-1]
+            outputFrame = self.calculateDeltaDeltaShifts(inputDataTable.data,
+                                                      filteringAtoms=self._filteringAtoms,
+                                                      alphaFactors=self._alphaFactors,
+                                                      excludedResidues=self._excludedResidueTypes)
+            outputFrame = fittingModel.fitSeries(outputFrame)
+
+            if not outputDataTableName:
+                outputDataTableName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'.replace(" ", "")
+            outputDataTable = self._fetchOutputDataTable(name=outputDataTableName,
+                                                         overrideExisting=ovverideOutputDataTable)
+            outputDataTable.data = outputFrame
+            self.addOutputData(outputDataTable)
+        self._needsRefitting = False
+        getLogger().info('Fitting InputData completed.')
+
+    def _getGroupedOutputDataFrame(self, *args):
         """ Return the outputDataFrame containing the fitting and deltaDeltas calculations"""
         if len(self.inputDataTables) == 0:
             return
         if not self.getOutputDataTables():
             return
-        outData = self.getOutputDataTables()[-1]
-        outDataFrame = outData.data
-
+        outputDataTable = self.getOutputDataTables()[-1]
+        outDataFrame = outputDataTable.data
+        outDataFrame = outDataFrame.groupby(sv.COLLECTIONID).first()
         return outDataFrame
 
     def getThresholdValueForData(self, factor=1):
@@ -169,10 +163,10 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
 
         factor = factor if factor and factor >0 else 1
         thresholdValue = None
-        data = self._getOutputMergedDataFrame()
+        data = self._getGroupedOutputDataFrame()
         if data is not None:
-            if len(data[sv.DELTA_DELTA_MEAN])>0:
-                values = data[sv.DELTA_DELTA_MEAN].values
+            if len(data[sv.DELTA_DELTA])>0:
+                values = data[sv.DELTA_DELTA].values
                 values = values[~np.isnan(values)]  # skip nans
                 thresholdValue = stats.median_absolute_deviation(values)
         if thresholdValue:
@@ -183,7 +177,7 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         getLogger().warning('Not implemented yet. Available: plotDeltaDeltas')
 
     def plotDeltaDeltas(self, deltaDeltaShiftsFrame,
-                        yColumnName=sv.DELTA_DELTA_SUM,
+                        yColumnName=sv.DELTA_DELTA,
                         unitLabels = 'minimal',
                         unitLabelRotation=45,
                         majorTick=5,
@@ -206,21 +200,5 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         :param kwargs:
         :return:
         """
-        from ccpn.ui.gui.widgets.PlotterWidget import plotter
-        from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
-        with plotter() as plt:
-            resCodes = deltaDeltaShiftsFrame[sv.NMRRESIDUECODE]
-            resTypes = deltaDeltaShiftsFrame[sv.NMRRESIDUETYPE]
-            if yColumnName not in deltaDeltaShiftsFrame.columns:
-                getLogger().warning(f'Given ColumnName not present in data. Used default {sv.DELTA_DELTA_SUM}')
-                yColumnName = sv.DELTA_DELTA_SUM
-            y = deltaDeltaShiftsFrame[yColumnName]
-            labels = resCodes
-            if unitLabels == 'full':
-                labels = ['-'.join(x) for x in zip(resCodes, resTypes)]
-            ax = plt.currentPlot
-            ax.xaxis.set_major_locator(MultipleLocator(majorTick))
-            ax.xaxis.set_major_formatter('{x:.0f}')
-            ax.xaxis.set_minor_locator(MultipleLocator(minorTicks))
-            plt.plotBar(values=resCodes, heights=y, unitLabels=labels, orientation=orientation)
-            # plt.currentPlot.set_xticklabels(labels, rotation=unitLabelRotation)
+        pass
+

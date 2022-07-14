@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-14 21:56:16 +0100 (Thu, July 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,9 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 
 import numpy as np
 from collections import defaultdict
+
+import pandas as pd
+
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.Pid import createPid
 from ccpn.core.NmrResidue import NmrResidue
@@ -87,9 +90,15 @@ class Binding1SiteMinimiser(MinimiserModel):
         :return: dict of params needed for the fitting
         """
         params = self.params
+        minKD = np.min(x)
+        maxKD = np.max(x)+(np.max(x)*0.5)
+        if minKD == maxKD == 0:
+            getLogger().warning(f'Fitting model min==max {minKD}, {maxKD}')
+            minKD = -1
+
         params.get(self.KDstr).value = np.mean(x)
-        params.get(self.KDstr).min = np.min(x)
-        params.get(self.KDstr).max = np.max(x)+(np.max(x)*0.5)
+        params.get(self.KDstr).min = minKD
+        params.get(self.KDstr).max = maxKD
         params.get(self.BMAXstr).value = np.mean(data)
         params.get(self.BMAXstr).min = 0.001
         params.get(self.BMAXstr).max = np.max(data)+(np.max(data)*0.5)
@@ -160,61 +169,48 @@ class DeltaDeltaShiftsCalculation():
             deltaDeltas.append(dd)
         return deltaDeltas
 
-
     def _getDeltaDeltasOutputFrame(self, inputData):
         """
         Calculate the DeltaDeltas for an input SeriesTable.
         :param inputData: CSMInputFrame
         :return: outputFrame
         """
-        getLogger().warning('CSM Under implementation...')
+        outputFrame = CSMOutputFrame()
+        outputFrame._buildColumnHeaders()
+        grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
+        rowIndex = 1
+        while True:
+            for collectionId, groupDf in grouppedByCollectionsId:
+                groupDf.sort_values([sv.SERIESSTEP], inplace=True)
+                dimensions = groupDf[sv.DIMENSION].unique()
+                dataPerDimensionDict = {}
+                for dim in dimensions:
+                    dimRow = groupDf[groupDf[sv.DIMENSION] == dim]
+                    dataPerDimensionDict[dim] = dimRow[sv._PPMPOSITION].values
+                alphaFactors = []
+                for i in dataPerDimensionDict: # get the correct alpha factors per IsotopeCode/dimension and not derive it by atomName.
+                    ic = groupDf[groupDf[sv.DIMENSION] == i][sv.ISOTOPECODE].unique()[-1]
+                    alphaFactors.append(self._alphaFactors.get(ic, 1))
+                values = np.array(list(dataPerDimensionDict.values()))
+                seriesValues4residue = values.T  ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
+                deltaDeltas = DeltaDeltaShiftsCalculation._calculateDeltaDeltas(seriesValues4residue, alphaFactors)
+                csmValue = np.mean(deltaDeltas[1:])      ## first item is excluded from as it is always 0 by definition.
+                nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf) # join the atom names from different rows in a list
+                seriesSteps = groupDf[sv.SERIESSTEP].unique()
+                for delta, seriesStep in zip(deltaDeltas, seriesSteps):
+                    # build the outputFrame
+                    outputFrame.loc[rowIndex, sv.COLLECTIONID] = collectionId
+                    outputFrame.loc[rowIndex, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
+                    outputFrame.loc[rowIndex, sv.SERIESSTEPVALUE] = delta
+                    outputFrame.loc[rowIndex, sv.SERIESSTEP] = seriesStep
+                    outputFrame.loc[rowIndex, sv.DELTA_DELTA] = csmValue
+                    outputFrame.loc[rowIndex, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
+                    outputFrame.loc[rowIndex, sv.NMRATOMNAMES] = nmrAtomNames
+                    outputFrame.loc[rowIndex, sv.FLAG] = sv.FLAG_INCLUDED
+                    rowIndex += 1
+            break
+        return outputFrame
 
-        # from ccpn.util.isotopes import name2IsotopeCode
-        # outputDataDict = defaultdict(list)
-        # grouppingHeaders = [sv.NMRCHAINCODE, sv.NMRRESIDUECODE, sv.NMRRESIDUETYPE]
-        # _filteringAtoms = self._filteringAtoms
-        # _alphaFactors = self._alphaFactors
-        # _excludedResidues = self._excludedResidueTypes
-        #
-        # for assignmentValues, grouppedDF in inputData.groupby(grouppingHeaders):        ## Group by Assignments except the atomName
-        #     atomFiltered = grouppedDF[grouppedDF[sv.NMRATOMNAME].isin(_filteringAtoms)]   ## filter by the specific atoms of interest
-        #     dataArrayPerIsotope = {}                                                    ## make sure we are using the right factor
-        #     for ii, _row in atomFiltered.iterrows():
-        #         atomName = _row[sv.NMRATOMNAME]
-        #         isotopeCode = name2IsotopeCode(atomName)
-        #         _alphaFactor = _alphaFactors.get(isotopeCode, 1)
-        #         dataArrayPerIsotope[_alphaFactor] = _row[inputData.valuesHeaders].values
-        #     alphaFactors = dataArrayPerIsotope.keys()
-        #     values = np.array(list(dataArrayPerIsotope.values()))
-        #     seriesValues4residue = values.T                                             ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
-        #     deltaDeltas = DeltaDeltaShiftsCalculation._calculateDeltaDeltas(seriesValues4residue, alphaFactors)  ## get the deltaDeltas
-        #     newUid = grouppedDF[grouppingHeaders].values[0].astype('str')
-        #     newUid = createPid(NmrResidue.shortClassName, *newUid)
-        #     outputDataDict[sv._ROW_UID].append(newUid)
-        #     for i, assignmentHeader in enumerate(grouppingHeaders):                     ## build new row for the output dataFrame as DefaultDict.
-        #         outputDataDict[assignmentHeader].append(list(assignmentValues)[i])      ## add common assignments definitions
-        #     outputDataDict[sv.NMRATOMNAMES].append(','.join(_filteringAtoms))             ## add atom names
-        #     outputDataDict[sv.DELTA_DELTA_MEAN].append(np.mean(deltaDeltas[1:]))        ## first item is excluded from as it is always 0 by definition.
-        #     for _dd, valueHeaderName in zip(deltaDeltas,inputData.valuesHeaders):       ## add single steps Deltadelta value
-        #         outputDataDict[valueHeaderName].append(_dd)
-        # outputFrame = CSMOutputFrame()
-        # DeltaDeltaShiftsCalculation._finaliseOutputFrame(grouppingHeaders, inputData, outputFrame, outputDataDict)
-        # outputFrame[sv.FLAG] = [sv.FLAG_INCLUDED] * len(outputFrame)  # for set flag all included. This will be for user included/excluded flags
-        # excludedData = outputFrame[outputFrame[sv.NMRRESIDUETYPE].isin(_excludedResidues)]
-        # outputFrame.loc[excludedData.index, sv.DELTA_DELTA_MEAN] = 0  ## Replace excluded residues with 0 but keep entries.
-        # outputFrame.loc[excludedData.index, sv.FLAG] = sv.FLAG_EXCLUDED
-        #
-        # outputFrame.set_index(sv._ROW_UID, inplace=True, drop=False)
-        # return outputFrame
-
-    @staticmethod
-    def _finaliseOutputFrame(grouppingHeaders, inputData, outputFrame, outputDataDict):
-        """private completion method """
-        outputFrame.setDataFromDict(outputDataDict)
-        outputFrame.setSeriesUnits(inputData.SERIESUNITS)
-        outputFrame.setSeriesSteps(inputData.SERIESSTEPS)
-        outputFrame._assignmentHeaders = grouppingHeaders + [sv.NMRATOMNAMES]
-        outputFrame._valuesHeaders = inputData.valuesHeaders
 
 
 class OneSiteBindingModel(FittingModelABC):
@@ -231,42 +227,50 @@ class OneSiteBindingModel(FittingModelABC):
     Minimiser = Binding1SiteMinimiser
 
     def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
+        """
+
+        :param inputData:
+        :param rescale:
+        :param args:
+        :param kwargs:
+        :return:
+
+        groupbyCollecID
+        get series steps as x
+        get Series Values as y
+        fill the stats
+        """
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
-        xArray = np.array(inputData.SERIESSTEPS)
+
         #TODO Missing rescale option
-        outputDataDict = defaultdict(list)
-        fittingResults = []
-        for ix, row in inputData.iterrows():
-            seriesValues = row[inputData.valuesHeaders]
+        grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
+
+        for collectionId, groupDf in grouppedByCollectionsId:
+            groupDf.sort_values([sv.SERIESSTEP], inplace=True)
+            seriesSteps = groupDf[sv.SERIESSTEP]
+            seriesValues = groupDf[sv.SERIESSTEPVALUE]
+            xArray = seriesSteps.values
             yArray = seriesValues.values
-            if row[sv.FLAG] == sv.FLAG_EXCLUDED:
+            if sv.FLAG_EXCLUDED in groupDf[sv.FLAG]:
                 yArray = np.full(seriesValues.values.shape, fill_value=np.nan)
             model = self.Minimiser()
             try:
                 params = model.guess(yArray, xArray)
                 result = model.fit(yArray, params, x=xArray)
             except:
-                if row[sv.FLAG] == sv.FLAG_EXCLUDED:
-                    getLogger().warning(f'Fitting skipped for: {row[sv._ROW_UID]} data.')
+                if sv.FLAG_EXCLUDED in groupDf[sv.FLAG]:
+                    getLogger().warning(f'Fitting skipped for collectionId: {collectionId} data.')
                 else:
-                    getLogger().warning(f'Fitting Failed for: {row[sv._ROW_UID]} data.')
+                    getLogger().warning(f'Fitting Failed for collectionId: {collectionId} data.')
                 params = model.params
                 result = MinimiserResult(model, params)
-            fittingResults.append(result)
-            outputDataDict[sv._ROW_UID].append(row[sv._ROW_UID])
-            for i, assignmentHeader in enumerate(inputData.assignmentHeaders[:-1]):  ## build new row for the output dataFrame as DefaultDict.
-                outputDataDict[assignmentHeader].append(row[assignmentHeader])  ## add common assignments definitions
-            outputDataDict['ModelName'].append(model.MODELNAME)
+
+
+            inputData.loc[collectionId, sv.MODEL_NAME] = model.MODELNAME
+            # inputData.loc[collectionId, sv.MINIMISER_METHOD] =
             for resultName, resulValue in result.getAllResultsAsDict().items():
-                outputDataDict[resultName].append(resulValue)
-            # outputDataDict['minimiser'].append(result)
-        outputFrame = CSMBindingOutputFrame()
-        outputFrame.setDataFromDict(outputDataDict)
-        outputFrame.setSeriesUnits(inputData.SERIESUNITS)
-        outputFrame.setSeriesSteps(inputData.SERIESSTEPS)
-        outputFrame._assignmentHeaders = inputData.assignmentHeaders
-        outputFrame._valuesHeaders = inputData.valuesHeaders
-        return outputFrame
+                inputData.loc[collectionId, resultName] = resulValue
+        return inputData
 
 
 class FractionBindingModel(FittingModelABC):

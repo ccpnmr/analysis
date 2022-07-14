@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-14 21:56:16 +0100 (Thu, July 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -202,21 +202,6 @@ class SeriesAnalysisABC(ABC):
     def plotResults(self, *args, **kwargs):
         pass
 
-    def _reportFittingPlots(self, outputData, path):
-        from matplotlib.backends.backend_pdf import PdfPages
-        import matplotlib.pyplot as plt
-        from ccpn.util.Logging import getLogger
-        getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
-
-        pdf = PdfPages(path)
-        for ix, row in outputData.iterrows():
-            minimiser = row.get(sv.MINIMISER)
-            title = row[sv._ROW_UID]
-            if minimiser is not None:
-                fig = minimiser.plot(title=title, showPlot=False)
-                pdf.savefig(fig)  # saves the current figure into a pdf page
-                plt.close()
-        pdf.close()
 
     def __init__(self):
 

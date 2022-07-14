@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-07 20:01:35 +0100 (Thu, July 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-14 21:56:17 +0100 (Thu, July 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -247,6 +247,8 @@ ColumnR2 = UNICODE_R2
 ColumnCHISQUARE = UNICODE_CHISQUARE
 ColumnREDCHISQUARE = UNICODE_RED_CHISQUARE
 
+ColumnID = 'Id'
+ColumnCollection = 'Collection'
 ColumnChainCode = 'Chain'
 ColumnResidueCode = 'Code'
 ColumnResidueType = 'Type'

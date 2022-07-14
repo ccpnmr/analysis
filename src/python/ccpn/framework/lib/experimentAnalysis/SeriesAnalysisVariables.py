@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-14 21:56:16 +0100 (Thu, July 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from ccpn.core.lib.AssignmentLib import CCP_CODES_SORTED
 ##  SeriesDataTable common definitions. Used in I/O tables columns and throughtout modules
 ############################################################################################
 
-NMRCHAINCODE     = 'nmrChainCode'           # -> str   | nmrChain Code
+NMRCHAINNAME     = 'nmrChainName'           # -> str   | nmrChain Name
 NMRRESIDUECODE   = 'nmrResidueCode'         # -> str   | nmrResidue Sequence Code (e.g.: '1', '1B')
 NMRRESIDUETYPE   = 'nmrResidueType'         # -> str   | nmrResidue Type (e.g.: 'ALA')
 NMRATOMNAME      = 'nmrAtomName'            # -> str   | nmrAtom name (e.g.: 'Hn')
@@ -55,6 +55,7 @@ ISOTOPECODE      = 'isotopeCode'
 CLUSTERID        = 'clusterId'
 COLLECTIONID     = 'collectionId'
 SERIESSTEP       = 'seriesStep'
+SERIESSTEPVALUE  = 'seriesStepValue'
 SERIESUNIT       = 'seriesUnit'
 PEAKPID          = 'peakPid'
 SPECTRUMPID      = 'spectrumPid'
@@ -65,13 +66,13 @@ ASSIGNEDNMRATOMS = 'assignedNmrAtoms'
 
 # fitting output Stat variables
 MINIMISER        = 'minimiser'
-R2               = 'R2'                  # -> float |
+R2               = 'R2'
 CHISQUARE        = 'Chi-square'
 REDUCEDCHISQUARE = f'Red-{CHISQUARE}'
 AKAIKE           = 'Akaike'
 BAYESIAN         = 'Bayesian'
 MINIMISER_METHOD = 'Method'
-
+MINIMISER_MODEL  = 'Model'
 
 ## Peak properties. Used to get nmrAtom assigned-peak by dimension and build tables.
 _POINTPOSITION  = pu._POSITION
@@ -96,16 +97,18 @@ _15N = '15N'
 _13C = '13C'
 
 
-CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, R2, CHISQUARE, REDUCEDCHISQUARE, AKAIKE, BAYESIAN]
-
+CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, MINIMISER_MODEL, R2, CHISQUARE, REDUCEDCHISQUARE, AKAIKE, BAYESIAN]
 SpectrumPropertiesHeaders = [DIMENSION, ISOTOPECODE, SERIESSTEP, SERIESUNIT]
 PeakPropertiesHeaders = [COLLECTIONID, _PPMPOSITION, _HEIGHT, _LINEWIDTH, _VOLUME]
-AssignmentPropertiesHeaders = [NMRCHAINCODE, NMRRESIDUECODE, NMRRESIDUETYPE, NMRATOMNAME]
+AssignmentPropertiesHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE, NMRATOMNAME]
+GROUPBYAssignmentHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE]
 PidHeaders = [COLLECTIONPID, SPECTRUMPID, PEAKPID, NMRATOMPID]
 
 KD = 'Kd'
 BMAX = 'BMax'
 _ERR = '_err'
+KD_ERR = f'{KD}{_ERR}'
+BMAX_ERR = f'{BMAX}{_ERR}'
 ERROR = 'Error'
 
 FLAG = 'Flag'
@@ -152,10 +155,8 @@ uDELTA = '\u0394'
 uDelta = '\u03B4'
 DELTA = 'Delta'
 DELTA_DELTA = f'{DELTA*2}'
+DELTADELTAMEAN = f'{DELTA*2}Mean'
 EUCLIDEAN_DISTANCE = 'Euclidean Distance'
-DELTA_DELTA_MEAN = f'{DELTA*2}(Mean)'
-DELTA_DELTA_SUM = f'{DELTA*2}(Sum)'
-DELTA_DELTA_STD = f'{DELTA*2}(STD)'
 DEFAULT_H_ALPHAFACTOR = 1
 DEFAULT_N_ALPHAFACTOR = 0.142
 DEFAULT_C_ALPHAFACTOR = 0.25

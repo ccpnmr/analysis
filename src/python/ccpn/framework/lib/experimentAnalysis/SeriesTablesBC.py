@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-14 21:56:17 +0100 (Thu, July 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -58,6 +58,17 @@ class SeriesFrameBC(TableFrame):
     def loadFromFile(self, filePath, *args, **kwargs):
         pass
 
+    @staticmethod
+    def _getAtomNamesFromGroupedByHeaders(groupedDf):
+        """
+        join the atom names from different rows in a list
+        :param groupedDf: groupedBy object
+        """
+        nmrAtomNames = groupedDf[sv.AssignmentPropertiesHeaders].groupby(
+            sv.GROUPBYAssignmentHeaders)[sv.NMRATOMNAME].unique().transform(
+            lambda x: ','.join(x)).values
+        return nmrAtomNames
+
 
 class InputSeriesFrameBC(SeriesFrameBC):
     """
@@ -65,33 +76,32 @@ class InputSeriesFrameBC(SeriesFrameBC):
     Columns names are divided in following groups assignmentProperties, spectrumProperties, peakProperties.
 
     ## --------- Columns definitions --------- ##
-        - _UID                  : str,   mandatory. Unique string used to index the DataFrame.
+        - _UID                  : str,   value mandatory. Unique string used to index the DataFrame.
 
         - spectrumProperties group:
-            - dimension         : int,   mandatory
-            - isotopeCode       : str,   mandatory
-            - seriesStep        : float, mandatory
-            - seriesUnit        : str,   mandatory
+            - dimension         : int,   value mandatory
+            - isotopeCode       : str,   value mandatory
+            - seriesStep        : float, value mandatory
+            - seriesUnit        : str,   value mandatory
 
         - peakProperties group:
-            - collectionId      : int,   mandatory
-            - height            : float, mandatory
-            - ppmPosition       : float, mandatory
-            - lineWidth         : float, optional
-            - volume            : float, optional
+            - collectionId      : int,   value mandatory
+            - height            : float, value mandatory
+            - ppmPosition       : float, value mandatory
+            - lineWidth         : float, value optional
+            - volume            : float, value optional
 
         - assignmentProperties group:
-            - nmrChainCode      : str,   optional
-            - nmrResidueCode    : str,   optional
-            - nmrResidueType    : str,   optional
-            - nmrAtomName       : str,   optional
-            - nmrAtomPid        : str,   optional
+            - nmrChainCode      : str,   value optional
+            - nmrResidueCode    : str,   value optional
+            - nmrResidueType    : str,   value optional
+            - nmrAtomName       : str,   value optional
 
         - pids group: all optional.  If available, changes to core objects may dynamically update the Data
-            - spectrumPid       : str,   optional
-            - peakPid           : str,   optional
-            - nmrAtomPid        : str,   optional
-            - peakCollectionPid : str,   optional
+            - spectrumPid       : str,   value optional
+            - peakPid           : str,   value optional
+            - nmrAtomPid        : str,   value optional
+            - peakCollectionPid : str,   value optional
 
     """
 
@@ -194,7 +204,7 @@ class InputSeriesFrameBC(SeriesFrameBC):
                             ## build the assignment Property Columns
                             assignedNmrAtoms = flattenLists(pk.getByDimensions(sv.ASSIGNEDNMRATOMS, [dimension]))
                             for nmrAtom in assignedNmrAtoms:
-                                self.loc[i, sv.NMRCHAINCODE] = nmrAtom.nmrResidue.nmrChain.name
+                                self.loc[i, sv.NMRCHAINNAME] = nmrAtom.nmrResidue.nmrChain.name
                                 self.loc[i, sv.NMRRESIDUECODE] = nmrAtom.nmrResidue.sequenceCode
                                 self.loc[i, sv.NMRRESIDUETYPE] = nmrAtom.nmrResidue.residueType
                                 self.loc[i, sv.NMRATOMNAME] = nmrAtom.name
@@ -218,8 +228,66 @@ class RelaxationOutputFrame(SeriesFrameBC):
 ########################################################################################################################
 
 class CSMOutputFrame(SeriesFrameBC):
+
+    """
+    A TableData used for the CSM Series Analysis,
+    Mandatory Column names are:
+        ## --------- Columns definitions --------- ##
+        # Group with various identifiers etc
+        - _UID              : str,     Same value as collectionId
+        - nmrChainName      : str,
+        - nmrResidueCode    : str,
+        - nmrResidueType    : str,
+        - nmrAtomNames      : list,
+        - collectionId      : int,
+        - collectionPid     : str,
+        # Group with calculation/calculated values
+        - seriesUnit        : str,
+        - seriesStep        : float,
+        - seriesStepValue   : float,
+        - deltaDeltaMean    : float,
+        - kd                : float,
+        - kd_error          : float,
+        - bMax              : float,
+        - bMax_error        : float,
+        # Group with statistical fitting results
+        - R2               : float,
+        - Chi-square       : float,
+        - Red-Chi-square   : float,
+        - Akaike           : float,
+        - Bayesian         : float,
+        - Method           : str, the minimiser method used for fitting. e.g.: 'leastsq'
+        - Model            : str, the minimiser model used for fitting.  e.g.: '1BindingSite'
+    """
+
+    SERIESFRAMENAME = sv.CSM_OUTPUT_FRAME
     SERIESFRAMETYPE = sv.CSM_OUTPUT_FRAME
 
+    def _buildColumnHeaders(self):
+        """
+        Set the Column Headers and order of appearance in the dataframe.
+        :return: None
+        """
+        columns = [
+                    sv._ROW_UID,
+                    sv.COLLECTIONID,
+                    sv.COLLECTIONPID,
+                    sv.NMRCHAINNAME,
+                    sv.NMRRESIDUECODE,
+                    sv.NMRRESIDUETYPE,
+                    sv.NMRATOMNAMES,
+                    sv.SERIESUNIT,
+                    sv.SERIESSTEP,
+                    sv.SERIESSTEPVALUE,
+                    sv.DELTADELTAMEAN,
+                    sv.KD,
+                    sv.KD_ERR,
+                    sv.BMAX,
+                    sv.BMAX_ERR,
+                  ]
+        columns += sv.CONSTANT_STATS_OUTPUT_TABLE_COLUMNS
+        self.loc[-1, columns] = None # None value, because you must give a value when creating columns after init.
+        self.dropna(inplace=True)    # remove  None values that were created as a temporary spaceHolder
 
 ########################################################################################################################
 ##################################        Private Library  functions                 ###################################
@@ -257,7 +325,7 @@ def _getOutputFrameFromInputFrame(inputFrame, outputFrameType=RelaxationOutputFr
         outputFrame[column] = inputFrame[column].values
     ## the parameters fitting Columns are added on the fly as may differ by Model (e.g.: amplitude, decay etc)
     ## add the statistical fitting output Columns
-    fittingColumns = sv.CONSTANT_STATS_OUTPUT_TABLE_COLUMNS + [sv.MINIMISER]
+    fittingColumns = sv.CONSTANT_STATS_OUTPUT_TABLE_COLUMNS
     for fittingColumn in fittingColumns:
         outputFrame[fittingColumn] = [None] * len(inputFrame)
     # #clone the other properties

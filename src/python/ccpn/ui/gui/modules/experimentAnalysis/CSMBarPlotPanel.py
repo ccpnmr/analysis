@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-14 21:56:17 +0100 (Thu, July 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -77,7 +77,7 @@ class CSMBarPlotPanel(BarPlotPanel):
 
     def updatePanel(self, *args, **kwargs):
         getLogger().info('Updating CSM barPlot panel')
-        dataFrame = self.guiModule.backendHandler._getOutputMergedDataFrame()
+        dataFrame = self.guiModule.backendHandler._getGroupedOutputDataFrame()
         if dataFrame is not None:
             self.plotDataFrame(dataFrame)
         else:
@@ -92,15 +92,15 @@ class CSMBarPlotPanel(BarPlotPanel):
         untraceableDd = dataFrame[dataFrame[yColumnName].isnull()]
         self._aboveX = [int(i) for i in aboveDf[xColumnName]]
         self._aboveY = aboveDf[yColumnName]
-        self._aboveObjects = [self.project.getByPid(x) for x in aboveDf[sv._ROW_UID]]
+        self._aboveObjects = None #[self.project.getByPid(x) for x in aboveDf[sv._ROW_UID]]
         ## below threshold values
         self._belowX = [int(i) for i in belowDf[xColumnName]]
         self._belowY = belowDf[yColumnName]
-        self._belowObjects = [self.project.getByPid(x) for x in belowDf[sv._ROW_UID]]
+        self._belowObjects = None #[self.project.getByPid(x) for x in belowDf[sv._ROW_UID]]
         ## untraceable values
         self._untraceableX = [int(i) for i in untraceableDd[xColumnName]]
         self._untraceableY = [self.guiModule.backendHandler.untraceableValue] * len(untraceableDd[yColumnName])
-        self._untraceableObjects = [self.project.getByPid(x) for x in untraceableDd[sv._ROW_UID]]
+        self._untraceableObjects = None # [self.project.getByPid(x) for x in untraceableDd[sv._ROW_UID]]
         ## Brushes
         self._aboveBrush = colourNameToHexDict.get(self.aboveThresholdBrushColour, guiNameSpaces.BAR_aboveBrushHex)
         self._belowBrush = colourNameToHexDict.get(self.belowThresholdBrushColour, guiNameSpaces.BAR_belowBrushHex)
@@ -108,7 +108,7 @@ class CSMBarPlotPanel(BarPlotPanel):
         self._tresholdLineBrush = colourNameToHexDict.get(self.thresholdBrushColour, guiNameSpaces.BAR_thresholdLineHex)
         self._gradientbrushes = colorSchemeTable.get(self.aboveThresholdBrushColour, []) #in case there is one.
 
-    def plotDataFrame(self, dataFrame, xColumnName=sv.NMRRESIDUECODE, yColumnName=sv.DELTA_DELTA_MEAN):
+    def plotDataFrame(self, dataFrame, xColumnName=sv.NMRRESIDUECODE, yColumnName=sv.DELTA_DELTA):
         """ Plot the given columns of dataframe as bars
          """
         getLogger().warning('DEMO version of plotting')

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-14 21:56:16 +0100 (Thu, July 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-15 12:41:34 +0100 (Fri, July 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -148,14 +148,19 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         getLogger().info('Fitting InputData completed.')
 
     def _getGroupedOutputDataFrame(self, *args):
-        """ Return the outputDataFrame containing the fitting and deltaDeltas calculations"""
+        """ internal. Used to get a df to display in GuiTables
+         Return the outputDataFrame containing the fitting and deltaDeltas calculations.
+         """
         if len(self.inputDataTables) == 0:
             return
         if not self.getOutputDataTables():
             return
         outputDataTable = self.getOutputDataTables()[-1]
         outDataFrame = outputDataTable.data
-        outDataFrame = outDataFrame.groupby(sv.COLLECTIONID).first()
+        ## group by id and keep only first row as all duplicated except the series steps, which are not needed here.
+        ## reset index otherwise you lose the column collectionId
+        outDataFrame = outDataFrame.groupby(sv.COLLECTIONID).first().reset_index()
+        outDataFrame[sv._ROW_UID] = np.arange(1, len(outDataFrame)+1)
         return outDataFrame
 
     def getThresholdValueForData(self, factor=1):

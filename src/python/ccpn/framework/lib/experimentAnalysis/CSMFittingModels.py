@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-14 21:56:16 +0100 (Thu, July 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-15 12:41:34 +0100 (Fri, July 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -205,7 +205,7 @@ class DeltaDeltaShiftsCalculation():
                     outputFrame.loc[rowIndex, sv.SERIESSTEP] = seriesStep
                     outputFrame.loc[rowIndex, sv.DELTA_DELTA] = csmValue
                     outputFrame.loc[rowIndex, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
-                    outputFrame.loc[rowIndex, sv.NMRATOMNAMES] = nmrAtomNames
+                    outputFrame.loc[rowIndex, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''
                     outputFrame.loc[rowIndex, sv.FLAG] = sv.FLAG_INCLUDED
                     rowIndex += 1
             break
@@ -228,23 +228,15 @@ class OneSiteBindingModel(FittingModelABC):
 
     def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
         """
-
         :param inputData:
         :param rescale:
         :param args:
         :param kwargs:
         :return:
-
-        groupbyCollecID
-        get series steps as x
-        get Series Values as y
-        fill the stats
         """
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
-
         #TODO Missing rescale option
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
-
         for collectionId, groupDf in grouppedByCollectionsId:
             groupDf.sort_values([sv.SERIESSTEP], inplace=True)
             seriesSteps = groupDf[sv.SERIESSTEP]
@@ -264,12 +256,11 @@ class OneSiteBindingModel(FittingModelABC):
                     getLogger().warning(f'Fitting Failed for collectionId: {collectionId} data.')
                 params = model.params
                 result = MinimiserResult(model, params)
-
-
             inputData.loc[collectionId, sv.MODEL_NAME] = model.MODELNAME
-            # inputData.loc[collectionId, sv.MINIMISER_METHOD] =
-            for resultName, resulValue in result.getAllResultsAsDict().items():
-                inputData.loc[collectionId, resultName] = resulValue
+            inputData.loc[collectionId, sv.MINIMISER_METHOD] = model.method
+            for ix, row in groupDf.iterrows():
+                for resultName, resulValue in result.getAllResultsAsDict().items():
+                    inputData.loc[ix, resultName] = resulValue
         return inputData
 
 

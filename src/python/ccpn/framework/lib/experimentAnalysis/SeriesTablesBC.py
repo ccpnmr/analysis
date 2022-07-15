@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-14 21:56:17 +0100 (Thu, July 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-15 12:41:34 +0100 (Fri, July 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -234,7 +234,7 @@ class CSMOutputFrame(SeriesFrameBC):
     Mandatory Column names are:
         ## --------- Columns definitions --------- ##
         # Group with various identifiers etc
-        - _UID              : str,     Same value as collectionId
+        - _UID              : int,
         - nmrChainName      : str,
         - nmrResidueCode    : str,
         - nmrResidueType    : str,

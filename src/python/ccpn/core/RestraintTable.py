@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-03 19:09:31 +0000 (Thu, March 03, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-07-15 16:05:27 +0100 (Fri, July 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -52,6 +52,8 @@ class RestraintTable(AbstractWrapperObject):
     shortClassName = 'RT'
     # Attribute it necessary as subclasses must use superclass className
     className = 'RestraintTable'
+
+    _isPandasTableClass = True
 
     _parentClass = StructureData
 

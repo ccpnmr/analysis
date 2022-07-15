@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-16 11:02:55 +0000 (Wed, February 16, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-07-15 16:05:27 +0100 (Fri, July 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -160,7 +160,7 @@ class DataFrameABC(pd.DataFrame):
     so some behaviours will be different. Specifically columns with reserved names are type-checked,
     and you cannot add new columns with data that match only part of the existing rows.
 
-    If subclassing, remember to add classes to ccpn.util.jsonIo.py
+    NOTE: If subclassing, remember to add classes to ccpn.util.jsonIo.py
     """
 
     RECORDNAME = 'DataFrameABC'
@@ -176,7 +176,7 @@ class DataFrameABC(pd.DataFrame):
     @_containingObject.setter
     def _containingObject(self, value):
         """Get containing object"""
-        if (value is None or (hasattr(value, 'className') and value.className in ('DataTable', 'StructureEnsemble',))):
+        if (value is None or (hasattr(value, 'className') and value._isPandasTableClass)):
             self._containerDataTable = value
         else:
             raise ValueError(f'{self.__class__.__name__}._containingObject must be None, subclass of DataTable, was {value}')

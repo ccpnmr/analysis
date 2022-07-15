@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-22 11:25:37 +0000 (Tue, March 22, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-07-15 18:22:54 +0100 (Fri, July 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -137,6 +137,12 @@ class DataTableModule(CcpnModule):
         # fixed height
         self._modulePulldown.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
 
+        # row += 1
+        self.labelComment = Label(_topWidget, text='comment', grid=(row, 2), hAlign='r')
+        self.lineEditComment = LineEdit(_topWidget, grid=(row, 3), gridSpan=(1, 1),
+                                        textAlignment='l', backgroundText='> Optional <')
+        self.lineEditComment.editingFinished.connect(self._applyComment)
+
         row += 1
         HLine(parent=_topWidget, grid=(row, 0), gridSpan=(1, 4), height=16, colour=getColours()[DIVIDER])
 
@@ -145,12 +151,6 @@ class DataTableModule(CcpnModule):
         self._metadata = _SimplePandasTableView(_topWidget, showVerticalHeader=False)
         _topWidget.getLayout().addWidget(self._metadata, row, 1, 1, 3)
         self._metadata.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-
-        row += 1
-        self.labelComment = Label(_topWidget, text='comment', grid=(row, 0), hAlign='r')
-        self.lineEditComment = LineEdit(_topWidget, grid=(row, 1), gridSpan=(1, 3),
-                                        textAlignment='l', backgroundText='> Optional <')
-        self.lineEditComment.editingFinished.connect(self._applyComment)
 
         row += 1
         Spacer(_topWidget, 5, 5,

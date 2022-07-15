@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 17:17:08 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-15 18:10:39 +0100 (Fri, July 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -51,32 +51,44 @@ class CSMFitPlotPanel(FitPlotPanel):
         FitPlotPanel.__init__(self, guiModule, *args , **Framekwargs)
         self.setXLabel(label='X')
         self.setYLabel(label=guiNameSpaces.RelativeDisplacement)
-        self._selectCurrentNRNotifier = Notifier(self.current, [Notifier.CURRENT], targetName='nmrResidues',
-                                                 callback=self._selectCurrentNmrResiduesNotifierCallback, onceOnly=True)
+        self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
+                                                 callback=self._currentCollectionCallback, onceOnly=True)
 
-    def _selectCurrentNmrResiduesNotifierCallback(self, *args):
+    def getPlottingData(self):
+        pass
+
+    def _currentCollectionCallback(self, *args):
         getLogger().info('Selected Current. Callback in FitPlot')
-        nmrResidues = self.current.nmrResidues
-        dataTables = self.guiModule.outputDataTables
-        df = None
-        if len(dataTables)>0:
-            df = dataTables[0].data
-        if df is None:
-            return
-        if len(nmrResidues) > 0:
-            self.setXLabel(label=df.SERIESUNITS)
-            # get nmrRes form module data or table selection
-            # only first as demo
-            pid = nmrResidues[0].pid
-            selectedDf = df[df[sv._ROW_UID]==pid]
-            func = lf.oneSiteBinding_func
+        collections = self.current.collections
+        dataFrame = self.guiModule.backendHandler.getFirstOutputDataFrame()
 
-            kd = selectedDf[sv.KD].values[0]
-            bmax = selectedDf[sv.BMAX].values[0]
-
-            xf = np.linspace(min(df.SERIESSTEPS), max(df.SERIESSTEPS), 1000)
+        for collection in collections:
+            filteredDf = dataFrame[dataFrame[sv.COLLECTIONPID] == collection.pid]
+            seriesSteps = filteredDf[sv.SERIESSTEP].values
+            seriesStepsValues = filteredDf[sv.SERIESSTEPVALUE].values
+            seriesUnit = filteredDf[sv.SERIESUNIT].values[-1]
+            peakPids = filteredDf[sv.PEAKPID].values
+            objs = [self.project.getByPid(pid) for pid in peakPids]
+            func = lf.oneSiteBinding_func # todo need to get from the model name
+            kd = filteredDf[sv.KD].values[0]
+            bmax = filteredDf[sv.BMAX].values[0]
+            xf = np.linspace(min(seriesSteps), max(seriesSteps), 1000)
             yf = func(xf, kd, bmax)
-            self.plotCurve(xf, yf)
+            self.bindingPlot.clear()
+            self.bindingPlot.plot(xf, yf)
+            self.setXLabel(label=seriesUnit)
+            spots = []
+            for obj, x, y in zip(objs, seriesSteps, seriesStepsValues):
+                dd = {'pos': [0, 0], 'data': 'obj', 'brush': pg.mkBrush(255, 0, 0), 'symbol': 'o', 'size': 10, 'pen': None}  # red default
+                dd['pos'] = [x,y]
+                dd['data'] = obj
+                if hasattr(obj.spectrum, 'positiveContourColour'):  # colour from the spectrum. The only CCPN obj implemeted so far
+                    dd['brush'] = pg.functions.mkBrush(hexToRgb(obj.spectrum.positiveContourColour))
+                spots.append(dd)
+
+            scatter = pg.ScatterPlotItem(spots)
+            self.bindingPlot.addItem(scatter)
+
 
     def plotCurve(self, xs, ys):
         self.bindingPlot.clear()
@@ -86,7 +98,8 @@ class CSMFitPlotPanel(FitPlotPanel):
         pass
         #to do when cleaning input data and avoid wrongly displayed curves
 
-
+    def close(self):
+        self._selectCurrentCONotifier.unRegister()
 
 
 

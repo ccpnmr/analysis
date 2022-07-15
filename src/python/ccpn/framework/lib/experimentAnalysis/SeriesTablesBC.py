@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-15 12:41:34 +0100 (Fri, July 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-15 18:10:39 +0100 (Fri, July 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -241,6 +241,7 @@ class CSMOutputFrame(SeriesFrameBC):
         - nmrAtomNames      : list,
         - collectionId      : int,
         - collectionPid     : str,
+        - peakPid           : str,
         # Group with calculation/calculated values
         - seriesUnit        : str,
         - seriesStep        : float,
@@ -272,6 +273,7 @@ class CSMOutputFrame(SeriesFrameBC):
                     sv._ROW_UID,
                     sv.COLLECTIONID,
                     sv.COLLECTIONPID,
+                    sv.PEAKPID,
                     sv.NMRCHAINNAME,
                     sv.NMRRESIDUECODE,
                     sv.NMRRESIDUETYPE,

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-15 12:41:35 +0100 (Fri, July 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-15 18:10:39 +0100 (Fri, July 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -237,13 +237,12 @@ class _CSMGuiTableABC(gt.GuiTable):
         :param args:
         :return:
         """
-        getLogger().warning('Selection not implemented yet.')
         seriesList = data['object']
         objs = set()
         for series in seriesList:
-            pid = series[sv._ROW_UID]
-            obj = self.project.getByPid(pid)
-            objs.add(obj)
+            pid = series[sv.COLLECTIONPID]
+            objs.add(self.project.getByPid(pid))
+        self.current.collections = objs
 
     def action(self, *args):
         pass

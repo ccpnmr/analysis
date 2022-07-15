@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-01 09:41:43 +0100 (Fri, July 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-15 18:10:39 +0100 (Fri, July 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -72,9 +72,22 @@ class FitPlotPanel(GuiPanel):
         self._bindingPlotView = pg.GraphicsLayoutWidget()
         self._bindingPlotView.setBackground(self.backgroundColour)
         self.bindingPlot = self._bindingPlotView.addPlot(axisItems={'left': FmtAxisItem(orientation='left')})
+        self._bindingPlotViewbox = self.bindingPlot.vb
+        self.bindingPlot.mouseDoubleClickEvent = self._mouseDoubleClickEvent
+        self.bindingPlot.mouseClickEvent = self._mouseClickEvent
+        self._bindingPlotViewbox.mouseClickEvent = self._viewboxMouseClickEvent
         self.bindingPlot.setMenuEnabled(False)
         self.bindingPlot.getAxis('bottom').setPen(self.gridPen)
         self.bindingPlot.getAxis('left').setPen(self.gridPen)
         self.bindingPlot.getAxis('bottom').tickFont = self.gridFont
         self.bindingPlot.getAxis('left').tickFont = self.gridFont
         self.getLayout().addWidget(self._bindingPlotView)
+
+    def _mouseDoubleClickEvent(self, *args):
+        print('_mouseDoubleClickEvent on bindingPlot ', args)
+
+    def _mouseClickEvent(self, *args):
+        print('_mouseClickEvent on bindingPlot ', args)
+
+    def _viewboxMouseClickEvent(self, *args):
+        print('_viewboxMouseClickEvent on bindingPlot ', args)

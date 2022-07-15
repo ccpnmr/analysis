@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-15 12:41:34 +0100 (Fri, July 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-15 18:10:39 +0100 (Fri, July 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -197,9 +197,11 @@ class DeltaDeltaShiftsCalculation():
                 csmValue = np.mean(deltaDeltas[1:])      ## first item is excluded from as it is always 0 by definition.
                 nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf) # join the atom names from different rows in a list
                 seriesSteps = groupDf[sv.SERIESSTEP].unique()
-                for delta, seriesStep in zip(deltaDeltas, seriesSteps):
+                peakPids = groupDf[sv.PEAKPID].unique()
+                for delta, seriesStep, peakPid in zip(deltaDeltas, seriesSteps, peakPids):
                     # build the outputFrame
                     outputFrame.loc[rowIndex, sv.COLLECTIONID] = collectionId
+                    outputFrame.loc[rowIndex, sv.PEAKPID] = peakPid
                     outputFrame.loc[rowIndex, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
                     outputFrame.loc[rowIndex, sv.SERIESSTEPVALUE] = delta
                     outputFrame.loc[rowIndex, sv.SERIESSTEP] = seriesStep

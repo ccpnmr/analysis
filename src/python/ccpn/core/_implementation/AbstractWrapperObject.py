@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-07-17 15:51:21 +0100 (Sun, July 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ from contextlib import contextmanager
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
 
+import pandas as pd
 from decorator import decorator
 
 import ccpn.core._implementation.resetSerial
@@ -1481,6 +1482,9 @@ class AbstractWrapperObject(NotifierBase):
             except Exception as e:
                 getLogger().warning('Potential error for the property %s in creating dictionary from object: %s . Error: %s' % (i, self, e))
         return od
+
+    def getAsDataFrame(self) -> pd.DataFrame:
+        raise RuntimeError('Not implemented')
 
 
 AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:37 +0100 (Tue, July 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-07-17 15:51:21 +0100 (Sun, July 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar
 from ccpn.util.Logging import getLogger
 from ccpn.core._implementation.PMIListABC import PMIListABC
-
+import pandas as pd
 
 GAUSSIANMETHOD = 'gaussian'
 LORENTZIANMETHOD = 'lorentzian'
@@ -479,6 +479,13 @@ class PeakList(PMIListABC):
         return _newPickedPeak(self, pointPositions=pointPositions, height=height,
                               lineWidths=lineWidths, fitMethod=fitMethod, **kwds)
 
+
+    def getAsDataFrame(self) -> pd.DataFrame:
+        """ Get the peakList as a DataFrame. """
+        dfs = []
+        for peak in self.peaks:
+            dfs.append(peak.getAsDataFrame())
+        return pd.concat(dfs, axis=0)
 
 #=========================================================================================
 # Connections to parents:

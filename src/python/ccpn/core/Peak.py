@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:37 +0100 (Tue, July 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-07-17 15:51:21 +0100 (Sun, July 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ import operator
 import numpy as np
 from functools import partial
 from typing import Optional, Tuple, Union, Sequence, Any
-
+import pandas as pd
 from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices
 from ccpn.util import Common as commonUtil
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -1187,6 +1187,24 @@ class Peak(AbstractWrapperObject):
                     iterations -= 1
         getLogger().info('Peak fit completed for %s' % peak)
         return
+
+    def getAsDataFrame(self) -> pd.DataFrame:
+        """Get the peak properties as a dataframe """
+        df = pd.DataFrame()
+        ix = self.serial
+        dimHeaderPrefix = '_F'
+        # do assignments (complex case)
+        for i, nmrAtoms in enumerate(self.assignmentsByDimensions, start=1):
+            values = ','.join([na.pid for na in nmrAtoms])
+            df.loc[ix, f'Assign{dimHeaderPrefix}{i}'] = values
+        for header, values in self.getAsDict().items():
+            if isinstance(values, (list, tuple)):
+                for i, value in enumerate(values, start=1):
+                    if isinstance(value, (int, float, str)):
+                        df.loc[ix, f'{header.strip("s")}{dimHeaderPrefix}{i}'] = value
+            if isinstance(values, (int, float, str)):
+                df.loc[ix, f'{header}'] = values
+        return df
 
     # def _checkAliasing(self):
     #     """Recalculate the aliasing range for all peaks in the parent spectrum

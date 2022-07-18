@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-18 16:27:35 +0100 (Mon, July 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-18 18:59:32 +0100 (Mon, July 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -198,8 +198,8 @@ class SeriesAnalysisABC(ABC):
         """
         spectrumGroupPid = dataTable.metadata.get(SpectrumGroup.className, None)
         spectrumGroup = self.project.getByPid(spectrumGroupPid)
-        dataTypeStr = dataTable.metadata.get(sv.SERIESFRAMETYPE, SeriesFrameBC.SERIESFRAMETYPE)
-        dataType = ALL_SERIES_DATA_TYPES.get(dataTypeStr, SeriesFrameBC)
+        dataTypeStr = dataTable.metadata.get(sv.SERIESFRAMETYPE, None)
+        dataType = ALL_SERIES_DATA_TYPES.get(dataTypeStr, InputSeriesFrameBC)
         data = dataTable.data
         if spectrumGroup and data is not None:
             data.__class__ = dataType

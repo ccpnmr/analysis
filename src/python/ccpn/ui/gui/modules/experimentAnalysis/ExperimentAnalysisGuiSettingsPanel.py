@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-18 18:59:32 +0100 (Mon, July 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -131,15 +131,6 @@ class GuiInputDataPanel(GuiSettingPanel):
                                         'standardListItems':[],
                                         'objectName': guiNameSpaces.WidgetVarName_SpectrumGroupsSelection,
                                         'fixedWidths': SettingsWidgetFixedWidths}, }),
-            (guiNameSpaces.WidgetVarName_PeakProperty,
-             {'label': guiNameSpaces.Label_PeakProperty,
-                                'callBack': None,
-                                'tipText': guiNameSpaces.TipText_PeakPropertySelectionWidget,
-                                'type': compoundWidget.PulldownListCompoundWidget,
-                                'kwds': {'labelText': guiNameSpaces.Label_PeakProperty,
-                                       'tipText': guiNameSpaces.TipText_PeakPropertySelectionWidget,
-                                       'texts': [],
-                                       'fixedWidths': SettingsWidgetFixedWidths}}),
             (guiNameSpaces.WidgetVarName_DataTableName,
              {'label': guiNameSpaces.Label_InputDataTableName,
                                 'tipText': guiNameSpaces.TipText_dataTableNameSelectionWidget,
@@ -173,7 +164,6 @@ class GuiInputDataPanel(GuiSettingPanel):
             (guiNameSpaces.WidgetVarName_DataTablesSelection,
              {'label': guiNameSpaces.Label_SelectDataTable,
               'tipText': guiNameSpaces.TipText_DataTableSelection,
-              # 'callBack': self._addInputDataCallback,
               'type': settingWidgets._SeriesInputDataTableSelectionWidget,
               'kwds': {
                   'objectWidgetChangedCallback':self._addInputDataCallback,

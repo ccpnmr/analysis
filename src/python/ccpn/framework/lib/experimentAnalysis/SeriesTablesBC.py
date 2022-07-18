@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-18 17:24:25 +0100 (Mon, July 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-18 18:59:32 +0100 (Mon, July 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -352,7 +352,9 @@ def _getOutputFrameFromInputFrame(inputFrame, outputFrameType=RelaxationOutputFr
     return outputFrame
 
 
-
+INPUT_SERIESFRAME_DICT = {
+                    InputSeriesFrameBC.SERIESFRAMETYPE: InputSeriesFrameBC
+                    }
 
 OUTPUT_CSM_SERIESFRAMES_DICT = {
                               sv.CSM_OUTPUT_FRAME: CSMOutputFrame,
@@ -365,6 +367,7 @@ OUTPUT_RELAXATION_SERIESFRAMES_DICT = {
 
 
 ALL_SERIES_DATA_TYPES = {
+                        **INPUT_SERIESFRAME_DICT,
                         **OUTPUT_CSM_SERIESFRAMES_DICT,
                         **OUTPUT_RELAXATION_SERIESFRAMES_DICT
                          }

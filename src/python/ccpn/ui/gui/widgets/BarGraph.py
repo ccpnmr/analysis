@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-05 17:30:48 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-18 11:29:58 +0100 (Mon, July 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -716,16 +716,23 @@ if __name__ == '__main__':
     window = QtWidgets.QWidget()
     window.setLayout(QtWidgets.QGridLayout())
 
-    xLow = BarGraph(window, viewBox=customViewBox, xValues=x, yValues=y, objects=[], brushes=brushes, useGradient=True, widht=1)
-    # xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b',widht=1)
-    # xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g',widht=1)
 
     xax = plotWidget.getAxis('bottom')
-    # xax.setTicks(ticks)
+    xticks = list(x)+list(xMids)+list(xHighs)
+    xLabelTicks = [f'{str(i)}_abcd' for i in xticks]
+    xLabelTicksNumb = [int(i)+1 for i in range(len(xLabelTicks))]
+
+    ticks = [list(zip(xLabelTicksNumb, xLabelTicks))]
+
+    xax.setTicks(ticks)
+    xLow = BarGraph(window, viewBox=customViewBox, xValues=x, yValues=y, objects=[], brushes=brushes, useGradient=True,
+                    widht=1)
+    xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b', widht=1)
+    xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs, objects=[nmrResidues], brush='g', widht=1)
 
     customViewBox.addItem(xLow)
-    # customViewBox.addItem(xMid)
-    # customViewBox.addItem(xHigh)
+    customViewBox.addItem(xMid)
+    customViewBox.addItem(xHigh)
 
     # xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen='b')
     # customViewBox.addItem(xLine)
@@ -734,12 +741,12 @@ if __name__ == '__main__':
     l.setParentItem(customViewBox.graphicsItem())
 
     c1 = plotWidget.plot(pen='r', name='low')
-    # c2 = plotWidget.plot(pen='b', name='mid')
-    # c3 = plotWidget.plot(pen='g', name='high')
+    c2 = plotWidget.plot(pen='b', name='mid')
+    c3 = plotWidget.plot(pen='g', name='high')
 
     l.addItem(c1, 'low')
-    # l.addItem(c2, 'mid')
-    # l.addItem(c3, 'high')
+    l.addItem(c2, 'mid')
+    l.addItem(c3, 'high')
 
     # customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
     customViewBox.setRange(xRange=[10,200], yRange=[0.01,1000],)

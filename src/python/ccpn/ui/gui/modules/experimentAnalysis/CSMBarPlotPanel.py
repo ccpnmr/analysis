@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-14 21:56:17 +0100 (Thu, July 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-18 11:29:58 +0100 (Mon, July 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -85,30 +85,39 @@ class CSMBarPlotPanel(BarPlotPanel):
 
     def _setPlottingData(self, dataFrame, xColumnName, yColumnName):
         """Set the plotting variables from the current Dataframe.\
-         # TODO excluded filter"""
+        """
         ## group by threshold value
         aboveDf = dataFrame[dataFrame[yColumnName] >= self.thresholdValue]
         belowDf = dataFrame[dataFrame[yColumnName] < self.thresholdValue]
         untraceableDd = dataFrame[dataFrame[yColumnName].isnull()]
-        self._aboveX = [int(i) for i in aboveDf[xColumnName]]
+        _aboveXdf = aboveDf[xColumnName]
+        self._aboveX = _aboveXdf.index
         self._aboveY = aboveDf[yColumnName]
-        self._aboveObjects = None #[self.project.getByPid(x) for x in aboveDf[sv._ROW_UID]]
+        self._aboveObjects = [self.project.getByPid(x) for x in aboveDf[sv.COLLECTIONPID]]
         ## below threshold values
-        self._belowX = [int(i) for i in belowDf[xColumnName]]
+        _belowX = belowDf[xColumnName]
+        self._belowX = _belowX.index
         self._belowY = belowDf[yColumnName]
-        self._belowObjects = None #[self.project.getByPid(x) for x in belowDf[sv._ROW_UID]]
+        self._belowObjects = [self.project.getByPid(x) for x in belowDf[sv.COLLECTIONPID]]
         ## untraceable values
-        self._untraceableX = [int(i) for i in untraceableDd[xColumnName]]
+        _untraceableX = untraceableDd[xColumnName]
+        self._untraceableX = _untraceableX.index
         self._untraceableY = [self.guiModule.backendHandler.untraceableValue] * len(untraceableDd[yColumnName])
-        self._untraceableObjects = None # [self.project.getByPid(x) for x in untraceableDd[sv._ROW_UID]]
+        self._untraceableObjects = [self.project.getByPid(x) for x in untraceableDd[sv.COLLECTIONPID]]
         ## Brushes
         self._aboveBrush = colourNameToHexDict.get(self.aboveThresholdBrushColour, guiNameSpaces.BAR_aboveBrushHex)
         self._belowBrush = colourNameToHexDict.get(self.belowThresholdBrushColour, guiNameSpaces.BAR_belowBrushHex)
         self._untraceableBrush = colourNameToHexDict.get(self.untraceableBrushColour, guiNameSpaces.BAR_untracBrushHex)
         self._tresholdLineBrush = colourNameToHexDict.get(self.thresholdBrushColour, guiNameSpaces.BAR_thresholdLineHex)
         self._gradientbrushes = colorSchemeTable.get(self.aboveThresholdBrushColour, []) #in case there is one.
+        ticks1 = list(zip(_aboveXdf.index, _aboveXdf.values))
+        ticks2 = list(zip(_belowX.index, _belowX.values))
+        ticks3 = list(zip(_untraceableX.index, _untraceableX.values))
+        ticks = list(zip(dataFrame[yColumnName].index, dataFrame[yColumnName].values))
+        xAxis = self._getAxis('bottom')
+        # xAxis.setTicks([ticks])
 
-    def plotDataFrame(self, dataFrame, xColumnName=sv.NMRRESIDUECODE, yColumnName=sv.DELTA_DELTA):
+    def plotDataFrame(self, dataFrame, xColumnName=sv.COLLECTIONID, yColumnName=sv.DELTA_DELTA):
         """ Plot the given columns of dataframe as bars
          """
         getLogger().warning('DEMO version of plotting')
@@ -138,9 +147,9 @@ class CSMBarPlotPanel(BarPlotPanel):
     def _setBarGraphZoomFromData(self, dataFrame, xColumnName, yColumnName):
         """ Set the zoom without  considering the untraceable values"""
         ydata = dataFrame[yColumnName]
-        xdata = [int(i) for i in dataFrame[xColumnName]]
-        self.barGraphWidget.setXRange(np.min(xdata), np.max(xdata))
-        self.barGraphWidget.setYRange(ydata.min(), ydata.max())
+        # xdata = [int(i) for i in dataFrame[xColumnName]]
+        # self.barGraphWidget.setXRange(np.min(xdata), np.max(xdata))
+        # self.barGraphWidget.setYRange(ydata.min(), ydata.max())
 
     def _selectCurrentNmrResiduesNotifierCallback(self, *args):
         getLogger().info('Selected Current. Callback in BarPlot')

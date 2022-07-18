@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-15 18:10:39 +0100 (Fri, July 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-18 17:24:25 +0100 (Mon, July 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flattenLists
-
+from ccpn.core.Peak import Peak
 
 class SeriesFrameBC(TableFrame):
     """
@@ -165,6 +165,18 @@ class InputSeriesFrameBC(SeriesFrameBC):
         self.loc[-1, columns] = None # None value, because you must give a value when creating columns after init.
         self.dropna(inplace=True)    # remove  None values that were created as a temporary spaceHolder
 
+    def _getCollectionDict4SpectrumGroup(self, spectrumGroup):
+        """ _Internal. build the collection dict, so we know if a peak is in a collection.
+        Note, this routine exists because peak.collection is extremely slow and here we also filter-out peaks
+        which are not  in the spectrumGroup of interest."""
+        collectionDict = defaultdict(list)
+        for col in spectrumGroup.project.collections:
+            for item in col.items:
+                if isinstance(item, Peak):
+                    if item.spectrum in spectrumGroup.spectra:
+                        collectionDict[item].append(col)
+        return collectionDict
+
     def buildFromSpectrumGroup(self, spectrumGroup, peakListIndices=None):
         """
         :param spectrumGroup: A core object containg the spectra ans series information
@@ -178,6 +190,7 @@ class InputSeriesFrameBC(SeriesFrameBC):
         spectra = spectrumGroup.spectra
         if peakListIndices is None or len(peakListIndices) != len(spectra):
             peakListIndices = [-1] * len(spectra)
+        collectionDict = self._getCollectionDict4SpectrumGroup(spectrumGroup)
         i = 1
         while True: ## This because we don't know how many rows we need
             for spectrum, peakListIndex in zip(spectra, peakListIndices):
@@ -193,7 +206,8 @@ class InputSeriesFrameBC(SeriesFrameBC):
                             self.loc[i, sv.SERIESUNIT] = spectrumGroup.seriesUnits
                             self.loc[i, sv.SPECTRUMPID] = spectrum.pid
                             ## build the peak Property Columns
-                            for collection in pk.collections:
+                            collections = collectionDict.get(pk, [])
+                            for collection in collections:
                                 self.loc[i, sv.COLLECTIONID] = collection.uniqueId
                                 self.loc[i, sv.COLLECTIONPID] = collection.pid
                             for peakProperty in [sv._HEIGHT, sv._VOLUME]:

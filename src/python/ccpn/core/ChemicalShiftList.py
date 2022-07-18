@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-06 12:47:43 +0100 (Wed, July 06, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-07-18 11:29:34 +0100 (Mon, July 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -562,6 +562,9 @@ class ChemicalShiftList(AbstractWrapperObject):
         CCPN Internal
         """
         return self._wrappedData.data
+
+    def getAsDataFrame(self) -> pd.DataFrame:
+        return self._data
 
     def _searchChemicalShifts(self, nmrAtom=None, uniqueId=None):
         """Return True if the nmrAtom/uniqueId already exists in the chemicalShifts dataframe

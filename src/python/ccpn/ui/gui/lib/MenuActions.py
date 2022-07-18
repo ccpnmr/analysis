@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-16 18:02:32 +0100 (Thu, June 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-18 11:29:34 +0100 (Mon, July 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -471,7 +471,8 @@ class OpenItemABC():
             contextMenu.addAction('Make SpectrumGroup From Selected',
                                   partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False, defaultItems=spectra),
                                           self.mainWindow, self.getObj(), self.node))
-
+        if any([any(sp.isTimeDomains) for sp in spectra]): # 3.1.0 alpha feature from macro.
+            contextMenu.addAction('Split Planes to SpectrumGroup', partial(self._splitPlanesToSpectrumGroup, objs))
         contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
         self._addCollectionMenu(contextMenu, objs)
         contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
@@ -584,6 +585,13 @@ class OpenItemABC():
                                side_priority=(Side.TOP, Side.BOTTOM, Side.RIGHT, Side.LEFT),
                                target_screen=mouse_screen)
 
+    def _splitPlanesToSpectrumGroup(self, objs):
+        from ccpn.core.lib.SpectrumLib import splitPseudo3DSpectrumIntoPlanes
+        for obj in objs:
+            if not any(obj.isTimeDomains):
+                showWarning('3.1.0 Alpha version','This functionality has been implemented for Time Domain spectra only.')
+                return
+            splitPseudo3DSpectrumIntoPlanes(obj)
 
 from ccpn.ui.gui.widgets.SpeechBalloon import SpeechBalloon, Side
 from PyQt5 import QtCore, QtGui

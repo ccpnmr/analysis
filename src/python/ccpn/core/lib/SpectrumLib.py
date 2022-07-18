@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-07-18 11:29:34 +0100 (Mon, July 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -137,6 +137,27 @@ SPECTRUM_INTENSITIES = 'intensities'
 
 MAXALIASINGRANGE = 3
 
+
+def splitPseudo3DSpectrumIntoPlanes(spectrum, seriesUnits = 'ms'):
+    if not 'Time' in spectrum.dimensionTypes:
+        getLogger().warning('This functionality has been implemented for time pseudo-nD spectra only.')
+        return
+    timeDimension = spectrum.getByAxisCodes('dimensions', ['Time'])[0]
+    timeDimensionSize = spectrum.pointCounts[timeDimension - 1]
+    freqDims = [dim for dim in spectrum.dimensions if dim != timeDimension]
+    freqAxisCodes = spectrum.getByDimensions('axisCodes', freqDims)
+    seriesValue = 0.0
+    seriesIncrement = 1.0 / spectrum.spectralWidths[timeDimension - 1]
+    with notificationEchoBlocking():
+        with undoBlockWithoutSideBar():
+            spectrumGroup = spectrum.project.newSpectrumGroup(name=spectrum.name, seriesUnits=seriesUnits)
+            position = [1] * spectrum.dimensionCount  # dims and positions are 1-based
+            for timePoint in range(timeDimensionSize):
+                position[timeDimension - 1] = timePoint + 1
+                getLogger().info(f'==> extracting {freqAxisCodes} plane at {position}')
+                sp = spectrum.extractPlaneToFile(axisCodes=freqAxisCodes, position=position)
+                spectrumGroup.addSpectrum(sp, seriesValue)
+                seriesValue += seriesIncrement
 
 def getAssignmentTolerances(isotopeCode) -> float:
     """:return assignmentTolerance for isotopeCode or defaultAssignment tolerance if not defined

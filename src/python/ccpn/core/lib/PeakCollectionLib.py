@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-18 16:27:35 +0100 (Mon, July 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,16 +27,11 @@ __date__ = "$Date: 2022-07-12 15:39:33 +0100 (Tue, July 12, 2022) $"
 #=========================================================================================
 
 
-import abc
-import numpy as np
-import itertools
-from typing import Tuple
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.util.Logging import getLogger
-from collections import OrderedDict as od
 from collections import defaultdict
 from ccpn.util.Common import flattenLists
-
+from ccpn.core.Peak import Peak
 
 
 def _getClusteredPeaksBySpectralAssignemnt(spectra, peakListIndices=None) -> defaultdict:
@@ -57,9 +52,33 @@ def _getCollectionNameForAssignments(nmrAtoms):
         dd[(i.nmrResidue.nmrChain.name, i.nmrResidue.sequenceCode, i.nmrResidue.residueType)].append(i.name)
     prefix = '.'.join(flattenLists(list(dd.keys())))
     suffix = ','.join(flattenLists(list(dd.values())))
-    return f'{prefix}.{suffix}'
+    if prefix and suffix:
+        return f'{prefix}{suffix}'
 
-def createCollectionsFromSpectralAssignemnts(spectrumGroup, peakListIndices=None):
+def _getCollectionNameFromPeakPosition(peak):
+    """ Get a formatted name to use as a collection name from the PeakPosition.
+    Format:
+        coll.{nmrResidue.sequenceCode}.{nmrResidue.residueType}.{nmrAtom.names(comma-separated)}."""
+    position = [str(round(i, 3)) for i in peak.position]
+    prefix = 'PeaksAt'
+    suffix = ','.join(position)
+    if prefix and suffix:
+        return f'{prefix}:{suffix}'
+
+def renameCollectionFromAssignments(collection):
+    """ Rename the collection. Useful for example to rename a collection which was created before assigning peaks. TODO"""
+    pass
+
+def renameCollectionFromPeaks(collection):
+    peaks = collection.items
+    if len(peaks)>0:
+        peak = peaks[0]
+        if isinstance(peak, Peak):
+            name = _getCollectionNameFromPeakPosition(peak)
+            collection.rename(name)
+
+
+def createCollectionsFromSpectrumGroup(spectrumGroup, peakListIndices=None):
     collections = []
     clusteredPeaksByAssignemnt = _getClusteredPeaksBySpectralAssignemnt(spectrumGroup.spectra, peakListIndices)
     with undoBlockWithoutSideBar():
@@ -67,10 +86,10 @@ def createCollectionsFromSpectralAssignemnts(spectrumGroup, peakListIndices=None
             project = spectrumGroup.project
             for assignments, peaks in clusteredPeaksByAssignemnt.items():
                 name = _getCollectionNameForAssignments(flattenLists(assignments))
+                if not name:
+                    name = _getCollectionNameFromPeakPosition(peaks[0]) # alternatively get a name from ppm position
                 collections.append(project.newCollection(peaks, name=name))
-            parentCollectionName = f'{spectrumGroup.name}_AssignmentsCollection'
-            parentCollection = project.newCollection(collections, name=parentCollectionName)
-    return parentCollection
+    return collections
 
 
 

@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-21 19:04:44 +0100 (Tue, June 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-07-18 16:27:35 +0100 (Mon, July 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -492,6 +492,14 @@ def _newMultipletItem():
                     typeItem=ItemTypes.get(ITEM), toolTip='Add New Multiplet', shortcut='AM',
                     callback=_app.mainWindow.addMultiplet)
 
+def _newCollectionItem():
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
+    return _SCMitem(name='New Collection',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Create a new collection of Peaks', shortcut='CC',
+                    callback=_app.mainWindow.newCollectionOfCurrentPeaks)
+
 
 def _integrate1DItem():
     from ccpn.framework.Application import getApplication
@@ -888,6 +896,7 @@ def _get1dPeakMenuItems(menuId) -> list:
         _separator(),
 
         _newMultipletItem(),
+        _newCollectionItem(),
         _integrate1DItem(),
         _separator(),
 
@@ -1076,6 +1085,7 @@ def _getNdPeakMenuItems(menuId) -> list:
         _separator(),
 
         _newMultipletItem(),
+        _newCollectionItem(),
         _separator(),
 
         _navigateToPeakPosMenuItem(menuId),

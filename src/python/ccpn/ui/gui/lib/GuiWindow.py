@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-22 17:32:37 +0100 (Wed, June 22, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-07-18 16:27:35 +0100 (Mon, July 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -99,6 +99,7 @@ class GuiWindow():
         addShortCut("l, a", self, partial(self.toggleLastAxisOnly, self), context=context)
 
         addShortCut("a, m", self, self.addMultiplet, context=context)
+        addShortCut("c, c", self, self.newCollectionOfCurrentPeaks, context=context)
         addShortCut("i, 1", self, self.add1DIntegral, context=context)
         addShortCut("g, p", self, self.getCurrentPositionAndStrip, context=context)
         addShortCut("r, p", self, partial(self.refitCurrentPeaks, singularMode=True), context=context)
@@ -459,6 +460,23 @@ class GuiWindow():
                              peak in self.application.current.peaks]
                     multiplet = multipletList.newMultiplet(peaks=peaks)
                     self.application.current.multiplet = multiplet
+
+    def newCollectionOfCurrentPeaks(self):
+        """add current peaks to a new collection"""
+        from ccpn.util.Common import flattenLists
+        from ccpn.core.lib.PeakCollectionLib import _getCollectionNameForAssignments, _getCollectionNameFromPeakPosition
+        strip = self.application.current.strip
+        with undoBlockWithoutSideBar():
+            if strip and strip.spectrumDisplay:
+                spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews if spectrumView.isDisplayed]
+                peaks = [peak for peak in self.application.current.peaks if peak.spectrum in spectra]
+                nmrAtoms = set(flattenLists([peak.assignedNmrAtoms for peak in peaks]))
+                name = _getCollectionNameForAssignments(list(nmrAtoms)) # get a name from assigned peaks
+                if not name:
+                    name = _getCollectionNameFromPeakPosition(peaks[0]) # alternatively get a name from ppm position
+                # we need to check if ordering is crucial here. For series is taking care by the SG where peaks belong.
+                collection = self.application.project.newCollection(items=list(set(peaks)), name=name)
+                self.application.current.collection = collection
 
     def traceScaleScale(self, window: 'GuiWindow', scale: float):
         """

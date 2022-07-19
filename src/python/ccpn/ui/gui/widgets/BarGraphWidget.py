@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-05 17:30:48 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-19 12:09:50 +0100 (Tue, July 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -24,7 +24,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import pyqtgraph as pg
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox
 from ccpn.ui.gui.widgets.Widget import Widget
 
@@ -61,7 +61,6 @@ class BarGraphWidget(Widget):
         self._setLayout()
         self.setContentsMargins(1, 1, 1, 1)
         self.barGraphs = []
-
         self.xValues = xValues
         self.yValues = yValues
         self.objects = objects
@@ -108,6 +107,7 @@ class BarGraphWidget(Widget):
         self.setThresholdLine()
 
     def getPlottedColoursDict(self):
+        """ TODO> check assignment. x axis is now detached from sequenceCode"""
         dd = {}
         for i in self.plotWidget.items():
             if isinstance(i, BarGraph):

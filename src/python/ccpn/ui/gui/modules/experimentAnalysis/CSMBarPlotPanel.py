@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-18 11:29:58 +0100 (Mon, July 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-19 12:09:50 +0100 (Tue, July 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -86,6 +86,7 @@ class CSMBarPlotPanel(BarPlotPanel):
     def _setPlottingData(self, dataFrame, xColumnName, yColumnName):
         """Set the plotting variables from the current Dataframe.\
         """
+
         ## group by threshold value
         aboveDf = dataFrame[dataFrame[yColumnName] >= self.thresholdValue]
         belowDf = dataFrame[dataFrame[yColumnName] < self.thresholdValue]
@@ -110,14 +111,8 @@ class CSMBarPlotPanel(BarPlotPanel):
         self._untraceableBrush = colourNameToHexDict.get(self.untraceableBrushColour, guiNameSpaces.BAR_untracBrushHex)
         self._tresholdLineBrush = colourNameToHexDict.get(self.thresholdBrushColour, guiNameSpaces.BAR_thresholdLineHex)
         self._gradientbrushes = colorSchemeTable.get(self.aboveThresholdBrushColour, []) #in case there is one.
-        ticks1 = list(zip(_aboveXdf.index, _aboveXdf.values))
-        ticks2 = list(zip(_belowX.index, _belowX.values))
-        ticks3 = list(zip(_untraceableX.index, _untraceableX.values))
-        ticks = list(zip(dataFrame[yColumnName].index, dataFrame[yColumnName].values))
-        xAxis = self._getAxis('bottom')
-        # xAxis.setTicks([ticks])
 
-    def plotDataFrame(self, dataFrame, xColumnName=sv.COLLECTIONID, yColumnName=sv.DELTA_DELTA):
+    def plotDataFrame(self, dataFrame, xColumnName=sv.COLLECTIONPID, yColumnName=sv.DELTA_DELTA):
         """ Plot the given columns of dataframe as bars
          """
         getLogger().warning('DEMO version of plotting')

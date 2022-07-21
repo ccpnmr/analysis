@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-14 21:56:17 +0100 (Thu, July 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-21 11:40:03 +0100 (Thu, July 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -166,6 +166,14 @@ TipText_SpectrumDisplSelection          = 'Navigate to Peaks/NmrResidues in the 
 WidgetVarName_BarGraphSeparator         = 'GeneralAppearanceSeparator'
 Label_BarGraphAppearance                = 'BarGraph'
 TipText_BarGraphAppearance              = 'General Appearance settings for the BarGraph'
+
+WidgetVarName_BarGraphXcolumnName       = 'XcolumnName'
+Label_XcolumnName                       = 'X axis data'
+TipText_XcolumnName                     = 'Set the BarGraph X axis data'
+
+WidgetVarName_BarGraphYcolumnName       = 'YcolumnName'
+Label_YcolumnName                       = 'Y axis data'
+TipText_YcolumnName                     = 'Set the BarGraph Y axis data'
 
 WidgetVarName_ThreshValue               = 'ThreshValue'
 Label_ThreshValue                       = 'Threshold Value'

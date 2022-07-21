@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-19 12:09:50 +0100 (Tue, July 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-21 11:40:03 +0100 (Thu, July 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -90,6 +90,26 @@ class BarPlotPanel(GuiPanel):
                 with w.blockWidgetSignals():
                     w.setValue(pos)
         self.updatePanel()
+
+    @property
+    def xColumnName(self):
+        """Returns selected colour name """
+        value = None
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BarGraphXcolumnName)
+            if w:
+                value = w.getText()
+        return value
+
+    @property
+    def yColumnName(self):
+        """Returns selected colour name """
+        value = None
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
+            if w:
+                value = w.getText()
+        return value
 
     @property
     def thresholdValue(self):

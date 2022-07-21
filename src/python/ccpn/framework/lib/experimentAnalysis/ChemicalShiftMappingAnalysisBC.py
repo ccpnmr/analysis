@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-15 18:10:39 +0100 (Fri, July 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-21 11:40:02 +0100 (Thu, July 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -167,6 +167,9 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         ## reset index otherwise you lose the column collectionId
         outDataFrame = outDataFrame.groupby(sv.COLLECTIONID).first().reset_index()
         outDataFrame[sv._ROW_UID] = np.arange(1, len(outDataFrame)+1)
+        outDataFrame[sv.ASHTAG] = outDataFrame[sv._ROW_UID].values
+        # add Code+type Column
+        outDataFrame.joinNmrResidueCodeType()
         return outDataFrame
 
     def getThresholdValueForData(self, factor=1):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-18 18:59:32 +0100 (Mon, July 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-21 11:40:03 +0100 (Thu, July 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -69,6 +69,20 @@ class SeriesFrameBC(TableFrame):
             lambda x: ','.join(x)).values
         return nmrAtomNames
 
+    def _joinTwoColumnsAsStr(self, columnName1:str=None, columnName2:str=None, newColumName:str=None, separator='-'):
+        """
+        Create a new column by joining values from existing columns. Keep all, don't drop columns. In-place operation.
+        :return: self with a new column (if successful)
+        """
+
+        self[newColumName] = self[columnName1].astype(str) + separator + self[columnName2].astype(str)
+        return self
+
+    def joinNmrResidueCodeType(self):
+        """ Merge the nmrResidue SequenceCode and ResidueType columns in a new colum (NMRRESIDUECODETYPE)"""
+        ## convert the sequenceCode to str. This because pandas Automatically tries to make floats.
+        self[sv.NMRRESIDUECODE] = self[sv.NMRRESIDUECODE].astype(int).astype(str)
+        self._joinTwoColumnsAsStr(sv.NMRRESIDUECODE, sv.NMRRESIDUETYPE, newColumName=sv.NMRRESIDUECODETYPE, separator='-')
 
 class InputSeriesFrameBC(SeriesFrameBC):
     """

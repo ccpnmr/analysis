@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-19 12:09:50 +0100 (Tue, July 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-21 11:40:03 +0100 (Thu, July 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -46,10 +46,9 @@ class CSMBarPlotPanel(BarPlotPanel):
 
     def __init__(self, guiModule, *args, **Framekwargs):
         BarPlotPanel.__init__(self, guiModule, *args , **Framekwargs)
-        self.setXLabel(label=guiNameSpaces.ColumnResidueCode)
-        self.setYLabel(label=guiNameSpaces.ColumnDdelta)
-        self._selectCurrentNRNotifier = Notifier(self.current, [Notifier.CURRENT], targetName='nmrResidues',
-                                                 callback=self._selectCurrentNmrResiduesNotifierCallback, onceOnly=True)
+
+        # self._selectCurrentNRNotifier = Notifier(self.current, [Notifier.CURRENT], targetName='nmrResidues',
+        #                                          callback=self._selectCurrentNmrResiduesNotifierCallback, onceOnly=True)
 
         self._aboveX = []
         self._belowX = []
@@ -86,7 +85,6 @@ class CSMBarPlotPanel(BarPlotPanel):
     def _setPlottingData(self, dataFrame, xColumnName, yColumnName):
         """Set the plotting variables from the current Dataframe.\
         """
-
         ## group by threshold value
         aboveDf = dataFrame[dataFrame[yColumnName] >= self.thresholdValue]
         belowDf = dataFrame[dataFrame[yColumnName] < self.thresholdValue]
@@ -111,13 +109,26 @@ class CSMBarPlotPanel(BarPlotPanel):
         self._untraceableBrush = colourNameToHexDict.get(self.untraceableBrushColour, guiNameSpaces.BAR_untracBrushHex)
         self._tresholdLineBrush = colourNameToHexDict.get(self.thresholdBrushColour, guiNameSpaces.BAR_thresholdLineHex)
         self._gradientbrushes = colorSchemeTable.get(self.aboveThresholdBrushColour, []) #in case there is one.
+        ## set ticks for the xAxis. As they Xs are strs, Need to create a dict Index:Value
+        ticks = dict(zip(dataFrame[xColumnName].index, dataFrame[xColumnName].values))
+        xaxis = self._getAxis('bottom')
+        ## setTicks uses a list of 3 dicts. Major, minor, sub minors ticks. (used for when zooming in-out)
+        xaxis.setTicks([list(ticks.items())[::10], # define steps of 10, show only 10 labels (max zoomed out)
+                        list(ticks.items())[::5],  # steps of 5
+                        list(ticks.items())[::1]]) # steps of 1, show all labels
+        ## update labels on axes
+        self.setXLabel(label=xColumnName)
+        self.setYLabel(label=yColumnName)
 
-    def plotDataFrame(self, dataFrame, xColumnName=sv.COLLECTIONPID, yColumnName=sv.DELTA_DELTA):
+    def plotDataFrame(self, dataFrame):
         """ Plot the given columns of dataframe as bars
          """
         getLogger().warning('DEMO version of plotting')
         self.barGraphWidget.clear()
-        self._setPlottingData(dataFrame, xColumnName, yColumnName)
+        if not self.xColumnName and not self.yColumnName in dataFrame.columns:
+            print('NOT FOUND',self.xColumnName, self.yColumnName)
+
+        self._setPlottingData(dataFrame, self.xColumnName, self.yColumnName)
         self.barGraphWidget._lineMoved(aboveX=self._aboveX,
                                        belowX=self._belowX,
                                        disappearedX=self._untraceableX,
@@ -136,12 +147,13 @@ class CSMBarPlotPanel(BarPlotPanel):
                                        disappearedBrush=self._untraceableBrush,
                                        )
         self.barGraphWidget.xLine.setPen(self._tresholdLineBrush)
-        self._setBarGraphZoomFromData(dataFrame, xColumnName, yColumnName)
+        self._setBarGraphZoomFromData(dataFrame)
 
 
-    def _setBarGraphZoomFromData(self, dataFrame, xColumnName, yColumnName):
+    def _setBarGraphZoomFromData(self, dataFrame):
         """ Set the zoom without  considering the untraceable values"""
-        ydata = dataFrame[yColumnName]
+        pass
+        # ydata = dataFrame[yColumnName]
         # xdata = [int(i) for i in dataFrame[xColumnName]]
         # self.barGraphWidget.setXRange(np.min(xdata), np.max(xdata))
         # self.barGraphWidget.setYRange(ydata.min(), ydata.max())

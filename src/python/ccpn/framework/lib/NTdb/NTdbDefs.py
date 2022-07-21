@@ -126,6 +126,12 @@ class AtomDef(dict):
         return self['name'][0] == 'H' or (self['isPseudoAtom'] and self['realAtoms'][0][0] == 'H')
 
     @property
+    def isBackbone(self) -> bool:
+        """:return True if it is backbone Atom
+        """
+        return 'isBackbone' in self.properties and not 'isSidechain' in self.properties
+
+    @property
     def attachedHeavyAtom(self):
         """:return the attached heavyAtom (AtomDef instance) if self is a proton, else None
         """

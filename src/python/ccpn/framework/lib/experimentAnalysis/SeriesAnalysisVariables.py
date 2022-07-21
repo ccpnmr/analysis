@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-14 21:56:16 +0100 (Thu, July 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-21 11:40:02 +0100 (Thu, July 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,11 @@ NMRRESIDUETYPE   = 'nmrResidueType'         # -> str   | nmrResidue Type (e.g.: 
 NMRATOMNAME      = 'nmrAtomName'            # -> str   | nmrAtom name (e.g.: 'Hn')
 NMRATOMNAMES     = f'{NMRATOMNAME}s'        # -> str   | nmrAtom names comma separated (e.g.: 'Hn, Nh'). Used in OutPut datarames instead of ATOMNAME
 
+NMRRESIDUECODETYPE = f'{NMRRESIDUECODE}-{NMRRESIDUETYPE}'  # -> str   | nmrResidue Sequence Code + Type (e.g.: '1-ALA')
+
+
 _ROW_UID         = '_ROW_UID'            # -> str   | Internal. Unique Identifier (e.g.: randomly generated 6 letters UUID)
+ASHTAG           = '#'                   # -> int   | incremental serial
 VALUE            = 'Value'               # -> str   | The column header  prefix in a SeriesTable. Used to store data after the CONSTANT_TABLE_COLUMNS
 TIME             = 'Time'                # -> str   | A general prefix in a SeriesTable.
 

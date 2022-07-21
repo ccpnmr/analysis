@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-19 12:09:50 +0100 (Tue, July 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-21 12:09:15 +0100 (Thu, July 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -23,6 +23,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import numpy as np
 import pyqtgraph as pg
 from PyQt5 import QtWidgets, QtGui
 from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox
@@ -227,6 +228,9 @@ class BarGraphWidget(Widget):
                         belowX.append(x)
                         belowY.append(y)
                         belowObjects.append(obj)
+        aboveX = np.array(aboveX) - 0.5 #need -0.5 to center the bar to the tick on axis
+        belowX = np.array(belowX) - 0.5
+        disappearedX = np.array(disappearedX) - 0.5
         if len(aboveBrushes)>0:
             self.aboveThreshold = BarGraph(viewBox=self.customViewBox, application=self.application,
                                            drawLabels=drawLabels,

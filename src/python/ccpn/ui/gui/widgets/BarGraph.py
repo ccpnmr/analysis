@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-18 11:29:58 +0100 (Mon, July 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-21 12:09:15 +0100 (Thu, July 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -46,7 +46,7 @@ from ccpn.util.Common import percentage,groupIntoChunks
 current = []
 
 class BarGraph(pg.BarGraphItem):
-    def __init__(self, application=None, viewBox=None, xValues=None, yValues=None,
+    def __init__(self, application=None, viewBox=None, xValues=None ,x0Values=None,x1Values=None, yValues=None,
                  objects=None, brush=None, brushes = None, useGradient=False, drawLabels=True, labelDistanceRatio=0.1, **kwds):
         super().__init__(**kwds)
         """
@@ -62,6 +62,8 @@ class BarGraph(pg.BarGraphItem):
         self.trigger = QtCore.pyqtSignal()
         self.useGradient = useGradient
         self.xValues = xValues if xValues is not None else []
+        self.x0Values = x0Values if x0Values is not None else self.xValues
+        self.x1Values = x1Values if x1Values is not None else self.xValues
         self.yValues = yValues if yValues is not None else []
         self.brush = brush
         self.brushes = brushes
@@ -72,8 +74,8 @@ class BarGraph(pg.BarGraphItem):
 
         self.opts = dict(  # setting for BarGraphItem
                 x=self.xValues,
-                x0=self.xValues,
-                x1=self.xValues,
+                x0=self.x0Values,
+                x1=self.x1Values,
                 height=self.yValues,
                 width=1,
                 pen=None,
@@ -94,8 +96,8 @@ class BarGraph(pg.BarGraphItem):
     def setValues(self, xValues, yValues):
         opts = dict(  # setting for BarGraphItem
                 x=xValues,
-                x0=xValues,
-                x1=xValues,
+                x0=self.x0Values,
+                x1=self.x1Values,
                 height=yValues,
                 width=1,
                 pen=self.brush,
@@ -315,6 +317,7 @@ class CustomLabel(QtWidgets.QGraphicsSimpleTextItem):
         self.setFlag(self.ItemIgnoresTransformations + self.ItemIsSelectable)
         self.setToolTip(text)
         self.isBelowThreshold = False
+
 
         self.customObject = self.data(int(self.text()))
 
@@ -722,17 +725,20 @@ if __name__ == '__main__':
     xLabelTicks = [f'{str(i)}_abcd' for i in xticks]
     xLabelTicksNumb = [int(i)+1 for i in range(len(xLabelTicks))]
 
-    ticks = [list(zip(xLabelTicksNumb, xLabelTicks))]
+    # ticks = [list(zip(xLabelTicksNumb, xLabelTicks))]
 
-    xax.setTicks(ticks)
-    xLow = BarGraph(window, viewBox=customViewBox, xValues=x, yValues=y, objects=[], brushes=brushes, useGradient=True,
+    # xax.setTicks(ticks)
+    xLow = BarGraph(window,
+                    viewBox=customViewBox, xValues=x-0.5,
+                    yValues=y, objects=[], brushes=brushes, useGradient=True,
+                    drawLabels=False,
                     widht=1)
-    xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b', widht=1)
-    xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs, objects=[nmrResidues], brush='g', widht=1)
+    # xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b', widht=1)
+    # xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs, objects=[nmrResidues], brush='g', widht=1)
 
     customViewBox.addItem(xLow)
-    customViewBox.addItem(xMid)
-    customViewBox.addItem(xHigh)
+    # customViewBox.addItem(xMid)
+    # customViewBox.addItem(xHigh)
 
     # xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen='b')
     # customViewBox.addItem(xLine)
@@ -741,12 +747,12 @@ if __name__ == '__main__':
     l.setParentItem(customViewBox.graphicsItem())
 
     c1 = plotWidget.plot(pen='r', name='low')
-    c2 = plotWidget.plot(pen='b', name='mid')
-    c3 = plotWidget.plot(pen='g', name='high')
+    # c2 = plotWidget.plot(pen='b', name='mid')
+    # c3 = plotWidget.plot(pen='g', name='high')
 
     l.addItem(c1, 'low')
-    l.addItem(c2, 'mid')
-    l.addItem(c3, 'high')
+    # l.addItem(c2, 'mid')
+    # l.addItem(c3, 'high')
 
     # customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
     customViewBox.setRange(xRange=[10,200], yRange=[0.01,1000],)

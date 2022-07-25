@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-25 13:11:53 +0100 (Mon, July 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -339,6 +339,7 @@ class _TableWidget(_SimplePandasTableView, _SearchTableView):
         super().__init__(parent=parent,
                          showHorizontalHeader=True,
                          showVerticalHeader=False,
+                         multiSelect=True,
                          grid=(3, 0), gridSpan=(1, 6))
         self.moduleParent = moduleParent
 

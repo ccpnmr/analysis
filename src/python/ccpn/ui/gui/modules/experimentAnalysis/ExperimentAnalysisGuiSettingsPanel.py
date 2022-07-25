@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-25 12:41:02 +0100 (Mon, July 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-25 13:50:14 +0100 (Mon, July 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -602,6 +602,32 @@ class CSMAppearancePanel(GuiSettingPanel):
                        'tipText': guiNameSpaces.TipText_YcolumnName,
                        'texts': guiNameSpaces.YBarGraphColumnNameOptionsCSM,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
+
+            (guiNameSpaces.WidgetVarName_ThreshValueCalcOptions,
+             {'label': guiNameSpaces.Label_ThreshValueCalcOptions,
+              'callBack': self._setThresholdValueForData,
+              'tipText': guiNameSpaces.TipText_ThreshValueCalcOptions,
+              'type': compoundWidget.PulldownListCompoundWidget,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_ThreshValueCalcOptions,
+                       'tipText': guiNameSpaces.TipText_ThreshValueCalcOptions,
+                       'texts': ["<Select>"] + guiNameSpaces.ThrValuesCalcOptions,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+
+            (guiNameSpaces.WidgetVarName_ThreshValueFactor,
+             {'label': guiNameSpaces.Label_ThreshValueFactor,
+              'tipText': guiNameSpaces.TipText_ThreshValueFactor,
+              'callBack': self._setThresholdValueForData,
+              'enabled': True,
+              'type': compoundWidget.DoubleSpinBoxCompoundWidget,
+              '_init': None,
+              'kwds': {'labelText': guiNameSpaces.Label_ThreshValueFactor,
+                       'tipText': guiNameSpaces.TipText_ThreshValueFactor,
+                       'value':1,
+                       'step': 0.01,
+                       'decimals': 4,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+
             (guiNameSpaces.WidgetVarName_ThreshValue,
              {'label': guiNameSpaces.Label_ThreshValue,
               'tipText': guiNameSpaces.TipText_ThreshValue,
@@ -612,21 +638,10 @@ class CSMAppearancePanel(GuiSettingPanel):
               'kwds': {'labelText': guiNameSpaces.Label_ThreshValue,
                        'tipText': guiNameSpaces.TipText_ThreshValue,
                        'value': 0.1,
-                       'step':0.01,
+                       'step': 0.01,
                        'decimals': 4,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
-            (guiNameSpaces.WidgetVarName_PredefThreshValue,
-             {'label': guiNameSpaces.Label_PredefThreshValue,
-              'tipText': guiNameSpaces.TipText_PredefThreshValue,
-              'callBack': self._setThresholdValueForData,
-              'enabled': True,
-              'type': compoundWidget.ButtonCompoundWidget,
-              '_init': None,
-              'kwds': {'labelText': guiNameSpaces.Label_PredefThreshValue,
-                       'tipText': guiNameSpaces.TipText_setThreshValue,
-                       'text':guiNameSpaces.Label_setThreshValue,
-                       'fixedWidths': SettingsWidgetFixedWidths
-                       }}),
+
             (guiNameSpaces.WidgetVarName_AboveThrColour,
              {'label': guiNameSpaces.Label_AboveThrColour,
               'callBack': self._commonCallback,
@@ -699,11 +714,21 @@ class CSMAppearancePanel(GuiSettingPanel):
                                                                          grid=(0, 0))
         self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
 
-    def _setThresholdValueForData(self):
-        value = self._guiModule.backendHandler.getThresholdValueForData()
-        thresholdValueW = self.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
-        if thresholdValueW and value:
-            thresholdValueW.setValue(round(value, 3))
+
+    def _setThresholdValueForData(self, *args):
+        mode = None
+        factor = 1
+        calculcationModeW =  self.getWidget(guiNameSpaces.WidgetVarName_ThreshValueCalcOptions)
+        if calculcationModeW:
+            mode = calculcationModeW.getText()
+        factorW = self.getWidget(guiNameSpaces.WidgetVarName_ThreshValueFactor)
+        if factorW:
+            factor = factorW.getValue()
+        if mode:
+            value = self._guiModule.backendHandler.getThresholdValueForData(calculationMode=mode, factor=factor)
+            thresholdValueW = self.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
+            if thresholdValueW and value:
+                thresholdValueW.setValue(round(value, 3))
 
 
     def _commonCallback(self, *args):

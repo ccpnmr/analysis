@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-21 11:40:02 +0100 (Thu, July 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-25 13:50:14 +0100 (Mon, July 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import _registerChemicalShiftMappingModels
+import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 
 
 class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
@@ -172,17 +173,33 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         outDataFrame.joinNmrResidueCodeType()
         return outDataFrame
 
-    def getThresholdValueForData(self, factor=1):
-        """ Get the Median absolute deviation for the deltaDeltas as a (default) Threshold value"""
+    def getThresholdValueForData(self, calculationMode=sv.MAD, factor=1.):
+        """ Get the Threshold value for the deltaDeltas.
+        :param calculationMode: str, one of ['MAD', 'AAD', 'Mean', 'Median', 'STD']
+        :param factor: float. Multiplication factor.
+        :return float.
 
+        MAD: Median absolute deviation, (https://en.wikipedia.org/wiki/Median_absolute_deviation)
+        AAD: Average absolute deviation, (https://en.wikipedia.org/wiki/Average_absolute_deviation).
+        Note, MAD and AAD are often abbreviated the same way, in fact, in scipy MAD is Median absolute deviation,
+        whereas in Pandas MAD is Mean absolute deviation!
+        """
         factor = factor if factor and factor >0 else 1
         thresholdValue = None
         data = self._getGroupedOutputDataFrame()
+
         if data is not None:
             if len(data[sv.DELTA_DELTA])>0:
                 values = data[sv.DELTA_DELTA].values
                 values = values[~np.isnan(values)]  # skip nans
-                thresholdValue = stats.median_absolute_deviation(values)
+                if calculationMode == sv.MAD:
+                    thresholdValue = stats.median_absolute_deviation(values) # in scipy MAD is Median absolute deviation
+                if calculationMode == sv.AAD:
+                    thresholdValue = data[sv.DELTA_DELTA].mad() # in pandas MAD is Mean absolute deviation !
+                else:
+                    func = lf.CommonStatFuncs.get(calculationMode, None)
+                    if func:
+                        thresholdValue = func(values)
         if thresholdValue:
             thresholdValue *= factor
         return thresholdValue

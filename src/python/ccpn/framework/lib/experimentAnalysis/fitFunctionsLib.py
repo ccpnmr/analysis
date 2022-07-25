@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 12:03:32 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-25 13:50:14 +0100 (Mon, July 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 from lmfit import lineshapes as ls
 import numpy as np
 from ccpn.util.Logging import getLogger
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 
 ## Common built-in functions.
 gaussian_func    = ls.gaussian
@@ -108,3 +109,11 @@ def euclideanDistance_func(array1, array2, alphaFactors):
         delta **= 2
         deltas.append(delta)
     return np.sqrt(np.mean(np.array(deltas)))
+
+
+CommonStatFuncs = {
+                sv.MEAN     : np.mean,
+                sv.MEDIAN   : np.median,
+                sv.STD      : np.std,
+                sv.VARIANCE : np.var,
+                }

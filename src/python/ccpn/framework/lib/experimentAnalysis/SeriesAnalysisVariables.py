@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-21 11:40:02 +0100 (Thu, July 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-25 13:50:14 +0100 (Mon, July 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -151,7 +151,12 @@ SERIES_TIME_UNITS = constants.TIME_UNITS
 SERIES_CONCENTRATION_UNITS = constants.CONCENTRATION_UNITS
 SERIES_UNITS = constants.ALL_SERIES_UNITS
 
-
+STD = 'Std'
+MEAN = 'Mean'
+MEDIAN = 'Median'
+VARIANCE = 'Variance'
+MAD = 'MAD (Median Absolute Deviation)'
+AAD = 'AAD (Average Absolute Deviation)'
 
 ## Alpha Factors Definitions used in ChemicalShiftAnalysis DeltaDeltas
 uALPHA = '\u03B1'
@@ -210,3 +215,4 @@ RAISE_MODE = 'raise'
 # FLAG
 FLAG_EXCLUDED = 'Excluded'
 FLAG_INCLUDED = 'Included'
+

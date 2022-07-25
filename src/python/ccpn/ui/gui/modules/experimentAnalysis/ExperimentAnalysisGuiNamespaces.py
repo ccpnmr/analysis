@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-25 12:41:02 +0100 (Mon, July 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-25 13:50:14 +0100 (Mon, July 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -54,6 +54,8 @@ SETTINGS = 'settings'
 WidgetVarName_          = 'VarName'
 Label_                  = 'Label'
 tipText_                = 'tipText'
+
+
 
 ####################################################
 ##########     TAB: GuiInputDataPanel     ##########
@@ -185,8 +187,18 @@ WidgetVarName_PredefThreshValue         = 'PredefinedThreshValue'
 Label_PredefThreshValue                 = 'Predefined Threshold setter'
 TipText_PredefThreshValue               = 'Predefined threshold value setters based on the current data'
 
-Label_setThreshValue                    = 'Set to 1 MAD'
-TipText_setThreshValue                  = 'Calculate 1 Median absolute deviation of the current data and set the value to the Threshold Line'
+Label_setThreshValue                    = 'Recalculate Threshold'
+TipText_setThreshValue                  = 'Recalculate the threshold value from the current data and set the line on the graph'
+
+WidgetVarName_ThreshValueCalcOptions    = 'ThreshValueCalcOptions'
+Label_ThreshValueCalcOptions            = 'Threshold Value Calculation'
+TipText_ThreshValueCalcOptions          = 'Select the calculation method for the threshold line.'
+
+WidgetVarName_ThreshValueFactor         = 'ThreshValueCalcFactor'
+Label_ThreshValueFactor                 = 'Threshold Factor'
+TipText_ThreshValueFactor               = 'Increase (multiply) the threshold value by a factor.'
+
+### Threshold Values for BarGraph options
 
 WidgetVarName_AboveThrColour            = 'AboveThrColour'
 Label_AboveThrColour                    = 'Above Threshold Colour'
@@ -335,3 +347,12 @@ YBarGraphColumnNameOptionsCommon =  [
                                 ]
 
 YBarGraphColumnNameOptionsCSM =  [ColumnDdelta] + YBarGraphColumnNameOptionsCommon
+
+
+### Threshold Values calculation options
+ThrValuesCalcOptions  = [seriesVariables.MAD,
+                        seriesVariables.AAD,
+                        seriesVariables.MEAN,
+                        seriesVariables.MEDIAN,
+                        seriesVariables.STD,
+                        seriesVariables.VARIANCE]

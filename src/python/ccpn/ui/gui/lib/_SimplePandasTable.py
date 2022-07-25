@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-07 12:47:57 +0100 (Thu, July 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-25 13:15:40 +0100 (Mon, July 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,7 @@ __date__ = "$Date: 2022-02-28 12:23:27 +0100 (Mon, February 28, 2022) $"
 import numpy as np
 import pandas as pd
 from PyQt5 import QtWidgets, QtCore, QtGui
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import partial
@@ -49,12 +49,23 @@ from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.SearchWidget import attachDFSearchWidget
 from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.FileDialog import TablesFileDialog
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
+from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import copyToClipboard
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.UpdateScheduler import UpdateScheduler
 from ccpn.util.UpdateQueue import UpdateQueue
+
+
+ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
+                'horizontal'        : QtCore.Qt.Horizontal,
+                'v'                 : QtCore.Qt.Vertical,
+                'vertical'          : QtCore.Qt.Vertical,
+                QtCore.Qt.Horizontal: QtCore.Qt.Horizontal,
+                QtCore.Qt.Vertical  : QtCore.Qt.Vertical,
+                }
 
 
 #=========================================================================================
@@ -86,6 +97,8 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
     # overrides QtCore.Qt.ForegroundRole
     # QTableView::item - color: %(GUITABLE_ITEM_FOREGROUND)s;
     # QTableView::item:selected - color: %(GUITABLE_SELECTED_FOREGROUND)s;
+
+    _columnDefs = None
 
     def __init__(self, parent=None,
                  multiSelect=False, selectRows=True,
@@ -372,9 +385,25 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
         # create numpy arrays to match the data that will hold background colour
         self._colour = np.empty(value.shape, dtype=np.object)
+        self._headerToolTips = {orient: np.empty(value.shape[ii], dtype=np.object)
+                                for ii, orient in enumerate([QtCore.Qt.Vertical, QtCore.Qt.Horizontal])}
 
         # notify that the data has changed
         self.endResetModel()
+
+    def setToolTips(self, orientation, values):
+        """Set the tooltips for the horizontal/vertical headers
+        """
+        orientation = ORIENTATIONS.get(orientation)
+        if orientation is None:
+            raise ValueError(f'orientation not in {list(ORIENTATIONS.keys())}')
+
+        try:
+            header = self._headerToolTips[orientation]
+            for ind, hText in enumerate(values):
+                header[ind] = hText
+        except:
+            raise ValueError(f'{self.__class__.__name__}.setToolTips: Error setting values {orientation} -> {values}')
 
     def _insertRow(self, row, newRow):
         """Insert a new row into the table
@@ -545,17 +574,24 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
     def headerData(self, col, orientation, role=None):
         """Return the column headers
         """
-        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
+        if role == QtCore.Qt.DisplayRole and orientation == QtCore.Qt.Horizontal:
             try:
                 # quickest way to get the column
                 return self._df.columns[col]
             except:
                 return None
 
+        elif role == QtCore.Qt.ToolTipRole and orientation == QtCore.Qt.Horizontal:
+            try:
+                # quickest way to get the column
+                return self._headerToolTips[orientation][col]
+            except:
+                return None
+
         # if orientation == QtCore.Qt.Vertical and role == QtCore.Qt.DisplayRole:
         #     return self._df.index[col] if not self._df.empty else None
 
-        if role == QtCore.Qt.SizeHintRole:
+        elif role == QtCore.Qt.SizeHintRole:
             # process the heights/widths of the headers
             if orientation == QtCore.Qt.Horizontal:
                 try:
@@ -746,21 +782,29 @@ class _SimplePandasTableHeaderModel(QtCore.QAbstractTableModel):
         """Process the data callback for the model
         """
         if index.isValid():
-            if role == QtCore.Qt.DisplayRole:
-                return str(self._df[index.row(), index.column()])
+            # get the source cell
+            row, col = index.row(), index.column()
 
-            if role == QtCore.Qt.BackgroundRole:
-                if (colourDict := self._colour[index.row(), index.column()]):
+            if role == QtCore.Qt.DisplayRole:
+                return str(self._df[row, col])
+
+            elif role == QtCore.Qt.BackgroundRole:
+                if (colourDict := self._colour[row, col]):
                     # get the colour from the dict
                     return colourDict.get(role)
 
-            if role == QtCore.Qt.ForegroundRole:
-                if (colourDict := self._colour[index.row(), index.column()]):
+            elif role == QtCore.Qt.ForegroundRole:
+                if (colourDict := self._colour[row, col]):
                     # get the colour from the dict
                     return colourDict.get(role)
 
                 # return the default foreground colour
                 return self._defaultForegroundColour
+
+            elif role == QtCore.Qt.ToolTipRole:
+                data = self._df[row, col]
+
+                return str(data)
 
         return None
 
@@ -1169,8 +1213,104 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         """
         self.clearSelection()
 
+    #=========================================================================================
+    # Exporters
+    #=========================================================================================
+
+    @staticmethod
+    def _dataFrameToExcel(dataFrame, path, sheet_name='Table', columns=None):
+        if dataFrame is not None:
+            path = aPath(path)
+            path = path.assureSuffix('xlsx')
+            if columns is not None and isinstance(columns, list):  #this is wrong. columns can be a 1d array
+                dataFrame.to_excel(path, sheet_name=sheet_name, columns=columns, index=False)
+            else:
+                dataFrame.to_excel(path, sheet_name=sheet_name, index=False)
+
+    @staticmethod
+    def _dataFrameToCsv(dataFrame, path, *args):
+        dataFrame.to_csv(path)
+
+    @staticmethod
+    def _dataFrameToTsv(dataFrame, path, *args):
+        dataFrame.to_csv(path, sep='\t')
+
+    @staticmethod
+    def _dataFrameToJson(dataFrame, path, *args):
+        dataFrame.to_json(path, orient='split', default_handler=str)
+
+    def findExportFormats(self, path, dataFrame, sheet_name='Table', filterType=None, columns=None):
+        formatTypes = OrderedDict([
+            ('.xlsx', self._dataFrameToExcel),
+            ('.csv', self._dataFrameToCsv),
+            ('.tsv', self._dataFrameToTsv),
+            ('.json', self._dataFrameToJson)
+            ])
+
+        # extension = os.path.splitext(path)[1]
+        extension = aPath(path).suffix
+        if not extension:
+            extension = '.xlsx'
+        if extension in formatTypes.keys():
+            formatTypes[extension](dataFrame, path, sheet_name, columns)
+            return
+        else:
+            try:
+                self._findExportFormats(str(path) + filterType, sheet_name)
+            except:
+                MessageDialog.showWarning('Could not export', 'Format file not supported or not provided.'
+                                                              '\nUse one of %s' % ', '.join(formatTypes))
+                getLogger().warning('Format file not supported')
+
+    # def _rawDataToDF(self):
+    #     try:
+    #         # TODO:ED - check _rawData
+    #         df = pd.DataFrame(self._rawData)
+    #         return df
+    #     except:
+    #         return pd.DataFrame()
+
     def exportTableDialog(self, exportAll=True):
-        pass
+        """export the contents of the table to a file
+        The actual data values are exported, not the visible items which may be rounded due to the table settings
+
+        :param exportAll: True/False - True implies export whole table - but in visible order
+                                    False, export only the visible table
+        """
+        model = self.model()
+        df = model.df
+        rows, cols = model.rowCount(), model.columnCount()
+
+        if df is None or df.empty:
+            MessageDialog.showWarning('Export Table to File', 'Table does not contain a dataFrame')
+
+        else:
+            rowList = [model._sortIndex[row] for row in range(rows)]
+            if exportAll:
+                colList = self._dataFrameObject.userHeadings
+            else:
+                colList = self._dataFrameObject.visibleColumnHeadings
+
+            self._exportTableDialog(df, rowList=rowList, colList=colList)
+
+    def _exportTableDialog(self, dataFrame, rowList=None, colList=None):
+
+        self.saveDialog = TablesFileDialog(parent=None, acceptMode='save', selectFile='ccpnTable.xlsx',
+                                           fileFilter=".xlsx;; .csv;; .tsv;; .json ")
+        self.saveDialog._show()
+        path = self.saveDialog.selectedFile()
+        if path:
+            sheet_name = 'Table'
+            if dataFrame is not None and not dataFrame.empty:
+
+                if colList:
+                    dataFrame = dataFrame[colList]  # returns a new dataFrame
+                if rowList:
+                    dataFrame = dataFrame[:].iloc[rowList]
+
+                ft = self.saveDialog.selectedNameFilter()
+
+                self.findExportFormats(path, dataFrame, sheet_name=sheet_name, filterType=ft, columns=colList)
 
     def deleteObjFromTable(self):
         """Delete all objects in the selection from the project
@@ -1303,15 +1443,13 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             pulldown.select(selectableObjects[0].pid)
 
         else:
-            from ccpn.ui.gui.widgets.MessageDialog import showYesNo
-
             othersClassNames = list(set([obj.className for obj in others if hasattr(obj, 'className')]))
             if len(othersClassNames) > 0:
                 if len(othersClassNames) == 1:
                     title, msg = 'Dropped wrong item.', 'Do you want to open the %s in a new module?' % ''.join(othersClassNames)
                 else:
                     title, msg = 'Dropped wrong items.', 'Do you want to open items in new modules?'
-                openNew = showYesNo(title, msg)
+                openNew = MessageDialog.showYesNo(title, msg)
                 if openNew:
                     _openItemObject(self.mainWindow, others)
 
@@ -1365,6 +1503,10 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 
             self.showColumns(None)
             self._highLightObjs(objs)
+
+            # set the tipTexts
+            if self._columnDefs is not None:
+                model.setToolTips('horizontal', self._columnDefs.tipTexts)
 
         except Exception as es:
             getLogger().warning('Error populating table', str(es))
@@ -2081,6 +2223,54 @@ class _SimpleTableDelegate(QtWidgets.QStyledItemDelegate):
 
         except Exception as es:
             getLogger().debug('Error handling cell editing: %i %i - %s    %s    %s' % (row, col, str(es), self._parent.model()._sortIndex, value))
+
+    def createEditor(self, parentWidget, itemStyle, index):  # returns the edit widget
+
+        col = index.column()
+        objCol = self._parent._columnDefs.columns[col]
+
+        if objCol.editClass:
+            widget = objCol.editClass(None, *objCol.editArgs, **objCol.editKw)
+            widget.setParent(parentWidget)
+            self.customWidget = True
+            return widget
+
+        else:
+            return super().createEditor(parentWidget, itemStyle, index)
+
+    def updateEditorGeometry(self, widget, itemStyle, index):  # ensures that the editor is displayed correctly
+
+        if True:  # self.customWidget:
+            cellRect = itemStyle.rect
+            x = cellRect.x()
+            y = cellRect.y()
+            hint = widget.sizeHint()
+
+            # if hint.height() > cellRect.height():
+            #     if isinstance(widget, QtWidgets.QComboBox):  # has a popup anyway
+            #         widget.move(cellRect.topLeft())
+            #
+            #     else:
+            #         pos = widget.mapToGlobal(cellRect.topLeft())
+            #         widget.setParent(self._parent, QtCore.Qt.Popup)  # popup so not confined
+            #         widget.move(pos)
+
+            width = max(hint.width(), cellRect.width())
+            height = max(hint.height(), cellRect.height())
+            widget.setGeometry(x, y, width, height)
+
+        else:
+            return super().updateEditorGeometry(widget, itemStyle, index)
+
+    def _returnPressedCallback(self, widget):
+        """Capture the returnPressed event from the widget, because the setModeData event seems to be a frame behind the widget
+        when getting the text()
+        """
+
+        # check that it is a QLineEdit - check for other types later (see old table class)
+        if isinstance(widget, QtWidgets.QLineEdit):
+            self._editorValue = widget.text()
+            self._returnPressed = True
 
 
 #=========================================================================================

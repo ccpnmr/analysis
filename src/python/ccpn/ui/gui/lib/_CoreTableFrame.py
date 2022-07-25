@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-25 13:13:59 +0100 (Mon, July 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -265,7 +265,14 @@ class _CoreTableWidgetABC(_SimplePandasTableViewProjectSpecific):
             try:
                 df = self._df
                 objSet = set(self._sourceObjects)  # objects in the list
-                tableSet = set(df[self.OBJECTCOLUMN])  # objects currently in the table
+                if df is not None and not df.empty:
+                    tableSet = set(df[self.OBJECTCOLUMN])  # objects currently in the table
+                else:
+                    # # populate here or in CREATE?
+                    # self.populateTable()
+                    # return
+                    # current table is empty
+                    tableSet = set()
 
                 if trigger == Notifier.DELETE:
                     # uniqueIds in the visible table
@@ -277,10 +284,15 @@ class _CoreTableWidgetABC(_SimplePandasTableViewProjectSpecific):
                 elif trigger == Notifier.CREATE:
                     # uniqueIds in the visible table
                     if obj in (objSet - tableSet):
-                        # insert into the table
-                        newRow = self._newRowFromUniqueId(df, obj, None)
-                        self.model()._insertRow(obj, newRow)
-                        self._reindexTable()
+                        if df is None or df.empty:
+                            # create a new table from the list
+                            #   required here as the peak tables can be different widths
+                            self.populateTable()
+                        else:
+                            # insert into the table
+                            newRow = self._newRowFromUniqueId(df, obj, None)
+                            self.model()._insertRow(obj, newRow)
+                            self._reindexTable()
 
                 elif trigger == Notifier.CHANGE:
                     # uniqueIds in the visible table

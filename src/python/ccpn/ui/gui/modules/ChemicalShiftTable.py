@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-25 13:13:37 +0100 (Mon, July 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -422,7 +422,7 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
             _cols[CS_TABLECOLUMNS.index(col)] = tuple(_temp)
 
         # set the table _columns
-        self._columns = ColumnClass(_cols)
+        self._columns = self._columnDefs = ColumnClass(_cols)  # Other tables are using _columnDefs :|
 
         _csl = self._table
 
@@ -532,8 +532,15 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
             trigger = data[Notifier.TRIGGER]
             try:
                 df = self._table._data
-                df = df[df[CS_ISDELETED] == False]  # not deleted - should be the only visible ones
-                objSet = set(df[CS_UNIQUEID])
+                if df is not None and not df.empty:
+                    df = df[df[CS_ISDELETED] == False]  # not deleted - should be the only visible ones
+                    objSet = set(df[CS_UNIQUEID])
+                else:
+                    # # populate here or in CREATE?
+                    # self.populateTable()
+                    # return
+                    # current table is empty
+                    objSet = set()
                 tableSet = set(self._df['Unique ID'])  # must be table column name, not reference name
 
                 if trigger == Notifier.DELETE:
@@ -545,9 +552,14 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
                 elif trigger == Notifier.CREATE:
                     # uniqueIds in the visible table
                     if uniqueId in (objSet - tableSet):
-                        # insert into the table
-                        newRow = self._newRowFromUniqueId(df, obj, uniqueId)
-                        self.model()._insertRow(uniqueId, newRow)
+                        if df is None or df.empty:
+                            # create a new table from the list
+                            #   not essential for chemicalShiftTable, in for completeness
+                            self.populateTable()
+                        else:
+                            # insert into the table
+                            newRow = self._newRowFromUniqueId(df, obj, uniqueId)
+                            self.model()._insertRow(uniqueId, newRow)
 
                 elif trigger == Notifier.CHANGE:
                     # uniqueIds in the visible table
@@ -794,6 +806,7 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
                         if delete:
                             # delete the chemicalShift
                             cs.delete()
+
 
 #=========================================================================================
 # _CSLTableDelegate - handle editing the table, needs moving

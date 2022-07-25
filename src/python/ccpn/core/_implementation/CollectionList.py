@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-24 17:19:13 +0000 (Thu, February 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-25 16:30:39 +0100 (Mon, July 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -412,7 +412,7 @@ class CollectionList():
             # set as the new subclassed DataFrameABC
             self._data = _CollectionFrame(_dfRow)
         else:
-            self._data = self._data.append(_dfRow)
+            self._data = pd.concat([self._data, _dfRow], ignore_index=True)
 
         _data = self._data
         _data.set_index(_data[CO_UNIQUEID], inplace=True, )  # drop=False)

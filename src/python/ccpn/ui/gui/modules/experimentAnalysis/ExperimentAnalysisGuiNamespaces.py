@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-21 11:40:03 +0100 (Thu, July 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-25 12:41:02 +0100 (Mon, July 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -23,6 +23,9 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 # Start of code
 #=========================================================================================
 
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
+import ccpn.ui.gui.guiSettings as gs
+
 LASTDISPLAY = 'Last Opened'
 NEW = '<New Item...>'
 EmptySpace = '< >'
@@ -31,7 +34,6 @@ DELTA = '\u0394'
 Delta = '\u03B4'
 
 #### colours
-import ccpn.ui.gui.guiSettings as gs
 BackgroundColour = gs.getColours()[gs.CCPNGLWIDGET_HEXBACKGROUND]
 
 ## Default fallback colours for BarGraph.
@@ -257,10 +259,12 @@ ColumnREDCHISQUARE = UNICODE_RED_CHISQUARE
 
 ColumnID = 'Id'
 ColumnCollection = 'Collection'
+ColumnCollectionPid = 'Collection Pid'
 ColumnChainCode = 'Chain'
 ColumnResidueCode = 'Code'
 ColumnResidueType = 'Type'
 ColumnAtoms = 'Atoms'
+ColumnCodeType = 'Code-Type'
 
 _COLUM_FLOAT_FORM = '%0.3f'
 
@@ -288,3 +292,46 @@ ToolbarPanel = 'ToolbarPanel'
 
 PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
 PYMOL = 'pymol'
+
+
+def getGuiNameMapping():
+    """ Get a dict with display name and corresponding core name. E.g.: column name display in table and name used in 
+    core dataFrame"""
+    return {
+        seriesVariables._ROW_UID             : ASHTAG,
+        seriesVariables.COLLECTIONID         : ColumnID,
+        seriesVariables.COLLECTIONPID        : ColumnCollectionPid,
+        seriesVariables.NMRCHAINNAME         : ColumnChainCode,
+        seriesVariables.NMRRESIDUECODE       : ColumnResidueCode,
+        seriesVariables.NMRRESIDUETYPE       : ColumnResidueType,
+        seriesVariables.NMRRESIDUECODETYPE   : ColumnCodeType,
+        seriesVariables.NMRATOMNAMES         : ColumnAtoms,
+        seriesVariables.DELTA_DELTA          : ColumnDdelta,
+        seriesVariables.R2                   : ColumnR2,
+        seriesVariables.CHISQUARE            : ColumnCHISQUARE,
+        seriesVariables.REDUCEDCHISQUARE     : ColumnREDCHISQUARE,
+        }
+
+def getReverseGuiNameMapping():
+    """ get the reveresed Key:value for getGuiNameMapping dict"""
+    return {v:k for k,v in getGuiNameMapping().items()}
+    
+### Appearance BarGraph X axis
+XBarGraphColumnNameOptions =  [
+                                ASHTAG,
+                                ColumnID,
+                                ColumnCollectionPid,
+                                ColumnResidueCode,
+                                ColumnCodeType,
+                                ]
+
+YBarGraphColumnNameOptionsCommon =  [
+                                seriesVariables.KD,
+                                seriesVariables.BMAX,
+                                ColumnR2,
+                                seriesVariables.BAYESIAN,
+                                ColumnCHISQUARE,
+                                seriesVariables.AKAIKE
+                                ]
+
+YBarGraphColumnNameOptionsCSM =  [ColumnDdelta] + YBarGraphColumnNameOptionsCommon

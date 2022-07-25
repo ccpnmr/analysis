@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-21 12:09:15 +0100 (Thu, July 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-25 12:41:02 +0100 (Mon, July 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 
 import numpy as np
 import pyqtgraph as pg
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox
 from ccpn.ui.gui.widgets.Widget import Widget
 
@@ -46,6 +46,65 @@ AboveBrushes = 'aboveBrushes'
 BelowBrush = 'belowBrush'
 DisappearedBrush = 'disappearedBrush'
 DrawLabels = 'drawLabels'
+
+
+class XBarAxisItem(pg.AxisItem):
+    def __init__(self, labelRotation=-90, outward=True, *args, **kwargs):
+        pg.AxisItem.__init__(self, *args, **kwargs)
+        self.style = {
+            'tickTextOffset': [5, 2],  ## (horizontal, vertical) spacing between text and axis
+            'tickTextWidth': 30,  ## space reserved for tick text
+            'tickTextHeight': 18,
+            'autoExpandTextSpace': True,  ## automatically expand text space if needed
+            'tickFont': None,
+            'stopAxisAtTick': (False, False),  ## whether axis is drawn to edge of box or to last tick
+            'textFillLimits': [  ## how much of the axis to fill up with tick text, maximally.
+                (0, 0.8),    ## never fill more than 80% of the axis
+                (2, 0.6),    ## If we already have 2 ticks with text, fill no more than 60% of the axis
+                (4, 0.4),    ## If we already have 4 ticks with text, fill no more than 40% of the axis
+                (6, 0.2),    ## If we already have 6 ticks with text, fill no more than 20% of the axis
+                ],
+            'showValues': True,
+            'tickLength': 5 if outward else -5,
+            'maxTickLevel': 2,
+            'maxTextLevel': 2,
+        }
+        self.orientation = 'bottom'
+        self.labelRotation = labelRotation
+        self.pixelTextSize = 8
+        self.setHeight(40)
+
+    def mouseDragEvent(self, event):
+        """ Override this method to remove a native bug in PyQtGraph. """
+        pass
+
+class YBarAxisItem(pg.AxisItem):
+    def __init__(self,  outward=False, *args, **kwargs):
+        pg.AxisItem.__init__(self, *args, **kwargs)
+        self.style = {
+            'tickTextOffset': [5, 2],  ## (horizontal, vertical) spacing between text and axis
+            'tickTextWidth': 30,  ## space reserved for tick text
+            'tickTextHeight': 18,
+            'autoExpandTextSpace': True,  ## automatically expand text space if needed
+            'tickFont': None,
+            'stopAxisAtTick': (False, False),  ## whether axis is drawn to edge of box or to last tick
+            'textFillLimits': [  ## how much of the axis to fill up with tick text, maximally.
+                (0, 0.8),    ## never fill more than 80% of the axis
+                (2, 0.6),    ## If we already have 2 ticks with text, fill no more than 60% of the axis
+                (4, 0.4),    ## If we already have 4 ticks with text, fill no more than 40% of the axis
+                (6, 0.2),    ## If we already have 6 ticks with text, fill no more than 20% of the axis
+                ],
+            'showValues': True,
+            'tickLength': 5 if outward else -5,
+            'maxTickLevel': 2,
+            'maxTextLevel': 2,
+        }
+        self.orientation = 'left'
+        self.setWidth(50)
+
+    def mouseDragEvent(self, event):
+        """ this method is to remove a native bug in PyQtGraph. """
+        pass
 
 
 class BarGraphWidget(Widget):
@@ -95,6 +154,7 @@ class BarGraphWidget(Widget):
         self.customViewBox = CustomViewBox(application=self.application)
         self.customViewBox.setMenuEnabled(enableMenu=False)  # override pg default context menu
         self.plotWidget = pg.PlotWidget(viewBox=self.customViewBox, background=self.backgroundColour)
+        self.plotWidget.setAxisItems({'bottom': XBarAxisItem(orientation='bottom'), 'left': YBarAxisItem(orientation='left')})
         self.customViewBox.setParent(self.plotWidget)
 
     def _setLayout(self):

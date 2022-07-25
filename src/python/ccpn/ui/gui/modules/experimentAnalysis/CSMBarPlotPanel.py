@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-21 11:40:03 +0100 (Thu, July 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-25 12:41:02 +0100 (Mon, July 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -113,12 +113,16 @@ class CSMBarPlotPanel(BarPlotPanel):
         ticks = dict(zip(dataFrame[xColumnName].index, dataFrame[xColumnName].values))
         xaxis = self._getAxis('bottom')
         ## setTicks uses a list of 3 dicts. Major, minor, sub minors ticks. (used for when zooming in-out)
-        xaxis.setTicks([list(ticks.items())[::10], # define steps of 10, show only 10 labels (max zoomed out)
-                        list(ticks.items())[::5],  # steps of 5
+        xaxis.setTicks([list(ticks.items())[9::10], # define steps of 10, show only 10 labels (max zoomed out)
+                        list(ticks.items())[4::5],  # steps of 5
                         list(ticks.items())[::1]]) # steps of 1, show all labels
         ## update labels on axes
-        self.setXLabel(label=xColumnName)
-        self.setYLabel(label=yColumnName)
+        self._updateAxisLabels()
+
+    def _updateAxisLabels(self):
+        dd = guiNameSpaces.getGuiNameMapping()
+        self.setXLabel(label=dd.get(self.xColumnName))
+        self.setYLabel(label=dd.get(self.yColumnName))
 
     def plotDataFrame(self, dataFrame):
         """ Plot the given columns of dataframe as bars
@@ -126,7 +130,8 @@ class CSMBarPlotPanel(BarPlotPanel):
         getLogger().warning('DEMO version of plotting')
         self.barGraphWidget.clear()
         if not self.xColumnName and not self.yColumnName in dataFrame.columns:
-            print('NOT FOUND',self.xColumnName, self.yColumnName)
+            getLogger().warning(f'Column names  not found in dataFrame: {self.xColumnName}, {self.yColumnName}')
+            return
 
         self._setPlottingData(dataFrame, self.xColumnName, self.yColumnName)
         self.barGraphWidget._lineMoved(aboveX=self._aboveX,

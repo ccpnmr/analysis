@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-21 11:40:03 +0100 (Thu, July 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-25 12:41:02 +0100 (Mon, July 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -99,6 +99,9 @@ class BarPlotPanel(GuiPanel):
             w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BarGraphXcolumnName)
             if w:
                 value = w.getText()
+            # convert the GuiValue to the CoreColumn name
+            dd = guiNameSpaces.getReverseGuiNameMapping()
+            value = dd.get(value, value)
         return value
 
     @property
@@ -109,6 +112,9 @@ class BarPlotPanel(GuiPanel):
             w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
             if w:
                 value = w.getText()
+            # convert the GuiValue to the CoreColumn name
+            dd = guiNameSpaces.getReverseGuiNameMapping()
+            value = dd.get(value, value)
         return value
 
     @property

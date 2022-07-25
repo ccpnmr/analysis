@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-21 11:40:03 +0100 (Thu, July 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-25 12:41:02 +0100 (Mon, July 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -584,34 +584,23 @@ class CSMAppearancePanel(GuiSettingPanel):
                        'tipText': guiNameSpaces.TipText_BarGraphAppearance}}),
             (guiNameSpaces.WidgetVarName_BarGraphXcolumnName,
             {'label': guiNameSpaces.Label_XcolumnName,
-             'callBack': None,
+             'callBack': self._commonCallback,
              'tipText': guiNameSpaces.TipText_XcolumnName,
              'type': compoundWidget.PulldownListCompoundWidget,
              'enabled': True,
              'kwds': {'labelText': guiNameSpaces.Label_XcolumnName,
                       'tipText': guiNameSpaces.TipText_XcolumnName,
-                      'texts': [seriesVariables.ASHTAG,
-                                seriesVariables.COLLECTIONID,
-                                seriesVariables.COLLECTIONPID,
-                                seriesVariables.NMRRESIDUECODE,
-                                seriesVariables.NMRRESIDUETYPE,
-                                seriesVariables.NMRRESIDUECODETYPE
-                                ],
+                      'texts': guiNameSpaces.XBarGraphColumnNameOptions,
                       'fixedWidths': SettingsWidgetFixedWidths}}),
             (guiNameSpaces.WidgetVarName_BarGraphYcolumnName,
              {'label': guiNameSpaces.Label_YcolumnName,
-              'callBack': None,
+              'callBack':  self._commonCallback,
               'tipText': guiNameSpaces.TipText_YcolumnName,
               'type': compoundWidget.PulldownListCompoundWidget,
               'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_YcolumnName,
                        'tipText': guiNameSpaces.TipText_YcolumnName,
-                       'texts': [seriesVariables.DELTA_DELTA, seriesVariables.KD,
-                                 seriesVariables.BMAX,
-                                 seriesVariables.R2,
-                                 seriesVariables.BAYESIAN,
-                                 seriesVariables.CHISQUARE,
-                                 seriesVariables.AKAIKE],
+                       'texts': guiNameSpaces.YBarGraphColumnNameOptionsCSM,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
             (guiNameSpaces.WidgetVarName_ThreshValue,
              {'label': guiNameSpaces.Label_ThreshValue,

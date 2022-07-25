@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 17:13:53 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-25 12:41:02 +0100 (Mon, July 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -137,7 +137,8 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         getLogger().info(f'Updating All ...')
         backend = self.backendHandler
         if backend._needsRefitting:
-            backend.fitInputData()
+            if self.inputDataTables:
+                backend.fitInputData()
         getLogger().info(f'{self.className}: Updating all Gui Panels...')
         settingsDict = self.settingsPanelHandler.getAllSettings()
         for panelName, panel in self.panelHandler.panels.items():

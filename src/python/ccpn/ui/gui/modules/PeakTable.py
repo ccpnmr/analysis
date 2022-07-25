@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-07-25 13:13:09 +0100 (Mon, July 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -150,6 +150,7 @@ class PeakTableModule(CcpnModule):
         self.tableFrame._closeFrame()
         super()._closeModule()
 
+
 #=========================================================================================
 # _NewPeakTableWidget
 #=========================================================================================
@@ -164,8 +165,85 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
     _internalColumns = ['isDeleted', '_object']  # columns that are always hidden
 
     # define self._columns here
-    columnHeaders = {}
-    tipTexts = ()
+    columnHeaders = {'#'          : '#',
+                     'Pid'        : 'Pid',
+                     '_object'    : '_object',
+                     'Spectrum'   : 'Spectrum',
+                     'PeakList'   : 'PeakList',
+                     'Assign F1'  : 'Assign F1',
+                     'Assign F2'  : 'Assign F2',
+                     'Assign F3'  : 'Assign F3',
+                     'Assign F4'  : 'Assign F4',
+                     'Assign F5'  : 'Assign F5',
+                     'Assign F6'  : 'Assign F6',
+                     'Assign F7'  : 'Assign F7',
+                     'Assign F8'  : 'Assign F8',
+                     'Pos F1'     : 'Pos F1',
+                     'Pos F2'     : 'Pos F2',
+                     'Pos F3'     : 'Pos F3',
+                     'Pos F4'     : 'Pos F4',
+                     'Pos F5'     : 'Pos F5',
+                     'Pos F6'     : 'Pos F6',
+                     'Pos F7'     : 'Pos F7',
+                     'Pos F8'     : 'Pos F8',
+                     'LW F1 (Hz)' : 'LW F1 (Hz)',
+                     'LW F2 (Hz)' : 'LW F2 (Hz)',
+                     'LW F3 (Hz)' : 'LW F3 (Hz)',
+                     'LW F4 (Hz)' : 'LW F4 (Hz)',
+                     'LW F5 (Hz)' : 'LW F5 (Hz)',
+                     'LW F6 (Hz)' : 'LW F6 (Hz)',
+                     'LW F7 (Hz)' : 'LW F7 (Hz)',
+                     'LW F8 (Hz)' : 'LW F8 (Hz)',
+                     'Height'     : 'Height',
+                     'HeightError': 'HeightError',
+                     'S/N'        : 'S/N',
+                     'Volume'     : 'Volume',
+                     'VolumeError': 'VolumeError',
+                     'ClusterId'  : 'ClusterId',
+                     'Merit'      : 'Merit',
+                     'Annotation' : 'Annotation',
+                     'Comment'    : 'Comment',
+                     }
+
+    tipTexts = ('Peak serial number',
+                'Pid of the Peak',
+                'Object',
+                'Spectrum containing the Peak',
+                'PeakList containing the Peak',
+                'NmrAtom assignments of peak in dimension 1',
+                'NmrAtom assignments of peak in dimension 2',
+                'NmrAtom assignments of peak in dimension 3',
+                'NmrAtom assignments of peak in dimension 4',
+                'NmrAtom assignments of peak in dimension 5',
+                'NmrAtom assignments of peak in dimension 6',
+                'NmrAtom assignments of peak in dimension 7',
+                'NmrAtom assignments of peak in dimension 8',
+                'Peak position in dimension 1',
+                'Peak position in dimension 2',
+                'Peak position in dimension 3',
+                'Peak position in dimension 4',
+                'Peak position in dimension 5',
+                'Peak position in dimension 6',
+                'Peak position in dimension 7',
+                'Peak position in dimension 8',
+                'Peak line width in dimension 1',
+                'Peak line width in dimension 2',
+                'Peak line width in dimension 3',
+                'Peak line width in dimension 4',
+                'Peak line width in dimension 5',
+                'Peak line width in dimension 6',
+                'Peak line width in dimension 7',
+                'Peak line width in dimension 8',
+                'Magnitude of spectrum intensity at peak center (interpolated), unless user edited',
+                'Error of the height',
+                'Signal to Noise Ratio',
+                'Integral of spectrum intensity around peak location, according to chosen volume method',
+                'Error of the volume',
+                'The peak clusterId. ClusterIds are used for grouping peaks in fitting routines',
+                'Figure of merit',
+                'Any other peak label (excluded assignments)',
+                'Optional user comment'
+                )
 
     # define the notifiers that are required for the specific table-type
     tableClass = PeakList
@@ -383,7 +461,17 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
                            lambda pk, value: self._setComment(pk, value), None)
                           )
 
-        return ColumnClass(columnDefs)
+        colDefs = ColumnClass(columnDefs)
+        idx = colDefs.headings.index('Merit')
+
+        from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+
+        # define the edit widget for the 'merit' column
+        col = colDefs.columns[idx]
+        col.editClass = DoubleSpinbox
+        col.editKw = {'min': 0, 'max': 1, 'step': 0.1}
+
+        return colDefs
 
     #=========================================================================================
     # Updates

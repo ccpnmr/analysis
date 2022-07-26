@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-06-07 17:29:57 +0100 (Tue, June 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-26 09:22:12 +0100 (Tue, July 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -593,7 +593,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """define valid path to a (binary) data file, if needed appends or substitutes
         the suffix (if defined).
 
-        return self or None on error
+        :return self or None on error
         """
         if path is None:
             self.dataFile = None  # A reset essentially

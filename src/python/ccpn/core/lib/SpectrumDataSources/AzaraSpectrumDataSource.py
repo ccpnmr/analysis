@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-07-26 13:05:29 +0100 (Tue, July 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-26 13:42:33 +0100 (Tue, July 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,8 @@ __date__ = "$Date: 2020-11-20 10:28:48 +0000 (Fri, November 20, 2020) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+import numpy as np
 
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
@@ -228,9 +230,13 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
 
         super().readParameters()
 
-        # we now need a patch to check for endian-ness, as this may vary and is not stored
+        # we now need a patch to check for endian-ness, as this may vary and is
+        # not stored for the Azara format
+        # Wrong endiness data are characterised by very large or very small
+        # exponents of their values
         slice = self.getSliceData()
-        if max(slice) > 1e30:
+        data = np.log10(np.fabs(slice))
+        if max(data) > 30 or min(data) < -30:
             self.isBigEndian = not self.isBigEndian
             self.clearCache()
 

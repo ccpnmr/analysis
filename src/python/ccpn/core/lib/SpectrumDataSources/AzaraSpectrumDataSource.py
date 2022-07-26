@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-07-26 12:09:08 +0100 (Tue, July 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-26 13:05:29 +0100 (Tue, July 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -126,7 +126,7 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
 
     def readParameters(self):
         """Read the parameters from the azara parameter file
-        Returns self
+        :return self
         """
         params = self.parameterFile
         if params is None or not params.exists():
@@ -226,7 +226,15 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
 
         self.comment = ''.join(comments)
 
-        return super().readParameters()
+        super().readParameters()
+
+        # we now need a patch to check for endian-ness, as this may vary and is not stored
+        slice = self.getSliceData()
+        if max(slice) > 1e30:
+            self.isBigEndian = not self.isBigEndian
+            self.clearCache()
+
+        return self
 
 # Register this format
 AzaraSpectrumDataSource._registerFormat()

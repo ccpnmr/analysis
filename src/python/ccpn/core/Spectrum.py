@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-06-07 17:29:57 +0100 (Tue, June 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-26 13:05:28 +0100 (Tue, July 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2496,8 +2496,10 @@ class Spectrum(AbstractWrapperObject):
         :param axisDict: dict of (axisCode, (startPpm,stopPpm)) key,value pairs
         :return: RegionData object
         """
-        if not self.hasValidPath():
-            raise RuntimeError('Not valid path for %s ' % self)
+        if self.dataSource is None:
+            text = 'No proper (filePath, dataFormat) set for %s; unable to get region' % self
+            getLogger().error(text)
+            raise RuntimeError(text)
         sliceTuples = self._axisDictToSliceTuples(axisDict)
         return self.dataSource.getRegionData(sliceTuples, aliasingFlags=[1] * self.dimensionCount)
 

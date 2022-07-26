@@ -2,6 +2,12 @@
 This file contains the Azara data access class
 it serves as an interface between the V3 Spectrum class and the actual spectral data
 
+In defining the Azara dataSource it accepts:
+- path to binary Azara file (with or without .spc extension); parameter file is binary file + '.par'
+  or .spc extension replaced by .par
+- parameter file with .par extension: binary file is parameter file without .par extension
+  or .par extention replaced by .spc
+
 See SpectrumDataSourceABC for a description of the methods
 """
 #=========================================================================================
@@ -18,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-07-26 11:54:37 +0100 (Tue, July 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-26 12:09:08 +0100 (Tue, July 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -52,7 +58,7 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
     defaultOpenReadMode = 'rb'
 
     # an attibute to store the (parsed) path to the azara parameter file
-    parameterPath = CPath(default_value=None, allow_none=True).tag(
+    parameterFile = CPath(default_value=None, allow_none=True).tag(
                                                                   isDimensional=False,
                                                                   doCopy=False,
                                                                   spectrumAttribute=None,
@@ -61,13 +67,17 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
 
 
     def setPath(self, path, substituteSuffix=False):
-        """Set the dataFile attribute to path after suitable manipulation,
+        """Set the dataFile and parameterFile attributes from path after suitable path manipulation
+
+        :param path: see doc-string above for hndling of the argument values
+        :param substituteSuffix: argument of the superclass, ignored here
+
         do some checks by calling the super class
 
         :return self or None on error
         """
         if path is None:
-            return super().setPath(path, substituteSuffix=substituteSuffix)
+            return super().setPath(path, substituteSuffix=False)
 
         path = aPath(path)
 
@@ -75,52 +85,50 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
         # .spc suffix, this is (supposingly) the azara binary
         # no suffix, assume this is (maybe) an azara binary
         if path.suffix == '.spc' or len(path.suffixes) == 0:
-            self.parameterPath = None
+            self.parameterFile = None
             # Find a parameter file
             if (_p := path.withSuffix('.par')) and _p.exists():
-                self.parameterPath = _p
+                self.parameterFile = _p
             elif (_p := path + '.par') and _p.exists():
-                self.parameterPath = _p
+                self.parameterFile = _p
 
         # testing for .par files
         elif len(path.suffixes) >= 1 and path.suffixes[-1] == '.par':
             # any .par suffix, set the parameterPath to it
-            self.parameterPath = path
+            self.parameterFile = path
             path = None
 
             # test the path without suffix is the binary
-            if (_p := self.parameterPath.withoutSuffix()) and _p.exists():
+            if (_p := self.parameterFile.withoutSuffix()) and _p.exists():
                 path = _p
 
             # test the path with suffix .spc is the binary
-            elif (_p := self.parameterPath.withSuffix('.spc')) and _p.exists():
+            elif (_p := self.parameterFile.withSuffix('.spc')) and _p.exists():
                 path = _p
 
         # By now, we expect to have found a valid parameter file
-        if self.parameterPath is None or not self.parameterPath.exists():
+        if self.parameterFile is None or not self.parameterFile.exists():
             getLogger().debug(f'AzaraSpectrumDataSource: unable to find parameter file from "{path}"')
-            # super().setPath(None, substituteSuffix=False)
-            # return None
 
         # By now, we expect to have found a valid binary, if not try to find/define it from the parameter file
         # (i.e. using the 'file' parameter)
         if path is None or not path.exists():
-            getLogger().debug(f'AzaraSpectrumDataSource: unable to find binary datafile from "{path}", trying from "{self.parameterPath}"')
+            getLogger().debug(f'AzaraSpectrumDataSource: unable to find binary datafile from "{path}", trying from "{self.parameterFile}"')
             # find, open and parse the parameter file
-            if self.parameterPath is not None and self.parameterPath.exists():
-                with self.parameterPath.open(mode='rU', encoding='utf-8') as fp:
+            if self.parameterFile is not None and self.parameterFile.exists():
+                with self.parameterFile.open(mode='rU', encoding='utf-8') as fp:
                     for line in fp.readlines():
                         if (data := line.split()) and len(data) ==2 and data[0] =='file':
-                            path = self.parameterPath.parent / data[1]
+                            path = self.parameterFile.parent / data[1]
                             break
 
-        return super().setPath(path, substituteSuffix=substituteSuffix)
+        return super().setPath(path, substituteSuffix=False)
 
     def readParameters(self):
         """Read the parameters from the azara parameter file
         Returns self
         """
-        params = self.parameterPath
+        params = self.parameterFile
         if params is None or not params.exists():
             raise RuntimeError('Cannot find Azara parameter file "%s"' % params)
 

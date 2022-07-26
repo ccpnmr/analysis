@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-07-26 09:22:12 +0100 (Tue, July 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-26 11:54:37 +0100 (Tue, July 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -75,6 +75,7 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
         # .spc suffix, this is (supposingly) the azara binary
         # no suffix, assume this is (maybe) an azara binary
         if path.suffix == '.spc' or len(path.suffixes) == 0:
+            self.parameterPath = None
             # Find a parameter file
             if (_p := path.withSuffix('.par')) and _p.exists():
                 self.parameterPath = _p
@@ -85,14 +86,14 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
         elif len(path.suffixes) >= 1 and path.suffixes[-1] == '.par':
             # any .par suffix, set the parameterPath to it
             self.parameterPath = path
+            path = None
 
             # test the path without suffix is the binary
-            if (_p := path.withoutSuffix()) and _p.exists():
+            if (_p := self.parameterPath.withoutSuffix()) and _p.exists():
                 path = _p
 
             # test the path with suffix .spc is the binary
-            elif (_p := path.withSuffix('.spc')) and _p.exists():
-                # self.parameterPath = path
+            elif (_p := self.parameterPath.withSuffix('.spc')) and _p.exists():
                 path = _p
 
         # By now, we expect to have found a valid parameter file
@@ -101,11 +102,17 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
             # super().setPath(None, substituteSuffix=False)
             # return None
 
-        # # By now, we expect to have found a valid binary
-        # if not path.exists():
-        #     getLogger().debug(f'AzaraSpectrumDataSource: unable to find binary datafile from "{path}"')
-        #     super().setPath(None, substituteSuffix=False)
-        #     return None
+        # By now, we expect to have found a valid binary, if not try to find/define it from the parameter file
+        # (i.e. using the 'file' parameter)
+        if path is None or not path.exists():
+            getLogger().debug(f'AzaraSpectrumDataSource: unable to find binary datafile from "{path}", trying from "{self.parameterPath}"')
+            # find, open and parse the parameter file
+            if self.parameterPath is not None and self.parameterPath.exists():
+                with self.parameterPath.open(mode='rU', encoding='utf-8') as fp:
+                    for line in fp.readlines():
+                        if (data := line.split()) and len(data) ==2 and data[0] =='file':
+                            path = self.parameterPath.parent / data[1]
+                            break
 
         return super().setPath(path, substituteSuffix=substituteSuffix)
 

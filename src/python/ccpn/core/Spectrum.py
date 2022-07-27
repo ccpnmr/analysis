@@ -50,8 +50,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-27 14:36:44 +0100 (Wed, July 27, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-07-27 15:41:00 +0100 (Wed, July 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -159,7 +159,6 @@ class Spectrum(AbstractWrapperObject):
 
     # Key for storing the dataStore info in the Ccpn internal parameter store
     _DATASTORE_KEY = '_dataStore'
-    _REFERENCESUBSTANCESCACHE = '_referenceSubstances'
 
     _AdditionalAttribute = 'AdditionalAttribute'
     _ReferenceSubstancesPids = '_ReferenceSubstancesPids'
@@ -1226,39 +1225,27 @@ class Spectrum(AbstractWrapperObject):
         self._setDimensionalAttributes('referenceValue', value)
 
     @property
-    # @cached(_REFERENCESUBSTANCESCACHE, maxItems=5000, debug=False)
     def referenceSubstances(self):
         """
         :return: a list of substances
         """
+        from ccpn.core.lib.SubstanceLib import _updateSubstanceDicts4Spectrum
         pids = self._getInternalParameter(self._REFERENCESUBSTANCES) or []
         objs = _getObjectsByPids(self.project, pids)
+        _updateSubstanceDicts4Spectrum(self, objs)
         return objs
 
     @referenceSubstances.setter
     def referenceSubstances(self, substances):
-        """
+        """ Add substances to the spectrum.referenceSubstances list
         """
         from ccpn.core.Substance import Substance
-
+        from ccpn.core.lib.SubstanceLib import _addSubstancesToSpectrum, _addSpectraToSubstance
+        _addSubstancesToSpectrum(self, substances)
+        for substance in substances:
+            _addSpectraToSubstance(substance, [self])
         pids = [su.pid for su in substances if isinstance(su, Substance)]
         self._setInternalParameter(self._REFERENCESUBSTANCES, pids)
-
-    @property
-    def referenceSubstance(self):
-        """
-        Deprecated. See referenceSubstances
-        """
-        getLogger().warning('spectrum.referenceSubstance is deprecated. Use referenceSubstances instead. ')
-        substance = None
-        if len(self.referenceSubstances) > 0:
-            substance = self.referenceSubstances[-1]
-        return substance
-
-    @referenceSubstance.setter
-    def referenceSubstance(self, substance):
-        getLogger().warning('spectrum.referenceSubstance is deprecated. Use referenceSubstances instead. ')
-        self.referenceSubstances = [substance]
 
     @property
     @_includeInDimensionalCopy
@@ -2990,7 +2977,6 @@ class Spectrum(AbstractWrapperObject):
             # GLSignals = GLNotifier(parent=self)
             # GLSignals.emitPaintEvent()
 
-    @cached.clear(_REFERENCESUBSTANCESCACHE)
     def _clearCache(self):
         """Clear the cache
         """

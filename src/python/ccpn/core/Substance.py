@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-07-27 15:41:00 +0100 (Wed, July 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -545,10 +545,12 @@ class Substance(AbstractWrapperObject):
     @property
     def referenceSpectra(self) -> typing.Tuple[Spectrum, ...]:
         """Reference Spectra acquired for Substance"""
-        _referenceSpectra = tuple([sp for sp in self.project.spectra if self in sp.referenceSubstances])
-        # _referenceSpectra = tuple(filter(lambda sp: self in sp.referenceSubstances, self.project.spectra)) # just an alternative way to a loop
-
-        return _referenceSpectra
+        from ccpn.core.lib.SubstanceLib import SubstanceSpectraDict, _initSubstanceSpectraDict
+        dd = SubstanceSpectraDict()
+        if not self in dd:
+            _initSubstanceSpectraDict()
+        spectra = dd.get(self)
+        return spectra
 
 
     @referenceSpectra.setter

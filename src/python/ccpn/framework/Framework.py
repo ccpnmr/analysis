@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-27 15:03:39 +0100 (Wed, July 27, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-07-27 10:25:00 +0100 (Wed, July 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1427,7 +1427,7 @@ class Framework(NotifierBase, GuiBase):
 
     def showSpectrumGroupsPopup(self):
         if not self.project.spectra:
-            getLogger().warning('Project has no Specta. Spectrum groups cannot be displayed')
+            getLogger().warning('Project has no Spectra. Spectrum groups cannot be displayed')
             MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
         else:
             from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
@@ -1441,13 +1441,20 @@ class Framework(NotifierBase, GuiBase):
             else:
                 SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True, obj=self.project.spectrumGroups[0]).exec_()
 
+    def showPeakCollectionsPopup(self):
+        if not self.project.spectra:
+            getLogger().warning('Project has no Spectra. Spectrum groups cannot be displayed')
+            MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
+        else:
+            from ccpn.ui.gui.popups.SeriesPeakCollectionPopup import SeriesPeakCollectionPopup
+            SeriesPeakCollectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow ).exec_()
+
     def showProjectionPopup(self):
         if not self.project.spectra:
-            getLogger().warning('Project has no Specta. Make Projection Popup cannot be displayed')
+            getLogger().warning('Project has no Spectra. Make Projection Popup cannot be displayed')
             MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')
         else:
             from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
-
             popup = SpectrumProjectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
 
@@ -1456,7 +1463,7 @@ class Framework(NotifierBase, GuiBase):
         Displays experiment type popup.
         """
         if not self.project.spectra:
-            getLogger().warning('Experiment Type Selection: Project has no Specta.')
+            getLogger().warning('Experiment Type Selection: Project has no Spectra.')
             MessageDialog.showWarning('Experiment Type Selection', 'Project has no Spectra.')
         else:
             from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
@@ -1469,7 +1476,7 @@ class Framework(NotifierBase, GuiBase):
         Displays validate spectra popup.
         """
         if not self.project.spectra:
-            getLogger().warning('Validate Spectrum Paths Selection: Project has no Specta.')
+            getLogger().warning('Validate Spectrum Paths Selection: Project has no Spectra.')
             MessageDialog.showWarning('Validate Spectrum Paths Selection', 'Project has no Spectra.')
         else:
             from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraPopup
@@ -1492,7 +1499,7 @@ class Framework(NotifierBase, GuiBase):
                 popup = PickPeak1DPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
                 popup.exec_()
             else:
-                getLogger().warning('Peak Picking: Project has no 1d Specta.')
+                getLogger().warning('Peak Picking: Project has no 1d Spectra.')
                 MessageDialog.showWarning('Peak Picking', 'Project has no 1d Spectra.')
 
     def showPeakPickNDPopup(self):
@@ -1510,7 +1517,7 @@ class Framework(NotifierBase, GuiBase):
                 popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
                 popup.exec_()
             else:
-                getLogger().warning('Peak Picking: Project has no Nd Specta.')
+                getLogger().warning('Peak Picking: Project has no Nd Spectra.')
                 MessageDialog.showWarning('Peak Picking', 'Project has no Nd Spectra.')
 
     def showCopyPeakListPopup(self):

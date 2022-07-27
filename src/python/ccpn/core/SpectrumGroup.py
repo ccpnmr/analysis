@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-07-27 10:25:00 +0100 (Wed, July 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -371,6 +371,80 @@ class SpectrumGroup(AbstractWrapperObject):
 
         return newSpectrumGroup
 
+    # =========================================================================================
+    # Peak Clustering methods
+    # =========================================================================================
+
+    def copyPeaksInSeries(self, sourcePeakList, refit=True, recalculateVolume=True,
+                       keepPosition=True, useSliceColour=True, createCollections=True):
+        """
+
+        :param sourcePeakList:
+        :param refit:
+        :param recalculateVolume:
+        :param keepPosition:
+        :param createCollections:
+        :return:
+        """
+        from ccpn.util.Common import flattenLists
+        from ccpn.core.lib.PeakCollectionLib import _getCollectionNameForAssignments, _getCollectionNameFromPeakPosition
+        from collections import defaultdict
+        from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
+        from ccpn.core.lib.ContextManagers import progressHandler
+
+        fitMethod = self.project.application.preferences.general.peakFittingMethod
+        if not sourcePeakList:
+            raise RuntimeError(f'Cannot Propagate Peaks in {self.pid}. Provide a valid peakList.')
+
+        count = 100
+        pDiv = (count // 100) + 1  # 10 if count > 100 else 1
+        totalCopies = int(count / pDiv)
+
+        with progressHandler(text='Propagating Peaks in series...', maximum=totalCopies, autoClose=True) as progress:
+            with undoBlockWithoutSideBar():
+                with notificationEchoBlocking():
+                    clusters = defaultdict(list)
+                    for cc, peak in enumerate(sourcePeakList.peaks):
+                        if cc % pDiv == 0:
+                            # update the progress-bar - 100 steps at the most
+                            progress.setValue(int(cc / pDiv))
+                        if progress.wasCanceled():
+                            progress.finalise()
+                            break
+                        clusterName = _getCollectionNameForAssignments(flattenLists(peak.assignedNmrAtoms))
+                        if clusterName is None:
+                            clusterName = _getCollectionNameFromPeakPosition(peak)
+                        clusters[clusterName].append(peak)
+                        for spectrum in self.spectra:
+                            targetPeakList = spectrum.peakLists[-1]
+                            if targetPeakList == sourcePeakList:
+                                continue
+                            if useSliceColour:
+                                targetPeakList.textColour = spectrum.positiveContourColour
+                                targetPeakList.symbolColour = spectrum.positiveContourColour
+                            newPeak = peak.copyTo(targetPeakList)
+                            newPeak.height = spectrum.getHeight(newPeak.position)
+                            try:
+                                if refit:
+                                   newPeak.fit(fitMethod=fitMethod, keepPosition=keepPosition)
+                                if recalculateVolume:
+                                    if None in newPeak.lineWidths:
+                                        newPeak.fit(fitMethod=fitMethod, keepPosition=keepPosition)
+                                    newPeak.estimateVolume()
+                            except Exception as e:
+                                getLogger().warning(f'Fitting failed for peak {newPeak}. Skipping with error: {e}')
+                                continue
+                            clusters[clusterName].append(newPeak)
+                    if createCollections: #could be removed from here.
+                        collections = []
+                        for clusterName, clusterPeaks in clusters.items():
+                            newCollection = self.project.newCollection(clusterPeaks, name=clusterName)
+                            collections.append(newCollection)
+                        topCollection = self.project.newCollection(collections, name=self.name)
+
+            progress.finalise()
+
+        return clusters
     #=========================================================================================
     # Implementation functions
     #=========================================================================================

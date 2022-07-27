@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-25 13:13:59 +0100 (Mon, July 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-27 12:22:56 +0100 (Wed, July 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -146,8 +146,8 @@ class _CoreTableWidgetABC(_SimplePandasTableViewProjectSpecific):
             try:
                 listItem[header.headerText] = header.getValue(obj)
             except Exception as es:
-                # NOTE:ED - catch any nasty surprises in tables
-                listItem[header.headerText] = None
+                # NOTE:ED - catch any nasty surprises in tables - empty string stops tables changing column-type
+                listItem[header.headerText] = ''
 
         return list(listItem.values())
 

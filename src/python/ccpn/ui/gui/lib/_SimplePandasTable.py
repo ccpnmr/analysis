@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-25 13:15:40 +0100 (Mon, July 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-27 12:29:55 +0100 (Wed, July 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -879,7 +879,7 @@ def _clearSimplePandasTable(table):
 # _SimplePandasTableViewProjectSpecific project specific
 #=========================================================================================
 
-# define a simple class that can contains a simple id
+# define a simple class that can contain a simple id
 blankId = SimpleNamespace(className='notDefined', serial=0)
 
 OBJECT_CLASS = 0
@@ -1110,8 +1110,11 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 
     def getRightMouseItem(self):
         if self._rightClickedTableIndex:
-            row = self._rightClickedTableIndex.row()
-            return self._df.iloc[self.model()._sortIndex[row]]
+            try:
+                row = self._rightClickedTableIndex.row()
+                return self._df.iloc[self.model()._sortIndex[row]]
+            except:
+                return None
 
     def setCurrent(self):
         """Set self to current.guiTable"""

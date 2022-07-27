@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-27 14:36:45 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-27 15:03:39 +0100 (Wed, July 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1859,6 +1859,7 @@ class Framework(NotifierBase, GuiBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
+
         notesEditorModule = NotesEditorModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(notesEditorModule, position=position, relativeTo=relativeTo)
         if note:

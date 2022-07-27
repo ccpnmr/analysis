@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-27 12:33:27 +0100 (Wed, July 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,6 @@ from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Integral import Integral
 from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.util.AttrDict import AttrDict
-from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_FOREGROUND, getColours
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_DRAW, GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
@@ -60,7 +59,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import getAliasSetting
 #       a = x[np.where(x != 3)]
 #       *** a = x[x != SKIPINDEX]
 
-from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT
+from ccpn.ui.gui.lib.OpenGL import GL
 
 
 OBJ_ISINPLANE = 0
@@ -294,6 +293,8 @@ class GLLabelling():
         """Append a new label to the end of the list
         """
         if obj.isDeleted:
+            return
+        if stringList and obj in (sl.stringObject for sl in stringList):
             return
 
         # spectrum = spectrumView.spectrum
@@ -1100,6 +1101,9 @@ class GLLabelling():
         """
         spectrum = spectrumView.spectrum
         drawList = self._GLSymbols[objListView]
+        if obj in drawList.pids[0::GLDefs.LENPID]:
+            return
+
         self.objIsInVisiblePlanesRemove(spectrumView, obj)
 
         # find the correct scale to draw square pixels
@@ -2106,6 +2110,8 @@ class GL1dLabelling():
         """Append a new symbol to the end of the list
         """
         drawList = self._GLSymbols[objListView]
+        if obj in drawList.pids[0::GLDefs.LENPID]:
+            return
 
         # find the correct scale to draw square pixels
         # don't forget to change when the axes change
@@ -2222,6 +2228,8 @@ class GL1dLabelling():
 
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
+        if stringList and obj in (sl.stringObject for sl in stringList):
+            return
 
         _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 

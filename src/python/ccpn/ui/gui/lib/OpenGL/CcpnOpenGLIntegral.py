@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-27 12:33:27 +0100 (Wed, July 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -340,6 +340,8 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
 
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
+        if stringList and obj in (sl.stringObject for sl in stringList):
+            return
 
         # symbolWidth = self.strip.symbolSize / 2.0
 

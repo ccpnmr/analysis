@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:06 +0000 (Tue, February 01, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-07-27 17:27:14 +0100 (Wed, July 27, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -62,7 +62,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.pipes import loadedPipes as LP
 from ccpn.util.Path import aPath, joinPath
 from ccpn.ui.gui.widgets import MessageDialog
-
+from ccpn.core.lib.ContextManagers import progressHandler
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
@@ -471,15 +471,26 @@ class GuiPipeline(CcpnModule, Pipeline):
         # self.goButton.setEnabled(False)
         self.project._logger.info('Pipeline: Started.')
         self.queue = []
+
+
         if self.inputData:
             if len(self.pipelineArea.findAll()[1]) > 0:
                 guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
-                with progressManager(self, 'Running Pipeline. See terminal window for more info...'):
+                count = len(guiPipes)
+                pDiv = (count // 100) + 1  # 10 if count > 100 else 1
+                totalCopies = int(count / pDiv)
+                with progressHandler(text='Running Pipeline...', maximum=totalCopies,
+                                     autoClose=True, delay=1,) as progress:
                     with undoBlockWithoutSideBar():
                         with notificationEchoBlocking():
                             self._kwargs = {}
                             if len(guiPipes) > 0:
-                                for guiPipe in guiPipes:
+                                for cc, guiPipe in enumerate(guiPipes):
+                                    progress.setValue(int(cc / pDiv))
+                                    progress.setText(f'Running Pipeline: {guiPipe.pipeName}')
+                                    if progress.wasCanceled():
+                                        progress.finalise()
+                                        break
                                     pipe = guiPipe.pipe
                                     if guiPipe.isActive:
                                         pipe.isActive = True
@@ -493,6 +504,7 @@ class GuiPipeline(CcpnModule, Pipeline):
                                         self.inputData = result or set()
                                     else:
                                         pipe.isActive = False
+                progress.finalise()
         else:
             self.project._logger.info('Pipeline: No input data.')
             showWarning('Pipeline', 'No input data')

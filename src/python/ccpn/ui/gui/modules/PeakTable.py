@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-25 13:13:09 +0100 (Mon, July 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-27 12:21:55 +0100 (Wed, July 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -386,7 +386,7 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
         editOption allows the user to modify the value content by doubleclick
         """
 
-        columnDefs = [('#', 'serial', 'Peak serial number', None, None),
+        columnDefs = [('#', lambda pk: pk.serial, 'Peak serial number', None, None),
                       ('Pid', lambda pk: pk.pid, 'Pid of the Peak', None, None),
                       ('_object', lambda pk: pk, 'Object', None, None),
                       ('Spectrum', lambda pk: pk.peakList.spectrum.id, 'Spectrum containing the Peak', None, None),
@@ -396,7 +396,7 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
 
         # Serial column
 
-        if peakList:
+        if peakList and peakList.spectrum:
             # Assignment column
             for i in range(peakList.spectrum.dimensionCount):
                 assignTipText = 'NmrAtom assignments of peak in dimension %s' % str(i + 1)

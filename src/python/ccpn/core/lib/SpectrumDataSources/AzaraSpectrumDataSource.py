@@ -2,24 +2,30 @@
 This file contains the Azara data access class
 it serves as an interface between the V3 Spectrum class and the actual spectral data
 
+In defining the Azara dataSource it accepts:
+- path to binary Azara file (with or without .spc extension); parameter file is binary file + '.par'
+  or .spc extension replaced by .par
+- parameter file with .par extension: binary file is parameter file without .par extension
+  or .par extention replaced by .spc
+
 See SpectrumDataSourceABC for a description of the methods
 """
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:16 +0000 (Thu, December 23, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-07-27 14:36:45 +0100 (Wed, July 27, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,10 +35,13 @@ __date__ = "$Date: 2020-11-20 10:28:48 +0000 (Fri, November 20, 2020) $"
 # Start of code
 #=========================================================================================
 
+import numpy as np
+
 from ccpn.util.Path import aPath
+from ccpn.util.Logging import getLogger
 
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
-
+from ccpn.util.traits.CcpNmrTraits import CPath
 
 class AzaraSpectrumDataSource(SpectrumDataSourceABC):
     """
@@ -46,33 +55,83 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
     blockHeaderSize = 0
     isFloatData = True
 
-    suffixes = ['.spc', '.par']
+    suffixes = [None, '.spc', '.par']
     openMethod = open
     defaultOpenReadMode = 'rb'
 
-    @property
-    def parameterPath(self):
-        """Path of the parameter file"""
-        return self.path +'.par'
+    # an attibute to store the (parsed) path to the azara parameter file
+    parameterFile = CPath(default_value=None, allow_none=True).tag(
+                                                                  isDimensional=False,
+                                                                  doCopy=False,
+                                                                  spectrumAttribute=None,
+                                                                  hasSetterInSpectrumClass=False
+                                                                  )
+
 
     def setPath(self, path, substituteSuffix=False):
-        """Set the path, optionally change .par in .spc suffix and do some checks by calling
-        the super class
+        """Set the dataFile and parameterFile attributes from path after suitable path manipulation
+
+        :param path: see doc-string above for hndling of the argument values
+        :param substituteSuffix: argument of the superclass, ignored here
+
+        do some checks by calling the super class
+
+        :return self or None on error
         """
-        if path is not None:
-            path = aPath(path)
-            if len(path.suffixes) == 2 and \
-                    path.suffixes[-1] == '.par' and path.suffixes[-2] == '.spc':
-                path = path.withoutSuffix()
-            path = str(path)
-        return super().setPath(path, substituteSuffix=substituteSuffix)
+        if path is None:
+            return super().setPath(path, substituteSuffix=False)
+
+        path = aPath(path)
+
+        # Testing for binaries
+        # .spc suffix, this is (supposingly) the azara binary
+        # no suffix, assume this is (maybe) an azara binary
+        if path.suffix == '.spc' or len(path.suffixes) == 0:
+            self.parameterFile = None
+            # Find a parameter file
+            if (_p := path.withSuffix('.par')) and _p.exists():
+                self.parameterFile = _p
+            elif (_p := path + '.par') and _p.exists():
+                self.parameterFile = _p
+
+        # testing for .par files
+        elif len(path.suffixes) >= 1 and path.suffixes[-1] == '.par':
+            # any .par suffix, set the parameterPath to it
+            self.parameterFile = path
+            path = None
+
+            # test the path without suffix is the binary
+            if (_p := self.parameterFile.withoutSuffix()) and _p.exists():
+                path = _p
+
+            # test the path with suffix .spc is the binary
+            elif (_p := self.parameterFile.withSuffix('.spc')) and _p.exists():
+                path = _p
+
+        # By now, we expect to have found a valid parameter file
+        if self.parameterFile is None or not self.parameterFile.exists():
+            getLogger().debug(f'AzaraSpectrumDataSource: unable to find parameter file from "{path}"')
+
+        # By now, we expect to have found a valid binary, if not try to find/define it from the parameter file
+        # (i.e. using the 'file' parameter)
+        if path is None or not path.exists():
+            getLogger().debug(f'AzaraSpectrumDataSource: unable to find binary datafile from "{path}", trying from "{self.parameterFile}"')
+            # find, open and parse the parameter file
+            if self.parameterFile is not None and self.parameterFile.exists():
+                with self.parameterFile.open(mode='rU', encoding='utf-8') as fp:
+                    for line in fp.readlines():
+                        if (data := line.split()) and len(data) ==2 and data[0] =='file':
+                            path = self.parameterFile.parent / data[1]
+                            break
+
+        return super().setPath(path, substituteSuffix=False)
 
     def readParameters(self):
         """Read the parameters from the azara parameter file
-        Returns self
+        :return self
         """
-        params = self.parameterPath
-        if not params.exists():
+        params = self.parameterFile
+        if params is None or not params.exists():
             raise RuntimeError('Cannot find Azara parameter file "%s"' % params)
 
         self.setDefaultParameters()
@@ -169,7 +228,19 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
 
         self.comment = ''.join(comments)
 
-        return super().readParameters()
+        super().readParameters()
+
+        # we now need a patch to check for endian-ness, as this may vary and is
+        # not stored for the Azara format
+        # Wrong endiness data are characterised by very large or very small
+        # exponents of their values
+        slice = self.getSliceData()
+        data = np.log10(np.fabs(slice))
+        if max(data) > 30 or min(data) < -30:
+            self.isBigEndian = not self.isBigEndian
+            self.clearCache()
+
+        return self
 
 # Register this format
 AzaraSpectrumDataSource._registerFormat()

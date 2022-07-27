@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-17 15:51:21 +0100 (Sun, July 17, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-07-27 14:36:45 +0100 (Wed, July 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -126,6 +126,7 @@ class AbstractWrapperObject(NotifierBase):
     _childClasses = []
 
     _isGuiClass = False  # Overridden by Gui classes
+    _isPandasTableClass = False  # Overridden by classes with panda DataFrame tables
 
     # Wrapper-level notifiers that are set up on code import and
     # registered afresh for every new project

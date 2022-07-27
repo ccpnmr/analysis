@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-03 19:09:31 +0000 (Thu, March 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-27 14:36:45 +0100 (Wed, July 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -58,6 +58,8 @@ class ViolationTable(AbstractWrapperObject):
     shortClassName = 'VT'
     # Attribute is necessary as subclasses must use superclass className
     className = 'ViolationTable'
+
+    _isPandasTableClass = True
 
     _parentClass = StructureData
 
@@ -300,22 +302,30 @@ def _newViolationTable(self: StructureData, name: str = None, data: Optional[Vio
 
     data must be of type ViolationFrame, pd.DataFrame or None.
     If data is None, an empty dataFrame wll be created.
-    pd.DataFrames will be converted to ViolationFrame.
+    pd.DataFrame's will be converted to ViolationFrame.
 
     :param name: name of the violationTable
     :param data: a ViolationFrame, Pandas DataFrame instance or None
     :param comment: optional comment string
     :return: a new ViolationTable instance.
     """
-    if not isinstance(data, (ViolationFrame, type(None))):
-        if isinstance(data, pd.DataFrame):
-            data = ViolationFrame(data)
-            getLogger().debug(f'Data must be of type {ViolationFrame}. The value pd.DataFrame was converted to {ViolationFrame}.')
-        else:
-            raise RuntimeError(f'Unable to generate new ViolationTable: data not of type {ViolationFrame}, pd.DataFrame or None')
+    if isinstance(data, ViolationFrame):
+        pass
+
+    elif data is None:
+        # create new, empty ViolationFrame
+        data = ViolationFrame()
+
+    elif isinstance(data, pd.DataFrame):
+        # convert type from panda's dataFrame
+        data = ViolationFrame(data)
+        getLogger().debug(f'The data of type pd.DataFrame was converted to {ViolationFrame}.')
+
+    else:
+        raise ValueError(f'Unable to generate new ViolationTable: data not of type {ViolationFrame}, pd.DataFrame or None')
 
     # get unique name from the parent structureData
-    name = ViolationTable._uniqueName(project=self, name=name)
+    name = ViolationTable._uniqueName(project=self.project, name=name)
 
     apiParent = self._wrappedData
 
@@ -325,12 +335,8 @@ def _newViolationTable(self: StructureData, name: str = None, data: Optional[Vio
     if result is None:
         raise RuntimeError('Unable to generate new ViolationTable item')
 
-    if data is None:
-        # create new, empty dataFrame
-        result._wrappedData.data = ViolationFrame()
-    else:
-        # insert the subclassed pandas dataFrame
-        result._wrappedData.data = data
-        data._containingObject = result
+    # set the data and back-link
+    result._wrappedData.data = data
+    data._containingObject = result
 
     return result

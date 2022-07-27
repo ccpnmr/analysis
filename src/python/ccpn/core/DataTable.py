@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:36 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-27 14:36:44 +0100 (Wed, July 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -58,6 +58,8 @@ class DataTable(AbstractWrapperObject):
     shortClassName = 'DT'
     # Attribute is necessary as subclasses must use superclass className
     className = 'DataTable'
+
+    _isPandasTableClass = True
 
     _parentClass = Project
 
@@ -288,12 +290,20 @@ def _newDataTable(self: Project, name: str = None, data: Optional[TableFrame] = 
     :param comment: optional comment string
     :return: a new DataTable instance.
     """
-    if not isinstance(data, (TableFrame, type(None))):
-        if isinstance(data, pd.DataFrame):
-            data = TableFrame(data)
-            getLogger().debug(f'Data must be of type {TableFrame}. The value pd.DataFrame was converted to {TableFrame}.')
-        else:
-            raise RuntimeError(f'Unable to generate new DataTable: data not of type {TableFrame}, pd.DataFrame or None')
+    if isinstance(data, TableFrame):
+        pass
+
+    elif data is None:
+        # create new, empty TableFrame
+        data = TableFrame()
+
+    elif isinstance(data, pd.DataFrame):
+        # convert type from panda's dataFrame
+        data = TableFrame(data)
+        getLogger().debug(f'The data of type pd.DataFrame was converted to {TableFrame}.')
+
+    else:
+        raise ValueError(f'Unable to generate new DataTable: data not of type {TableFrame}, pd.DataFrame or None')
 
     name = DataTable._uniqueName(project=self, name=name)
 
@@ -304,13 +314,9 @@ def _newDataTable(self: Project, name: str = None, data: Optional[TableFrame] = 
     if result is None:
         raise RuntimeError('Unable to generate new DataTable item')
 
-    if data is None:
-        # create new, empty dataFrame
-        result._wrappedData.data = TableFrame()
-    else:
-        # insert the subclassed pandas dataFrame
-        result._wrappedData.data = data
-        data._containingObject = result
+    # set the data and back-link
+    result._wrappedData.data = data
+    data._containingObject = result
 
     return result
 

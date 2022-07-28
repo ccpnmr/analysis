@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-29 15:20:31 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-28 20:00:38 +0100 (Thu, July 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ __date__ = "$Date: 2017-04-04 09:51:15 +0100 (Tue, April 04, 2017) $"
 #=========================================================================================
 
 import os
+import time
 from functools import partial
 
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -55,6 +56,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Font import setWidgetFont
+from ccpn.ui.gui.widgets.Label import Label
 
 from ccpn.util.Common import camelCaseToString
 from ccpn.util.Logging import getLogger
@@ -79,6 +81,7 @@ from ccpn.ui.gui.lib.MenuActions import _openItemObject
 # The docstring of GuiMainWindow should detail how this setup is
 
 MAXITEMLOGGING = 4
+KEY_DELAY = 0.75
 
 
 class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
@@ -150,6 +153,27 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
         # self.setUnifiedTitleAndToolBarOnMac(True) #uncomment this to remove the extra title bar on osx 10.14+
 
+        self._setKeyTimer()
+
+    def _setKeyTimer(self):
+        """
+        Create a timer to reset the keysequences by simulating an escape key if nothing pressed for a second
+        only affects this widget, runs every 0.5s
+        add a small label to the statusBar to show the last keys pressed
+        """
+        # create timer, repeats every 500ms
+        self._lastKeyTimer = QtCore.QTimer()
+        self._lastKeyTimer.timeout.connect(self._lastKeyTimerCallback)
+        self._lastKeyTimer.setInterval(500)
+        self._lastKeyTimer.start()
+        self._lastKey = 0
+        self._lastKeyTime = 0
+        self._lastKeyMessage = ''
+
+        # label for the statusBar, with grey text
+        self._lastKeyStatus = Label(textColour='grey')
+        self.statusBar().addPermanentWidget(self._lastKeyStatus, 0)
+
     @property
     def ui(self):
         """The application.ui instance; eg. the gui
@@ -220,13 +244,13 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
         self.setNotifier(self.application.project, [Notifier.CHANGE], 'SpectrumDisplay', self._spectrumDisplayChanged)
 
-    def _activatedkeySequence(self, ev):
-        key = ev.key()
-        self.statusBar().showMessage('key: %s' % str(key))
-
-    def _ambiguouskeySequence(self, ev):
-        key = ev.key()
-        self.statusBar().showMessage('key: %s' % str(key))
+    # def _activatedkeySequence(self, ev):
+    #     key = ev.key()
+    #     self.statusBar().showMessage('key: %s' % str(key))
+    #
+    # def _ambiguouskeySequence(self, ev):
+    #     key = ev.key()
+    #     self.statusBar().showMessage('key: %s' % str(key))
 
     def changeEvent(self, event):
         if event.type() == QtCore.QEvent.WindowStateChange:
@@ -860,13 +884,42 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         except Exception as es:
             getLogger().warning('Error expanding module: sideBar')
 
-    def keyPressEvent(self, e):
-
-        if e.key() == QtCore.Qt.Key_Escape:
+    def keyReleaseEvent(self, event: QtGui.QKeyEvent) -> None:
+        # this MUST be a keyRelease event
+        key = event.key()
+        if key == QtCore.Qt.Key_Escape:
             # Reset Mouse Mode
             mode = getCurrentMouseMode()
             if mode != SELECT:
                 self.setMouseMode(SELECT)
+
+        # remember the last key that was pressed for reset keySequence timer below
+        self._lastKeyTime = time.perf_counter()
+        self._lastKey = key
+        try:
+            if chr(key).isascii():
+                self._lastKeyMessage += chr(key)
+                self._lastKeyMessage = self._lastKeyMessage[-2:]
+
+        except:
+            self._lastKeyMessage = ''
+
+        self._lastKeyStatus.setText(self._lastKeyMessage)
+
+    def _lastKeyTimerCallback(self):
+        """QTimer event that fires every 500ms
+        """
+        deltaT = time.perf_counter() - self._lastKeyTime
+        if deltaT > KEY_DELAY and self._lastKey not in [QtCore.Qt.Key_Escape, 0]:
+            self._lastKey = 0
+
+            # simulate an escape-key to clear keySequences - MUST be KeyPress
+            event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Escape, QtCore.Qt.NoModifier)
+            QtCore.QCoreApplication.sendEvent(self, event)
+
+            # clear the statusBar
+            self._lastKeyMessage = ''
+            self._lastKeyStatus.setText(self._lastKeyMessage)
 
     def _fillCcpnPluginsMenu(self):
 

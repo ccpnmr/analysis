@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-14 15:45:50 +0100 (Tue, June 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-28 16:08:26 +0100 (Thu, July 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -61,6 +61,8 @@ from ccpn.util import Logging
 from ccpn.util import Register
 from ccpn.util.Path import aPath, Path
 from ccpn.util.decorators import logCommand
+
+from ccpnmodel.ccpncore.memops.ApiError import ApiError
 
 
 #-----------------------------------------------------------------------------------------
@@ -483,7 +485,7 @@ class Gui(Ui):
             # if the new project contains invalid spectra then open the popup to see them
             self.mainWindow._checkForBadSpectra(newProject)
 
-        except RuntimeError as es:
+        except (RuntimeError, ApiError) as es:
             MessageDialog.showError('Error loading Project:', f'{es}', parent=self)
 
             # Try to restore the state

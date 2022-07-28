@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-27 14:36:45 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-28 16:09:46 +0100 (Thu, July 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -235,8 +235,10 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
         # Wrong endiness data are characterised by very large or very small
         # exponents of their values
         slice = self.getSliceData()
-        data = np.log10(np.fabs(slice))
-        if max(data) > 30 or min(data) < -30:
+        # remove any bad values - zeroes mess up the result and the endian-ness is flipped, also hides numpy warning
+        data = np.log10(np.fabs(slice[slice != 0.0]))
+        data = data[np.isfinite(data)]
+        if len(data) > 0 and (max(data) > 30 or min(data) < -30):
             self.isBigEndian = not self.isBigEndian
             self.clearCache()
 

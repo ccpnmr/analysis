@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-27 14:36:45 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-28 16:09:46 +0100 (Thu, July 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1469,6 +1469,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         elif self.isBlocked:
             position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
             data = self._readBlockedSlice(sliceDim=sliceDim, position=position)
+            # np.nan_to_num(data, copy=False, nan=0.0, posinf=0.0, neginf=0.0)  # NOTE:ED - do we need this here?
             data *= self.dataScale
             return data
 

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-18 11:29:34 +0100 (Mon, July 18, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-07-28 16:09:46 +0100 (Thu, July 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1206,8 +1206,8 @@ def getNoiseEstimate(spectrum):
     """
     # NOTE:ED more detail needed
 
-    fractPerAxis = 0.04
-    subsetFract = 0.25
+    fractPerAxis = 0.03
+    subsetFract = 0.2
     fract = 0.1
     maxSamples = 10000
 
@@ -1227,7 +1227,7 @@ def getContourEstimate(spectrum):
     Calculated from a random subset of points
     """
 
-    fractPerAxis = 0.04
+    fractPerAxis = 0.03
     subsetFract = 0.01
     fract = 0.1
     maxSamples = 10000
@@ -1298,9 +1298,9 @@ def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
     # check whether there are too many bad numbers in the data
     good = nsamples - fails
     if good == 0:
-        getLogger().warning(f'Spectrum {spectrum} contains all bad points')
+        getLogger().warning(f'Spectrum {spectrum} contains all bad points - check possible endian-ness')
         return NoiseEstimateTuple(mean=None, std=None, min=None, max=None, noiseLevel=1.0)
-    elif good < 10:  # arbitrary number of bad points
+    elif good < 10:  # arbitrary minimum number of bad points
         getLogger().warning(f'Spectrum {spectrum} contains minimal data')
         maxValue = max([abs(x) for x in data])
         if maxValue > 0:
@@ -1310,19 +1310,29 @@ def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
 
     m = max(1, int(nsamples * fraction))
 
+    funcs = {'mean': np.mean, 'std': np.std, 'min': np.min, 'max': np.max}
     def meanStd():
-        # take m random values from data, and return mean/SD
+        # take m random values from data, and return mean/SD, data is already finite
         y = np.random.choice(data, m)
-        return NoiseEstimateTuple(mean=np.mean(y), std=np.std(y), min=np.min(y), max=np.max(y), noiseLevel=None)
+        attrs = {attr: func(y) for attr, func in funcs.items()}
+        if all(np.isfinite(val) for val in attrs.values() if val is not None):
+            # only return valid results - too large will give inf
+            return NoiseEstimateTuple(noiseLevel=None, **attrs)
 
     # generate 'nsubsets' noiseEstimates and take the one with the minimum standard deviation
-    value = min((meanStd() for i in range(nsubsets)), key=lambda mSD: mSD.std)
-    value = NoiseEstimateTuple(mean=value.mean,
-                               std=value.std * 1.1 if value.std != 0 else 1.0,
-                               min=value.min, max=value.max,
-                               noiseLevel=None)
+    valid = list({meanStd() for i in range(nsubsets)} - {None})
+    if valid:
+        value = min(valid, key=lambda mSD: mSD.std)
+        value = NoiseEstimateTuple(mean=value.mean,
+                                   std=value.std * 1.1 if value.std != 0 else 1.0,
+                                   min=value.min, max=value.max,
+                                   noiseLevel=None)
 
-    value = _noiseFunc(value)
+        value = _noiseFunc(value)
+    else:
+        # all None means that there is a major problem with the data - probably endian-ness
+        getLogger().warning(f'Spectrum {spectrum} contains all bad points - check possible endian-ness')
+        value = NoiseEstimateTuple(mean=None, std=None, min=None, max=None, noiseLevel=1.0)
 
     return value
 

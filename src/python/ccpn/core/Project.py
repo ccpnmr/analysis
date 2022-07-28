@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-07-28 16:07:43 +0100 (Thu, July 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2117,7 +2117,7 @@ def _loadProject(application, path: str) -> Project:
     apiNmrProject.initialiseGraphicsData()
     project = Project(apiNmrProject)
     project._isNew = False
-    # NB: linkages are set in Framework._intialiseProject()
+    # NB: linkages are set in Framework._initialiseProject()
 
     # If path pointed to a V2 project, save the result
     if project._isUpgradedFromV2:

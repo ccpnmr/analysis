@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-07-29 17:57:42 +0100 (Fri, July 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -5392,6 +5392,7 @@ class CcpnNefReader(CcpnNefContent):
         """Create or get a spectrum corresponding to the saveFrame data
         :return: the Spectrum instance
         """
+        from ccpn.core.Spectrum import _newEmptySpectrum
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
@@ -5436,7 +5437,7 @@ class CcpnNefReader(CcpnNefContent):
             # create a new spectrum; first empty but change dataFormat if known
             filePath = _params.pop('filePath', None)
             dataFormat = _params.pop('dataFormat', None)
-            spectrum = project.newEmptySpectrum(name=spectrumName, path=filePath, **_params)
+            spectrum = _newEmptySpectrum(project, name=spectrumName, path=filePath, **_params)
             # Optionally change the dataFormat
             if filePath is not None and dataFormat is not None:
                 try:
@@ -6753,7 +6754,7 @@ class CcpnNefReader(CcpnNefContent):
     verifiers['ccpn_complex_chain'] = verify_ccpn_complex_chain
 
     def load_ccpn_sample(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-
+        from ccpn.core.Sample import _newSample
         # NBNB TODO add crosslinks to spectrum (also for components)
 
         # Get ccpn-to-nef mapping for saveframe
@@ -6765,7 +6766,7 @@ class CcpnNefReader(CcpnNefContent):
         self._updateStringParameters(parameters)
 
         # Make main object
-        result = project.newSample(**parameters)
+        result = _newSample(project, **parameters)
 
         # Load loops, with object as parent
         for loopName in loopNames:
@@ -6800,18 +6801,17 @@ class CcpnNefReader(CcpnNefContent):
 
     def load_ccpn_sample_component(self, parent: Sample, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame):
         """load ccpn_sample_component loop"""
+        from ccpn.core.SampleComponent import _newSampleComponent
 
         result = []
-
-        creatorFunc = parent.newSampleComponent
 
         mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
             self._updateStringParameters(parameters)
-
-            result.append(creatorFunc(**parameters))
+            sc = _newSampleComponent(parent, **parameters)
+            result.append(sc)
 
         return result
 
@@ -6840,6 +6840,7 @@ class CcpnNefReader(CcpnNefContent):
     verifiers['ccpn_sample_component'] = verify_ccpn_sample_component
 
     def load_ccpn_substance(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        from ccpn.core.Substance import _getSubstanceByName
 
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
@@ -6852,7 +6853,7 @@ class CcpnNefReader(CcpnNefContent):
             labelling = parameters.pop('labelling')
         else:
             labelling = None
-        previous = [x for x in project.substances if x.name == name]
+        previous = [_getSubstanceByName(project, name)] #get directly from API and avoid loops.
         sequence = saveFrame.get('sequence_string')
         if sequence and not previous:
             # We have a 'Molecule' type substance with a sequence and no previous occurrence

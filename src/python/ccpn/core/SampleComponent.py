@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-07-29 17:59:13 +0100 (Fri, July 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -301,7 +301,7 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
     :return: a new SampleComponent instance.
     """
 
-    labelling = labelling or DEFAULT_LABELLING
+    labelling = labelling if labelling is not None else DEFAULT_LABELLING
 
     # if not name:
     #     name = SampleComponent._nextAvailableName(SampleComponent, self)
@@ -317,7 +317,10 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
     if not isinstance(name, str):
         name = str(name)
 
-    existing = [sC for sC in self._apiSample.sortedSampleComponents() if sC.name == name and sC.labeling == labelling]
+    _apiNmrProject = self._project._apiNmrProject
+    apiRefComponentStore = _apiNmrProject.sampleStore.refSampleComponentStore
+    # existing = [sC for sC in self._apiSample.sortedSampleComponents() if sC.name == name and sC.labeling == labelling]
+    existing = self._apiSample.findAllSampleComponents(name=name, labelling=labelling)
     if existing:
         raise ValueError('{}.{}.{} already exists'.format(self._apiSample.name, name, labelling if labelling != DEFAULT_LABELLING else ''))
 
@@ -328,11 +331,21 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
 
     apiSample = self._wrappedData
 
-    existingSubstances = [substance for substance in self._project.substances if (substance.name == name and substance.labelling == labelling)]
-    if len(existingSubstances) > 1:
+    # existingSubstances = [substance for substance in self._project.substances if (substance.name == name and substance.labelling == labelling)]
+    apiExistingSubstances = apiRefComponentStore.findAllComponents(name=name, labelling=labelling)
+    if len(apiExistingSubstances) > 1:
         # should only return one element
         raise RuntimeError('Too many identical substances')
-    substance = existingSubstances[0] if existingSubstances else self._project.fetchSubstance(name=name, labelling=labelling)
+    apiSubstance = apiRefComponentStore.findFirstComponent(name=name, labeling=labelling)
+    if apiSubstance:
+        substance = self._project._data2Obj.get(apiSubstance)
+    else:
+        from ccpn.core.Substance import _newSubstance
+        from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                substance = _newSubstance(self.project, name=name, labelling=labelling)
+    # substance = existingSubstances[0] if existingSubstances else self._project.fetchSubstance(name=name, labelling=labelling)
 
     # NB - using substance._wrappedData.labelling because we need the API labelling value,
     # which is different for the default case
@@ -348,7 +361,7 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
         raise RuntimeError('Unable to generate new SampleComponent item')
 
     # if substance already exists then don't flag for delete through the newObject decorator
-    if existingSubstances:
+    if apiExistingSubstances:
         return (result,)
     else:
         # need to notify that a substance has also been created

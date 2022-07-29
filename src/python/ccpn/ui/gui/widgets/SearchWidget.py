@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:42 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-07-29 14:14:33 +0100 (Fri, July 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -52,12 +52,14 @@ GreaterThanInclude = '>='
 LessThanInclude = '<='
 Equal = 'Equal'
 Include = 'Include'
+Exclude = 'Exclude'
 Between = 'Between'
 NotBetween = 'Not-Between'
 
 SearchConditionsDict = {
     Equal             : op.eq,
     Include           : op.contains,
+    Exclude           : op.contains,  # is negated later - must be a better way though
     GreaterThan       : op.gt,
     GreaterThanInclude: op.ge,
     LessThan          : op.lt,
@@ -99,9 +101,12 @@ def _compareKeys(a, b, condition):
         getLogger().debug('Condition %s  not available  for GuiTable filters.' % condition)
     try:
         if condition == Equal:
-            return SearchConditionsDict.get(Equal)(a, b)
-        if condition == Include:
-            return SearchConditionsDict.get(Include)(a, b)
+            return SearchConditionsDict.get(condition)(a, b)
+        elif condition == Include:
+            return SearchConditionsDict.get(condition)(a, b)
+        elif condition == Exclude:
+            # this functions slightly differently as requires specific columns to search
+            return not SearchConditionsDict.get(condition)(a, b)
         else:
             a, b, = float(a), float(b)
             return SearchConditionsDict.get(condition)(a, b)

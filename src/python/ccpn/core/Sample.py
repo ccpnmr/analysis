@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-27 15:41:00 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-01 12:18:01 +0100 (Mon, August 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
 from ccpn.util.Constants import AMOUNT_UNITS, IONICSTRENGTH_UNITS
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, renameObject, undoBlock
-from ccpn.core.lib.SubstanceLib import SubstanceSpectraDict
+
 
 DEFAULTAMOUNTUNITS = 'µL'
 DEFAULTIONICSTRENGTHUNITS = 'mM'

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-27 10:25:00 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-01 13:14:05 +0100 (Mon, August 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -45,6 +45,8 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Icon import Icon, ICON_DIR
+from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumGroupPulldown, PeakListPulldown
+from ccpn.ui.gui.widgets.HLine import HLine, LabeledHLine
 
 INPLACE = 'In Place'
 FOLLOW = 'Follow'
@@ -53,18 +55,6 @@ NEW = 'Create New'
 FINDPEAKS = 'Find Peaks'
 USEEXISTINGPEAKS = 'Use Existing Peaks'
 
-_OnlyPositionAndAssignments = 'Copy position and assignments'
-_IncludeAllPeakProperties   = 'Copy all existing properties'
-_SnapToExtremum             = 'Snap to extremum'
-_RefitPeaks                 = 'Refit peaks'
-_RefitPeaksAtPosition       = 'Refit peaks at position'
-_RecalculateVolume          = 'Recalculate volume'
-_tipTextOnlyPos             = f'''Copy Peaks and include only the original position and assignments (if available).\nAdditionally, execute the selected operations'''
-_tipTextIncludeAll          = f'''Copy Peaks and include all the original properties: \nPosition, Assignments, Heights, Linewidths, Volumes etc...'''
-_tipTextSnapToExtremum      = 'Snap all new peaks to extremum. Default properties set in the General Preferences'
-_tipTextRefitPeaks          = 'Refit all new peaks. Default properties set in the General Preferences'
-_tipTextRefitPeaksAtPosition= 'Refit peaks and force to maintain the original position. Default properties set in the General Preferences'
-_tipTextRecalculateVolume   = 'Recalculate volume for all peaks. Requires a Refit.'
 
 def showWarningPopup():
     showWarning('Under implementation!', 'This popup is not active yet.')
@@ -72,8 +62,6 @@ def showWarningPopup():
 class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
     def __init__(self, parent=None, mainWindow=None, title='Series Peak Collection', **kwds):
         super().__init__(parent, setLayout=True,  size=(200, 300), minimumSize=None, windowTitle=title, **kwds)
-
-        showWarningPopup()
 
         if mainWindow:
             self.mainWindow = mainWindow
@@ -99,12 +87,12 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
 
     def setWidgets(self):
         row = 0
-        self.spectrumGroupCW = cw.PulldownListCompoundWidget(self.mainWidget, mainWindow=self.mainWindow,
+        self.spectrumGroupCW = SpectrumGroupPulldown(self.mainWidget, mainWindow=self.mainWindow,
                                                              labelText='SpectrumGroup', grid=(row, 0),
                                                              gridSpan = (1,2))
                                                              # fixedWidths=self._fixedWidthsCW)
         row += 1
-        self.sourcePeakListCW = cw.PulldownListCompoundWidget(self.mainWidget,
+        self.sourcePeakListCW = PeakListPulldown(self.mainWidget,
                                                               mainWindow=self.mainWindow,
                                                               labelText='Source PeakList',grid=(row, 0),
                                                               gridSpan=(1, 2))
@@ -112,11 +100,6 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         row += 1
         self.collectionNameCW = cw.EntryCompoundWidget(self.mainWidget, labelText='Collection Name', grid=(row, 0),
                                                        gridSpan=(1, 2))
-        row += 1
-        self.coloursLabel = Label(self.mainWidget, text='Colouring', grid=(row, 0))
-        self.coloursOption = CheckBox(self.mainWidget, text='Use colour from contours', checked=True,
-                                      tipText='Use contour colours for peak symbols and texts',
-                                      grid=(row, 1))
         row += 1
 
         ## InPlace Peak options
@@ -126,32 +109,37 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         self._inplaceFrame = Frame(self.mainWidget, setLayout=True, grid=(row, 0), gridSpan=(1, 2))
         row += 1
         subRow = 0
-        self.targetPeakListLabel = Label(self._inplaceFrame, text='Use peakList', grid=(subRow, 0))
-        self.targetPeakListOptions = RadioButtons(self._inplaceFrame, texts=[LAST, NEW], grid=(subRow, 1))
-        subRow += 1
-        self.refitLabel = Label(self._inplaceFrame, text='Refitting', grid=(subRow, 0))
-        self.refitOption = CheckBox(self._inplaceFrame, text='Refit and calculate volume',checked=False, grid=(subRow, 1))
-
-        row += 1
-        subRow = 0
         ## follow Peaks options
         self.followRadioButton = RadioButton(self.mainWidget, text='Follow Peaks', callback=self._toggleFrames,grid=(row, 0))
         row += 1
-        self._followFrame = Frame(self.mainWidget, setLayout=True, grid=(row, 0), gridSpan=(1, 2))
+        self._followFrame = Frame(self.mainWidget, setLayout=True, grid=(row, 0), gridSpan=(2, 2))
         self.followPeakOptionstLabel = Label(self._followFrame, text='Select Mode', grid=(subRow, 0))
         self.followPeakOptionsRB = RadioButtons(self._followFrame, texts=[FINDPEAKS, USEEXISTINGPEAKS],
-                                                callback=self._togglePeakListOptions, selectedInd=0, grid=(subRow, 1))
+                                                selectedInd=0, grid=(subRow, 1))
         subRow += 1
-        self.followPeakLastNewPeakListLabel = Label(self._followFrame, text='Use peakList', grid=(subRow, 0))
-        self.followPeakLastNewPeakListRB = RadioButtons(self._followFrame, texts=[LAST, NEW], grid=(subRow, 1))
-        subRow += 1
-
         self.followMethodLabel = Label(self._followFrame, text='Method', grid=(subRow, 0))
         self.followMethodPD = PulldownList(self._followFrame, texts=['Option1'], grid=(subRow, 1))
         subRow += 1
+        row += subRow
 
+        HLine(self.mainWidget,  grid=(row, 0), gridSpan=(1, 2))
+
+        ## Common for both options
+        row += 1
+        self.usePeakListLabel = Label(self.mainWidget, text='Use peakList', grid=(row, 0))
+        self.usePeakListLabelRB = RadioButtons(self.mainWidget, texts=[LAST, NEW], grid=(row, 1))
+        row += 1
+        self.refitLabel = Label(self.mainWidget, text='Refitting', grid=(row, 0))
+        self.refitOption = CheckBox(self.mainWidget, text='Refit Peaks', checked=False, grid=(row, 1))
+        row += 1
+        self.coloursLabel = Label(self.mainWidget, text='Colouring', grid=(row, 0))
+        self.coloursOption = CheckBox(self.mainWidget, text='Use colour from contours', checked=True,
+                                      tipText='Use contour colours for peak symbols and texts',
+                                      grid=(row, 1))
+        row += 1
 
         self.inplaceRadioButton.click()
+        self.followRadioButton.setEnabled(False)
 
     @property
     def sourcePeakList(self):
@@ -161,22 +149,28 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
     def spectrumGroup(self):
         return self.project.getByPid(self.spectrumGroupCW.pulldownList.getText())
 
+    @property
+    def collectionName(self):
+        return self.collectionNameCW.getText()
+
+    @property
+    def copyInPlace(self):
+        return self.inplaceRadioButton.isChecked()
+
+    @property
+    def _isNewTargetPeakListNeeded(self):
+        return self.usePeakListLabelRB.getSelectedText() == NEW
+
     def _toggleFrames(self, *args):
         if self.inplaceRadioButton.isChecked():
             self._inplaceFrame.setVisible(True)
             self._followFrame.setVisible(False)
+            self.usePeakListLabelRB.setEnabled(True)
         else:
             self._followFrame.setVisible(True)
             self._inplaceFrame.setVisible(False)
-
-    def _togglePeakListOptions(self):
-        if self.followPeakOptionsRB.getSelectedText() == FINDPEAKS:
-            self.followPeakLastNewPeakListRB.setVisible(True)
-            self.followPeakLastNewPeakListLabel.setVisible(True)
-        else:
-            self.followPeakLastNewPeakListLabel.setVisible(False)
-            self.followPeakLastNewPeakListRB.setVisible(False)
-
+            self.usePeakListLabelRB.set(LAST)
+            self.usePeakListLabelRB.setEnabled(False)
 
     def _populate(self):
         self._populateSourcePeakListPullDown()
@@ -184,8 +178,26 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
 
 
     def _okClicked(self):
-        # with undoBlockWithoutSideBar():
-        #    showWarningPopup()
+
+        if not self.spectrumGroup:
+            showWarning('Missing SpectrumGroup', 'Select a SpectrumGroup first')
+            return
+        if not self.sourcePeakList:
+            showWarning('Missing PeakList', 'Select a source PeakList first')
+            return
+
+        refit = self.refitOption.isChecked()
+        useSliceColour = self.coloursOption.isChecked()
+
+        if self.copyInPlace:
+            with undoBlockWithoutSideBar():
+                self.spectrumGroup.copyPeaksInSeries(self.sourcePeakList,
+                                                 refit=refit, recalculateVolume=refit,
+                                                 keepPosition=True, useSliceColour=useSliceColour,
+                                                 createCollections=True,
+                                                 newTargetPeakList=self._isNewTargetPeakListNeeded,
+                                                 topCollectionName=None
+                                                 )
         self.accept()
 
 

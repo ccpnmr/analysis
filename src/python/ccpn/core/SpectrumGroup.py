@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-27 10:25:00 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-01 13:14:05 +0100 (Mon, August 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -376,7 +376,9 @@ class SpectrumGroup(AbstractWrapperObject):
     # =========================================================================================
 
     def copyPeaksInSeries(self, sourcePeakList, refit=True, recalculateVolume=True,
-                       keepPosition=True, useSliceColour=True, createCollections=True):
+                       keepPosition=True, useSliceColour=True,
+                       newTargetPeakList=False, createCollections=True,
+                       topCollectionName = None):
         """
 
         :param sourcePeakList:
@@ -384,6 +386,7 @@ class SpectrumGroup(AbstractWrapperObject):
         :param recalculateVolume:
         :param keepPosition:
         :param createCollections:
+        :param newTargetPeakList: whether create a new newTargetPeakList or copy peaks to last created
         :return:
         """
         from ccpn.util.Common import flattenLists
@@ -416,7 +419,10 @@ class SpectrumGroup(AbstractWrapperObject):
                             clusterName = _getCollectionNameFromPeakPosition(peak)
                         clusters[clusterName].append(peak)
                         for spectrum in self.spectra:
-                            targetPeakList = spectrum.peakLists[-1]
+                            if newTargetPeakList:
+                                targetPeakList = spectrum.newPeakList()
+                            else:
+                                targetPeakList = spectrum.peakLists[-1]
                             if targetPeakList == sourcePeakList:
                                 continue
                             if useSliceColour:
@@ -440,7 +446,8 @@ class SpectrumGroup(AbstractWrapperObject):
                         for clusterName, clusterPeaks in clusters.items():
                             newCollection = self.project.newCollection(clusterPeaks, name=clusterName)
                             collections.append(newCollection)
-                        topCollection = self.project.newCollection(collections, name=self.name)
+                        collectionName = topCollectionName or self.name
+                        topCollection = self.project.newCollection(collections, name=collectionName)
 
             progress.finalise()
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-27 12:29:55 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-01 16:01:03 +0100 (Mon, August 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1416,7 +1416,10 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 
         self.initSearchWidget()
         if self.searchWidget is not None:
-            self.searchWidget.show()
+            if not self.searchWidget.isVisible():
+                self.searchWidget.show()
+            else:
+                self.searchWidget.hideSearch()
 
     #=========================================================================================
     # Handle dropped items

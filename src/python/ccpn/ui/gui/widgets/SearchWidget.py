@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-29 14:14:33 +0100 (Fri, July 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-01 16:01:03 +0100 (Mon, August 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -106,7 +106,7 @@ def _compareKeys(a, b, condition):
             return SearchConditionsDict.get(condition)(a, b)
         elif condition == Exclude:
             # this functions slightly differently as requires specific columns to search
-            return not SearchConditionsDict.get(condition)(a, b)
+            return SearchConditionsDict.get(condition)(a, b)
         else:
             a, b, = float(a), float(b)
             return SearchConditionsDict.get(condition)(a, b)
@@ -446,19 +446,35 @@ class _TableFilterABC(ScrollArea):
         condition2Value = self.condition2.text()
         condition = self.conditionWidget.getText()
 
-        # check using the actual table - not the underlying dataframe
-        df = self.df
-        rows = OrderedSet()
+        # # check using the actual table - not the underlying dataframe
+        # df = self.df
+        # if condition != Exclude:
+        #     rows = OrderedSet()
+        # else:
+        #     rows = OrderedSet(val for val in range(_model.rowCount()))
 
         searchColumn = self.columnOptions.getText()
         visHeadings = self.visibleColumns(searchColumn=searchColumn)
 
         _compareErrorCount = 0
         _model = self.table.model()
+        # check using the actual table - not the underlying dataframe
+        df = self.df
+        if condition != Exclude:
+            rows = OrderedSet()
+        else:
+            # Exclude needs to remove values from the list
+            # Start with the sorted values already found - from _sortIndex
+            if self._listRows is not None:
+                rows = OrderedSet(list(self._listRows)[row] for row in _model._sortIndex)
+            else:
+                rows = OrderedSet(_model._sortIndex)
 
         for row in range(_model.rowCount()):
-            for column in range(_model.columnCount()):
+            # the sorted row
+            _row = _model._sortIndex[row]
 
+            for column in range(_model.columnCount()):
                 if self.table._df.columns[column] in visHeadings:
                     idx = _model.index(row, column)
                     cellText = idx.data(QtCore.Qt.DisplayRole)
@@ -470,10 +486,19 @@ class _TableFilterABC(ScrollArea):
                             _compareErrorCount += 1
 
                     if match:
-                        if self._listRows is not None:
-                            rows.add(list(self._listRows)[row])
+                        if condition != Exclude:
+                            # add the found sorted row to the found list
+                            if self._listRows is not None:
+                                rows.add(list(self._listRows)[_row])
+                            else:
+                                rows.add(_row)
                         else:
-                            rows.add(row)
+                            # remove the found sorted values from the list
+                            if self._listRows is not None:
+                                rows -= {list(self._listRows)[_row]}
+                            else:
+                                rows -= {_row}
+
         if _compareErrorCount > 0:
             getLogger().debug('Error in comparing values for GuiTable filters, use debug2 for details')
 

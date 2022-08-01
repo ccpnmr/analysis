@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-21 18:52:48 +0100 (Tue, June 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-01 14:43:48 +0100 (Mon, August 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -57,9 +57,9 @@ class PeakPickerNd(PeakPickerABC):
     minimumLineWidth = CList(allow_none=True, default_value=[])
     checkAllAdjacent = CBool(allow_none=True, default_value=True)
     singularMode = CBool(allow_none=True, default_value=True)
-    halfBoxFindPeaksWidth = CInt(allow_none=True, default_value=2)
-    halfBoxSearchWidth = CInt(allow_none=True, default_value=3)
-    halfBoxFitWidth = CInt(allow_none=True, default_value=3)
+    halfBoxFindPeaksWidth = CInt(allow_none=True, default_value=4)
+    halfBoxSearchWidth = CInt(allow_none=True, default_value=4)
+    halfBoxFitWidth = CInt(allow_none=True, default_value=4)
     searchBoxDoFit = CBool(allow_none=True, default_value=True)
     setLineWidths = CBool(allow_none=True, default_value=True)
     searchBoxMode = CBool(allow_none=True, default_value=True)
@@ -325,7 +325,7 @@ class PeakPickerNd(PeakPickerABC):
                 peakDist = np.linalg.norm((np.array(findNextPeak[0]) - boxWidths) / boxWidths)
                 peakFit = abs(height) / (1e-6 + peakDist)
 
-                if height == None or peakFit > bestFit:
+                if height is None or peakFit > bestFit:
                     bestFit = peakFit
                     bestHeight = abs(peakHeight)
                     peakPoint = findNextPeak[0]

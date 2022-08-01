@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-01 14:43:48 +0100 (Mon, August 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -553,7 +553,7 @@ def _fitExpDecayCurve(bindingCurves, aFunc=exponenial_func, xfStep=0.01, xfPerce
     # return errorValue
 
 
-def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: int = 3,
+def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 4, halfBoxFitWidth: int = 4,
                    minDropFactor: float = 0.1, fitMethod: str = PARABOLICMETHOD,
                    searchBoxMode=False, searchBoxDoFit=False):
     """Snap the position of the peak the nearest extremum.

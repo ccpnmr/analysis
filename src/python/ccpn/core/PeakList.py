@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-17 15:51:21 +0100 (Sun, July 17, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-08-01 14:43:48 +0100 (Mon, August 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -343,7 +343,7 @@ class PeakList(PMIListABC):
         return peaks
 
     def fitExistingPeaks(self, peaks: Sequence['Peak'], fitMethod: str = GAUSSIANMETHOD, singularMode: bool = True,
-                         halfBoxSearchWidth: int = 2, halfBoxFitWidth: int = 2):
+                         halfBoxSearchWidth: int = 4, halfBoxFitWidth: int = 4):
         """Refit the current selected peaks.
         Must be called with peaks that belong to this peakList
         """

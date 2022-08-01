@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-17 15:51:21 +0100 (Sun, July 17, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-08-01 14:43:48 +0100 (Mon, August 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1143,7 +1143,7 @@ class Peak(AbstractWrapperObject):
         # do I need to set the volume error?
         # self.volumeError = 1e-8
 
-    def fit(self, fitMethod=None, halfBoxSearchWidth=2, keepPosition=False, iterations=10):
+    def fit(self, fitMethod=None, halfBoxSearchWidth=4, keepPosition=False, iterations=10):
         """
         Fit the peak to recalculate position and lineWidths.
         Use peak.estimateVolume to recalculate the volume.
@@ -1151,7 +1151,7 @@ class Peak(AbstractWrapperObject):
         :param fitMethod: str, one of ['gaussian', 'lorentzian', 'parabolic']
                Default: the fitting method defined in the general preferences.
                If not given or not included in the available options, it uses the default.
-        :param halfBoxSearchWidth: int. Default: 2.
+        :param halfBoxSearchWidth: int. Default: 4.
                Used to increase the searching area limits from the initial position.
         :param keepPosition: bool. Default: False.
                if True, reset to the original position after applying the fitting method.

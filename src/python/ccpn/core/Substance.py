@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-27 15:41:00 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-01 11:39:02 +0100 (Mon, August 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -91,6 +91,9 @@ class Substance(AbstractWrapperObject):
     # CCPN internal
     _linkedSpectraPids = '_linkedSpectraPids'
     _SPECIFICATOMLABELLING = 'specificAtomLabelling'
+
+    _ReferenceSpectraPids = '_ReferenceSpectraPids'
+    _REFERENCESPECTRA = 'referenceSpectra'
 
     # CCPN properties
     @property
@@ -531,33 +534,34 @@ class Substance(AbstractWrapperObject):
         relativeId = self._key
         return tuple(x for x in self._project.sampleComponents if x._key == relativeId)
 
-        # name = self.name
-        # apiLabeling = self.labelling
-        # if apiLabeling is None:
-        #   apiLabeling = DEFAULT_LABELLING
-        # apiSampleStore = self._project._apiNmrProject.sampleStore
-        # data2Obj = self._project._data2Obj
-        # return tuple(data2Obj[x]
-        #              for y in apiSampleStore.sortedSamples()
-        #              for x in y.sortedSampleComponents()
-        #              if x.name == name and x.labeling == apiLabeling)
-
     @property
-    def referenceSpectra(self) -> typing.Tuple[Spectrum, ...]:
-        """Reference Spectra acquired for Substance"""
-        from ccpn.core.lib.SubstanceLib import SubstanceSpectraDict, _initSubstanceSpectraDict
-        dd = SubstanceSpectraDict()
-        if not self in dd:
-            _initSubstanceSpectraDict()
-        spectra = dd.get(self)
-        return spectra
-
+    def referenceSpectra(self):
+        """
+        :return: a list of substances
+        """
+        pids = self._getInternalParameter(self._REFERENCESPECTRA) or []
+        objs = self.project.getByPids(pids)
+        return objs
 
     @referenceSpectra.setter
     def referenceSpectra(self, spectra):
+        """ Add substances to the spectrum.referenceSubstances list
+        """
+        pids = []
+        for sp in spectra:
+            if isinstance(sp, Spectrum):
+                pids.append(sp.pid)
+                sp.referenceSubstances += [self]
+        currentSpPids = self._getInternalParameter(self._REFERENCESPECTRA) or []
+        self._setInternalParameter(self._REFERENCESPECTRA, list(set(pids+currentSpPids)))
+        ## set to spectrum internal the cross-link to self
+        for sp in spectra:
+            currentPids = sp._getInternalParameter(sp._REFERENCESUBSTANCES) or []
+            sp._setInternalParameter(sp._REFERENCESUBSTANCES, list(set(currentPids+[self.pid])))
 
-        for spectrum in spectra:
-            spectrum.referenceSubstances += [self]
+    def clearReferenceSpectra(self):
+        "remove the links to any ReferenceSpectra"
+        self._setInternalParameter(self._REFERENCESPECTRA, [])
 
     @property
     def _molecule(self):

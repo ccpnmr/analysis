@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-27 15:41:00 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-01 11:39:02 +0100 (Mon, August 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1229,10 +1229,8 @@ class Spectrum(AbstractWrapperObject):
         """
         :return: a list of substances
         """
-        from ccpn.core.lib.SubstanceLib import _updateSubstanceDicts4Spectrum
         pids = self._getInternalParameter(self._REFERENCESUBSTANCES) or []
         objs = _getObjectsByPids(self.project, pids)
-        _updateSubstanceDicts4Spectrum(self, objs)
         return objs
 
     @referenceSubstances.setter
@@ -1240,12 +1238,17 @@ class Spectrum(AbstractWrapperObject):
         """ Add substances to the spectrum.referenceSubstances list
         """
         from ccpn.core.Substance import Substance
-        from ccpn.core.lib.SubstanceLib import _addSubstancesToSpectrum, _addSpectraToSubstance
-        _addSubstancesToSpectrum(self, substances)
-        for substance in substances:
-            _addSpectraToSubstance(substance, [self])
+        currentPids = self._getInternalParameter(self._REFERENCESUBSTANCES) or [] #don't remove current pids
         pids = [su.pid for su in substances if isinstance(su, Substance)]
-        self._setInternalParameter(self._REFERENCESUBSTANCES, pids)
+        self._setInternalParameter(self._REFERENCESUBSTANCES, pids+currentPids)
+        ## set to substance internal the cross-link to self
+        for su in substances:
+            currentSpPids = su._getInternalParameter(su._REFERENCESPECTRA) or []
+            su._setInternalParameter(su._REFERENCESPECTRA, list(set(currentSpPids+[self.pid])))
+
+    def clearReferenceSubstances(self):
+        "remove the links to any ReferenceSubstances"
+        self._setInternalParameter(self._REFERENCESUBSTANCES, [])
 
     @property
     @_includeInDimensionalCopy

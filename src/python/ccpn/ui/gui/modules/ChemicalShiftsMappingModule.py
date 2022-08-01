@@ -68,8 +68,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-07 12:47:41 +0100 (Thu, July 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-08-01 13:17:45 +0100 (Mon, August 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1288,7 +1288,7 @@ class ChemicalShiftsMapping(CcpnModule):
                     else:
                         nmrResidue._delta = None
             if not silent:
-                self._updateTable(self.nmrResidueTable._table)
+                self._updateTable()
                 self._updateBarGraph()
                 self._plotScatters(self._getScatterData(), selectedObjs=self.current.nmrResidues)
                 self._plotBindingCFromCurrent()
@@ -1560,11 +1560,9 @@ class ChemicalShiftsMapping(CcpnModule):
         self._updateBarGraph()
         # self.barGraphWidget._lineMoved()
 
-    def _updateTable(self, nmrChain):
+    def _updateTable(self):
         """ Updates table based on the given nmrChain """
-        self.nmrResidueFrame._modulePulldown.select(nmrChain.pid)
-        # self.nmrResidueTable._update(nmrChain)
-        # self.nmrResidueTable._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
+        self.nmrResidueTable.populateTable()
 
     def _updatedPeakCount(self, nmrResidue, spectra):
         if len(nmrResidue.nmrAtoms) > 0:

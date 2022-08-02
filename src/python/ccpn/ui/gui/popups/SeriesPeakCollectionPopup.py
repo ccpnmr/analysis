@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-01 13:14:05 +0100 (Mon, August 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-02 17:40:24 +0100 (Tue, August 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -61,7 +61,7 @@ def showWarningPopup():
 
 class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
     def __init__(self, parent=None, mainWindow=None, title='Series Peak Collection', **kwds):
-        super().__init__(parent, setLayout=True,  size=(200, 300), minimumSize=None, windowTitle=title, **kwds)
+        super().__init__(parent, setLayout=True,  size=(200, 350), minimumSize=None, windowTitle=title, **kwds)
 
         if mainWindow:
             self.mainWindow = mainWindow
@@ -120,6 +120,9 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         self.followMethodLabel = Label(self._followFrame, text='Method', grid=(subRow, 0))
         self.followMethodPD = PulldownList(self._followFrame, texts=['Option1'], grid=(subRow, 1))
         subRow += 1
+        self.copyAssignmentsLabel = Label(self._followFrame, text='Copy Assignments', grid=(subRow, 0))
+        self.copyAssignmentsOption = CheckBox(self._followFrame, text='', checked=False, grid=(subRow, 1))
+        subRow += 1
         row += subRow
 
         HLine(self.mainWidget,  grid=(row, 0), gridSpan=(1, 2))
@@ -139,7 +142,7 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         row += 1
 
         self.inplaceRadioButton.click()
-        self.followRadioButton.setEnabled(False)
+        # self.followRadioButton.setEnabled(False)
 
     @property
     def sourcePeakList(self):
@@ -158,8 +161,16 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         return self.inplaceRadioButton.isChecked()
 
     @property
+    def _copyAssignments(self):
+        return self.copyAssignmentsOption.isChecked()
+
+    @property
     def _isNewTargetPeakListNeeded(self):
         return self.usePeakListLabelRB.getSelectedText() == NEW
+
+    @property
+    def _isFindPeaksNeeded(self):
+        return self.followPeakOptionsRB.getSelectedText() == FINDPEAKS
 
     def _toggleFrames(self, *args):
         if self.inplaceRadioButton.isChecked():
@@ -188,16 +199,24 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
 
         refit = self.refitOption.isChecked()
         useSliceColour = self.coloursOption.isChecked()
-
-        if self.copyInPlace:
-            with undoBlockWithoutSideBar():
-                self.spectrumGroup.copyPeaksInSeries(self.sourcePeakList,
-                                                 refit=refit, recalculateVolume=refit,
-                                                 keepPosition=True, useSliceColour=useSliceColour,
-                                                 createCollections=True,
-                                                 newTargetPeakList=self._isNewTargetPeakListNeeded,
-                                                 topCollectionName=None
+        with undoBlockWithoutSideBar():
+            if self.copyInPlace:
+                self.spectrumGroup.copyAndCollectPeaksInSeries(self.sourcePeakList,
+                                             refit=refit,
+                                             useSliceColour=useSliceColour,
+                                             newTargetPeakList=self._isNewTargetPeakListNeeded,
+                                             topCollectionName=self.collectionName
+                                             )
+            else:
+                self.spectrumGroup.followAndCollectPeaksInSeries(self.sourcePeakList,
+                                             engine='Nearest',
+                                             newTargetPeakList=self._isNewTargetPeakListNeeded,
+                                             pickPeaks=self._isFindPeaksNeeded,
+                                             copyAssignment=self._copyAssignments,
+                                             useSliceColour=useSliceColour,
+                                             topCollectionName=self.collectionName
                                                  )
+
         self.accept()
 
 

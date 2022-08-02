@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-08-02 17:40:23 +0100 (Tue, August 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -345,7 +345,7 @@ class PeakPickerABC(CcpNmrJson):
         count = len(peaks)
         pDiv = (count // 100) + 1
         totalCopies = int(count / pDiv)
-        with progressHandler(text='creating peaks...', maximum=totalCopies, autoClose=False) as progress:
+        with progressHandler(text=f'Creating peaks in {peakList.pid}', maximum=totalCopies, autoClose=False) as progress:
 
             try:
                 corePeaks = []

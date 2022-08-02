@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-01 14:43:48 +0100 (Mon, August 01, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-08-02 17:40:23 +0100 (Tue, August 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -984,6 +984,16 @@ class Peak(AbstractWrapperObject):
                 newPeak.assignedNmrAtoms = assignments
 
             return newPeak
+
+    @logCommand(get='self')
+    def copyAssignmentTo(self, targetPeak):
+        """Copy the assignment to a target peak with matching AxisCodes
+        :return tuple of tuple. The assignedNmrAtoms """
+        destinationAxisCodes = targetPeak.spectrum.axisCodes
+        dimensionMapping = self.spectrum.getByAxisCodes('dimensions', destinationAxisCodes, exactMatch=False)
+        assignments = self.getByDimensions('assignedNmrAtoms', dimensionMapping)
+        targetPeak.assignedNmrAtoms = assignments
+        return assignments
 
     def reorderValues(self, values, newAxisCodeOrder):
         """Reorder values in spectrum dimension order to newAxisCodeOrder

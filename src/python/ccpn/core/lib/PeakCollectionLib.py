@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-18 16:27:35 +0100 (Mon, July 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-02 17:40:23 +0100 (Tue, August 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -64,6 +64,15 @@ def _getCollectionNameFromPeakPosition(peak):
     suffix = ','.join(position)
     if prefix and suffix:
         return f'{prefix}:{suffix}'
+
+def _getCollectionNameForPeak(peak):
+    """ Get a formatted name to use as a collection name from the PeakAssignment or PeakPosition.
+    """
+    collectionName = _getCollectionNameForAssignments(flattenLists(peak.assignedNmrAtoms))
+    if collectionName is None:
+        collectionName = _getCollectionNameFromPeakPosition(peak)
+    return collectionName
+
 
 def renameCollectionFromAssignments(collection):
     """ Rename the collection. Useful for example to rename a collection which was created before assigning peaks. TODO"""

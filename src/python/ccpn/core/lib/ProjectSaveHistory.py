@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-01 18:06:36 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-02 20:24:28 +0100 (Tue, August 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -40,15 +40,21 @@ from ccpn.util.traits.CcpNmrTraits import List, Path
 
 
 def getProjectSaveHistory(projectPath):
-    """Return a ProjectSaveHistory instance from a project path, or None if it doesn't exist
+    """Return a ProjectSaveHistory instance from a project path, or default single-entry if it doesn't exist.
+    File is not created.
     """
     sv = ProjectSaveHistory(projectPath)
-    if sv.exists():
-        return sv
+    if not sv.exists():
+        # pre 3.1.0 ccp project; create one with '3.0.4' as the last (and only) entry
+        sv.addSaveRecord('3.0.4', comment='created retroactively')
+    else:
+        sv.restore()
+    return sv
 
 
 def fetchProjectSaveHistory(projectPath):
-    """Return a ProjectSaveHistory instance from a project path
+    """Return a ProjectSaveHistory instance from a project path.
+    Creates a default single-entry instance if it doesn't exist and creates file
     """
     sv = ProjectSaveHistory(projectPath)
     if not sv.exists():
@@ -82,8 +88,10 @@ class ProjectSaveHistory(CcpNmrJson):
     # The path of the file
     path = Path()
 
+
     class RecordListHandler(TraitJsonHandlerBase):
         """Record-list handling by Json"""
+
         def decode(self, obj, trait, value):
             """uses value to generate and set the new (or modified) obj"""
             newValue = []
@@ -91,6 +99,7 @@ class ProjectSaveHistory(CcpNmrJson):
                 record = obj._newRecord(*item)
                 newValue.append(record)
             setattr(obj, trait, newValue)
+
 
     # the list of entries
     records = List(default_value=[]).tag(saveToJson=True, jsonHandler=RecordListHandler)
@@ -101,6 +110,7 @@ class ProjectSaveHistory(CcpNmrJson):
         """
         super().__init__()
 
+        self.records = []  # to stop the singleton behaviour
         _path = aPath(projectPath)
         if not _path.exists():
             raise ValueError('Project path "%s" does not exist' % projectPath)
@@ -126,7 +136,7 @@ class ProjectSaveHistory(CcpNmrJson):
             user = getpass.getuser()
         if platform is None:
             platform = sys.platform
-        record = self.SaveRecord( version, datetime, user, platform, comment )
+        record = self.SaveRecord(version, datetime, user, platform, comment)
         return record
 
     def addSaveRecord(self, version=None, comment=None):
@@ -186,6 +196,7 @@ class ProjectSaveHistory(CcpNmrJson):
     def __str__(self):
         return '<%s: len=%s, lastSavedVersion=%r>' % \
                (self.__class__.__name__, len(self), self.lastSavedVersion)
+
 
 # Register this class
 ProjectSaveHistory.register()

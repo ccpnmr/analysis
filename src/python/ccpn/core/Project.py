@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-28 16:07:43 +0100 (Thu, July 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-02 20:24:28 +0100 (Tue, August 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -672,10 +672,16 @@ class Project(AbstractWrapperObject):
             if self.application and self.application.hasGui:
                 self.application.mainWindow.sideBar.setProjectName(self)
 
-            # store the version history in state subfolder json file
+            # store the version history in state sub-folder json file
             if _saveAs:
                 self._checkProjectSubDirectories()
+                # create a new save history
                 self._saveHistory = newProjectSaveHistory(path)
+            else:
+                # find the old history or create a new one
+                self._saveHistory = fetchProjectSaveHistory(path)
+
+            # add a new record
             self._saveHistory.addSaveRecord().save()
 
         return savedOk
@@ -2150,8 +2156,8 @@ def _loadProject(application, path: str) -> Project:
     project._resetUndo(debug=application._debugLevel <= Logging.DEBUG2, application=application)
 
     # Do some admin
-    # need project.path, as it may have have changed; e.g. for a V2 project
-    project._saveHistory = fetchProjectSaveHistory(project.path)
+    # need project.path, as it may have changed; e.g. for a V2 project
+    project._saveHistory = getProjectSaveHistory(project.path)
 
     # the initialisation is completed by Framework when it has done its things
     # project._initialiseProject()

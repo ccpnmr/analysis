@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-02 17:40:24 +0100 (Tue, August 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-02 17:46:56 +0100 (Tue, August 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -82,7 +82,7 @@ class FollowPeakAbc(abc.ABC):
 
 class FollowNearestPeak(FollowPeakAbc):
 
-    name = 'Nearest'
+    name = 'Nearest Match'
     info = 'Find the nearest peak by ppm position'
 
     def getMatchedIndex(self, originPosition, targets, **kwargs) -> int:

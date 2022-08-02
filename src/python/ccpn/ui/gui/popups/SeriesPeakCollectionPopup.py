@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-02 17:40:24 +0100 (Tue, August 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-02 17:46:56 +0100 (Tue, August 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -47,6 +47,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Icon import Icon, ICON_DIR
 from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumGroupPulldown, PeakListPulldown
 from ccpn.ui.gui.widgets.HLine import HLine, LabeledHLine
+from ccpn.framework.lib.experimentAnalysis.FollowPeakInSeries import AVAILABLEFOLLOWPEAKS
 
 INPLACE = 'In Place'
 FOLLOW = 'Follow'
@@ -117,8 +118,9 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         self.followPeakOptionsRB = RadioButtons(self._followFrame, texts=[FINDPEAKS, USEEXISTINGPEAKS],
                                                 selectedInd=0, grid=(subRow, 1))
         subRow += 1
+        engines = list(AVAILABLEFOLLOWPEAKS.keys())
         self.followMethodLabel = Label(self._followFrame, text='Method', grid=(subRow, 0))
-        self.followMethodPD = PulldownList(self._followFrame, texts=['Option1'], grid=(subRow, 1))
+        self.followMethodPD = PulldownList(self._followFrame, texts=engines, grid=(subRow, 1))
         subRow += 1
         self.copyAssignmentsLabel = Label(self._followFrame, text='Copy Assignments', grid=(subRow, 0))
         self.copyAssignmentsOption = CheckBox(self._followFrame, text='', checked=False, grid=(subRow, 1))
@@ -169,6 +171,10 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         return self.usePeakListLabelRB.getSelectedText() == NEW
 
     @property
+    def _followMethod(self):
+        return self.followMethodPD.getText()
+
+    @property
     def _isFindPeaksNeeded(self):
         return self.followPeakOptionsRB.getSelectedText() == FINDPEAKS
 
@@ -209,7 +215,7 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
                                              )
             else:
                 self.spectrumGroup.followAndCollectPeaksInSeries(self.sourcePeakList,
-                                             engine='Nearest',
+                                             engine=self._followMethod,
                                              newTargetPeakList=self._isNewTargetPeakListNeeded,
                                              pickPeaks=self._isFindPeaksNeeded,
                                              copyAssignment=self._copyAssignments,

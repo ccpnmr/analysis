@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-27 12:21:55 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-03 14:19:53 +0100 (Wed, August 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -514,7 +514,7 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
         Must be a floatRatio in range [0.0, 1.0]
         """
         # clip and set the figure of merit
-        obj.figureOfMerit = min(max(float(value), 0.0), 1.0) if value else None
+        obj.figureOfMerit = min(max(float(value), 0.0), 1.0) if value is not None else None
 
     @staticmethod
     def _setClusterId(obj, value):

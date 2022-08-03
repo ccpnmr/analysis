@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-11 19:02:33 +0100 (Wed, May 11, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-08-03 19:49:59 +0100 (Wed, August 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -73,6 +73,9 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
     def _getNefName(self, aDef) -> str:
         """Construct the nefName from aDef.name; account for the different possibilities
         """
+        if aDef is None:
+            return ''
+
         # all methyls
         if aDef.isMethyl and aDef.isProton:
             _nefName = aDef.name[:-1] + '%'
@@ -147,68 +150,69 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
         chainCode = chemShiftList.name
         atomName = _row.atomName
 
-        if _row.ambiguityCode == 1:
-            # unfortunately:
+        if _row.ntDef is not None:
+            if _row.ambiguityCode == 1:
+                # unfortunately:
 
-            # - methyl protons have identical chemical shifts with ambiguity code 1
-            if _row.ntDef.isMethyl and _row.ntDef.isProton:
-                atomName = _row.nefAtomName
-                # We can skip all other methyl protons
-                for _aDef in _row.ntDef.otherAttachedProtons:
+                # - methyl protons have identical chemical shifts with ambiguity code 1
+                if _row.ntDef.isMethyl and _row.ntDef.isProton:
+                    atomName = _row.nefAtomName
+                    # We can skip all other methyl protons
+                    for _aDef in _row.ntDef.otherAttachedProtons:
+                        if (_aRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _aDef.name) )):
+                            _aRow.skip = True
+
+                # - methylene protons with identical chemical shifts have ambiguity code 1
+                elif _row.ntDef.isMethylene and _row.ntDef.isProton:
+                    _aDef = _row.ntDef.otherAttachedProtons[0]
                     if (_aRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _aDef.name) )):
-                        _aRow.skip = True
+                        if _row.value == _aRow.value:
+                            _aRow.skip = True
+                            atomName = _row.atomName.replace('2','%').replace('3','%')
 
-            # - methylene protons with identical chemical shifts have ambiguity code 1
-            elif _row.ntDef.isMethylene and _row.ntDef.isProton:
-                _aDef = _row.ntDef.otherAttachedProtons[0]
-                if (_aRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _aDef.name) )):
-                    if _row.value == _aRow.value:
-                        _aRow.skip = True
-                        atomName = _row.atomName.replace('2','%').replace('3','%')
+                # - Phe, Tyr aromatic protons/carbons (e.g. HD1/HD2) with identical chemical shifts have ambiguity code 1
+                # these occur on non-sequential rows;
+                elif _row.ntDef.parent.name in ('PHE', 'TYR') and _row.atomName in 'HD1 CD1 HD2 CD2 HE1 CE1 HE2 CE2'.split():
+                    if atomName.endswith('1'):
+                        _aName = _row.atomName.replace('1','2')
+                    elif atomName.endswith('2'):
+                        _aName = _row.atomName.replace('2','1')
+                    if (_aRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _aName) )):
+                        if _row.value == _aRow.value:
+                            _aRow.skip = True
+                            atomName = _row.atomName.replace('1','%').replace('2','%')
 
-            # - Phe, Tyr aromatic protons/carbons (e.g. HD1/HD2) with identical chemical shifts have ambiguity code 1
-            # these occur on non-sequential rows;
-            elif _row.ntDef.parent.name in ('PHE', 'TYR') and _row.atomName in 'HD1 CD1 HD2 CD2 HE1 CE1 HE2 CE2'.split():
-                if atomName.endswith('1'):
-                    _aName = _row.atomName.replace('1','2')
-                elif atomName.endswith('2'):
-                    _aName = _row.atomName.replace('2','1')
-                if (_aRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _aName) )):
-                    if _row.value == _aRow.value:
-                        _aRow.skip = True
-                        atomName = _row.atomName.replace('1','%').replace('2','%')
+            elif _row.ambiguityCode == 2:
+                #  (Val, Leu NEF xy rules propagation; i.e. HDx% connected to CDx)
+                if _row.ntDef.parent.name in ('VAL', 'LEU') and _row.ntDef.isMethyl and _row.ntDef.isProton:
+                    atomName = _row.nefAtomName.replace('1','x').replace('2','y')
+                    # We can skip all other methyl protons
+                    for _aDef in _row.ntDef.otherAttachedProtons:
+                        if (_aRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _aDef.name) )):
+                            _aRow.skip = True
+                    # propagate xy to carbon; fortunately, these rows appear follow the proton ones so we
+                    # can adjust the attributes
+                    _cName = _row.ntDef.attachedHeavyAtom.name
+                    if (_cRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _cName) )):
+                        _cRow.nefAtomName = _cRow.atomName.replace('1','x').replace('2','y')
+                        _cRow.ambiguityCode = 2
+                else:
+                    atomName = _row.nefAtomName
 
-        elif _row.ambiguityCode == 2:
-            #  (Val, Leu NEF xy rules propagation; i.e. HDx% connected to CDx)
-            if _row.ntDef.parent.name in ('VAL', 'LEU') and _row.ntDef.isMethyl and _row.ntDef.isProton:
-                atomName = _row.nefAtomName.replace('1','x').replace('2','y')
-                # We can skip all other methyl protons
-                for _aDef in _row.ntDef.otherAttachedProtons:
-                    if (_aRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _aDef.name) )):
-                        _aRow.skip = True
-                # propagate xy to carbon; fortunately, these rows appear follow the proton ones so we
-                # can adjust the attributes
-                _cName = _row.ntDef.attachedHeavyAtom.name
-                if (_cRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _cName) )):
-                    _cRow.nefAtomName = _cRow.atomName.replace('1','x').replace('2','y')
-                    _cRow.ambiguityCode = 2
+            elif _row.ambiguityCode == 3:
+                #  (Phe, Tyr NEF xy rules propagation; i.e. HDx connected to CDx)
+                if _row.ntDef.parent.name in ('PHE', 'TYR') and _row.atomName in 'HD1 HD2 HE1 HE2'.split():
+                    atomName = _row.nefAtomName
+                    # propagate to Carbon
+                    _cName = _row.ntDef.attachedHeavyAtom.name
+                    if (_cRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _cName) )):
+                        _cRow.nefAtomName = _cRow.atomName.replace('1','x').replace('2','y')
+                        _cRow.ambiguityCode = 3
+                else:
+                    atomName = _row.nefAtomName
+
             else:
-                atomName = _row.nefAtomName
-
-        elif _row.ambiguityCode == 3:
-            #  (Phe, Tyr NEF xy rules propagation; i.e. HDx connected to CDx)
-            if _row.ntDef.parent.name in ('PHE', 'TYR') and _row.atomName in 'HD1 HD2 HE1 HE2'.split():
-                atomName = _row.nefAtomName
-                # propagate to Carbon
-                _cName = _row.ntDef.attachedHeavyAtom.name
-                if (_cRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _cName) )):
-                    _cRow.nefAtomName = _cRow.atomName.replace('1','x').replace('2','y')
-                    _cRow.ambiguityCode = 3
-            else:
-                atomName = _row.nefAtomName
-
-        else:
-            getLogger().warning(f'No provisions for ({_row.residueType},{_row.atomName}) with ambiguity code {_row.ambiguityCode}')
+                getLogger().warning(f'No provisions for ({_row.residueType},{_row.atomName}) with ambiguity code {_row.ambiguityCode}')
 
         # get the NmrAtom object
         nmrChain = project.fetchNmrChain(chainCode)

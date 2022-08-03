@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-02 17:40:23 +0100 (Tue, August 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-03 19:55:18 +0100 (Wed, August 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -986,11 +986,11 @@ class Peak(AbstractWrapperObject):
             return newPeak
 
     @logCommand(get='self')
-    def copyAssignmentTo(self, targetPeak):
+    def copyAssignmentTo(self, targetPeak, exactMatch=False):
         """Copy the assignment to a target peak with matching AxisCodes
         :return tuple of tuple. The assignedNmrAtoms """
         destinationAxisCodes = targetPeak.spectrum.axisCodes
-        dimensionMapping = self.spectrum.getByAxisCodes('dimensions', destinationAxisCodes, exactMatch=False)
+        dimensionMapping = self.spectrum.getByAxisCodes('dimensions', destinationAxisCodes, exactMatch=exactMatch)
         assignments = self.getByDimensions('assignedNmrAtoms', dimensionMapping)
         targetPeak.assignedNmrAtoms = assignments
         return assignments

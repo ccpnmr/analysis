@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-28 12:04:06 +0100 (Mon, March 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-04 11:58:05 +0100 (Thu, August 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -133,16 +133,20 @@ class DeleteItemsPopup(CcpnDialogMainWidget):
         """
         When ok button pressed: delete and exit
         """
+        # get the list of checked items - do first to stop threading issue?
+        itms = set()
+        for delItem in self._items:
+            if delItem.checkBox.isChecked():
+                itms |= set(delItem.values)
+
         with handleDialogApply(self):
 
             # add item here to redraw items
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(undo=self._refreshGLItems)
 
-            # delete the checked items
-            for delItem in self._items:
-                if delItem.checkBox.isChecked():
-                    self.project.deleteObjects(*delItem.values)
+            # delete the items
+            self.project.deleteObjects(*list(itms))
 
             # add item here to redraw items
             with undoStackBlocking() as addUndoItem:

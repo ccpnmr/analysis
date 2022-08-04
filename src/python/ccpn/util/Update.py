@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:42 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-04 13:48:30 +0100 (Thu, August 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -171,23 +171,27 @@ def downloadFile(serverScript, serverDbRoot, fileName):
     try:
         values = {'fileName': fileName}
         response = fetchUrl(serverScript, values, decodeResponse=False)
-        data = response.data
+        if response is not None:
+            data = response.data
 
-        if isBinaryData(data):
-            result = data
+            if isBinaryData(data):
+                result = data
+            else:
+                result = data.decode('utf-8')
+
+                if result.startswith(BAD_DOWNLOAD):
+                    ll = len(result)
+                    bd = len(BAD_DOWNLOAD)
+                    print(str(result[min(ll, bd):min(ll, bd + 50)]))
+                    return
+
+            return result
+
         else:
-            result = data.decode('utf-8')
-
-            if result.startswith(BAD_DOWNLOAD):
-                ll = len(result)
-                bd = len(BAD_DOWNLOAD)
-                print(str(result[min(ll, bd):min(ll, bd + 50)]))
-                return
-
-        return result
+            raise ValueError('No file found')
 
     except Exception as es:
-        print('Error downloading file from server.')
+        print(f'Error downloading file from server. {es}')
 
 
 def installUpdates(version, dryRun=True):

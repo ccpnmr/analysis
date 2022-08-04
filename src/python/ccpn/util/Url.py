@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:42 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-04 13:48:30 +0100 (Thu, August 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -114,17 +114,21 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
     else:
         http = urllib3.PoolManager(**options)
 
-    # generate an http request
-    response = http.request(method, url,
-                            fields=data,
-                            headers=headers,
-                            # body=body,
-                            # preload_content=True,
-                            # decode_content=False
-                            )
+    try:
+        # generate an http request
+        response = http.request(method, url,
+                                fields=data,
+                                headers=headers,
+                                # body=body,
+                                # preload_content=True,
+                                # decode_content=False
+                                )
 
-    # return the http response
-    return response
+        # return the http response
+        return response
+
+    except Exception as es:
+        getLogger().warning(f'Error getting connection - {es}')
 
 
 def fetchUrl(url, data=None, headers=None, timeout=5, proxySettings=None, decodeResponse=True):
@@ -178,7 +182,8 @@ def fetchUrl(url, data=None, headers=None, timeout=5, proxySettings=None, decode
             response = fetchHttpResponse('POST', url, data=data, headers=headers,
                                          proxySettings=proxySettings)
 
-    return response.data.decode('utf-8') if decodeResponse else response
+    if response:
+        return response.data.decode('utf-8') if decodeResponse else response
 
 
 def uploadFile(url, fileName, data=None):

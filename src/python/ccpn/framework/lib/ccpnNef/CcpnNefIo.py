@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-29 17:57:42 +0100 (Fri, July 29, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-08-05 11:05:50 +0100 (Fri, August 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1400,6 +1400,26 @@ class CcpnNefWriter:
         if peakList:
             self._appendCategory(peakList, appendCategory, result)
 
+        # NOTE:ED - add the dataSource values that are required for v2io
+        appendCategory = 'nef_ccpn_spectrum_datastore'
+        self._appendCategory(obj.dataSource, appendCategory, result)
+        try:
+            result['ccpn_file_number_type'] = obj.dataSource.isFloatData and 'float' or 'int'
+
+            # still missing complexStoredBy, hasBlockPadding
+
+            # import numpy as np
+            #
+            # result['ccpn_file_number_type'] = str(_val.dtype)
+            # _val = np.finfo(result['ccpn_file_number_type'])
+            # result['ccpn_file_byte_number'] = _val.bits // 8
+            # if 'ccpn_file_complex_stored_by' not in result:
+            #     # set a default for the minute, not sure where this comes from
+            #     result['ccpn_file_complex_stored_by'] = 'dimension'
+
+        except:
+            self.project._logger.debug("Could not get %s from Spectrum.dataSource %s\n" % ('ccpn_file_number_type', spectrum))
+
         # NOTE:ED - added to match the spectrum saveFrame above - need to add loops after the peak_list info
         self._appendCategoryLoops(obj, category, result)
 
@@ -1485,17 +1505,17 @@ class CcpnNefWriter:
                 loop.removeColumn(tag)
 
         # Get name map for per-dimension attributes
-        max = spectrum.dimensionCount + 1
+        _max = spectrum.dimensionCount + 1
         multipleAttributes = {
-            'position'     : tuple('position_%s' % ii for ii in range(1, max)),
-            'positionError': tuple('position_uncertainty_%s' % ii for ii in range(1, max)),
-            'chainCodes'   : tuple('chain_code_%s' % ii for ii in range(1, max)),
-            'sequenceCodes': tuple('sequence_code_%s' % ii for ii in range(1, max)),
-            'residueTypes' : tuple('residue_name_%s' % ii for ii in range(1, max)),
-            'atomNames'    : tuple('atom_name_%s' % ii for ii in range(1, max)),
-            'slopes'       : tuple('slopes_%s' % ii for ii in range(1, max)),
-            'lowerLimits'  : tuple('lower_limits_%s' % ii for ii in range(1, max)),
-            'upperLimits'  : tuple('upper_limits_%s' % ii for ii in range(1, max)),
+            'position'     : tuple('position_%s' % ii for ii in range(1, _max)),
+            'positionError': tuple('position_uncertainty_%s' % ii for ii in range(1, _max)),
+            'chainCodes'   : tuple('chain_code_%s' % ii for ii in range(1, _max)),
+            'sequenceCodes': tuple('sequence_code_%s' % ii for ii in range(1, _max)),
+            'residueTypes' : tuple('residue_name_%s' % ii for ii in range(1, _max)),
+            'atomNames'    : tuple('atom_name_%s' % ii for ii in range(1, _max)),
+            'slopes'       : tuple('slopes_%s' % ii for ii in range(1, _max)),
+            'lowerLimits'  : tuple('lower_limits_%s' % ii for ii in range(1, _max)),
+            'upperLimits'  : tuple('upper_limits_%s' % ii for ii in range(1, _max)),
             }
 
         index = 0

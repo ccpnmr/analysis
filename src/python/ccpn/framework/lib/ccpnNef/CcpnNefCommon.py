@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-17 18:11:59 +0000 (Thu, March 17, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-08-05 11:05:50 +0100 (Fri, August 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -456,6 +456,19 @@ nef2CcpnMap = {
         ('ccpn_multiplet_peaks', _isALoop),
         ('ccpn_spectrum_hit', _isALoop),
         ('ccpn_spectrum_reference_substances', _isALoop),
+        )),
+
+    'nef_ccpn_spectrum_datastore'           : OrderedDict((
+        # ('ccpn_spectrum_file_path', 'filePath'),
+        ('ccpn_file_header_size', 'headerSize'),
+        ('ccpn_file_number_type', 'isFloatData'),
+        ('ccpn_file_complex_stored_by', 'complexStoredBy'),
+        # ('ccpn_file_scale_factor', 'dataScale'),
+        ('ccpn_file_is_big_endian', 'isBigEndian'),
+        ('ccpn_file_byte_number', 'wordSize'),  # nByte
+        ('ccpn_file_has_block_padding', 'hasBlockPadding'),
+        ('ccpn_file_block_header_size', 'blockHeaderSize'),
+        # ('ccpn_file_type', 'fileType'),
         )),
 
     'ccpn_spectrum_reference_substances'    : OrderedDict((

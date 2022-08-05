@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:37 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-05 13:12:45 +0100 (Fri, August 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -85,19 +85,19 @@ def _calculateCenterOfMassPoints(multiplet):
     """
 
     try:
-        _peaks = multiplet.peaks
-        _lenPeaks = len(_peaks)
-        if _lenPeaks > 0:
+        pks = multiplet.peaks
+        if len(pks) > 0:
             position = ()
             dim = multiplet.multipletList.spectrum.dimensionCount
             if dim > 1:
                 for d in range(dim):
-                    peakPositions = set(peak.pointPositions[d] for peak in _peaks) - {None}  # remove the bad points
-                    position += (sum(peakPositions) / _lenPeaks,)
+                    peakPoints = list(filter(lambda vv: vv is not None, [peak.pointPositions[d] for peak in pks]))
+                    position += (sum(peakPoints) / len(peakPoints),)
             else:
-                peakPositions = set(peak.pointPositions[0] for peak in _peaks) - {None}
-                heights = set(peak.height for peak in _peaks) - {None}
-                position = (sum(peakPositions) / _lenPeaks, sum(heights) / _lenPeaks)
+                # 1d multiplet - add the height for the other dimension
+                peakPoints = list(filter(lambda vv: vv is not None, [peak.pointPositions[0] for peak in pks]))
+                heights = list(filter(lambda vv: vv is not None, [peak.height for peak in pks]))
+                position = (sum(peakPoints) / len(peakPoints), sum(heights) / len(heights))
             return position
     except:
         return None

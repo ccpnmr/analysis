@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-02 20:24:28 +0100 (Tue, August 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-07 15:18:52 +0100 (Sun, August 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1499,10 +1499,21 @@ class Project(AbstractWrapperObject):
         #
         return result
 
-    def getObjectsByPids(self, pids: list):
+    def getObjectsByPids(self, pids: [list, tuple], objectTypes: tuple = None):
         """Optimise method to get all found objects from a list of pids. Remove any None.
-         Warning: do not use with zip"""
-        return list(filter(None, map(lambda x: self.getByPid(x) if isinstance(x, str) else str(x), pids)))
+        Warning: do not use with zip
+        Specify objectTypes to only return objects of the required type, otherwise all objects returned, defaults to None
+        """
+        if not isinstance(pids, (list, tuple)):
+            raise ValueError(f'{self.__class__.__name__}.getObjectsByPids: pids must be list/tuple')
+        if not isinstance(objectTypes, (type, type(None))) and \
+                not (isinstance(objectTypes, tuple) and all(isinstance(obj, (type, type(None))) for obj in objectTypes)):
+            raise ValueError(f'{self.__class__.__name__}.getObjectsByPids: objectTypes must be a type, tuple of types, or None')
+
+        if objectTypes:
+            return list(filter(lambda obj: isinstance(obj, objectTypes), map(lambda x: self.getByPid(x) if isinstance(x, str) else x, pids)))
+        else:
+            return list(filter(None, map(lambda x: self.getByPid(x) if isinstance(x, str) else x, pids)))
 
     def getByPids(self, pids: list):
         """Optimise method to get all found objects from a list of pids. Remove any None.

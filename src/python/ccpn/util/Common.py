@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 15:35:39 +0100 (Wed, June 29, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-08-07 15:04:06 +0100 (Sun, August 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -829,3 +829,12 @@ def loadModules(paths):
                 traceback.print_tb(err.__traceback__)
                 getLogger().warning('Error Loading Module %s. %s' % (name, str(err)))
     return modules
+
+
+def main():
+    # make sure that zeroes are still included
+    print(makeIterableList(((0, 1, 2, [[[], [None, 0]]], None, (0, {3, 4, 5, 5, None, 0}, 4, 5)))))
+
+
+if __name__ == '__main__':
+    main()

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-01 16:01:03 +0100 (Mon, August 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-07 15:17:12 +0100 (Sun, August 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2004,13 +2004,13 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                 data = [dfTemp[dfTemp[self._OBJECT] == obj] for obj in uniqObjs]
                 rows = [_sortIndex.index(_dt.index[0]) for _dt in data if not _dt.empty]
                 if rows:
-                    minRow = rows.index(min(rows))
+                    minInd = model.index(min(rows), 0)
                     for row in rows:
                         rowIndex = model.index(row, 0)
                         selectionModel.select(rowIndex, selectionModel.Select | selectionModel.Rows)
 
-                    if scrollToSelection and not self._scrollOverride:
-                        self.scrollTo(model.index(minRow, 0))
+                    if scrollToSelection and not self._scrollOverride and minInd is not None:
+                        self.scrollTo(minInd, self.EnsureVisible)
 
     def highlightObjects(self, objectList, scrollToSelection=True):
         """Highlight a list of objects in the table

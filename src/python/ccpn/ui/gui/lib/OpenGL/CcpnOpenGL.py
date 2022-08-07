@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-07 15:37:24 +0100 (Sun, August 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1447,32 +1447,36 @@ class CcpnGLWidget(QOpenGLWidget):
         self._rescaleAllAxes()
 
     def initialiseAxes(self, strip=None):
-        """setup the correct axis range and padding
+        """set up the correct axis range and padding
         """
         self.orderedAxes = strip.orderedAxes
         self._axisCodes = strip.axisCodes
         self._axisOrder = strip.axisOrder
 
         axis = self.orderedAxes[0]
-        region = axis.region
-        if self.INVERTXAXIS:
-            self.axisL = max(region[0], region[1])
-            self.axisR = min(region[0], region[1])
-        else:
-            self.axisL = min(region[0], region[1])
-            self.axisR = max(region[0], region[1])
-        self._xUnits = axis._unitIndex
+        if axis:
+            # trap missing axis for a bad strip
+            region = axis.region
+            if self.INVERTXAXIS:
+                self.axisL = max(region[0], region[1])
+                self.axisR = min(region[0], region[1])
+            else:
+                self.axisL = min(region[0], region[1])
+                self.axisR = max(region[0], region[1])
+            self._xUnits = axis._unitIndex
 
         axis = self.orderedAxes[1]
-        region = axis.region
-        if self.INVERTYAXIS:
-            self.axisB = max(region[0], region[1])
-            self.axisT = min(region[0], region[1])
-        else:
-            self.axisB = min(region[0], region[1])
-            self.axisT = max(region[0], region[1])
-        if not self.spectrumDisplay.is1D:
-            self._yUnits = axis._unitIndex
+        if axis:
+            # trap missing axis for a bad strip
+            region = axis.region
+            if self.INVERTYAXIS:
+                self.axisB = max(region[0], region[1])
+                self.axisT = min(region[0], region[1])
+            else:
+                self.axisB = min(region[0], region[1])
+                self.axisT = max(region[0], region[1])
+            if not self.spectrumDisplay.is1D:
+                self._yUnits = axis._unitIndex
 
         self.update()
 

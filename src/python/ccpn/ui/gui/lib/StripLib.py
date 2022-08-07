@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-21 19:01:26 +0100 (Tue, June 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-07 15:37:24 +0100 (Sun, August 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -222,6 +222,11 @@ def navigateToNmrAtomsInStrip(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom], w
 
     if len(nmrAtoms) == 0:
         getLogger().warning('navigateToNmrAtomsInStrip: no atoms specified')
+        return
+
+    if not strip.spectra:
+        getLogger().error('navigateToNmrAtomsInStrip: strip has no spectra')
+        return
 
     shiftDict = matchAxesAndNmrAtoms(strip, nmrAtoms)
     # atomPositions = shiftDict[strip.axisOrder[2]]

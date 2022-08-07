@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-16 18:10:24 +0100 (Mon, May 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-07 15:37:24 +0100 (Sun, August 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -529,7 +529,8 @@ class GuiStripNd(GuiStrip):
         """
         if self.spectrumDisplay.dimensionCount > 2:
             for axis in self.orderedAxes[2:]:
-                self._changePlane(axis._index, planeIncrement=0, refresh=False)
+                if axis:
+                    self._changePlane(axis._index, planeIncrement=0, refresh=False)
 
     def _updatePlaneToolBarWidgets(self, stripAxisIndex: int):
         """Update the planeToolBar widgets

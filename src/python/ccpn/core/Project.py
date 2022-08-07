@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-07 15:18:52 +0100 (Sun, August 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-07 15:37:24 +0100 (Sun, August 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -535,6 +535,21 @@ class Project(AbstractWrapperObject):
 
         # create new collections from table
         project._collectionList._restoreObject(project, None)
+
+        # check that strips have been recovered correctly
+        try:
+            for sd in project.application.mainWindow.spectrumDisplays:
+                for strp in sd.strips:
+                    if not strp.axes:
+                        # set the border to red
+                        sd.mainWidget.setStyleSheet('Frame { border: 3px solid #FF1234; }')
+                        sd.mainWidget.setEnabled(False)
+                        strp.setEnabled(False)
+
+                        getLogger().error(f'Strip {strp} contains bad axes - please close SpectrumDisplay {sd} outlined in red.')
+
+        except Exception as es:
+            getLogger().warning(f'There was an issue checking the spectrumDisplays')
 
         # don't need to call super here
         return project

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-07 15:37:24 +0100 (Sun, August 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-08-08 15:41:02 +0100 (Mon, August 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,7 @@ from typing import Sequence, Union, Optional, List
 from collections import OrderedDict
 # from time import time
 from datetime import datetime
-
+from collections.abc import Iterable
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.Updater import UPDATE_POST_PROJECT_INITIALISATION
 from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
@@ -1514,13 +1514,14 @@ class Project(AbstractWrapperObject):
         #
         return result
 
-    def getObjectsByPids(self, pids: [list, tuple], objectTypes: tuple = None):
+    def getObjectsByPids(self, pids: Iterable, objectTypes: tuple = None):
         """Optimise method to get all found objects from a list of pids. Remove any None.
         Warning: do not use with zip
         Specify objectTypes to only return objects of the required type, otherwise all objects returned, defaults to None
         """
-        if not isinstance(pids, (list, tuple)):
-            raise ValueError(f'{self.__class__.__name__}.getObjectsByPids: pids must be list/tuple')
+
+        if not isinstance(pids, Iterable):
+            raise ValueError(f'{self.__class__.__name__}.getObjectsByPids: pids argument must be an iterable')
         if not isinstance(objectTypes, (type, type(None))) and \
                 not (isinstance(objectTypes, tuple) and all(isinstance(obj, (type, type(None))) for obj in objectTypes)):
             raise ValueError(f'{self.__class__.__name__}.getObjectsByPids: objectTypes must be a type, tuple of types, or None')

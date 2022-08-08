@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-16 10:48:21 +0100 (Mon, May 16, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-08-08 19:58:03 +0100 (Mon, August 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -166,8 +166,10 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
 
             editable = setFunction is not None
             newWidget = attrType(self.mainWidget, mainWindow=self.mainWindow, labelText=_label, editable=editable,
-                                 grid=(row, 0), fixedWidths=(self.hWidth, None),
+                                 grid=(row, 0),
                                  tipText=tipText, compoundKwds=kwds)  #, **kwds)
+            widths = [self.hWidth] + [None]*(len(newWidget._widgets)-1)
+            newWidget.setFixedWidths(widths)
 
             # connect the signal
             if attrType and attrType.__name__ in CommonWidgetsEdits:

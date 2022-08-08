@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 17:13:53 +0100 (Mon, July 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-08 19:58:03 +0100 (Mon, August 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -139,7 +139,8 @@ class ListCompoundWidget(CompoundBaseWidget):
         self._addWidget(self.pulldownList)
 
         # listWidget
-        self.listWidget = ListWidget(parent=self, callback=callback, infiniteHeight=True, objectName=objectName,
+        self.listWidget = ListWidget(parent=self, callback=callback,
+                                     objectName=objectName,
                                      **(compoundKwds or {}))
         self.listWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self._uniqueList = uniqueList

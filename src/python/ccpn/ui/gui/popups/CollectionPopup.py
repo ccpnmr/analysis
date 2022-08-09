@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-08 19:58:03 +0100 (Mon, August 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-08-09 14:27:34 +0100 (Tue, August 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,16 +29,14 @@ __date__ = "$Date: 2021-10-29 16:10:20 +0100 (Fri, October 29, 2021) $"
 from functools import partial
 from ccpn.core.Collection import Collection
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
-from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget
-from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
+from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ListCompoundWidget
 from ccpn.ui.gui.popups.Dialog import _verifyPopupApply
-from ccpn.core.lib.ContextManagers import queueStateChange, catchExceptions
+from ccpn.core.lib.ContextManagers import queueStateChange
+
 
 class CollectionPopup(AttributeEditorPopupABC):
     """Collection attributes editor popup
     """
-
-    # _fixedWidth = False
 
     def _getItems(self, obj, *args):
         """Populate collection items
@@ -49,12 +47,15 @@ class CollectionPopup(AttributeEditorPopupABC):
                 data.append(str(item.pid))
         return data
 
-
     def _postInitListWidget(self, *args):
         """Populate collection items
         """
         itemsListWidget = self.items
+
+        # hide the pulldown and move the label down a row
         itemsListWidget.showPulldownList(False)
+        itemsListWidget.layout().addWidget(itemsListWidget.label, 1, 0)
+
         listWidget = itemsListWidget.listWidget
         listWidget.model().rowsRemoved.connect(self._queueRemoveItem)
         listWidget.cleared.connect(self._queueRemoveItem)

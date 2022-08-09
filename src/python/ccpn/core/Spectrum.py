@@ -50,8 +50,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-01 11:39:02 +0100 (Mon, August 01, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-08-09 12:55:39 +0100 (Tue, August 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -868,7 +868,7 @@ class Spectrum(AbstractWrapperObject):
             return self.axisCodes[trues[0]]
         else:
             raise RuntimeError(
-                    'Spectrum.acquisitionAxisCode: this should not happen; more then one dimension defined as acquisition dimension')
+                    'Spectrum.acquisitionAxisCode: this should not happen; more than one dimension defined as acquisition dimension')
 
     @property
     def dimensionTypes(self) -> List[Optional[str]]:

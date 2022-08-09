@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-09 15:59:57 +0100 (Tue, August 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-09 18:58:05 +0100 (Tue, August 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,14 +26,9 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 
 import pyqtgraph as pg
 from PyQt5 import QtCore, QtWidgets, QtGui
-from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, MEDIUM_BLUE, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_GRID, CCPNGLWIDGET_LABELLING
-from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
 from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
-from ccpn.ui.gui.widgets.Font import Font, getFont
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
 import numpy as np
-import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import ChemicalShiftCalculationModels
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
@@ -92,15 +87,6 @@ class CSMFitPlotPanel(FitPlotPanel):
 
             scatter = pg.ScatterPlotItem(spots)
             self.bindingPlot.addItem(scatter)
-
-
-    def plotCurve(self, xs, ys):
-        self.bindingPlot.clear()
-        self.bindingPlot.plot(xs, ys)
-
-    def clearData(self):
-        pass
-        #to do when cleaning input data and avoid wrongly displayed curves
 
     def close(self):
         self._selectCurrentCONotifier.unRegister()

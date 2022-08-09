@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-25 13:50:14 +0100 (Mon, July 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-09 15:59:57 +0100 (Tue, August 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -452,7 +452,7 @@ TABPOS += 1
 class CSMGuiFittingPanel(GuiSettingPanel):
 
     tabPosition = TABPOS
-    tabName = 'Fitting'
+    tabName = guiNameSpaces.Label_Fitting
     tabTipText = 'Set the various fitting modes and options'
 
     def initWidgets(self):

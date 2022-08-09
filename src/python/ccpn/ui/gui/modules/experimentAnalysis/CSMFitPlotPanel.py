@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-15 18:10:39 +0100 (Fri, July 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-09 15:59:57 +0100 (Tue, August 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import Gu
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
 import numpy as np
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
-
+from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import ChemicalShiftCalculationModels
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
@@ -69,7 +69,11 @@ class CSMFitPlotPanel(FitPlotPanel):
             seriesUnit = filteredDf[sv.SERIESUNIT].values[-1]
             peakPids = filteredDf[sv.PEAKPID].values
             objs = [self.project.getByPid(pid) for pid in peakPids]
-            func = lf.oneSiteBinding_func # todo need to get from the model name
+            modelName = filteredDf[sv.MODEL_NAME].values[-1]
+            model = ChemicalShiftCalculationModels.get(modelName)
+            if model is None: ## get it from settings
+                model = self.guiModule.getCurrentFittingModel()
+            func = model.getFittingFunc(model)
             kd = filteredDf[sv.KD].values[0]
             bmax = filteredDf[sv.BMAX].values[0]
             xf = np.linspace(min(seriesSteps), max(seriesSteps), 1000)

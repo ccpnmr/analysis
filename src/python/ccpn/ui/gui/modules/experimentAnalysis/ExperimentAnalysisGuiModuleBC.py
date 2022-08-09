@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-25 12:41:02 +0100 (Mon, July 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-09 15:59:57 +0100 (Tue, August 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -161,6 +161,21 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         self.ioHandler.close()
         self.settingsPanelHandler.close()
         super()._closeModule()
+
+    #####################################################################
+    #####################  convenient methods  ##########################
+    #####################################################################
+
+    def getCurrentFittingModel(self):
+        """ Get the fitting model from the selected settings """
+        _fittingPanel = self.settingsPanelHandler.getTab(guiNameSpaces.Label_Fitting)
+        if _fittingPanel:
+            w = _fittingPanel.getWidget(guiNameSpaces.WidgetVarName_FittingModel)
+            if w:
+                modelName = w.getByText()
+                model = self.backendHandler.getFittingModelByName(modelName)
+                return model
+
 
 
 #################################

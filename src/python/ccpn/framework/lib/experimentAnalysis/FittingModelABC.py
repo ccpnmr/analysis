@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-09 15:59:57 +0100 (Tue, August 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -69,6 +69,12 @@ class FittingModelABC(ABC):
         :return: an output TableFrame with fitted data
         """
         pass
+
+    @staticmethod
+    def getFittingFunc(cls):
+        """Get the Fitting Function used by the Minimiser """
+        if cls.Minimiser is not None:
+            return cls.Minimiser.FITTING_FUNC
 
     def __str__(self):
         return f'<{self.__class__.__name__}: {self.ModelName}>'

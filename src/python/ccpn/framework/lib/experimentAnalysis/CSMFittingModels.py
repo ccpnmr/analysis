@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-15 18:10:39 +0100 (Fri, July 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-09 15:59:57 +0100 (Tue, August 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -247,19 +247,19 @@ class OneSiteBindingModel(FittingModelABC):
             yArray = seriesValues.values
             if sv.FLAG_EXCLUDED in groupDf[sv.FLAG]:
                 yArray = np.full(seriesValues.values.shape, fill_value=np.nan)
-            model = self.Minimiser()
+            minimiser = self.Minimiser()
             try:
-                params = model.guess(yArray, xArray)
-                result = model.fit(yArray, params, x=xArray)
+                params = minimiser.guess(yArray, xArray)
+                result = minimiser.fit(yArray, params, x=xArray)
             except:
                 if sv.FLAG_EXCLUDED in groupDf[sv.FLAG]:
                     getLogger().warning(f'Fitting skipped for collectionId: {collectionId} data.')
                 else:
                     getLogger().warning(f'Fitting Failed for collectionId: {collectionId} data.')
-                params = model.params
-                result = MinimiserResult(model, params)
-            inputData.loc[collectionId, sv.MODEL_NAME] = model.MODELNAME
-            inputData.loc[collectionId, sv.MINIMISER_METHOD] = model.method
+                params = minimiser.params
+                result = MinimiserResult(minimiser, params)
+            inputData.loc[collectionId, sv.MODEL_NAME] = self.ModelName
+            inputData.loc[collectionId, sv.MINIMISER_METHOD] = minimiser.method
             for ix, row in groupDf.iterrows():
                 for resultName, resulValue in result.getAllResultsAsDict().items():
                     inputData.loc[ix, resultName] = resulValue

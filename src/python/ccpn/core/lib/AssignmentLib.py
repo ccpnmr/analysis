@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2022-08-09 12:15:40 +0100 (Tue, August 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -451,9 +451,11 @@ def getAllSpinSystems(project: Project, nmrResidues: typing.List[NmrResidue],
                         ppms = []
                         elements = []
                         atomNames = []
+                        elementTypes = []
                         ppmsAppend = ppms.append
                         elementsAppend = elements.append
                         atomNamesAppend = atomNames.append
+                        elementTypesAppend = elementTypes.append
 
                         for resonance, shift in apiShift:
 
@@ -462,8 +464,10 @@ def getAllSpinSystems(project: Project, nmrResidues: typing.List[NmrResidue],
                                 ppmsAppend(shift.value)
                                 elementsAppend(isotope.chemElement.symbol)
                                 atomNamesAppend(resonance.implName)
+                                if isotope.chemElement.symbol not in elementTypes:
+                                    elementTypesAppend(isotope.chemElement.symbol)
 
-                        prob = _getResidueProbability(ppms, ccpCode, elements,
+                        prob = _getResidueProbability(ppms, ccpCode, elements, elementTypes,
                                                       atomNames, prior=0.05, molType=molType)
 
                         if apiSpinSystem not in spinHash:

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-27 12:33:27 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-09 13:12:00 +0100 (Tue, August 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1601,6 +1601,7 @@ class GLLabelling():
         spectrum = spectrumView.spectrum
 
         if objListView not in self._GLSymbols:
+            # creates a new GLSymbolArray set to rebuild for below
             self._GLSymbols[objListView] = GLSymbolArray(GLContext=self,
                                                          spectrumView=spectrumView,
                                                          objListView=objListView)
@@ -1689,66 +1690,72 @@ class GLLabelling():
         if self.strip.isDeleted:
             return
 
-        # list through the valid peakListViews attached to the strip - including undeleted
-        for spectrumView in self._ordering:  # strip.spectrumViews:
+        for olv in [(spectrumView, objListView) for spectrumView in self._ordering if not spectrumView.isDeleted
+                        for objListView in self.listViews(spectrumView) if objListView.isDeleted and self._objIsInVisiblePlanesCache.get(objListView)
+                       ]:
+            del self._objIsInVisiblePlanesCache[olv]
 
-            if spectrumView.isDeleted:
-                continue
+        objListViews = [(spectrumView, objListView) for spectrumView in self._ordering if not spectrumView.isDeleted
+                        for objListView in self.listViews(spectrumView) if not objListView.isDeleted
+                       ]
 
-            # for peakListView in spectrumView.peakListViews:
-            for objListView in self.listViews(spectrumView):  # spectrumView.peakListViews:
+        for spectrumView, objListView in objListViews:
 
-                if objListView.isDeleted:
-                    if objListView in self._objIsInVisiblePlanesCache:
-                        del self._objIsInVisiblePlanesCache[objListView]
-                    continue
+        # # list through the valid peakListViews attached to the strip - including undeleted
+        # for spectrumView in self._ordering:  # strip.spectrumViews:
+        #
+        #     if spectrumView.isDeleted:
+        #         continue
+        #
+        #     # for peakListView in spectrumView.peakListViews:
+        #     for objListView in self.listViews(spectrumView):  # spectrumView.peakListViews:
+        #
+        #         if objListView.isDeleted:
+        #             if objListView in self._objIsInVisiblePlanesCache:
+        #                 del self._objIsInVisiblePlanesCache[objListView]
+        #             continue
 
-                if objListView in self._GLSymbols:
-                    if self._GLSymbols[objListView].renderMode == GLRENDERMODE_RESCALE:
-                        self._buildSymbols(spectrumView, objListView)
+            if objListView.buildSymbols:
+                objListView.buildSymbols = False
 
-                if objListView.buildSymbols:
-                    objListView.buildSymbols = False
+                # generate the planeVisibility list here - need to integrate with labels
+                self._buildObjIsInVisiblePlanesList(spectrumView, objListView)
 
-                    # generate the planeVisibility list here - need to integrate with labels
-                    self._buildObjIsInVisiblePlanesList(spectrumView, objListView)
+                # set the interior flags for rebuilding the GLdisplay
+                if (dList := self._GLSymbols.get(objListView)):
+                    dList.renderMode = GLRENDERMODE_REBUILD
 
-                    # set the interior flags for rebuilding the GLdisplay
-                    if objListView in self._GLSymbols:
-                        self._GLSymbols[objListView].renderMode = GLRENDERMODE_REBUILD
+                self._buildSymbols(spectrumView, objListView)
 
-                    self._buildSymbols(spectrumView, objListView)
+            elif (dList := self._GLSymbols.get(objListView)) and dList.renderMode == GLRENDERMODE_RESCALE:
+                self._buildSymbols(spectrumView, objListView)
 
     def buildLabels(self):
         if self.strip.isDeleted:
             return
 
         _buildList = []
-        for spectrumView in self._ordering:  # strip.spectrumViews:
+        objListViews = [(spectrumView, objListView) for spectrumView in self._ordering if not spectrumView.isDeleted
+                        for objListView in self.listViews(spectrumView) if not objListView.isDeleted
+                       ]
 
-            if spectrumView.isDeleted:
-                continue
+        for sView, olv in objListViews:
+            # spectrumView not deleted
+            # objListView not deleted
 
-            # for peakListView in spectrumView.peakListViews:
+            if olv.buildLabels:
+                # print(f'   building objList  {olv}')
+                olv.buildLabels = False
+                if (dList := self._GLLabels.get(olv)):
+                    dList.renderMode = GLRENDERMODE_REBUILD
 
-            for objListView in self.listViews(spectrumView):
-                if objListView.isDeleted:
-                    continue
+                # self._buildPeakListLabels(spectrumView, peakListView)
+                _buildList.append([sView, olv])
 
-                if objListView in self._GLLabels.keys():
-                    if self._GLLabels[objListView].renderMode == GLRENDERMODE_RESCALE:
-                        self._rescaleLabels(spectrumView, objListView, self._GLLabels[objListView])
-                        self._GLLabels[objListView].renderMode = GLRENDERMODE_DRAW
-                        continue
-
-                if objListView.buildLabels:
-                    objListView.buildLabels = False
-
-                    if objListView in self._GLLabels.keys():
-                        self._GLLabels[objListView].renderMode = GLRENDERMODE_REBUILD
-
-                    # self._buildPeakListLabels(spectrumView, peakListView)
-                    _buildList.append([spectrumView, objListView])
+            elif (dList := self._GLLabels.get(olv)) and dList.renderMode == GLRENDERMODE_RESCALE:
+                # print(f'   rescaling objList  {olv}')
+                self._rescaleLabels(sView, olv, dList)
+                dList.renderMode = GLRENDERMODE_DRAW
 
         if _buildList:
             self._buildAllLabels(_buildList)

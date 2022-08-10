@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-28 16:09:46 +0100 (Thu, July 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-10 18:10:31 +0100 (Wed, August 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1842,6 +1842,7 @@ def _setApiRefExperiment(experiment, refExperiment):
 
     for expDim in expDims:
         expData = []
+        expDim.isAcquisition = False
 
         for expDimRef in expDim.expDimRefs:
             isotopes = frozenset(expDimRef.isotopeCodes)

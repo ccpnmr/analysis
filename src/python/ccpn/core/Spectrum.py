@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-09 12:55:39 +0100 (Tue, August 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-10 18:10:31 +0100 (Wed, August 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -648,19 +648,22 @@ class Spectrum(AbstractWrapperObject):
             self.experimentName = None
             _clearLinkToRefExp(self._wrappedData.experiment)
             return
+
         # nmrExpPrototype = self._wrappedData.root.findFirstNmrExpPrototype(name=value) # Why not findFirst instead of looping all sortedNmrExpPrototypes
         for nmrExpPrototype in self._wrappedData.root.sortedNmrExpPrototypes():
             for refExperiment in nmrExpPrototype.sortedRefExperiments():
                 # check if the given value is in the STD nomenclature rather than the CCPN! E.g.: standard=COSY; CCPN=HH
                 ccpnName = refExperiment.name
                 standardName = refExperiment.synonym
-                if value in [ccpnName, standardName] :
+
+                if value in [ccpnName, standardName]:
                     # set API RefExperiment and ExpTransfer
                     _setApiRefExperiment(self._wrappedData.experiment, refExperiment)
                     _setApiExpTransfers(self._wrappedData.experiment)
                     if standardName:
                         self.experimentName = standardName
                     return
+
         # No reason to raise an error if cannot find a CCPN experimentType definition!
         getLogger().warning('Could not set ExperimentType. No reference experiment matches name "%s."' % value)
 

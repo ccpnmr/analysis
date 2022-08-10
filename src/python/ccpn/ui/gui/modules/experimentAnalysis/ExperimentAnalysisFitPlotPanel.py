@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-09 18:58:05 +0100 (Tue, August 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-10 09:22:45 +0100 (Wed, August 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,55 @@ from collections import OrderedDict as od
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Action import Action
 
+class ExperimentAnalysisPlotToolBar(ToolBar):
+
+    def __init__(self, parent, plotItem, **kwds):
+        super().__init__(parent=parent, **kwds)
+        self.plotItem = plotItem
+        self.plotItem.toolbar = self
+        self.setToolActions(self._defaultToolBarDefs())
+        self.setMaximumHeight(30)
+
+    def setToolActions(self, actionDefinitions):
+        for v in actionDefinitions:
+            if len(v) == 2:
+                if isinstance(v[1], od):
+                    action = Action(self, **v[1])
+                    action.setObjectName(v[0])
+                    self.addAction(action)
+            else:
+                self.addSeparator()
+
+    def _defaultToolBarDefs(self):
+        toolBarDefs = (
+            ('Zoom-All', od((
+                ('text', 'Zoom-All'),
+                ('toolTip', 'Zoom All Axes'),
+                ('icon', Icon('icons/zoom-full')),
+                ('callback', self.plotItem.zoomFull),
+                ('enabled', True)
+                ))),
+            ('Zoom-X', od((
+                ('text', 'Zoom-X-axis'),
+                ('toolTip', 'Reset X-axis to fit view'),
+                ('icon', Icon('icons/zoom-full-1d')),
+                ('callback', self.plotItem.fitXZoom),
+                ('enabled', True)
+            ))),
+            ('Zoom-Y', od((
+                ('text', 'Zoom-Y-axis'),
+                ('toolTip', 'Reset Y-axis to fit view'),
+                ('icon', Icon('icons/zoom-best-fit-1d')),
+                ('callback', self.plotItem.fitYZoom),
+                ('enabled', True)
+            ))),
+            (),
+            )
+        return toolBarDefs
+
+
+
+
 class FmtAxisItem(pg.AxisItem):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -47,15 +96,14 @@ class FmtAxisItem(pg.AxisItem):
         return [f'{v:.4f}' for v in values]
 
 class FittingPlot(pg.PlotItem):
-    def __init__(self, parentWidget, toolbar, *args, **kwargs):
+    def __init__(self, parentWidget, *args, **kwargs):
         pg.PlotItem.__init__(self, axisItems={'left': FmtAxisItem(orientation='left')}, **kwargs)
         self.parentWidget = parentWidget
 
         colour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
         self.gridPen = pg.functions.mkPen(colour, width=1, style=QtCore.Qt.SolidLine)
         self.gridFont = getFont()
-        self.toolbar = toolbar
-        self.toolbar.setMaximumHeight(30)
+        self.toolbar = None
         self.setMenuEnabled(False)
         self.getAxis('bottom').setPen(self.gridPen)
         self.getAxis('left').setPen(self.gridPen)
@@ -66,55 +114,9 @@ class FittingPlot(pg.PlotItem):
         self.autoBtn.mode = None
         self.buttonsHidden = True
         self.autoBtn.hide()
-        self._setToolBar()
 
-    def _setToolBar(self):
-        for v in self._getToolBarDefs():
-            if len(v) == 2:
-                if isinstance(v[1], od):
-                    action = Action(self, **v[1])
-                    action.setObjectName(v[0])
-                    self.toolbar.addAction(action)
-            else:
-                self.toolbar.addSeparator()
-
-    def _getToolBarDefs(self):
-        toolBarDefs = (
-            ('Zoom-All', od((
-                ('text', 'Zoom-All'),
-                ('toolTip', 'Zoom All Axes'),
-                ('icon', Icon('icons/zoom-full')),
-                ('callback', self.zoomFull),
-                ('enabled', True)
-                ))),
-            ('Zoom-X', od((
-                ('text', 'Zoom-X-axis'),
-                ('toolTip', 'Reset X-axis to fit view'),
-                ('icon', Icon('icons/zoom-full-1d')),
-                ('callback', self.fitXZoom),
-                ('enabled', True)
-            ))),
-            ('Zoom-Y', od((
-                ('text', 'Zoom-Y-axis'),
-                ('toolTip', 'Reset Y-axis to fit view'),
-                ('icon', Icon('icons/zoom-best-fit-1d')),
-                ('callback', self.fitYZoom),
-                ('enabled', True)
-            ))),
-            (),
-
-            )
-        return toolBarDefs
-
-    def _getPlotData(self):
-        xs = []
-        ys = []
-        for item in self.dataItems:
-            if hasattr(item, 'getData'):
-                x,y = item.getData()
-                xs.append(x)
-                ys.append(y)
-        return xs,ys
+    def setToolbar(self, toolbar):
+        self.toolbar = toolbar
 
     def zoomFull(self):
         self.autoRange()
@@ -132,6 +134,16 @@ class FittingPlot(pg.PlotItem):
             x, y = xs[-1], ys[-1]
             yMin, yMax = min(y), max(y)
             self.setYRange(yMin, yMax, padding=None, update=True)
+
+    def _getPlotData(self):
+        xs = []
+        ys = []
+        for item in self.dataItems:
+            if hasattr(item, 'getData'):
+                x,y = item.getData()
+                xs.append(x)
+                ys.append(y)
+        return xs,ys
 
     def mouseDoubleClickEvent(self, *args):
         print('Under implementation. _mouseDoubleClickEvent on bindingPlot ', args)
@@ -171,8 +183,9 @@ class FitPlotPanel(GuiPanel):
         ###  Plot setup
         self._bindingPlotView = pg.GraphicsLayoutWidget()
         self._bindingPlotView.setBackground(self.backgroundColour)
-        self.toolbar = ToolBar(self, grid=(0, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
-        self.bindingPlot = FittingPlot(parentWidget=self, toolbar=self.toolbar)
+        self.bindingPlot = FittingPlot(parentWidget=self)
+        self.toolbar = ExperimentAnalysisPlotToolBar(parent=self, plotItem=self.bindingPlot,
+                                                     grid=(0, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
         self._bindingPlotView.addItem(self.bindingPlot)
         self.getLayout().addWidget(self._bindingPlotView)
 

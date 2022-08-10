@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-25 12:41:02 +0100 (Mon, July 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-10 09:22:45 +0100 (Wed, August 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -24,6 +24,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import numpy as np
+import pandas as pd
 import pyqtgraph as pg
 from PyQt5 import QtWidgets, QtGui, QtCore
 from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox
@@ -149,6 +150,38 @@ class BarGraphWidget(Widget):
             DisappearedObjects: [],
             DrawLabels        : True
             }
+
+    def _getPlotData(self):
+        xs = []
+        ys = []
+        plotItems = self.plotWidget.items()
+        for item in plotItems:
+            if hasattr(item, 'getData'):
+                x,y = item.getData()
+                xs.append(x)
+                if isinstance(y, pd.Series):
+                    ys.append(y.values)
+                else:
+                    ys.append(y)
+        return xs,ys
+
+    def zoomFull(self):
+        self.plotWidget.autoRange()
+
+    def fitXZoom(self):
+        xs, ys = self._getPlotData()
+        if len(xs) > 0:
+            _max = np.max([np.max(a) for a in xs])
+            _min = np.min([np.min(a) for a in xs])
+            self.plotWidget.setXRange(_min, _max)
+
+    def fitYZoom(self):
+        """ToDo get this from the current view, rather then the whole data """
+        xs, ys = self._getPlotData()
+        if len(ys) > 0:
+            _max = np.max([np.max(a) for a in ys])
+            _min = np.min([np.min(a) for a in ys])
+            self.plotWidget.setYRange(_min, _max)
 
     def _setViewBox(self):
         self.customViewBox = CustomViewBox(application=self.application)

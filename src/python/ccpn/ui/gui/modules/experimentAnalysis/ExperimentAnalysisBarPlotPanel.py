@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-25 12:41:02 +0100 (Mon, July 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-10 09:22:45 +0100 (Wed, August 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.Font import Font, getFont
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 from ccpn.util.Common import percentage
-
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import ExperimentAnalysisPlotToolBar
 
 
 class BarPlotPanel(GuiPanel):
@@ -43,7 +43,7 @@ class BarPlotPanel(GuiPanel):
     panelName = 'BarPlotPanel'
 
     def __init__(self, guiModule, *args, **Framekwargs):
-        GuiPanel.__init__(self, guiModule, *args , **Framekwargs)
+        GuiPanel.__init__(self, guiModule,*args , **Framekwargs)
         self._appearancePanel = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
         self._toolbarPanel = self.guiModule.panelHandler.getToolBarPanel()
 
@@ -60,10 +60,12 @@ class BarPlotPanel(GuiPanel):
         self.selectedPointPen = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
         self.selectedLabelPen = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
         self.barGraphWidget = BarGraphWidget(self, application=self.application, backgroundColour=self.backgroundColour,
-                                             threshouldLine=0.1, grid=(0,0))
+                                             threshouldLine=0.1, grid=(1,0))
         self.barGraphWidget.showThresholdLine(True)
         self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._thresholdLineMoved)
         self._setBarGraphWidget()
+        self.toolbar = ExperimentAnalysisPlotToolBar(parent=self, plotItem=self.barGraphWidget,
+                                                     grid=(0, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
 
     def setXLabel(self, label=''):
         self.barGraphWidget.plotWidget.setLabel('bottom', label)

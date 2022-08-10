@@ -6972,9 +6972,10 @@ class CcpnNefReader(CcpnNefContent):
             if previous and previous[0]:
                 # In case this is a new Substance, (known name, different labelling)
                 # set the sequenceString, if any, to the same as previous
-                sequenceString = previous[0].sequenceString
-                if sequenceString is not None:
-                    result.sequenceString = sequenceString
+                if previous[0] is not None:
+                    sequenceString = previous[0].sequenceString
+                    if sequenceString is not None:
+                        result.sequenceString = sequenceString
 
         # Whether substance was pre-existing or not
         # overwrite the missing substance-specific parameters

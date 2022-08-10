@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-08 19:57:27 +0100 (Wed, June 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-08-10 19:25:40 +0100 (Wed, August 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -347,9 +347,14 @@ class SpectrumToolBar(ToolBar):
         """
         # event called from right-mouse menu
         key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
+        uniqueViews = set(sv.spectrum for sv in self.widget.spectrumViews)
         for spectrumView in self.widget.spectrumViews:
             if spectrumView.spectrum == key:
-                self.widget.removeSpectrum(spectrumView.spectrum)
+                if len(uniqueViews) == 1:
+                    # close the spectrumDisplay
+                    self.widget.close()
+                else:
+                    self.widget.removeSpectrum(spectrumView.spectrum)
                 break
         else:
             showWarning('Spectrum', 'Spectrum not found in toolbar')

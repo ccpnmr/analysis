@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-08 22:26:11 +0100 (Wed, June 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-08-10 19:25:40 +0100 (Wed, August 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2478,6 +2478,10 @@ class GuiSpectrumDisplay(CcpnModule):
             return
 
         _spectrum, specView = sv[0]
+        uniqueViews = set(sv.spectrum for sv in self.spectrumViews)
+        if len(uniqueViews) == 1 and spectrum in uniqueViews:
+            self.close()
+            return
 
         # # for debugger
         # _undo = self.application._getUndo()

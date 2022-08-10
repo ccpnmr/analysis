@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-10 18:10:31 +0100 (Wed, August 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-10 19:25:40 +0100 (Wed, August 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -3004,11 +3004,12 @@ class Spectrum(AbstractWrapperObject):
         """Delete Spectrum"""
         with undoBlock():
 
-            # self._deleteSpectrumMetaData()
-
+            fp = self.filePath
             self._close()
 
-            # self.deleteAllNotifiers() TODO: no longer required?
+            with undoStackBlocking() as addUndoItem:
+                # recover the dataSource when undeleting
+                addUndoItem(undo=partial(setattr, self, 'filePath', fp))
 
             # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier?
             specDisplays = []
@@ -3033,13 +3034,6 @@ class Spectrum(AbstractWrapperObject):
 
             # delete the _wrappedData
             self._delete()
-
-            # with undoStackBlocking() as addUndoItem:
-            #     # notify spectrumViews of delete
-            #     addUndoItem(redo=self._finaliseSpectrumViews, '')
-
-            # for sd in specViews:
-            #     sd[0]._removeOrderedSpectrumViewIndex(sd[1])
 
     def _deleteChild(self, child):
         """Delete child object

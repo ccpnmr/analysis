@@ -45,19 +45,19 @@ By Mouse button:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:19 +0000 (Thu, December 23, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-08-11 12:50:00 +0100 (Thu, August 11, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -108,8 +108,8 @@ class CrossHair:
         else:
             pen = pg.functions.mkPen(color=(129, 129, 129), **kwds)
 
-        self.vLine = pg.InfiniteLine(angle=90, movable=moveable, pen=pen)
-        self.hLine = pg.InfiniteLine(angle=0, movable=moveable, pen=pen)
+        self.vLine = pg.InfiniteLine(angle=90, movable=moveable, pen=pen, label=' ')
+        self.hLine = pg.InfiniteLine(angle=0, movable=moveable, pen=pen, label=' ')
         plotWidget.addItem(self.vLine, ignoreBounds=True)
         plotWidget.addItem(self.hLine, ignoreBounds=True)
 

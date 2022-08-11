@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-09 15:59:57 +0100 (Tue, August 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-11 12:50:00 +0100 (Thu, August 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -197,6 +197,7 @@ class DeltaDeltaShiftsCalculation():
                 csmValue = np.mean(deltaDeltas[1:])      ## first item is excluded from as it is always 0 by definition.
                 nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf) # join the atom names from different rows in a list
                 seriesSteps = groupDf[sv.SERIESSTEP].unique()
+                seriesUnits = groupDf[sv.SERIESUNIT].unique()
                 peakPids = groupDf[sv.PEAKPID].unique()
                 for delta, seriesStep, peakPid in zip(deltaDeltas, seriesSteps, peakPids):
                     # build the outputFrame
@@ -205,6 +206,7 @@ class DeltaDeltaShiftsCalculation():
                     outputFrame.loc[rowIndex, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
                     outputFrame.loc[rowIndex, sv.SERIESSTEPVALUE] = delta
                     outputFrame.loc[rowIndex, sv.SERIESSTEP] = seriesStep
+                    outputFrame.loc[rowIndex, sv.SERIESUNIT] = seriesUnits[-1]
                     outputFrame.loc[rowIndex, sv.DELTA_DELTA] = csmValue
                     outputFrame.loc[rowIndex, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
                     outputFrame.loc[rowIndex, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''

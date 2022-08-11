@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-09 18:58:05 +0100 (Tue, August 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-11 12:50:00 +0100 (Thu, August 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,7 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 import pyqtgraph as pg
 from PyQt5 import QtCore, QtWidgets, QtGui
 from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel, _CustomLabel
 import numpy as np
 from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import ChemicalShiftCalculationModels
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
@@ -35,7 +35,7 @@ from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel impor
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.Notifiers import Notifier
-
+from ccpn.util.Common import percentage
 
 class CSMFitPlotPanel(FitPlotPanel):
 
@@ -48,6 +48,7 @@ class CSMFitPlotPanel(FitPlotPanel):
         self.setYLabel(label=guiNameSpaces.RelativeDisplacement)
         self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
                                                  callback=self._currentCollectionCallback, onceOnly=True)
+        self.labels = []
 
     def getPlottingData(self):
         pass
@@ -71,22 +72,34 @@ class CSMFitPlotPanel(FitPlotPanel):
             func = model.getFittingFunc(model)
             kd = filteredDf[sv.KD].values[0]
             bmax = filteredDf[sv.BMAX].values[0]
-            xf = np.linspace(min(seriesSteps), max(seriesSteps), 1000)
+            extra = percentage(50, max(seriesSteps))
+            xf = np.linspace(min(seriesSteps), max(seriesSteps)+extra, 3000)
             yf = func(xf, kd, bmax)
+            self.currentCollectionLabel.setText('')
             self.bindingPlot.clear()
-            self.bindingPlot.plot(xf, yf)
+            self.bindingPlot.plot(xf, yf,  pen=self.fittingLinePen)
             self.setXLabel(label=seriesUnit)
             spots = []
             for obj, x, y in zip(objs, seriesSteps, seriesStepsValues):
+                brush = pg.mkBrush(255, 0, 0)
                 dd = {'pos': [0, 0], 'data': 'obj', 'brush': pg.mkBrush(255, 0, 0), 'symbol': 'o', 'size': 10, 'pen': None}  # red default
                 dd['pos'] = [x,y]
                 dd['data'] = obj
+
                 if hasattr(obj.spectrum, 'positiveContourColour'):  # colour from the spectrum. The only CCPN obj implemeted so far
-                    dd['brush'] = pg.functions.mkBrush(hexToRgb(obj.spectrum.positiveContourColour))
+                    brush = pg.functions.mkBrush(hexToRgb(obj.spectrum.positiveContourColour))
+                    dd['brush'] = brush
                 spots.append(dd)
+                label = _CustomLabel(obj=obj, textProperty='id')
+                self.bindingPlot.addItem(label)
+                label.setPos(x,y)
+                self.labels.append(label)
 
             scatter = pg.ScatterPlotItem(spots)
             self.bindingPlot.addItem(scatter)
+            self.bindingPlot.scene().sigMouseMoved.connect(self.bindingPlot.mouseMoved)
+            self.bindingPlot.zoomFull()
+            self.currentCollectionLabel.setText(collection.pid)
 
     def close(self):
         self._selectCurrentCONotifier.unRegister()

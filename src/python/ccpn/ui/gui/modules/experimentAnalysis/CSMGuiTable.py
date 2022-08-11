@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-15 18:10:39 +0100 (Fri, July 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-11 12:50:00 +0100 (Thu, August 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,7 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 import pandas as pd
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
-
+from ccpn.core.Peak import Peak
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
@@ -231,18 +231,35 @@ class _CSMGuiTableABC(gt.GuiTable):
         super(_CSMGuiTableABC, self).clearSelection()
         self.current.nmrResidues = []
 
+
+    def getSelectedCollections(self):
+        selectedObjs = self.getSelectedObjects()
+        collections = set()
+        for selectedRow in selectedObjs:
+            coPid = selectedRow[sv.COLLECTIONPID]
+            co = self.project.getByPid(coPid)
+            collections.add(co)
+        return list(collections)
+
+    def getPeaksFromCollection(self, collection):
+        peaks = set()
+        for item in collection.items:
+            if isinstance(item, Peak):
+                peaks.add(item)
+        return list(peaks)
+
     def selection(self, data, *args):
         """
 
         :param args:
         :return:
         """
-        seriesList = data['object']
-        objs = set()
-        for series in seriesList:
-            pid = series[sv.COLLECTIONPID]
-            objs.add(self.project.getByPid(pid))
-        self.current.collections = objs
+        collections = self.getSelectedCollections()
+        peaks = set()
+        for collection in collections:
+            peaks.update(self.getPeaksFromCollection(collection))
+        self.current.collections = collections
+        self.current.peaks = list(peaks)
 
     def action(self, *args):
         pass
@@ -258,15 +275,22 @@ class _CSMGuiTableABC(gt.GuiTable):
         """
         super()._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
         _actions = self.tableMenu.actions()
+
         if _actions:
             _topMenuItem = _actions[0]
-            _topSeparator = self.tableMenu.insertSeparator(_topMenuItem)
-            pass
+            self.tableMenu.insertSeparator(_topMenuItem)
+            editCollection = self.tableMenu.addAction('Edit Collection', self._editCollection)
+            self.tableMenu.moveActionAboveName(editCollection, 'Export Visible Table')
 
-    def _exportRawData(self):
-        if self.moduleParent:
-            self.moduleParent._exportRawData()
-
+    def _editCollection(self):
+        from ccpn.ui.gui.popups.CollectionPopup import CollectionPopup
+        collections = self.getSelectedCollections()
+        if len(collections)>0:
+            co = collections[-1]
+            if co is not None:
+                popup = CollectionPopup(self, mainWindow=self.mainWindow, obj=co, editMode=True)
+                popup.exec()
+                popup.raise_()
 
 class CSMTablePanel(GuiPanel):
 

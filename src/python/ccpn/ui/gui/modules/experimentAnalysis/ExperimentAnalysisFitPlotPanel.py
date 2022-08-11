@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-10 09:22:45 +0100 (Wed, August 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-11 12:50:00 +0100 (Thu, August 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,13 +29,16 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, MEDIUM_BLUE, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_GRID, CCPNGLWIDGET_LABELLING
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
 from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
-from ccpn.ui.gui.widgets.Font import Font, getFont
+from ccpn.ui.gui.widgets.Font import Font, getFont,getFontHeight
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
+from ccpn.ui.gui.widgets.Label import Label
 from collections import OrderedDict as od
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Action import Action
+from ccpn.core.Peak import Peak
+from ccpn.ui.gui.widgets.ViewBox import CrossHair
 
 class ExperimentAnalysisPlotToolBar(ToolBar):
 
@@ -114,12 +117,24 @@ class FittingPlot(pg.PlotItem):
         self.autoBtn.mode = None
         self.buttonsHidden = True
         self.autoBtn.hide()
+        self.crossHair = CrossHair(plotWidget=self )
+
+
+    def clear(self):
+        """
+        Remove all items from the ViewBox.
+        """
+        for i in self.items[:]:
+            if not isinstance(i, pg.InfiniteLine):
+                self.removeItem(i)
+        self.avgCurves = {}
 
     def setToolbar(self, toolbar):
         self.toolbar = toolbar
 
     def zoomFull(self):
-        self.autoRange()
+        self.fitXZoom()
+        self.fitYZoom()
 
     def fitXZoom(self):
         xs,ys = self._getPlotData()
@@ -154,6 +169,58 @@ class FittingPlot(pg.PlotItem):
     def _viewboxMouseClickEvent(self, *args):
         print('Under implementation. _viewboxMouseClickEvent on bindingPlot ', args)
 
+    def mouseMoved(self, event):
+        position = event
+        mousePoint = self._bindingPlotViewbox.mapSceneToView(position)
+        x = mousePoint.x()
+        y = mousePoint.y()
+        self.crossHair.setPosition(x, y)
+        label = f'x:{round(x,3)} - y:{round(y,3)}'
+        self.crossHair.hLine.label.setText(label)
+
+
+class _CustomLabel(QtWidgets.QGraphicsSimpleTextItem):
+    """ A text annotation of a scatterPlot.
+        """
+    def __init__(self, obj, textProperty='pid', labelRotation = 0, application=None):
+        QtWidgets.QGraphicsSimpleTextItem.__init__(self)
+        self.textProperty = textProperty
+        self.obj = obj
+        self.displayProperty(self.textProperty)
+        self.setRotation(labelRotation)
+        self.setDefaultFont()
+        self.setBrushByObject()
+        self.setFlag(self.ItemIgnoresTransformations + self.ItemIsSelectable)
+        self.application = application
+
+    def setDefaultFont(self):
+        font = getFont()
+        # height = getFontHeight(size='SMALL') #SMALL is still to large
+        font.setPointSize(10)
+        self.setFont(font)
+
+    def setBrushByObject(self):
+        brush = None
+        if isinstance(self.obj, Peak):
+            brush = pg.functions.mkBrush(hexToRgb(self.obj.peakList.textColour))
+        if brush:
+            self.setBrush(brush)
+
+    def displayProperty(self, theProperty):
+        text = getattr(self.obj, theProperty)
+        self.setText(str(text))
+        self.setToolTip(f'Displaying {theProperty} for {self.obj}')
+
+    def setObject(self, obj):
+        self.obj = obj
+
+    def getCustomObject(self):
+        return self.customObject
+
+    def paint(self, painter, option, widget):
+        # self._selectCurrent()
+        QtWidgets.QGraphicsSimpleTextItem.paint(self, painter, option, widget)
+
 class FitPlotPanel(GuiPanel):
 
     position = 2
@@ -168,10 +235,10 @@ class FitPlotPanel(GuiPanel):
         self.backgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
         self.originAxesPen = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1,
                                                 style=QtCore.Qt.DashLine)
-        self.fittingLinePen = pg.functions.mkPen(hexToRgb(getColours()[DIVIDER]), width=0.5, style=QtCore.Qt.DashLine)
+        self.fittingLinePen = pg.functions.mkPen((0,0,0), width=1, style=QtCore.Qt.SolidLine)
         self.selectedPointPen = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
         self.selectedLabelPen = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
-        self._setBindingPlot()
+        self._setExtraWidgets()
 
     def setXLabel(self, label=''):
         self.bindingPlot.setLabel('bottom', label)
@@ -179,15 +246,16 @@ class FitPlotPanel(GuiPanel):
     def setYLabel(self, label=''):
         self.bindingPlot.setLabel('left', label)
 
-    def _setBindingPlot(self):
+    def _setExtraWidgets(self):
         ###  Plot setup
         self._bindingPlotView = pg.GraphicsLayoutWidget()
         self._bindingPlotView.setBackground(self.backgroundColour)
         self.bindingPlot = FittingPlot(parentWidget=self)
         self.toolbar = ExperimentAnalysisPlotToolBar(parent=self, plotItem=self.bindingPlot,
                                                      grid=(0, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
+        self.currentCollectionLabel = Label(self, text='test', grid=(0, 2), hAlign='r',)
         self._bindingPlotView.addItem(self.bindingPlot)
-        self.getLayout().addWidget(self._bindingPlotView)
+        self.getLayout().addWidget(self._bindingPlotView, 1,0,1,3)
 
 
     def plotCurve(self, xs, ys):

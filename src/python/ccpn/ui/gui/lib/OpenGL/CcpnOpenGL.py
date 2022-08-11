@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-07 15:37:24 +0100 (Sun, August 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-11 16:03:57 +0100 (Thu, August 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -6400,7 +6400,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # set the checkboxes to the correct settings
         strip.toolbarAction.setChecked(strip.spectrumDisplay.spectrumUtilToolBar.isVisible())
-        strip.crosshairAction.setChecked(self._crosshairVisible)
+        if hasattr(strip, 'crosshairAction'):
+            strip.crosshairAction.setChecked(self._crosshairVisible)
 
         strip.gridAction.setChecked(self._gridVisible)
         if hasattr(strip, 'lastAxisOnlyCheckBox'):

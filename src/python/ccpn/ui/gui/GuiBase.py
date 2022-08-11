@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-02 17:48:49 +0100 (Tue, August 02, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-08-11 16:03:57 +0100 (Thu, August 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -235,6 +235,7 @@ class GuiBase(object):
                                             (" .. with Y-Z Axes Flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
                                             (" .. with Axes Flipped...", self.showFlipArbitraryAxisPopup, [('shortcut', 'fa')]),
                                             )),
+            ("Show/Hide Crosshairs", self.toggleCrosshairAll, [('shortcut', 'ch')]),
             (),
             (SHOWMODULESMENU, ([
                 ("None", None, [('checkable', True),

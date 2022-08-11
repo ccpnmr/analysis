@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-27 10:25:00 +0100 (Wed, July 27, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-08-11 16:03:57 +0100 (Thu, August 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2015,6 +2015,12 @@ class Framework(NotifierBase, GuiBase):
         cs = ChemicalShiftMappingGuiModule(mainWindow=mainWindow)
         mainWindow.moduleArea.addModule(cs, position=position, relativeTo=relativeTo)
         return cs
+
+    def toggleCrosshairAll(self):
+        """Toggles whether crosshairs are displayed in all windows.
+        """
+        for window in self.project.windows:
+            window.toggleCrosshair()
 
     #################################################################################################
     ## MENU callbacks:  Macro

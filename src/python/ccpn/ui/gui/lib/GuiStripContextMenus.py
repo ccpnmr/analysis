@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-18 16:27:35 +0100 (Mon, July 18, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-08-11 16:03:57 +0100 (Thu, August 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -830,7 +830,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
     items = [
         _toolBarItem(guiStrip1d),
         _spectrumToolBarItem(guiStrip1d),
-        _crosshairItem(guiStrip1d),
+        # _crosshairItem(guiStrip1d),
         _gridItem(guiStrip1d),
         _cyclePeakLabelsItem(guiStrip1d),
         ]
@@ -997,7 +997,7 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
     items = [
         _toolBarItem(guiStripNd),
         _spectrumToolBarItem(guiStripNd),
-        _crosshairItem(guiStripNd),
+        # _crosshairItem(guiStripNd),
         _gridItem(guiStripNd),
         _sideBandsItem(guiStripNd),
         _shareYAxisItem(guiStripNd),

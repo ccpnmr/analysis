@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-11 12:50:00 +0100 (Thu, August 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-11 19:00:35 +0100 (Thu, August 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -53,8 +53,7 @@ class CSMFitPlotPanel(FitPlotPanel):
     def getPlottingData(self):
         pass
 
-    def _currentCollectionCallback(self, *args):
-        getLogger().info('Selected Current. Callback in FitPlot')
+    def plotCurrentData(self, kd=None, bmax=None, *args):
         collections = self.current.collections
         dataFrame = self.guiModule.backendHandler.getFirstOutputDataFrame()
 
@@ -70,14 +69,18 @@ class CSMFitPlotPanel(FitPlotPanel):
             if model is None: ## get it from settings
                 model = self.guiModule.getCurrentFittingModel()
             func = model.getFittingFunc(model)
-            kd = filteredDf[sv.KD].values[0]
-            bmax = filteredDf[sv.BMAX].values[0]
+            if kd is None:
+                kd = filteredDf[sv.KD].values[0]
+            if bmax is None:
+                bmax = filteredDf[sv.BMAX].values[0]
             extra = percentage(50, max(seriesSteps))
-            xf = np.linspace(min(seriesSteps), max(seriesSteps)+extra, 3000)
+            initialPoint = min(seriesSteps)
+            finalPoint = max(seriesSteps)+extra
+            xf = np.linspace(initialPoint, finalPoint, 3000)
             yf = func(xf, kd, bmax)
             self.currentCollectionLabel.setText('')
             self.bindingPlot.clear()
-            self.bindingPlot.plot(xf, yf,  pen=self.fittingLinePen)
+            self.fittedCurve = self.bindingPlot.plot(xf, yf,  pen=self.bindingPlot.gridPen)
             self.setXLabel(label=seriesUnit)
             spots = []
             for obj, x, y in zip(objs, seriesSteps, seriesStepsValues):
@@ -100,6 +103,46 @@ class CSMFitPlotPanel(FitPlotPanel):
             self.bindingPlot.scene().sigMouseMoved.connect(self.bindingPlot.mouseMoved)
             self.bindingPlot.zoomFull()
             self.currentCollectionLabel.setText(collection.pid)
+            self.bindingPlot.fittingHandle.setPos(kd, bmax)
+
+    def _replot(self, *args, **kwargs):
+        pos = kwargs.get('pos', [])
+        kd = None
+        bmax = None
+        if pos and len(pos) > 0:
+            kd = pos[0]
+            bmax = pos[1]
+        collections = self.current.collections
+        dataFrame = self.guiModule.backendHandler.getFirstOutputDataFrame()
+        if len(collections)== 0:
+            return
+        collection = collections[-1]
+        filteredDf = dataFrame[dataFrame[sv.COLLECTIONPID] == collection.pid]
+        seriesSteps = filteredDf[sv.SERIESSTEP].values
+        modelName = filteredDf[sv.MODEL_NAME].values[-1]
+        model = ChemicalShiftCalculationModels.get(modelName)
+        if model is None:  ## get it from settings
+            model = self.guiModule.getCurrentFittingModel()
+        func = model.getFittingFunc(model)
+        if kd is None:
+            kd = filteredDf[sv.KD].values[0]
+        if bmax is None:
+            bmax = filteredDf[sv.BMAX].values[0]
+        extra = percentage(50, max(seriesSteps))
+        initialPoint = min(seriesSteps)
+        finalPoint = max(seriesSteps) + extra
+        xf = np.linspace(initialPoint, finalPoint, 3000)
+        yf = func(xf, kd, bmax)
+        if self.fittedCurve is not None:
+            self.bindingPlot.removeItem(self.fittedCurve)
+        self.fittedCurve = self.bindingPlot.plot(xf, yf, pen=self.bindingPlot.gridPen)
+        # self.bindingPlot.zoomFull()
+        label = f'Kd: {round(kd,2)} \nbmax: {round(kd,2)}'
+        self.bindingPlot.crossHair.hLine.label.setText(label)
+
+    def _currentCollectionCallback(self, *args):
+        getLogger().info('Selected Current. Callback in FitPlot')
+        self.plotCurrentData()
 
     def close(self):
         self._selectCurrentCONotifier.unRegister()

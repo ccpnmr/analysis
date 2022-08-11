@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-11 12:50:00 +0100 (Thu, August 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-11 19:00:35 +0100 (Thu, August 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -25,6 +25,7 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 
 
 import pyqtgraph as pg
+from pyqtgraph.graphicsItems.ROI import MouseDragHandler, Handle
 from PyQt5 import QtCore, QtWidgets, QtGui
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, MEDIUM_BLUE, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_GRID, CCPNGLWIDGET_LABELLING
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
@@ -87,8 +88,6 @@ class ExperimentAnalysisPlotToolBar(ToolBar):
         return toolBarDefs
 
 
-
-
 class FmtAxisItem(pg.AxisItem):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -97,6 +96,48 @@ class FmtAxisItem(pg.AxisItem):
         """ Overridden method to show minimal decimals.
         """
         return [f'{v:.4f}' for v in values]
+
+
+
+class FittingHandle(Handle):
+
+    sigMoved = QtCore.Signal(object)  # pos
+
+    def __init__(self, parentPlot=None, radius=8, typ='s', pen=(200, 200, 220),  deletable=False):
+        super().__init__(radius, typ, pen=pen, parent=parentPlot, deletable=deletable)
+        self.parentPlot = parentPlot
+        self.pen.setWidth(2)
+
+    def mouseDragEvent(self, ev):
+        if ev.button() != QtCore.Qt.LeftButton:
+            return
+        ev.accept()
+
+        if ev.isFinish():
+            if self.isMoving:
+                pos = self.mapToParent(ev.pos())
+                self.setPos(pos)
+                self.sigMoved.emit([pos.x(), pos.y()])
+            self.isMoving = False
+
+        elif ev.isStart():
+            self.isMoving = True
+            # self.startPos = self.scenePos()
+            # self.cursorOffset = self.scenePos() - ev.buttonDownScenePos()
+            pos = self.mapToParent(ev.pos())
+            self.setPos(pos)
+            self.sigMoved.emit([pos.x(), pos.y()])
+
+        if self.isMoving:  ## note: isMoving may become False in mid-drag due to right-click.
+            # pos = ev.scenePos() + self.cursorOffset
+            pos = self.mapToParent(ev.pos())
+            self.setPos(pos)
+            self.sigMoved.emit([pos.x(), pos.y()])
+
+    def mouseClickEvent(self, ev):
+        print('Testing HANDLE CLICKED', ev)
+        self.sigClicked.emit(self, ev)
+
 
 class FittingPlot(pg.PlotItem):
     def __init__(self, parentWidget, *args, **kwargs):
@@ -117,7 +158,13 @@ class FittingPlot(pg.PlotItem):
         self.autoBtn.mode = None
         self.buttonsHidden = True
         self.autoBtn.hide()
-        self.crossHair = CrossHair(plotWidget=self )
+        self.crossHair = CrossHair(plotWidget=self)
+        self.fittingHandle = FittingHandle(pen=self.gridPen)
+        self.fittingHandle.sigMoved.connect(self._handleMoved)
+        self.addItem(self.fittingHandle)
+
+    def _handleMoved(self, pos, *args):
+        self.parentWidget._replot(**{'pos':pos})
 
 
     def clear(self):
@@ -125,7 +172,7 @@ class FittingPlot(pg.PlotItem):
         Remove all items from the ViewBox.
         """
         for i in self.items[:]:
-            if not isinstance(i, pg.InfiniteLine):
+            if not isinstance(i, (pg.InfiniteLine,Handle)):
                 self.removeItem(i)
         self.avgCurves = {}
 
@@ -175,7 +222,7 @@ class FittingPlot(pg.PlotItem):
         x = mousePoint.x()
         y = mousePoint.y()
         self.crossHair.setPosition(x, y)
-        label = f'x:{round(x,3)} - y:{round(y,3)}'
+        label = f'x:{round(x,3)} \ny:{round(y,3)}'
         self.crossHair.hLine.label.setText(label)
 
 
@@ -233,11 +280,6 @@ class FitPlotPanel(GuiPanel):
     def initWidgets(self):
 
         self.backgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
-        self.originAxesPen = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1,
-                                                style=QtCore.Qt.DashLine)
-        self.fittingLinePen = pg.functions.mkPen((0,0,0), width=1, style=QtCore.Qt.SolidLine)
-        self.selectedPointPen = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
-        self.selectedLabelPen = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
         self._setExtraWidgets()
 
     def setXLabel(self, label=''):
@@ -256,6 +298,9 @@ class FitPlotPanel(GuiPanel):
         self.currentCollectionLabel = Label(self, text='test', grid=(0, 2), hAlign='r',)
         self._bindingPlotView.addItem(self.bindingPlot)
         self.getLayout().addWidget(self._bindingPlotView, 1,0,1,3)
+
+    def _replot(self,  *args, **kwargs):
+        pass
 
 
     def plotCurve(self, xs, ys):

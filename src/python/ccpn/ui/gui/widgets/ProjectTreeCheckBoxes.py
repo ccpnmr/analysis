@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-24 17:00:35 +0000 (Thu, February 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-12 20:59:02 +0100 (Fri, August 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -409,7 +409,66 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
 class ExportTreeCheckBoxes(ProjectTreeCheckBoxes):
     """Class to handle exporting peaks/integrals/multiplets to nef files
     """
-    pass
+
+    def _populateTreeView(self, project=None):
+        if project:
+            # set the new project if required
+            self.project = project
+
+        checkable = QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable
+        if self.includeProject:
+            # add the project as the top of the tree - allows to un/select all
+
+            self.projectItem = _StoredTreeWidgetItem(self.invisibleRootItem())
+            self.projectItem.setText(0, self.project.name)
+            if self._enableCheckBoxes:
+                self.projectItem.setFlags(self.projectItem.flags() | checkable)
+            else:
+                self.projectItem.setFlags(self.projectItem.flags() & ~checkable)
+            self.projectItem.setExpanded(True)
+            self.headerItem = self.projectItem
+
+        for name in self.checkList:
+            if (projectItems := getattr(self.project, name, [])):
+                item = _StoredTreeWidgetItem(self.headerItem)
+                item.setText(0, name)
+                item.setFlags(item.flags() | checkable)
+
+                for obj in projectItems:  # getattr(self.project, name):
+
+                    child = _StoredTreeWidgetItem(item)
+                    if self._enableCheckBoxes:
+                        child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+                    else:
+                        child.setFlags(child.flags() & ~QtCore.Qt.ItemIsUserCheckable)
+                    child.setData(1, 0, obj)
+                    child.setText(0, obj.pid)
+                    if self._enableCheckBoxes:
+                        child.setCheckState(0, QtCore.Qt.Unchecked)
+
+                item.setExpanded(False)
+                if name in self.lockedItems:
+                    item.setDisabled(True)
+                    if self._enableCheckBoxes:
+                        item.setCheckState(0, self.lockedItems[name])
+                else:
+                    if self._enableCheckBoxes:
+                        item.setCheckState(0, QtCore.Qt.Checked)
+
+        # # extra tree item if needed later
+        # self.emptyItem = _StoredTreeWidgetItem(self.invisibleRootItem())
+        # self.emptyItem.setExpanded(True)
+        # self.emptyItem.setDisabled(True)
+        # self.setRowHidden(self.indexFromItem(self.emptyItem, 1).row(),
+        #                   QtCore.QModelIndex(), True)
+
+        for name in self.checkList:
+            if not getattr(self.project, name, []):
+                item = _StoredTreeWidgetItem(self.invisibleRootItem())
+
+                item.setText(0, name + ' (empty)')
+                item.setExpanded(False)
+                item.setDisabled(True)
 
 
 class _StoredTreeWidgetItem(QtWidgets.QTreeWidgetItem):

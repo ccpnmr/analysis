@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-12 10:46:29 +0100 (Fri, August 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-12 18:21:46 +0100 (Fri, August 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -71,10 +71,32 @@ class GuiSettingPanel(Frame):
         self._guiModule = guiModule
         self.getLayout().setAlignment(QtCore.Qt.AlignTop)
         self._moduleSettingsWidget = None # the widgets the collects all autogen widgets
+        self.widgetDefinitions = self.setWidgetDefinitions()
         self.initWidgets()
 
+    def setWidgetDefinitions(self) -> od:
+        """ Override in subclass. Define the widgets in an orderedDict.
+        See ccpn.ui.gui.widgets.SettingsWidgets.ModuleSettingsWidget. Example:
+            od((
+                (WidgetVarName,
+                {'label': Label_toShow,
+                'type': WidgetClass-not-init,
+                'kwds': {'text': Label_toShow,
+                       'height': 30,
+                       'gridSpan': (1, 2),
+                       'tipText': TipText}})
+            ))
+        """
+        return od()
+
     def initWidgets(self):
-        pass
+        mainWindow = self._guiModule.mainWindow
+        self._moduleSettingsWidget = settingWidgets.ModuleSettingsWidget(parent=self, mainWindow=mainWindow,
+                                                                         settingsDict=self.widgetDefinitions,
+                                                                         grid=(0, 0))
+        self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
+        Spacer(self, 0, 2, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+               grid=(1, 0), gridSpan=(1, 1))
 
     def getWidget(self, name):
         if self._moduleSettingsWidget is not None:
@@ -101,15 +123,26 @@ TABPOS = 0
 ## Note: Tabs are not added automatically.
 ## Tabs are added from the SettingsHandler defined in the main GuiModule which allows more customisation in subclasses.
 
+
+#####################################################################
+#####################   InputData Panel   ###########################
+#####################################################################
+
 class GuiInputDataPanel(GuiSettingPanel):
 
     tabPosition = TABPOS
     tabName = guiNameSpaces.Label_InputData
     tabTipText = guiNameSpaces.TipText_GuiInputDataPanel
 
-    def initWidgets(self):
-        mainWindow = self._guiModule.mainWindow
-        settingsDict = od((
+    def __init__(self, guiModule, *args, **Framekwargs):
+        GuiSettingPanel.__init__(self, guiModule, *args, **Framekwargs)
+
+        self._limitSelectionOnInputData() ## This constrain might be removed on future implementations
+        self._setCreateDataTableButtonCallback()
+
+    def setWidgetDefinitions(self):
+        """ Define the widgets in a dict."""
+        self.widgetDefinitions = od((
             (guiNameSpaces.WidgetVarName_SpectrumGroupsSeparator,
              {'label': guiNameSpaces.Label_SpectrumGroups,
                                  'type': LabeledHLine,
@@ -175,11 +208,7 @@ class GuiInputDataPanel(GuiSettingPanel):
                   'objectName': guiNameSpaces.WidgetVarName_DataTablesSelection,
                   'fixedWidths': SettingsWidgetFixedWidths}, }),
             ))
-        self._moduleSettingsWidget = settingWidgets.ModuleSettingsWidget(parent=self, mainWindow=mainWindow,
-                                               settingsDict=settingsDict,
-                                               grid=(0, 0))
-        self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
-
+        return self.widgetDefinitions
 
     def _addInputDataCallback(self, *args):
 
@@ -196,3 +225,402 @@ class GuiInputDataPanel(GuiSettingPanel):
                 getLogger().info(f'{self._guiModule.className}:{self.tabName}. {obj} added to inputDataTables')
 
         self._guiModule.updateAll()
+
+    def _setCreateDataTableButtonCallback(self):
+        "Set callback for create-input-DataTable button."
+        buttonWidget = self.getWidget(guiNameSpaces.WidgetVarName_CreateDataTable)
+        if buttonWidget:
+            buttonWidget.button.clicked.connect(self._createInputDataTableCallback)
+
+    def _setPeakPropertySelection(self):
+        "Allow  selection of 'Position' or 'LineWidth' for creating a new input DataTable. "
+        peakPropertyWidget = self.getWidget(guiNameSpaces.WidgetVarName_PeakProperty)
+        if peakPropertyWidget:
+            properties = [seriesVariables._PPMPOSITION, seriesVariables._LINEWIDTH]
+            peakPropertyWidget.setTexts(properties)
+
+
+    def _limitSelectionOnInputData(self):
+        "Allow only one selection on SpectrumGroups and DataTable. "
+        sgSelectionWidget = self.getWidget(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection)
+        dtSelectionWidget = self.getWidget(guiNameSpaces.WidgetVarName_DataTablesSelection)
+
+        if sgSelectionWidget:
+            sgSelectionWidget.setMaximumItemSelectionCount(1)
+        if dtSelectionWidget:
+            dtSelectionWidget.setMaximumItemSelectionCount(1)
+
+    def _createInputDataTableCallback(self, *args):
+        """ """
+        settingsPanelHandler = self._guiModule.settingsPanelHandler
+        inputSettings = settingsPanelHandler.getInputDataSettings()
+        sgPids = inputSettings.get(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection, [None])
+        if not sgPids:
+            showWarning('Select SpectrumGroup', 'Cannot create an input DataTable without a SpectrumGroup')
+            return
+        spGroup = self._guiModule.project.getByPid(sgPids[-1])
+        dataTableName = inputSettings.get(guiNameSpaces.WidgetVarName_DataTableName, None)
+        if not spGroup:
+            getLogger().warn('Cannot create an input DataTable without a SpectrumGroup. Select one first')
+            return
+        backend = self._guiModule.backendHandler
+        newDataTable = backend.newInputDataTableFromSpectrumGroup(spGroup, dataTableName=dataTableName)
+        ## add as first selection in the datatable. clear first.
+        dtSelectionWidget = self.getWidget(guiNameSpaces.WidgetVarName_DataTablesSelection)
+        if dtSelectionWidget:
+            dtSelectionWidget.clearList()
+            dtSelectionWidget.updatePulldown()
+            dtSelectionWidget.select(newDataTable.pid)
+
+TABPOS += 1
+
+
+#####################################################################
+#####################  Calculation Panel  ###########################
+#####################################################################
+
+class GuiCalculationPanel(GuiSettingPanel):
+    tabPosition = TABPOS
+    tabName = guiNameSpaces.Label_Calculation
+    tabTipText = guiNameSpaces.Label_Calculation
+
+    def setWidgetDefinitions(self):
+        """Common calculation Widgets"""
+        self.widgetDefinitions = od((
+            (guiNameSpaces.WidgetVarName_IncludeGroups,
+             {'label': guiNameSpaces.Label_IncludeGroups,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': None,
+              'callBack': self._followGroupSelectionCallback,
+              'enabled': False,
+              'kwds': {'labelText': guiNameSpaces.Label_IncludeGroups,
+                       'hAlign': 'l',
+                       'tipText': '',
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds': {'texts': [g.groupType for g in ALL_GROUPINGNMRATOMS.values()],
+                                        'tipTexts': [g.groupInfo for g in ALL_GROUPINGNMRATOMS.values()],
+                                        'direction': 'v',
+                                        'selectedInd':4,
+                                        }}}),
+
+            (guiNameSpaces.WidgetVarName_IncludeAtoms,
+             {'label': guiNameSpaces.Label_IncludeAtoms,
+              'tipText': guiNameSpaces.TipText_IncludeAtoms,
+              'type': settingWidgets.UniqueNmrAtomNamesSelectionWidget,
+              'postInit': self._setFixedHeightPostInit,
+              'callBack': self._setCalculationOptionsToBackend,
+              'enabled': False,
+              'kwds': {
+                  'labelText': guiNameSpaces.Label_IncludeAtoms,
+                  'tipText': guiNameSpaces.TipText_IncludeAtoms,
+                  'objectWidgetChangedCallback': self._setCalculationOptionsToBackend,
+                  'pulldownCallback': self._setCalculationOptionsToBackend,
+                  'texts': seriesVariables.DEFAULT_FILTERING_ATOMS,
+                  'defaults': seriesVariables.DEFAULT_FILTERING_ATOMS,
+                  'objectName': guiNameSpaces.WidgetVarName_IncludeAtoms,
+                  'standardListItems': [],
+                  'fixedWidths': SettingsWidgetFixedWidths
+              }}),
+            (guiNameSpaces.WidgetVarName_ExcludeResType,
+             {'label': guiNameSpaces.Label_ExcludeResType,
+              'tipText': guiNameSpaces.TipText_ExcludeResType,
+              'postInit': self._setFixedHeightPostInit,
+              'enabled': False,
+              'type': settingWidgets.UniqueNmrResidueTypeSelectionWidget,
+              'callBack': self._setCalculationOptionsToBackend,
+              'kwds': {
+                  'labelText': guiNameSpaces.Label_ExcludeResType,
+                  'tipText': guiNameSpaces.TipText_ExcludeResType,
+                  'objectWidgetChangedCallback': self._setCalculationOptionsToBackend,
+                  'pulldownCallback': self._setCalculationOptionsToBackend,
+                  'texts': [],
+                  'defaults': [],
+                  'standardListItems': [],
+                  'objectName': guiNameSpaces.WidgetVarName_ExcludeResType,
+                  'fixedWidths': SettingsWidgetFixedWidths
+              }}),
+        ))
+
+        return self.widgetDefinitions
+
+    def _setFixedHeightPostInit(self, widget, *args):
+        widget.listWidget.setFixedHeight(100)
+        widget.setMaximumWidths(SettingsWidgetFixedWidths)
+        widget.getLayout().setAlignment(QtCore.Qt.AlignTop)
+
+    def _followGroupSelectionCallback(self, *args):
+        widget = self.getWidget(guiNameSpaces.WidgetVarName_IncludeGroups)
+        value = widget.getByText()
+        groupObj = ALL_GROUPINGNMRATOMS.get(value, None)
+        # todo to  be implemented: pre-fill the nmrAtoms selection and Excluded nmrRes.
+        pass
+
+    def _setCalculationOptionsToBackend(self):
+        """ Update the backend """
+        getLogger().info('_setCalculationOptionsToBackend: NIY...')
+        pass
+
+TABPOS += 1
+
+#####################################################################
+#####################    Fitting Panel    ###########################
+#####################################################################
+
+class GuiFittingPanel(GuiSettingPanel):
+    tabPosition = TABPOS
+    tabName = guiNameSpaces.Label_Fitting
+    tabTipText = 'Set the various Fitting modes and options'
+
+    def setWidgetDefinitions(self):
+        """Common fitting Widgets"""
+        self.widgetDefinitions = od((
+            (guiNameSpaces.WidgetVarName_OptimiserSeparator,
+             {'label': guiNameSpaces.Label_OptimiserSeparator,
+              'type': LabeledHLine,
+              'kwds': {'text': guiNameSpaces.Label_OptimiserSeparator,
+                       'height': 30,
+                       'gridSpan': (1, 2),
+                       'colour': DividerColour,
+                       'tipText': guiNameSpaces.TipText_OptimiserSeparator}}),
+            (guiNameSpaces.WidgetVarName_OptimiserMethod,
+             {'label': guiNameSpaces.Label_OptimiserMethod,
+              'callBack': None,
+              'tipText': guiNameSpaces.TipText_PeakPropertySelectionWidget,
+              'type': compoundWidget.PulldownListCompoundWidget,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_OptimiserMethod,
+                       'tipText': guiNameSpaces.TipText_OptimiserMethod,
+                       'texts': ['leastsq', 'differential_evolution', 'ampgo', 'newton'],
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+            (guiNameSpaces.WidgetVarName_ErrorMethod,
+             {'label': guiNameSpaces.Label_ErrorMethod,
+              'callBack': None,
+              'tipText': guiNameSpaces.TipText_ErrorMethod,
+              'type': compoundWidget.PulldownListCompoundWidget,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_ErrorMethod,
+                       'tipText': guiNameSpaces.TipText_ErrorMethod,
+                       'texts': ['parametric bootstrapping', 'non-parametric bootstrapping', 'Monte-Carlo', ],
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+        ))
+        return self.widgetDefinitions
+
+    def _calculateFittingCallback(self, *args):
+        getLogger().info(f'Recalculating Fitting values ...')
+        backend = self._guiModule.backendHandler
+        backend.fitInputData()
+        self._guiModule.updateAll()
+
+
+TABPOS += 1
+
+#####################################################################
+#####################   Appearance Panel  ###########################
+#####################################################################
+
+class AppearancePanel(GuiSettingPanel):
+    tabPosition = TABPOS
+    tabName = guiNameSpaces.Label_GeneralAppearance
+    tabTipText = ''
+
+    def setWidgetDefinitions(self):
+        self.widgetDefinitions = od((
+            (guiNameSpaces.WidgetVarName_SpectrumDisplSeparator,
+             {'label': guiNameSpaces.Label_SpectrumDisplSeparator,
+              'type': LabeledHLine,
+              'kwds': {'text': guiNameSpaces.Label_SpectrumDisplSeparator,
+                       'height': 30,
+                       'colour': DividerColour,
+                       'gridSpan': (1, 2),
+                       'tipText': guiNameSpaces.TipText_SpectrumDisplSeparator}}),
+            (guiNameSpaces.WidgetVarName_SpectrumDisplSelection,
+             {'label': guiNameSpaces.Label_SpectrumDisplSelection,
+              'callBack': None,
+              'enabled': False,
+              '_init': None,
+              'type': settingWidgets.SpectrumDisplaySelectionWidget,
+              'kwds': {'texts': ['Current'],
+                       'displayText': ['Current'],
+                       'defaults': ['Current'],
+                       'objectName': guiNameSpaces.WidgetVarName_SpectrumDisplSelection,
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'tipText': guiNameSpaces.TipText_SpectrumDisplSelection}}),
+            (guiNameSpaces.WidgetVarName_BarGraphSeparator,
+             {'label': guiNameSpaces.Label_BarGraphAppearance,
+              'type': LabeledHLine,
+              'kwds': {'text': guiNameSpaces.Label_BarGraphAppearance,
+                       'height': 30,
+                       'colour': DividerColour,
+                       'gridSpan': (1, 2),
+                       'tipText': guiNameSpaces.TipText_BarGraphAppearance}}),
+            (guiNameSpaces.WidgetVarName_BarGraphXcolumnName,
+             {'label': guiNameSpaces.Label_XcolumnName,
+              'callBack': self._commonCallback,
+              'tipText': guiNameSpaces.TipText_XcolumnName,
+              'type': compoundWidget.PulldownListCompoundWidget,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_XcolumnName,
+                       'tipText': guiNameSpaces.TipText_XcolumnName,
+                       'texts': guiNameSpaces.XBarGraphColumnNameOptions,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+            (guiNameSpaces.WidgetVarName_BarGraphYcolumnName,
+             {'label': guiNameSpaces.Label_YcolumnName,
+              'callBack': self._commonCallback,
+              'tipText': guiNameSpaces.TipText_YcolumnName,
+              'type': compoundWidget.PulldownListCompoundWidget,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_YcolumnName,
+                       'tipText': guiNameSpaces.TipText_YcolumnName,
+                       'texts': self._axisYOptions,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+
+            (guiNameSpaces.WidgetVarName_ThreshValueCalcOptions,
+             {'label': guiNameSpaces.Label_ThreshValueCalcOptions,
+              'callBack': self._setThresholdValueForData,
+              'tipText': guiNameSpaces.TipText_ThreshValueCalcOptions,
+              'type': compoundWidget.PulldownListCompoundWidget,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_ThreshValueCalcOptions,
+                       'tipText': guiNameSpaces.TipText_ThreshValueCalcOptions,
+                       'texts': ["<Select>"] + guiNameSpaces.ThrValuesCalcOptions,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+
+            (guiNameSpaces.WidgetVarName_ThreshValueFactor,
+             {'label': guiNameSpaces.Label_ThreshValueFactor,
+              'tipText': guiNameSpaces.TipText_ThreshValueFactor,
+              'callBack': self._setThresholdValueForData,
+              'enabled': True,
+              'type': compoundWidget.DoubleSpinBoxCompoundWidget,
+              '_init': None,
+              'kwds': {'labelText': guiNameSpaces.Label_ThreshValueFactor,
+                       'tipText': guiNameSpaces.TipText_ThreshValueFactor,
+                       'value': 1,
+                       'step': 0.01,
+                       'decimals': 4,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+
+            (guiNameSpaces.WidgetVarName_ThreshValue,
+             {'label': guiNameSpaces.Label_ThreshValue,
+              'tipText': guiNameSpaces.TipText_ThreshValue,
+              'callBack': self._commonCallback,
+              'enabled': True,
+              'type': compoundWidget.DoubleSpinBoxCompoundWidget,
+              '_init': None,
+              'kwds': {'labelText': guiNameSpaces.Label_ThreshValue,
+                       'tipText': guiNameSpaces.TipText_ThreshValue,
+                       'value': 0.1,
+                       'step': 0.01,
+                       'decimals': 4,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+
+            (guiNameSpaces.WidgetVarName_AboveThrColour,
+             {'label': guiNameSpaces.Label_AboveThrColour,
+              'callBack': self._commonCallback,
+              'tipText': guiNameSpaces.TipText_AboveThrColour,
+              'type': compoundWidget.ColourSelectionCompoundWidget,
+              'kwds': {'labelText': guiNameSpaces.Label_AboveThrColour,
+                       'tipText': guiNameSpaces.TipText_AboveThrColour,
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'selectItem': guiNameSpaces.BAR_aboveBrush,
+                       'compoundKwds': {'includeGradients': True,
+                                        }}}),
+            (guiNameSpaces.WidgetVarName_BelowThrColour,
+             {'label': guiNameSpaces.Label_BelowThrColour,
+              'callBack': self._commonCallback,
+
+              'tipText': guiNameSpaces.TipText_BelowThrColour,
+              'type': compoundWidget.ColourSelectionCompoundWidget,
+              'kwds': {'labelText': guiNameSpaces.Label_BelowThrColour,
+                       'tipText': guiNameSpaces.TipText_BelowThrColour,
+                       'selectItem': guiNameSpaces.BAR_belowBrush,
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds': {'includeGradients': False}}}),
+            (guiNameSpaces.WidgetVarName_UntraceableColour,
+             {'label': guiNameSpaces.Label_UntraceableColour,
+              'callBack': self._commonCallback,
+
+              'tipText': guiNameSpaces.TipText_UntraceableColour,
+              'type': compoundWidget.ColourSelectionCompoundWidget,
+              'kwds': {'labelText': guiNameSpaces.Label_UntraceableColour,
+                       'tipText': guiNameSpaces.TipText_UntraceableColour,
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'selectItem': guiNameSpaces.BAR_untracBrush,
+                       'compoundKwds': {'includeGradients': False}}}),
+            (guiNameSpaces.WidgetVarName_ThrColour,
+             {'label': guiNameSpaces.Label_ThrColour,
+              'callBack': self._commonCallback,
+              'tipText': guiNameSpaces.TipText_ThrColour,
+              'type': compoundWidget.ColourSelectionCompoundWidget,
+              'kwds': {'labelText': guiNameSpaces.Label_ThrColour,
+                       'tipText': guiNameSpaces.TipText_ThrColour,
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'selectItem': guiNameSpaces.BAR_thresholdLine,
+                       'compoundKwds': {'includeGradients': False,
+                                        }}}),
+            (guiNameSpaces.WidgetVarName_MolStrucSeparator,
+             {'label': guiNameSpaces.Label_MolStrucSeparator,
+              'type': LabeledHLine,
+              'kwds': {'text': guiNameSpaces.Label_MolStrucSeparator,
+                       'height': 30,
+                       'colour': DividerColour,
+                       'gridSpan': (1, 2),
+                       'tipText': guiNameSpaces.TipText_MolStrucSeparator}}),
+            (guiNameSpaces.WidgetVarName_MolStructureFile,
+             {'label': guiNameSpaces.Label_MolStructureFile,
+              'tipText': guiNameSpaces.TipText_MolStructureFile,
+              'enabled': True,
+              'type': compoundWidget.EntryPathCompoundWidget,
+              '_init': None,
+              'kwds': {
+                  'labelText': guiNameSpaces.Label_MolStructureFile,
+                  'tipText': guiNameSpaces.TipText_MolStructureFile,
+                  'entryText': '~',
+                  'fixedWidths': SettingsWidgetFixedWidths,
+                  'compoundKwds': {'lineEditMinimumWidth': 300}
+              }}),
+
+        ))
+        return self.widgetDefinitions
+
+    @property
+    def _axisYOptions(self):
+        return []
+
+    def _setThresholdValueForData(self, *args):
+        mode = None
+        factor = 1
+        calculcationModeW = self.getWidget(guiNameSpaces.WidgetVarName_ThreshValueCalcOptions)
+        if calculcationModeW:
+            mode = calculcationModeW.getText()
+        factorW = self.getWidget(guiNameSpaces.WidgetVarName_ThreshValueFactor)
+        if factorW:
+            factor = factorW.getValue()
+        yColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
+        yColumnName = ''
+        if yColumnNameW:
+            yColumnName = yColumnNameW.getText()
+            dd = guiNameSpaces.getReverseGuiNameMapping()
+            yColumnName = dd.get(yColumnName, yColumnName)
+        if mode:
+            value = self._getThresholdValueFromBackend(columnName=yColumnName, calculationMode=mode, factor=factor)
+            if isinstance(value, (float,int)):
+                thresholdValueW = self.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
+                if thresholdValueW and value:
+                    thresholdValueW.setValue(round(value, 3))
+
+    def _getThresholdValueFromBackend(self, columnName, calculationMode, factor):
+        """Subclassed. Backend/values may vary for experiment """
+        pass
+
+    def _commonCallback(self, *args):
+        """ _commonCallback to set the updateState icon"""
+        self._setUpdatedDetectedState()
+
+TABPOS += 1
+
+
+#####################################################################
+#####################   Filtering Panel   ###########################
+#####################################################################
+
+## Not yet Implemeted

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-10 09:22:45 +0100 (Wed, August 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-12 18:21:46 +0100 (Fri, August 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -108,7 +108,7 @@ class BarPlotPanel(GuiPanel):
 
     @property
     def yColumnName(self):
-        """Returns selected colour name """
+        """Returns selected y Column name """
         value = None
         if self._appearancePanel:
             w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)

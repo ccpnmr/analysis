@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-09 15:59:57 +0100 (Tue, August 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-12 18:21:46 +0100 (Fri, August 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -56,9 +56,8 @@ Label_                  = 'Label'
 tipText_                = 'tipText'
 
 
-
 ####################################################
-##########     TAB: GuiInputDataPanel     ##########
+##########  TAB: GuiInputDataPanel
 ####################################################
 
 Label_InputData                         = 'Input data'
@@ -94,9 +93,40 @@ Label_SelectDataTable                   = 'Select DataTable(s)'
 TipText_DataTableSelection              = 'Select input DataTable(s) to start the Experiment Analysis'
 
 
-####################################################
-##########    TAB: ChemicalShiftMapping   ##########
-####################################################
+#############################################################
+##########  TAB: Calculation
+#############################################################
+
+WidgetVarName_IncludeAtoms              = 'IncludeAtoms'
+Label_IncludeAtoms                      = 'Include NmrAtoms'
+TipText_IncludeAtoms                    = 'Consider only the selected NmrAtoms in the calculation. E.g.: H, N'
+
+WidgetVarName_IncludeGroups             = 'IncludeGroups'
+Label_IncludeGroups                     = 'Include Groups'
+TipText_FollowGroups                    = 'Include grouped NmrAtoms in the calculation. E.g.: H, N for Backbone group'
+
+WidgetVarName_ExcludeResType            = 'ExcludeResidueType'
+Label_ExcludeResType                    = 'Exclude NmrResidue Type'
+TipText_ExcludeResType                  = 'Exclude the selected NmrResidue Type from the calculation. E.g.: Pro'
+
+WidgetVarName_UntraceablePeak           = 'UntraceablePeak'
+Label_UntraceablePeak                   = f'{DELTA}{Delta} for Untraceable Observations'
+TipText_UntraceablePeak                 = f'Set a fixed {DELTA}{Delta} value for Untraceable Observations.' \
+                                          f'This situation could happen when a peak in a series disappeared or is impossible to calculate the {DELTA}{Delta} '
+
+WidgetVarName_CalculateDeltaDelta       = 'CalculateDeltaDelta'
+Label_CalculateDeltaDelta               = f'Calculate {DELTA}{Delta}'
+Button_CalculateDeltaDelta              = f'Re-Calculate '
+TipText_CalculateDeltaDelta             = f'Calculate {DELTA}{Delta} values based on current settings'
+
+WidgetVarName_CalculateFitting          = 'CalculateFitting'
+Label_CalculateFitting                  = f'Start Fitting'
+Button_CalculateFitting                 = f'Re-Fit'
+TipText_CalculateFitting                = f'Perform the fitting based on current settings'
+
+#############################################################
+##########  TAB: Calculation ChemicalShiftMapping
+#############################################################
 
 Label_Calculation                       = 'Calculation'
 TipText_CSMCalculationPanelPanel        = 'Set the various calculation modes and options for the Chemical Shift Mapping Analysis'
@@ -109,8 +139,8 @@ FactorValue                             = 'FactorValue'
 JournalReference                        = 'JournalReference'
 
 ## widgets
-WidgetVarName_DeltaDeltasSeparator      = 'SpectrumGroupsSeparator'
-Label_DeltaDeltas                       = 'Chemical Shift Perturbation Options'
+WidgetVarName_DeltaDeltasSeparator      = 'DeltaDeltaSeparator'
+Label_DeltaDeltas                       = 'Chemical Shift Mapping Options'
 TipText_DeltaDeltasSeparator            = f'{TipText_CSMCalculationPanelPanel} \n For weighting factors, see reference: ' \
                                           f'{Journal_WilliamsonReference}{Journal_WilliamsonSection}'
 
@@ -124,35 +154,47 @@ TipText_Factor                          = f'Factors are weighting of shifts (0-1
                                           f'Default for {{{AtomName}}}: {{{FactorValue}}}. See references.'
 ALPHA_FACTORS                           = 'AlphaFactors'
 
-WidgetVarName_FollowAtoms               = 'FollowAtoms'
-Label_FollowAtoms                       = 'Follow (nmr)Atoms'
-TipText_FollowAtoms                     = 'Consider only the selected (nmr)Atoms in the calculation. E.g.: H, N'
+#############################################################
+##########  TAB: Calculation Relaxation
+#############################################################
 
-WidgetVarName_FollowGroups              = 'FollowGroups'
-Label_FollowGroups                      = 'Follow Groups'
-TipText_FollowGroups                    = 'Follow grouped NmrAtoms in the calculation. E.g.: H, N for Backbone group'
+TipText_RelaxCalculationPanelPanel      = 'Set the various calculation modes and options for the Relaxation Analysis'
 
-WidgetVarName_ExcludeResType            = 'ExcludeResidueType'
-Label_ExcludeResType                    = 'Exclude NmrResidue Type'
-TipText_ExcludeResType                  = 'Exclude the selected NmrResidue Type from the calculation. E.g.: Pro'
+## General
 
-WidgetVarName_UntraceablePeak           = 'UntraceablePeak'
-Label_UntraceablePeak                   = f'{DELTA}{Delta} for Untraceable Perturbations'
-TipText_UntraceablePeak                 = f'Set a fixed {DELTA}{Delta} value for Untraceable Perturbations.' \
-                                          f'This situation could happen when a peak in a series disappeared or is impossible to calculate the {DELTA}{Delta} '
+## widgets
+WidgetVarName_RelaxSeparator            = 'RelaxSeparator'
+Label_RelaxOption                       = 'Relaxation Options'
+TipText_RelaxSeparator                  = f''
 
-WidgetVarName_CalculateDeltaDelta       = 'CalculateDeltaDelta'
-Label_CalculateDeltaDelta               = f'Calculate {DELTA}{Delta}'
-Button_CalculateDeltaDelta              = f'Re-Calculate '
-TipText_CalculateDeltaDelta             = f'Calculate {DELTA}{Delta} values based on current settings'
-
-WidgetVarName_CalculateFitting          = 'CalculateFitting'
-Label_CalculateFitting                  = f'Start Fitting'
-Button_CalculateFitting                 = f'Re-Fit'
-TipText_CalculateFitting                = f'Perform the fitting based on current settings'
 
 ############################################################
-##########  TAB: Appearance ChemicalShiftMapping  ##########
+##########  TAB: Fitting
+############################################################
+Label_Fitting                           = 'Fitting'
+WidgetVarName_FittingSeparator          = 'FittingSeparator'
+Label_FittingSeparator                  = 'Fitting Options'
+TipText_FittingSeparator                = 'General fitting options'
+
+WidgetVarName_FittingModel              = 'FittingModel'
+Label_FittingModel                      = 'Fitting Model'
+TipText_FittingModel                    = 'Select the Fitting Model'
+
+WidgetVarName_OptimiserSeparator        = 'OptimiserSeparator'
+Label_OptimiserSeparator                = 'Optimiser Options'
+TipText_OptimiserSeparator              = 'General Optimiser options'
+
+WidgetVarName_OptimiserMethod           = 'OptimiserMethod'
+Label_OptimiserMethod                   = 'Optimiser Method'
+TipText_OptimiserMethod                 = 'Select the Optimiser Method'
+
+WidgetVarName_ErrorMethod               = 'ErrorMethod'
+Label_ErrorMethod                       = 'Fitting Error Method'
+TipText_ErrorMethod                     = 'Select the Fitting Error calculation Method'
+
+
+############################################################
+##########  TAB: Appearance
 ############################################################
 
 WidgetVarName_GenAppearanceSeparator    = 'GeneralAppearanceSeparator'
@@ -209,47 +251,20 @@ Label_BelowThrColour                    = 'Below Threshold Colour'
 TipText_BelowThrColour                  = 'Select the colour for bars below a threshold line value in the BarPlot'
 
 WidgetVarName_UntraceableColour         = 'UntraceableColour'
-Label_UntraceableColour                 = 'Untraceable Perturbation Colour'
-TipText_UntraceableColour               = 'Select the colour for for Untraceable Perturbations.'
+Label_UntraceableColour                 = 'Untraceable Observation Colour'
+TipText_UntraceableColour               = 'Select the colour for for Untraceable Observations.'
 
 WidgetVarName_ThrColour                 = 'ThresholdColour'
 Label_ThrColour                         = 'Threshold Line Colour'
 TipText_ThrColour                       = 'Select the colour for the threshold line in the BarPlot'
 
 WidgetVarName_MolStrucSeparator         = 'MolStructureSeparator'
-Label_MolStrucSeparator                 = 'Molecular Structure'
+Label_MolStrucSeparator                 = 'Molecular Viewer'
 TipText_MolStrucSeparator               = ''
 
 WidgetVarName_MolStructureFile          = 'MolStructureFile'
 Label_MolStructureFile                  = 'Molecular Structure File'
 TipText_MolStructureFile                = 'Select the molecular structure file path. (.pdb only)'
-
-
-
-############################################################
-##########  TAB: Fitting ChemicalShiftMapping     ##########
-############################################################
-Label_Fitting                           = 'Fitting'
-WidgetVarName_FittingSeparator          = 'FittingSeparator'
-Label_FittingSeparator                  = 'Fitting Options'
-TipText_FittingSeparator                = 'General fitting options'
-
-WidgetVarName_FittingModel              = 'FittingModel'
-Label_FittingModel                      = 'Fitting Model'
-TipText_FittingModel                    = 'Select the Fitting Model'
-
-WidgetVarName_OptimiserSeparator        = 'OptimiserSeparator'
-Label_OptimiserSeparator                = 'Optimiser Options'
-TipText_OptimiserSeparator              = 'General Optimiser options'
-
-WidgetVarName_OptimiserMethod           = 'OptimiserMethod'
-Label_OptimiserMethod                   = 'Optimiser Method'
-TipText_OptimiserMethod                 = 'Select the Optimiser Method'
-
-WidgetVarName_ErrorMethod               = 'ErrorMethod'
-Label_ErrorMethod                       = 'Fitting Error Method'
-TipText_ErrorMethod                     = 'Select the Fitting Error calculation Method'
-
 
 
 ############################################################
@@ -356,3 +371,6 @@ ThrValuesCalcOptions  = [seriesVariables.MAD,
                         seriesVariables.MEDIAN,
                         seriesVariables.STD,
                         seriesVariables.VARIANCE]
+
+
+

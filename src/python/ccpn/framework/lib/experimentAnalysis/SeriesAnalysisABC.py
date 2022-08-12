@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-18 18:59:32 +0100 (Mon, July 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-12 18:21:46 +0100 (Fri, August 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,8 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
+import numpy as np
+from scipy import stats
 from abc import ABC
 from collections import defaultdict
 from ccpn.util.OrderedSet import OrderedSet
@@ -34,6 +36,7 @@ from ccpn.util.Common import flattenLists
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.framework.Application import getApplication, getCurrent, getProject
 from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC, InputSeriesFrameBC, ALL_SERIES_DATA_TYPES
+import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 
 class SeriesAnalysisABC(ABC):
     """
@@ -110,7 +113,6 @@ class SeriesAnalysisABC(ABC):
             if not isinstance(dataTable.data, theType):
                 dataTable.data.__class__ = theType
 
-
     @classmethod
     def fitInputData(self, *args, **kwargs):
         """
@@ -184,6 +186,37 @@ class SeriesAnalysisABC(ABC):
             raise TypeError(f'spectrumGroup argument must be a SpectrumGroup Type. Given: {type(spectrumGroup)}')
         collections = createCollectionsFromSpectrumGroup(spectrumGroup, peakListIndices)
         return collections
+
+    def getThresholdValueForData(self, data, columnName, calculationMode=sv.MAD, factor=1.):
+        """ Get the Threshold value for the ColumnName values.
+        :param data: pd.dataFrame
+        :param columnName: str. a column name presents in the data(frame)
+        :param calculationMode: str, one of ['MAD', 'AAD', 'Mean', 'Median', 'STD']
+        :param factor: float. Multiplication factor.
+        :return float.
+
+        MAD: Median absolute deviation, (https://en.wikipedia.org/wiki/Median_absolute_deviation)
+        AAD: Average absolute deviation, (https://en.wikipedia.org/wiki/Average_absolute_deviation).
+        Note, MAD and AAD are often abbreviated the same way, in fact, in scipy MAD is Median absolute deviation,
+        whereas in Pandas MAD is Mean absolute deviation!
+        """
+        factor = factor if factor and factor >0 else 1
+        thresholdValue = None
+        if data is not None:
+            if len(data[columnName])>0:
+                values = data[columnName].values
+                values = values[~np.isnan(values)]  # skip nans
+                if calculationMode == sv.MAD:
+                    thresholdValue = stats.median_absolute_deviation(values) # in scipy MAD is Median absolute deviation
+                if calculationMode == sv.AAD:
+                    thresholdValue = data[columnName].mad() # in pandas MAD is Mean absolute deviation !
+                else:
+                    func = lf.CommonStatFuncs.get(calculationMode, None)
+                    if func:
+                        thresholdValue = func(values)
+        if thresholdValue:
+            thresholdValue *= factor
+        return thresholdValue
 
     @staticmethod
     def _setRestoringMetadata(dataTable, seriesFrame, spectrumGroup):

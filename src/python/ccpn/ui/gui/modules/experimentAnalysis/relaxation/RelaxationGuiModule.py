@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-12 11:00:29 +0100 (Fri, August 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-12 18:21:46 +0100 (Fri, August 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel impor
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import ExperimentAnalysisGuiModuleBC
-import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiSettingsPanel as settingsPanel
+import ccpn.ui.gui.modules.experimentAnalysis.relaxation.RelaxationSettingsPanel as settingsPanel
 
 #####################################################################
 #######################  The main GUI Module ########################
@@ -73,8 +73,10 @@ class RelaxationGuiModule(ExperimentAnalysisGuiModuleBC):
         """
         Add the Settings Panels to the Gui. To retrieve a Panel use/see the settingsPanelsManager.
         """
-        self.settingsPanelHandler.append(settingsPanel.GuiInputDataPanel(self))
-
+        self.settingsPanelHandler.append(settingsPanel.RelaxationGuiInputDataPanel(self))
+        self.settingsPanelHandler.append(settingsPanel.RelaxationCalculationPanel(self))
+        self.settingsPanelHandler.append(settingsPanel.RelaxationFittingPanel(self))
+        self.settingsPanelHandler.append(settingsPanel.RelaxationAppearancePanel(self))
 
     #####################################################################
     #####################  Widgets callbacks  ###########################

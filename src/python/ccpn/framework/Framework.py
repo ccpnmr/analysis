@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-11 16:03:57 +0100 (Thu, August 11, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-08-12 10:46:29 +0100 (Fri, August 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -84,18 +84,11 @@ from ccpn.framework import Version
 from ccpn.framework.AutoBackup import AutoBackup
 from ccpn.framework.credits import printCreditsText
 from ccpn.framework.Current import Current
-from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
 from ccpn.framework.Translation import defaultLanguage
 from ccpn.framework.Translation import translator
 from ccpn.framework.Preferences import Preferences
 from ccpn.framework.PathsAndUrls import \
     userCcpnMacroPath, \
-    CCPN_ARCHIVES_DIRECTORY, \
-    CCPN_STATE_DIRECTORY, \
-    CCPN_DATA_DIRECTORY, \
-    CCPN_SPECTRA_DIRECTORY, \
-    CCPN_PLUGINS_DIRECTORY, \
-    CCPN_SCRIPTS_DIRECTORY, \
     tipOfTheDayConfig, \
     ccpnCodePath
 
@@ -2008,7 +2001,7 @@ class Framework(NotifierBase, GuiBase):
         return cs
 
     def showChemicalShiftMappingAlpha(self, position: str = 'top', relativeTo: CcpnModule = None):
-        from ccpn.ui.gui.modules.experimentAnalysis.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
+        from ccpn.ui.gui.modules.experimentAnalysis.chemicalShiftMapping.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea

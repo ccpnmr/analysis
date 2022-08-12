@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-12 09:58:33 +0100 (Fri, August 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-12 10:46:29 +0100 (Fri, August 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -88,18 +88,19 @@ class ExperimentAnalysisPlotToolBar(ToolBar):
         return toolBarDefs
 
 
-class FmtAxisItem(pg.AxisItem):
+class LeftAxisItem(pg.AxisItem):
+    """ Overridden class for the left axis to show minimal decimals and stop resizing to massive space.
+    """
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(orientation='left', *args, **kwargs)
 
     def tickStrings(self, values, scale, spacing):
         """ Overridden method to show minimal decimals.
         """
         return [f'{v:.4f}' for v in values]
 
-
-
 class FittingHandle(Handle):
+    """Experimental.  A class to allow manual refitting of a curve based.  """
 
     sigMoved = QtCore.Signal(object)  # pos
     sigHovered = QtCore.Signal(object)  # ev
@@ -152,7 +153,7 @@ class FittingHandle(Handle):
 
 class FittingPlot(pg.PlotItem):
     def __init__(self, parentWidget, *args, **kwargs):
-        pg.PlotItem.__init__(self, axisItems={'left': FmtAxisItem(orientation='left')}, **kwargs)
+        pg.PlotItem.__init__(self, axisItems={'left': LeftAxisItem()}, **kwargs)
         self.parentWidget = parentWidget
 
         colour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])

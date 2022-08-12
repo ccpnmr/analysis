@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-28 20:00:38 +0100 (Thu, July 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-12 20:31:51 +0100 (Fri, August 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -885,7 +885,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             getLogger().warning('Error expanding module: sideBar')
 
     def keyReleaseEvent(self, event: QtGui.QKeyEvent) -> None:
-        # this MUST be a keyRelease event
+        # this MUST be a keyRelease event (isAutoRepeat can be used)
         key = event.key()
         if key == QtCore.Qt.Key_Escape:
             # Reset Mouse Mode
@@ -893,18 +893,39 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             if mode != SELECT:
                 self.setMouseMode(SELECT)
 
+        self._addKeyToStatusBar(key)
+
+    def _addKeyToStatusBar(self, key):
         # remember the last key that was pressed for reset keySequence timer below
         self._lastKeyTime = time.perf_counter()
         self._lastKey = key
         try:
             if chr(key).isascii():
-                self._lastKeyMessage += chr(key)
-                self._lastKeyMessage = self._lastKeyMessage[-2:]
+                if chr(key) not in [' ', self._lastKeyMessage[-1:]]:
+                    self._lastKeyMessage += chr(key)
+                elif chr(key) == ' ':
+                    self._lastKeyMessage += 'Space'
+            if len(self._lastKeyMessage) > max(2, 5 * min(self._lastKeyMessage.count('Space'), 2)):
+                # limit the message to 2 characters, or 2 occurrences of 'Space'
+                if self._lastKeyMessage.startswith('Space'):
+                    self._lastKeyMessage = self._lastKeyMessage[5:]
+                else:
+                    self._lastKeyMessage = self._lastKeyMessage[1:]
 
         except:
             self._lastKeyMessage = ''
 
         self._lastKeyStatus.setText(self._lastKeyMessage)
+
+    def _setStatusBarKeys(self, keys: str):
+        """Set the statusBar and update the timer
+        """
+        if isinstance(keys, str):
+            if self._lastKeyMessage.endswith(keys) or (keys == '  ' and self._lastKeyMessage.endswith('SpaceSpace')):
+                self._lastKeyMessage = ''
+        self._lastKey = 0
+        self._lastKeyTime = time.perf_counter()
+        self._lastKeyStatus.setText(keys)
 
     def _lastKeyTimerCallback(self):
         """QTimer event that fires every 500ms

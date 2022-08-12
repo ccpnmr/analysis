@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-08-12 13:09:04 +0100 (Fri, August 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,8 @@ __date__ = "$Date: 2021-07-07 12:10:32 +0100 (Wed, July 07, 2021) $"
 #=========================================================================================
 
 from collections import OrderedDict as OD
-from ccpn.core.lib.NefImporter.NefSaveFrameABC import SaveFrameABC, _isALoop
+from ccpn.framework.lib.ccpnNef.CcpnNefCommon import _isALoop
+from ccpn.framework.lib.ccpnNef.NefImporter_inProgress.NefSaveFrameABC import SaveFrameABC
 
 
 class MetaData(SaveFrameABC):

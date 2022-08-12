@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-08-12 13:09:04 +0100 (Fri, August 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -48,7 +48,7 @@ def getSaveFrameTypes() -> OrderedDict:
     :return: a dictionary of (type-identifier-strings, SaveFrame classes) as (key, value) pairs
     """
     # register the saveFrame types in the correct order
-    from ccpn.core.lib.NefImporter.MetaData import MetaData
+    from ccpn.framework.lib.ccpnNef.NefImporter_inProgress.MetaData import MetaData
 
     # # load all from folder
     # loadModules([nefSaveFramePath, ])

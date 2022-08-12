@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-03 19:09:32 +0000 (Thu, March 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-12 16:53:27 +0100 (Fri, August 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -972,6 +972,7 @@ class NefDictFrame(Frame):
                 palette = saveFrameData.palette()
                 palette.setColor(QtGui.QPalette.Base, _fillColour)
                 saveFrameData.setPalette(palette)
+                # saveFrameData.setToolTip('HELP!')  # can set a toolTip message here for bad names
             except Exception as es:
                 getLogger().debug(f'error setting colours {es}')
 

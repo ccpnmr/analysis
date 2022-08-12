@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-05 11:05:50 +0100 (Fri, August 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-12 16:58:10 +0100 (Fri, August 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -38,6 +38,7 @@ from collections import OrderedDict as OD, namedtuple
 # from collections import Counter
 from operator import attrgetter, itemgetter
 from typing import List, Union, Optional, Sequence, Tuple
+from ast import literal_eval
 
 from ccpn.core.lib import Pid
 from ccpn.core import _coreImportOrder
@@ -600,6 +601,9 @@ class CcpnNefWriter:
         for obj in sorted(chemicalShiftLists):
             saveFrames.append(self.chemicalShiftList2Nef(obj, includeOrphans))
 
+        # Create Samples - create first otherwise ccpn2SaveFrameName not populated correctly :|
+        sampleFrames = [self.sample2Nef(obj) for obj in sorted(samples)]
+
         # RestraintLists and
         restraintTables = sorted(restraintTables, key=attrgetter('restraintType', 'serial'))
         singleStructureTable = bool(restraintTables) and len(set(x.structureData for x in restraintTables)) == 1
@@ -678,8 +682,7 @@ class CcpnNefWriter:
             saveFrames.append(saveFrame)
 
         # Samples
-        for obj in sorted(samples):
-            saveFrames.append(self.sample2Nef(obj))
+        saveFrames.extend(sampleFrames)
 
         # Substances
         for obj in sorted(substances):
@@ -1393,7 +1396,7 @@ class CcpnNefWriter:
             self.ccpn2SaveFrameName[spectrum] = result['sf_framecode']
 
         result['chemical_shift_list'] = self.ccpn2SaveFrameName.get(obj.chemicalShiftList)  # NOTE:ED - was peakList
-        result['ccpn_sample'] = self.ccpn2SaveFrameName.get(spectrum.sample)
+        result['ccpn_sample'] = self.ccpn2SaveFrameName.get(obj.sample)
 
         # NOTE:ED - add extra saveFrame information for the peakList frame
         appendCategory = 'ccpn_no_peak_list'
@@ -2979,6 +2982,12 @@ class CcpnNefReader(CcpnNefContent):
                     name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
                     self._frameCodeToSpectra[saveFrameName] = sDataName  # or dataSetSerial or 1
 
+                elif sf_category == 'nef_chemical_shift_list':
+                    # needs to be more generic
+                    if '.' in str(saveFrameName):
+                        # make sure the chemicalShiftList name does not contain a '.'
+                        saveFrameName = saveFrameName.replace('.', '_')
+
                 # if selection and str(saveFrameName) not in selection:
                 #     getLogger().debug2('>>>  -- skip saveframe {}'.format(saveFrameName))
                 #     continue
@@ -3614,7 +3623,13 @@ class CcpnNefReader(CcpnNefContent):
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
         self._updateStringParameters(parameters)
 
-        parameters['name'] = framecode[len(category) + 1:]
+        name = str(framecode[len(category) + 1:])
+        if '.' in name:
+            name = name.replace('.', '_')
+            self.warning(f'chemicalShiftList name contains "." replacing with {name}')
+
+        # parameters['name'] = framecode[len(category) + 1:]
+        parameters['name'] = name
         parameters.pop('serial', 1)  # not required
 
         # Make main object
@@ -3650,7 +3665,11 @@ class CcpnNefReader(CcpnNefContent):
 
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        name = framecode[len(category) + 1:]
+        name = str(framecode[len(category) + 1:])
+        if '.' in name:
+            # flag that chemicalShiftList contains bad characters - need ability to store errors
+            self.error(f'nef_chemical_shift_list - ChemicalShiftList {name} contains bad character "."', saveFrame)
+            saveFrame._rowErrors[category] = (name,)
 
         # Verify main object
         result = project.getChemicalShiftList(name)
@@ -4826,8 +4845,8 @@ class CcpnNefReader(CcpnNefContent):
                 isotopeCode = None
 
             try:
-                if (nmrResidue := self.produceNmrResidue(*tt[:3])):
-                    nmrAtom = self.produceNmrAtom(nmrResidue, tt[3], isotopeCode=isotopeCode)
+                if (nmrResidue := self.produceNmrResidue(*tt[:3])) and \
+                        (nmrAtom := self.produceNmrAtom(nmrResidue, tt[3], isotopeCode=isotopeCode)):
                     parameters['nmrAtom'] = nmrAtom
                 parameters['static'] = row.get('ccpn_static') or False  # may be undefined for older nef files
 
@@ -5389,7 +5408,7 @@ class CcpnNefReader(CcpnNefContent):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def _parametersFromSpectrumDimensionLoop(self, loop: StarIo.NmrLoop, mapping) -> dict:
-        """Parse a spectrum dimension loop (either ned or ccpn) and convert data to a dictionary
+        """Parse a spectrum dimension loop (either nef or ccpn) and convert data to a dictionary
         """
         if mapping is None:
             raise ValueError('Undefined spectrum dimension mapping dict')
@@ -5457,6 +5476,7 @@ class CcpnNefReader(CcpnNefContent):
             # create a new spectrum; first empty but change dataFormat if known
             filePath = _params.pop('filePath', None)
             dataFormat = _params.pop('dataFormat', None)
+            refExpDims = _params.pop('referenceExperimentDimensions', None)
             spectrum = _newEmptySpectrum(project, name=spectrumName, path=filePath, **_params)
             # Optionally change the dataFormat
             if filePath is not None and dataFormat is not None:
@@ -5464,6 +5484,41 @@ class CcpnNefReader(CcpnNefContent):
                     spectrum._openFile(path=filePath, dataFormat=dataFormat, checkParameters=True)
                 except (RuntimeError, ValueError) as es:
                     getLogger().warning(f'{es}')
+
+            framecode = saveFrame.get('chemical_shift_list')
+            # Defaults to the specified shiftList or the first shiftList (there should be only one, but we want the read to work)
+            if (csl := (self.frameCode2Object.get(framecode) or self.defaultChemicalShiftList)):
+                spectrum.chemicalShiftList = csl
+
+            framecode = saveFrame.get('ccpn_sample')
+            if (sample := self.frameCode2Object.get(framecode)):
+                spectrum.sample = sample
+
+            if refExpDims is not None:
+                try:
+                    spectrum.referenceExperimentDimensions = literal_eval(refExpDims)
+                except Exception:
+                    getLogger().warning(f'could not evaluate referenceExperimentDimensions - {es}')
+
+            # TODO:ED - search for ccpn experiment names?
+            dimensionTransferTags = ('dimension_1', 'dimension_2', 'transfer_type', 'is_indirect')
+
+            # read dimension transfer data
+            loopName = 'nef_spectrum_dimension_transfer'
+            # Those are treated elsewhere
+            loop = saveFrame.get(loopName)
+            if loop:
+                data = loop.data
+                transferData = [
+                    SpectrumLib.MagnetisationTransferTuple(*(row.get(tag) for tag in dimensionTransferTags))
+                    for row in data
+                    ]
+                if (expName := spectrum.experimentName):
+                    spectrum.experimentType = expName  # name or type can be used here
+                if not spectrum.experimentType:
+                    spectrum._setMagnetisationTransfers(transferData)
+            else:
+                raise ValueError("nef_spectrum_dimension_transfer is missing or empty")
 
             # to still implement
             #             framecode = saveFrame.get('chemical_shift_list')

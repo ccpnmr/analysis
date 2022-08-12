@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-05 11:05:50 +0100 (Fri, August 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-12 16:58:10 +0100 (Fri, August 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -417,7 +417,8 @@ nef2CcpnMap = {
         ('num_dimensions', 'dimensionCount'),
         ('chemical_shift_list', None),
         ('experiment_classification', None),
-        ('experiment_type', None),
+        ('experiment_type', 'experimentName'),
+        ('ccpn_reference_experiment_dimensions', 'referenceExperimentDimensions'),
         ('ccpn_positive_contour_count', 'positiveContourCount'),
         ('ccpn_positive_contour_base', 'positiveContourBase'),
         ('ccpn_positive_contour_factor', 'positiveContourFactor'),

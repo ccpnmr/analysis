@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-11 19:00:35 +0100 (Thu, August 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-12 09:58:33 +0100 (Fri, August 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -102,37 +102,48 @@ class FmtAxisItem(pg.AxisItem):
 class FittingHandle(Handle):
 
     sigMoved = QtCore.Signal(object)  # pos
+    sigHovered = QtCore.Signal(object)  # ev
 
     def __init__(self, parentPlot=None, radius=8, typ='s', pen=(200, 200, 220),  deletable=False):
         super().__init__(radius, typ, pen=pen, parent=parentPlot, deletable=deletable)
         self.parentPlot = parentPlot
         self.pen.setWidth(2)
+        self.hoverPen = pg.functions.mkPen((255, 255, 0), width=2, style=QtCore.Qt.SolidLine)
 
     def mouseDragEvent(self, ev):
         if ev.button() != QtCore.Qt.LeftButton:
             return
         ev.accept()
-
         if ev.isFinish():
             if self.isMoving:
                 pos = self.mapToParent(ev.pos())
                 self.setPos(pos)
                 self.sigMoved.emit([pos.x(), pos.y()])
             self.isMoving = False
-
         elif ev.isStart():
             self.isMoving = True
-            # self.startPos = self.scenePos()
-            # self.cursorOffset = self.scenePos() - ev.buttonDownScenePos()
+            pos = self.mapToParent(ev.pos())
+            self.setPos(pos)
+            self.sigMoved.emit([pos.x(), pos.y()])
+        if self.isMoving:  ## note: isMoving may become False in mid-drag due to right-click.
             pos = self.mapToParent(ev.pos())
             self.setPos(pos)
             self.sigMoved.emit([pos.x(), pos.y()])
 
-        if self.isMoving:  ## note: isMoving may become False in mid-drag due to right-click.
-            # pos = ev.scenePos() + self.cursorOffset
-            pos = self.mapToParent(ev.pos())
-            self.setPos(pos)
-            self.sigMoved.emit([pos.x(), pos.y()])
+    def hoverEvent(self, ev):
+        hover = False
+        if not ev.isExit():
+            if ev.acceptDrags(QtCore.Qt.LeftButton):
+                hover = True
+            for btn in [QtCore.Qt.LeftButton, QtCore.Qt.RightButton, QtCore.Qt.MidButton]:
+                if int(self.acceptedMouseButtons() & btn) > 0 and ev.acceptClicks(btn):
+                    hover = True
+        if hover:
+            self.currentPen = self.hoverPen
+            self.sigHovered.emit(ev)
+        else:
+            self.currentPen = self.pen
+        self.update()
 
     def mouseClickEvent(self, ev):
         print('Testing HANDLE CLICKED', ev)
@@ -161,11 +172,20 @@ class FittingPlot(pg.PlotItem):
         self.crossHair = CrossHair(plotWidget=self)
         self.fittingHandle = FittingHandle(pen=self.gridPen)
         self.fittingHandle.sigMoved.connect(self._handleMoved)
+        self.fittingHandle.sigHovered.connect(self._handleHovered)
+        self.fittingHandle.sigClicked.connect(self._handleClicked)
         self.addItem(self.fittingHandle)
 
     def _handleMoved(self, pos, *args):
         self.parentWidget._replot(**{'pos':pos})
 
+    def _handleHovered(self, *args):
+        # Action to be decided: maybe a tooltip of what it can do.
+        pass
+
+    def _handleClicked(self, *args):
+        # Action to be decided. maybe open a context menu gor right-click?
+        pass
 
     def clear(self):
         """
@@ -295,7 +315,7 @@ class FitPlotPanel(GuiPanel):
         self.bindingPlot = FittingPlot(parentWidget=self)
         self.toolbar = ExperimentAnalysisPlotToolBar(parent=self, plotItem=self.bindingPlot,
                                                      grid=(0, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
-        self.currentCollectionLabel = Label(self, text='test', grid=(0, 2), hAlign='r',)
+        self.currentCollectionLabel = Label(self, text='', grid=(0, 2), hAlign='r',)
         self._bindingPlotView.addItem(self.bindingPlot)
         self.getLayout().addWidget(self._bindingPlotView, 1,0,1,3)
 

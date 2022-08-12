@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-27 12:22:56 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-12 13:08:42 +0100 (Fri, August 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -285,7 +285,7 @@ class _CoreTableWidgetABC(_SimplePandasTableViewProjectSpecific):
                     # uniqueIds in the visible table
                     if obj in (objSet - tableSet):
                         if df is None or df.empty:
-                            # create a new table from the list
+                            # create a new table from the list - should only be a single item
                             #   required here as the peak tables can be different widths
                             self.populateTable()
                         else:
@@ -293,6 +293,8 @@ class _CoreTableWidgetABC(_SimplePandasTableViewProjectSpecific):
                             newRow = self._newRowFromUniqueId(df, obj, None)
                             self.model()._insertRow(obj, newRow)
                             self._reindexTable()
+                        # highlight the new row
+                        self._highlightRow(obj)
 
                 elif trigger == Notifier.CHANGE:
                     # uniqueIds in the visible table
@@ -312,6 +314,8 @@ class _CoreTableWidgetABC(_SimplePandasTableViewProjectSpecific):
                         newRow = self._newRowFromUniqueId(df, obj, None)
                         self.model()._insertRow(obj, newRow)
                         self._reindexTable()
+                        # highlight the new row
+                        self._highlightRow(obj)
 
                     elif obj in (tableSet - objSet):
                         # remove renamed object OUT of the table
@@ -320,6 +324,22 @@ class _CoreTableWidgetABC(_SimplePandasTableViewProjectSpecific):
 
             except Exception as es:
                 getLogger().debug2(f'{self.__class__.__name__}._updateRowCallback: Error updating row in table - {es}')
+
+    def _highlightRow(self, obj):
+        """Highlight the new row if in selection
+        """
+        # probably not the fastest checking for current
+        if obj in self._sourceCurrent:
+            # highlight the row
+            selectionModel = self.selectionModel()
+            model = self.model()
+            _sortIndex = model._sortIndex
+            try:
+                if (row := self._df.index.get_loc(obj)) is not None:
+                    rowIndex = model.index(_sortIndex.index(row), 0)
+                    selectionModel.select(rowIndex, selectionModel.Select | selectionModel.Rows)
+            except Exception:
+                getLogger().debug2(f'{self.__class__.__name__}._highlightRow: Error highlighting row')
 
     def _reindexTable(self):
         """Reset the index column for the table

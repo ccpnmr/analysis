@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-12 20:58:14 +0100 (Fri, August 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 14:14:48 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -5476,6 +5476,8 @@ class CcpnNefReader(CcpnNefContent):
             # create a new spectrum; first empty but change dataFormat if known
             filePath = _params.pop('filePath', None)
             dataFormat = _params.pop('dataFormat', None)
+            expName = _params.pop('experimentName', None)
+            expType = _params.pop('experimentType', None)
             refExpDims = _params.pop('referenceExperimentDimensions', None)
             spectrum = _newEmptySpectrum(project, name=spectrumName, path=filePath, **_params)
             # Optionally change the dataFormat
@@ -5494,15 +5496,15 @@ class CcpnNefReader(CcpnNefContent):
             if (sample := self.frameCode2Object.get(framecode)):
                 spectrum.sample = sample
 
-            if refExpDims is not None:
-                try:
-                    spectrum.referenceExperimentDimensions = literal_eval(refExpDims)
-                except Exception:
-                    getLogger().warning(f'could not evaluate referenceExperimentDimensions - {es}')
+            # set the experimentName and -Type if available - not mandatory
+            if expName:
+                spectrum.experimentName = expName
+            if expType:
+                spectrum.experimentType = expType
 
-            # TODO:ED - search for ccpn experiment names?
             dimensionTransferTags = ('dimension_1', 'dimension_2', 'transfer_type', 'is_indirect')
 
+            transferData = None
             # read dimension transfer data
             loopName = 'nef_spectrum_dimension_transfer'
             # Those are treated elsewhere
@@ -5513,12 +5515,29 @@ class CcpnNefReader(CcpnNefContent):
                     SpectrumLib.MagnetisationTransferTuple(*(row.get(tag) for tag in dimensionTransferTags))
                     for row in data
                     ]
-                if (expName := spectrum.experimentName):
+                # if name is available, use it to set the experimentType (if not set)
+                if expName and not expType:  # (expName := spectrum.experimentName):
                     spectrum.experimentType = expName  # name or type can be used here
-                if not spectrum.experimentType:
+
+                # will be set if the type is valid
+                if not spectrum.experimentType and transferData:
                     spectrum._setMagnetisationTransfers(transferData)
             else:
                 raise ValueError("nef_spectrum_dimension_transfer is missing or empty")
+
+            if refExpDims:
+                try:
+                    # set the reference dimensions - may be a bad string
+                    spectrum.referenceExperimentDimensions = literal_eval(refExpDims)
+                except Exception:
+                    getLogger().warning(f'could not evaluate referenceExperimentDimensions - {es}')
+
+            else:
+                # set the default
+                if (newRefs := spectrum.getAvailableReferenceExperimentDimensions(spectrum.experimentType)):
+                    spectrum.referenceExperimentDimensions = newRefs[0]
+                elif transferData:
+                    spectrum.referenceExperimentDimensions = spectrum.axisCodes
 
             # to still implement
             #             framecode = saveFrame.get('chemical_shift_list')

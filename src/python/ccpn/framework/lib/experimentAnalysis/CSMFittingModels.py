@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 16:47:20 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 17:05:51 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,13 +27,8 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 #=========================================================================================
 
 import numpy as np
-from collections import defaultdict
-
-import pandas as pd
-
+import warnings
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.Pid import createPid
-from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.DataTable import TableFrame
 from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult, _registerModels
 from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import  CSMOutputFrame
@@ -178,40 +173,42 @@ class DeltaDeltaShiftsCalculation():
         outputFrame._buildColumnHeaders()
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
         rowIndex = 1
-        while True:
-            for collectionId, groupDf in grouppedByCollectionsId:
-                groupDf.sort_values([sv.SERIESSTEP], inplace=True)
-                dimensions = groupDf[sv.DIMENSION].unique()
-                dataPerDimensionDict = {}
-                for dim in dimensions:
-                    dimRow = groupDf[groupDf[sv.DIMENSION] == dim]
-                    dataPerDimensionDict[dim] = dimRow[sv._PPMPOSITION].values
-                alphaFactors = []
-                for i in dataPerDimensionDict: # get the correct alpha factors per IsotopeCode/dimension and not derive it by atomName.
-                    ic = groupDf[groupDf[sv.DIMENSION] == i][sv.ISOTOPECODE].unique()[-1]
-                    alphaFactors.append(self._alphaFactors.get(ic, 1))
-                values = np.array(list(dataPerDimensionDict.values()))
-                seriesValues4residue = values.T  ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
-                deltaDeltas = DeltaDeltaShiftsCalculation._calculateDeltaDeltas(seriesValues4residue, alphaFactors)
-                csmValue = np.mean(deltaDeltas[1:])      ## first item is excluded from as it is always 0 by definition.
-                nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf) # join the atom names from different rows in a list
-                seriesSteps = groupDf[sv.SERIESSTEP].unique()
-                seriesUnits = groupDf[sv.SERIESUNIT].unique()
-                peakPids = groupDf[sv.PEAKPID].unique()
-                for delta, seriesStep, peakPid in zip(deltaDeltas, seriesSteps, peakPids):
-                    # build the outputFrame
-                    outputFrame.loc[rowIndex, sv.COLLECTIONID] = collectionId
-                    outputFrame.loc[rowIndex, sv.PEAKPID] = peakPid
-                    outputFrame.loc[rowIndex, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
-                    outputFrame.loc[rowIndex, sv.SERIESSTEPVALUE] = delta
-                    outputFrame.loc[rowIndex, sv.SERIESSTEP] = seriesStep
-                    outputFrame.loc[rowIndex, sv.SERIESUNIT] = seriesUnits[-1]
-                    outputFrame.loc[rowIndex, sv.DELTA_DELTA] = csmValue
-                    outputFrame.loc[rowIndex, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
-                    outputFrame.loc[rowIndex, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''
-                    outputFrame.loc[rowIndex, sv.FLAG] = sv.FLAG_INCLUDED
-                    rowIndex += 1
-            break
+        with warnings.catch_warnings():
+            warnings.filterwarnings(action='ignore', category=RuntimeWarning)
+            while True:
+                for collectionId, groupDf in grouppedByCollectionsId:
+                    groupDf.sort_values([sv.SERIESSTEP], inplace=True)
+                    dimensions = groupDf[sv.DIMENSION].unique()
+                    dataPerDimensionDict = {}
+                    for dim in dimensions:
+                        dimRow = groupDf[groupDf[sv.DIMENSION] == dim]
+                        dataPerDimensionDict[dim] = dimRow[sv._PPMPOSITION].values
+                    alphaFactors = []
+                    for i in dataPerDimensionDict: # get the correct alpha factors per IsotopeCode/dimension and not derive it by atomName.
+                        ic = groupDf[groupDf[sv.DIMENSION] == i][sv.ISOTOPECODE].unique()[-1]
+                        alphaFactors.append(self._alphaFactors.get(ic, 1))
+                    values = np.array(list(dataPerDimensionDict.values()))
+                    seriesValues4residue = values.T  ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
+                    deltaDeltas = DeltaDeltaShiftsCalculation._calculateDeltaDeltas(seriesValues4residue, alphaFactors)
+                    csmValue = np.mean(deltaDeltas[1:])      ## first item is excluded from as it is always 0 by definition.
+                    nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf) # join the atom names from different rows in a list
+                    seriesSteps = groupDf[sv.SERIESSTEP].unique()
+                    seriesUnits = groupDf[sv.SERIESUNIT].unique()
+                    peakPids = groupDf[sv.PEAKPID].unique()
+                    for delta, seriesStep, peakPid in zip(deltaDeltas, seriesSteps, peakPids):
+                        # build the outputFrame
+                        outputFrame.loc[rowIndex, sv.COLLECTIONID] = collectionId
+                        outputFrame.loc[rowIndex, sv.PEAKPID] = peakPid
+                        outputFrame.loc[rowIndex, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
+                        outputFrame.loc[rowIndex, sv.SERIESSTEPVALUE] = delta
+                        outputFrame.loc[rowIndex, sv.SERIESSTEP] = seriesStep
+                        outputFrame.loc[rowIndex, sv.SERIESUNIT] = seriesUnits[-1]
+                        outputFrame.loc[rowIndex, sv.DELTA_DELTA] = csmValue
+                        outputFrame.loc[rowIndex, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
+                        outputFrame.loc[rowIndex, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''
+                        outputFrame.loc[rowIndex, sv.FLAG] = sv.FLAG_INCLUDED
+                        rowIndex += 1
+                break
         return outputFrame
 
 

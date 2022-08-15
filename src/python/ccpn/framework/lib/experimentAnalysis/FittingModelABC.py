@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 16:47:20 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 17:05:51 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,8 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
+
+import warnings
 import numpy as np
 import pandas as pd
 from collections import defaultdict
@@ -207,86 +209,87 @@ class MinimiserModel(Model):
             params = self.make_params(verbose=verbose)
         else:
             params = deepcopy(params)
+        with warnings.catch_warnings():
+            warnings.filterwarnings(action='ignore', category=RuntimeWarning)
+            # If any kwargs match parameter names, override params.
+            param_kwargs = set(kwargs.keys()) & set(self.param_names)
+            for name in param_kwargs:
+                p = kwargs[name]
+                if isinstance(p, Parameter):
+                    p.name = name  # allows N=Parameter(value=5) with implicit name
+                    params[name] = deepcopy(p)
+                else:
+                    params[name].set(value=p)
+                del kwargs[name]
 
-        # If any kwargs match parameter names, override params.
-        param_kwargs = set(kwargs.keys()) & set(self.param_names)
-        for name in param_kwargs:
-            p = kwargs[name]
-            if isinstance(p, Parameter):
-                p.name = name  # allows N=Parameter(value=5) with implicit name
-                params[name] = deepcopy(p)
-            else:
-                params[name].set(value=p)
-            del kwargs[name]
+            # All remaining kwargs should correspond to independent variables.
+            for name in kwargs:
+                if name not in self.independent_vars:
+                    getLogger.warn(f"The keyword argument {name} does not " +
+                                  "match any arguments of the model function. " +
+                                  "It will be ignored.", UserWarning)
 
-        # All remaining kwargs should correspond to independent variables.
-        for name in kwargs:
-            if name not in self.independent_vars:
-                getLogger.warn(f"The keyword argument {name} does not " +
-                              "match any arguments of the model function. " +
-                              "It will be ignored.", UserWarning)
+            # If any parameter is not initialized raise a more helpful error.
+            missing_param = any(p not in params.keys() for p in self.param_names)
+            blank_param = any((p.value is None and p.expr is None)
+                              for p in params.values())
+            if missing_param or blank_param:
+                msg = ('Assign each parameter an initial value by passing '
+                       'Parameters or keyword arguments to fit.\n')
+                missing = [p for p in self.param_names if p not in params.keys()]
+                blank = [name for name, p in params.items()
+                         if p.value is None and p.expr is None]
+                msg += f'Missing parameters: {str(missing)}\n'
+                msg += f'Non initialized parameters: {str(blank)}'
+                raise ValueError(msg)
 
-        # If any parameter is not initialized raise a more helpful error.
-        missing_param = any(p not in params.keys() for p in self.param_names)
-        blank_param = any((p.value is None and p.expr is None)
-                          for p in params.values())
-        if missing_param or blank_param:
-            msg = ('Assign each parameter an initial value by passing '
-                   'Parameters or keyword arguments to fit.\n')
-            missing = [p for p in self.param_names if p not in params.keys()]
-            blank = [name for name, p in params.items()
-                     if p.value is None and p.expr is None]
-            msg += f'Missing parameters: {str(missing)}\n'
-            msg += f'Non initialized parameters: {str(blank)}'
-            raise ValueError(msg)
+            # Handle null/missing values.
+            if nan_policy is not None:
+                self.nan_policy = nan_policy
 
-        # Handle null/missing values.
-        if nan_policy is not None:
-            self.nan_policy = nan_policy
+            mask = None
+            if self.nan_policy == 'omit':
+                mask = ~isnull(data)
+                if mask is not None:
+                    data = data[mask]
+                if weights is not None:
+                    weights = _align(weights, mask, data)
 
-        mask = None
-        if self.nan_policy == 'omit':
-            mask = ~isnull(data)
-            if mask is not None:
-                data = data[mask]
-            if weights is not None:
-                weights = _align(weights, mask, data)
+            # If independent_vars and data are alignable (pandas), align them,
+            # and apply the mask from above if there is one.
+            for var in self.independent_vars:
+                if not np.isscalar(kwargs[var]):
+                    kwargs[var] = _align(kwargs[var], mask, data)
 
-        # If independent_vars and data are alignable (pandas), align them,
-        # and apply the mask from above if there is one.
-        for var in self.independent_vars:
-            if not np.isscalar(kwargs[var]):
-                kwargs[var] = _align(kwargs[var], mask, data)
+            # Make sure `dtype` for data is always `float64` or `complex128`
+            if np.isrealobj(data):
+                data = np.asfarray(data)
+            elif np.iscomplexobj(data):
+                data = np.asarray(data, dtype='complex128')
 
-        # Make sure `dtype` for data is always `float64` or `complex128`
-        if np.isrealobj(data):
-            data = np.asfarray(data)
-        elif np.iscomplexobj(data):
-            data = np.asarray(data, dtype='complex128')
+            # Coerce `dtype` for independent variable(s) to `float64` or
+            # `complex128` when the variable has one of the following types: list,
+            # tuple, numpy.ndarray, or pandas.Series
+            for var in self.independent_vars:
+                var_data = kwargs[var]
+                if isinstance(var_data, (list, tuple, np.ndarray, Series)):
+                    if np.isrealobj(var_data):
+                        kwargs[var] = np.asfarray(var_data)
+                    elif np.iscomplexobj(var_data):
+                        kwargs[var] = np.asarray(var_data, dtype='complex128')
 
-        # Coerce `dtype` for independent variable(s) to `float64` or
-        # `complex128` when the variable has one of the following types: list,
-        # tuple, numpy.ndarray, or pandas.Series
-        for var in self.independent_vars:
-            var_data = kwargs[var]
-            if isinstance(var_data, (list, tuple, np.ndarray, Series)):
-                if np.isrealobj(var_data):
-                    kwargs[var] = np.asfarray(var_data)
-                elif np.iscomplexobj(var_data):
-                    kwargs[var] = np.asarray(var_data, dtype='complex128')
+            if fit_kws is None:
+                fit_kws = {}
 
-        if fit_kws is None:
-            fit_kws = {}
-
-        result = MinimiserResult(self, params, method=method, iter_cb=iter_cb,
-                             scale_covar=scale_covar, fcn_kws=kwargs,
-                             nan_policy=self.nan_policy, calc_covar=calc_covar,
-                             max_nfev=max_nfev, **fit_kws)
-        result.fit(data=data, weights=weights)
-        result.components = self.components
-        self.method = method
-        if result.redchi is not None:
-            result.r2 = lf.r2_func(redchi=result.redchi, y=data)
+            result = MinimiserResult(self, params, method=method, iter_cb=iter_cb,
+                                 scale_covar=scale_covar, fcn_kws=kwargs,
+                                 nan_policy=self.nan_policy, calc_covar=calc_covar,
+                                 max_nfev=max_nfev, **fit_kws)
+            result.fit(data=data, weights=weights)
+            result.components = self.components
+            self.method = method
+            if result.redchi is not None:
+                result.r2 = lf.r2_func(redchi=result.redchi, y=data)
         return result
 
     def guess(self, data, x, **kws):

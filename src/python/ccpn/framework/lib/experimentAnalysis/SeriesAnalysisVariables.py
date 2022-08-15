@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-25 13:50:14 +0100 (Mon, July 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 16:47:20 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -108,12 +108,20 @@ AssignmentPropertiesHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE, NMR
 GROUPBYAssignmentHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE]
 PidHeaders = [COLLECTIONPID, SPECTRUMPID, PEAKPID, NMRATOMPID]
 
+_ERR = '_err'
+ERROR = 'Error'
+
+## CSM Fitting Variables
 KD = 'Kd'
 BMAX = 'BMax'
-_ERR = '_err'
 KD_ERR = f'{KD}{_ERR}'
 BMAX_ERR = f'{BMAX}{_ERR}'
-ERROR = 'Error'
+
+## Relaxation  Fitting Variables
+AMPLITUDE = 'amplitude'
+DECAY = 'decay'
+AMPLITUDE_ERR = f'{AMPLITUDE}{_ERR}'
+DECAY_ERR = f'{DECAY}{_ERR}'
 
 FLAG = 'Flag'
 SERIAL = 'Serial'

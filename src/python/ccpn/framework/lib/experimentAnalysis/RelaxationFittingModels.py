@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 11:37:34 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 16:47:20 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -37,21 +37,28 @@ from lmfit.models import update_param_vals
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 
 
+#####################################################
+###########        Minimisers        ################
+#####################################################
 
-###############################################################
-###########  T2 Relaxation Minimiser/Fitting Models   #########
-###############################################################
-
-class ExponentialModel(MinimiserModel):
+class _RelaxationBaseMinimiser(MinimiserModel):
     """
-    A model based on an exponential decay function.
+    A base model for T1/T2
     """
-
-    FITTING_FUNC = lf.exponential_func
+    AMPLITUDEstr = sv.AMPLITUDE # They must be exactly as they are defined in the FITTING_FUNC arguments! This was too hard to change!
+    DECAYstr = sv.DECAY
+    _defaultParams = {
+                        AMPLITUDEstr:1,
+                        DECAYstr:0.5
+                      }
 
     def __init__(self, independent_vars=['x'], prefix='', nan_policy=sv.OMIT_MODE, **kwargs):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
-        super().__init__(ExponentialModel.FITTING_FUNC, **kwargs)
+        super().__init__(T1Minimiser.FITTING_FUNC, **kwargs)
+        self.name = self.MODELNAME
+        self.amplitude = None  # this will be a Parameter Obj . Set on the fly by the minimiser while inspecting the Fitting Func signature
+        self.decay = None  # this will be a Parameter Obj
+        self.params = self.make_params(**self._defaultParams)
 
     def guess(self, data, x, **kws):
         """
@@ -60,114 +67,105 @@ class ExponentialModel(MinimiserModel):
         :param kws:
         :return: dict of params needed for the fitting
         """
-        params = self.make_params(amplitude=max(data), decay=np.mean(x))
-        params['amplitude'].min = min(data)
-        params['amplitude'].max = max(data) + max(data) * 0.5
-        params['decay'].min = min(x)
-        params['decay'].max = max(x) + max(x) * 0.5
+        params = self.params
+        minDecay = np.min(x)
+        maxDecay = np.max(x) + (np.max(x) * 0.5)
+        if minDecay == maxDecay == 0:
+            getLogger().warning(f'Fitting model min==max {minDecay}, {maxDecay}')
+            minDecay = -1
+        params.get(self.DECAYstr).value = np.mean(x)
+        params.get(self.DECAYstr).min = minDecay
+        params.get(self.DECAYstr).max = maxDecay
+        params.get(self.AMPLITUDEstr).value = np.mean(data)
+        params.get(self.AMPLITUDEstr).min = 0.001
+        params.get(self.AMPLITUDEstr).max = np.max(data) + (np.max(data) * 0.5)
         return params
 
+class T1Minimiser(_RelaxationBaseMinimiser):
+    """
+    A model based on the T1 fitting function.
+    """
+    FITTING_FUNC = lf.T1_func
+    MODELNAME = 'T1_Model'
 
-class T2FittingModel(FittingModelABC):
+
+class T2Minimiser(_RelaxationBaseMinimiser):
+    """
+    A model based on the T2 fitting function.
+    """
+    FITTING_FUNC = lf.T2_func
+
+
+#####################################################
+###########       FittingModel       ################
+#####################################################
+
+class _RelaxationBaseFittingModel(FittingModelABC):
+    """
+    A Base model class for T1/T2
+    """
+    PeakProperty = 'height'
+
+    def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
+        """
+        :param inputData:
+        :param rescale:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
+        ## Keep only one IsotopeCode as we are using only Height/Volume
+        inputData = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
+        grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
+        for collectionId, groupDf in grouppedByCollectionsId:
+            groupDf.sort_values([sv.SERIESSTEP], inplace=True)
+            seriesSteps = groupDf[sv.SERIESSTEP]
+            seriesValues = groupDf[sv._HEIGHT]
+            xArray = seriesSteps.values
+            yArray = seriesValues.values
+
+            minimiser = self.Minimiser()
+            try:
+                params = minimiser.guess(yArray, xArray)
+                result = minimiser.fit(yArray, params, x=xArray)
+            except:
+                getLogger().warning(f'Fitting Failed for collectionId: {collectionId} data.')
+                params = minimiser.params
+                result = MinimiserResult(minimiser, params)
+            inputData.loc[collectionId, sv.MODEL_NAME] = self.ModelName
+            inputData.loc[collectionId, sv.MINIMISER_METHOD] = minimiser.method
+            for ix, row in groupDf.iterrows():
+                for resultName, resulValue in result.getAllResultsAsDict().items():
+                    inputData.loc[ix, resultName] = resulValue
+        return inputData
+
+class T1FittingModel(_RelaxationBaseFittingModel):
+    """
+    T1 model class containing fitting equations
+    """
+    ModelName   = sv.T1
+    Info        = '''
+                  '''
+    Description = '''
+                  '''
+    References  = '''
+                  '''
+    Minimiser = T1Minimiser
+    MaTex = ''
+
+class T2FittingModel(_RelaxationBaseFittingModel):
     """
     T2 model class containing fitting equations
     """
     ModelName   = sv.T2
-
     Info        = '''
-                  A model based on an exponential decay function.
-                  The model has two Parameters: `amplitude` (`A`) and `decay` (`tau`)
                   '''
-    Description = ''' A * e^{ -x / tau }'''
-    References  = '''
-                  1) https://en.wikipedia.org/wiki/Exponential_decay
-                  '''
-
-    Minimiser = ExponentialModel
-
-    def fitSeries(self, inputData: TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
-
-        getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
-        xArray = np.array(inputData.SERIESSTEPS)
-        minimiserResults = []
-        outputFrame = _getOutputFrameFromInputFrame(inputData, outputFrameType=RelaxationOutputFrame)
-        for ix, row in inputData.iterrows():
-            seriesValues = row[inputData.valuesHeaders]
-            yArray = seriesValues.values
-            modelMinimiser = self.Minimiser()
-            modelMinimiser.label = row[sv._ROW_UID]
-            params = modelMinimiser.guess(yArray, xArray)
-            try:
-                minimiserResult = modelMinimiser.fit(yArray, params, x=xArray)
-            except:
-                getLogger().warning(f'Fitting Failed for: {row[sv._ROW_UID]} data.')
-                minimiserResult = MinimiserResult(modelMinimiser, params, method=modelMinimiser.method)
-            minimiserResults.append(minimiserResult)
-
-        return outputFrame
-
-###############################################################
-###########  T2 Relaxation Minimiser/Fitting Models   #########
-###############################################################
-
-class T1Model(MinimiserModel):
-    """
-    A model based on an exponential decay function.
-    """
-
-    FITTING_FUNC = lf.T1_func
-
-    def __init__(self, independent_vars=['x'], prefix='', nan_policy=sv.OMIT_MODE, **kwargs):
-        kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
-        super().__init__(ExponentialModel.FITTING_FUNC, **kwargs)
-
-    def guess(self, data, x, **kws):
-        """
-        :param data: y values 1D array
-        :param x: the x axis values. 1D array
-        :param kws:
-        :return: dict of params needed for the fitting
-        """
-        params = self.make_params(amplitude=max(data), decay=np.mean(x))
-        params['amplitude'].min = min(data)
-        params['amplitude'].max = max(data) + max(data) * 0.5
-        params['decay'].min = min(x)
-        params['decay'].max = max(x) + max(x) * 0.5
-        return params
-
-class T1FittingModel(FittingModelABC):
-    """
-    T2 model class containing fitting equations
-    """
-    ModelName   = sv.T1
-
-    Info        = '''
-                  The model has two Parameters: `amplitude` (`A`) and `decay` (`tau`)
-                  '''
-    Description = ''' A *(1- e^{-x / tau })'''
+    Description = ''''''
     References  = '''
                   '''
-    Minimiser = T1Model
-
-    def fitSeries(self, inputData: TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
-        """Perform the fitting routine to the input DataTable. Return an output dataTable"""
-        getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
-        xArray = np.array(inputData.SERIESSTEPS)
-        minimiserResults = []
-        outputFrame = _getOutputFrameFromInputFrame(inputData, outputFrameType=RelaxationOutputFrame)
-        for ix, row in inputData.iterrows():
-            seriesValues = row[inputData.valuesHeaders]
-            yArray = seriesValues.values
-            modelMinimiser = self.Minimiser()
-            modelMinimiser.label = row[sv._ROW_UID]
-            params = modelMinimiser.guess(yArray, xArray)
-            try:
-                minimiserResult = modelMinimiser.fit(yArray, params, x=xArray)
-            except:
-                getLogger().warning(f'Fitting Failed for: {row[sv._ROW_UID]} data.')
-                minimiserResult = MinimiserResult(modelMinimiser, params, method=modelMinimiser.method)
-            minimiserResults.append(minimiserResult)
-        return outputFrame
+    Minimiser = T2Minimiser
+    MaTex = ''
 
 
 #####################################################
@@ -182,7 +180,7 @@ RELAXATION_MODELS_DICT = {
 
 def _registerFittingModels():
     from ccpn.framework.lib.experimentAnalysis.RelaxationAnalysisBC import RelaxationAnalysisBC
-    models = [T1FittingModel, T2FittingModel]
+    models = [T2FittingModel]#, T2FittingModel]
     for model in models:
         RelaxationAnalysisBC.registerFittingModel(model)
     return models

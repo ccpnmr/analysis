@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-12 10:46:29 +0100 (Fri, August 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 16:47:20 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -23,7 +23,7 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 # Start of code
 #=========================================================================================
 
-
+import numpy as np
 import pyqtgraph as pg
 from pyqtgraph.graphicsItems.ROI import MouseDragHandler, Handle
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -40,6 +40,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Action import Action
 from ccpn.core.Peak import Peak
 from ccpn.ui.gui.widgets.ViewBox import CrossHair
+from ccpn.util.Common import percentage
 
 class ExperimentAnalysisPlotToolBar(ToolBar):
 

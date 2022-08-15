@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-25 13:50:14 +0100 (Mon, July 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 16:47:20 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -46,11 +46,16 @@ powerlaw_func    = ls.powerlaw
 
 
 def T1_func(x, amplitude=1, decay=1):
-    """Return an exponential function.
-    exponential(x, amplitude, decay) = amplitude * (1-exp(-x/decay))
+    """ Function used to describe the T1 decay
     """
     decay = ls.not_zero(decay)
     return amplitude * (1-np.exp(-x/decay))
+
+def T2_func(x, amplitude=1, decay=1):
+    """ Function used to describe the T2 decay
+    """
+    decay = ls.not_zero(decay)
+    return amplitude * np.exp(-x/decay)
 
 def fractionBound_func(p, l, kd):
     """

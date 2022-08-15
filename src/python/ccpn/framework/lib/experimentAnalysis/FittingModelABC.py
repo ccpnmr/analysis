@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-09 15:59:57 +0100 (Tue, August 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 16:47:20 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -54,13 +54,14 @@ class FittingModelABC(ABC):
     """
     The top level class for the FittingModel Object.
     """
-    ModelName   = 'ModelName'      # The Model name.
-    Info        = 'the info'            # A brief description of the fitting model.
-    Description = 'Description'  # A simplified representation of the used equation(s).
-    MaTex      = r''                 # MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
-    References  = 'References'    # A list of journal article references. E.g.: DOIs or title/authors/year/journal; web-pages.
+    ModelName   = 'ModelName'       # The Model name.
+    Info        = 'the info'        # A brief description of the fitting model.
+    Description = 'Description'     # A simplified representation of the used equation(s).
+    MaTex      = r''                # MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
+    References  = 'References'      # A list of journal article references. E.g.: DOIs or title/authors/year/journal; web-pages.
     Minimiser   = None
     FullDescription = f'{Info} \n {Description}\nSee References: {References}'
+    PeakProperty = ''               # The peak property to fit. One of ['height', 'lineWidth', 'volume', 'ppmPosition']
 
     @abstractmethod
     def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:

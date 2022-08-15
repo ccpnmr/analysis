@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-21 11:40:03 +0100 (Thu, July 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 16:47:20 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -80,8 +80,8 @@ class SeriesFrameBC(TableFrame):
 
     def joinNmrResidueCodeType(self):
         """ Merge the nmrResidue SequenceCode and ResidueType columns in a new colum (NMRRESIDUECODETYPE)"""
-        ## convert the sequenceCode to str. This because pandas Automatically tries to make floats.
-        self[sv.NMRRESIDUECODE] = self[sv.NMRRESIDUECODE].astype(int).astype(str)
+        ## convert the sequenceCode to str. This because pandas Automatically tries to make floats.!!
+        self[sv.NMRRESIDUECODE] = self[sv.NMRRESIDUECODE].astype(str).apply(lambda x: x.replace('.0', ''))
         self._joinTwoColumnsAsStr(sv.NMRRESIDUECODE, sv.NMRRESIDUETYPE, newColumName=sv.NMRRESIDUECODETYPE, separator='-')
 
 class InputSeriesFrameBC(SeriesFrameBC):

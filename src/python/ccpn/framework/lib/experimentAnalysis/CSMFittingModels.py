@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 17:05:51 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,8 +30,8 @@ import numpy as np
 import warnings
 from ccpn.util.Logging import getLogger
 from ccpn.core.DataTable import TableFrame
-from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult, _registerModels
-from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import  CSMOutputFrame
+from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMOutputFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 
@@ -283,16 +283,20 @@ class FractionBindingModel(FittingModelABC):
 ########################################################################################################################
 ########################################################################################################################
 
-ChemicalShiftCalculationModes = {DeltaDeltaShiftsCalculation.ModelName: DeltaDeltaShiftsCalculation,
-                                 }
-ChemicalShiftCalculationModels = {OneSiteBindingModel.ModelName: OneSiteBindingModel,
-                                  FractionBindingModel.ModelName: FractionBindingModel}
 
-def _registerFittingModels():
-    """
-    Register the ChemicalShiftMapping specific Models
-    """
-    from ccpn.framework.lib.experimentAnalysis.ChemicalShiftMappingAnalysisBC import ChemicalShiftMappingAnalysisBC
-    models = [OneSiteBindingModel]
-    _registerModels(ChemicalShiftMappingAnalysisBC, models)
-    return models
+
+## Add a new Model to the list to be available throughout the program
+Models = [
+        OneSiteBindingModel,
+        ]
+
+def _registerFittingModels(cls, models):
+    dd = {}
+    for model in models:
+        cls.registerFittingModel(model)
+        dd[model.ModelName] = model
+    return dd
+
+ChemicalShiftCalculationModes = {
+                                DeltaDeltaShiftsCalculation.ModelName: DeltaDeltaShiftsCalculation,
+                                 }

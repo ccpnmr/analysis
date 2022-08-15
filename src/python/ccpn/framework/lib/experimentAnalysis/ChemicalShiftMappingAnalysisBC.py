@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 11:37:34 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,7 @@ from scipy import stats
 from ccpn.util.Logging import getLogger
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import _registerFittingModels
+from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import Models
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 
 
@@ -51,9 +51,11 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         self._alphaFactors = sv.DEFAULT_ALPHA_FACTORS
         self._excludedResidueTypes = sv.DEFAULT_EXCLUDED_RESIDUES
         self._untraceableValue = 1.0 # default value for replacing NaN values in the DeltaDeltas column
-        models = _registerFittingModels()
-        if len(models) > 0:
-            self._currentFittingModel = models[-1]()
+        self.fittingModels = self._registerFittingModels(Models)
+        fittingModel = self._getFirstFittingModel()
+        if fittingModel:
+            self._currentFittingModel = fittingModel()
+
 
     @property
     def inputDataTables(self, ) -> list:
@@ -151,30 +153,6 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         self._needsRefitting = False
         getLogger().info('Fitting InputData completed.')
 
-    def getFirstOutputDataFrame(self):
-        """Get the first available dataFrame from the outputDataTable. """
-        if len(self.inputDataTables) == 0:
-            return
-        if not self.getOutputDataTables():
-            return
-        outputDataTable = self.getOutputDataTables()[0]
-        return outputDataTable.data
-
-    def _getGroupedOutputDataFrame(self, *args):
-        """ internal. Used to get a df to display in GuiTables
-         Return the outputDataFrame containing the fitting and deltaDeltas calculations.
-         """
-        outDataFrame = self.getFirstOutputDataFrame()
-        if outDataFrame is None:
-            return
-        ## group by id and keep only first row as all duplicated except the series steps, which are not needed here.
-        ## reset index otherwise you lose the column collectionId
-        outDataFrame = outDataFrame.groupby(sv.COLLECTIONID).first().reset_index()
-        outDataFrame[sv._ROW_UID] = np.arange(1, len(outDataFrame)+1)
-        outDataFrame[sv.ASHTAG] = outDataFrame[sv._ROW_UID].values
-        # add Code+type Column
-        outDataFrame.joinNmrResidueCodeType()
-        return outDataFrame
 
     def plotResults(self, *args, **kwargs):
         getLogger().warning('Not implemented yet. Available: plotDeltaDeltas')

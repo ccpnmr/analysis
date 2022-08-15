@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 19:08:16 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,54 +32,43 @@ import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import _ExperimentalAnalysisTableABC, TablePanel
 
 
-class _CSMGuiTable(_ExperimentalAnalysisTableABC):
+class _RelaxationGuiTable(_ExperimentalAnalysisTableABC):
 
-    className = guiNameSpaces.CSMTablePanel
+    className = guiNameSpaces.RelaxationTablePanel
 
     _fittingColumnsDefs = {
-        sv.KD: {gt.NAME: sv.KD,
-            gt.GETTER: lambda row: gt._getValueByHeader(row, sv.KD),
-            gt.TIPTEXT: gt._makeTipText(sv.KD, ""),
+        sv.DECAY: {gt.NAME: sv.DECAY,
+            gt.GETTER: lambda row: gt._getValueByHeader(row, sv.DECAY),
             gt.FORMAT: guiNameSpaces._COLUM_FLOAT_FORM,
+            gt.TIPTEXT: gt._makeTipText(sv.DECAY, ""),
             gt.WIDTH: 70,
             gt.HIDDEN: False
             },
-        sv.KD_ERR:  {gt.NAME: sv.KD_ERR,
-            gt.GETTER: lambda row: gt._getValueByHeader(row, sv.KD_ERR),
-            gt.TIPTEXT: gt._makeTipText(sv.KD_ERR, ""),
-            gt.FORMAT: guiNameSpaces._COLUM_FLOAT_FORM,
+        sv.DECAY_ERR: {gt.NAME: sv.DECAY_ERR,
+            gt.GETTER: lambda row: gt._getValueByHeader(row,  sv.DECAY_ERR),
+            gt.TIPTEXT: gt._makeTipText(sv.DECAY_ERR, ""),
             gt.WIDTH: 70,
             gt.HIDDEN: True
             },
-        sv.BMAX: {gt.NAME: sv.BMAX,
-            gt.GETTER: lambda row: gt._getValueByHeader(row, sv.BMAX),
-            gt.FORMAT: guiNameSpaces._COLUM_FLOAT_FORM,
-            gt.TIPTEXT: gt._makeTipText(sv.BMAX, ""),
-            gt.WIDTH: 70,
-            gt.HIDDEN: False
-            },
-        sv.BMAX_ERR: {gt.NAME: sv.BMAX_ERR,
-            gt.GETTER: lambda row: gt._getValueByHeader(row,  sv.BMAX_ERR),
-            gt.TIPTEXT: gt._makeTipText(sv.BMAX_ERR, ""),
-            gt.WIDTH: 70,
-            gt.HIDDEN: True
-            }}
-
-    _othersColumnsDefs = {
-        guiNameSpaces.ColumnDdelta: {gt.NAME: sv.DELTA_DELTA,
-                                     gt.GETTER: lambda row: gt._getValueByHeader(row, sv.DELTA_DELTA),
-                                     gt.TIPTEXT: gt._makeTipText(sv.DELTA_DELTA,
-                                                                 "Perturbation value calculated as per Settings"),
-                                     gt.FORMAT: guiNameSpaces._COLUM_FLOAT_FORM,
-                                     gt.WIDTH: 70,
-                                     gt.HIDDEN: False
-                                     }}
+        sv.AMPLITUDE: {gt.NAME: sv.AMPLITUDE,
+                       gt.GETTER: lambda row: gt._getValueByHeader(row, sv.AMPLITUDE),
+                       gt.TIPTEXT: gt._makeTipText(sv.AMPLITUDE, ""),
+                       gt.FORMAT: guiNameSpaces._COLUM_FLOAT_FORM,
+                       gt.WIDTH: 70,
+                       gt.HIDDEN: False
+                       },
+        sv.AMPLITUDE_ERR: {gt.NAME: sv.AMPLITUDE_ERR,
+                           gt.GETTER: lambda row: gt._getValueByHeader(row, sv.AMPLITUDE_ERR),
+                           gt.TIPTEXT: gt._makeTipText(sv.AMPLITUDE_ERR, ""),
+                           gt.FORMAT: guiNameSpaces._COLUM_FLOAT_FORM,
+                           gt.WIDTH: 70,
+                           gt.HIDDEN: True
+                           },
+        }
 
 
-class CSMTablePanel(TablePanel):
+class RelaxationTablePanel(TablePanel):
 
     panelName = guiNameSpaces.CSMTablePanel
-    TABLE = _CSMGuiTable
-
-
+    TABLE = _RelaxationGuiTable
 

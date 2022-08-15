@@ -28,8 +28,7 @@ This module contains the GUI Settings panels for the CSM module.
 """
 
 from collections import OrderedDict as od
-from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import ChemicalShiftCalculationModes, \
-    ChemicalShiftCalculationModels
+from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import ChemicalShiftCalculationModes
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import ALL_GROUPINGNMRATOMS
 from ccpn.util.Logging import getLogger
 import numpy as np
@@ -193,9 +192,10 @@ class CSMGuiFittingPanel(GuiFittingPanel):
     def setWidgetDefinitions(self):
         """Add the CSM widget specific."""
         self.widgetDefinitions = super().setWidgetDefinitions()
-        extraLabels_ddCalculationsModels = [model.MaTex for modelName, model in ChemicalShiftCalculationModels.items()]
+        models = self._guiModule.backendHandler.fittingModels
+        extraLabels_ddCalculationsModels = [model.MaTex for modelName, model in models.items()]
         tipTexts_ddCalculationsModels = [model.FullDescription for modelName, model in
-                                         ChemicalShiftCalculationModels.items()]
+                                         models.items()]
         extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddCalculationsModels]
         settingsDict = od((
             (guiNameSpaces.WidgetVarName_FittingSeparator,
@@ -214,7 +214,7 @@ class CSMGuiFittingPanel(GuiFittingPanel):
               'enabled': False,
               'kwds': {'labelText': guiNameSpaces.Label_FittingModel,
                        'fixedWidths': SettingsWidgetFixedWidths,
-                       'compoundKwds': {'texts': list(ChemicalShiftCalculationModels.keys()),
+                       'compoundKwds': {'texts': list(models.keys()),
                                         'extraLabels': extraLabels_ddCalculationsModels,
                                         'tipTexts': tipTexts_ddCalculationsModels,
                                         'direction': 'v',
@@ -235,8 +235,8 @@ class CSMAppearancePanel(AppearancePanel):
     def _getThresholdValueFromBackend(self, columnName, calculationMode, factor):
         """ Get the threshold value based on selected Y axis. called from _setThresholdValueForData"""
         h = self._guiModule.backendHandler
-        value = h.getThresholdValueForData(data= h._getGroupedOutputDataFrame(), columnName=columnName,
-                                                calculationMode=calculationMode, factor=factor)
+        value = h.getThresholdValueForData(data= h._getGuiOutputDataFrame(), columnName=columnName,
+                                           calculationMode=calculationMode, factor=factor)
         return value
 
     @property

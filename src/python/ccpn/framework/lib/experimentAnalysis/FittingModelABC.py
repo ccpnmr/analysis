@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 17:05:51 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -83,17 +83,6 @@ class FittingModelABC(ABC):
         return f'<{self.__class__.__name__}: {self.ModelName}>'
 
     __repr__ = __str__
-
-def _registerModels(cls, fittingModels):
-    """
-    INTERNAL
-    Register the FittingModel class (not-initialised) in the respective Experiment Analysis BaseClass
-    :param cls: Experiment Analysis BaseClass e.g.: ChemicalShiftMappingAnalysisBC
-    :param fittingModels: list of FittingModels to add to the cls
-    :return: None
-    """
-    for model in fittingModels:
-        cls.registerFittingModel(model)
 
 
 class MinimiserModel(Model):

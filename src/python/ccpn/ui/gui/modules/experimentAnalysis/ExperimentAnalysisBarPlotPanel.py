@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-12 18:21:46 +0100 (Fri, August 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -46,7 +46,6 @@ class BarPlotPanel(GuiPanel):
         GuiPanel.__init__(self, guiModule,*args , **Framekwargs)
         self._appearancePanel = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
         self._toolbarPanel = self.guiModule.panelHandler.getToolBarPanel()
-
 
     def initWidgets(self):
         ## this colour def could go in an higher position as they are same for all possible plots

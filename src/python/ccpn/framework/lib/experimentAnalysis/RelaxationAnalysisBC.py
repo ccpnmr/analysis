@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 11:37:34 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.RelaxationFittingModels import _registerFittingModels, RELAXATION_MODELS_DICT
+from ccpn.framework.lib.experimentAnalysis.RelaxationFittingModels import Models
 from ccpn.util.Logging import getLogger
 
 class RelaxationAnalysisBC(SeriesAnalysisABC):
@@ -39,10 +39,10 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
 
     def __init__(self):
         super().__init__()
-        models = _registerFittingModels()
-        if len(models)>0:
-            self._currentFittingModel = models[-1]()
-
+        self.fittingModels = self._registerFittingModels(Models)
+        fittingModel = self._getFirstFittingModel()
+        if fittingModel:
+            self._currentFittingModel = fittingModel()
 
     def fitInputData(self, *args, **kwargs):
         """

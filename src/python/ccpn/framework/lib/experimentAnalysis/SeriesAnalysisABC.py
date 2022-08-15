@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 11:37:34 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -44,7 +44,7 @@ class SeriesAnalysisABC(ABC):
     The top level class for SeriesAnalysis modules.
     """
     seriesAnalysisName = ''
-    fittingModels = OrderedSet()
+    fittingModels = dict()
 
     @property
     def inputDataTables(self, ) -> list:
@@ -71,6 +71,16 @@ class SeriesAnalysisABC(ABC):
         Remove all  DataTable as inputData
         """
         self._inputDataTables = OrderedSet()
+
+    def getFirstOutputDataFrame(self):
+        """Get the first available dataFrame from the outputDataTable. """
+        if len(self.inputDataTables) == 0:
+            return
+        if not self.getOutputDataTables():
+            return
+        outputDataTable = self.getOutputDataTables()[0]
+        return outputDataTable.data
+
 
     def getOutputDataTables(self, seriesFrameType:str=None):
         """
@@ -150,14 +160,14 @@ class SeriesAnalysisABC(ABC):
         A method to register a FittingModel object.
         See the FittingModelABC for more information
         """
-        cls.fittingModels.add(fittingModel)
+        cls.fittingModels.update({fittingModel.ModelName: fittingModel})
 
     @classmethod
     def deRegisterFittingModel(cls, fittingModel):
         """
         A method to de-register a fitting Model
         """
-        cls.fittingModels.discard(fittingModel)
+        cls.fittingModels.pop(fittingModel.ModelName, None)
 
     def getFittingModelByName(self, modelName):
         """
@@ -165,8 +175,12 @@ class SeriesAnalysisABC(ABC):
         :param modelName: str
         :return:
         """
-        dd = {model.ModelName:model for model in self.fittingModels}
-        return dd.get(modelName, None)
+        return self.fittingModels.get(modelName, None)
+
+    def _getFirstFittingModel(self):
+        first = next(iter(self.fittingModels), iter({}))
+        model = self.fittingModels.get(first)
+        return model
 
     def newInputDataTableFromSpectrumGroup(self, spectrumGroup:SpectrumGroup, peakListIndices=None, dataTableName:str=None):
         """
@@ -198,6 +212,23 @@ class SeriesAnalysisABC(ABC):
             raise TypeError(f'spectrumGroup argument must be a SpectrumGroup Type. Given: {type(spectrumGroup)}')
         collections = createCollectionsFromSpectrumGroup(spectrumGroup, peakListIndices)
         return collections
+
+    def _getGuiOutputDataFrame(self, dataFrame=None, *args):
+        """ internal. Used to get a df to display in GuiTables
+         Return the outputDataFrame grouped by Collection IDs.
+         """
+        if dataFrame is None:
+            dataFrame = self.getFirstOutputDataFrame()
+        if dataFrame is None:
+            return
+        ## group by id and keep only first row as all duplicated except the series steps, which are not needed here.
+        ## reset index otherwise you lose the column collectionId
+        outDataFrame = dataFrame.groupby(sv.COLLECTIONID).first().reset_index()
+        outDataFrame[sv._ROW_UID] = np.arange(1, len(outDataFrame)+1)
+        outDataFrame[sv.ASHTAG] = outDataFrame[sv._ROW_UID].values
+        # add Code+type Column
+        outDataFrame.joinNmrResidueCodeType()
+        return outDataFrame
 
     def getThresholdValueForData(self, data, columnName, calculationMode=sv.MAD, factor=1.):
         """ Get the Threshold value for the ColumnName values.
@@ -256,6 +287,13 @@ class SeriesAnalysisABC(ABC):
         A method to export to an external File
         """
         pass
+
+    def _registerFittingModels(self, models):
+        dd = {}
+        for model in models:
+            self.registerFittingModel(model)
+            dd[model.ModelName] = model
+        return dd
 
     def plotResults(self, *args, **kwargs):
         pass

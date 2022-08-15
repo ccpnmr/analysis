@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 16:47:20 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -45,13 +45,13 @@ students_t_func  = ls.students_t
 powerlaw_func    = ls.powerlaw
 
 
-def T1_func(x, amplitude=1, decay=1):
+def T1_func(x, decay=1, amplitude=1):
     """ Function used to describe the T1 decay
     """
     decay = ls.not_zero(decay)
     return amplitude * (1-np.exp(-x/decay))
 
-def T2_func(x, amplitude=1, decay=1):
+def T2_func(x, decay=1, amplitude=1):
     """ Function used to describe the T2 decay
     """
     decay = ls.not_zero(decay)

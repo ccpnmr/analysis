@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 19:08:16 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,20 +30,20 @@ from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRand
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel, _CustomLabel
 import numpy as np
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Common import percentage
 
-class CSMFitPlotPanel(FitPlotPanel):
+class RelaxationFitPlotPanel(FitPlotPanel):
 
-    position = 2
-    panelName = guiNameSpaces.CSMFittingPlotPanel
+    panelName = guiNameSpaces.RelaxationFittingPlotPanel
 
     def __init__(self, guiModule, *args, **Framekwargs):
         FitPlotPanel.__init__(self, guiModule, *args , **Framekwargs)
         self.setXLabel(label='X')
-        self.setYLabel(label=guiNameSpaces.RelativeDisplacement)
+        self.setYLabel(label='Height') #hardcoded get it from the fittingModel
         self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
                                                  callback=self._currentCollectionCallback, onceOnly=True)
         self.labels = []
@@ -51,14 +51,14 @@ class CSMFitPlotPanel(FitPlotPanel):
     def getPlottingData(self):
         pass
 
-    def plotCurrentData(self, kd=None, bmax=None, *args):
+    def plotCurrentData(self, decay=None, amplitude=None, *args):
         collections = self.current.collections
         dataFrame = self.guiModule.backendHandler.getFirstOutputDataFrame()
 
         for collection in collections:
             filteredDf = dataFrame[dataFrame[sv.COLLECTIONPID] == collection.pid]
             seriesSteps = filteredDf[sv.SERIESSTEP].values
-            seriesStepsValues = filteredDf[sv.SERIESSTEPVALUE].values
+            seriesStepsValues = filteredDf[sv._HEIGHT].values #could add option to normalise
             seriesUnit = filteredDf[sv.SERIESUNIT].values[-1]
             peakPids = filteredDf[sv.PEAKPID].values
             objs = [self.project.getByPid(pid) for pid in peakPids]
@@ -67,15 +67,15 @@ class CSMFitPlotPanel(FitPlotPanel):
             if model is None: ## get it from settings
                 model = self.guiModule.getCurrentFittingModel()
             func = model.getFittingFunc(model)
-            if kd is None:
-                kd = filteredDf[sv.KD].values[0]
-            if bmax is None:
-                bmax = filteredDf[sv.BMAX].values[0]
+            if decay is None:
+                decay = float(filteredDf[sv.DECAY].values[0])
+            if amplitude is None:
+                amplitude = float(filteredDf[sv.AMPLITUDE].values[0])
             extra = percentage(50, max(seriesSteps))
             initialPoint = min(seriesSteps)
             finalPoint = max(seriesSteps)+extra
             xf = np.linspace(initialPoint, finalPoint, 3000)
-            yf = func(xf, kd, bmax)
+            yf = func(xf, decay, amplitude)
             self.currentCollectionLabel.setText('')
             self.bindingPlot.clear()
             self.fittedCurve = self.bindingPlot.plot(xf, yf,  pen=self.bindingPlot.gridPen)
@@ -101,15 +101,15 @@ class CSMFitPlotPanel(FitPlotPanel):
             self.bindingPlot.scene().sigMouseMoved.connect(self.bindingPlot.mouseMoved)
             self.bindingPlot.zoomFull()
             self.currentCollectionLabel.setText(collection.pid)
-            self.bindingPlot.fittingHandle.setPos(kd, bmax)
+            self.bindingPlot.fittingHandle.setPos(decay, amplitude)
 
     def _replot(self, *args, **kwargs):
         pos = kwargs.get('pos', [])
-        kd = None
-        bmax = None
+        decay = None
+        amplitude = None
         if pos and len(pos) > 0:
-            kd = pos[0]
-            bmax = pos[1]
+            decay = pos[0]
+            amplitude = pos[1]
         collections = self.current.collections
         dataFrame = self.guiModule.backendHandler.getFirstOutputDataFrame()
         if len(collections)== 0:
@@ -122,20 +122,20 @@ class CSMFitPlotPanel(FitPlotPanel):
         if model is None:  ## get it from settings
             model = self.guiModule.getCurrentFittingModel()
         func = model.getFittingFunc(model)
-        if kd is None:
-            kd = filteredDf[sv.KD].values[0]
-        if bmax is None:
-            bmax = filteredDf[sv.BMAX].values[0]
+        if decay is None:
+            decay = filteredDf[sv.DECAY].values[0]
+        if amplitude is None:
+            amplitude = filteredDf[sv.AMPLITUDE].values[0]
         extra = percentage(50, max(seriesSteps))
         initialPoint = min(seriesSteps)
         finalPoint = max(seriesSteps) + extra
         xf = np.linspace(initialPoint, finalPoint, 3000)
-        yf = func(xf, kd, bmax)
+        yf = func(xf, decay, amplitude)
         if self.fittedCurve is not None:
             self.bindingPlot.removeItem(self.fittedCurve)
         self.fittedCurve = self.bindingPlot.plot(xf, yf, pen=self.bindingPlot.gridPen)
         # self.bindingPlot.zoomFull()
-        label = f'Kd: {round(kd,2)} \nbmax: {round(bmax,2)}'
+        label = f'decay: {round(decay,2)} \namplitude: {round(amplitude,2)}'
         self.bindingPlot.crossHair.hLine.label.setText(label)
 
     def _currentCollectionCallback(self, *args):

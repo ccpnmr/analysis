@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-12 10:46:29 +0100 (Fri, August 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 11:37:34 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -137,7 +137,7 @@ class CSMFitPlotPanel(FitPlotPanel):
             self.bindingPlot.removeItem(self.fittedCurve)
         self.fittedCurve = self.bindingPlot.plot(xf, yf, pen=self.bindingPlot.gridPen)
         # self.bindingPlot.zoomFull()
-        label = f'Kd: {round(kd,2)} \nbmax: {round(kd,2)}'
+        label = f'Kd: {round(kd,2)} \nbmax: {round(bmax,2)}'
         self.bindingPlot.crossHair.hLine.label.setText(label)
 
     def _currentCollectionCallback(self, *args):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-13 11:03:43 +0100 (Wed, July 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 11:37:34 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.RelaxationFittingModels import _registerRelaxationModels, RELAXATION_MODELS_DICT
+from ccpn.framework.lib.experimentAnalysis.RelaxationFittingModels import _registerFittingModels, RELAXATION_MODELS_DICT
 from ccpn.util.Logging import getLogger
 
 class RelaxationAnalysisBC(SeriesAnalysisABC):
@@ -39,7 +39,9 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
 
     def __init__(self):
         super().__init__()
-        _registerRelaxationModels()
+        models = _registerFittingModels()
+        if len(models)>0:
+            self._currentFittingModel = models[-1]()
 
 
     def fitInputData(self, *args, **kwargs):
@@ -61,18 +63,12 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
 
         if not self.inputDataTables:
             raise RuntimeError('Cannot run any fitting models. Add a valid inputData first')
-        fittingModel = RELAXATION_MODELS_DICT.get(kwargs.get(sv.MODEL_NAME))
-        if fittingModel is not None:
-            fittingModels = [fittingModel]
-        else:
-            fittingModels = self.fittingModels or kwargs.get(sv.FITTING_MODELS, [])
-        ovverideOutputDataTable = kwargs.get(sv.OVERRIDE_OUTPUT_DATATABLE, True)
-        for model in fittingModels:
-            fittingModel = model()
-            inputDataTable = self.inputDataTables[-1]
-            outputFrame = fittingModel.fitSeries(inputDataTable.data)
-            outputName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'
-            outputDataTable = self._fetchOutputDataTable(name=outputName,
-                                                   overrideExisting=ovverideOutputDataTable)
-            outputDataTable.data = outputFrame
-            self.addOutputData(outputDataTable)
+
+        fittingModel = self.currentFittingModel
+        inputDataTable = self.inputDataTables[-1]
+        outputFrame = fittingModel.fitSeries(inputDataTable.data)
+        outputName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'
+        outputDataTable = self._fetchOutputDataTable(name=outputName,
+                                               overrideExisting=True)
+        outputDataTable.data = outputFrame
+        self.addOutputData(outputDataTable)

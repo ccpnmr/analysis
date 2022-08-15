@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-12 18:21:46 +0100 (Fri, August 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 11:37:34 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,9 +31,10 @@ from scipy import stats
 from abc import ABC
 from collections import defaultdict
 from ccpn.util.OrderedSet import OrderedSet
-from ccpn.core.SpectrumGroup import SpectrumGroup
+from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flattenLists
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.framework.Application import getApplication, getCurrent, getProject
 from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC, InputSeriesFrameBC, ALL_SERIES_DATA_TYPES
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
@@ -131,6 +132,17 @@ class SeriesAnalysisABC(ABC):
 
         """
         pass
+
+    @property
+    def currentFittingModel(self):
+        if self._currentFittingModel is None:
+            getLogger().warn('Fitting Model not set.')
+            return
+        return self._currentFittingModel
+
+    @currentFittingModel.setter
+    def currentFittingModel(self, model):
+        self._currentFittingModel = model
 
     @classmethod
     def registerFittingModel(cls, fittingModel):
@@ -256,6 +268,7 @@ class SeriesAnalysisABC(ABC):
         self.current = getCurrent()
         self._inputDataTables = OrderedSet()
         self._outputDataTables = OrderedSet()
+        self._currentFittingModel = None
         self._needsRefitting = False
 
     def __str__(self):

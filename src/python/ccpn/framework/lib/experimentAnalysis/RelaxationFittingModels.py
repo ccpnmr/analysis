@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-14 21:56:16 +0100 (Thu, July 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 11:37:34 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -180,10 +180,10 @@ RELAXATION_MODELS_DICT = {
     }
 
 
-def _registerRelaxationModels():
+def _registerFittingModels():
     from ccpn.framework.lib.experimentAnalysis.RelaxationAnalysisBC import RelaxationAnalysisBC
     models = [T1FittingModel, T2FittingModel]
     for model in models:
         RelaxationAnalysisBC.registerFittingModel(model)
-
+    return models
 

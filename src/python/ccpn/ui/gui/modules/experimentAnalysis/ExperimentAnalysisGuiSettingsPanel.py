@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-12 18:21:46 +0100 (Fri, August 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 11:37:34 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -404,6 +404,20 @@ class GuiFittingPanel(GuiSettingPanel):
                        'fixedWidths': SettingsWidgetFixedWidths}}),
         ))
         return self.widgetDefinitions
+
+
+    def _setFittingsSettingToBackend(self):
+        """ Update the backend """
+        getLogger().info('Setting Fitting changed...')
+        fittingSettings = self.getSettingsAsDict()
+        currentFittingModel = fittingSettings.get(guiNameSpaces.WidgetVarName_FittingModel, None)
+
+        ## update the backend
+        backend = self._guiModule.backendHandler
+        backend.currentFittingModel = currentFittingModel
+        # set update detected.
+        backend._needsRefitting = True
+        self._setUpdatedDetectedState()
 
     def _calculateFittingCallback(self, *args):
         getLogger().info(f'Recalculating Fitting values ...')

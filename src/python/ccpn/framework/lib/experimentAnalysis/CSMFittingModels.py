@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-11 12:50:00 +0100 (Thu, August 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 11:37:34 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -292,10 +292,11 @@ ChemicalShiftCalculationModes = {DeltaDeltaShiftsCalculation.ModelName: DeltaDel
 ChemicalShiftCalculationModels = {OneSiteBindingModel.ModelName: OneSiteBindingModel,
                                   FractionBindingModel.ModelName: FractionBindingModel}
 
-def _registerChemicalShiftMappingModels():
+def _registerFittingModels():
     """
     Register the ChemicalShiftMapping specific Models
     """
     from ccpn.framework.lib.experimentAnalysis.ChemicalShiftMappingAnalysisBC import ChemicalShiftMappingAnalysisBC
     models = [OneSiteBindingModel]
     _registerModels(ChemicalShiftMappingAnalysisBC, models)
+    return models

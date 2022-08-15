@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-12 18:21:45 +0100 (Fri, August 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-15 11:37:34 +0100 (Mon, August 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,7 @@ from scipy import stats
 from ccpn.util.Logging import getLogger
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import _registerChemicalShiftMappingModels
+from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import _registerFittingModels
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 
 
@@ -51,7 +51,9 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         self._alphaFactors = sv.DEFAULT_ALPHA_FACTORS
         self._excludedResidueTypes = sv.DEFAULT_EXCLUDED_RESIDUES
         self._untraceableValue = 1.0 # default value for replacing NaN values in the DeltaDeltas column
-        _registerChemicalShiftMappingModels()
+        models = _registerFittingModels()
+        if len(models) > 0:
+            self._currentFittingModel = models[-1]()
 
     @property
     def inputDataTables(self, ) -> list:
@@ -127,24 +129,25 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         if not self.inputDataTables:
             raise RuntimeError('CSM. Cannot run any fitting models. Add a valid inputData first')
 
-        fittingModels = self.fittingModels or kwargs.get(sv.FITTING_MODELS, [])
+        fittingModel = self.currentFittingModel
+        if not fittingModel:
+            raise RuntimeError('CSM. Cannot run any fitting models. Select a FittingModel first')
         ovverideOutputDataTable = True
         outputDataTableName = kwargs.get(sv.OUTPUT_DATATABLE_NAME, None)
-        for model in fittingModels:
-            fittingModel = model()
-            inputDataTable = self.inputDataTables[-1]
-            outputFrame = self.calculateDeltaDeltaShifts(inputDataTable.data,
-                                                      filteringAtoms=self._filteringAtoms,
-                                                      alphaFactors=self._alphaFactors,
-                                                      excludedResidues=self._excludedResidueTypes)
-            outputFrame = fittingModel.fitSeries(outputFrame)
 
-            if not outputDataTableName:
-                outputDataTableName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'.replace(" ", "")
-            outputDataTable = self._fetchOutputDataTable(name=outputDataTableName,
-                                                         overrideExisting=ovverideOutputDataTable)
-            outputDataTable.data = outputFrame
-            self.addOutputData(outputDataTable)
+        inputDataTable = self.inputDataTables[-1]
+        outputFrame = self.calculateDeltaDeltaShifts(inputDataTable.data,
+                                                  filteringAtoms=self._filteringAtoms,
+                                                  alphaFactors=self._alphaFactors,
+                                                  excludedResidues=self._excludedResidueTypes)
+        outputFrame = fittingModel.fitSeries(outputFrame)
+
+        if not outputDataTableName:
+            outputDataTableName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'.replace(" ", "")
+        outputDataTable = self._fetchOutputDataTable(name=outputDataTableName,
+                                                     overrideExisting=ovverideOutputDataTable)
+        outputDataTable.data = outputFrame
+        self.addOutputData(outputDataTable)
         self._needsRefitting = False
         getLogger().info('Fitting InputData completed.')
 

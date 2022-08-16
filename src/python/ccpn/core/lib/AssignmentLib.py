@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2022-08-09 12:15:40 +0100 (Tue, August 09, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-08-16 13:20:50 +0100 (Tue, August 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1210,11 +1210,13 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
     if peakList.peaks:
         peak = peakList.peaks[0]
         axisIso = list(zip(peak.axisCodes, peak.spectrum.isotopeCodes))
+        numDims = len(peak.axisCodes)
 
         count = len(peakList.peaks)
         pDiv = (count // 100) + 1  #10 if count > 100 else 1
         totalCopies = int(count / pDiv)
 
+        foundMts = {}
         with progressHandler(text='Set up NmrResidues...', maximum=totalCopies, autoClose=False) as progress:
 
             with undoBlock():
@@ -1229,15 +1231,42 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
                             progress.setText('Cancelling...')  # may not be visible
                             raise RuntimeError('Cancel')
 
+                        # # make a list of the assignments associated with each multiplet
+                        # for mt in peak.multiplets:
+                        #     multiplets.setdefault(mt, None)
+
                         # only process those that are empty OR those not empty when checkbox cleared
                         dimensionNmrAtoms = peak.dimensionNmrAtoms  # for speed reasons !?
                         if not keepAssignments or all(not dimAtoms for dimAtoms in dimensionNmrAtoms):
 
-                            # make a new nmrResidue with new nmrAtoms and assign to the peak
-                            nmrResidue = nmrChain.newNmrResidue()
-                            for i, (axis, isotope) in enumerate(axisIso):
-                                nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)
-                                peak.assignDimension(axisCode=axis, value=[nmrAtom])
+                            if peak.multiplets:
+                                existingDims = [[] for dd in range(numDims)]
+                                for mt in peak.multiplets:
+                                    if mt in foundMts:
+                                        for i, (exst, dimNmr) in enumerate(zip(existingDims, foundMts[mt])):
+                                            existingDims[i].append(dimNmr)
+
+                                    else:
+                                        # need to create a new residue and nmrAtoms
+                                        thisDims = [[] for dd in range(numDims)]
+                                        nmrResidue = nmrChain.newNmrResidue()
+                                        for i, (axis, isotope) in enumerate(axisIso):
+                                            nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)
+                                            existingDims[i].append(nmrAtom)
+                                            thisDims[i] = nmrAtom
+
+                                        foundMts[mt] = thisDims
+
+                                # assign all the dimensions
+                                for i, ((axis, isotope), dims) in enumerate(zip(axisIso, existingDims)):
+                                    peak.assignDimension(axisCode=axis, value=dims)
+
+                            else:
+                                # make a new nmrResidue with new nmrAtoms and assign to the peak
+                                nmrResidue = nmrChain.newNmrResidue()
+                                for i, (axis, isotope) in enumerate(axisIso):
+                                    nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)
+                                    peak.assignDimension(axisCode=axis, value=[nmrAtom])
 
                 except Exception as es:
                     if 'Cancel' not in str(es):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-16 13:20:50 +0100 (Tue, August 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-16 13:31:12 +0100 (Tue, August 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1231,16 +1231,12 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
                             progress.setText('Cancelling...')  # may not be visible
                             raise RuntimeError('Cancel')
 
-                        # # make a list of the assignments associated with each multiplet
-                        # for mt in peak.multiplets:
-                        #     multiplets.setdefault(mt, None)
-
                         # only process those that are empty OR those not empty when checkbox cleared
                         dimensionNmrAtoms = peak.dimensionNmrAtoms  # for speed reasons !?
                         if not keepAssignments or all(not dimAtoms for dimAtoms in dimensionNmrAtoms):
 
                             if peak.multiplets:
-                                existingDims = [[] for dd in range(numDims)]
+                                existingDims = [[] for _nd in range(numDims)]
                                 for mt in peak.multiplets:
                                     if mt in foundMts:
                                         for i, (exst, dimNmr) in enumerate(zip(existingDims, foundMts[mt])):
@@ -1248,7 +1244,7 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
 
                                     else:
                                         # need to create a new residue and nmrAtoms
-                                        thisDims = [[] for dd in range(numDims)]
+                                        thisDims = [[] for _nd in range(numDims)]
                                         nmrResidue = nmrChain.newNmrResidue()
                                         for i, (axis, isotope) in enumerate(axisIso):
                                             nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)

@@ -141,7 +141,9 @@
         "rememberLastClosedModuleState"      : true,
         "autoOpenPythonConsoleOnMacroEditor" : true,
         "nefImporterOpenFirstTable"          : false,
-        "useOnlineDocumentation"             : false
+        "useOnlineDocumentation"             : false,
+        "closeSpectrumDisplayOnLastSpectrum" : false,
+        "closeSpectrumDisplayOnLastStrip"    : false
     },
     "printSettings"    : {
         "font"              : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular",

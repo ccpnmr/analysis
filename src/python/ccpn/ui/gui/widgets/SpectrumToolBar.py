@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-10 19:25:40 +0100 (Wed, August 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-17 11:11:51 +0100 (Wed, August 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -350,7 +350,7 @@ class SpectrumToolBar(ToolBar):
         uniqueViews = set(sv.spectrum for sv in self.widget.spectrumViews)
         for spectrumView in self.widget.spectrumViews:
             if spectrumView.spectrum == key:
-                if len(uniqueViews) == 1:
+                if len(uniqueViews) == 1 and self.project.application.preferences.appearance.closeSpectrumDisplayOnLastSpectrum:
                     # close the spectrumDisplay
                     self.widget.close()
                 else:

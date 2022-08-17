@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-17 13:42:00 +0100 (Fri, June 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-17 11:11:51 +0100 (Wed, August 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -619,6 +619,17 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                     toolTip="Use the online api-documentation instead of the local folder")
         self.useOnlineDocumentation.setEnabled(False)
 
+        row += 1
+        self.closeSpectrumDisplayOnLastSpectrum = _makeCheckBox(parent, row=row, text="Close spectrumDisplay on last spectrum",
+                                                                callback=self._queueSetCloseSpectrumDisplayOnLastSpectrum,
+                                                                toolTip="Close spectrumDisplays if the last spectrum has been removed or deleted")
+
+        # row += 1
+        # # not sure whether this is needed
+        # self.closeSpectrumDisplayOnLastStrip = _makeCheckBox(parent, row=row, text="Close spectrumDisplay on last strip",
+        #                                                      callback=self._queueSetCloseSpectrumDisplayOnLastStrip,
+        #                                                      toolTip="Close spectrumDisplay if the last strip has been removed")
+
         #====== Tip of the Day ======
         row += 1
         _makeLine(parent, grid=(row, 0), text="Tip of the Day")
@@ -718,28 +729,51 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _setUseOnlineDocumentation(self, state):
         self.preferences.appearance.useOnlineDocumentation = state
 
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetCloseSpectrumDisplayOnLastSpectrum(self, _value):
+        value = self.closeSpectrumDisplayOnLastSpectrum.isChecked()
+        if value != self.preferences.appearance.closeSpectrumDisplayOnLastSpectrum:
+            return partial(self._setCloseSpectrumDisplayOnLastSpectrum, value)
+
+    def _setCloseSpectrumDisplayOnLastSpectrum(self, state):
+        self.preferences.appearance.closeSpectrumDisplayOnLastSpectrum = state
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetCloseSpectrumDisplayOnLastStrip(self, _value):
+        value = self.closeSpectrumDisplayOnLastStrip.isChecked()
+        if value != self.preferences.appearance.closeSpectrumDisplayOnLastStrip:
+            return partial(self._setCloseSpectrumDisplayOnLastStrip, value)
+
+    def _setCloseSpectrumDisplayOnLastStrip(self, state):
+        self.preferences.appearance.closeSpectrumDisplayOnLastStrip = state
+
     def _populateAppearanceTab(self):
         """Populate the widgets in the appearanceTab
         """
-        self.useNativeFileBox.setChecked(self.preferences.general.useNative)
-        self.useNativeMenus.setChecked(self.preferences.general.useNativeMenus)
-        self.useNativeWebBox.setChecked(self.preferences.general.useNativeWebbrowser)
-        # self.useImportNefPopupBox.setChecked(self.preferences.appearance.openImportPopupOnDroppedNef)
+        prefGen = self.preferences.general
+        prefApp = self.preferences.appearance
+        
+        self.useNativeFileBox.setChecked(prefGen.useNative)
+        self.useNativeMenus.setChecked(prefGen.useNativeMenus)
+        self.useNativeWebBox.setChecked(prefGen.useNativeWebbrowser)
+        # self.useImportNefPopupBox.setChecked(prefApp.openImportPopupOnDroppedNef)
 
         for fontNum, fontName in enumerate(FONTLIST):
-            value = self.preferences.appearance[FONTPREFS.format(fontNum)]
+            value = prefApp[FONTPREFS.format(fontNum)]
             _fontAttr = getattr(self, FONTDATAFORMAT.format(fontNum))
             self.setFontText(_fontAttr, value)
 
         self.glFontSizeData.addItems([str(val) for val in _OLDGLFONT_SIZES])
-        self.glFontSizeData.setCurrentIndex(self.glFontSizeData.findText(str(self.preferences.appearance.spectrumDisplayFontSize)))
+        self.glFontSizeData.setCurrentIndex(self.glFontSizeData.findText(str(prefApp.spectrumDisplayFontSize)))
 
-        self.showTipsAtStartUp.setChecked(self.preferences.general.showTipOfTheDay)
-        self.showAllTips.setEnabled(len(self.preferences.general.seenTipsOfTheDay) > 0)
+        self.showTipsAtStartUp.setChecked(prefGen.showTipOfTheDay)
+        self.showAllTips.setEnabled(len(prefGen.seenTipsOfTheDay) > 0)
 
-        self.rememberLastClosedModule.setChecked(self.preferences.appearance.rememberLastClosedModuleState)
-        self.runPyConsoleOnMacroEditor.setChecked(self.preferences.appearance.autoOpenPythonConsoleOnMacroEditor)
-        self.useOnlineDocumentation.setChecked(self.preferences.appearance.useOnlineDocumentation)
+        self.rememberLastClosedModule.setChecked(prefApp.rememberLastClosedModuleState)
+        self.runPyConsoleOnMacroEditor.setChecked(prefApp.autoOpenPythonConsoleOnMacroEditor)
+        self.useOnlineDocumentation.setChecked(prefApp.useOnlineDocumentation)
+        self.closeSpectrumDisplayOnLastSpectrum.setChecked(prefApp.closeSpectrumDisplayOnLastSpectrum)
+        # self.closeSpectrumDisplayOnLastStrip.setChecked(prefApp.closeSpectrumDisplayOnLastStrip)
 
     def _populate(self):
         """Populate the widgets in the tabs
@@ -1067,7 +1101,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         _makeLine(parent, grid=(row, 0), text="Scaling")
         row += 1
         self.spectrumScalingLabel = _makeLabel(parent, text="Single step scaling factor",
-                                               tipText= 'Set the single step for rescaling a current spectrum using the shortcuts.',
+                                               tipText='Set the single step for rescaling a current spectrum using the shortcuts.',
                                                grid=(row, 0))
         self.spectrumScalingData = ScientificDoubleSpinBox(parent, step=0.01, min=None, max=None, grid=(row, 1), hAlign='l')
         self.spectrumScalingData.setMinimumWidth(LineEditsMinimumWidth)
@@ -1980,7 +2014,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         prefValue = textFromValue(self.preferences.general.zoomPercent)
         if value >= 0 and textFromValue(value) != prefValue:
             return partial(self._setZoomPercent, value)
-
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetSpectrumScaling(self, _value):

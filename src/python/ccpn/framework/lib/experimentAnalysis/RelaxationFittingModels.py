@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-18 13:02:01 +0100 (Thu, August 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 18:08:35 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -134,10 +134,12 @@ class _RelaxationBaseFittingModel(FittingModelABC):
                 result = MinimiserResult(minimiser, params)
             inputData.loc[collectionId, sv.MODEL_NAME] = self.ModelName
             inputData.loc[collectionId, sv.MINIMISER_METHOD] = minimiser.method
+            nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf)  # join the atom names from different rows in a list
+            inputData.loc[collectionId, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames) > 0 else ''
             for ix, row in groupDf.iterrows():
                 for resultName, resulValue in result.getAllResultsAsDict().items():
+                    print('ix, resultName, resulValue',ix, resultName, resulValue, type(resulValue))
                     inputData.loc[ix, resultName] = resulValue
-        print(self._rawData)
         return inputData
 
 class InversionRecoveryFittingModel(_RelaxationBaseFittingModel):

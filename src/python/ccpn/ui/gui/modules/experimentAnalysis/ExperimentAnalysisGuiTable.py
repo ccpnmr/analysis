@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 18:08:36 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -91,12 +91,7 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
             gt.WIDTH: 60,
             gt.HIDDEN: False
             },
-        sv.FLAG: {gt.NAME: sv.FLAG,
-                  gt.GETTER: lambda row: gt._getValueByHeader(row, sv.FLAG),
-                  gt.TIPTEXT: gt._makeTipText(sv.FLAG, ""),
-                  gt.WIDTH: 40,
-                  gt.HIDDEN: True
-                  },
+
         sv._ROW_UID: {gt.NAME: sv._ROW_UID,
                       gt.GETTER: lambda row: gt._getValueByHeader(row, sv._ROW_UID),
                       gt.TIPTEXT: gt._makeTipText(sv._ROW_UID, ""),

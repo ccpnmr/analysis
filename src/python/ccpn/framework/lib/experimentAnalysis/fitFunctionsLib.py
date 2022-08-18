@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-18 13:02:02 +0100 (Thu, August 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 18:08:36 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -140,6 +140,18 @@ def _scaleStandardData(data, with_mean=True, with_std=True):
     scaler = scaler.fit(data)
     scaledData = scaler.transform(data)
     return scaledData.flatten()
+
+def _formatValue(value, maxInt=3, floatPrecision=3, expDigits=1):
+    """Convert value to numeric when possible """
+    try:
+        if isinstance(value, (float, int)):
+            if len(str(int(value))) > maxInt:
+                value = np.format_float_scientific(value, precision=floatPrecision, exp_digits=expDigits)
+            else:
+                value = round(value, 4)
+    except Exception as ex:
+        getLogger().debug2(f'Impossible to format {value}. Error:{ex}')
+    return value
 
 CommonStatFuncs = {
                 sv.MEAN     : np.mean,

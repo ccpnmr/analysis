@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-18 13:02:02 +0100 (Thu, August 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 18:08:36 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ from ccpn.util.Logging import getLogger
 from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import ToolBarPanel
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
+from ccpn.ui.gui.modules.experimentAnalysis.relaxation.RelaxationBarPlotPanel import RelaxationBarPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.relaxation.RelaxationFitPlotPanel import RelaxationFitPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.relaxation.RelaxationGuiTable import RelaxationTablePanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import ExperimentAnalysisGuiModuleBC
@@ -64,7 +64,7 @@ class RelaxationGuiModule(ExperimentAnalysisGuiModuleBC):
         self.panelHandler.addToolBar(ToolBarPanel(self))
         self.panelHandler.addPanel(RelaxationTablePanel(self))
         self.panelHandler.addPanel(RelaxationFitPlotPanel(self))
-        self.panelHandler.addPanel(BarPlotPanel(self))
+        self.panelHandler.addPanel(RelaxationBarPlotPanel(self))
 
     def addSettingsPanels(self):
         """
@@ -89,7 +89,6 @@ class RelaxationGuiModule(ExperimentAnalysisGuiModuleBC):
                 showWarning('InputData','Add/create an Input DataTable from Settings')
         super(RelaxationGuiModule, self).updateAll()
 
-
     def restoreWidgetsState(self, **widgetsState):
         # with self.blockWidgetSignals():
         super().restoreWidgetsState(**widgetsState)
@@ -98,8 +97,6 @@ class RelaxationGuiModule(ExperimentAnalysisGuiModuleBC):
     def _closeModule(self):
         ## de-register/close all notifiers
         super()._closeModule()
-
-
 
 
 

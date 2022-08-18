@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-18 13:02:01 +0100 (Thu, August 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 18:08:35 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -41,16 +41,6 @@ from ccpn.util.Logging import getLogger
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 
-def _formatValue(value, maxInt=3, floatPrecision=3, expDigits=1):
-    try:
-        if isinstance(value, (float, int)):
-            if len(str(int(value))) > maxInt:
-                value = np.format_float_scientific(value, precision=floatPrecision, exp_digits=expDigits)
-            else:
-                value = round(value, 4)
-    except Exception as ex:
-        getLogger().debug2(f'Impossible to format {value}. Error:{ex}')
-    return value
 
 class FittingModelABC(ABC):
     condition = "new"
@@ -384,9 +374,9 @@ class MinimiserResult(ModelResult):
         """
         outputDict = {}
         for key, value in self.getParametersResult().items():
-            outputDict[key] = _formatValue(value)
+            outputDict[key] = value
         for key, value in self.getStatisticalResult().items():
-            outputDict[key] = _formatValue(value)
+            outputDict[key] = value
         return outputDict
 
     def getAllResultsAsDataFrame(self):

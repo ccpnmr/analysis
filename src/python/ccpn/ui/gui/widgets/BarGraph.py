@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-21 12:09:15 +0100 (Thu, July 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 18:08:36 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -49,14 +49,6 @@ class BarGraph(pg.BarGraphItem):
     def __init__(self, application=None, viewBox=None, xValues=None ,x0Values=None,x1Values=None, yValues=None,
                  objects=None, brush=None, brushes = None, useGradient=False, drawLabels=True, labelDistanceRatio=0.1, **kwds):
         super().__init__(**kwds)
-        """
-        This class allows top draw bars with or without objects.It Needs only xValues and yValues.
-        The bar width is by default set to 1.
-        The objects are linked to the bars through the label annotations (with setData).
-        """
-        # TODO:
-        # setObjects in a more general way. Initially implemented only for NmrResidues objects.
-
         self.viewBox = viewBox
         self.callback = None
         self.trigger = QtCore.pyqtSignal()

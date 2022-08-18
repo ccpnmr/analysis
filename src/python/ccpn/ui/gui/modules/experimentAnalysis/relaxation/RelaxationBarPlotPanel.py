@@ -28,8 +28,7 @@ import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
 
 
-
-class CSMBarPlotPanel(BarPlotPanel):
-    panelName = guiNameSpaces.CSMBarPlotPanel
+class RelaxationBarPlotPanel(BarPlotPanel):
+    panelName = guiNameSpaces.RelaxationBarPlotPanel
 
 

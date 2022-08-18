@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-18 13:02:01 +0100 (Thu, August 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 18:08:36 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -80,7 +80,6 @@ class SeriesAnalysisABC(ABC):
         outputDataTable = self.getOutputDataTables()[0]
         return outputDataTable.data
 
-
     def getOutputDataTables(self, seriesFrameType:str=None):
         """
         Get the attached Lists of DataTables using SeriesFrame with Output format.
@@ -123,6 +122,17 @@ class SeriesAnalysisABC(ABC):
         for dataTable in dataTables:
             if not isinstance(dataTable.data, theType):
                 dataTable.data.__class__ = theType
+
+    @property
+    def untraceableValue(self) -> float:
+        return self._untraceableValue
+
+    @untraceableValue.setter
+    def untraceableValue(self, value):
+        if isinstance(value, (float, int)):
+            self._untraceableValue = value
+        else:
+            getLogger().warning(f'Impossible to set untraceableValue to {value}. Use type int or float.')
 
     @classmethod
     def fitInputData(self, *args, **kwargs):
@@ -304,6 +314,7 @@ class SeriesAnalysisABC(ABC):
         self.current = getCurrent()
         self._inputDataTables = OrderedSet()
         self._outputDataTables = OrderedSet()
+        self._untraceableValue = 1.0   # default value for replacing NaN values in untraceableValues.
         self.fittingModels = dict()
         self._currentFittingModel = None
         self._needsRefitting = False

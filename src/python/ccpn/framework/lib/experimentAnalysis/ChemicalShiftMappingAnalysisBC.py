@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 18:08:35 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -89,16 +89,7 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         if isinstance(_Other, (float, int)):
             self._alphaFactors.update({sv._OTHER: _Other})
 
-    @property
-    def untraceableValue(self) ->float:
-        return self._untraceableValue
 
-    @untraceableValue.setter
-    def untraceableValue(self, value):
-        if isinstance(value, (float,int)):
-            self._untraceableValue = value
-        else:
-            getLogger().warning(f'Impossible to set untraceableValue to {value}. Use type int or float.')
 
     def calculateDeltaDeltaShifts(self, inputData, **kwargs):
         """

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 18:08:36 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -360,15 +360,14 @@ XBarGraphColumnNameOptions =  [
                                 ]
 
 YBarGraphColumnNameOptionsCommon =  [
-                                seriesVariables.KD,
-                                seriesVariables.BMAX,
+
                                 ColumnR2,
                                 seriesVariables.BAYESIAN,
                                 ColumnCHISQUARE,
                                 seriesVariables.AKAIKE
                                 ]
 
-YBarGraphColumnNameOptionsCSM =  [ColumnDdelta] + YBarGraphColumnNameOptionsCommon
+YBarGraphColumnNameOptionsCSM =  [ColumnDdelta,  seriesVariables.KD, seriesVariables.BMAX,] + YBarGraphColumnNameOptionsCommon
 YBarGraphColumnNameOptionsRelax =  [seriesVariables.DECAY, seriesVariables.AMPLITUDE] + YBarGraphColumnNameOptionsCommon
 
 

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-02 17:46:56 +0100 (Tue, August 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 13:02:02 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -115,7 +115,7 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         row += 1
         self._followFrame = Frame(self.mainWidget, setLayout=True, grid=(row, 0), gridSpan=(2, 2))
         self.followPeakOptionstLabel = Label(self._followFrame, text='Select Mode', grid=(subRow, 0))
-        self.followPeakOptionsRB = RadioButtons(self._followFrame, texts=[FINDPEAKS, USEEXISTINGPEAKS],
+        self.followPeakOptionsRB = RadioButtons(self._followFrame, texts=[USEEXISTINGPEAKS], # texts=[FINDPEAKS, USEEXISTINGPEAKS],
                                                 selectedInd=0, grid=(subRow, 1))
         subRow += 1
         engines = list(AVAILABLEFOLLOWPEAKS.keys())

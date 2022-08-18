@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 13:02:01 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -53,10 +53,8 @@ def _formatValue(value, maxInt=3, floatPrecision=3, expDigits=1):
     return value
 
 class FittingModelABC(ABC):
-    """
-    The top level class for the FittingModel Object.
-    """
-    ModelName   = 'ModelName'       # The Model name.
+    condition = "new"
+    ModelName = 'ModelName'  # The Model name.
     Info        = 'the info'        # A brief description of the fitting model.
     Description = 'Description'     # A simplified representation of the used equation(s).
     MaTex      = r''                # MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
@@ -64,6 +62,13 @@ class FittingModelABC(ABC):
     Minimiser   = None
     FullDescription = f'{Info} \n {Description}\nSee References: {References}'
     PeakProperty = ''               # The peak property to fit. One of ['height', 'lineWidth', 'volume', 'ppmPosition']
+
+    def __init__(self, applyScaleMinMax=False, applyStandardScaler=False, **kwargs):
+        self.applyScaleMinMax = applyScaleMinMax
+        self.applyStandardScaler = applyStandardScaler
+        self._rawData = []  # raw daw used for the fitting. this is for example the peak height
+        self._xRawData = []   # raw data used for the x values . this is for example the series times
+        self._rawIndexes = []
 
     @abstractmethod
     def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
@@ -79,10 +84,18 @@ class FittingModelABC(ABC):
         if cls.Minimiser is not None:
             return cls.Minimiser.FITTING_FUNC
 
+    def scaleMinMax(self, data):
+        return lf._scaleMinMaxData(data)
+
+    def getRawDataAsDataFrame(self) -> pd.DataFrame:
+        df = pd.DataFrame(self._rawData, columns=self._xRawData, index=self._rawIndexes)
+        return df
+
     def __str__(self):
         return f'<{self.__class__.__name__}: {self.ModelName}>'
 
     __repr__ = __str__
+
 
 
 class MinimiserModel(Model):
@@ -183,17 +196,8 @@ class MinimiserModel(Model):
         Take ``t`` to be the independent variable and data to be the curve
         we will fit. Use keyword arguments to set initial guesses:
 
-        >>> result = my_model.fit(data, tau=5, N=3, t=t)
-
-        Or, for more control, pass a Parameters object.
-
-        >>> result = my_model.fit(data, params, t=t)
-
-        Keyword arguments override Parameters.
-
-        >>> result = my_model.fit(data, params, tau=5, t=t)
-
         """
+
         if params is None:
             params = self.make_params(verbose=verbose)
         else:
@@ -294,7 +298,7 @@ class MinimiserResult(ModelResult):
 
        """
 
-    def __init__(self, model, params, data=None, weights=None,
+    def __init__(self, model, params, data=None, weights=None, scaleMinMax=False,
                  method=sv.LEASTSQ, fcn_args=None, fcn_kws=None,
                  iter_cb=None, scale_covar=True, nan_policy=sv.OMIT_MODE,
                  calc_covar=True, max_nfev=None, **fit_kws):
@@ -309,6 +313,8 @@ class MinimiserResult(ModelResult):
             Data to be modeled.
         weights : array_like, optional
             Weights to multiply ``(data-model)`` for fit residual.
+        scaleMinMax: bool, True to scale data 0-1
+
         method : str, optional
             Name of minimization method to use (default is `'leastsq'`).
         fcn_args : sequence, optional
@@ -333,6 +339,7 @@ class MinimiserResult(ModelResult):
 
         """
         self.r2 = None
+        self.scaleMinMax = scaleMinMax
 
         super().__init__( model, params, data=data, weights=weights,
                  method=method, fcn_args=fcn_args, fcn_kws=fcn_kws,
@@ -387,7 +394,7 @@ class MinimiserResult(ModelResult):
         :return: A dataFrame with all minimiser results
         """
         outputDict = self.getAllResultsAsDict()
-        df = pd.DataFrame(outputDict)
+        df = pd.DataFrame(outputDict, index=[0])
         return df
 
     def plot(self, datafmt='o', fitfmt='-', initfmt='--', showPlot=True, xlabel=None,
@@ -521,11 +528,8 @@ class MinimiserResult(ModelResult):
         ax_table.axis('tight')
 
         df = self.getAllResultsAsDataFrame()
-        columns = df.columns
-        columns = list(map(lambda x: x.replace(sv.CHISQUARE, sv.UNICODE_CHISQUARE), columns))
-        columns = list(map(lambda x: x.replace(sv.REDUCEDCHISQUARE, sv.UNICODE_RED_CHISQUARE), columns))
-        columns = list(map(lambda x: x.replace(sv.R2, sv.UNICODE_R2), columns))
-        table = ax_table.table(cellText=df.values, colLabels=columns,  loc='center')
+
+        table = ax_table.table(cellText=df.values, colLabels=df.columns,  loc='center')
         table.auto_set_font_size(False) #or plots very tiny
         table.set_fontsize(5)
         fig.tight_layout()

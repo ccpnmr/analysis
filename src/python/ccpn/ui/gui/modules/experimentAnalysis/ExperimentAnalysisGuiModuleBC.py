@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 13:02:02 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -52,7 +52,7 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     settingsPosition = 'left'
     className = 'ExperimentAnalysis'
 
-    def __init__(self, mainWindow, name='Experiment Analysis', **kwds):
+    def __init__(self, mainWindow, name='Experiment Analysis', backendHandler=None, **kwds):
         super(ExperimentAnalysisGuiModuleBC, self)
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
@@ -61,7 +61,7 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         self.current = getCurrent()
 
         ## link to the Non-Gui backend and its Settings
-        self.backendHandler = SeriesAnalysisABC()
+        self.backendHandler = backendHandler or SeriesAnalysisABC()
 
         ## link to Gui Setting-Panels. Needs to be before the GuiPanels
         self.settingsPanelHandler = SettingsPanelHandler(self)
@@ -74,11 +74,8 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         ## link to Core Notifiers (Project/Current)
         self.coreNotifiersHandler = CoreNotifiersHandler(guiModule=self)
 
-        ## link to Core Notifiers (Project/Current)
+        ## link to Input/output to external programs. (NYI)
         self.ioHandler = IOHandler(guiModule=self)
-
-        ## the working dataTable which drives all Gui
-        self._selectedDataTables = () # add comment on what will be, e.g.: Pids
 
         ## Startup with the first Data available
         if self.project:

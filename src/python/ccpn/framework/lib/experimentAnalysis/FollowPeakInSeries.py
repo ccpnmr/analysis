@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-02 17:46:56 +0100 (Tue, August 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 13:02:01 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -103,6 +103,21 @@ class FollowNearestPeak(FollowPeakAbc):
         return idx
 
 
+class FollowSameAssignmentPeak(FollowPeakAbc):
+
+    name = 'Same assignment'
+    info = 'Find peaks assigned to the same NmrAtoms'
+
+    def getMatchedIndex(self, originPosition, targets) -> int:
+        raise RuntimeError('NYI')
+
+    def getMatchedPeak(self, originPeak, targetPeaks):
+        raise RuntimeError('NYI')
+
+    def getCollectionPeaks(self, originPeak, targetPeakLists:list):
+        raise RuntimeError('NYI')
+
 AVAILABLEFOLLOWPEAKS = {
-                    FollowNearestPeak.name: FollowNearestPeak
+                    FollowNearestPeak.name: FollowNearestPeak,
+                    # FollowSameAssignmentPeak.name: FollowSameAssignmentPeak
                     }

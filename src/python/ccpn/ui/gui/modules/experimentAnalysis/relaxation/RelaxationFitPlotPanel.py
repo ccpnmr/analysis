@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 19:08:16 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 13:02:02 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -66,6 +66,11 @@ class RelaxationFitPlotPanel(FitPlotPanel):
             model = self.guiModule.backendHandler.getFittingModelByName(modelName)
             if model is None: ## get it from settings
                 model = self.guiModule.getCurrentFittingModel()
+            # seriesStepsValues = model.Minimiser()._scaleMinMaxData(seriesStepsValues)
+            yArray = seriesStepsValues
+            if model.applyScaleMinMax:
+                yArray = model.scaleMinMax(seriesStepsValues)
+
             func = model.getFittingFunc(model)
             if decay is None:
                 decay = float(filteredDf[sv.DECAY].values[0])
@@ -81,7 +86,7 @@ class RelaxationFitPlotPanel(FitPlotPanel):
             self.fittedCurve = self.bindingPlot.plot(xf, yf,  pen=self.bindingPlot.gridPen)
             self.setXLabel(label=seriesUnit)
             spots = []
-            for obj, x, y in zip(objs, seriesSteps, seriesStepsValues):
+            for obj, x, y in zip(objs, seriesSteps, yArray):
                 brush = pg.mkBrush(255, 0, 0)
                 dd = {'pos': [0, 0], 'data': 'obj', 'brush': pg.mkBrush(255, 0, 0), 'symbol': 'o', 'size': 10, 'pen': None}  # red default
                 dd['pos'] = [x,y]

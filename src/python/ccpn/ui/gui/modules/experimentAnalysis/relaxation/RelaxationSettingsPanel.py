@@ -72,14 +72,9 @@ class RelaxationCalculationPanel(GuiCalculationPanel):
 
 class RelaxationFittingPanel(GuiFittingPanel):
 
-    def setWidgetDefinitions(self):
-        """Add the Relaxation widget specific."""
-        self.widgetDefinitions = super().setWidgetDefinitions()
-        wdict = od((
-        ))
-        ## add the new items to the main dict
-        self.widgetDefinitions.update(wdict)
-        return self.widgetDefinitions
+    tabName = guiNameSpaces.Label_Fitting
+    tabTipText = 'Set the various Fitting modes and options for the Relaxation module'
+
 
 #####################################################################
 #####################   Appearance Panel  ###########################

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 13:02:01 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -45,14 +45,40 @@ class FractionBindingMinimiser(MinimiserModel):
     """
 
     FITTING_FUNC = lf.fractionBound_func
+    KDstr = sv.KD # They must be exactly as they are defined in the FITTING_FUNC arguments! This was too hard to change!
+    BMAXstr = sv.BMAX
 
-    def __init__(self, independent_vars=['x'], prefix='', nan_policy=sv.OMIT_MODE, **kwargs):
-        kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
-        super().__init__(FractionBindingMinimiser.FITTING_FUNC, **kwargs)
+    _defaultParams = {KDstr:1,
+                      BMAXstr:0.5}
 
-    def guess(self, data, x, **kwargs):
-        """Estimate initial model parameter values from data."""
-        raise NotImplementedError()
+    def __init__(self, **kwargs):
+        super().__init__(Binding1SiteMinimiser.FITTING_FUNC, **kwargs)
+        self.name = self.MODELNAME
+        self.Kd = None # this will be a Parameter Obj . Set on the fly by the minimiser while inspecting the Fitting Func signature
+        self.BMax = None # this will be a Parameter Obj
+        self.params = self.make_params(**self._defaultParams)
+
+    def guess(self, data, x, **kws):
+        """
+        :param data: y values 1D array
+        :param x: the x axis values. 1D array
+        :param kws:
+        :return: dict of params needed for the fitting
+        """
+        params = self.params
+        minKD = np.min(x)
+        maxKD = np.max(x) + (np.max(x) * 0.5)
+        if minKD == maxKD == 0:
+            getLogger().warning(f'Fitting model min==max {minKD}, {maxKD}')
+            minKD = -1
+
+        params.get(self.KDstr).value = np.mean(x)
+        params.get(self.KDstr).min = minKD
+        params.get(self.KDstr).max = maxKD
+        params.get(self.BMAXstr).value = np.mean(data)
+        params.get(self.BMAXstr).min = 0.001
+        params.get(self.BMAXstr).max = np.max(data) + (np.max(data) * 0.5)
+        return params
 
 
 class Binding1SiteMinimiser(MinimiserModel):
@@ -223,7 +249,7 @@ class OneSiteBindingModel(FittingModelABC):
     References = '''
                     1) Eq. (x) M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
                   '''
-    MaTex = ''
+    MaTex = r'$\frac{B_{Max} * [L]}{[L] + K_d}$'
     Minimiser = Binding1SiteMinimiser
 
     def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
@@ -241,19 +267,14 @@ class OneSiteBindingModel(FittingModelABC):
             groupDf.sort_values([sv.SERIESSTEP], inplace=True)
             seriesSteps = groupDf[sv.SERIESSTEP]
             seriesValues = groupDf[sv.SERIESSTEPVALUE]
-            xArray = seriesSteps.values
-            yArray = seriesValues.values
-            if sv.FLAG_EXCLUDED in groupDf[sv.FLAG]:
-                yArray = np.full(seriesValues.values.shape, fill_value=np.nan)
+            xArray = seriesSteps.values # e.g. ligand concentration
+            yArray = seriesValues.values # DeltaDeltas
             minimiser = self.Minimiser()
             try:
                 params = minimiser.guess(yArray, xArray)
                 result = minimiser.fit(yArray, params, x=xArray)
             except:
-                if sv.FLAG_EXCLUDED in groupDf[sv.FLAG]:
-                    getLogger().warning(f'Fitting skipped for collectionId: {collectionId} data.')
-                else:
-                    getLogger().warning(f'Fitting Failed for collectionId: {collectionId} data.')
+                getLogger().warning(f'Fitting Failed for collectionId: {collectionId} data.')
                 params = minimiser.params
                 result = MinimiserResult(minimiser, params)
             inputData.loc[collectionId, sv.MODEL_NAME] = self.ModelName
@@ -288,14 +309,8 @@ class FractionBindingModel(FittingModelABC):
 ## Add a new Model to the list to be available throughout the program
 Models = [
         OneSiteBindingModel,
+        FractionBindingModel
         ]
-
-def _registerFittingModels(cls, models):
-    dd = {}
-    for model in models:
-        cls.registerFittingModel(model)
-        dd[model.ModelName] = model
-    return dd
 
 ChemicalShiftCalculationModes = {
                                 DeltaDeltaShiftsCalculation.ModelName: DeltaDeltaShiftsCalculation,

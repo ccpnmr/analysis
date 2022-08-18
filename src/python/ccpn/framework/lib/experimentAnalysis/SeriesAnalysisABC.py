@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 13:02:01 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,7 @@ from abc import ABC
 from collections import defaultdict
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Logging import getLogger
-from ccpn.util.Common import flattenLists
+
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.framework.Application import getApplication, getCurrent, getProject
@@ -44,7 +44,6 @@ class SeriesAnalysisABC(ABC):
     The top level class for SeriesAnalysis modules.
     """
     seriesAnalysisName = ''
-    fittingModels = dict()
 
     @property
     def inputDataTables(self, ) -> list:
@@ -86,6 +85,7 @@ class SeriesAnalysisABC(ABC):
         """
         Get the attached Lists of DataTables using SeriesFrame with Output format.
         """
+        from ccpn.util.Common import flattenLists # circular imports in common
         dataTablesByDataType = defaultdict(list)
         for dataTable in self._outputDataTables:
             seriesFrame = dataTable.data
@@ -154,20 +154,18 @@ class SeriesAnalysisABC(ABC):
     def currentFittingModel(self, model):
         self._currentFittingModel = model
 
-    @classmethod
-    def registerFittingModel(cls, fittingModel):
+    def registerFittingModel(self, fittingModel):
         """
         A method to register a FittingModel object.
         See the FittingModelABC for more information
         """
-        cls.fittingModels.update({fittingModel.ModelName: fittingModel})
+        self.fittingModels.update({fittingModel.ModelName: fittingModel})
 
-    @classmethod
-    def deRegisterFittingModel(cls, fittingModel):
+    def deRegisterFittingModel(self, fittingModel):
         """
         A method to de-register a fitting Model
         """
-        cls.fittingModels.pop(fittingModel.ModelName, None)
+        self.fittingModels.pop(fittingModel.ModelName, None)
 
     def getFittingModelByName(self, modelName):
         """
@@ -306,6 +304,7 @@ class SeriesAnalysisABC(ABC):
         self.current = getCurrent()
         self._inputDataTables = OrderedSet()
         self._outputDataTables = OrderedSet()
+        self.fittingModels = dict()
         self._currentFittingModel = None
         self._needsRefitting = False
 

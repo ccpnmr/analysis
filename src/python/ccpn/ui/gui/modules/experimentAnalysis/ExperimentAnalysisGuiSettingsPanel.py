@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 13:02:02 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -51,7 +51,7 @@ from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import Pan
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
 
 SettingsWidgeMinimumWidths =  (180, 180, 180)
-SettingsWidgetFixedWidths = (250, 300, 300)
+SettingsWidgetFixedWidths = (200, 350, 350)
 
 DividerColour = getColours()[DIVIDER]
 
@@ -172,7 +172,7 @@ class GuiInputDataPanel(GuiSettingPanel):
                                 'type': compoundWidget.EntryCompoundWidget,
                                 '_init': None,
                                 'kwds': {'labelText': guiNameSpaces.Label_InputDataTableName,
-                                         'entryText': 'CSM_Input_DataTable',
+                                         'entryText': 'SeriesAnalysis_DataTable',
                                          'tipText': guiNameSpaces.TipText_dataTableNameSelectionWidget,
                                          'fixedWidths': SettingsWidgetFixedWidths}, }),
             (guiNameSpaces.WidgetVarName_CreateDataTable,
@@ -373,6 +373,8 @@ class GuiFittingPanel(GuiSettingPanel):
 
     def setWidgetDefinitions(self):
         """Common fitting Widgets"""
+        models = list(self._guiModule.backendHandler.fittingModels.values())
+
         self.widgetDefinitions = od((
             (guiNameSpaces.WidgetVarName_OptimiserSeparator,
              {'label': guiNameSpaces.Label_OptimiserSeparator,
@@ -403,18 +405,65 @@ class GuiFittingPanel(GuiSettingPanel):
                        'texts': ['parametric bootstrapping', 'non-parametric bootstrapping', 'Monte-Carlo', ],
                        'fixedWidths': SettingsWidgetFixedWidths}}),
         ))
+        ## Set the models definitions
+        extraLabels_ddCalculationsModels = [model.MaTex for model in models]
+        tipTexts_ddCalculationsModels = [model.FullDescription for model in models]
+        modelNames = [model.ModelName for model in models]
+        extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddCalculationsModels]
+        settingsDict = od((
+            (guiNameSpaces.WidgetVarName_FittingSeparator,
+             {'label': guiNameSpaces.Label_FittingSeparator,
+              'type': LabeledHLine,
+              'kwds': {'text': guiNameSpaces.Label_FittingSeparator,
+                       'height': 30,
+                       'gridSpan': (1, 2),
+                       'colour': DividerColour,
+                       'tipText': guiNameSpaces.TipText_FittingSeparator}}),
+            (guiNameSpaces.WidgetVarName_FittingModel,
+             {'label': guiNameSpaces.Label_FittingModel,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': None,
+              'callback': self.updateFittingModel,
+              'tipText': guiNameSpaces.TipText_FittingModel,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_FittingModel,
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds': {'texts': modelNames,
+                                        'extraLabels': extraLabels_ddCalculationsModels,
+                                        'tipTexts': tipTexts_ddCalculationsModels,
+                                        'direction': 'v',
+                                        'tipText': '',
+                                        'hAlign': 'l',
+                                        'extraLabelIcons': extraLabelPixmaps}}}),
+        ))
+        self.widgetDefinitions.update(settingsDict)
+
         return self.widgetDefinitions
 
+    def updateFittingModel(self, *args):
+        """ Update FittingModel Settings at Backend"""
+        print('Updating')
+        self._setFittingSettingToBackend()
 
-    def _setFittingsSettingToBackend(self):
-        """ Update the backend """
-        getLogger().info('Setting Fitting changed...')
+    def _getSelectedFittingModel(self):
         fittingSettings = self.getSettingsAsDict()
         currentFittingModel = fittingSettings.get(guiNameSpaces.WidgetVarName_FittingModel, None)
 
+    def _setFittingSettingToBackend(self):
+        """ Update the backend """
+        getLogger().info('Setting Fitting changed...')
+        fittingSettings = self.getSettingsAsDict()
+        selectedFittingModelName = fittingSettings.get(guiNameSpaces.WidgetVarName_FittingModel, None)
+
         ## update the backend
         backend = self._guiModule.backendHandler
+        currentFittingModel = backend.currentFittingModel
+        modelObj = backend.getFittingModelByName(selectedFittingModelName)
+        if modelObj is not None:
+            currentFittingModel = modelObj()
+        print('Selected currentFittingModel', currentFittingModel)
         backend.currentFittingModel = currentFittingModel
+        # todo Add the optimiser options (method, fitting Error etc)
         # set update detected.
         backend._needsRefitting = True
         self._setUpdatedDetectedState()

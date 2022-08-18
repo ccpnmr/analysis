@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 13:02:02 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -38,50 +38,50 @@ gaussian_func    = ls.gaussian
 lorentzian_func  = ls.lorentzian
 linear_func      = ls.linear
 parabolic_func   = ls.parabolic
-exponential_func = ls.exponential
 lognormal_func   = ls.lognormal
 pearson7_func    = ls.pearson7
 students_t_func  = ls.students_t
 powerlaw_func    = ls.powerlaw
 
 
-def T1_func(x, decay=1, amplitude=1):
+def inversionRecovery_func(x, decay=1, amplitude=1):
     """ Function used to describe the T1 decay
     """
     decay = ls.not_zero(decay)
-    return amplitude * (1-np.exp(-x/decay))
+    return amplitude * (1 - np.exp(-x / decay))
 
-def T2_func(x, decay=1, amplitude=1):
+def exponentialDecay_func(x, decay=1, amplitude=1):
     """ Function used to describe the T2 decay
     """
     decay = ls.not_zero(decay)
-    return amplitude * np.exp(-x/decay)
+    return amplitude * np.exp(-x / decay)
 
-def fractionBound_func(p, l, kd):
+def exponential_func(x, amplitude, decay):
+    return amplitude * np.exp(decay * x)
+
+def fractionBound_func(x, kd, Bmax):
     """
     #FittingFunc. Called recursively with from the  Minimiser
     Eq. 6 from  M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
-    :param p:
-    :param l:
+    :param x: ligand concentration
     :param kd:
+    :param Bmax: DeltaDeltas cs values
     :return: l, kd
     """
-    qd = np.sqrt(((p + l + kd) ** 2) - 4 * p * l)
-    return ((p + l + kd - qd) / 2)
+    qd = np.sqrt(((Bmax + x + kd) ** 2) - 4 * Bmax * x)
+    return ((Bmax + x + kd - qd) / 2)
 
 def oneSiteBinding_func(x, Kd, BMax):
     """
     #FittingFunc. Called recursively with from the Minimiser
     Args are used/inspected to set the attr to the Minimiser object and other functionalities. Do not change signature characters
-    :param x: 1d array
+    :param x: 1d array (e.g. ligand concentration)
     :param kd: the initial kd value
     :param bmax:
     :return:
     """
     return (BMax * x) / (x + Kd)
 
-# def exponential_func(x, amplitude, decay):
-#     return amplitude * np.exp(decay * x)
 
 ########################################################################################################################
 ########################                     Various Calculation Functions                   ###########################
@@ -115,6 +115,31 @@ def euclideanDistance_func(array1, array2, alphaFactors):
         deltas.append(delta)
     return np.sqrt(np.mean(np.array(deltas)))
 
+def _scaleMinMaxData(data, minMaxRange=(1.e-5, 1)):
+    """
+    :param data: 1d Array
+    :return 1d Array
+    Scale data  to value minMaxRange"""
+    from sklearn.preprocessing import MinMaxScaler
+    data = data.reshape(-1, 1)
+    scaler = MinMaxScaler(feature_range=minMaxRange)
+    scaler = scaler.fit(data)
+    scaledData = scaler.transform(data)
+    scaledData = scaledData.flatten()
+    return scaledData
+
+def _scaleStandardData(data, with_mean=True, with_std=True):
+    """
+    :param data: 1d Array
+    :return 1d Array
+    Scale data to StandardScale; Standardise features by removing the mean and scaling to unit variance.
+    see sklearn StandardScaler for more information"""
+    from sklearn.preprocessing import StandardScaler
+    data = data.reshape(-1, 1)
+    scaler = StandardScaler(with_mean=with_mean, with_std=with_std)
+    scaler = scaler.fit(data)
+    scaledData = scaler.transform(data)
+    return scaledData.flatten()
 
 CommonStatFuncs = {
                 sv.MEAN     : np.mean,

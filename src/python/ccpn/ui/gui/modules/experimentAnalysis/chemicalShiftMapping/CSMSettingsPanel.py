@@ -188,42 +188,10 @@ class CSMCalculationPanel(GuiCalculationPanel):
 #####################################################################
 
 class CSMGuiFittingPanel(GuiFittingPanel):
+    tabName = guiNameSpaces.Label_Fitting
+    tabTipText = 'Set the various Fitting modes and options'
 
-    def setWidgetDefinitions(self):
-        """Add the CSM widget specific."""
-        self.widgetDefinitions = super().setWidgetDefinitions()
-        models = self._guiModule.backendHandler.fittingModels
-        extraLabels_ddCalculationsModels = [model.MaTex for modelName, model in models.items()]
-        tipTexts_ddCalculationsModels = [model.FullDescription for modelName, model in
-                                         models.items()]
-        extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddCalculationsModels]
-        settingsDict = od((
-            (guiNameSpaces.WidgetVarName_FittingSeparator,
-             {'label': guiNameSpaces.Label_FittingSeparator,
-              'type': LabeledHLine,
-              'kwds': {'text': guiNameSpaces.Label_FittingSeparator,
-                       'height': 30,
-                       'gridSpan': (1, 2),
-                       'colour': DividerColour,
-                       'tipText': guiNameSpaces.TipText_FittingSeparator}}),
-            (guiNameSpaces.WidgetVarName_FittingModel,
-             {'label': guiNameSpaces.Label_FittingModel,
-              'type': compoundWidget.RadioButtonsCompoundWidget,
-              'postInit': None,
-              'tipText': guiNameSpaces.TipText_FittingModel,
-              'enabled': False,
-              'kwds': {'labelText': guiNameSpaces.Label_FittingModel,
-                       'fixedWidths': SettingsWidgetFixedWidths,
-                       'compoundKwds': {'texts': list(models.keys()),
-                                        'extraLabels': extraLabels_ddCalculationsModels,
-                                        'tipTexts': tipTexts_ddCalculationsModels,
-                                        'direction': 'v',
-                                        'tipText': '',
-                                        'hAlign': 'l',
-                                        'extraLabelIcons': extraLabelPixmaps}}}),
-                ))
-        self.widgetDefinitions.update(settingsDict)
-        return self.widgetDefinitions
+
 
 
 #####################################################################

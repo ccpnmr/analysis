@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-08 19:58:03 +0100 (Mon, August 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-18 13:02:02 +0100 (Thu, August 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -998,6 +998,12 @@ class LabelCompoundWidget(CompoundBaseWidget):
 
         if fixedWidths is not None:
             self.setFixedWidths(fixedWidths)
+
+    def _getSaveState(self):
+        return self.label2.get()
+
+    def _setSavedState(self, value):
+        self.label2.setText(value)
     
 class SpinBoxCompoundWidget(CompoundBaseWidget):
     """
@@ -1089,6 +1095,12 @@ class SpinBoxCompoundWidget(CompoundBaseWidget):
         """Set the callback for the spinBox
         """
         self.spinBox.setCallback(callback)
+
+    def _getSaveState(self):
+        return self.getValue()
+
+    def _setSavedState(self, value):
+        self.setValue(value)
 
 
 class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
@@ -1291,6 +1303,12 @@ class ScientificSpinBoxCompoundWidget(CompoundBaseWidget):
         """Set the callback for the scientificSpinBox
         """
         self.scientificSpinBox.setCallback(callback)
+
+    def _getSaveState(self):
+        return self.getValue()
+
+    def _setSavedState(self, value):
+        self.setValue(value)
 
 
 class SelectorWidget(Widget):
@@ -1540,6 +1558,12 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
         """Convenience: set the radioButtons selected text
         """
         self.radioButtons.set(value)
+
+    def _getSaveState(self):
+        return self.getByText()
+
+    def _setSavedState(self, value):
+        self.setByText(value)
 
 class ColourSelectionCompoundWidget(PulldownListCompoundWidget):
 

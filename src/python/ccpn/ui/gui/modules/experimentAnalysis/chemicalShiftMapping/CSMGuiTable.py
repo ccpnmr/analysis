@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 19:08:15 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-19 16:05:00 +0100 (Fri, August 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -35,35 +35,6 @@ from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import _E
 class _CSMGuiTable(_ExperimentalAnalysisTableABC):
 
     className = guiNameSpaces.CSMTablePanel
-
-    _fittingColumnsDefs = {
-        sv.KD: {gt.NAME: sv.KD,
-            gt.GETTER: lambda row: gt._getValueByHeader(row, sv.KD),
-            gt.TIPTEXT: gt._makeTipText(sv.KD, ""),
-            gt.FORMAT: guiNameSpaces._COLUM_FLOAT_FORM,
-            gt.WIDTH: 70,
-            gt.HIDDEN: False
-            },
-        sv.KD_ERR:  {gt.NAME: sv.KD_ERR,
-            gt.GETTER: lambda row: gt._getValueByHeader(row, sv.KD_ERR),
-            gt.TIPTEXT: gt._makeTipText(sv.KD_ERR, ""),
-            gt.FORMAT: guiNameSpaces._COLUM_FLOAT_FORM,
-            gt.WIDTH: 70,
-            gt.HIDDEN: True
-            },
-        sv.BMAX: {gt.NAME: sv.BMAX,
-            gt.GETTER: lambda row: gt._getValueByHeader(row, sv.BMAX),
-            gt.FORMAT: guiNameSpaces._COLUM_FLOAT_FORM,
-            gt.TIPTEXT: gt._makeTipText(sv.BMAX, ""),
-            gt.WIDTH: 70,
-            gt.HIDDEN: False
-            },
-        sv.BMAX_ERR: {gt.NAME: sv.BMAX_ERR,
-            gt.GETTER: lambda row: gt._getValueByHeader(row,  sv.BMAX_ERR),
-            gt.TIPTEXT: gt._makeTipText(sv.BMAX_ERR, ""),
-            gt.WIDTH: 70,
-            gt.HIDDEN: True
-            }}
 
     _othersColumnsDefs = {
         guiNameSpaces.ColumnDdelta: {gt.NAME: sv.DELTA_DELTA,

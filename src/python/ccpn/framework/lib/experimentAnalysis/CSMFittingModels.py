@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-18 13:02:01 +0100 (Thu, August 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-19 16:04:59 +0100 (Fri, August 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -48,8 +48,8 @@ class FractionBindingMinimiser(MinimiserModel):
     KDstr = sv.KD # They must be exactly as they are defined in the FITTING_FUNC arguments! This was too hard to change!
     BMAXstr = sv.BMAX
 
-    _defaultParams = {KDstr:1,
-                      BMAXstr:0.5}
+    defaultParams = {KDstr:1,
+                     BMAXstr:0.5}
 
     def __init__(self, **kwargs):
         super().__init__(Binding1SiteMinimiser.FITTING_FUNC, **kwargs)
@@ -91,8 +91,8 @@ class Binding1SiteMinimiser(MinimiserModel):
     KDstr = sv.KD # They must be exactly as they are defined in the FITTING_FUNC arguments! This was too hard to change!
     BMAXstr = sv.BMAX
 
-    _defaultParams = {KDstr:1,
-                      BMAXstr:0.5}
+    defaultParams = {KDstr:1,
+                     BMAXstr:0.5}
 
     def __init__(self, independent_vars=['x'], prefix='', nan_policy=sv.OMIT_MODE, **kwargs):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})

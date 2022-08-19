@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-18 18:08:35 +0100 (Thu, August 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-19 16:04:59 +0100 (Fri, August 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -47,9 +47,11 @@ class _RelaxationBaseMinimiser(MinimiserModel):
     A base model for T1/T2
     """
     FITTING_FUNC = lf.exponentialDecay_func
-    AMPLITUDEstr = sv.AMPLITUDE # They must be exactly as they are defined in the FITTING_FUNC arguments! This was too hard to change!
+    AMPLITUDEstr = sv.AMPLITUDE
     DECAYstr = sv.DECAY
-    _defaultParams = {
+    # _defaultParams must be set. They are required. Also Strings must be exactly as they are defined in the FITTING_FUNC arguments!
+    # There is a clever signature inspection that set the args as class attributes. This was too hard/dangerous to change!
+    defaultParams = {
                         AMPLITUDEstr:1,
                         DECAYstr:0.5
                       }
@@ -60,7 +62,7 @@ class _RelaxationBaseMinimiser(MinimiserModel):
         super().__init__(lf.exponentialDecay_func, **kwargs)
         self.name = self.MODELNAME
         self.amplitude = None  # this will be a Parameter Obj . Set on the fly by the minimiser while inspecting the Fitting Func signature
-        self.decay = None  # this will be a Parameter Obj
+        self.decay = None      # this will be a Parameter Obj
 
     def guess(self, data, x, **kwargs):
         """Estimate initial model parameter values from data."""
@@ -108,8 +110,7 @@ class _RelaxationBaseFittingModel(FittingModelABC):
         """
         self._rawData.clear()
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
-        ## Keep only one IsotopeCode as we are using only Height/Volume
-
+        ## Keep only one IsotopeCode as we are using only Height/Volume 15N?
         inputData = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
         for collectionId, groupDf in grouppedByCollectionsId:

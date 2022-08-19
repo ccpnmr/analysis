@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-18 18:08:35 +0100 (Thu, August 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-19 16:04:59 +0100 (Fri, August 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -81,6 +81,12 @@ class FittingModelABC(ABC):
         df = pd.DataFrame(self._rawData, columns=self._xRawData, index=self._rawIndexes)
         return df
 
+    def getFittingArgumentNames(self):
+        """ get the list of parameters as str used in the minimiser fitting function  """
+        minimiser = self.Minimiser
+        return minimiser.getParamNames(minimiser)
+
+
     def __str__(self):
         return f'<{self.__class__.__name__}: {self.ModelName}>'
 
@@ -115,13 +121,32 @@ class MinimiserModel(Model):
         - `'propagate'` : do nothing
         - `'omit'` : drop missing data
 
-    usage example:
+    ----- ccpn internal ----
+
+     _defaultParams must be set.
+        It is a dict containing as key the fitting func argument to be optimised (excluding x)
+        and an initial default value. (Arbitrary at this stage or None. Initial values are calculated separately in the "guess" method).
+
+        Also, these arguments as a string must be exactly as they are defined in the FITTING_FUNC arguments!
+        Example fitFunc with args decay and amplitude:
+
+            def expDecay(x, decay, amplitude):...
+            defaultParams = {
+                            'decay'    : 0.3,
+                            'amplitude': 1
+                            }
+            (note x is not necessary to be defined here, it is part of the "independent_vars" set automatically)
+        This because there is a clever signature inspection that sets on-the-fly args as class attributes,
+        and they are used throughout the code.  <is an odd behaviour but too hard/dangerous to change!>
+        defaultParams are also used to autogenerate Gui definitions in tables and widget entries.
 
     """
-    FITTING_FUNC= None
-    MODELNAME   = 'Minimiser'
-    method      = 'leastsq'
-    label       = ''
+    FITTING_FUNC  = None
+    MODELNAME     = 'Minimiser'
+    method        = 'leastsq'
+    label         = ''
+    defaultParams = {} # N.B Very important. see docs above.
+
 
     def fit(self, data, params=None, weights=None, method='leastsq',
             iter_cb=None, scale_covar=True, verbose=False, fit_kws=None,
@@ -277,6 +302,11 @@ class MinimiserModel(Model):
 
     def guess(self, data, x, **kws):
         pass
+
+    @staticmethod
+    def getParamNames(cls):
+        """ get the list of parameters as str used in the fitting function  """
+        return list(cls.defaultParams.keys())
 
 
 class MinimiserResult(ModelResult):

@@ -171,7 +171,7 @@ class CSMCalculationPanel(GuiCalculationPanel):
         _excludedTypes = calculationSettings.get(guiNameSpaces.WidgetVarName_ExcludeResType, [])
         _untraceablePeakValue = calculationSettings.get(guiNameSpaces.WidgetVarName_UntraceablePeak, 1)
         ## update the backend
-        backend = self._guiModule.backendHandler
+        backend = self.guiModule.backendHandler
         backend.setAlphaFactor(_1H=_alphaFactors.get(seriesVariables._1H),
                                _15N=_alphaFactors.get(seriesVariables._15N),
                                _13C=_alphaFactors.get(seriesVariables._13C),
@@ -202,14 +202,11 @@ class CSMAppearancePanel(AppearancePanel):
 
     def _getThresholdValueFromBackend(self, columnName, calculationMode, factor):
         """ Get the threshold value based on selected Y axis. called from _setThresholdValueForData"""
-        h = self._guiModule.backendHandler
+        h = self.guiModule.backendHandler
         value = h.getThresholdValueForData(data= h._getGuiOutputDataFrame(), columnName=columnName,
                                            calculationMode=calculationMode, factor=factor)
         return value
 
-    @property
-    def _axisYOptions(self):
-        return guiNameSpaces.YBarGraphColumnNameOptionsCSM
 
 #####################################################################
 #####################   Filtering Panel   ###########################

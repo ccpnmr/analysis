@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 19:08:16 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-19 16:05:00 +0100 (Fri, August 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -35,36 +35,6 @@ from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import _E
 class _RelaxationGuiTable(_ExperimentalAnalysisTableABC):
 
     className = guiNameSpaces.RelaxationTablePanel
-
-    _fittingColumnsDefs = {
-        sv.DECAY: {gt.NAME: sv.DECAY,
-            gt.GETTER: lambda row: gt._getValueByHeader(row, sv.DECAY),
-            gt.FORMAT: guiNameSpaces._COLUM_FLOAT_FORM,
-            gt.TIPTEXT: gt._makeTipText(sv.DECAY, ""),
-            gt.WIDTH: 70,
-            gt.HIDDEN: False
-            },
-        sv.DECAY_ERR: {gt.NAME: sv.DECAY_ERR,
-            gt.GETTER: lambda row: gt._getValueByHeader(row,  sv.DECAY_ERR),
-            gt.TIPTEXT: gt._makeTipText(sv.DECAY_ERR, ""),
-            gt.WIDTH: 70,
-            gt.HIDDEN: True
-            },
-        sv.AMPLITUDE: {gt.NAME: sv.AMPLITUDE,
-                       gt.GETTER: lambda row: gt._getValueByHeader(row, sv.AMPLITUDE),
-                       gt.TIPTEXT: gt._makeTipText(sv.AMPLITUDE, ""),
-                       gt.FORMAT: guiNameSpaces._COLUM_FLOAT_FORM,
-                       gt.WIDTH: 70,
-                       gt.HIDDEN: False
-                       },
-        sv.AMPLITUDE_ERR: {gt.NAME: sv.AMPLITUDE_ERR,
-                           gt.GETTER: lambda row: gt._getValueByHeader(row, sv.AMPLITUDE_ERR),
-                           gt.TIPTEXT: gt._makeTipText(sv.AMPLITUDE_ERR, ""),
-                           gt.FORMAT: guiNameSpaces._COLUM_FLOAT_FORM,
-                           gt.WIDTH: 70,
-                           gt.HIDDEN: True
-                           },
-        }
 
 
 class RelaxationTablePanel(TablePanel):

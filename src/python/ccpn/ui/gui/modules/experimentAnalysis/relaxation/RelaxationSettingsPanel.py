@@ -86,10 +86,6 @@ class RelaxationAppearancePanel(AppearancePanel):
         """ Get the threshold value based on selected Y axis. called from _setThresholdValueForData"""
         return super()._getThresholdValueFromBackend(columnName, calculationMode, factor)
 
-    @property
-    def _axisYOptions(self):
-        return guiNameSpaces.YBarGraphColumnNameOptionsRelax
-
 
 #####################################################################
 #####################   Filtering Panel   ###########################

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-18 13:02:02 +0100 (Thu, August 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-19 16:05:00 +0100 (Fri, August 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -68,7 +68,7 @@ class GuiSettingPanel(Frame):
 
     def __init__(self, guiModule,  *args, **Framekwargs):
         Frame.__init__(self, setLayout=True, **Framekwargs)
-        self._guiModule = guiModule
+        self.guiModule = guiModule
         self.getLayout().setAlignment(QtCore.Qt.AlignTop)
         self._moduleSettingsWidget = None # the widgets the collects all autogen widgets
         self.widgetDefinitions = self.setWidgetDefinitions()
@@ -90,7 +90,7 @@ class GuiSettingPanel(Frame):
         return od()
 
     def initWidgets(self):
-        mainWindow = self._guiModule.mainWindow
+        mainWindow = self.guiModule.mainWindow
         self._moduleSettingsWidget = settingWidgets.ModuleSettingsWidget(parent=self, mainWindow=mainWindow,
                                                                          settingsDict=self.widgetDefinitions,
                                                                          grid=(0, 0))
@@ -114,7 +114,7 @@ class GuiSettingPanel(Frame):
 
     def _setUpdatedDetectedState(self):
         """ set update detected on toolbar icons. """
-        toolbar = self._guiModule.panelHandler.getToolBarPanel()
+        toolbar = self.guiModule.panelHandler.getToolBarPanel()
         if toolbar:
             toolbar.setUpdateState(PanelUpdateState.DETECTED)
 
@@ -212,19 +212,19 @@ class GuiInputDataPanel(GuiSettingPanel):
 
     def _addInputDataCallback(self, *args):
 
-        backend = self._guiModule.backendHandler
+        backend = self.guiModule.backendHandler
         dataTablePids = self.getSettingsAsDict().get(guiNameSpaces.WidgetVarName_DataTablesSelection, [])
         if not dataTablePids:
-            self._guiModule.backendHandler.clearInputDataTables()
-            getLogger().info(f'{self._guiModule.className}:{self.tabName}. Cleaned inputDataTables')
+            self.guiModule.backendHandler.clearInputDataTables()
+            getLogger().info(f'{self.guiModule.className}:{self.tabName}. Cleaned inputDataTables')
             return
         for pid in dataTablePids:
-            obj = self._guiModule.project.getByPid(pid)
+            obj = self.guiModule.project.getByPid(pid)
             if obj:
                 backend.addInputDataTable(obj)
-                getLogger().info(f'{self._guiModule.className}:{self.tabName}. {obj} added to inputDataTables')
+                getLogger().info(f'{self.guiModule.className}:{self.tabName}. {obj} added to inputDataTables')
 
-        self._guiModule.updateAll()
+        self.guiModule.updateAll()
 
     def _setCreateDataTableButtonCallback(self):
         "Set callback for create-input-DataTable button."
@@ -252,18 +252,18 @@ class GuiInputDataPanel(GuiSettingPanel):
 
     def _createInputDataTableCallback(self, *args):
         """ """
-        settingsPanelHandler = self._guiModule.settingsPanelHandler
+        settingsPanelHandler = self.guiModule.settingsPanelHandler
         inputSettings = settingsPanelHandler.getInputDataSettings()
         sgPids = inputSettings.get(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection, [None])
         if not sgPids:
             showWarning('Select SpectrumGroup', 'Cannot create an input DataTable without a SpectrumGroup')
             return
-        spGroup = self._guiModule.project.getByPid(sgPids[-1])
+        spGroup = self.guiModule.project.getByPid(sgPids[-1])
         dataTableName = inputSettings.get(guiNameSpaces.WidgetVarName_DataTableName, None)
         if not spGroup:
             getLogger().warn('Cannot create an input DataTable without a SpectrumGroup. Select one first')
             return
-        backend = self._guiModule.backendHandler
+        backend = self.guiModule.backendHandler
         newDataTable = backend.newInputDataTableFromSpectrumGroup(spGroup, dataTableName=dataTableName)
         ## add as first selection in the datatable. clear first.
         dtSelectionWidget = self.getWidget(guiNameSpaces.WidgetVarName_DataTablesSelection)
@@ -373,7 +373,7 @@ class GuiFittingPanel(GuiSettingPanel):
 
     def setWidgetDefinitions(self):
         """Common fitting Widgets"""
-        models = list(self._guiModule.backendHandler.fittingModels.values())
+        models = list(self.guiModule.backendHandler.fittingModels.values())
 
         self.widgetDefinitions = od((
             (guiNameSpaces.WidgetVarName_OptimiserSeparator,
@@ -456,7 +456,7 @@ class GuiFittingPanel(GuiSettingPanel):
         selectedFittingModelName = fittingSettings.get(guiNameSpaces.WidgetVarName_FittingModel, None)
 
         ## update the backend
-        backend = self._guiModule.backendHandler
+        backend = self.guiModule.backendHandler
         currentFittingModel = backend.currentFittingModel
         modelObj = backend.getFittingModelByName(selectedFittingModelName)
         if modelObj is not None:
@@ -470,9 +470,9 @@ class GuiFittingPanel(GuiSettingPanel):
 
     def _calculateFittingCallback(self, *args):
         getLogger().info(f'Recalculating Fitting values ...')
-        backend = self._guiModule.backendHandler
+        backend = self.guiModule.backendHandler
         backend.fitInputData()
-        self._guiModule.updateAll()
+        self.guiModule.updateAll()
 
 
 TABPOS += 1
@@ -647,7 +647,13 @@ class AppearancePanel(GuiSettingPanel):
 
     @property
     def _axisYOptions(self):
-        return []
+        """ Get the columns names for plottable data. E.g.: the Fitting results and stats. """
+        backend = self.guiModule.backendHandler
+        model = backend.currentFittingModel
+        fittingArgumentNames = model.getFittingArgumentNames()
+        statNames = guiNameSpaces.YBarGraphColumnNameOptionsCommon
+        allOptions = fittingArgumentNames + statNames
+        return allOptions
 
     def _setThresholdValueForData(self, *args):
         mode = None

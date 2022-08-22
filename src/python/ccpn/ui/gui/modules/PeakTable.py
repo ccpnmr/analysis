@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-22 15:20:35 +0100 (Mon, August 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-22 17:51:56 +0100 (Mon, August 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -293,11 +293,9 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
     # Widget callbacks
     #=========================================================================================
 
-    def selectionCallback(self, data):
+    def actionCallback(self, data):
         """If current strip contains the double-clicked peak will navigateToPositionInStrip
         """
-        super(_NewPeakTableWidget, self).selectionCallback(data)
-
         from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
 
         # multi-selection table will return a list of objects

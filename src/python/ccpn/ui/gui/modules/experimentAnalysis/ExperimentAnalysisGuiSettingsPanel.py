@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-19 16:05:00 +0100 (Fri, August 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-22 17:52:30 +0100 (Mon, August 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,6 @@ This module contains the GUI Settings panels.
 """
 
 from collections import OrderedDict as od
-from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import ChemicalShiftCalculationModes
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import ALL_GROUPINGNMRATOMS
 from ccpn.util.Logging import getLogger
 import numpy as np

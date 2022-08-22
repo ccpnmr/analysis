@@ -27,14 +27,23 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 This module contains the GUI Settings panels for the Relaxation module.
 """
 
+
 from collections import OrderedDict as od
+from ccpn.framework.lib.experimentAnalysis.RelaxationFittingModels import RelaxationCalculationModes
+from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import ChemicalShiftCalculationModes
+from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import ALL_GROUPINGNMRATOMS
+from ccpn.util.Logging import getLogger
 ######## gui/ui imports ########
+from PyQt5 import QtCore, QtWidgets, QtGui
+import ccpn.ui.gui.widgets.CompoundWidgets as compoundWidget
+from ccpn.ui.gui.widgets.Label import maTex2Pixmap
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
+from ccpn.ui.gui.widgets.HLine import LabeledHLine
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiSettingsPanel import GuiSettingPanel, \
     GuiInputDataPanel, GuiCalculationPanel, GuiFittingPanel, AppearancePanel
-
 
 SettingsWidgeMinimumWidths = (180, 180, 180)
 SettingsWidgetFixedWidths = (250, 300, 300)
@@ -60,10 +69,38 @@ class RelaxationCalculationPanel(GuiCalculationPanel):
         """ Relaxation-widget-specific"""
 
         self.widgetDefinitions = super().setWidgetDefinitions()
-        wdict = od((
-                    ))
+        ## autogenerate labels/tiptexts from the calculationModes.
+        extraLabels_ddCalculationsModes = [model.MaTex for modelName, model in
+                                           RelaxationCalculationModes.items()]
+        tipTexts_ddCalculationsModes = [model.FullDescription for modelName, model in
+                                        RelaxationCalculationModes.items()]
+        extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddCalculationsModes]
+        calculationWidgetDefinitions = od((
+            (guiNameSpaces.WidgetVarName_CalcModeSeparator,
+             {'label': guiNameSpaces.Label_CalcModeSeparator,
+              'type': LabeledHLine,
+              'kwds': {'text': guiNameSpaces.Label_CalcModeSeparator,
+                       'height': 30,
+                       'gridSpan': (1, 2),
+                       'colour': DividerColour,
+                       'tipText': guiNameSpaces.TipText_CalculationSeparator}}),
+            (guiNameSpaces.WidgetVarName_CalcMode,
+             {'label': guiNameSpaces.Label_CalculationOptions,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': None,
+              'callBack': self._setCalculationOptionsToBackend,
+              'kwds': {'labelText': guiNameSpaces.Label_CalculationOptions,
+                       'hAlign': 'l',
+                       'tipText': '',
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds': {'texts': list(RelaxationCalculationModes.keys()),
+                                        'extraLabels': extraLabels_ddCalculationsModes,
+                                        'tipTexts': tipTexts_ddCalculationsModes,
+                                        'direction': 'v',
+                                        'extraLabelIcons': extraLabelPixmaps}}}),
+        ))
         ## add the new items to the main dict
-        self.widgetDefinitions.update(wdict)
+        self.widgetDefinitions.update(calculationWidgetDefinitions)
         return self.widgetDefinitions
 
 #####################################################################

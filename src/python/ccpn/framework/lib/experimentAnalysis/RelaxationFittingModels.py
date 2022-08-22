@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-22 15:20:35 +0100 (Mon, August 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-22 17:52:30 +0100 (Mon, August 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 import pandas as pd
-
+from ccpn.framework.Application import getApplication, getProject
 from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult
@@ -186,7 +186,7 @@ class HetNoeCalculation():
     """
     Calculate HeteroNuclear NOE Values
     """
-    ModelName = sv.EUCLIDEAN_DISTANCE
+    ModelName = sv.HETNOE
     Info        = 'Calculate HeteroNuclear NOE Values using peak properties (Height/Volume).'
     MaTex       = r''
     Description = ''
@@ -200,6 +200,7 @@ class HetNoeCalculation():
     def __init__(self, intensity=HEIGHT):
         super().__init__()
         self._intensity = intensity
+        self.project = getProject()
 
     @property
     def intensity(self):
@@ -210,14 +211,6 @@ class HetNoeCalculation():
         if value not in self._allowedIntesityTypes:
             raise ValueError(f'Value must be on of: {self._allowedIntesityTypes}')
         self._intensity =value
-
-    def calculateValueError(self):
-        """ V2"""
-        # for (peakA, peakB) in self.peakPairs:  # peakA is sat
-        #     value = float(intensA) / intensB
-        #     error = abs(value) * sqrt((noiseSat / intensA) ** 2 + (noiseRef / intensB) ** 2)
-
-
 
     def calculate(self, inputData:TableFrame) -> TableFrame:
         """
@@ -232,46 +225,56 @@ class HetNoeCalculation():
     ### Private functions ###
     #########################
 
-
-
     def _getHetNoeOutputFrame(self, inputData):
         """
         Calculate the HetNoe for an input SeriesTable.
+        The non-Sat peak is the first in the SpectrumGroup series.
         :param inputData: SeriesInputFrame
         :return: outputFrame (HetNoeOutputFrame)
         """
+        unSatIndex = 0 
+        satIndex = 1
         outputFrame = HetNoeOutputFrame()
-        outputFrame._buildColumnHeaders()
-        grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
-        rowIndex = 1
-
-        getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
+    
         ## Keep only one IsotopeCode as we are using only 15N
         inputData = inputData[inputData[sv.ISOTOPECODE] == '15N']
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
+        satNoiseLevel = None
+        unSatNoiseLevel = None
         for collectionId, groupDf in grouppedByCollectionsId:
             groupDf.sort_values([sv.SERIESSTEP], inplace=True)
-            seriesSteps = groupDf[sv.SERIESSTEP]
             seriesValues = groupDf[self.intensity]
-            pid = groupDf[sv.COLLECTIONPID].values[-1]
-            yArray = seriesValues.values
-
+            satPeakPid = groupDf[sv.PEAKPID].values[satIndex]
+            unSatPeakPid = groupDf[sv.PEAKPID].values[unSatIndex]
+            if satNoiseLevel is None: # get the NoiseLevel from peakPid
+                satPeak = self.project.getByPid(satPeakPid)
+                unSatPeak = self.project.getByPid(unSatPeakPid)
+                if satPeak:
+                    satNoiseLevel = satPeak.spectrum.noiseLevel
+                if unSatPeak:
+                    unSatNoiseLevel = unSatPeak.spectrum.noiseLevel
+            unSatValue = seriesValues.values[unSatIndex]
+            satValue =seriesValues.values[satIndex]
             nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf) # join the atom names from different rows in a list
-            seriesSteps = groupDf[sv.SERIESSTEP].unique()
             seriesUnits = groupDf[sv.SERIESUNIT].unique()
 
-            value = yArray[0]/yArray[1]
-            error = None
+            if satNoiseLevel is None:
+                satNoiseLevel = None
+                unSatNoiseLevel = None
+
+            ratio = satValue/unSatValue
+            error = lf.hetNoeError(ratio, satValue, unSatValue, satNoiseLevel, unSatNoiseLevel)
 
             # build the outputFrame
-            outputFrame.loc[rowIndex, sv.COLLECTIONID] = collectionId
-            outputFrame.loc[rowIndex, sv.PEAKPID] = groupDf[sv.PEAKPID].values[0]
-            outputFrame.loc[rowIndex, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
-            outputFrame.loc[rowIndex, sv.SERIESUNIT] = seriesUnits[-1]
-            outputFrame.loc[rowIndex, 'value'] = value
-            outputFrame.loc[rowIndex, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
-            outputFrame.loc[rowIndex, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''
-            outputFrame.loc[rowIndex, sv.FLAG] = sv.FLAG_INCLUDED
+            outputFrame.loc[collectionId, sv.COLLECTIONID] = collectionId
+            outputFrame.loc[collectionId, sv.PEAKPID] = groupDf[sv.PEAKPID].values[0]
+            outputFrame.loc[collectionId, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
+            outputFrame.loc[collectionId, sv.SERIESUNIT] = seriesUnits[-1]
+            outputFrame.loc[collectionId, 'ratio'] = ratio
+            outputFrame.loc[collectionId, 'error'] = error
+            outputFrame.loc[collectionId, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
+            outputFrame.loc[collectionId, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''
+            outputFrame.loc[collectionId, sv.FLAG] = sv.FLAG_INCLUDED
 
         return outputFrame
 
@@ -287,7 +290,10 @@ Models = [
         ]
 
 
-#
+RelaxationCalculationModes = {
+                                HetNoeCalculation.ModelName: HetNoeCalculation,
+                                 }
+
 
 
 

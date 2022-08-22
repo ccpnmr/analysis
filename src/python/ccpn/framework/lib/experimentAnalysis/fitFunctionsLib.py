@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-22 15:20:35 +0100 (Mon, August 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-22 17:52:30 +0100 (Mon, August 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -115,19 +115,19 @@ def euclideanDistance_func(array1, array2, alphaFactors):
         deltas.append(delta)
     return np.sqrt(np.mean(np.array(deltas)))
 
-def hetNoeError(sat, nonSat, noiseSat, noiseNonSat):
+def hetNoeError(ratio, sat, nonSat, noiseSat, noiseNonSat):
     """
     Calculate the Error of NOE measurements
-    :param sat: intensity value for the saturated Peak
-    :param nonSat: intensity value for the reference/saturated Peak
-    :param noiseSat: noise value for the saturated Spectrum
-    :param noiseNonSat: noise value for the unsaturated Spectrum
+    :param sat: float, intensity  ratio value for the saturated/unsaturated
+    :param sat: float, intensity value for the saturated Peak
+    :param nonSat: float, intensity value for the unsaturated(reference) Peak
+    :param noiseSat: float, noise value for the saturated Spectrum
+    :param noiseNonSat: float, noise value for the unsaturated Spectrum
     :return:
     Ref.:
     """
-    ratio =  sat/nonSat
     error = abs(ratio) * np.sqrt((noiseSat / sat) ** 2 + (noiseNonSat / nonSat) ** 2)
-    return  error
+    return error
 
 
 def _scaleMinMaxData(data, minMaxRange=(1.e-5, 1)):

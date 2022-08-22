@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-22 15:20:35 +0100 (Mon, August 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-22 17:52:30 +0100 (Mon, August 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -160,13 +160,19 @@ ALPHA_FACTORS                           = 'AlphaFactors'
 
 TipText_RelaxCalculationPanelPanel      = 'Set the various calculation modes and options for the Relaxation Analysis'
 
-## General
 
 ## widgets
 WidgetVarName_RelaxSeparator            = 'RelaxSeparator'
 Label_RelaxOption                       = 'Relaxation Options'
 TipText_RelaxSeparator                  = f''
 
+WidgetVarName_CalcModeSeparator         = 'CalcModeSeparator'
+Label_CalcModeSeparator                 = 'Calculation Options'
+TipText_CalculationSeparator            = f''
+
+WidgetVarName_CalcMode                  = 'CalculationOptions'
+Label_CalculationOptions                = 'Calculation Options'
+TipText_CalculationOptions              = f''
 
 ############################################################
 ##########  TAB: Fitting

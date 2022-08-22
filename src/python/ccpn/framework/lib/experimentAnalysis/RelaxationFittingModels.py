@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-19 16:04:59 +0100 (Fri, August 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-22 15:20:35 +0100 (Mon, August 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ import pandas as pd
 from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult
-from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationOutputFrame, _getOutputFrameFromInputFrame
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationOutputFrame, _getOutputFrameFromInputFrame, HetNoeOutputFrame
 from ccpn.util.Logging import getLogger
 import numpy as np
 from collections import defaultdict
@@ -179,6 +179,106 @@ class ExponentialDecayFittingModel(_RelaxationBaseFittingModel):
 
 
 #####################################################
+##########  Calculation Models   ####################
+#####################################################
+
+class HetNoeCalculation():
+    """
+    Calculate HeteroNuclear NOE Values
+    """
+    ModelName = sv.EUCLIDEAN_DISTANCE
+    Info        = 'Calculate HeteroNuclear NOE Values using peak properties (Height/Volume).'
+    MaTex       = r''
+    Description = ''
+    References  = '''
+                  '''
+    FullDescription = f'{Info} \n {Description}\nSee References: {References}'
+    HEIGHT = sv._HEIGHT
+    VOLUME = sv._VOLUME
+    _allowedIntesityTypes = (HEIGHT, VOLUME)
+
+    def __init__(self, intensity=HEIGHT):
+        super().__init__()
+        self._intensity = intensity
+
+    @property
+    def intensity(self):
+        return self._intensity
+
+    @intensity.setter
+    def intensity(self, value):
+        if value not in self._allowedIntesityTypes:
+            raise ValueError(f'Value must be on of: {self._allowedIntesityTypes}')
+        self._intensity =value
+
+    def calculateValueError(self):
+        """ V2"""
+        # for (peakA, peakB) in self.peakPairs:  # peakA is sat
+        #     value = float(intensA) / intensB
+        #     error = abs(value) * sqrt((noiseSat / intensA) ** 2 + (noiseRef / intensB) ** 2)
+
+
+
+    def calculate(self, inputData:TableFrame) -> TableFrame:
+        """
+        Calculate the DeltaDeltas for an input SeriesTable.
+        :param inputData: CSMInputFrame
+        :return: outputFrame
+        """
+        outputFrame = self._getHetNoeOutputFrame(inputData)
+        return outputFrame
+
+    #########################
+    ### Private functions ###
+    #########################
+
+
+
+    def _getHetNoeOutputFrame(self, inputData):
+        """
+        Calculate the HetNoe for an input SeriesTable.
+        :param inputData: SeriesInputFrame
+        :return: outputFrame (HetNoeOutputFrame)
+        """
+        outputFrame = HetNoeOutputFrame()
+        outputFrame._buildColumnHeaders()
+        grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
+        rowIndex = 1
+
+        getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
+        ## Keep only one IsotopeCode as we are using only 15N
+        inputData = inputData[inputData[sv.ISOTOPECODE] == '15N']
+        grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
+        for collectionId, groupDf in grouppedByCollectionsId:
+            groupDf.sort_values([sv.SERIESSTEP], inplace=True)
+            seriesSteps = groupDf[sv.SERIESSTEP]
+            seriesValues = groupDf[self.intensity]
+            pid = groupDf[sv.COLLECTIONPID].values[-1]
+            yArray = seriesValues.values
+
+            nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf) # join the atom names from different rows in a list
+            seriesSteps = groupDf[sv.SERIESSTEP].unique()
+            seriesUnits = groupDf[sv.SERIESUNIT].unique()
+
+            value = yArray[0]/yArray[1]
+            error = None
+
+            # build the outputFrame
+            outputFrame.loc[rowIndex, sv.COLLECTIONID] = collectionId
+            outputFrame.loc[rowIndex, sv.PEAKPID] = groupDf[sv.PEAKPID].values[0]
+            outputFrame.loc[rowIndex, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
+            outputFrame.loc[rowIndex, sv.SERIESUNIT] = seriesUnits[-1]
+            outputFrame.loc[rowIndex, 'value'] = value
+            outputFrame.loc[rowIndex, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
+            outputFrame.loc[rowIndex, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''
+            outputFrame.loc[rowIndex, sv.FLAG] = sv.FLAG_INCLUDED
+
+        return outputFrame
+
+
+
+
+#####################################################
 ###########      Register models    #################
 #####################################################
 Models = [
@@ -186,6 +286,8 @@ Models = [
             InversionRecoveryFittingModel,
         ]
 
+
+#
 
 
 

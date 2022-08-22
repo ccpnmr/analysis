@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-15 16:47:20 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-22 15:20:35 +0100 (Mon, August 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -250,6 +250,28 @@ class InputSeriesFrameBC(SeriesFrameBC):
 
 class RelaxationOutputFrame(SeriesFrameBC):
     SERIESFRAMETYPE = sv.RELAXATION_OUTPUT_FRAME
+
+
+class HetNoeOutputFrame(SeriesFrameBC):
+
+    """
+    A TableData used for the HetNoe Series Analysis,
+    Mandatory Column names are:
+        ## --------- Columns definitions --------- ##
+        # Group with various identifiers as the main RelaxationOutputFrame
+
+        # Group with calculation/calculated values
+        - seriesUnit        : str,
+        - seriesStep        : float,
+        - seriesStepValue   : float,
+        - value             : float,
+        - value_error       : float,
+
+    """
+
+    SERIESFRAMENAME = sv.HetNoe_OUTPUT_FRAME
+    SERIESFRAMETYPE = sv.HetNoe_OUTPUT_FRAME
+
 
 ########################################################################################################################
 ################################   Chemical Shift Mapping  I/O Series Output Table      ################################

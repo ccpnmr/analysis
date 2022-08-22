@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-19 16:04:59 +0100 (Fri, August 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-22 15:20:35 +0100 (Mon, August 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -347,7 +347,7 @@ def getGuiNameMapping():
         }
 
 def getReverseGuiNameMapping():
-    """ get the reveresed Key:value for getGuiNameMapping dict"""
+    """ get the reversed Key:value for getGuiNameMapping dict"""
     return {v:k for k,v in getGuiNameMapping().items()}
     
 ### Appearance BarGraph X axis

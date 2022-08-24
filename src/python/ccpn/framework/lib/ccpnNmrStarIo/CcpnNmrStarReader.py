@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-22 19:58:04 +0000 (Tue, February 22, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-08-24 16:33:31 +0100 (Wed, August 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -45,12 +45,20 @@ class CcpnNmrStarReader():
         """
         self.path = None  # Absolute path to star file used to fill self
         self._dataBlock = None
+        self._entryName = None
 
     @property
     def dataBlock(self):
         """:return the NmrDataBlock or None, depending if a file has been parsed
         """
         return self._dataBlock
+
+    @property
+    def entryName(self) -> str:
+        """:return: a name derived from the entry Id
+        """
+        name = 'undefined' if self.dataBlock is None else f'bmrb{self.dataBlock.name}'
+        return name
 
     def parse(self, path, mode=PARSER_MODE_STANDARD) -> NmrDataBlock:
         """
@@ -90,15 +98,17 @@ class CcpnNmrStarReader():
     def importIntoProject(self, project) -> list:
         """Import the data of the saveFrame's of self into project
         :param project: A Project instance
-        :return A list of imported V3 objects
+        :return A list of imported V3 objects; first object is a Collection
         """
-        result = []
+        collection = project.newCollection(name=self.entryName)
+        result = [collection]
         for key, saveFrame in self.dataBlock.items():
             if not isinstance(saveFrame, SaveFrameABC):
                 getLogger().warning(f'CcpNmrStarReader.importIntoProject: cannot import "{key}" (category {saveFrame.category})')
             else:
-                objs = saveFrame.importIntoProject(project=project)
-                result.extend(objs)
+                if (objs := saveFrame.importIntoProject(project=project)) and len(objs) > 0:
+                    result.extend(objs)
+                    collection.addItems(objs)
         return result
 
     def __str__(self):

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-08-24 15:48:09 +0100 (Wed, August 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-24 16:33:31 +0100 (Wed, August 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -73,6 +73,12 @@ class SaveFrameABC(NmrSaveFrame):
         if _id is None:
             return None
         return str(_id)
+
+    @property
+    def entryName(self) -> str:
+        """:return the entryName (derived from entry_id) as a str
+        """
+        return  f'bmrb{self.entry_id}'
 
     def importIntoProject(self, project) -> list:
         """Import the data of self into project.

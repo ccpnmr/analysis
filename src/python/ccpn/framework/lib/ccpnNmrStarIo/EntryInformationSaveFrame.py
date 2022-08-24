@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-08-24 15:48:09 +0100 (Wed, August 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-24 16:33:31 +0100 (Wed, August 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -84,9 +84,9 @@ class EntryInformationSaveFrame(SaveFrameABC):
         :return: list of imported V3 objects.
         """
         comment = f'{self.entry_id} Entry information'
-        name = f'entry{self.entry_id}'
 
-        text = f'BMRB entry: {self.entry_id}\n'
+        text = f'Data imported from: {self.parent.path}\n'
+        text += f'\nBMRB entry: {self.entry_id}\n'
         text += f'Submission date: {self[self._SUBMISSION_DATE_TAG]}\n'
         text += f'\nTitle: {self[self._TITLE_TAG]}\n'
         text += f'\nAuthors:\n'
@@ -96,7 +96,7 @@ class EntryInformationSaveFrame(SaveFrameABC):
         for row in self.data:
             text += f'  {row[self._DATA_COUNT_TAG]} {row[self._DATA_TYPE_TAG]}\n'
 
-        note = project.newNote(name=name, comment=comment, text=text)
+        note = project.newNote(name=self.entryName, comment=comment, text=text)
 
         return [note]
 

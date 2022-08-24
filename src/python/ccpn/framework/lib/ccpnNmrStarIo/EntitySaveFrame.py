@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-08-24 15:48:09 +0100 (Wed, August 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-24 16:33:31 +0100 (Wed, August 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -66,12 +66,11 @@ class EntitySaveFrame(SaveFrameABC):
         :return: list of imported V3 objects.
         """
         comment = f'Chain {self.name} from entry{self.entry_id}'
-        name = f'entry{self.entry_id}'
 
         sequence = [res[self._RESIDUE_TYPE_TAG] for res in self.residues]
         startNumber = min([res[self._SEQUENCE_CODE_TAG] for res in self.residues])
 
-        chain = project.newChain(shortName=name,
+        chain = project.newChain(shortName=self.entryName,
                                  sequence=sequence, startNumber=startNumber,
                                  comment=comment)
 

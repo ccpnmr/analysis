@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-08-24 15:07:30 +0100 (Wed, August 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-24 17:42:39 +0100 (Wed, August 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -154,8 +154,10 @@ class StarImporterPopup(CcpnDialog):
         self.treeView.selectObjects(selectedOnly)
 
     def _okButton(self):
-        """Prepare the datablock for the loading. Keep only what selected from the gui.
-        The actual data loading doesn't happen here but in the DataLoader."""
+        """Prepare the datablock for the loading. Keep only what selected from the gui; i.e. deleting all non-selected
+        saveFrame's from the dataBlock
+        The actual data loading doesn't happen here but in the DataLoader..
+        """
         selectedItems = self.treeView.getSelectedItems()
         keysToDelete = [key for key in self.dataBlock.keys() if key not in selectedItems]
         for key in keysToDelete:

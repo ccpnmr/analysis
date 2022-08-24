@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-08 15:41:02 +0100 (Mon, August 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-08-24 15:07:30 +0100 (Wed, August 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1931,6 +1931,9 @@ class Project(AbstractWrapperObject):
                             shortName=shortName, role=role, comment=comment,
                             expandFromAtomSets=expandFromAtomSets, addPseudoAtoms=addPseudoAtoms,
                             addNonstereoAtoms=addNonstereoAtoms, **kwds)
+
+    # GWV: why not newChain to be consistent???
+    newChain = createChain
 
     @logCommand('project.')
     def newSubstance(self, name: str = None, labelling: str = None, substanceType: str = 'Molecule',

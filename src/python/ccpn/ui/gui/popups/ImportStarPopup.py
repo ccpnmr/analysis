@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-17 10:49:42 +0100 (Fri, June 17, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-08-24 15:07:30 +0100 (Wed, August 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -37,9 +37,11 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.framework.PathsAndUrls import macroPath as mp
 
+from ccpn.framework.lib.ccpnNmrStarIo.SaveFrameABC import getSaveFrames
 
-ASSIGNED_CHEMICAL_SHIFTS = 'assigned_chemical_shifts'
-sf_categories =  (ASSIGNED_CHEMICAL_SHIFTS,)
+# ASSIGNED_CHEMICAL_SHIFTS = 'assigned_chemical_shifts'
+# sf_categories =  (ASSIGNED_CHEMICAL_SHIFTS,)
+sf_categories = getSaveFrames().keys()
 
 InfoMessage = "This popup will create a new chemical shift list from the selected NMR-STAR v3.1 file."
 
@@ -145,11 +147,11 @@ class StarImporterPopup(CcpnDialog):
     def _limitFunctionalities(self):
         """Only check the boxes that current are supported"""
         self.treeView._uncheckAll()
-        chemicalShiftListOnly = []
+        selectedOnly = []
         for key, value in self.dataBlock.items():
-            if value.category == ASSIGNED_CHEMICAL_SHIFTS:
-                chemicalShiftListOnly.append(key)
-        self.treeView.selectObjects(chemicalShiftListOnly)
+            if value.category in sf_categories:
+                selectedOnly.append(key)
+        self.treeView.selectObjects(selectedOnly)
 
     def _okButton(self):
         """Prepare the datablock for the loading. Keep only what selected from the gui.

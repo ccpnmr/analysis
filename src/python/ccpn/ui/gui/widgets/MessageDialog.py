@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-08-24 17:56:38 +0100 (Wed, August 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -351,6 +351,15 @@ def showWarning(title, message, parent=None, iconPath=None, scrollableMessage=Fa
     dialog.exec_()
     return
 
+def showNYI(parent=None):
+    text = 'Not yet implemented'
+    dialog = MessageDialog(title=text, basicText=text, message='Sorry!', icon=Warning, iconPath=None, parent=parent,
+                           scrollableMessage=False)
+
+    dialog.setStandardButtons(Close)
+    dialog.raise_()
+    dialog.exec_()
+    return
 
 def showOkCancelWarning(title, message, parent=None, iconPath=None):
     dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent)

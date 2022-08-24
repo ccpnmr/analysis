@@ -37,26 +37,44 @@ from ccpn.framework.lib.ccpnNmrStarIo.SaveFrameABC import SaveFrameABC
 from ccpn.framework.lib.NTdb.NTdbDefs import getNTdbDefs
 
 
-class EntitySaveFrame(SaveFrameABC):
-    """A class to manage the BMRB Entity saveFrame
-    Creates a new Chain
+class EntryInformationSaveFrame(SaveFrameABC):
+    """A class to manage the BMRB entry_information saveFrame
+    Info is imported into a Note
     """
     # NOTE the parser code converts tags to lower case!
 
-    _sf_category = 'entity'
+    _sf_category = 'entry_information'
+    _ENTRY_ID_TAG = 'id'
 
-    # this key contains the NmrLoop with the residue data
-    _LOOP_KEY = 'entity_poly_seq'
+    _TITLE_TAG = 'title'
+    _SUBMISSION_DATE_TAG = 'submission_date'
 
-    # These keys map the row onto the V3 ChemicalShift object
-    _SEQUENCE_CODE_TAG = 'comp_index_id'
-    _RESIDUE_TYPE_TAG = 'mon_id'
+    # this key contains the NmrLoop with the author data
+    _LOOP_KEY = 'entry_author'
+    # These keys define the author data
+    _AUTHOR_FIRST_NAME_TAG = 'given_name'
+    _AUTHOR_MIDDLE_NAME_TAG = 'middle_initials'
+    _AUTHOR_LAST_NAME_TAG = 'family_name'
+
+    # This key contains the NmrLoop with the data descriptions
+    _DATA_KEY = 'datum'
+    # These keys define the data
+    _DATA_TYPE_TAG = 'type'
+    _DATA_COUNT_TAG = 'count'
 
     @property
-    def residues(self) ->list :
+    def authors(self) ->list :
         """:return a list of residues LoopRow's
         """
         if (_loop := self.get(self._LOOP_KEY)) is None:
+            return []
+        return _loop.data
+
+    @property
+    def data(self) ->list :
+        """:return a list of data LoopRow's
+        """
+        if (_loop := self.get(self._DATA_KEY)) is None:
             return []
         return _loop.data
 
@@ -65,17 +83,22 @@ class EntitySaveFrame(SaveFrameABC):
         :param project: a Project instance.
         :return: list of imported V3 objects.
         """
-        comment = f'Chain {self.name} from entry{self.entry_id}'
+        comment = f'{self.entry_id} Entry information'
         name = f'entry{self.entry_id}'
 
-        sequence = [res[self._RESIDUE_TYPE_TAG] for res in self.residues]
-        startNumber = min([res[self._SEQUENCE_CODE_TAG] for res in self.residues])
+        text = f'BMRB entry: {self.entry_id}\n'
+        text += f'Submission date: {self[self._SUBMISSION_DATE_TAG]}\n'
+        text += f'\nTitle: {self[self._TITLE_TAG]}\n'
+        text += f'\nAuthors:\n'
+        for author in self.authors:
+             text += f'  {author[self._AUTHOR_FIRST_NAME_TAG]} {author[self._AUTHOR_MIDDLE_NAME_TAG]} {author[self._AUTHOR_LAST_NAME_TAG]}\n'
+        text += '\nData content:\n'
+        for row in self.data:
+            text += f'  {row[self._DATA_COUNT_TAG]} {row[self._DATA_TYPE_TAG]}\n'
 
-        chain = project.newChain(shortName=name,
-                                 sequence=sequence, startNumber=startNumber,
-                                 comment=comment)
+        note = project.newNote(name=name, comment=comment, text=text)
 
-        return [chain]
+        return [note]
 
-EntitySaveFrame._registerSaveFrame()
+EntryInformationSaveFrame._registerSaveFrame()
 

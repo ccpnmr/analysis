@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-03 19:49:59 +0100 (Wed, August 03, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-08-24 15:48:09 +0100 (Wed, August 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ from ccpn.framework.lib.NTdb.NTdbDefs import getNTdbDefs
 
 class ChemicalShiftSaveFrame(SaveFrameABC):
     """A class to manage chemicalShift saveFrame
+    Creates a new (static) ChemicalShift Table and NmrChain/Residues/Atoms
     """
     _sf_category = 'assigned_chemical_shifts'
 

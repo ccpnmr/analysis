@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:37 +0100 (Tue, July 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-08-25 17:30:42 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -455,6 +455,9 @@ def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False
 
     nmrProject = self._apiNmrProject
     serial = None
+
+    if shortName is not None:
+        shortName = NmrChain._uniqueName(project=self, name=shortName)
 
     if shortName:
         previous = self.getNmrChain(shortName.translate(Pid.remapSeparators))

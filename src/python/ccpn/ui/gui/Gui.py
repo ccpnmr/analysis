@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-08-25 14:02:18 +0100 (Thu, August 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 17:30:42 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -600,10 +600,18 @@ class Gui(Ui):
         and suspending sidebar.
         :return a list of loaded opjects
         """
+        from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
+        from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+
         result = []
         errorStringTemplate = 'Loading "%s" failed:' % dataLoader.path + '\n%s'
         with catchExceptions(errorStringTemplate=errorStringTemplate):
-            result = dataLoader.load()
+            # For data loads that are possibly time consuming, use progressManager
+            if isinstance(dataLoader, (StarDataLoader, NefDataLoader)):
+                with MessageDialog.progressManager(self.mainWindow, f'Importing data ... '):
+                    result = dataLoader.load()
+            else:
+                result = dataLoader.load()
         return result
 
     # @logCommand('application.') # eventually decorated by  _loadData()

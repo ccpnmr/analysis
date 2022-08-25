@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-08-25 14:02:18 +0100 (Thu, August 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 17:30:42 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -80,16 +80,13 @@ class EntryInformationSaveFrame(SaveFrameABC):
         return _loop.data
 
     def importIntoProject(self, project) -> list:
-        """Import the data of self into project.
+        """Import the data of self into the note that was generated
+        at the start of the import.
         :param project: a Project instance.
-        :return: list of imported V3 objects.
+        :return: empty list.
         """
-        comment = f'{self.entry_id} meta data'
-
-        text = f'Data from: {self.parent.path}\n'
-        text += f'Imported on: {now()}\n'
-
-        text += f'\nBMRB entry: {self.entry_id}\n'
+        text = f'\n==> saveFrame "{self.name}"\n'
+        text += f'BMRB entry: {self.entry_id}\n'
         text += f'Submission date: {self[self._SUBMISSION_DATE_TAG]}\n'
 
         text += f'\nTitle: {self[self._TITLE_TAG]}\n'
@@ -102,9 +99,9 @@ class EntryInformationSaveFrame(SaveFrameABC):
         for row in self.data:
             text += f'  {row[self._DATA_COUNT_TAG]} {row[self._DATA_TYPE_TAG]}\n'
 
-        note = project.newNote(name=self.entryName, comment=comment, text=text)
+        self.parent.note.appendText(text)
 
-        return [note]
+        return []
 
 EntryInformationSaveFrame._registerSaveFrame()
 

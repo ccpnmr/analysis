@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-08-25 14:02:18 +0100 (Thu, August 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 17:30:42 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,7 @@ from ccpn.util.Path import aPath, Path
 from ccpn.util.Logging import getLogger
 from ccpn.util.nef.StarIo import NmrDataBlock, NmrSaveFrame, NmrLoop, parseNmrStarFile
 from ccpn.util.nef.GenericStarParser import PARSER_MODE_STANDARD, LoopRow
+from ccpn.util.Time import now
 
 from ccpn.framework.lib.ccpnNmrStarIo.SaveFrameABC import SaveFrameABC, getSaveFrames
 
@@ -46,6 +47,7 @@ class CcpnNmrStarReader():
         self.path = None  # Absolute path to star file used to fill self
         self._dataBlock = None
         self._chainCode = None  # Alternative chainCode to use for NmrChain or Chain
+        self._note = None  # Note; created on import
 
     @property
     def dataBlock(self):
@@ -59,6 +61,12 @@ class CcpnNmrStarReader():
         """
         name = 'undefined' if self.dataBlock is None else f'bmrb{self.dataBlock.name}'
         return name
+
+    @property
+    def note(self):
+        """:return: the Note instance or None if undefined
+        """
+        return self._note
 
     @property
     def chainCode(self):
@@ -107,12 +115,26 @@ class CcpnNmrStarReader():
 
         return _dataBlock
 
+    def _newNote(self, project):
+        """Create the note on start of import
+        """
+        comment = f'{self.entryName} meta data'
+
+        text = f'Data from: {self.path}\n'
+        text += f'Imported on: {now()}\n'
+
+        self._note = project.newNote(name=self.entryName, comment=comment, text=text)
+        return self._note
+
     def importIntoProject(self, project) -> list:
         """Import the data of the saveFrame's of self into project
         :param project: A Project instance
         :return A list of imported V3 objects; first object is a Collection
         """
-        collection = project.newCollection(name=self.entryName)
+        # Create a note and a collection
+        note = self._newNote(project)
+        collection = project.newCollection(name=self.entryName, items=[note])
+
         result = [collection]
         for key, saveFrame in self.dataBlock.items():
             if not isinstance(saveFrame, SaveFrameABC):

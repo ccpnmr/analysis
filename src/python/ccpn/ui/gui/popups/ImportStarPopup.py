@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-08-25 12:23:40 +0100 (Thu, August 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 14:02:18 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,21 +26,20 @@ __date__ = "$Date: 2019-06-12 10:28:40 +0000 (Wed, Jun 12, 2019) $"
 # Start of code
 #=========================================================================================
 
-
-
 import os
+import string
 from PyQt5 import QtWidgets, QtCore
+
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.framework.PathsAndUrls import macroPath as mp
 
+# getting the currently implemented saveFrames for import
 from ccpn.framework.lib.ccpnNmrStarIo.SaveFrameABC import getSaveFrames
-
-# ASSIGNED_CHEMICAL_SHIFTS = 'assigned_chemical_shifts'
-# sf_categories =  (ASSIGNED_CHEMICAL_SHIFTS,)
 sf_categories = getSaveFrames().keys()
 
 InfoMessage = "This popup will create a new chemical shift list from the selected NMR-STAR v3.1 file."
@@ -126,30 +125,49 @@ class StarImporterPopup(CcpnDialog):
     CANCEL_PRESSED = 'cancel_pressed'
     IMPORT_PRESSED = 'import_pressed'
 
-    def __init__(self, parent=None, bmrbFilePath=None, project=None, directory=None,
-                 dataBlock=None, title='Import From NMRSTAR', **kw):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
-        self.bmrbFilePath = bmrbFilePath or ''
-        self.directory = directory or ''
-        self.project = project
-        self.dataBlock = dataBlock or {}
+    def __init__(self, dataLoader, parent=None, title='Import From NMRSTAR', **kwds):
+
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+
+        self.dataLoader = dataLoader
+        self.dataBlock = dataLoader.dataBlock or {}
 
         row = 0
         bmrbFileLabel = Label(self, text="NmrStar File", grid=(row, 0))
-        self.fileName = LineEdit(self, text=os.path.basename(self.bmrbFilePath), grid=(row, 1))
-        self.fileName.setEnabled(False)
+        self.fileName = LineEdit(self, text=str(dataLoader.path), grid=(row, 1),
+                                 textAlignment='l', editable=False
+                                 )
 
         row += 1
         tree = Label(self, text="Frames", grid=(row, 0))
-        selectableItems = [key for key, value in dataBlock.items() if value.category in sf_categories]
-        self.treeView = TreeCheckBoxes(self, orderedDataDict=dataBlock,
-                                       checkList=list(dataBlock.keys()),
+        selectableItems = [key for key, value in self.dataBlock.items() if value.category in sf_categories]
+        self.treeView = TreeCheckBoxes(self,
+                                       orderedDataDict=self.dataBlock,
+                                       checkList=list(self.dataBlock.keys()),
                                        selectableItems=selectableItems,
                                        grid=(row, 1))
         self._limitFunctionalities()
+
+        row += 1
+        # Make a list of possible chainCodes, removing those already in use for Chain and NmrChain
+        _chains = list(
+                  set(string.ascii_uppercase) - \
+                  set(chain.name for chain in dataLoader.project.chains) - \
+                  set(chain.name for chain in dataLoader.project.nmrChains)
+        )
+        _chains.sort()
+        _chains = [''] + _chains
+
+        Label(self, text="Set NmrChain/Chain", grid=(row, 0))
+        self._chainCodeEdit = PulldownList(self,
+                                           texts=_chains,
+                                           grid=(row, 1)
+                                          )
+
         row += 1
         self.buttonList = ButtonList(self, ['Cancel', 'Import'], [self._cancelButtonCallback, self._importButtonCallback], grid=(row, 1))
 
+        self.chainCode = None  # set from the _chainCodeEdit widget
         self.result = None  # set by button callback functions
 
     def _limitFunctionalities(self):
@@ -171,6 +189,9 @@ class StarImporterPopup(CcpnDialog):
         keysToDelete = [key for key in self.dataBlock.keys() if key not in selectedItems]
         for key in keysToDelete:
             del(self.dataBlock[key])
+
+        if (chainCode := self._chainCodeEdit.getText()) and len(chainCode) > 0:
+            self.dataLoader.starReader.setChainCode(chainCode)
 
         self.result = self.IMPORT_PRESSED
         self.accept()

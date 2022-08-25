@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-08-25 12:23:40 +0100 (Thu, August 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 14:02:18 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -394,11 +394,9 @@ class Gui(Ui):
             if dataLoader and not ignore:
                 title = 'New project from NmrStar' if createNewProject else \
                         'Import from NmrStar'
-                dataBlock = dataLoader.getDataBlock()  # this will read and parse the file
-                popup = StarImporterPopup(project=self.project,
-                                          bmrbFilePath=dataLoader.path,
-                                          directory=dataLoader.path.parent,
-                                          dataBlock=dataBlock,
+                dataLoader.getDataBlock()  # this will read and parse the file
+                popup = StarImporterPopup(dataLoader=dataLoader,
+                                          parent=self.mainWindow,
                                           size=(700,1000),
                                           title=title
                                           )

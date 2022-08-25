@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-08-25 12:23:40 +0100 (Thu, August 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 14:02:18 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -45,13 +45,13 @@ class EntryInformationSaveFrame(SaveFrameABC):
     # NOTE the parser code converts tags to lower case!
 
     _sf_category = 'entry_information'
-    _ENTRY_ID_TAG = 'id'
+    _ENTRY_ID_TAG = 'id'    # NB different from the other saveFrames!
 
     _TITLE_TAG = 'title'
     _SUBMISSION_DATE_TAG = 'submission_date'
 
     # this key contains the NmrLoop with the author data
-    _LOOP_KEY = 'entry_author'
+    _AUTHOR_KEY = 'entry_author'
     # These keys define the author data
     _AUTHOR_FIRST_NAME_TAG = 'given_name'
     _AUTHOR_MIDDLE_NAME_TAG = 'middle_initials'
@@ -65,9 +65,9 @@ class EntryInformationSaveFrame(SaveFrameABC):
 
     @property
     def authors(self) ->list :
-        """:return a list of residues LoopRow's
+        """:return a list of authors LoopRow's
         """
-        if (_loop := self.get(self._LOOP_KEY)) is None:
+        if (_loop := self.get(self._AUTHOR_KEY)) is None:
             return []
         return _loop.data
 
@@ -84,7 +84,7 @@ class EntryInformationSaveFrame(SaveFrameABC):
         :param project: a Project instance.
         :return: list of imported V3 objects.
         """
-        comment = f'{self.entry_id} Entry information'
+        comment = f'{self.entry_id} meta data'
 
         text = f'Data from: {self.parent.path}\n'
         text += f'Imported on: {now()}\n'

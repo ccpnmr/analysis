@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-08-24 16:33:31 +0100 (Wed, August 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 14:02:18 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -148,7 +148,8 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
             return None
 
         project = chemShiftList.project
-        chainCode = chemShiftList.name
+        chainCode = self.parent.chainCode if self.parent.chainCode else \
+                    chemShiftList.name
         atomName = _row.atomName
 
         if _row.ntDef is not None:

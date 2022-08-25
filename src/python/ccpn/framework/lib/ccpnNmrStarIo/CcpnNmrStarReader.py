@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-08-25 12:23:40 +0100 (Thu, August 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 14:02:18 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -45,6 +45,7 @@ class CcpnNmrStarReader():
         """
         self.path = None  # Absolute path to star file used to fill self
         self._dataBlock = None
+        self._chainCode = None  # Alternative chainCode to use for NmrChain or Chain
 
     @property
     def dataBlock(self):
@@ -58,6 +59,17 @@ class CcpnNmrStarReader():
         """
         name = 'undefined' if self.dataBlock is None else f'bmrb{self.dataBlock.name}'
         return name
+
+    @property
+    def chainCode(self):
+        """:return the alternative chainCode or None
+        """
+        return self._chainCode
+
+    def setChainCode(self, chainCode=None):
+        """Sets the alternative chainCode
+        """
+        self._chainCode = chainCode
 
     def parse(self, path, mode=PARSER_MODE_STANDARD) -> NmrDataBlock:
         """
@@ -82,6 +94,7 @@ class CcpnNmrStarReader():
         # get the first key-ed value
         _keys = list(_data.keys())
         _dataBlock = _data[_keys[0]]
+
         # now check if we have to do any saveFrame "updates"
         saveFrameDefs = getSaveFrames()
         for key, saveFrame in _dataBlock.items():

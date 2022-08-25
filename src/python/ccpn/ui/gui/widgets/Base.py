@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-22 13:40:16 +0100 (Wed, June 22, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-08-25 16:13:49 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from dataclasses import dataclass
 from functools import partial
 from contextlib import contextmanager
 from PyQt5 import QtWidgets, QtCore
@@ -37,7 +38,6 @@ from pyqtgraph.dockarea import Dock
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.Font import setWidgetFont
-from ccpn.util.AttrDict import AttrDict
 
 
 HALIGN_DICT = {
@@ -79,10 +79,18 @@ FOCUS_DICT = {
     }
 
 
+# small object to facilitate blocking signals in widgets
+@dataclass
+class _WidgetState:
+    root = None
+    widgetUpdatesEnabled = None
+    signalBlockers = None
+
+
 class SignalBlocking():
     """
     Class to add widget blocking methods to a subclass.
-    Blocks signals from nested widgets.
+    Blocks the signals from nested widgets.
 
     Blocking is applied by a contextManager
     """
@@ -94,16 +102,23 @@ class SignalBlocking():
         """
         return self._widgetSignalBlockingLevel > 0
 
-    def _blockEvents(self, root, widgetState, recursive=True, additionalWidgets=None):
+    def _blockEvents(self, root, widgetState, recursive=True, additionalWidgets=None, blockUpdates=True):
         """Block all updates/signals in the widget and children.
+
+        :param root: target widget for blocking
+        :param widgetState: dataclass holding widget state data
+        :param recursive: if True, apply blocking to all children
+        :param additionalWidgets: other widgets that may require special blocking
+        :param blockUpdates: block widget updates
+        :return:
         """
-        # block all signals on first entry, each instance stores it's own blocking level
+        # block all signals on first entry, each instance stores its own blocking level
         if self._widgetSignalBlockingLevel == 0:
 
             # 'root' must be a widget, store previous updatesEnabled state
             widgetState.root = root
             widgetState.widgetUpdatesEnabled = root.updatesEnabled()
-            root.setUpdatesEnabled(False)
+            root.setUpdatesEnabled(blockUpdates)
 
             # create blocker objects to block child widget signals
             widgetState.signalBlockers = [QtCore.QSignalBlocker(root)]
@@ -118,6 +133,10 @@ class SignalBlocking():
 
     def _unblockEvents(self, root, widgetState):
         """Unblock all updates/signals in the widget and children.
+
+        :param root: target root widget for blocking
+        :param widgetState: dataclass holding widget state data
+        :return:
         """
         if self._widgetSignalBlockingLevel > 0:
             self._widgetSignalBlockingLevel -= 1
@@ -134,7 +153,7 @@ class SignalBlocking():
             raise RuntimeError('Error: Widget signal blocking already at 0')
 
     @contextmanager
-    def blockWidgetSignals(self, root=None, recursive=True, additionalWidgets=None):
+    def blockWidgetSignals(self, root=None, recursive=True, additionalWidgets=None, blockUpdates=True):
         """Block all signals for the widget.
 
         root is the widget to be blocked, if no widget specified then self is assumed.
@@ -146,9 +165,10 @@ class SignalBlocking():
         :param recursive: bool, defaults to True
         """
         # local widgetState is kept private
-        _widgetState = AttrDict()
+        _widgetState = _WidgetState()
         _root = root or self
-        self._blockEvents(_root, _widgetState, recursive=recursive, additionalWidgets=additionalWidgets)
+        self._blockEvents(_root, _widgetState, recursive=recursive, additionalWidgets=additionalWidgets,
+                          blockUpdates=blockUpdates)
         try:
             yield  # yield control to the calling process
 
@@ -159,7 +179,12 @@ class SignalBlocking():
 
     @staticmethod
     def _removeWidget(widget, removeTopWidget=False):
-        """Destroy a widget and all it's contents
+        """Destroy a widget and all its contents.
+        Can be used to remove only the children of a widget.
+
+        :param widget: target widget
+        :param removeTopWidget: include target widget
+        :return:
         """
 
         def deleteItems(layout):
@@ -181,7 +206,10 @@ class SignalBlocking():
 
     @staticmethod
     def _setMinimumWidgetSize(widget):
-        """Set the minimum widget size of content widgets
+        """Set the minimum widget size of content widgets.
+
+        :param widget: target widget
+        :return:
         """
 
         def _setWidgetSize(layout):
@@ -432,7 +460,7 @@ class Base(DropBase, SignalBlocking):
         """
         pass
 
-    def enableWidget(self, flag:bool):
+    def enableWidget(self, flag: bool):
         """Enable or disable widget depending on flag
         """
         if flag:

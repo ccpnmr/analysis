@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-25 10:13:01 +0100 (Thu, August 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 16:21:44 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,11 +26,13 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 import pandas as pd
-from ccpn.framework.Application import getApplication, getProject
+
 from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult
-from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationOutputFrame, _getOutputFrameFromInputFrame, HetNoeOutputFrame
+from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult,\
+    CalculationModel, BlankFittingModel, BlankCalculationModel
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationOutputFrame,\
+    _getOutputFrameFromInputFrame, HetNoeOutputFrame
 from ccpn.util.Logging import getLogger
 import numpy as np
 from collections import defaultdict
@@ -139,7 +141,6 @@ class _RelaxationBaseFittingModel(FittingModelABC):
             inputData.loc[collectionId, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames) > 0 else ''
             for ix, row in groupDf.iterrows():
                 for resultName, resulValue in result.getAllResultsAsDict().items():
-                    print('ix, resultName, resulValue',ix, resultName, resulValue, type(resulValue))
                     inputData.loc[ix, resultName] = resulValue
         return inputData
 
@@ -182,37 +183,33 @@ class ExponentialDecayFittingModel(_RelaxationBaseFittingModel):
 ##########  Calculation Models   ####################
 #####################################################
 
-class HetNoeCalculation():
+class HetNoeCalculation(CalculationModel):
     """
     Calculate HeteroNuclear NOE Values
     """
     ModelName = sv.HETNOE
-    Info        = 'Calculate HeteroNuclear NOE Values using peak properties (Height/Volume).'
-    MaTex       = r''
-    Description = ''
+    Info        = 'Calculate HeteroNuclear NOE Values using peak Intensity (Height/Volume).'
+    MaTex       = r'$I_{Sat} / I_{UnSat}$'
+    Description = '''
+                    Sat = Peak Intensity for the Saturated Spectrum;
+                    UnSat = Peak Intensity for the UnSaturated Spectrum, 
+                    Value Error calculated as:
+                    error = factor * np.sqrt((noiseSat / sat) ** 2 + (noiseUnSat / UnSat) ** 2)
+                    factor = sat/unSat'''
+
     References  = '''
                   '''
     FullDescription = f'{Info} \n {Description}\nSee References: {References}'
-    HEIGHT = sv._HEIGHT
-    VOLUME = sv._VOLUME
-    _allowedIntesityTypes = (HEIGHT, VOLUME)
-
-    def __init__(self, intensity=HEIGHT):
-        super().__init__()
-        self._intensity = intensity
-        self.project = getProject()
+    PeakProperty = sv._HEIGHT
+    _allowedIntensityTypes = (sv._HEIGHT, sv._VOLUME)
 
     @property
-    def intensity(self):
-        return self._intensity
+    def modelArgumentNames(self):
+        """ The list of parameters as str used in the calculation model.
+            These names will appear as column headers in the output result frames. """
+        return [sv.HETNOE_VALUE, sv.HETNOE_VALUE_ERR]
 
-    @intensity.setter
-    def intensity(self, value):
-        if value not in self._allowedIntesityTypes:
-            raise ValueError(f'Value must be on of: {self._allowedIntesityTypes}')
-        self._intensity =value
-
-    def calculate(self, inputData:TableFrame) -> TableFrame:
+    def calculateValues(self, inputData:TableFrame) -> TableFrame:
         """
         Calculate the DeltaDeltas for an input SeriesTable.
         :param inputData: CSMInputFrame
@@ -239,60 +236,67 @@ class HetNoeCalculation():
         ## Keep only one IsotopeCode as we are using only 15N
         inputData = inputData[inputData[sv.ISOTOPECODE] == '15N']
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
-        satNoiseLevel = None
-        unSatNoiseLevel = None
         for collectionId, groupDf in grouppedByCollectionsId:
             groupDf.sort_values([sv.SERIESSTEP], inplace=True)
-            seriesValues = groupDf[self.intensity]
-            satPeakPid = groupDf[sv.PEAKPID].values[satIndex]
-            unSatPeakPid = groupDf[sv.PEAKPID].values[unSatIndex]
-            if satNoiseLevel is None: # get the NoiseLevel from peakPid
-                satPeak = self.project.getByPid(satPeakPid)
-                unSatPeak = self.project.getByPid(unSatPeakPid)
-                if satPeak:
-                    satNoiseLevel = satPeak.spectrum.noiseLevel
-                if unSatPeak:
-                    unSatNoiseLevel = unSatPeak.spectrum.noiseLevel
-            unSatValue = seriesValues.values[unSatIndex]
-            satValue =seriesValues.values[satIndex]
+            seriesValues = groupDf[self.PeakProperty]
             nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf) # join the atom names from different rows in a list
             seriesUnits = groupDf[sv.SERIESUNIT].unique()
-
-            if satNoiseLevel is None:
-                satNoiseLevel = None
-                unSatNoiseLevel = None
-
+            satPeakPid = groupDf[sv.PEAKPID].values[satIndex]
+            unSatPeakPid = groupDf[sv.PEAKPID].values[unSatIndex]
+            unSatValue = seriesValues.values[unSatIndex]
+            satValue = seriesValues.values[satIndex]
             ratio = satValue/unSatValue
-            error = lf.hetNoeError(ratio, satValue, unSatValue, satNoiseLevel, unSatNoiseLevel)
+            error = self._calculateHetNoeErrorFromPids(satPeakPid, unSatPeakPid, satValue=satValue, unSatValue=unSatValue)
 
             # build the outputFrame
             outputFrame.loc[collectionId, sv.COLLECTIONID] = collectionId
             outputFrame.loc[collectionId, sv.PEAKPID] = groupDf[sv.PEAKPID].values[0]
             outputFrame.loc[collectionId, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
             outputFrame.loc[collectionId, sv.SERIESUNIT] = seriesUnits[-1]
-            outputFrame.loc[collectionId, 'ratio'] = ratio
-            outputFrame.loc[collectionId, 'error'] = error
             outputFrame.loc[collectionId, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
             outputFrame.loc[collectionId, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''
             outputFrame.loc[collectionId, sv.FLAG] = sv.FLAG_INCLUDED
+            if len(self.modelArgumentNames) == 2:
+                for header, value in zip(self.modelArgumentNames, [ratio, error]):
+                    outputFrame.loc[collectionId, header] = value
 
         return outputFrame
 
-
+    def _calculateHetNoeErrorFromPids(self, satPeakPid, unSatPeakPid, satValue=None, unSatValue=None):
+        # get the NoiseLevel from peakPid
+        satPeak = self.project.getByPid(satPeakPid)
+        unSatPeak = self.project.getByPid(unSatPeakPid)
+        if not satPeak:
+            getLogger().warning(f'Peak not found for {satPeakPid}. Cannot calculate Error.')
+            return None
+        if not unSatPeak:
+            getLogger().warning(f'Peak not found for {unSatPeakPid}. Cannot calculate Error.')
+            return None
+        satNoiseLevel = satPeak.spectrum.noiseLevel or satPeak.spectrum.estimateNoise()
+        unSatNoiseLevel = unSatPeak.spectrum.noiseLevel or unSatPeak.spectrum.estimateNoise()
+        unSatValue = unSatValue or getattr(unSatPeak, self.PeakProperty, None)
+        satValue = satValue or getattr(satPeak, self.PeakProperty, None)
+        if not all([satValue, unSatValue, satNoiseLevel, unSatNoiseLevel]):
+            return None
+        factor = abs(satValue / unSatValue)
+        error = lf.hetNoeError(factor, satValue, unSatValue, satNoiseLevel, unSatNoiseLevel)
+        return error
 
 
 #####################################################
 ###########      Register models    #################
 #####################################################
-Models = [
-            ExponentialDecayFittingModel,
-            InversionRecoveryFittingModel,
-        ]
+Models            = [
+                    BlankFittingModel,
+                    ExponentialDecayFittingModel,
+                    InversionRecoveryFittingModel,
+                    ]
 
 
-RelaxationCalculationModes = {
-                                HetNoeCalculation.ModelName: HetNoeCalculation,
-                                 }
+CalculationModels = [
+                    BlankCalculationModel,
+                    HetNoeCalculation
+                    ]
 
 
 

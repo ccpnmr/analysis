@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-22 17:52:30 +0100 (Mon, August 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 16:21:44 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -169,13 +169,14 @@ VARIANCE = 'Variance'
 MAD = 'MAD (Median Absolute Deviation)'
 AAD = 'AAD (Average Absolute Deviation)'
 
+### CSM Calculation Models
 ## Alpha Factors Definitions used in ChemicalShiftAnalysis DeltaDeltas
 uALPHA = '\u03B1'
 uDELTA = '\u0394'
 uDelta = '\u03B4'
 DELTA = 'Delta'
 DELTA_DELTA = f'{DELTA*2}'
-DELTADELTAMEAN = f'{DELTA*2}Mean'
+DELTA_DELTA_ERR = f'{DELTA_DELTA}{_ERR}'
 EUCLIDEAN_DISTANCE = 'Euclidean Distance'
 DEFAULT_H_ALPHAFACTOR = 1
 DEFAULT_N_ALPHAFACTOR = 0.142
@@ -193,8 +194,11 @@ DEFAULT_EXCLUDED_RESIDUES = ['PRO']
 FILTERINGATOMS  = 'FilteringAtoms'
 ALPHAFACTORS    = 'AlphaFactors'
 
-## Fitting models
+### Relaxation Calculation Models
+HETNOE_VALUE = f'{HETNOE}'
+HETNOE_VALUE_ERR = f'{HETNOE_VALUE}{_ERR}'
 
+## Fitting models
 FITTING_MODEL = 'fittingModel'
 MODEL_NAME = 'modelName'
 FITTING_MODELS = f'{FITTING_MODEL}s'

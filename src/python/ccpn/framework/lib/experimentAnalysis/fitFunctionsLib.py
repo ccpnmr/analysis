@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-23 14:29:08 +0100 (Tue, August 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 16:21:44 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -115,10 +115,10 @@ def euclideanDistance_func(array1, array2, alphaFactors):
         deltas.append(delta)
     return np.sqrt(np.mean(np.array(deltas)))
 
-def hetNoeError(ratio, sat, nonSat, noiseSat, noiseNonSat):
+def hetNoeError(sat, nonSat, noiseSat, noiseNonSat, factor=1):
     """
     Calculate the Error of NOE measurements (as in AnalysisV2)
-    :param sat: float, intensity  ratio value for the saturated/unsaturated
+    :param factor: float, correction factor. E.g.: intensity  ratio value for the saturated/unsaturated
     :param sat: float, intensity value for the saturated Peak
     :param nonSat: float, intensity value for the unsaturated(reference) Peak
     :param noiseSat: float, noise value for the saturated Spectrum
@@ -126,17 +126,7 @@ def hetNoeError(ratio, sat, nonSat, noiseSat, noiseNonSat):
     :return:
     Ref.:
     """
-    error = abs(ratio) * np.sqrt((noiseSat / sat) ** 2 + (noiseNonSat / nonSat) ** 2)
-    return error
-
-def hetNoeErrorSNR(snrSat, snrUnSat, factor):
-    """
-    Calculate the Error of NOE measurements
-    :return:
-    Ref.: E.q. 4. Dynamic 15N{1H} NOE measurements: a tool for studying protein dynamics.
-          Journal of Biomolecular NMR (2020) 74:707–716
-    """
-    error = abs(factor) * np.sqrt((snrSat) ** -2 + (snrUnSat) ** -2)
+    error = factor * np.sqrt((noiseSat / sat) ** 2 + (noiseNonSat / nonSat) ** 2)
     return error
 
 def _scaleMinMaxData(data, minMaxRange=(1.e-5, 1)):

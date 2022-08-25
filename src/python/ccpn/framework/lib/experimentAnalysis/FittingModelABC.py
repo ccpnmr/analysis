@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-25 10:13:01 +0100 (Thu, August 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 16:21:44 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -40,26 +40,37 @@ from ccpn.core.DataTable import TableFrame
 from ccpn.util.Logging import getLogger
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-
+from ccpn.framework.Application import getApplication, getProject
 
 class FittingModelABC(ABC):
 
-    condition = "new"
-    ModelName = 'ModelName'         # The Model name.
-    Info        = 'the info'        # A brief description of the fitting model.
-    Description = 'Description'     # A simplified representation of the used equation(s).
-    MaTex      = r''                # MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
-    References  = 'References'      # A list of journal article references. E.g.: DOIs or title/authors/year/journal; web-pages.
-    Minimiser   = None
+    ModelName       = 'ModelName'       # The Model name.
+    Info            = 'the info'        # A brief description of the fitting model.
+    Description     = 'Description'     # A simplified representation of the used equation(s).
+    MaTex           = r''               # MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
+    References      = 'References'      # A list of journal article references. E.g.: DOIs or title/authors/year/journal; web-pages.
+    Minimiser       = None              # The fitting minimiser model object (initiated)
     FullDescription = f'{Info} \n {Description}\nSee References: {References}'
-    PeakProperty = ''               # The peak property to fit. One of ['height', 'lineWidth', 'volume', 'ppmPosition']
+    PeakProperty    = ''               # The peak property to fit. One of ['height', 'lineWidth', 'volume', 'ppmPosition']
 
     def __init__(self, applyScaleMinMax=False, applyStandardScaler=False, **kwargs):
+
+        self.application = getApplication()
+        self.project = getProject()
         self.applyScaleMinMax = applyScaleMinMax
         self.applyStandardScaler = applyStandardScaler
         self._rawData = []  # raw daw used for the fitting. this is for example the peak height
         self._xRawData = []   # raw data used for the x values . this is for example the series times
         self._rawIndexes = []
+        self._modelArgumentNames = []
+
+    @property
+    def modelArgumentNames(self):
+        """ The list of parameters as str used in the minimiser fitting function or calculation models.
+          These names will be used in the models and will appear as column headers in the output result frames. """
+        if self.Minimiser:
+            return self.Minimiser.getParamNames(self.Minimiser)
+        return []
 
     @abstractmethod
     def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
@@ -82,11 +93,6 @@ class FittingModelABC(ABC):
         df = pd.DataFrame(self._rawData, columns=self._xRawData, index=self._rawIndexes)
         return df
 
-    def getFittingArgumentNames(self):
-        """ get the list of parameters as str used in the minimiser fitting function  """
-        minimiser = self.Minimiser
-        return minimiser.getParamNames(minimiser)
-
 
     def __str__(self):
         return f'<{self.__class__.__name__}: {self.ModelName}>'
@@ -105,6 +111,7 @@ class CalculationModel(FittingModelABC):
     MaTex       = r''               ## MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
     References  = 'References'      ## A list of journal article references that help to identify the employed calculation equations. E.g.: DOIs or title/authors/year/journal; web-pages.
 
+
     def calculateValues(self, inputData: TableFrame) -> TableFrame:
         """
         Calculate the required values for an input SeriesTable.
@@ -116,6 +123,32 @@ class CalculationModel(FittingModelABC):
     def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
         raise RuntimeError('This method cannot be used in this class')
 
+
+
+class BlankCalculationModel(CalculationModel):
+    """
+    Blank Calculation model for Series Analysis
+    """
+
+    ModelName   = 'None'
+    Info        = 'Blank Model'
+    Description = 'Blank Model'
+
+    def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
+        return TableFrame()
+
+
+class BlankFittingModel(FittingModelABC):
+    """
+    Blank Fitting model for Series Analysis
+    """
+
+    ModelName   = 'None'
+    Info        = 'Blank Model'
+    Description = 'Blank Model'
+
+    def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
+        return TableFrame()
 
 class MinimiserModel(Model):
     """

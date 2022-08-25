@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-25 10:13:01 +0100 (Thu, August 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 16:21:44 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -149,6 +149,12 @@ class EuclideanCalculationModel(CalculationModel):
         self._excludedResidueTypes = []
         self._euclideanCalculationMethod = 'mean'
 
+    @property
+    def modelArgumentNames(self):
+        """ The list of parameters as str used in the calculation model.
+          These names will appear as column headers in the output result frames. """
+        return [sv.DELTA_DELTA, sv.DELTA_DELTA_ERR]
+
     def setAlphaFactors(self, values):
         self._alphaFactors = values
 
@@ -213,6 +219,7 @@ class EuclideanCalculationModel(CalculationModel):
                     seriesValues4residue = values.T  ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
                     deltaDeltas = EuclideanCalculationModel._calculateDeltaDeltas(seriesValues4residue, alphaFactors)
                     csmValue = np.mean(deltaDeltas[1:])      ## first item is excluded from as it is always 0 by definition.
+                    csmValueError = None
                     nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf) # join the atom names from different rows in a list
                     seriesSteps = groupDf[sv.SERIESSTEP].unique()
                     seriesUnits = groupDf[sv.SERIESUNIT].unique()
@@ -229,6 +236,9 @@ class EuclideanCalculationModel(CalculationModel):
                         outputFrame.loc[rowIndex, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
                         outputFrame.loc[rowIndex, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''
                         outputFrame.loc[rowIndex, sv.FLAG] = sv.FLAG_INCLUDED
+                        if len(self.modelArgumentNames) == 2:
+                            for header, value in zip(self.modelArgumentNames, [csmValue, csmValueError]):
+                                outputFrame.loc[collectionId, header] = value
                         rowIndex += 1
                 break
         return outputFrame
@@ -247,6 +257,8 @@ class OneSiteBindingModel(FittingModelABC):
                   '''
     MaTex = r'$\frac{B_{Max} * [L]}{[L] + K_d}$'
     Minimiser = Binding1SiteMinimiser
+
+
 
     def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
         """

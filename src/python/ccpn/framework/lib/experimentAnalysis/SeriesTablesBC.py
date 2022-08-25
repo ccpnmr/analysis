@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-22 15:20:35 +0100 (Mon, August 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 16:21:44 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -265,7 +265,7 @@ class HetNoeOutputFrame(SeriesFrameBC):
         - seriesStep        : float,
         - seriesStepValue   : float,
         - value             : float,
-        - value_error       : float,
+        - value_err         : float,
 
     """
 
@@ -296,11 +296,12 @@ class CSMOutputFrame(SeriesFrameBC):
         - seriesUnit        : str,
         - seriesStep        : float,
         - seriesStepValue   : float,
-        - deltaDeltaMean    : float,
+        - deltaDelta        : float,
+        - deltaDelta_err    : float,
         - kd                : float,
-        - kd_error          : float,
+        - kd_err            : float,
         - bMax              : float,
-        - bMax_error        : float,
+        - bMax_err          : float,
         # Group with statistical fitting results
         - R2               : float,
         - Chi-square       : float,
@@ -331,7 +332,7 @@ class CSMOutputFrame(SeriesFrameBC):
                     sv.SERIESUNIT,
                     sv.SERIESSTEP,
                     sv.SERIESSTEPVALUE,
-                    sv.DELTADELTAMEAN,
+                    sv.DELTA_DELTA,
                     sv.KD,
                     sv.KD_ERR,
                     sv.BMAX,

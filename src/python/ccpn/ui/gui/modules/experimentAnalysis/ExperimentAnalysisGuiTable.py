@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-05 11:51:23 +0100 (Mon, September 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-08-25 16:21:44 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -187,7 +187,7 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
          But it might be more in future implementations """
         backend = self.guiModule.backendHandler
         model = backend.currentFittingModel
-        params = model.getFittingArgumentNames()
+        params = model.modelArgumentNames
         defs = {}
         for param in params:
             hidden = True if sv._ERR in param else False # don't show the error column as default

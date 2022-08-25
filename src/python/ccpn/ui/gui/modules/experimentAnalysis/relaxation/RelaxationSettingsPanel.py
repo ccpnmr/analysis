@@ -29,7 +29,6 @@ This module contains the GUI Settings panels for the Relaxation module.
 
 
 from collections import OrderedDict as od
-from ccpn.framework.lib.experimentAnalysis.RelaxationModels import RelaxationCalculationModes
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets, QtGui
 import ccpn.ui.gui.widgets.CompoundWidgets as compoundWidget

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-18 18:08:36 +0100 (Thu, August 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 10:13:01 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -155,6 +155,8 @@ class SeriesAnalysisABC(ABC):
 
     @property
     def currentFittingModel(self):
+        """ The working fittingModel in the module.
+         E.g.: the initiated ExponentialDecayModel. See models for docs. """
         if self._currentFittingModel is None:
             getLogger().warn('Fitting Model not set.')
             return
@@ -164,18 +166,38 @@ class SeriesAnalysisABC(ABC):
     def currentFittingModel(self, model):
         self._currentFittingModel = model
 
-    def registerFittingModel(self, fittingModel):
+    @property
+    def currentCalculationModel(self):
+        """ The working CalculationModel in the module.
+        E.g.: the initiated EuclidianModel for ChemicalshiftMapping. See models for docs. """
+        if self._currentCalculationModel is None:
+            getLogger().warn('CalculationModel not set.')
+            return
+        return self._currentCalculationModel
+
+    @currentCalculationModel.setter
+    def currentCalculationModel(self, model):
+        self._currentCalculationModel = model
+
+    def registerModel(self, model):
         """
-        A method to register a FittingModel object.
+        A method to register a Model object, either FittingModel or CalculationModel.
         See the FittingModelABC for more information
         """
-        self.fittingModels.update({fittingModel.ModelName: fittingModel})
+        from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, CalculationModel
+        if issubclass(model, CalculationModel):
+            self.calculationModels.update({model.ModelName: model})
+            return
+        if issubclass(model, FittingModelABC):
+            self.fittingModels.update({model.ModelName: model})
+        return
 
-    def deRegisterFittingModel(self, fittingModel):
+    def deRegisterModel(self, model):
         """
-        A method to de-register a fitting Model
+        A method to de-register a  Model
         """
-        self.fittingModels.pop(fittingModel.ModelName, None)
+        self.calculationModels.pop(model.ModelName, None)
+        self.fittingModels.pop(model.ModelName, None)
 
     def getFittingModelByName(self, modelName):
         """
@@ -188,6 +210,11 @@ class SeriesAnalysisABC(ABC):
     def _getFirstFittingModel(self):
         first = next(iter(self.fittingModels), iter({}))
         model = self.fittingModels.get(first)
+        return model
+
+    def _getFirstCalculationModel(self):
+        first = next(iter(self.calculationModels), iter({}))
+        model = self.calculationModels.get(first)
         return model
 
     def newInputDataTableFromSpectrumGroup(self, spectrumGroup:SpectrumGroup, peakListIndices=None, dataTableName:str=None):
@@ -296,10 +323,11 @@ class SeriesAnalysisABC(ABC):
         """
         pass
 
-    def _registerFittingModels(self, models):
+    def _registerModels(self, models):
+        """Register multiple models in the main class """
         dd = {}
         for model in models:
-            self.registerFittingModel(model)
+            self.registerModel(model)
             dd[model.ModelName] = model
         return dd
 
@@ -316,7 +344,9 @@ class SeriesAnalysisABC(ABC):
         self._outputDataTables = OrderedSet()
         self._untraceableValue = 1.0   # default value for replacing NaN values in untraceableValues.
         self.fittingModels = dict()
-        self._currentFittingModel = None
+        self.calculationModels = dict()
+        self._currentFittingModel = None     ## e.g.: ExponentialDecay for relaxation
+        self._currentCalculationModel = None ## e.g.: HetNoe for Relaxation
         self._needsRefitting = False
 
     def __str__(self):

@@ -28,7 +28,7 @@ This module contains the GUI Settings panels for the CSM module.
 """
 
 from collections import OrderedDict as od
-from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import ChemicalShiftCalculationModes
+from ccpn.framework.lib.experimentAnalysis.CSMappingModels import CalculationModels
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import ALL_GROUPINGNMRATOMS
 from ccpn.util.Logging import getLogger
 import numpy as np
@@ -76,35 +76,7 @@ class CSMCalculationPanel(GuiCalculationPanel):
     def setWidgetDefinitions(self):
         """CSM specific"""
         self.widgetDefinitions = super().setWidgetDefinitions()
-        ## autogenerate labels/tiptexts from the calculationModes.
-        extraLabels_ddCalculationsModes = [model.MaTex for modelName, model in ChemicalShiftCalculationModes.items()]
-        tipTexts_ddCalculationsModes = [model.FullDescription for modelName, model in
-                                        ChemicalShiftCalculationModes.items()]
-        extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddCalculationsModes]
-        calculationWidgetDefinitions = od((
-                        (guiNameSpaces.WidgetVarName_DeltaDeltasSeparator,
-                         {'label': guiNameSpaces.Label_DeltaDeltas,
-                          'type': LabeledHLine,
-                          'kwds': {'text': guiNameSpaces.Label_DeltaDeltas,
-                                   'height': 30,
-                                   'gridSpan': (1, 2),
-                                   'colour': DividerColour,
-                                   'tipText': guiNameSpaces.TipText_DeltaDeltasSeparator}}),
-                        (guiNameSpaces.WidgetVarName_DDCalculationMode,
-                         {'label': guiNameSpaces.Label_DDCalculationMode,
-                          'type': compoundWidget.RadioButtonsCompoundWidget,
-                          'postInit': self._calculationModePostInit,
-                          'callBack': self._setCalculationOptionsToBackend,
-                          'kwds': {'labelText': guiNameSpaces.Label_DDCalculationMode,
-                                   'hAlign': 'l',
-                                   'tipText': '',
-                                   'fixedWidths': SettingsWidgetFixedWidths,
-                                   'compoundKwds': {'texts': list(ChemicalShiftCalculationModes.keys()),
-                                                    'extraLabels': extraLabels_ddCalculationsModes,
-                                                    'tipTexts': tipTexts_ddCalculationsModes,
-                                                    'direction': 'v',
-                                                    'extraLabelIcons': extraLabelPixmaps}}}),
-                        ))
+
         ## add the weighting Factor widgets. Autogenerate labels/tiptext from DEFAULT_ALPHA_FACTORS defs.
         factorsWidgetDefinitions = od(())
         for atomName, factorValue in seriesVariables.DEFAULT_ALPHA_FACTORS.items():
@@ -135,7 +107,6 @@ class CSMCalculationPanel(GuiCalculationPanel):
                                        'fixedWidths': SettingsWidgetFixedWidths}}),
                             ))
         ## add the new items to the main dict
-        self.widgetDefinitions.update(calculationWidgetDefinitions)
         self.widgetDefinitions.update(factorsWidgetDefinitions)
         self.widgetDefinitions.update(untraceableWidgetDefinitions)
         return self.widgetDefinitions

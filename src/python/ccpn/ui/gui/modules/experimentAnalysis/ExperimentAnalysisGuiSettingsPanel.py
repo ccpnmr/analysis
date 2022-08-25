@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-22 17:52:30 +0100 (Mon, August 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 10:13:01 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -339,6 +339,39 @@ class GuiCalculationPanel(GuiSettingPanel):
                   'fixedWidths': SettingsWidgetFixedWidths
               }}),
         ))
+        calculationModels = self.guiModule.backendHandler.calculationModels
+        ## autogenerate labels/tiptexts from the calculationModes.
+        extraLabels_ddCalculationsModes = [model.MaTex for modelName, model in
+                                           calculationModels.items()]
+        tipTexts_ddCalculationsModes = [model.FullDescription for modelName, model in
+                                        calculationModels.items()]
+        extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddCalculationsModes]
+        calculationWidgetDefinitions = od((
+            (guiNameSpaces.WidgetVarName_CalcModeSeparator,
+             {'label': guiNameSpaces.Label_CalcModeSeparator,
+              'type': LabeledHLine,
+              'kwds': {'text': guiNameSpaces.Label_CalcModeSeparator,
+                       'height': 30,
+                       'gridSpan': (1, 2),
+                       'colour': DividerColour,
+                       'tipText': guiNameSpaces.TipText_CalculationSeparator}}),
+            (guiNameSpaces.WidgetVarName_CalcMode,
+             {'label': guiNameSpaces.Label_CalculationOptions,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': None,
+              'callBack': self._setCalculationOptionsToBackend,
+              'kwds': {'labelText': guiNameSpaces.Label_CalculationOptions,
+                       'hAlign': 'l',
+                       'tipText': '',
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds': {'texts': list(calculationModels.keys()),
+                                        'extraLabels': extraLabels_ddCalculationsModes,
+                                        'tipTexts': tipTexts_ddCalculationsModes,
+                                        'direction': 'v',
+                                        'extraLabelIcons': extraLabelPixmaps}}}),
+        ))
+        ## add the new items to the main dict
+        self.widgetDefinitions.update(calculationWidgetDefinitions)
 
         return self.widgetDefinitions
 

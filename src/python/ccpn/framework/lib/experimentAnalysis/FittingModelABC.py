@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-19 16:04:59 +0100 (Fri, August 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 10:13:01 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -43,8 +43,9 @@ import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 
 
 class FittingModelABC(ABC):
+
     condition = "new"
-    ModelName = 'ModelName'  # The Model name.
+    ModelName = 'ModelName'         # The Model name.
     Info        = 'the info'        # A brief description of the fitting model.
     Description = 'Description'     # A simplified representation of the used equation(s).
     MaTex      = r''                # MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
@@ -92,6 +93,28 @@ class FittingModelABC(ABC):
 
     __repr__ = __str__
 
+
+class CalculationModel(FittingModelABC):
+    """
+    Calculation model for Series Analysis
+    """
+
+    ModelName   = 'Calculation'     ## The Model name.
+    Info        = 'the info'        ## A brief description of the fitting model.
+    Description = 'Description'     ## A simplified representation of the used equation(s).
+    MaTex       = r''               ## MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
+    References  = 'References'      ## A list of journal article references that help to identify the employed calculation equations. E.g.: DOIs or title/authors/year/journal; web-pages.
+
+    def calculateValues(self, inputData: TableFrame) -> TableFrame:
+        """
+        Calculate the required values for an input SeriesTable.
+        :param inputData: InputFrame
+        :return: outputFrame
+        """
+        raise RuntimeError('This method must be overridden in subclass')
+
+    def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
+        raise RuntimeError('This method cannot be used in this class')
 
 
 class MinimiserModel(Model):

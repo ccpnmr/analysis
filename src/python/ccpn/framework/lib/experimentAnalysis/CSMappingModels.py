@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-19 16:04:59 +0100 (Fri, August 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 10:13:01 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ import numpy as np
 import warnings
 from ccpn.util.Logging import getLogger
 from ccpn.core.DataTable import TableFrame
-from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult
+from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult, CalculationModel
 from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMOutputFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
@@ -54,9 +54,7 @@ class FractionBindingMinimiser(MinimiserModel):
     def __init__(self, **kwargs):
         super().__init__(Binding1SiteMinimiser.FITTING_FUNC, **kwargs)
         self.name = self.MODELNAME
-        self.Kd = None # this will be a Parameter Obj . Set on the fly by the minimiser while inspecting the Fitting Func signature
-        self.BMax = None # this will be a Parameter Obj
-        self.params = self.make_params(**self._defaultParams)
+        self.params = self.make_params(**self.defaultParams)
 
     def guess(self, data, x, **kws):
         """
@@ -98,9 +96,7 @@ class Binding1SiteMinimiser(MinimiserModel):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
         super().__init__(Binding1SiteMinimiser.FITTING_FUNC, **kwargs)
         self.name = self.MODELNAME
-        self.Kd = None # this will be a Parameter Obj . Set on the fly by the minimiser while inspecting the Fitting Func signature
-        self.BMax = None # this will be a Parameter Obj
-        self.params = self.make_params(**self._defaultParams)
+        self.params = self.make_params(**self.defaultParams)
 
     def guess(self, data, x, **kws):
         """
@@ -129,7 +125,7 @@ class Binding1SiteMinimiser(MinimiserModel):
 ####################################    DataSeries Models    ###########################################################
 ########################################################################################################################
 
-class DeltaDeltaShiftsCalculation():
+class EuclideanCalculationModel(CalculationModel):
     """
     ChemicalShift Analysis DeltaDeltas shift distance calculation
     """
@@ -146,11 +142,11 @@ class DeltaDeltaShiftsCalculation():
 
     _euclideanCalculationMethod = 'mean' # mean or sum.
 
-    def __init__(self, alphaFactors=None, filteringAtoms=None, excludedResidues=[]):
+    def __init__(self, alphaFactors=None):
         super().__init__()
         self._alphaFactors = alphaFactors
-        self._filteringAtoms = filteringAtoms
-        self._excludedResidueTypes = excludedResidues
+        self._filteringAtoms = []
+        self._excludedResidueTypes = []
         self._euclideanCalculationMethod = 'mean'
 
     def setAlphaFactors(self, values):
@@ -162,7 +158,7 @@ class DeltaDeltaShiftsCalculation():
     def setExcludedResidueTypes(self, values):
         self._excludedResidueTypes = values
 
-    def calculateDeltaDeltaShift(self, inputData:TableFrame) -> TableFrame:
+    def calculateValues(self, inputData:TableFrame) -> TableFrame:
         """
         Calculate the DeltaDeltas for an input SeriesTable.
         :param inputData: CSMInputFrame
@@ -215,7 +211,7 @@ class DeltaDeltaShiftsCalculation():
                         alphaFactors.append(self._alphaFactors.get(ic, 1))
                     values = np.array(list(dataPerDimensionDict.values()))
                     seriesValues4residue = values.T  ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
-                    deltaDeltas = DeltaDeltaShiftsCalculation._calculateDeltaDeltas(seriesValues4residue, alphaFactors)
+                    deltaDeltas = EuclideanCalculationModel._calculateDeltaDeltas(seriesValues4residue, alphaFactors)
                     csmValue = np.mean(deltaDeltas[1:])      ## first item is excluded from as it is always 0 by definition.
                     nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf) # join the atom names from different rows in a list
                     seriesSteps = groupDf[sv.SERIESSTEP].unique()
@@ -307,11 +303,12 @@ class FractionBindingModel(FittingModelABC):
 
 
 ## Add a new Model to the list to be available throughout the program
-Models = [
+FittingModels = [
         OneSiteBindingModel,
         FractionBindingModel
         ]
 
-ChemicalShiftCalculationModes = {
-                                DeltaDeltaShiftsCalculation.ModelName: DeltaDeltaShiftsCalculation,
-                                 }
+CalculationModels = [
+                    EuclideanCalculationModel,
+                    ]
+

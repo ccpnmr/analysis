@@ -4,10 +4,10 @@ This module defines base classes for Series Analysis
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-02 19:07:11 +0000 (Wed, February 02, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-08-25 10:13:01 +0100 (Thu, August 25, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -57,7 +57,7 @@ class SeriesAnalysisABC_Test(ExperimentAnalysisTestingBC):
         message = f'The given fittingModel is not of instance {FittingModelABC}.'
         badModelExample = 'A_wrong_model_type'
         with self.assertRaises(ValueError):
-            self.seriesAnalysisABC.registerFittingModel(badModelExample)
+            self.seriesAnalysisABC.registerModel(badModelExample)
             self.assertTrue(message)
 
     def test_registerFittingModel_goodModelType(self):
@@ -66,7 +66,7 @@ class SeriesAnalysisABC_Test(ExperimentAnalysisTestingBC):
         message = f'An unexpected error was raising registering a correct Type FittingModel.'
         goodModelExample = T1FittingModel()
         try:
-            self.seriesAnalysisABC.registerFittingModel(goodModelExample)
+            self.seriesAnalysisABC.registerModel(goodModelExample)
         except ValueError:
             self.fail(message)
 
@@ -75,9 +75,9 @@ class SeriesAnalysisABC_Test(ExperimentAnalysisTestingBC):
         from ccpn.framework.lib.experimentAnalysis.FittingModelABC import T1FittingModel
         message = f'An unexpected error was raising registering a correct Type FittingModel.'
         fittingModel = T1FittingModel()
-        self.seriesAnalysisABC.registerFittingModel(fittingModel)
+        self.seriesAnalysisABC.registerModel(fittingModel)
         try:
-            self.seriesAnalysisABC.deRegisterFittingModel(fittingModel)
+            self.seriesAnalysisABC.deRegisterModel(fittingModel)
         except ValueError:
             self.fail(message)
 
@@ -86,7 +86,7 @@ class SeriesAnalysisABC_Test(ExperimentAnalysisTestingBC):
         from ccpn.framework.lib.experimentAnalysis.FittingModelABC import T1FittingModel
         queryName = T1FittingModel.ModelName
         fittingModel = T1FittingModel()
-        self.seriesAnalysisABC.registerFittingModel(fittingModel)
+        self.seriesAnalysisABC.registerModel(fittingModel)
         message = "getFittingModelByName retrieved the wrong Object"
         foundFittingModel =  self.seriesAnalysisABC.getFittingModelByName(queryName)
         self.assertEqual(fittingModel, foundFittingModel, message)

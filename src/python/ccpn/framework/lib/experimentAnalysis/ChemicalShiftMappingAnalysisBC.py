@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-18 18:08:35 +0100 (Thu, August 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 10:13:01 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,14 +26,10 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
-import numpy as np
-import pandas as pd
-from scipy import stats
 from ccpn.util.Logging import getLogger
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import Models
-import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
+from ccpn.framework.lib.experimentAnalysis.CSMappingModels import FittingModels, CalculationModels
 
 
 class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
@@ -51,10 +47,14 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         self._alphaFactors = sv.DEFAULT_ALPHA_FACTORS
         self._excludedResidueTypes = sv.DEFAULT_EXCLUDED_RESIDUES
         self._untraceableValue = 1.0 # default value for replacing NaN values in the DeltaDeltas column
-        self.fittingModels = self._registerFittingModels(Models)
+        self.fittingModels = self._registerModels(FittingModels)
+        self.calculationModels = self._registerModels(CalculationModels)
         fittingModel = self._getFirstFittingModel()
+        calculationModel = self._getFirstCalculationModel()
         if fittingModel:
             self._currentFittingModel = fittingModel()
+        if calculationModel:
+            self._currentCalculationModel = calculationModel(self._alphaFactors)
 
 
     @property
@@ -89,19 +89,16 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         if isinstance(_Other, (float, int)):
             self._alphaFactors.update({sv._OTHER: _Other})
 
-
-
     def calculateDeltaDeltaShifts(self, inputData, **kwargs):
         """
         Calculate the DeltaDeltas Chemical shift distances for an input SeriesTable.
         :param inputData: CSMInputFrame
         :return: outputFrame
         """
-        from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import DeltaDeltaShiftsCalculation
-        ddc = DeltaDeltaShiftsCalculation(alphaFactors=self._alphaFactors,
-                                          filteringAtoms=self._filteringAtoms,
-                                          excludedResidues=self._excludedResidueTypes)
-        frame = ddc.calculateDeltaDeltaShift(inputData)
+        from ccpn.framework.lib.experimentAnalysis.CSMappingModels import EuclideanCalculationModel
+        if self.currentCalculationModel is None: # it shouldn't happen
+            self.currentCalculationModel = EuclideanCalculationModel(alphaFactors=self._alphaFactors)
+        frame = self.currentCalculationModel.calculateValues(inputData)
         return frame
 
     def fitInputData(self, *args, **kwargs):
@@ -129,10 +126,7 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         outputDataTableName = kwargs.get(sv.OUTPUT_DATATABLE_NAME, None)
 
         inputDataTable = self.inputDataTables[-1]
-        outputFrame = self.calculateDeltaDeltaShifts(inputDataTable.data,
-                                                  filteringAtoms=self._filteringAtoms,
-                                                  alphaFactors=self._alphaFactors,
-                                                  excludedResidues=self._excludedResidueTypes)
+        outputFrame = self.calculateDeltaDeltaShifts(inputDataTable.data)
         outputFrame = fittingModel.fitSeries(outputFrame)
 
         if not outputDataTableName:

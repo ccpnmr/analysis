@@ -23,8 +23,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-28 16:09:46 +0100 (Thu, July 28, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-08-25 17:31:26 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -110,12 +110,12 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
 
         # By now, we expect to have found a valid parameter file
         if self.parameterFile is None or not self.parameterFile.exists():
-            getLogger().debug(f'AzaraSpectrumDataSource: unable to find parameter file from "{path}"')
+            getLogger().debug2(f'AzaraSpectrumDataSource: unable to find parameter file from given path "{path}"')
 
         # By now, we expect to have found a valid binary, if not try to find/define it from the parameter file
         # (i.e. using the 'file' parameter)
         if path is None or not path.exists():
-            getLogger().debug(f'AzaraSpectrumDataSource: unable to find binary datafile from "{path}", trying from "{self.parameterFile}"')
+            getLogger().debug2(f'AzaraSpectrumDataSource: unable to find binary datafile "{path}", trying from "{self.parameterFile}"')
             # find, open and parse the parameter file
             if self.parameterFile is not None and self.parameterFile.exists():
                 with self.parameterFile.open(mode='rU', encoding='utf-8') as fp:

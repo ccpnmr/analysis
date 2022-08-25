@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-08-24 16:33:31 +0100 (Wed, August 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 12:23:40 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ __date__ = "$Date: 2020-08-24 10:28:41 +0000 (Wed, August 24, 2022) $"
 from collections import OrderedDict
 from ccpn.util.Logging import getLogger
 from ccpn.util.nef.GenericStarParser import LoopRow
+from ccpn.util.Time import now
 from ccpn.framework.lib.ccpnNmrStarIo.SaveFrameABC import SaveFrameABC
 
 # from sandbox.Geerten.NTdb.NTdbLib import getNefName
@@ -85,13 +86,18 @@ class EntryInformationSaveFrame(SaveFrameABC):
         """
         comment = f'{self.entry_id} Entry information'
 
-        text = f'Data imported from: {self.parent.path}\n'
+        text = f'Data from: {self.parent.path}\n'
+        text += f'Imported on: {now()}\n'
+
         text += f'\nBMRB entry: {self.entry_id}\n'
         text += f'Submission date: {self[self._SUBMISSION_DATE_TAG]}\n'
+
         text += f'\nTitle: {self[self._TITLE_TAG]}\n'
+
         text += f'\nAuthors:\n'
         for author in self.authors:
              text += f'  {author[self._AUTHOR_FIRST_NAME_TAG]} {author[self._AUTHOR_MIDDLE_NAME_TAG]} {author[self._AUTHOR_LAST_NAME_TAG]}\n'
+
         text += '\nData content:\n'
         for row in self.data:
             text += f'  {row[self._DATA_COUNT_TAG]} {row[self._DATA_TYPE_TAG]}\n'

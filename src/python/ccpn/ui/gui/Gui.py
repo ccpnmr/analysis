@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-08-24 17:42:39 +0100 (Wed, August 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-25 12:23:40 +0100 (Thu, August 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -391,14 +391,19 @@ class Gui(Ui):
 
         elif dataLoader.dataFormat == StarDataLoader.dataFormat and dataLoader:
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
-            if dataLoader and not createNewProject and not ignore:
+            if dataLoader and not ignore:
+                title = 'New project from NmrStar' if createNewProject else \
+                        'Import from NmrStar'
                 dataBlock = dataLoader.getDataBlock()  # this will read and parse the file
                 popup = StarImporterPopup(project=self.project,
                                           bmrbFilePath=dataLoader.path,
                                           directory=dataLoader.path.parent,
                                           dataBlock=dataBlock,
-                                          size=(700,1000))
+                                          size=(700,1000),
+                                          title=title
+                                          )
                 popup.exec_()
+                ignore = (popup.result == popup.CANCEL_PRESSED)
 
         elif dataLoader.dataFormat == DirectoryDataLoader.dataFormat and len(dataLoader) > MAXITEMLOGGING:
             ok = MessageDialog.showYesNoWarning('Directory "%s"\n' %dataLoader.path,

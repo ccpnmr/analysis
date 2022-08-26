@@ -57,15 +57,17 @@ class RelaxationFitPlotPanel(FitPlotPanel):
 
         for collection in collections:
             filteredDf = dataFrame[dataFrame[sv.COLLECTIONPID] == collection.pid]
-            seriesSteps = filteredDf[sv.SERIESSTEP].values
-            seriesStepsValues = filteredDf[sv._HEIGHT].values #could add option to normalise
-            seriesUnit = filteredDf[sv.SERIESUNIT].values[-1]
-            peakPids = filteredDf[sv.PEAKPID].values
-            objs = [self.project.getByPid(pid) for pid in peakPids]
             modelName = filteredDf[sv.MODEL_NAME].values[-1]
             model = self.guiModule.backendHandler.getFittingModelByName(modelName)
             if model is None: ## get it from settings
                 model = self.guiModule.getCurrentFittingModel()
+            seriesSteps = filteredDf[sv.SERIESSTEP].values
+            seriesStepsValues = filteredDf[model.PeakProperty].values #could add option to normalise
+            seriesUnit = filteredDf[sv.SERIESUNIT].values[-1]
+            peakPids = filteredDf[sv.PEAKPID].values
+            objs = [self.project.getByPid(pid) for pid in peakPids]
+
+
             # seriesStepsValues = model.Minimiser()._scaleMinMaxData(seriesStepsValues)
             yArray = seriesStepsValues
             if model.applyScaleMinMax:

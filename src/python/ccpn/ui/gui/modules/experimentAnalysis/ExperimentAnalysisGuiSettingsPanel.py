@@ -48,6 +48,7 @@ from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColo
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import PanelUpdateState
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 
 SettingsWidgeMinimumWidths =  (180, 180, 180)
 SettingsWidgetFixedWidths = (200, 350, 350)
@@ -474,7 +475,6 @@ class GuiFittingPanel(GuiSettingPanel):
 
     def updateFittingModel(self, *args):
         """ Update FittingModel Settings at Backend"""
-        print('Updating')
         self._setFittingSettingToBackend()
 
     def _getSelectedFittingModel(self):
@@ -556,7 +556,7 @@ class AppearancePanel(GuiSettingPanel):
               'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_XcolumnName,
                        'tipText': guiNameSpaces.TipText_XcolumnName,
-                       'texts': guiNameSpaces.XBarGraphColumnNameOptions,
+                       'texts': self._axisXOptions,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
             (guiNameSpaces.WidgetVarName_BarGraphYcolumnName,
              {'label': guiNameSpaces.Label_YcolumnName,
@@ -681,10 +681,20 @@ class AppearancePanel(GuiSettingPanel):
     def _axisYOptions(self):
         """ Get the columns names for plottable data. E.g.: the Fitting results and stats. """
         backend = self.guiModule.backendHandler
-        model = backend.currentFittingModel
-        fittingArgumentNames = model.modelArgumentNames
-        statNames = guiNameSpaces.YBarGraphColumnNameOptionsCommon
-        allOptions = fittingArgumentNames + statNames
+        currentFittingModel = backend.currentFittingModel
+        currentCalculationModel = backend.currentCalculationModel
+        fittingArgumentNames = currentFittingModel.modelArgumentNames
+        calculationArgumentNames = currentCalculationModel.modelArgumentNames
+        statNames = currentFittingModel.modelStatsNames
+        allOptions = calculationArgumentNames + fittingArgumentNames + statNames
+        return allOptions
+
+    @property
+    def _axisXOptions(self):
+        """ Get the columns names for plottable data. E.g.: the Fitting results and stats. """
+        backend = self.guiModule.backendHandler
+        ## Todo: populate the list using headers that are definitely inside the Data
+        allOptions = [sv.COLLECTIONID, sv.COLLECTIONPID, sv.NMRRESIDUECODE, sv.NMRRESIDUECODETYPE]
         return allOptions
 
     def _setThresholdValueForData(self, *args):
@@ -697,11 +707,10 @@ class AppearancePanel(GuiSettingPanel):
         if factorW:
             factor = factorW.getValue()
         yColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
-        yColumnName = ''
         if yColumnNameW:
             yColumnName = yColumnNameW.getText()
-            dd = guiNameSpaces.getReverseGuiNameMapping()
-            yColumnName = dd.get(yColumnName, yColumnName)
+        else:
+            return
         if mode:
             value = self._getThresholdValueFromBackend(columnName=yColumnName, calculationMode=mode, factor=factor)
             if isinstance(value, (float,int)):

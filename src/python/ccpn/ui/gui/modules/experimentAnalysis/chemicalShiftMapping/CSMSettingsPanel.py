@@ -28,7 +28,6 @@ This module contains the GUI Settings panels for the CSM module.
 """
 
 from collections import OrderedDict as od
-from ccpn.framework.lib.experimentAnalysis.CSMappingModels import CalculationModels
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import ALL_GROUPINGNMRATOMS
 from ccpn.util.Logging import getLogger
 import numpy as np

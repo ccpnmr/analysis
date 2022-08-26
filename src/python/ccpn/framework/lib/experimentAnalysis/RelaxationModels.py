@@ -99,7 +99,7 @@ class _RelaxationBaseFittingModel(FittingModelABC):
     """
     A Base model class for T1/T2
     """
-    PeakProperty = 'height'
+    PeakProperty =  sv._HEIGHT
 
 
     def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
@@ -118,7 +118,7 @@ class _RelaxationBaseFittingModel(FittingModelABC):
         for collectionId, groupDf in grouppedByCollectionsId:
             groupDf.sort_values([sv.SERIESSTEP], inplace=True)
             seriesSteps = groupDf[sv.SERIESSTEP]
-            seriesValues = groupDf[sv._HEIGHT]
+            seriesValues = groupDf[self.PeakProperty]
             pid = groupDf[sv.COLLECTIONPID].values[-1]
             xArray = seriesSteps.values
             yArray = seriesValues.values
@@ -253,13 +253,17 @@ class HetNoeCalculation(CalculationModel):
             outputFrame.loc[collectionId, sv.PEAKPID] = groupDf[sv.PEAKPID].values[0]
             outputFrame.loc[collectionId, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
             outputFrame.loc[collectionId, sv.SERIESUNIT] = seriesUnits[-1]
+            outputFrame.loc[collectionId,self.modelArgumentNames[0]] = ratio
+            outputFrame.loc[collectionId, self.modelArgumentNames[1]] = error
+
             outputFrame.loc[collectionId, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
             outputFrame.loc[collectionId, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''
             outputFrame.loc[collectionId, sv.FLAG] = sv.FLAG_INCLUDED
-            if len(self.modelArgumentNames) == 2:
-                for header, value in zip(self.modelArgumentNames, [ratio, error]):
-                    outputFrame.loc[collectionId, header] = value
-
+            # if len(self.modelArgumentNames) == 2:
+            #     for header, value in zip(self.modelArgumentNames, [ratio, error]):
+            #         outputFrame.loc[collectionId, header] = value
+            #         print('£££', collectionId, header, value)
+        print('OTUTRA',outputFrame)
         return outputFrame
 
     def _calculateHetNoeErrorFromPids(self, satPeakPid, unSatPeakPid, satValue=None, unSatValue=None):
@@ -279,22 +283,22 @@ class HetNoeCalculation(CalculationModel):
         if not all([satValue, unSatValue, satNoiseLevel, unSatNoiseLevel]):
             return None
         factor = abs(satValue / unSatValue)
-        error = lf.hetNoeError(factor, satValue, unSatValue, satNoiseLevel, unSatNoiseLevel)
+        error = lf.hetNoeError(satValue, unSatValue, satNoiseLevel, unSatNoiseLevel,factor=factor)
         return error
 
 
 #####################################################
 ###########      Register models    #################
 #####################################################
-Models            = [
-                    BlankFittingModel,
+FittingModels            = [
+                    # BlankFittingModel,
                     ExponentialDecayFittingModel,
                     InversionRecoveryFittingModel,
                     ]
 
 
 CalculationModels = [
-                    BlankCalculationModel,
+                    # BlankCalculationModel,
                     HetNoeCalculation
                     ]
 

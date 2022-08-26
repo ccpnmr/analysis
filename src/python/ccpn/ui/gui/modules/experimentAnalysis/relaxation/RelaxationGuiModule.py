@@ -51,8 +51,6 @@ class RelaxationGuiModule(ExperimentAnalysisGuiModuleBC):
         backendHandler = RelaxationAnalysisBC()
         ExperimentAnalysisGuiModuleBC.__init__(self, mainWindow=mainWindow, name=name, backendHandler=backendHandler)
 
-
-
     #################################################################
     #####################      Widgets    ###########################
     #################################################################
@@ -97,7 +95,6 @@ class RelaxationGuiModule(ExperimentAnalysisGuiModuleBC):
     def _closeModule(self):
         ## de-register/close all notifiers
         super()._closeModule()
-
 
 
 #################################

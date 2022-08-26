@@ -28,7 +28,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.RelaxationModels import Models, CalculationModels
+from ccpn.framework.lib.experimentAnalysis.RelaxationModels import FittingModels, CalculationModels
 from ccpn.util.Logging import getLogger
 
 class RelaxationAnalysisBC(SeriesAnalysisABC):
@@ -39,11 +39,14 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
 
     def __init__(self):
         super().__init__()
-        self.fittingModels = self._registerModels(Models)
+        self.fittingModels = self._registerModels(FittingModels)
         self.calculationModels = self._registerModels(CalculationModels)
-        fittingModel = self._getFirstFittingModel()
+        fittingModel = self._getFirstModel(self.fittingModels)
+        calculationModel = self._getFirstModel(self.calculationModels)
         if fittingModel:
             self._currentFittingModel = fittingModel()
+        if calculationModel:
+            self._currentCalculationModel = calculationModel()
 
     def fitInputData(self, *args, **kwargs):
         """
@@ -66,10 +69,13 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
             raise RuntimeError('Cannot run any fitting models. Add a valid inputData first')
 
         fittingModel = self.currentFittingModel
+        calculationgModel = self.currentCalculationModel
         inputDataTable = self.inputDataTables[-1]
-        outputFrame = fittingModel.fitSeries(inputDataTable.data)
+        inputFrame = inputDataTable.data
+        # inputFrame = fittingModel.fitSeries(inputFrame)
+        frame = calculationgModel.calculateValues(inputFrame)
         outputName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'
         outputDataTable = self._fetchOutputDataTable(name=outputName,
                                                overrideExisting=True)
-        outputDataTable.data = outputFrame
+        outputDataTable.data = frame
         self.addOutputData(outputDataTable)

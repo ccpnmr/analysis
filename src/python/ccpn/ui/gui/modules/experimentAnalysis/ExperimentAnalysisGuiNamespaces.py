@@ -334,42 +334,13 @@ PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
 PYMOL = 'pymol'
 
 
-def getGuiNameMapping():
-    """ Get a dict with display name and corresponding core name. E.g.: column name display in table and name used in 
-    core dataFrame"""
-    return {
-        seriesVariables._ROW_UID             : ASHTAG,
-        seriesVariables.COLLECTIONID         : ColumnID,
-        seriesVariables.COLLECTIONPID        : ColumnCollectionPid,
-        seriesVariables.NMRCHAINNAME         : ColumnChainCode,
-        seriesVariables.NMRRESIDUECODE       : ColumnResidueCode,
-        seriesVariables.NMRRESIDUETYPE       : ColumnResidueType,
-        seriesVariables.NMRRESIDUECODETYPE   : ColumnCodeType,
-        seriesVariables.NMRATOMNAMES         : ColumnAtoms,
-        seriesVariables.DELTA_DELTA          : ColumnDdelta,
-        seriesVariables.R2                   : ColumnR2,
-        seriesVariables.CHISQUARE            : ColumnCHISQUARE,
-        seriesVariables.REDUCEDCHISQUARE     : ColumnREDCHISQUARE,
-        }
-
-def getReverseGuiNameMapping():
-    """ get the reversed Key:value for getGuiNameMapping dict"""
-    return {v:k for k,v in getGuiNameMapping().items()}
     
 ### Appearance BarGraph X axis
 XBarGraphColumnNameOptions =  [
-                                ASHTAG,
                                 ColumnID,
                                 ColumnCollectionPid,
                                 ColumnResidueCode,
                                 ColumnCodeType,
-                                ]
-
-YBarGraphColumnNameOptionsCommon =  [
-                                ColumnR2,
-                                seriesVariables.BAYESIAN,
-                                ColumnCHISQUARE,
-                                seriesVariables.AKAIKE
                                 ]
 
 

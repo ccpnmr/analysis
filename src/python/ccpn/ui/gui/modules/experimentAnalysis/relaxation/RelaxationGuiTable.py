@@ -39,6 +39,6 @@ class _RelaxationGuiTable(_ExperimentalAnalysisTableABC):
 
 class RelaxationTablePanel(TablePanel):
 
-    panelName = guiNameSpaces.CSMTablePanel
+    panelName = guiNameSpaces.RelaxationTablePanel
     TABLE = _RelaxationGuiTable
 

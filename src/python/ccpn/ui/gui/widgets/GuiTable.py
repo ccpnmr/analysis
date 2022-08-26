@@ -1646,16 +1646,14 @@ class GuiTable(TableWidget, Base):
         columnsMap a dictionary, key = the columnName as in the raw dataFrame and value = the columnName
         to show in the new Guitable
         """
-        objects = []
-        defDict = defaultdict(list)
-        newColumns = []
+
+
+        newDf = pd.DataFrame()
         for rawDFColumnName, newDFcolumnName in columnsMap.items():
             if rawDFColumnName in df.columns:
-                theSeries = df[rawDFColumnName]
-                defDict[newDFcolumnName] = theSeries
-                objects.append(theSeries)
-                newColumns.append(newDFcolumnName)
-        newDf = pd.DataFrame(defDict, columns=newColumns)
+                newDf[newDFcolumnName] = df[rawDFColumnName].values
+        objects = [row for index, row in df.iterrows()]
+
         return DataFrameObject(dataFrame=newDf,
                                objectList=objects or [],
                                columnDefs=colDefs or [],
@@ -1672,7 +1670,8 @@ class GuiTable(TableWidget, Base):
         for index, row in df.iterrows():
             listItem = OrderedDict()
             for header in colDefs.columns:
-                listItem[header.headerText] = header.getValue(row)
+                if header.headerText in df.columns:
+                    listItem[header.headerText] = row[header.headerText]
             allItems.append(listItem)
             objects.append(row)
 

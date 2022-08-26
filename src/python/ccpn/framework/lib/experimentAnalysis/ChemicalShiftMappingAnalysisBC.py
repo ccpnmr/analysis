@@ -48,8 +48,8 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         self._untraceableValue = 1.0 # default value for replacing NaN values in the DeltaDeltas column
         self.fittingModels = self._registerModels(FittingModels)
         self.calculationModels = self._registerModels(CalculationModels)
-        fittingModel = self._getFirstFittingModel()
-        calculationModel = self._getFirstCalculationModel()
+        fittingModel = self._getFirstModel(self.fittingModels)
+        calculationModel = self._getFirstModel(self.calculationModels)
         if fittingModel:
             self._currentFittingModel = fittingModel()
         if calculationModel:

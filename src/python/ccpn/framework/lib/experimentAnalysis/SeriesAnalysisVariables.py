@@ -70,11 +70,11 @@ ASSIGNEDNMRATOMS = 'assignedNmrAtoms'
 
 # fitting output Stat variables
 MINIMISER        = 'minimiser'
-R2               = 'R2'
-CHISQUARE        = 'Chi-square'
-REDUCEDCHISQUARE = f'Red-{CHISQUARE}'
-AKAIKE           = 'Akaike'
-BAYESIAN         = 'Bayesian'
+R2               = 'r2'
+CHISQR           = 'chisqr'
+REDCHI           = 'redchi'  # DO NOT CHANGE! Hardcoded in dependencies Model
+AIC              = 'aic' # DO NOT CHANGE! Hardcoded in dependencies Model
+BIC              = 'bic' # DO NOT CHANGE! Hardcoded in dependencies Model
 MINIMISER_METHOD = 'Method'
 MINIMISER_MODEL  = 'Model'
 
@@ -101,7 +101,7 @@ _15N = '15N'
 _13C = '13C'
 
 
-CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, MINIMISER_MODEL, R2, CHISQUARE, REDUCEDCHISQUARE, AKAIKE, BAYESIAN]
+CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, MINIMISER_MODEL, R2, CHISQR, REDCHI, AIC, BIC]
 SpectrumPropertiesHeaders = [DIMENSION, ISOTOPECODE, SERIESSTEP, SERIESUNIT]
 PeakPropertiesHeaders = [COLLECTIONID, _PPMPOSITION, _HEIGHT, _LINEWIDTH, _VOLUME]
 AssignmentPropertiesHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE, NMRATOMNAME]

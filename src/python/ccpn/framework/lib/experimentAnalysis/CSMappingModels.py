@@ -232,13 +232,12 @@ class EuclideanCalculationModel(CalculationModel):
                         outputFrame.loc[rowIndex, sv.SERIESSTEPVALUE] = delta
                         outputFrame.loc[rowIndex, sv.SERIESSTEP] = seriesStep
                         outputFrame.loc[rowIndex, sv.SERIESUNIT] = seriesUnits[-1]
-                        outputFrame.loc[rowIndex, sv.DELTA_DELTA] = csmValue
                         outputFrame.loc[rowIndex, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
                         outputFrame.loc[rowIndex, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''
                         outputFrame.loc[rowIndex, sv.FLAG] = sv.FLAG_INCLUDED
                         if len(self.modelArgumentNames) == 2:
                             for header, value in zip(self.modelArgumentNames, [csmValue, csmValueError]):
-                                outputFrame.loc[collectionId, header] = value
+                                outputFrame.loc[rowIndex, header] = value
                         rowIndex += 1
                 break
         return outputFrame

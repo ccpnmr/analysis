@@ -72,6 +72,14 @@ class FittingModelABC(ABC):
             return self.Minimiser.getParamNames(self.Minimiser)
         return []
 
+    @property
+    def modelStatsNames(self):
+        """ The list of statistical names used in the minimiser fitting function .
+          These names will be used in the models and will appear as column headers in the output result frames. """
+        if self.Minimiser:
+            return self.Minimiser.getStatParamNames(self.Minimiser)
+        return []
+
     @abstractmethod
     def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
         """
@@ -134,8 +142,8 @@ class BlankCalculationModel(CalculationModel):
     Info        = 'Blank Model'
     Description = 'Blank Model'
 
-    def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
-        return TableFrame()
+    def calculateValues(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
+        return inputData
 
 
 class BlankFittingModel(FittingModelABC):
@@ -148,7 +156,7 @@ class BlankFittingModel(FittingModelABC):
     Description = 'Blank Model'
 
     def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
-        return TableFrame()
+        return inputData
 
 class MinimiserModel(Model):
     """
@@ -364,6 +372,14 @@ class MinimiserModel(Model):
         """ get the list of parameters as str used in the fitting function  """
         return list(cls.defaultParams.keys())
 
+    def getStatParamNames(self):
+        """
+        Get the common statistical ParamNames .
+        :return: list
+        """
+        stats =  [sv.R2, sv.CHISQR, sv.REDCHI, sv.AIC, sv.BIC]
+        return stats
+
 
 class MinimiserResult(ModelResult):
     """Result from the Model fit.
@@ -430,10 +446,10 @@ class MinimiserResult(ModelResult):
         dd = {}
         mappingNames = {sv.MINIMISER_METHOD :'method',
                        sv.R2                :'r2',
-                       sv.CHISQUARE         :'chisqr',
-                       sv.REDUCEDCHISQUARE  :'redchi',
-                       sv.AKAIKE            :'aic',
-                       sv.BAYESIAN          :'bic',
+                       sv.CHISQR         : 'chisqr',
+                       sv.REDCHI  : 'redchi',
+                       sv.AIC            : 'aic',
+                       sv.BIC          : 'bic',
                        }
         for nn, vv in mappingNames.items():
             dd[nn] = getattr(self, vv, None)

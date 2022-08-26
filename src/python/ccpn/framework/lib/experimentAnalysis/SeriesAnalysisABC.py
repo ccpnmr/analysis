@@ -207,15 +207,17 @@ class SeriesAnalysisABC(ABC):
         """
         return self.fittingModels.get(modelName, None)
 
-    def _getFirstFittingModel(self):
-        first = next(iter(self.fittingModels), iter({}))
-        model = self.fittingModels.get(first)
+    def _getFirstModel(self, models):
+        """
+        Get the first Model in the dict
+        :param models: dict of FittingModels or CalculationModels
+        :return:
+        """
+        first = next(iter(models), iter({}))
+        model = models.get(first)
         return model
 
-    def _getFirstCalculationModel(self):
-        first = next(iter(self.calculationModels), iter({}))
-        model = self.calculationModels.get(first)
-        return model
+
 
     def newInputDataTableFromSpectrumGroup(self, spectrumGroup:SpectrumGroup, peakListIndices=None, dataTableName:str=None):
         """
@@ -252,10 +254,13 @@ class SeriesAnalysisABC(ABC):
         """ internal. Used to get a df to display in GuiTables
          Return the outputDataFrame grouped by Collection IDs.
          """
+        # TODO needs more error checking
         if dataFrame is None:
             dataFrame = self.getFirstOutputDataFrame()
         if dataFrame is None:
             return
+        if not sv.COLLECTIONID in dataFrame:
+            return dataFrame
         ## group by id and keep only first row as all duplicated except the series steps, which are not needed here.
         ## reset index otherwise you lose the column collectionId
         outDataFrame = dataFrame.groupby(sv.COLLECTIONID).first().reset_index()

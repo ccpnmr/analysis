@@ -62,6 +62,8 @@ class BarPlotPanel(GuiPanel):
         self._belowBrush = guiNameSpaces.BAR_belowBrushHex
         self._untraceableBrush = guiNameSpaces.BAR_untracBrushHex
         self._gradientbrushes = []
+        self._tresholdLineBrush = None
+        self._gradientbrushes = []
 
         _thresholdValueW = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
         if _thresholdValueW:
@@ -122,9 +124,6 @@ class BarPlotPanel(GuiPanel):
             w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BarGraphXcolumnName)
             if w:
                 value = w.getText()
-            # convert the GuiValue to the CoreColumn name
-            dd = guiNameSpaces.getReverseGuiNameMapping()
-            value = dd.get(value, value)
         return value
 
     @property
@@ -135,9 +134,6 @@ class BarPlotPanel(GuiPanel):
             w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
             if w:
                 value = w.getText()
-            # convert the GuiValue to the CoreColumn name
-            dd = guiNameSpaces.getReverseGuiNameMapping()
-            value = dd.get(value, value)
         return value
 
     @property
@@ -263,9 +259,8 @@ class BarPlotPanel(GuiPanel):
         self._updateAxisLabels()
 
     def _updateAxisLabels(self):
-        dd = guiNameSpaces.getGuiNameMapping()
-        self.setXLabel(label=dd.get(self.xColumnName))
-        self.setYLabel(label=dd.get(self.yColumnName))
+        self.setXLabel(label=self.xColumnName)
+        self.setYLabel(label=self.yColumnName)
 
     def plotDataFrame(self, dataFrame):
         """ Plot the given columns of dataframe as bars

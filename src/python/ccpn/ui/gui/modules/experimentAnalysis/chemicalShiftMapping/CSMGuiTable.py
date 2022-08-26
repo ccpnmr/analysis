@@ -36,16 +36,6 @@ class _CSMGuiTable(_ExperimentalAnalysisTableABC):
 
     className = guiNameSpaces.CSMTablePanel
 
-    _othersColumnsDefs = {
-        guiNameSpaces.ColumnDdelta: {gt.NAME: sv.DELTA_DELTA,
-                                     gt.GETTER: lambda row: gt._getValueByHeader(row, sv.DELTA_DELTA),
-                                     gt.TIPTEXT: gt._makeTipText(sv.DELTA_DELTA,
-                                                                 "Perturbation value calculated as per Settings"),
-                                     gt.FORMAT: guiNameSpaces._COLUM_FLOAT_FORM,
-                                     gt.WIDTH: 70,
-                                     gt.HIDDEN: False
-                                     }}
-
 
 class CSMTablePanel(TablePanel):
 

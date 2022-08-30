@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-30 12:58:40 +0100 (Tue, August 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1297,7 +1297,7 @@ def checkDeleted():
 DEFINEDPARAMETERS = ('option', 'attr', 'parameter', 'dim')
 
 
-def queueStateChange(verify):
+def queueStateChange(verify, last=True):
     """A decorator to wrap a state change event with a verify function
     """
 
@@ -1320,7 +1320,7 @@ def queueStateChange(verify):
         result = func(*args, **kwds)
 
         # call the verify function to update the _changes dict
-        verify(self, func.__name__, result, *pars)
+        verify(self, func.__name__, result, last, *pars)
 
         return result
 

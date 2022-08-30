@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-30 12:58:40 +0100 (Tue, August 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -657,7 +657,7 @@ def handleDialogApply(self):
             raise es
 
 
-def _verifyPopupApply(self, attributeName, value, *postArgs, **postKwds):
+def _verifyPopupApply(self, attributeName, value, last, *postArgs, **postKwds):
     """Change the state of the apply button based on the changes in the tabs
     """
     if not hasattr(self, GETCHANGESTATE):
@@ -666,7 +666,7 @@ def _verifyPopupApply(self, attributeName, value, *postArgs, **postKwds):
     if not callable(_getChanges):
         raise RuntimeError('changes method for {} not correctly defined'.format(self))
 
-    # _changes must  be a ChangeDict and be enabled to accept changes from the gui
+    # _changes must be a ChangeDict and be enabled to accept changes from the gui
     if not self._changes.enabled:
         return
 
@@ -687,6 +687,9 @@ def _verifyPopupApply(self, attributeName, value, *postArgs, **postKwds):
         if value:
             # store in dict - overwrite as required
             self._changes[attributeName] = value
+            if not last:
+                # put to the front if needed - could put priority into the attribute-name and then sort
+                self._changes.move_to_end(attributeName, last=False)
 
         else:
             if attributeName in self._changes:

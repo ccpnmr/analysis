@@ -71,13 +71,13 @@ class SeriesAnalysisABC(ABC):
         """
         self._inputDataTables = OrderedSet()
 
-    def getFirstOutputDataFrame(self):
-        """Get the first available dataFrame from the outputDataTable. """
+    def getLastOutputDataFrame(self):
+        """Get the last created dataFrame from the outputDataTable. """
         if len(self.inputDataTables) == 0:
             return
         if not self.getOutputDataTables():
             return
-        outputDataTable = self.getOutputDataTables()[0]
+        outputDataTable = self.getOutputDataTables()[-1]
         return outputDataTable.data
 
     def getOutputDataTables(self, seriesFrameType:str=None):
@@ -256,7 +256,7 @@ class SeriesAnalysisABC(ABC):
          """
         # TODO needs more error checking
         if dataFrame is None:
-            dataFrame = self.getFirstOutputDataFrame()
+            dataFrame = self.getLastOutputDataFrame()
         if dataFrame is None:
             return
         if not sv.COLLECTIONID in dataFrame:

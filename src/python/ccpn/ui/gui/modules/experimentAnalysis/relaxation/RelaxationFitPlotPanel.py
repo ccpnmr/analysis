@@ -53,14 +53,17 @@ class RelaxationFitPlotPanel(FitPlotPanel):
 
     def plotCurrentData(self, decay=None, amplitude=None, *args):
         collections = self.current.collections
-        dataFrame = self.guiModule.backendHandler.getFirstOutputDataFrame()
+        dataFrame = self.guiModule.backendHandler.getLastOutputDataFrame()
 
         for collection in collections:
             filteredDf = dataFrame[dataFrame[sv.COLLECTIONPID] == collection.pid]
+
             modelName = filteredDf[sv.MODEL_NAME].values[-1]
             model = self.guiModule.backendHandler.getFittingModelByName(modelName)
             if model is None: ## get it from settings
                 model = self.guiModule.getCurrentFittingModel()
+            if model.PeakProperty in filteredDf:
+                return # no point continuing
             seriesSteps = filteredDf[sv.SERIESSTEP].values
             seriesStepsValues = filteredDf[model.PeakProperty].values #could add option to normalise
             seriesUnit = filteredDf[sv.SERIESUNIT].values[-1]
@@ -118,7 +121,7 @@ class RelaxationFitPlotPanel(FitPlotPanel):
             decay = pos[0]
             amplitude = pos[1]
         collections = self.current.collections
-        dataFrame = self.guiModule.backendHandler.getFirstOutputDataFrame()
+        dataFrame = self.guiModule.backendHandler.getLastOutputDataFrame()
         if len(collections)== 0:
             return
         collection = collections[-1]

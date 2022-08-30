@@ -1927,9 +1927,11 @@ class GuiTable(TableWidget, Base):
                 if self._dataFrameObject:
                     if len(self._dataFrameObject._objects) > 0:
                         if isinstance(self._dataFrameObject._objects[0], pd.Series):
-                            h = self.horizontalHeaderItem(col).text()
-                            v = self.item(row, col).text()
-                            valuesDict[h].append(v)
+                            _header = self.horizontalHeaderItem(col)
+                            if _header:
+                                h = _header.text()
+                                v = self.item(row, col).text()
+                                valuesDict[h].append(v)
 
                         else:
                             _header = self.horizontalHeaderItem(col)

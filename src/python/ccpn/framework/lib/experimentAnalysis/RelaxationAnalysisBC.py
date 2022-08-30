@@ -72,10 +72,10 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
         calculationgModel = self.currentCalculationModel
         inputDataTable = self.inputDataTables[-1]
         inputFrame = inputDataTable.data
-        # inputFrame = fittingModel.fitSeries(inputFrame)
-        frame = calculationgModel.calculateValues(inputFrame)
+        inputFrame = fittingModel.fitSeries(inputFrame)
+        # frame = calculationgModel.calculateValues(inputFrame)
         outputName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'
         outputDataTable = self._fetchOutputDataTable(name=outputName,
                                                overrideExisting=True)
-        outputDataTable.data = frame
+        outputDataTable.data = inputFrame
         self.addOutputData(outputDataTable)

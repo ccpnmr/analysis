@@ -439,10 +439,10 @@ class GuiFittingPanel(GuiSettingPanel):
                        'fixedWidths': SettingsWidgetFixedWidths}}),
         ))
         ## Set the models definitions
-        extraLabels_ddCalculationsModels = [model.MaTex for model in models]
-        tipTexts_ddCalculationsModels = [model.FullDescription for model in models]
+        extraLabels_ddFittingModels = [model.MaTex for model in models]
+        tipTexts_ddFittingModels = [model.FullDescription for model in models]
         modelNames = [model.ModelName for model in models]
-        extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddCalculationsModels]
+        extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddFittingModels]
         settingsDict = od((
             (guiNameSpaces.WidgetVarName_FittingSeparator,
              {'label': guiNameSpaces.Label_FittingSeparator,
@@ -456,14 +456,14 @@ class GuiFittingPanel(GuiSettingPanel):
              {'label': guiNameSpaces.Label_FittingModel,
               'type': compoundWidget.RadioButtonsCompoundWidget,
               'postInit': None,
-              'callback': self.updateFittingModel,
+              'callBack': self.updateFittingModel,
               'tipText': guiNameSpaces.TipText_FittingModel,
               'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_FittingModel,
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'compoundKwds': {'texts': modelNames,
-                                        'extraLabels': extraLabels_ddCalculationsModels,
-                                        'tipTexts': tipTexts_ddCalculationsModels,
+                                        'extraLabels': extraLabels_ddFittingModels,
+                                        'tipTexts': tipTexts_ddFittingModels,
                                         'direction': 'v',
                                         'tipText': '',
                                         'hAlign': 'l',
@@ -493,7 +493,6 @@ class GuiFittingPanel(GuiSettingPanel):
         modelObj = backend.getFittingModelByName(selectedFittingModelName)
         if modelObj is not None:
             currentFittingModel = modelObj()
-        print('Selected currentFittingModel', currentFittingModel)
         backend.currentFittingModel = currentFittingModel
         # todo Add the optimiser options (method, fitting Error etc)
         # set update detected.

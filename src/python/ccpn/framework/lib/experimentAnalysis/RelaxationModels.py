@@ -291,14 +291,14 @@ class HetNoeCalculation(CalculationModel):
 ###########      Register models    #################
 #####################################################
 FittingModels            = [
-                    # BlankFittingModel,
+                    BlankFittingModel,
                     ExponentialDecayFittingModel,
                     InversionRecoveryFittingModel,
                     ]
 
 
 CalculationModels = [
-                    # BlankCalculationModel,
+                    BlankCalculationModel,
                     HetNoeCalculation
                     ]
 

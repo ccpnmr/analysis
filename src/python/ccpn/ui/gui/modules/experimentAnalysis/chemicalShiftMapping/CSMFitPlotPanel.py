@@ -53,7 +53,7 @@ class CSMFitPlotPanel(FitPlotPanel):
 
     def plotCurrentData(self, kd=None, bmax=None, *args):
         collections = self.current.collections
-        dataFrame = self.guiModule.backendHandler.getFirstOutputDataFrame()
+        dataFrame = self.guiModule.backendHandler.getLastOutputDataFrame()
 
         for collection in collections:
             filteredDf = dataFrame[dataFrame[sv.COLLECTIONPID] == collection.pid]
@@ -111,7 +111,7 @@ class CSMFitPlotPanel(FitPlotPanel):
             kd = pos[0]
             bmax = pos[1]
         collections = self.current.collections
-        dataFrame = self.guiModule.backendHandler.getFirstOutputDataFrame()
+        dataFrame = self.guiModule.backendHandler.getLastOutputDataFrame()
         if len(collections)== 0:
             return
         collection = collections[-1]

@@ -224,6 +224,10 @@ class BarPlotPanel(GuiPanel):
     def _setPlottingData(self, dataFrame, xColumnName, yColumnName):
         """Set the plotting variables from the current Dataframe.\
         """
+        if not xColumnName in dataFrame:
+            return False
+        if not yColumnName in dataFrame:
+            return False
         ## group by threshold value
         aboveDf = dataFrame[dataFrame[yColumnName] >= self.thresholdValue]
         belowDf = dataFrame[dataFrame[yColumnName] < self.thresholdValue]
@@ -257,6 +261,7 @@ class BarPlotPanel(GuiPanel):
                         list(ticks.items())[::1]]) # steps of 1, show all labels
         ## update labels on axes
         self._updateAxisLabels()
+        return True
 
     def _updateAxisLabels(self):
         self.setXLabel(label=self.xColumnName)
@@ -271,7 +276,9 @@ class BarPlotPanel(GuiPanel):
             getLogger().warning(f'Column names  not found in dataFrame: {self.xColumnName}, {self.yColumnName}')
             return
 
-        self._setPlottingData(dataFrame, self.xColumnName, self.yColumnName)
+        success = self._setPlottingData(dataFrame, self.xColumnName, self.yColumnName)
+        if not success:
+            return
         self.barGraphWidget._lineMoved(aboveX=self._aboveX,
                                        belowX=self._belowX,
                                        disappearedX=self._untraceableX,

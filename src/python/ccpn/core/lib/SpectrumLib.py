@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-10 18:10:31 +0100 (Wed, August 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-30 13:11:15 +0100 (Tue, August 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,8 +30,8 @@ import math
 import random
 import numpy as np
 import decorator
-
-from typing import Tuple, Optional, Sequence, List
+from typing import Tuple, Optional, Sequence
+from itertools import permutations
 
 from ccpn.framework.Application import getApplication
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoBlockWithoutSideBar
@@ -83,7 +83,7 @@ dimensionNames = {INTENSITY_DIM: "intensity",
                   X_DIM        : "x-dimension", Y_DIM: "y-dimension", Z_DIM: "z-dimension", A_DIM: "a-dimension",
                   B_DIM        : "b-dimension", C_DIM: "c-dimension", D_DIM: "d-dimension", E_DIM: "e-dimension",
                   UNDEFINED_DIM: "undefined-dimension"
-                 }
+                  }
 
 X_DIM_INDEX = 0
 Y_DIM_INDEX = 1
@@ -95,13 +95,15 @@ D_DIM_INDEX = 6
 E_DIM_INDEX = 7
 UNDEFINED_DIM_INDEX = 8
 
-
-MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', 'dimension1 dimension2 transferType isIndirect')
+MagnetisationTransferTypes = ('onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'through-space', 'relayed-alternate')
+MagnetisationTransferParameters = ('dimension1 dimension2 transferType isIndirect'.split())
+MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', MagnetisationTransferParameters)
 NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
 
 FOLDING_MODE_CIRCULAR = 'circular'
 FOLDING_MODE_MIRROR = 'mirror'
 FOLDING_MODES = (FOLDING_MODE_CIRCULAR, FOLDING_MODE_MIRROR)
+
 
 class CoherenceOrder(DataEnum):
     # name, value, description, dataValue = number of isotope-codes per order
@@ -138,7 +140,7 @@ SPECTRUM_INTENSITIES = 'intensities'
 MAXALIASINGRANGE = 3
 
 
-def splitPseudo3DSpectrumIntoPlanes(spectrum, seriesUnits = 'ms'):
+def splitPseudo3DSpectrumIntoPlanes(spectrum, seriesUnits='ms'):
     if not 'Time' in spectrum.dimensionTypes:
         getLogger().warning('This functionality has been implemented for time pseudo-nD spectra only.')
         return
@@ -158,6 +160,7 @@ def splitPseudo3DSpectrumIntoPlanes(spectrum, seriesUnits = 'ms'):
                 sp = spectrum.extractPlaneToFile(axisCodes=freqAxisCodes, position=position)
                 spectrumGroup.addSpectrum(sp, seriesValue)
                 seriesValue += seriesIncrement
+
 
 def getAssignmentTolerances(isotopeCode) -> float:
     """:return assignmentTolerance for isotopeCode or defaultAssignment tolerance if not defined
@@ -1311,6 +1314,7 @@ def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
     m = max(1, int(nsamples * fraction))
 
     funcs = {'mean': np.mean, 'std': np.std, 'min': np.min, 'max': np.max}
+
     def meanStd():
         # take m random values from data, and return mean/SD, data is already finite
         y = np.random.choice(data, m)
@@ -1686,6 +1690,167 @@ def _setApiExpTransfers(experiment, overwrite=True):
     return expTransfers
 
 
+def _getAvailableReferenceExperimentDimensions(spectrum, apiRefExperiment=None) -> tuple:
+    """Return list of available reference experiment dimensions based on spectrum isotopeCodes
+    """
+    nCodes = tuple(val.strip('0123456789') for val in spectrum.isotopeCodes)
+
+    if apiRefExperiment:
+        # get the permutations of the axisCodes and nucleusCodes
+        axisCodePerms = list(permutations(apiRefExperiment.axisCodes))
+        nucleusPerms = list(permutations(apiRefExperiment.nucleusCodes))
+
+        # return only those that match the current nucleusCodes (from isotopeCodes)
+        result = tuple(ac for ac, nc in zip(axisCodePerms, nucleusPerms) if nCodes == nc)
+        return result
+
+    else:
+        return ()
+
+
+def _getApiExpTransfers(spectrum, referenceExperimentName, referenceDimensions):
+    """Get the magnetisation-transfers for the specified experimentName.
+    Either matches against the existing experiment if the experiment has been set in the spectrum,
+    or the experiment found in the reference-experiments.
+
+
+    :param spectrum: target spectrum
+    :param referenceExperimentName: experimentName to match against magnetisation-transfers
+    :param referenceDimensions: dimension names to match against
+    :return: list of magnetisation-transfer-tuples
+    """
+
+    magTransfers = []
+    apiRefExperiment = None
+    try:
+        for nmrExpPrototype in spectrum._wrappedData.root.sortedNmrExpPrototypes():
+            for apiRefExperiment in nmrExpPrototype.sortedRefExperiments():
+                # check if the given value is in the STD nomenclature rather than the CCPN! E.g.: standard=COSY; CCPN=HH
+                ccpnName = apiRefExperiment.name
+                standardName = apiRefExperiment.synonym
+
+                if referenceExperimentName in [ccpnName, standardName]:
+                    # set API RefExperiment and ExpTransfer
+                    raise StopIteration
+
+    except StopIteration:
+        # found the correct apiRefExperiment
+
+        longRangeTransfers = ('through-space',)
+
+        visibleSites = {}
+        useRefs = False
+        if False:  # apiRefExperiment == spectrum._wrappedData.experiment.refExperiment:
+            # expRefDims should always match the refExperiment atomSites?
+            for expDim in spectrum._wrappedData.experiment.expDims:
+                for expDimRef in expDim.expDimRefs:
+                    if not expDimRef.refExpDimRef:
+                        continue
+
+                    measurement = expDimRef.refExpDimRef.expMeasurement
+                    if measurement.measurementType in ('Shift', 'shift', 'MQShift'):
+                        for atomSite in measurement.atomSites:
+                            vs = visibleSites.setdefault(atomSite, [])
+                            vs.append(expDimRef)
+
+        else:
+            for refExpDim in apiRefExperiment.refExpDims:
+                for refExpDimRef in refExpDim.refExpDimRefs:
+                    measurement = refExpDimRef.expMeasurement
+                    if measurement.measurementType in ('Shift', 'shift', 'MQShift'):
+                        for atomSite in measurement.atomSites:
+                            vs = visibleSites.setdefault(atomSite, [])
+                            vs.append(refExpDimRef)
+            useRefs = True
+
+        transferDict = {}
+        for atomSite in visibleSites:
+            expDimRefs = visibleSites[atomSite]
+
+            for expTransfer in atomSite.expTransfers:
+                atomSiteA, atomSiteB = expTransfer.atomSites
+
+                if (atomSiteA in visibleSites) and (atomSiteB in visibleSites):
+                    td = transferDict.setdefault(expTransfer, [])
+                    td.extend(expDimRefs)
+
+        indirectTransfers = set()
+        for expGraph in apiRefExperiment.nmrExpPrototype.expGraphs:
+            for expTransfer in expGraph.expTransfers:
+                if (expTransfer not in transferDict) and \
+                        (expTransfer.transferType in longRangeTransfers):
+                    atomSiteA, atomSiteB = expTransfer.atomSites
+
+                    if atomSiteA not in visibleSites:
+                        for expTransferA in atomSiteA.expTransfers:
+                            if expTransferA.transferType != 'onebond':
+                                continue
+
+                            atomSites = list(expTransferA.atomSites)
+                            atomSites.remove(atomSiteA)
+                            atomSiteC = atomSites[0]
+
+                            if atomSiteC in visibleSites:
+                                atomSiteA = atomSiteC
+                                break
+
+                    if atomSiteB not in visibleSites:
+                        for expTransferB in atomSiteB.expTransfers:
+                            if expTransferB.transferType != 'onebond':
+                                continue
+
+                            atomSites = list(expTransferB.atomSites)
+                            atomSites.remove(atomSiteB)
+                            atomSiteD = atomSites[0]
+
+                            if atomSiteD in visibleSites:
+                                atomSiteB = atomSiteD
+                                break
+
+                    if (atomSiteA in visibleSites) and (atomSiteB in visibleSites):
+                        expDimRefsA = visibleSites[atomSiteA]
+                        expDimRefsB = visibleSites[atomSiteB]
+                        transferDict[expTransfer] = expDimRefsA + expDimRefsB
+                        indirectTransfers.add(expTransfer)
+
+        magTransfers = set()
+        for refTransfer in transferDict.keys():
+            expDimRefs = frozenset(transferDict[refTransfer])
+            if len(expDimRefs) == 2:
+                transferType = refTransfer.transferType
+
+                isDirect = not (refTransfer in indirectTransfers)
+                try:
+                    if not useRefs:
+                        # dims = sorted(ii + 1 for exp in expDimRefs for ii, val in enumerate(spectrum.spectrumReferences) if exp == val._expDimRef)
+                        dims = sorted([ii + 1, exp.refExpDimRef.axisCode] for exp in expDimRefs for ii, val in enumerate(spectrum.spectrumReferences)
+                                      if exp == val._expDimRef and exp.refExpDimRef.axisCode in referenceDimensions)
+
+                    else:
+                        # read from the reference experiment - spectrum.axisCode order?
+                        # refAxes = [y for x in referenceDimensions for y in x.split(',')]
+                        refAxes = [x.split(',') if x else [] for x in referenceDimensions]
+
+                        dims = []
+                        for refExp in expDimRefs:
+                            for ii, val in enumerate(apiRefExperiment.refExpDims):
+                                if refExp in list(val.refExpDimRefs):
+                                    if (idx := [jj + 1 for jj, ra in enumerate(refAxes) if refExp.axisCode in ra]):
+                                        dims.append([idx[0], refExp.axisCode])
+                        dims = sorted(dims)
+
+                    if len(dims) == 2 and dims[0][0] != dims[1][0]:
+                        # only add the valid transfers
+                        magTransfers.add(MagnetisationTransferTuple(dims[0][0], dims[1][0], transferType, not isDirect))
+
+                except Exception:
+                    dims = 'not found'
+
+        magTransfers = list(sorted(magTransfers))
+
+    return magTransfers
+
+
 def _getAcqRefExpDimRef(refExperiment):
     """
     # CCPNInternal  - API Level routine -
@@ -1917,6 +2082,7 @@ def _setApiRefExperiment(experiment, refExperiment):
                             del refData[jj]
                             break
 
+
 #===========================================================================================================
 # Peak-related stuff
 #===========================================================================================================
@@ -2106,12 +2272,12 @@ def _pickPeaksByRegion(spectrum, sliceTuples, peakList, positiveThreshold, negat
         # check if the region is not completely outside the spectrum;
         # if so, issue a warning
         if (_slice[0] < points[0] and _slice[1] < points[0]) or \
-           (_slice[0] > points[1] and _slice[1] > points[1]):
+                (_slice[0] > points[1] and _slice[1] > points[1]):
             # region is fully outside the spectral range
             logger.debug('_pickPeaksByRegion: %s: sliceTuples[%d]=%r out of range %r' %
-                       (spectrum, dimIdx, tuple(_slice), points))
-            logger.warning(f'could not pick peaks for {spectrum} in region {sliceTuples}; '\
-                           f'dimension {dimIdx+1},"{spectrum.axisCodes[dimIdx]}" = {tuple(_slice)} out of range {points}')
+                         (spectrum, dimIdx, tuple(_slice), points))
+            logger.warning(f'could not pick peaks for {spectrum} in region {sliceTuples}; ' \
+                           f'dimension {dimIdx + 1},"{spectrum.axisCodes[dimIdx]}" = {tuple(_slice)} out of range {points}')
             return []
 
         if _slice[0] < points[0]:
@@ -2155,6 +2321,7 @@ def _pickPeaksByRegion(spectrum, sliceTuples, peakList, positiveThreshold, negat
             #     raise  err
 
     return peaks
+
 
 def fetchPeakPicker(spectrum):
     """Get a peakPicker; either by restore from spectrum or the default relevant for spectrum
@@ -2204,6 +2371,7 @@ def fetchPeakPicker(spectrum):
 
     return _picker
 
+
 #===========================================================================================================
 # Spectrum axis permutations
 #===========================================================================================================
@@ -2229,6 +2397,7 @@ def _searchAxisCodePermutations(spectrum, checkCodes: Tuple[str, ...]) -> Option
         if n and all(pCode[0] == cCode[0] for pCode, cCode in zip(perm[:n], checkCodes[:n])):
             return axisOrder[ii]
 
+
 def _setDefaultAxisOrdering(spectrum):
     """Establish and set a preferred axis ordering, based on some default rules;
     e.g. HCN for triple-resonance experiment
@@ -2239,7 +2408,7 @@ def _setDefaultAxisOrdering(spectrum):
     if spectrum.dimensionCount == 2:
         dCodes = ['H N'.split(), 'H C'.split(), ('H',)]
     elif spectrum.dimensionCount == 3:
-        dCodes = ['H C N'.split(), 'H H'.split(), 'C C'. split(), 'N N'.split()]
+        dCodes = ['H C N'.split(), 'H H'.split(), 'C C'.split(), 'N N'.split()]
     elif spectrum.dimensionCount == 4:
         dCodes = ['H C H N'.split(), 'H C H C'.split()]
     else:
@@ -2258,11 +2427,12 @@ def _setDefaultAxisOrdering(spectrum):
 
     return
 
+
 #===========================================================================================================
 # Spectrum/Peak parameter management
 #===========================================================================================================
 
-def _setParameterValues(obj, parameterName:str, values:Sequence, dimensions:Sequence, dimensionCount:int) -> list:
+def _setParameterValues(obj, parameterName: str, values: Sequence, dimensions: Sequence, dimensionCount: int) -> list:
     """A helper function to reduce code overhead in setting parameters of Spectrum and Peak
     :return The list with values
 
@@ -2291,7 +2461,7 @@ def _setParameterValues(obj, parameterName:str, values:Sequence, dimensions:Sequ
             # report error in 1-based, as the error is caught by the calling routines
             raise ValueError('%s: invalid dimension "%s"; should be in range (1,%d)' %
                              (obj, dim, dimensionCount))
-        newValues[dim-1] = val
+        newValues[dim - 1] = val
 
     try:
         setattr(obj, parameterName, newValues)
@@ -2303,7 +2473,7 @@ def _setParameterValues(obj, parameterName:str, values:Sequence, dimensions:Sequ
     return getattr(obj, parameterName)
 
 
-def _getParameterValues(obj, parameterName:str, dimensions:Sequence, dimensionCount:int) -> list:
+def _getParameterValues(obj, parameterName: str, dimensions: Sequence, dimensionCount: int) -> list:
     """A helper function to reduce code overhead in setting parameters of Spectrum and Peak
     :return The list with values
 
@@ -2339,7 +2509,7 @@ def _getParameterValues(obj, parameterName:str, dimensions:Sequence, dimensionCo
             # report error in 1-based, as the error is caught by the calling routines
             raise ValueError('%s: invalid dimension "%s"; should be in range (1,%d)' %
                              (obj, dim, dimensionCount))
-        newValues.append(values[dim-1])
+        newValues.append(values[dim - 1])
 
     return newValues
 
@@ -2360,14 +2530,14 @@ def _orderByDimensions(iterable, dimensions, dimensionCount) -> list:
 
     result = []
     for dim in dimensions:
-        if dim <1 or dim > dimensionCount:
+        if dim < 1 or dim > dimensionCount:
             raise ValueError('invalid dimension "%s"; should be in range (1,%d)' %
                              (dim, dimensionCount))
-        if dim-1 >= len(values):
+        if dim - 1 >= len(values):
             raise ValueError('invalid dimension "%s"; to large for iterable (%r)' %
                              (dim, values))
 
-        result.append( values[dim-1] )
+        result.append(values[dim - 1])
     return result
 
 

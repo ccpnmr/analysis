@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-07 15:17:12 +0100 (Sun, August 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-30 13:11:15 +0100 (Tue, August 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,7 +50,6 @@ from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.SearchWidget import attachDFSearchWidget
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.FileDialog import TablesFileDialog
-from ccpn.ui.gui.lib.MenuActions import _openItemObject
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import copyToClipboard
@@ -67,6 +66,10 @@ ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
                 QtCore.Qt.Vertical  : QtCore.Qt.Vertical,
                 }
 
+# define a role to return a cell-value
+DTypeRole = QtCore.Qt.UserRole + 1000
+ValueRole = QtCore.Qt.UserRole + 1001
+
 
 #=========================================================================================
 # _SimplePandasTableView
@@ -76,17 +79,17 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
     styleSheet = """QTableView {
                         background-color: %(GUITABLE_BACKGROUND)s;
                         alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
-                        border: 2px solid %(BORDER_NOFOCUS)s;
+                        border: %(_BORDER_WIDTH)spx solid %(BORDER_NOFOCUS)s;
                         border-radius: 2px;
                     }
                     QTableView::focus {
                         background-color: %(GUITABLE_BACKGROUND)s;
                         alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
-                        border: 2px solid %(BORDER_FOCUS)s;
+                        border: %(_BORDER_WIDTH)spx solid %(BORDER_FOCUS)s;
                         border-radius: 2px;
                     }
                     QTableView::item {
-                        padding: 2px;
+                        padding: %(_CELL_PADDING)spx;
                     }
                     QTableView::item::selected {
                         background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
@@ -103,6 +106,7 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
     def __init__(self, parent=None,
                  multiSelect=False, selectRows=True,
                  showHorizontalHeader=True, showVerticalHeader=True,
+                 borderWidth=2, cellPadding=2,
                  **kwds):
         super().__init__(parent)
         Base._init(self, **kwds)
@@ -115,6 +119,9 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
 
         # set stylesheet
         colours = getColours()
+        # add border-width/cell-padding options
+        self._borderWidth = colours['_BORDER_WIDTH'] = borderWidth
+        self._cellPadding = colours['_CELL_PADDING'] = cellPadding  # the extra padding for the selected cell-item
         self._defaultStyleSheet = self.styleSheet % colours
         self.setStyleSheet(self._defaultStyleSheet)
         self.setAlternatingRowColors(True)
@@ -320,6 +327,34 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
                     # self.PositionAtCenter)
                     break
 
+    #=========================================================================================
+    # Other methods
+    #=========================================================================================
+
+    def setWidthToColumns(self):
+        """Set the width of the table to the column widths
+        """
+        # need to get values from padding
+        header = self.horizontalHeader()
+        width = -2  # left/right borders
+        for nn in range(header.count()):
+            if not header.isSectionHidden(nn) and header.sectionViewportPosition(nn) >= 0:
+                width += (self.columnWidth(nn) + 1)  # cell border on right-hand-side
+
+        self.setFixedWidth(width)
+
+    def setHeightToRows(self):
+        """Set the height of the table to the row heights
+        """
+        height = 2 * self.horizontalHeader().height()
+
+        header = self.verticalHeader()
+        for nn in range(header.count()):
+            if not header.isSectionHidden(nn) and header.sectionViewportPosition(nn) >= 0:
+                height += (self.rowHeight(nn) + 1)
+
+        self.setFixedHeight(height)
+
 
 #=========================================================================================
 # _SimplePandasTableModel
@@ -338,10 +373,12 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
     showEditIcon = False
     defaultFlags = QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
+    defaultEditable = False
 
     def __init__(self, data, view=None):
-        """Initialise the pandas model
-        Allocates space for foreground/background colours
+        """Initialise the pandas model.
+        Allocates space for foreground/background colours.
+
         :param data: pandas DataFrame
         """
         if not isinstance(data, pd.DataFrame):
@@ -373,7 +410,10 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
     @df.setter
     def df(self, value):
-        """replace the dataFrame and update the model
+        """Replace the dataFrame and update the model.
+
+        :param value: pandas dataFrame
+        :return:
         """
         self.beginResetModel()
 
@@ -392,7 +432,13 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         self.endResetModel()
 
     def setToolTips(self, orientation, values):
-        """Set the tooltips for the horizontal/vertical headers
+        """Set the tooltips for the horizontal/vertical headers.
+
+        Orientation can be defined as: 'h', 'horizontal', 'v', 'vertical', QtCore.Qt.Horizontal, or QtCore.Qt.Vertical.
+
+        :param orientation: str or Qt constant
+        :param values: list of str containing new headers
+        :return:
         """
         orientation = ORIENTATIONS.get(orientation)
         if orientation is None:
@@ -406,7 +452,11 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             raise ValueError(f'{self.__class__.__name__}.setToolTips: Error setting values {orientation} -> {values}')
 
     def _insertRow(self, row, newRow):
-        """Insert a new row into the table
+        """Insert a new row into the table.
+
+        :param row: index of row to be inserted
+        :param newRow: new row as pandas-dataFrame or list of items
+        :return:
         """
         if self._view.isSortingEnabled():
             # notify that the table is about to be changed
@@ -430,7 +480,11 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             # self.endInsertRows()
 
     def _updateRow(self, row, newRow):
-        """Update a row in the table
+        """Update a row in the table.
+
+        :param row: index of row to be updated
+        :param newRow: new row as pandas-dataFrame or list of items
+        :return:
         """
         try:
             iLoc = self._df.index.get_loc(row)  # will give a keyError if the row is not found
@@ -477,7 +531,10 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
                 #     # self.dataChanged.emit(startIdx, endIdx)
 
     def _deleteRow(self, row):
-        """Delete a row from the table
+        """Delete a row from the table.
+
+        :param row: index of the row to be deleted
+        :return:
         """
         try:
             iLoc = self._df.index.get_loc(row)
@@ -534,6 +591,14 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
                 return str(data)
 
+            elif role == ValueRole:
+                val = self._df.iat[row, col]
+                try:
+                    # convert np.types to python types
+                    return val.item()  # type np.generic
+                except:
+                    return val
+
             elif role == QtCore.Qt.BackgroundRole:
                 if (colourDict := self._colour[row, col]):
                     # get the colour from the dict
@@ -570,6 +635,27 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             #     return self._editableIcon
 
         return None
+
+    def setData(self, index, value, role=QtCore.Qt.EditRole) -> bool:
+        """Set data in the DataFrame. Required if table is editable.
+        """
+        if not index.isValid():
+            return False
+
+        if role == QtCore.Qt.EditRole:
+            # get the source cell
+            row, col = self._sortIndex[index.row()], index.column()
+            try:
+                if self._df.iat[row, col] != value:
+                    self._df.iat[row, col] = value
+                    self.dataChanged.emit(index, index)
+
+                    return True
+
+            except Exception as es:
+                getLogger().debug2(f'error accessing cell {index}  ({row}, {col})   {es}')
+
+        return False
 
     def headerData(self, col, orientation, role=None):
         """Return the column headers
@@ -747,7 +833,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             # return True if the column contains an edit function
             return self._view._dataFrameObject.setEditValues[col] is not None
         except:
-            return False
+            return self.defaultEditable
 
 
 #=========================================================================================
@@ -813,7 +899,10 @@ class _SimplePandasTableHeaderModel(QtCore.QAbstractTableModel):
 # New/Update objects
 #=========================================================================================
 
-def _newSimplePandasTable(parent, data, _resize=False):
+def _newSimplePandasTable(parent, data,
+                          _resize=False,
+                          setWidthToColumns=False, setHeightToRows=False,
+                          **kwds):
     """Create a new _SimplePandasTable from a pd.DataFrame
     """
     if not parent:
@@ -822,22 +911,22 @@ def _newSimplePandasTable(parent, data, _resize=False):
         raise ValueError(f'data is not of type pd.DataFrame - {type(data)}')
 
     # create a new table
-    table = _SimplePandasTableView(parent)
+    table = _SimplePandasTableView(parent, **kwds)
 
     # set the model
     data = pd.DataFrame(data)
     model = _SimplePandasTableModel(data, view=table)
     table.setModel(model)
 
-    # # put a proxy in between view and model - REALLY SLOW for big tables
-    # table._proxy = QtCore.QSortFilterProxyModel()
-    # table._proxy.setSourceModel(_model)
-    # table.setModel(table._proxy)
-
     table.resizeColumnsToContents()
     if _resize:
         # resize if required
         table.resizeRowsToContents()
+
+    if setWidthToColumns:
+        table.setWidthToColumns()
+    if setHeightToRows:
+        table.setHeightToRows()
 
     return table
 
@@ -1005,7 +1094,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         """
         super().setModel(model)
 
-        # attach a handler for to respond to the selection changing
+        # attach a handler to respond to the selection changing
         self.selectionModel().selectionChanged.connect(self._selectionChangedCallback)
         model.showEditIcon = True
 
@@ -1440,6 +1529,9 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         :return: Actions: Select the dropped item on the table or/and open a new modules if multiple drops.
         If multiple different obj instances, then asks first.
         """
+        # import here to stop circular import
+        from ccpn.ui.gui.lib.MenuActions import _openItemObject
+
         objs = [self.project.getByPid(pid) for pid in pids]
 
         selectableObjects = [obj for obj in objs if isinstance(obj, objType)]
@@ -2152,7 +2244,7 @@ class _SimpleTableDelegate(QtWidgets.QStyledItemDelegate):
         :param parent - link to the handling table
         """
         QtWidgets.QStyledItemDelegate.__init__(self, parent)
-        self.customWidget = False
+        self.customWidget = None
         self._parent = parent
         self._objectColumn = objectColumn
 
@@ -2167,6 +2259,9 @@ class _SimpleTableDelegate(QtWidgets.QStyledItemDelegate):
 
         if hasattr(widget, 'setColor'):
             widget.setColor(*value)
+
+        elif hasattr(widget, 'selectValue'):
+            widget.selectValue(*value)
 
         elif hasattr(widget, 'setData'):
             widget.setData(*value)
@@ -2230,6 +2325,8 @@ class _SimpleTableDelegate(QtWidgets.QStyledItemDelegate):
         except Exception as es:
             getLogger().debug('Error handling cell editing: %i %i - %s    %s    %s' % (row, col, str(es), self._parent.model()._sortIndex, value))
 
+        super(_SimpleTableDelegate, self).setModelData(widget, mode, index)
+
     def createEditor(self, parentWidget, itemStyle, index):  # returns the edit widget
 
         col = index.column()
@@ -2246,7 +2343,7 @@ class _SimpleTableDelegate(QtWidgets.QStyledItemDelegate):
 
     def updateEditorGeometry(self, widget, itemStyle, index):  # ensures that the editor is displayed correctly
 
-        if True:  # self.customWidget:
+        if self.customWidget:
             cellRect = itemStyle.rect
             x = cellRect.x()
             y = cellRect.y()

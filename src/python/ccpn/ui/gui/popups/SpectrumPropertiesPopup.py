@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-16 19:56:50 +0100 (Mon, May 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-08-30 13:11:15 +0100 (Tue, August 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -25,20 +25,22 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 import numpy as np
 from functools import partial
 from PyQt5 import QtWidgets, QtCore, QtGui
 from itertools import permutations
 from collections.abc import Iterable
-from time import sleep
+import pandas as pd
 
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
-from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock
 from ccpn.core.lib.ContextManagers import undoStackBlocking
-from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise, MAXALIASINGRANGE, CoherenceOrder
+from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise, MAXALIASINGRANGE, CoherenceOrder, \
+    MagnetisationTransferParameters, _getApiExpTransfers
 from ccpn.core.lib.ContextManagers import queueStateChange
 
+from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
@@ -49,18 +51,17 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.popups.ExperimentTypePopup import _getExperimentTypes
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Tabs import Tabs
-from ccpn.ui.gui.popups.ValidateSpectraPopup import SpectrumValidator, SpectrumPathRow
-from ccpn.ui.gui.guiSettings import getColours, DIVIDER
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.MagnetisationTransferTable import newMagnetisationTransferTable
+from ccpn.ui.gui.popups.ExperimentTypePopup import _getExperimentTypes
+from ccpn.ui.gui.popups.ValidateSpectraPopup import SpectrumPathRow
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, handleDialogApply, _verifyPopupApply
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
-from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
-from ccpn.ui.gui.popups.AttributeEditorPopupABC import _complexAttribContainer
 
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, \
@@ -940,9 +941,11 @@ class DimensionsTab(Widget):
         self.mainWindow = mainWindow
         self.spectrum = spectrum
         self.dimensions = dimensions
+        self._magTransfers = self.spectrum.magnetisationTransfers
+
         self._changes = ChangeDict()
-        self._referenceExperiment = None
-        self._referenceDimensions = None
+        self._referenceExperiment = self.spectrum.experimentType
+        self._referenceDimensions = self.spectrum.referenceExperimentDimensions
         self._warningShown = False
 
         Label(self, text="Dimension ", grid=(1, 0), hAlign='l', vAlign='t', )
@@ -991,8 +994,15 @@ class DimensionsTab(Widget):
         row += 1
         _refLabel = Label(self, text="Reference Experiment Dimensions ", grid=(row, 0), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'referenceExperimentDimensions'))
 
-        row += 2
-        # spacer for extra button
+        row += 1
+        # spacer for 'copy' button
+
+        row += 1
+        _magTransferLabel = Label(self, text="Magnetisation Transfers ", grid=(row, 0), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'magnetisationTransfers'))
+        if dimensions < 2:
+            _magTransferLabel.setVisible(False)
+
+        row += 1
         hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, divisor=2)
         hLine.setContentsMargins(5, 0, 0, 0)
 
@@ -1063,7 +1073,7 @@ class DimensionsTab(Widget):
 
             row += 1
             if i == 0:
-                # reference experiment type
+                # reference experiment type - editable because has a search-completer
                 self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(row, i + 1), gridSpan=(1, dimensions))
                 _specButton = Button(self, grid=(row, i + 1 + dimensions),
                                      callback=partial(self._raiseExperimentFilterPopup, spectrum),
@@ -1098,7 +1108,25 @@ class DimensionsTab(Widget):
                     _copyBox.setVisible(False)
 
             row += 1
-            # line spacer
+            if i == 0:
+                # magnetisation transfer table
+                _data = pd.DataFrame(columns=MagnetisationTransferParameters)
+                _refMagTransfer = self.magnetisationTransferTable = newMagnetisationTransferTable(self, _data,
+                                                                                                  spectrum=self.spectrum,
+                                                                                                  showVerticalHeader=False,
+                                                                                                  borderWidth=1,
+                                                                                                  setHeightToRows=True,
+                                                                                                  setWidthToColumns=True)
+                _refMagTransfer.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+                self.getLayout().addWidget(_refMagTransfer, row, i + 1, 1, dimensions + 2)
+
+                if self.dimensions < 2:
+                    # hide as not required for 1d
+                    _refMagTransfer.setVisible(False)
+                self.magnetisationTransferTable.tableChanged.connect(partial(self._queueSetMagnetisationTransfers, spectrum))
+
+            row += 1
+            # HLine spacer
 
             row += 1
             self._pointCountsLabels[i] = Label(self, grid=(row, i + 1), vAlign='t', hAlign='l')
@@ -1302,6 +1330,31 @@ class DimensionsTab(Widget):
 
         self._referenceExperiment = text
 
+    def _populateMagnetisationTransfers(self):
+        """Populate the magnetisation transfers table
+        """
+        # refDimensions = self._referenceDimensions or self.spectrum.referenceExperimentDimensions
+        refDimensions = tuple(val.getText() or None for val in self.referenceDimensionPullDowns) or self.spectrum.referenceExperimentDimensions
+        refExperimentName = self.spectrumType.getText()
+
+        if (self._referenceExperiment or self.spectrum.experimentType) is None:
+            _referenceLists = [['', val] if val else ['', ] for val in refDimensions]
+            _refDimensions = [val if val else '' for val in refDimensions]
+
+            for ii, (refList, ref) in enumerate(zip(_referenceLists, _refDimensions)):
+                self.referenceDimensionPullDowns[ii].setData(refList)
+                self.referenceDimensionPullDowns[ii].setIndex(refList.index(ref))
+
+        if self._referenceExperiment:
+            magTransfers = _getApiExpTransfers(self.spectrum, refExperimentName, refDimensions)
+            editable = False
+
+        else:
+            magTransfers = self._magTransfers
+            editable = True
+
+        self.magnetisationTransferTable.populateTable(magTransfers, editable=editable)
+
     def _populateDimension(self):
         """Populate dimensions tab from self.spectrum
         Blocking to be performed by tab container
@@ -1395,6 +1448,7 @@ class DimensionsTab(Widget):
 
             self._populateExperimentType()
             self._populateReferenceDimensions()
+            self._populateMagnetisationTransfers()
 
     def _getChangeState(self):
         """Get the change state from the parent widget
@@ -1501,18 +1555,30 @@ class DimensionsTab(Widget):
         popup.exec_()
         self.spectrumType.select(popup.expType)
 
-    @queueStateChange(_verifyPopupApply)
+    @queueStateChange(_verifyPopupApply, last=False)
     def _queueSetSpectrumType(self, spectrum, value):
-        if self.spectrumType.getObject():
-            expType = self.spectrumType.objects[value]
+        result = None
+        if self.spectrumType.getObject() is not None:
+            expType = self.spectrumType.objects[value] if 0 <= value < len(self.spectrumType.objects) else None
             if expType != spectrum.experimentType:
-                self._referenceExperiment = expType
-                with self.blockWidgetSignals():
-                    self._populateReferenceDimensions()
-                return partial(self._setSpectrumType, spectrum, expType)
+                self._referenceExperiment = expType or None
+                self._magTransfers = None if self._referenceExperiment else self.spectrum.magnetisationTransfers
+
+                result = partial(self._setSpectrumType, spectrum, expType)
+
+                if not expType:
+                    # flag magTransfers to change if setting to empty - keeps current list
+                    self._queueSetMagnetisationTransfers(self.spectrum, keepMagTransfers=True)
+
+        # update the reference-dimensions and the magnetisation-transfers
+        with self.blockWidgetSignals(blockUpdates=False):
+            self._populateReferenceDimensions()
+            self._populateMagnetisationTransfers()
+
+        return result
 
     def _setSpectrumType(self, spectrum, expType):
-        spectrum.experimentType = expType
+        spectrum.experimentType = expType or None
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetReferenceDimensions(self, spectrum, _value):  #valueGetter, dim):
@@ -1539,13 +1605,34 @@ class DimensionsTab(Widget):
 
         self._referenceDimensions = tuple(_refDims)
 
+        result = None
         if value != spectrum.referenceExperimentDimensions:
-            return partial(self._setReferenceDimensions, spectrum, value)  #, dim, value)
+            result = partial(self._setReferenceDimensions, spectrum, value)  #, dim, value)
+
+        with self.blockWidgetSignals(blockUpdates=False):
+            self._populateMagnetisationTransfers()
+
+        return result
 
     def _setReferenceDimensions(self, spectrum, value):  #, dim, value):
         """Set the value for a single referenceDimension
-        - this can lead to non-unique values"""
+        - this can lead to non-unique values
+        """
         spectrum.referenceExperimentDimensions = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetMagnetisationTransfers(self, spectrum, keepMagTransfers=False):
+        # get the magTransfers
+        value = self.magnetisationTransferTable.getMagnetisationTransfers()
+        self._magTransfers = value if (self.spectrumType.getObject() is not None or keepMagTransfers) else None
+
+        if sorted(value) != sorted(self.spectrum.magnetisationTransfers):
+            return partial(self._setMagnetisationTransfers, spectrum, value)
+
+    def _setMagnetisationTransfers(self, spectrum, value):  #, dim, value):
+        """Set the magnetisationTransfers for the spectrum
+        """
+        spectrum._setMagnetisationTransfers(value)
 
     def _copyReferenceExperiments(self):
         """Copy the reference experiment dimensions to the axisCode lineEdits

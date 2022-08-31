@@ -31,11 +31,9 @@ from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult,\
     CalculationModel, BlankFittingModel, BlankCalculationModel
-from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationOutputFrame,\
-    _getOutputFrameFromInputFrame, HetNoeOutputFrame
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationOutputFrame, HetNoeOutputFrame
 from ccpn.util.Logging import getLogger
 import numpy as np
-from collections import defaultdict
 from lmfit.models import update_param_vals
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 
@@ -110,7 +108,6 @@ class _RelaxationBaseFittingModel(FittingModelABC):
         :param kwargs:
         :return:
         """
-        self._rawData.clear()
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
         ## Keep only one IsotopeCode as we are using only Height/Volume 15N?
         inputData = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
@@ -122,9 +119,6 @@ class _RelaxationBaseFittingModel(FittingModelABC):
             pid = groupDf[sv.COLLECTIONPID].values[-1]
             xArray = seriesSteps.values
             yArray = seriesValues.values
-            self._xRawData = xArray
-            self._rawData.append(yArray)
-            self._rawIndexes.append(pid)
             if self.applyScaleMinMax:
                 yArray = self.scaleMinMax(yArray)
             minimiser = self.Minimiser()

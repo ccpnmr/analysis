@@ -26,10 +26,14 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
-import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.RelaxationModels import FittingModels, CalculationModels
+import pandas as pd
+from functools import reduce
 from ccpn.util.Logging import getLogger
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
+from ccpn.framework.lib.experimentAnalysis.RelaxationModels import FittingModels, CalculationModels
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC
+
 
 class RelaxationAnalysisBC(SeriesAnalysisABC):
     """
@@ -65,17 +69,31 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
         """
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
 
+
         if not self.inputDataTables:
             raise RuntimeError('Cannot run any fitting models. Add a valid inputData first')
 
         fittingModel = self.currentFittingModel
-        calculationgModel = self.currentCalculationModel
+        calculationModel = self.currentCalculationModel
         inputDataTable = self.inputDataTables[-1]
         inputFrame = inputDataTable.data
-        inputFrame = fittingModel.fitSeries(inputFrame)
-        # frame = calculationgModel.calculateValues(inputFrame)
+        rawDataFrame = fittingModel.getRawData(inputFrame)
+        fittingFrame = fittingModel.fitSeries(inputFrame)
+        calculationFrame = calculationModel.calculateValues(inputFrame)
+        fittingFrame = self._getGuiOutputDataFrame(fittingFrame)
+        calculationFrame = self._getGuiOutputDataFrame(calculationFrame)
+
+        #create the output frame by merging the 3 frames on CollectionPid/id, Assignment, model-results/statistics and calculation
+
+        cdf = calculationFrame[[sv.COLLECTIONPID] + calculationModel.modelArgumentNames]
+        fdf = fittingFrame[[sv.COLLECTIONPID] + fittingModel.modelArgumentNames + fittingModel.modelStatsNames]
+        rawDataFrame.reset_index(drop=True, inplace=True)
+        fdf.reset_index(drop=True, inplace=True)
+        cdf.reset_index(drop=True, inplace=True)
+        merged = reduce(lambda left, right: pd.merge(left, right, on=[sv.COLLECTIONPID],
+                                                        how='outer'), [rawDataFrame, cdf, fdf])
         outputName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'
         outputDataTable = self._fetchOutputDataTable(name=outputName,
                                                overrideExisting=True)
-        outputDataTable.data = inputFrame
+        outputDataTable.data = merged
         self.addOutputData(outputDataTable)

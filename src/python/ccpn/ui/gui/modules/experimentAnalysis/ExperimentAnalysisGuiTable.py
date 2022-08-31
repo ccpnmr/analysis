@@ -132,6 +132,7 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
     def _columnsDefs(self) -> dict:
         dd = dict()
         dd.update(self._commonColumnsDefs)
+        dd.update(self._rawDataColumnsDefs)
         dd.update(self._calculationColumnsDefs)
         dd.update(self._fittingColumnsDefs)
         dd.update(self._statsColumnsDefs)
@@ -175,6 +176,12 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
         """ Populate the columns from the FittingModel modelStatsNames """
         model = self.guiModule.backendHandler.currentFittingModel
         return self._getModelColumnDefs(model, model.modelStatsNames) if model else {}
+
+    @property
+    def _rawDataColumnsDefs(self) -> dict:
+        """ Populate the columns from the FittingModel parameters """
+        model = self.guiModule.backendHandler.currentFittingModel
+        return self._getModelColumnDefs(model, model.rawDataHeaders) if model else {}
 
     @property
     def dataFrame(self):

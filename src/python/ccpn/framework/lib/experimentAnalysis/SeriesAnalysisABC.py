@@ -252,7 +252,7 @@ class SeriesAnalysisABC(ABC):
 
     def _getGuiOutputDataFrame(self, dataFrame=None, *args):
         """ internal. Used to get a df to display in GuiTables
-         Return the outputDataFrame grouped by Collection IDs.
+         Return the outputDataFrame grouped by COLLECTIONPID.
          """
         # TODO needs more error checking
         if dataFrame is None:
@@ -264,9 +264,8 @@ class SeriesAnalysisABC(ABC):
         ## group by id and keep only first row as all duplicated except the series steps, which are not needed here.
         ## reset index otherwise you lose the column collectionId
         outDataFrame = dataFrame.groupby(sv.COLLECTIONID).first().reset_index()
-        outDataFrame[sv._ROW_UID] = np.arange(1, len(outDataFrame)+1)
-        outDataFrame[sv.ASHTAG] = outDataFrame[sv._ROW_UID].values
-        # add Code+type Column
+        outDataFrame.set_index(sv.COLLECTIONPID, drop=False, inplace=True)
+        # add Code+type Column #TODO. shouldn't do here
         outDataFrame.joinNmrResidueCodeType()
         return outDataFrame
 

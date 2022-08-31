@@ -30,7 +30,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 import warnings
 import numpy as np
 import pandas as pd
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from pandas import Series, isnull
@@ -38,9 +38,15 @@ from lmfit import Model, Parameter
 from lmfit.model import ModelResult, _align
 from ccpn.core.DataTable import TableFrame
 from ccpn.util.Logging import getLogger
+from ccpn.util.OrderedSet import OrderedSet
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC
 from ccpn.framework.Application import getApplication, getProject
+from ccpn.core.lib.CcpnSorting import stringSortKey
+
+pd.set_option('display.max_columns', None)  # or 1\000
+pd.set_option('display.max_rows', 50)  # or 1000
 
 class FittingModelABC(ABC):
 
@@ -51,7 +57,7 @@ class FittingModelABC(ABC):
     References      = 'References'      # A list of journal article references. E.g.: DOIs or title/authors/year/journal; web-pages.
     Minimiser       = None              # The fitting minimiser model object (initiated)
     FullDescription = f'{Info} \n {Description}\nSee References: {References}'
-    PeakProperty    = ''               # The peak property to fit. One of ['height', 'lineWidth', 'volume', 'ppmPosition']
+    PeakProperty    = sv._HEIGHT        # The peak property to fit. One of ['height', 'lineWidth', 'volume', 'ppmPosition']
 
     def __init__(self, applyScaleMinMax=False, applyStandardScaler=False, **kwargs):
 
@@ -59,10 +65,13 @@ class FittingModelABC(ABC):
         self.project = getProject()
         self.applyScaleMinMax = applyScaleMinMax
         self.applyStandardScaler = applyStandardScaler
-        self._rawData = []  # raw daw used for the fitting. this is for example the peak height
-        self._xRawData = []   # raw data used for the x values . this is for example the series times
-        self._rawIndexes = []
         self._modelArgumentNames = []
+        self._rawDataHeaders = [] #strings of columnHeaders
+
+    @property
+    def rawDataHeaders(self):
+        """ The list of rawData Column headers to appear in output frames and tables."""
+        return self._rawDataHeaders
 
     @property
     def modelArgumentNames(self):
@@ -88,6 +97,44 @@ class FittingModelABC(ABC):
         """
         pass
 
+    def getRawData(self, inputData:TableFrame, dimensionSeparator='F') -> TableFrame:
+        """
+
+        :param inputData: TableFrame.
+        :param dimensionSeparator: String to separate DimensionColumns for ppmPosition or linewidth.
+        :return: TableFrame
+        Transform an inputData frame to a minimal Frame containing only the rawData and common assignment columns.
+        Sorted by CollectionPid and series values.
+        Note: this resulting table is NOT used as input for calculation or fitting models.
+        """
+        outputFrame = SeriesFrameBC()
+        self._rawDataHeaders = OrderedSet()
+        if self.PeakProperty in [sv._HEIGHT, sv._VOLUME]:
+            inputData = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
+        commonHeaders = sv.MERGINGHEADERS
+        grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
+        for collectionId, groupDf in grouppedByCollectionsId:
+            groupDf.sort_values([sv.SERIESSTEP], inplace=True)
+            seriesSteps = groupDf[sv.SERIESSTEP]
+            ## Build columns
+            for ix, row in groupDf.iterrows():
+                pid = row[sv.COLLECTIONPID]
+                for commonHeader in commonHeaders:
+                    outputFrame.loc[pid, commonHeader] = row[commonHeader]
+                for xValue in seriesSteps.values:
+                    if xValue == row[sv.SERIESSTEP]:
+                        valueHeader = f'{dimensionSeparator}{int(row[sv.DIMENSION])}_{xValue}'
+                        if self.PeakProperty in [sv._HEIGHT, sv._VOLUME]:
+                            valueHeader = f'{xValue}'
+                        outputFrame.loc[pid, valueHeader] = row[self.PeakProperty]
+                        self._rawDataHeaders.add(valueHeader)
+        self._rawDataHeaders = list(self._rawDataHeaders)
+        outputFrame.columns = commonHeaders + self._rawDataHeaders
+        outputFrame.set_index(sv.COLLECTIONPID, drop=False, inplace=True)
+
+        return outputFrame
+
+
     @staticmethod
     def getFittingFunc(cls):
         """Get the Fitting Function used by the Minimiser """
@@ -96,10 +143,6 @@ class FittingModelABC(ABC):
 
     def scaleMinMax(self, data):
         return lf._scaleMinMaxData(data)
-
-    def getRawDataAsDataFrame(self) -> pd.DataFrame:
-        df = pd.DataFrame(self._rawData, columns=self._xRawData, index=self._rawIndexes)
-        return df
 
 
     def __str__(self):
@@ -143,7 +186,7 @@ class BlankCalculationModel(CalculationModel):
     Description = 'Blank Model'
 
     def calculateValues(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
-        return inputData
+        return self.getRawData(inputData)
 
 
 class BlankFittingModel(FittingModelABC):
@@ -156,7 +199,7 @@ class BlankFittingModel(FittingModelABC):
     Description = 'Blank Model'
 
     def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
-        return inputData
+        return self.getRawData(inputData)
 
 class MinimiserModel(Model):
     """

@@ -71,11 +71,6 @@ WidgetVarName_SpectrumGroupsSelection   = 'SpectrumGroupsSelection'
 Label_SelectSpectrumGroups              = 'Select SpectrumGroup'
 TipText_SpectrumGroupSelectionWidget    = 'Select the SpectrumGroup containing the series of interest'
 
-WidgetVarName_PeakProperty              = 'peakProperty'
-Label_PeakProperty                      = 'Peak Property'
-TipText_PeakPropertySelectionWidget     = 'Select the Peak property to follow'
-
-
 WidgetVarName_DataTableName             = 'dataTableName'
 Label_InputDataTableName                = 'Input DataTable Name'
 TipText_dataTableNameSelectionWidget    = 'Select the name for the new DataTable input'
@@ -173,6 +168,14 @@ TipText_CalculationSeparator            = f''
 WidgetVarName_CalcMode                  = 'CalculationOptions'
 Label_CalculationOptions                = 'Calculation Options'
 TipText_CalculationOptions              = f''
+
+WidgetVarName_FilteringAtomsSeparator   = 'FilteringAtomsSeparator'
+Label_FilteringAtomsSeparator           = 'Filtering'
+TipText_FilteringAtomsSeparator         = f''
+
+WidgetVarName_CalcPeakProperty          = 'PeakProperty'
+Label_CalcPeakProperty                  = 'Peak Property'
+TipText_CalcPeakProperty                = 'Select the Peak property to follow'
 
 ############################################################
 ##########  TAB: Fitting

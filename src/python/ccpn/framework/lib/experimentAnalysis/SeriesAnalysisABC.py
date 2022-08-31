@@ -44,6 +44,7 @@ class SeriesAnalysisABC(ABC):
     The top level class for SeriesAnalysis modules.
     """
     seriesAnalysisName = ''
+    _allowedPeakProperties = [sv._HEIGHT, sv._VOLUME, sv._PPMPOSITION, sv._LINEWIDTH]
 
     @property
     def inputDataTables(self, ) -> list:
@@ -206,6 +207,14 @@ class SeriesAnalysisABC(ABC):
         :return:
         """
         return self.fittingModels.get(modelName, None)
+
+    def getCalculationModelByName(self, modelName):
+        """
+        Convenient method to get a registered Calculation Object  by its name
+        :param modelName: str
+        :return:
+        """
+        return self.calculationModels.get(modelName, None)
 
     def _getFirstModel(self, models):
         """

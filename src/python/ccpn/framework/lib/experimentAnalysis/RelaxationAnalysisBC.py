@@ -40,6 +40,7 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
     Relaxation Analysis Non-Gui module.
     """
     seriesAnalysisName = sv.RelaxationAnalysis
+    _allowedPeakProperties = [sv._HEIGHT, sv._VOLUME]
 
     def __init__(self):
         super().__init__()

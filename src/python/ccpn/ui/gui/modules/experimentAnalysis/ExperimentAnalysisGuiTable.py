@@ -195,11 +195,13 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
     def build(self, dataFrame):
         self.clear()
         if dataFrame is not None:
-            columnsMap = self.buildColumns()
-            self.dfo = self.dataFrameObject = self.getDataFromFrame(table=self, df=dataFrame, colDefs=self._columns, columnsMap=columnsMap)
-            self.setTableFromDataFrameObject(dataFrameObject=self.dfo, columnDefs=self._columns)
-            self.setHiddenColumns(gt._getHiddenColumns(self))
-            gt._resizeColumnWidths(self)
+            self.setData(dataFrame)
+            # TODO FIX the COLUMNs!!
+            # colu mnsMap = self.buildColumns()
+            # self.dfo = self.dataFrameObject = self.getDataFromFrame(table=self, df=dataFrame, colDefs=self._columns, columnsMap=columnsMap)
+            # self.setTableFromDataFrameObject(dataFrameObject=self.dfo, columnDefs=self._columns)
+            # self.setHiddenColumns(gt._getHiddenColumns(self))
+            # gt._resizeColumnWidths(self)
 
     def mousePressEvent(self, event):
         if self.itemAt(event.pos()) is None:

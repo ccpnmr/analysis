@@ -38,6 +38,7 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
     # needed settings:
     """
     seriesAnalysisName = sv.ChemicalShiftMappingAnalysis
+    _allowedPeakProperties = [sv._PPMPOSITION, sv._LINEWIDTH]
 
     def __init__(self):
         super().__init__()

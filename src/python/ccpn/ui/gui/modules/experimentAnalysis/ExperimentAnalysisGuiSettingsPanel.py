@@ -60,6 +60,12 @@ class GuiSettingPanel(Frame):
     Base class for GuiSettingPanel.
     A panel is Frame which will create a tab in the Gui Module settings
     Tabs are not added automatically. They need to be manually added from the SettingsHandler.
+
+    Macros from IPython Console: get the settingsPanel, e.g. for the calculation Tab:
+        guiModule = ui.getByGid('MO:Relaxation (Alpha)')    ## get the guiModule
+        guiModule.settingsPanelHandler.tabs                 ## get all tabs as dict. Key the tab name , value the Obj
+        calculationPanel = guiModule.settingsPanelHandler.tabs.get('Calculation')
+        allSettings = calculationPanel.getSettingsAsDict()  ## Key the variable name , value the widget current value
     """
 
     tabPosition = -1
@@ -232,14 +238,6 @@ class GuiInputDataPanel(GuiSettingPanel):
         if buttonWidget:
             buttonWidget.button.clicked.connect(self._createInputDataTableCallback)
 
-    def _setPeakPropertySelection(self):
-        "Allow  selection of 'Position' or 'LineWidth' for creating a new input DataTable. "
-        peakPropertyWidget = self.getWidget(guiNameSpaces.WidgetVarName_PeakProperty)
-        if peakPropertyWidget:
-            properties = [seriesVariables._PPMPOSITION, seriesVariables._LINEWIDTH]
-            peakPropertyWidget.setTexts(properties)
-
-
     def _limitSelectionOnInputData(self):
         "Allow only one selection on SpectrumGroups and DataTable. "
         sgSelectionWidget = self.getWidget(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection)
@@ -286,61 +284,21 @@ class GuiCalculationPanel(GuiSettingPanel):
 
     def setWidgetDefinitions(self):
         """Common calculation Widgets"""
-        self.widgetDefinitions = od((
-            (guiNameSpaces.WidgetVarName_IncludeGroups,
-             {'label': guiNameSpaces.Label_IncludeGroups,
-              'type': compoundWidget.RadioButtonsCompoundWidget,
-              'postInit': None,
-              'callBack': self._followGroupSelectionCallback,
-              'enabled': False,
-              'kwds': {'labelText': guiNameSpaces.Label_IncludeGroups,
-                       'hAlign': 'l',
-                       'tipText': '',
-                       'fixedWidths': SettingsWidgetFixedWidths,
-                       'compoundKwds': {'texts': [g.groupType for g in ALL_GROUPINGNMRATOMS.values()],
-                                        'tipTexts': [g.groupInfo for g in ALL_GROUPINGNMRATOMS.values()],
-                                        'direction': 'v',
-                                        'selectedInd':4,
-                                        }}}),
 
-            (guiNameSpaces.WidgetVarName_IncludeAtoms,
-             {'label': guiNameSpaces.Label_IncludeAtoms,
-              'tipText': guiNameSpaces.TipText_IncludeAtoms,
-              'type': settingWidgets.UniqueNmrAtomNamesSelectionWidget,
-              'postInit': self._setFixedHeightPostInit,
-              'callBack': self._setCalculationOptionsToBackend,
-              'enabled': False,
-              'kwds': {
-                  'labelText': guiNameSpaces.Label_IncludeAtoms,
-                  'tipText': guiNameSpaces.TipText_IncludeAtoms,
-                  'objectWidgetChangedCallback': self._setCalculationOptionsToBackend,
-                  'pulldownCallback': self._setCalculationOptionsToBackend,
-                  'texts': seriesVariables.DEFAULT_FILTERING_ATOMS,
-                  'defaults': seriesVariables.DEFAULT_FILTERING_ATOMS,
-                  'objectName': guiNameSpaces.WidgetVarName_IncludeAtoms,
-                  'standardListItems': [],
-                  'fixedWidths': SettingsWidgetFixedWidths
-              }}),
-            (guiNameSpaces.WidgetVarName_ExcludeResType,
-             {'label': guiNameSpaces.Label_ExcludeResType,
-              'tipText': guiNameSpaces.TipText_ExcludeResType,
-              'postInit': self._setFixedHeightPostInit,
-              'enabled': False,
-              'type': settingWidgets.UniqueNmrResidueTypeSelectionWidget,
-              'callBack': self._setCalculationOptionsToBackend,
-              'kwds': {
-                  'labelText': guiNameSpaces.Label_ExcludeResType,
-                  'tipText': guiNameSpaces.TipText_ExcludeResType,
-                  'objectWidgetChangedCallback': self._setCalculationOptionsToBackend,
-                  'pulldownCallback': self._setCalculationOptionsToBackend,
-                  'texts': [],
-                  'defaults': [],
-                  'standardListItems': [],
-                  'objectName': guiNameSpaces.WidgetVarName_ExcludeResType,
-                  'fixedWidths': SettingsWidgetFixedWidths
-              }}),
+        backendHandler = self.guiModule.backendHandler
+        self.widgetDefinitions = od((
+            (guiNameSpaces.WidgetVarName_CalcPeakProperty,
+             {'label': guiNameSpaces.Label_CalcPeakProperty,
+              'type': compoundWidget.PulldownListCompoundWidget,
+              'callBack': self._commonCallback,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_CalcPeakProperty,
+                       'tipText': guiNameSpaces.TipText_CalcPeakProperty,
+                       'texts': backendHandler._allowedPeakProperties,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+
         ))
-        calculationModels = self.guiModule.backendHandler.calculationModels
+        calculationModels = backendHandler.calculationModels
         ## autogenerate labels/tiptexts from the calculationModes.
         extraLabels_ddCalculationsModes = [model.MaTex for modelName, model in
                                            calculationModels.items()]
@@ -360,7 +318,7 @@ class GuiCalculationPanel(GuiSettingPanel):
              {'label': guiNameSpaces.Label_CalculationOptions,
               'type': compoundWidget.RadioButtonsCompoundWidget,
               'postInit': None,
-              'callBack': self._setCalculationOptionsToBackend,
+              'callBack': self._commonCallback,
               'kwds': {'labelText': guiNameSpaces.Label_CalculationOptions,
                        'hAlign': 'l',
                        'tipText': '',
@@ -372,7 +330,70 @@ class GuiCalculationPanel(GuiSettingPanel):
                                         'extraLabelIcons': extraLabelPixmaps}}}),
         ))
         ## add the new items to the main dict
+        filteringWidgetDefinitions = od((
+            (guiNameSpaces.WidgetVarName_FilteringAtomsSeparator,
+             {'label': guiNameSpaces.Label_FilteringAtomsSeparator,
+              'type': LabeledHLine,
+              'kwds': {'text': guiNameSpaces.Label_FilteringAtomsSeparator,
+                       'height': 30,
+                       'gridSpan': (1, 2),
+                       'colour': DividerColour,
+                       'tipText': guiNameSpaces.TipText_FilteringAtomsSeparator}}),
+            (guiNameSpaces.WidgetVarName_IncludeGroups,
+             {'label': guiNameSpaces.Label_IncludeGroups,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': None,
+              'callBack': self._followGroupSelectionCallback,
+              'enabled': False,
+              'kwds': {'labelText': guiNameSpaces.Label_IncludeGroups,
+                       'hAlign': 'l',
+                       'tipText': '',
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds': {'texts': [g.groupType for g in ALL_GROUPINGNMRATOMS.values()],
+                                        'tipTexts': [g.groupInfo for g in ALL_GROUPINGNMRATOMS.values()],
+                                        'direction': 'v',
+                                        'selectedInd': 4,
+                                        }}}),
+
+            (guiNameSpaces.WidgetVarName_IncludeAtoms,
+             {'label': guiNameSpaces.Label_IncludeAtoms,
+              'tipText': guiNameSpaces.TipText_IncludeAtoms,
+              'type': settingWidgets.UniqueNmrAtomNamesSelectionWidget,
+              'postInit': self._setFixedHeightPostInit,
+              'callBack': self._commonCallback,
+              'enabled': False,
+              'kwds': {
+                  'labelText': guiNameSpaces.Label_IncludeAtoms,
+                  'tipText': guiNameSpaces.TipText_IncludeAtoms,
+                  'objectWidgetChangedCallback': self._commonCallback,
+                  'pulldownCallback': self._commonCallback,
+                  'texts': seriesVariables.DEFAULT_FILTERING_ATOMS,
+                  'defaults': seriesVariables.DEFAULT_FILTERING_ATOMS,
+                  'objectName': guiNameSpaces.WidgetVarName_IncludeAtoms,
+                  'standardListItems': [],
+                  'fixedWidths': SettingsWidgetFixedWidths
+              }}),
+            (guiNameSpaces.WidgetVarName_ExcludeResType,
+             {'label': guiNameSpaces.Label_ExcludeResType,
+              'tipText': guiNameSpaces.TipText_ExcludeResType,
+              'postInit': self._setFixedHeightPostInit,
+              'enabled': False,
+              'type': settingWidgets.UniqueNmrResidueTypeSelectionWidget,
+              'callBack': self._commonCallback,
+              'kwds': {
+                  'labelText': guiNameSpaces.Label_ExcludeResType,
+                  'tipText': guiNameSpaces.TipText_ExcludeResType,
+                  'objectWidgetChangedCallback': self._commonCallback,
+                  'pulldownCallback': self._commonCallback,
+                  'texts': [],
+                  'defaults': [],
+                  'standardListItems': [],
+                  'objectName': guiNameSpaces.WidgetVarName_ExcludeResType,
+                  'fixedWidths': SettingsWidgetFixedWidths
+              }}),
+        ))
         self.widgetDefinitions.update(calculationWidgetDefinitions)
+        self.widgetDefinitions.update(filteringWidgetDefinitions)
 
         return self.widgetDefinitions
 
@@ -382,16 +403,35 @@ class GuiCalculationPanel(GuiSettingPanel):
         widget.getLayout().setAlignment(QtCore.Qt.AlignTop)
 
     def _followGroupSelectionCallback(self, *args):
-        widget = self.getWidget(guiNameSpaces.WidgetVarName_IncludeGroups)
-        value = widget.getByText()
-        groupObj = ALL_GROUPINGNMRATOMS.get(value, None)
-        # todo to  be implemented: pre-fill the nmrAtoms selection and Excluded nmrRes.
         pass
 
     def _setCalculationOptionsToBackend(self):
         """ Update the backend """
         getLogger().info('_setCalculationOptionsToBackend: NIY...')
         pass
+
+    def _commonCallback(self, *args):
+        print('setting callback')
+
+        calculationSettings = self.getSettingsAsDict()
+        selectedCalcPeakProperty = calculationSettings.get(guiNameSpaces.WidgetVarName_CalcPeakProperty, None)
+
+        selectedCalcModelName = calculationSettings.get(guiNameSpaces.WidgetVarName_CalcMode, None)
+
+        ## update the backend
+        backend = self.guiModule.backendHandler
+        currentCalculationModel = backend.currentCalculationModel
+        if currentCalculationModel is not None:
+            if currentCalculationModel.ModelName != selectedCalcModelName:
+
+                modelObj = backend.getCalculationModelByName(selectedCalcModelName)
+                if modelObj is not None:
+                    currentCalculationModel = modelObj()
+        backend.currentCalculationModel = currentCalculationModel
+        backend.currentFittingModel.PeakProperty = selectedCalcPeakProperty
+        backend.currentCalculationModel.PeakProperty = selectedCalcPeakProperty
+        backend._needsRefitting = True
+        self._setUpdatedDetectedState()
 
 TABPOS += 1
 
@@ -420,7 +460,7 @@ class GuiFittingPanel(GuiSettingPanel):
             (guiNameSpaces.WidgetVarName_OptimiserMethod,
              {'label': guiNameSpaces.Label_OptimiserMethod,
               'callBack': None,
-              'tipText': guiNameSpaces.TipText_PeakPropertySelectionWidget,
+              'tipText': '',
               'type': compoundWidget.PulldownListCompoundWidget,
               'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_OptimiserMethod,

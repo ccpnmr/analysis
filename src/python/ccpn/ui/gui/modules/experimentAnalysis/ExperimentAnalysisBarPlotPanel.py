@@ -272,6 +272,8 @@ class BarPlotPanel(GuiPanel):
          """
         getLogger().warning('Alpha version of plotting')
         self.barGraphWidget.clear()
+        self._updateAxisLabels()
+        return  # TODO FIXME
         if not self.xColumnName and not self.yColumnName in dataFrame.columns:
             getLogger().warning(f'Column names  not found in dataFrame: {self.xColumnName}, {self.yColumnName}')
             return

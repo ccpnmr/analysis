@@ -79,6 +79,7 @@ class GuiSettingPanel(Frame):
         self._moduleSettingsWidget = None # the widgets the collects all autogen widgets
         self.widgetDefinitions = self.setWidgetDefinitions()
         self.initWidgets()
+        self.guiModule.settingsChanged.connect(self._settingsChangedCallback)
 
     def setWidgetDefinitions(self) -> od:
         """ Override in subclass. Define the widgets in an orderedDict.
@@ -123,6 +124,18 @@ class GuiSettingPanel(Frame):
         toolbar = self.guiModule.panelHandler.getToolBarPanel()
         if toolbar:
             toolbar.setUpdateState(PanelUpdateState.DETECTED)
+
+    def _commonCallback(self, *args):
+        """ _commonCallback to all tabs. Usually to set the updateState icon"""
+        self._setUpdatedDetectedState()
+        self.guiModule.settingsChanged.emit(self.getSettingsAsDict())
+
+    def _settingsChangedCallback(self, settingsDict, *args):
+        """Callback when a core settings has changed.
+        E.g.: the fittingModel and needs to update some of the appearance Widgets
+        :param settingsDict: dict with settings {widgetVarName:value}
+        To be Subclassed"""
+        self._setUpdatedDetectedState()
 
 TABPOS = 0
 ## Make a default tab ordering as they are added to this file.
@@ -432,6 +445,8 @@ class GuiCalculationPanel(GuiSettingPanel):
         backend.currentCalculationModel.PeakProperty = selectedCalcPeakProperty
         backend._needsRefitting = True
         self._setUpdatedDetectedState()
+        self.guiModule.settingsChanged.emit(self.getSettingsAsDict())
+
 
 TABPOS += 1
 
@@ -459,7 +474,7 @@ class GuiFittingPanel(GuiSettingPanel):
                        'tipText': guiNameSpaces.TipText_OptimiserSeparator}}),
             (guiNameSpaces.WidgetVarName_OptimiserMethod,
              {'label': guiNameSpaces.Label_OptimiserMethod,
-              'callBack': None,
+              'callBack': self._commonCallback,
               'tipText': '',
               'type': compoundWidget.PulldownListCompoundWidget,
               'enabled': True,
@@ -469,7 +484,7 @@ class GuiFittingPanel(GuiSettingPanel):
                        'fixedWidths': SettingsWidgetFixedWidths}}),
             (guiNameSpaces.WidgetVarName_ErrorMethod,
              {'label': guiNameSpaces.Label_ErrorMethod,
-              'callBack': None,
+              'callBack': self._commonCallback,
               'tipText': guiNameSpaces.TipText_ErrorMethod,
               'type': compoundWidget.PulldownListCompoundWidget,
               'enabled': True,
@@ -496,7 +511,7 @@ class GuiFittingPanel(GuiSettingPanel):
              {'label': guiNameSpaces.Label_FittingModel,
               'type': compoundWidget.RadioButtonsCompoundWidget,
               'postInit': None,
-              'callBack': self.updateFittingModel,
+              'callBack': self._commonCallback,
               'tipText': guiNameSpaces.TipText_FittingModel,
               'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_FittingModel,
@@ -513,13 +528,10 @@ class GuiFittingPanel(GuiSettingPanel):
 
         return self.widgetDefinitions
 
-    def updateFittingModel(self, *args):
+    def _commonCallback(self, *args):
         """ Update FittingModel Settings at Backend"""
         self._setFittingSettingToBackend()
-
-    def _getSelectedFittingModel(self):
-        fittingSettings = self.getSettingsAsDict()
-        currentFittingModel = fittingSettings.get(guiNameSpaces.WidgetVarName_FittingModel, None)
+        super()._commonCallback(self, *args)
 
     def _setFittingSettingToBackend(self):
         """ Update the backend """
@@ -537,7 +549,6 @@ class GuiFittingPanel(GuiSettingPanel):
         # todo Add the optimiser options (method, fitting Error etc)
         # set update detected.
         backend._needsRefitting = True
-        self._setUpdatedDetectedState()
 
     def _calculateFittingCallback(self, *args):
         getLogger().info(f'Recalculating Fitting values ...')
@@ -761,9 +772,15 @@ class AppearancePanel(GuiSettingPanel):
         """Subclassed. Backend/values may vary for experiment """
         pass
 
-    def _commonCallback(self, *args):
-        """ _commonCallback to set the updateState icon"""
-        self._setUpdatedDetectedState()
+    def _settingsChangedCallback(self, settingsDict, *args):
+        """Callback when a core settings has changed.
+        E.g.: the fittingModel and needs to update some of the appearance Widgets"""
+        # reset the Ywidget options
+        print('SOmething chan', settingsDict)
+        yColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
+        if yColumnNameW:
+            yColumnNameW.setTexts(self._axisYOptions)
+
 
 TABPOS += 1
 

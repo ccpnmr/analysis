@@ -125,7 +125,7 @@ class FittingModelABC(ABC):
                     if xValue == row[sv.SERIESSTEP]:
                         valueHeader = f'{dimensionSeparator}{int(row[sv.DIMENSION])}_{xValue}'
                         if self.PeakProperty in [sv._HEIGHT, sv._VOLUME]:
-                            valueHeader = f'{xValue}'
+                            valueHeader = f'{self.PeakProperty}_{xValue}'
                         outputFrame.loc[pid, valueHeader] = row[self.PeakProperty]
                         self._rawDataHeaders.add(valueHeader)
         self._rawDataHeaders = list(self._rawDataHeaders)

@@ -28,6 +28,7 @@ from ccpn.framework.Application import getApplication, getCurrent, getProject
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisNotifierHandler import CoreNotifiersHandler
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 from ccpn.util.Logging import getLogger
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
 
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets
@@ -51,6 +52,8 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     maxSettingsState = 2
     settingsPosition = 'left'
     className = 'ExperimentAnalysis'
+    _includeInLastSeen = False
+    settingsChanged = pyqtSignal(dict)
 
     def __init__(self, mainWindow, name='Experiment Analysis', backendHandler=None, **kwds):
         super(ExperimentAnalysisGuiModuleBC, self)
@@ -123,7 +126,7 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         Add the Common Settings Panels to the settingsPanelsManager.
         """
         self.settingsPanelHandler.append(settingsPanel.GuiInputDataPanel(self))
-        self.settingsPanelHandler.append(settingsPanel.CSMAppearancePanel(self))
+        self.settingsPanelHandler.append(settingsPanel.AppearancePanel(self))
 
     #####################################################################
     #####################  Widgets callbacks  ###########################

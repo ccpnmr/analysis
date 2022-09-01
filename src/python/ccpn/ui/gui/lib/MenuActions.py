@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-12 20:57:40 +0100 (Fri, August 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-01 14:10:06 +0100 (Thu, September 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -74,6 +74,9 @@ from ccpn.core.lib.ContextManagers import notificationEchoBlocking, \
 
 
 MAXITEMLOGGING = 2
+_ADD_TO_COLLECTION = 'Add to Collection'
+_REMOVE_FROM_COLLECTION = 'Remove from Collection'
+_ITEMS_COLLECTION = 'Items'
 
 
 class CreateNewObjectABC():
@@ -459,7 +462,7 @@ class OpenItemABC():
 
             self.openAction = partial(func, **self.kwds)
 
-    def _openContextMenu(self, parentWidget, position, objs):
+    def _openContextMenu(self, parentWidget, position, objs, deferExec=False):
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
@@ -471,7 +474,7 @@ class OpenItemABC():
             contextMenu.addAction('Make SpectrumGroup From Selected',
                                   partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False, defaultItems=spectra),
                                           self.mainWindow, self.getObj(), self.node))
-        if any([any(sp.isTimeDomains) for sp in spectra]): # 3.1.0 alpha feature from macro.
+        if any([any(sp.isTimeDomains) for sp in spectra]):  # 3.1.0 alpha feature from macro.
             contextMenu.addAction('Split Planes to SpectrumGroup', partial(self._splitPlanesToSpectrumGroup, objs))
         contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
         self._addCollectionMenu(contextMenu, objs)
@@ -488,15 +491,22 @@ class OpenItemABC():
         contextMenu.addAction('Edit Properties', partial(parentWidget._raiseObjectProperties, self.node.widget))
 
         contextMenu.move(position)
-        contextMenu.exec()
 
-    def _cloneObject(self, objs):
+        if not deferExec:
+            # may want to defer the exec in a subclass
+            contextMenu.exec()
+
+        return contextMenu
+
+    @staticmethod
+    def _cloneObject(objs):
         """Clones the specified objects.
         """
         for obj in objs:
             obj.clone()
 
-    def _deleteItemObject(self, objs):
+    @staticmethod
+    def _deleteItemObject(objs):
         """Delete items from the project.
         """
 
@@ -511,7 +521,8 @@ class OpenItemABC():
         except Exception as es:
             showWarning('Delete', str(es))
 
-    def _copyPidsToClipboard(self, objs):
+    @staticmethod
+    def _copyPidsToClipboard(objs):
         """
         :param objs:
         Copy to clipboard quoted pids
@@ -524,7 +535,7 @@ class OpenItemABC():
         """Add a quick submenu containing a list of collections
         """
         # create subMenu for adding selected items to a single collection
-        subMenu = menu.addMenu('Add to Collection')
+        subMenu = menu.addMenu(_ADD_TO_COLLECTION)
         collections = self.mainWindow.application.project.collections
         _count = 0
         for col in collections:
@@ -540,7 +551,7 @@ class OpenItemABC():
             subMenu.setEnabled(False)
 
         # create subMenu for removing selected items from a single collection - items are not deleted
-        subMenu = menu.addMenu('Remove from Collection')
+        subMenu = menu.addMenu(_REMOVE_FROM_COLLECTION)
         collections = self.mainWindow.application.project.collections
         _count = 0
         for col in collections:
@@ -554,15 +565,6 @@ class OpenItemABC():
         if not len(subMenu.actions()) or _count == len(collections):
             # disable menu if empty
             subMenu.setEnabled(False)
-
-        if isinstance(self.getObj(), Collection):
-            # create subMenu for listing items in the collection - temporary until a module can be designed
-            itms = self.getObj().items
-            if itms:
-                subMenu = menu.addMenu('Items')
-                for itm in itms:
-                    _action = subMenu.addAction(itm.pid)
-                    _action.setEnabled(False)
 
     def _addToCollection(self, objs):
         """Add the objects to a collection
@@ -585,13 +587,16 @@ class OpenItemABC():
                                side_priority=(Side.TOP, Side.BOTTOM, Side.RIGHT, Side.LEFT),
                                target_screen=mouse_screen)
 
-    def _splitPlanesToSpectrumGroup(self, objs):
+    @staticmethod
+    def _splitPlanesToSpectrumGroup(objs):
         from ccpn.core.lib.SpectrumLib import splitPseudo3DSpectrumIntoPlanes
+
         for obj in objs:
             if not any(obj.isTimeDomains):
-                showWarning('3.1.0 Alpha version','This functionality has been implemented for Time Domain spectra only.')
+                showWarning('3.1.0 Alpha version', 'This functionality has been implemented for Time Domain spectra only.')
                 return
             splitPseudo3DSpectrumIntoPlanes(obj)
+
 
 from ccpn.ui.gui.widgets.SpeechBalloon import SpeechBalloon, Side
 from PyQt5 import QtCore, QtGui
@@ -627,7 +632,7 @@ class _openItemChemicalShiftListTable(OpenItemABC):
     openItemMethod = 'showChemicalShiftTable'
     objectArgumentName = 'chemicalShiftList'
 
-    def _openContextMenu(self, parentWidget, position, objs):
+    def _openContextMenu(self, parentWidget, position, objs, deferExec=False):
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
@@ -647,21 +652,23 @@ class _openItemChemicalShiftListTable(OpenItemABC):
         contextMenu.move(position)
         contextMenu.exec()
 
-    def _duplicateAction(self, objs):
+    @staticmethod
+    def _duplicateAction(objs):
         for obj in objs:
             obj.duplicate()
 
-    def _openSimulateSpectrumFromCSLPopup(self, objs):
-        if len(objs)>1:
+    @staticmethod
+    def _openSimulateSpectrumFromCSLPopup(objs):
+        if len(objs) > 1:
             showWarning('Simulate Spectrum from ChemicalShift', 'Please select only one ChemicalShift list')
             # Might think of merging multiple lists ?
             return
-        if len(objs)>0:
+        if len(objs) > 0:
             from ccpn.ui.gui.popups.ChemicalShiftList2SpectrumPopup import ChemicalShiftList2SpectrumPopup
+
             popup = ChemicalShiftList2SpectrumPopup(chemicalShiftList=objs[0])
             popup.show()
             popup.raise_()
-
 
 
 class _openItemPeakListTable(OpenItemABC):
@@ -698,7 +705,7 @@ class _openItemAtomItem(OpenItemABC):
     objectArgumentName = 'Atom'
     hasOpenMethod = False
 
-    def _openContextMenu(self, parentWidget, position, objs):
+    def _openContextMenu(self, parentWidget, position, objs, deferExec=False):
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
@@ -723,7 +730,7 @@ class _openItemResidueTable(OpenItemABC):
     objectArgumentName = 'residue'
     hasOpenMethod = False
 
-    def _openContextMenu(self, parentWidget, position, objs):
+    def _openContextMenu(self, parentWidget, position, objs, deferExec=False):
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
@@ -883,7 +890,7 @@ class _openItemSpectrumInGroupDisplay(_openItemSpectrumDisplay):
     """Modified class for spectra that are in sideBar under a spectrumGroup
     """
 
-    def _openContextMenu(self, parentWidget, position, objs):
+    def _openContextMenu(self, parentWidget, position, objs, deferExec=False):
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
@@ -954,6 +961,37 @@ class _openItemViolationTable(OpenItemABC):
 class _openItemCollectionModule(OpenItemABC):
     openItemMethod = 'showCollectionModule'
     objectArgumentName = 'collection'
+
+    def _openContextMenu(self, parentWidget, position, objs, deferExec=False):
+        """Open a context menu for the Collection item in the sideBar.
+        """
+        contextMenu = super()._openContextMenu(parentWidget, position, objs, deferExec=True)
+
+        # disable the contextMenuText action
+        if (actions := [act for act in contextMenu.actions() if act.text() == self.contextMenuText]):
+            actions[0].setEnabled(False)
+
+        # find the 'remove' action
+        removeAction = actions[0] if (actions := [act for act in contextMenu.actions() if act.text() == _REMOVE_FROM_COLLECTION]) else None
+
+        # create subMenu for listing items in the collection - temporary until a module can be designed
+        itms = self.getObj().items
+        if itms and removeAction:
+            subMenu = contextMenu.addMenu(_ITEMS_COLLECTION)
+
+            # find the inserted 'items' action
+            if (subMenuAction := actions[0] if (actions := [act for act in contextMenu.actions() if act.text() == _ITEMS_COLLECTION]) else None):
+                # add the items to the menu as disabled
+                for itm in itms:
+                    _action = subMenu.addAction(itm.pid)
+                    _action.setEnabled(False)
+
+                # insert above and then swap - required to insert below an action
+                contextMenu.insertAction(removeAction, subMenuAction)
+                contextMenu.insertAction(subMenuAction, removeAction)
+
+        # exec the menu
+        contextMenu.exec()
 
 
 OpenObjAction = {

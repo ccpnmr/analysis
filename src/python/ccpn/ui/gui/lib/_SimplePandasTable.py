@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-30 13:11:15 +0100 (Tue, August 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-01 15:55:39 +0100 (Thu, September 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -67,8 +67,11 @@ ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
                 }
 
 # define a role to return a cell-value
-DTypeRole = QtCore.Qt.UserRole + 1000
-ValueRole = QtCore.Qt.UserRole + 1001
+DTYPE_ROLE = QtCore.Qt.UserRole + 1000
+VALUE_ROLE = QtCore.Qt.UserRole + 1001
+EDIT_ROLE = QtCore.Qt.EditRole
+_EDITOR_SETTER = ('setColor', 'selectValue', 'setData', 'set', 'setValue', 'setText', 'setFile')
+_EDITOR_GETTER = ('get', 'value', 'text', 'getFile')
 
 
 #=========================================================================================
@@ -579,8 +582,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         """
         if index.isValid():
             # get the source cell
-            row = self._sortIndex[index.row()]
-            col = index.column()
+            row, col = self._sortIndex[index.row()], index.column()
 
             if role == QtCore.Qt.DisplayRole:
                 data = self._df.iat[row, col]
@@ -591,7 +593,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
                 return str(data)
 
-            elif role == ValueRole:
+            elif role == VALUE_ROLE:
                 val = self._df.iat[row, col]
                 try:
                     # convert np.types to python types
@@ -617,7 +619,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
                 return str(data)
 
-            elif role == QtCore.Qt.EditRole:
+            elif role == EDIT_ROLE:
                 data = self._df.iat[row, col]
 
                 # float/np.float - return float
@@ -642,7 +644,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         if not index.isValid():
             return False
 
-        if role == QtCore.Qt.EditRole:
+        if role == EDIT_ROLE:
             # get the source cell
             row, col = self._sortIndex[index.row()], index.column()
             try:
@@ -2232,9 +2234,6 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 # Table delegate to handle editing
 #=========================================================================================
 
-EDIT_ROLE = QtCore.Qt.EditRole
-
-
 class _SimpleTableDelegate(QtWidgets.QStyledItemDelegate):
     """handle the setting of data when editing the table
     """
@@ -2248,6 +2247,26 @@ class _SimpleTableDelegate(QtWidgets.QStyledItemDelegate):
         self._parent = parent
         self._objectColumn = objectColumn
 
+    def createEditor(self, parentWidget, itemStyle, index):  # returns the edit widget
+        """Create the editor widget
+        """
+        col = index.column()
+        objCol = self._parent._columnDefs.columns[col]
+
+        if objCol.editClass:
+            widget = objCol.editClass(None, *objCol.editArgs, **objCol.editKw)
+            widget.setParent(parentWidget)
+            # widget.activated.connect(partial(self._pulldownActivated, widget))
+
+            self.customWidget = widget
+
+            return widget
+
+        else:
+            self.customWidget = None
+
+            return super().createEditor(parentWidget, itemStyle, index)
+
     def setEditorData(self, widget, index) -> None:
         """populate the editor widget when the cell is edited
         """
@@ -2257,31 +2276,17 @@ class _SimpleTableDelegate(QtWidgets.QStyledItemDelegate):
         if not isinstance(value, (list, tuple)):
             value = (value,)
 
-        if hasattr(widget, 'setColor'):
-            widget.setColor(*value)
+        for attrib in _EDITOR_SETTER:
+            # get the method from the widget, and call with appropriate parameters
+            if (func := getattr(widget, attrib, None)):
+                if not callable(func):
+                    raise TypeError(f"widget.{attrib} is not callable")
 
-        elif hasattr(widget, 'selectValue'):
-            widget.selectValue(*value)
-
-        elif hasattr(widget, 'setData'):
-            widget.setData(*value)
-
-        elif hasattr(widget, 'set'):
-            widget.set(*value)
-
-        elif hasattr(widget, 'setValue'):
-            widget.setValue(*value)
-
-        elif hasattr(widget, 'setText'):
-            widget.setText(*value)
-
-        elif hasattr(widget, 'setFile'):
-            widget.setFile(*value)
+                func(*value)
+                break
 
         else:
-            msg = 'Widget %s does not expose "setData", "set" or "setValue" method; ' % widget
-            msg += 'required for table proxy editing'
-            raise Exception(msg)
+            raise Exception(f'Widget {widget} does not expose a set method; required for table editing')
 
     def setModelData(self, widget, mode, index):
         """Set the object to the new value
@@ -2289,32 +2294,24 @@ class _SimpleTableDelegate(QtWidgets.QStyledItemDelegate):
         :param mode - editing mode:
         :param index - QModelIndex of the cell
         """
-        if hasattr(widget, 'get'):
-            value = widget.get()
+        for attrib in _EDITOR_GETTER:
+            if (func := getattr(widget, attrib, None)):
+                if not callable(func):
+                    raise TypeError(f"widget.{attrib} is not callable")
 
-        elif hasattr(widget, 'value'):
-            value = widget.value()
-
-        elif hasattr(widget, 'text'):
-            value = widget.text()
-
-        elif hasattr(widget, 'getFile'):
-            files = widget.selectedFiles()
-            if not files:
-                return
-            value = files[0]
+                value = func()
+                break
 
         else:
-            msg = f'Widget {widget} does not expose "get", "value" or "text" method; required for table editing'
-            raise Exception(msg)
+            raise Exception(f'Widget {widget} does not expose a get method; required for table editing')
 
-        row = index.row()
-        col = index.column()
+        row, col = index.row(), index.column()
         try:
             # get the sorted element from the dataFrame
             df = self._parent._df
             iRow = self._parent.model()._sortIndex[row]
             iCol = df.columns.get_loc(self._objectColumn)
+            # get the object
             obj = df.iat[iRow, iCol]
 
             # set the data which will fire notifiers to populate all tables (including this)
@@ -2325,42 +2322,23 @@ class _SimpleTableDelegate(QtWidgets.QStyledItemDelegate):
         except Exception as es:
             getLogger().debug('Error handling cell editing: %i %i - %s    %s    %s' % (row, col, str(es), self._parent.model()._sortIndex, value))
 
-        super(_SimpleTableDelegate, self).setModelData(widget, mode, index)
-
-    def createEditor(self, parentWidget, itemStyle, index):  # returns the edit widget
-
-        col = index.column()
-        objCol = self._parent._columnDefs.columns[col]
-
-        if objCol.editClass:
-            widget = objCol.editClass(None, *objCol.editArgs, **objCol.editKw)
-            widget.setParent(parentWidget)
-            self.customWidget = True
-            return widget
-
-        else:
-            return super().createEditor(parentWidget, itemStyle, index)
-
     def updateEditorGeometry(self, widget, itemStyle, index):  # ensures that the editor is displayed correctly
 
         if self.customWidget:
             cellRect = itemStyle.rect
-            x = cellRect.x()
-            y = cellRect.y()
+            pos = widget.mapToGlobal(cellRect.topLeft())
+            x, y = pos.x(), pos.y()
             hint = widget.sizeHint()
-
-            # if hint.height() > cellRect.height():
-            #     if isinstance(widget, QtWidgets.QComboBox):  # has a popup anyway
-            #         widget.move(cellRect.topLeft())
-            #
-            #     else:
-            #         pos = widget.mapToGlobal(cellRect.topLeft())
-            #         widget.setParent(self._parent, QtCore.Qt.Popup)  # popup so not confined
-            #         widget.move(pos)
-
             width = max(hint.width(), cellRect.width())
             height = max(hint.height(), cellRect.height())
+
+            # force the pulldownList to be a popup - will always close when clicking outside
+            widget.setParent(self._parent, QtCore.Qt.Popup)
             widget.setGeometry(x, y, width, height)
+
+            # # QT delay to popup ensures that focus is correct when opening
+            # # - requires subclass of pulldown to delay closing in double-click
+            # QtCore.QTimer.singleShot(0, widget.showPopup)
 
         else:
             return super().updateEditorGeometry(widget, itemStyle, index)

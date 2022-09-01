@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-01 17:25:26 +0100 (Thu, September 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-01 17:27:44 +0100 (Thu, September 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -208,10 +208,10 @@ nef2CcpnMap = {
         ('script', 'script'),
         ('ccpn_input_uuid', 'inputDataUuid'),
         ('ccpn_output_uuid', 'outputDataUuid'),
-        ('ccpn_date', 'date'),
-        ('ccpn_stream_id', 'date'),
-        ('ccpn_saveframe', 'saveframe'),
-        ('ccpn_comment', 'comment'),
+        # ('ccpn_date', 'date'),
+        # ('ccpn_stream_id', 'date'),
+        # ('ccpn_saveframe', 'saveframe'),
+        # ('ccpn_comment', 'comment'),
         )),
 
     # new saveframes to handle ccpn specific logging

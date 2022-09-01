@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-04 11:58:05 +0100 (Thu, August 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-01 19:12:18 +0100 (Thu, September 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -34,19 +34,24 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 
 
+_ALWAYS_CHECKLIST = ['peaks', 'Peaks', 'integrals', 'Integrals', 'multiplets', 'Multiplets']
+
+
 @dataclass
 class _ItemState:
     """Small class to handle checkboxes
     """
     itemName: str
     values: list
+    checkState: bool
     checkBox: object
 
 
 class DeleteItemsPopup(CcpnDialogMainWidget):
     """Open a small popup to allow deletion of selected 'current' items.
     Items is a tuple of tuples: indexed by the name of the items, containing a list of the items for deletion
-    i.e. (('Peaks', peakList), ('Multiplets',multipletList))
+    i.e. (('Peaks', peakList, checked), ('Multiplets', multipletList, checked))
+    checked sets the state of the checkbox for the option.
     """
 
     def __init__(self, parent=None, mainWindow=None, title='Delete Items', items=None, **kwds):
@@ -83,7 +88,7 @@ class DeleteItemsPopup(CcpnDialogMainWidget):
         self.noteLabel = Label(self.mainWidget, "Delete selected items: ", grid=(row, 0))
 
         for item in self._items:
-            itemName, values = item.itemName, item.values
+            itemName, values, checkState = item.itemName, item.values, item.checkState
 
             row += 1
             # add a checkbox for each item
@@ -92,7 +97,7 @@ class DeleteItemsPopup(CcpnDialogMainWidget):
                                                  orientation='right',
                                                  # assume that the name is plural
                                                  labelText='{} {}{}'.format(len(values), itemName.rstrip('s'), 's' if len(values) > 1 else ''),
-                                                 checked=True if itemName in ['peaks', 'Peaks'] else False
+                                                 checked=checkState  # True if itemName in _ALWAYS_CHECKLIST else False
                                                  )
             newCheckBox.setToolTip('\n'.join(str(obj.pid) for obj in values))
 
@@ -115,15 +120,17 @@ class DeleteItemsPopup(CcpnDialogMainWidget):
             if not isinstance(itm, (list, tuple)):
                 raise ValueError('items must be a list of list or tuple pairs: (name, items)')
 
-            name, values = itm
+            name, values, checkState = itm
             if not isinstance(name, str):
                 raise ValueError(f'item {name} must be a str')
             if not isinstance(values, (list, tuple)):
                 raise ValueError('values must be a list of list or tuple pairs: (name, items)')
+            if not isinstance(checkState, bool):
+                raise ValueError(f'checkState must be True/False')
 
             # get the valid core objects
             objs = self.project.getByPids(values)
-            self._items.append(_ItemState(name, objs, None))
+            self._items.append(_ItemState(name, objs, checkState, None))
 
     def _refreshGLItems(self):
         # emit a signal to rebuild all peaks and multiplets

@@ -490,7 +490,12 @@ _coreClassMap = collections.OrderedDict()
 
 # Main data classes
 for className in _coreImportOrder:
-    cls = getattr(importlib.import_module('ccpn.core.%s' % className), className)
+    try:
+        impModule = importlib.import_module('ccpn.core.%s' % className)
+    except Exception:
+        # _OldChemicalShift and _PeakCluster have been moved to _implementation
+        impModule = importlib.import_module('ccpn.core._implementation.%s' % className)
+    cls = getattr(impModule, className)
     parentClass = cls._parentClass
     if parentClass is not None:
         if cls not in parentClass._childClasses:

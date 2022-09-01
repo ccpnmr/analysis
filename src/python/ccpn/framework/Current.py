@@ -9,12 +9,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-01 18:15:12 +0100 (Thu, September 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,6 @@ from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
-from ccpn.core._OldChemicalShift import _OldChemicalShift
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.Sample import Sample
 from ccpn.core.Restraint import Restraint
@@ -50,6 +49,8 @@ from ccpn.core.DataTable import DataTable
 from ccpn.core.ViolationTable import ViolationTable
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.Collection import Collection
+from ccpn.core._implementation._OldChemicalShift import _OldChemicalShift
+from ccpn.core._implementation._PeakCluster import _PeakCluster
 from ccpn.ui._implementation.Strip import Strip
 from ccpn.util.Logging import getLogger
 
@@ -84,6 +85,7 @@ _currentClasses = {
     DataTable        : {},
     ViolationTable   : {},
     StructureEnsemble: {},
+    _PeakCluster     : {},
     Collection       : {},
     }
 

@@ -9,12 +9,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-08 15:41:02 +0100 (Mon, August 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-09-01 17:25:26 +0100 (Thu, September 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -91,7 +91,7 @@ STRUCTUREDATA = 'structureData'
 COMPLEXES = 'complexes'
 SPECTRUMGROUPS = 'spectrumGroups'
 NOTES = 'notes'
-PEAKCLUSTERS = 'peakClusters'
+# _PEAKCLUSTERS = '_peakClusters'
 COLLECTIONS = 'collections'
 
 
@@ -240,7 +240,7 @@ class Project(AbstractWrapperObject):
         return None
 
     @property
-    def peakClusters(self):
+    def _peakClusters(self):
         """STUB: hot-fixed later"""
         return None
 
@@ -1782,17 +1782,19 @@ class Project(AbstractWrapperObject):
         return _fetchDataTable(self, name=name)
 
     @logCommand('project.')
-    def newPeakCluster(self, peaks: Sequence[Union['Peak', str]] = None, **kwds) -> Optional['PeakCluster']:
+    def _newPeakCluster(self, peaks: Sequence[Union['Peak', str]] = None, **kwds) -> Optional['_PeakCluster']:
         """Create new PeakCluster.
 
         See the PeakCluster class for details.
 
         Optional keyword arguments can be passed in; see PeakCluster._newPeakCluster for details.
 
+        CCPN Internal - this object is deprecated.
+
         :param peaks: optional list of peaks as objects or pids.
         :return: a new PeakCluster instance.
         """
-        from ccpn.core.PeakCluster import _newPeakCluster
+        from ccpn.core._PeakCluster import _newPeakCluster
 
         return _newPeakCluster(self, peaks=peaks, **kwds)
 

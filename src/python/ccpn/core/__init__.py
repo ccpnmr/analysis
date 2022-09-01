@@ -333,7 +333,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #     Project.getNmrResidue
 #     Project.getNote
 #     Project.getPeak
-#     Project.getPeakCluster
 #     Project.getPeakList
 #     Project.getPeakListView
 #     Project.getPseudoDimension
@@ -367,7 +366,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #     Project.nmrChains
 #     Project.nmrResidues
 #     Project.notes
-#     Project.peakClusters
 #     Project.peakListViews
 #     Project.peakLists
 #     Project.peaks
@@ -480,7 +478,7 @@ _coreImportOrder = (
     'ChemicalShiftList', '_OldChemicalShift',
     'StructureData', 'RestraintTable', 'Restraint',
     'RestraintContribution', 'CalculationStep', 'Data', 'StructureEnsemble', 'Model', 'Note',
-    'PeakCluster', 'MultipletList', 'Multiplet', 'DataTable', 'ViolationTable',
+    '_PeakCluster', 'MultipletList', 'Multiplet', 'DataTable', 'ViolationTable',
     'ChemicalShift', 'Collection'
     )
 

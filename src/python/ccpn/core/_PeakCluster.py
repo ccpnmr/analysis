@@ -9,12 +9,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:37 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-01 17:25:26 +0100 (Thu, September 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,11 +33,10 @@ from typing import Optional, Tuple, Any, Sequence, Union
 from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoBlock
-from ccpn.util.Logging import getLogger
 
 
-class PeakCluster(AbstractWrapperObject):
-    """PeakCluster object, holding position, intensity, and assignment information.
+class _PeakCluster(AbstractWrapperObject):
+    """_PeakCluster object, holding position, intensity, and assignment information.
 
     Measurements that require more than one NmrAtom for an individual assignment
     (such as  splittings, J-couplings, MQ dimensions, reduced-dimensionality
@@ -47,14 +46,17 @@ class PeakCluster(AbstractWrapperObject):
     """
 
     #: Short class name, for PID.
-    shortClassName = 'PC'
+    shortClassName = '_PC'
     # Attribute it necessary as subclasses must use superclass className
-    className = 'PeakCluster'
+    className = '_PeakCluster'
 
     _parentClass = Project
 
     #: Name of plural link to instances of class
-    _pluralLinkName = 'peakClusters'
+    _pluralLinkName = '_peakClusters'
+
+    # the attribute name used by current
+    _currentAttributeName = '_peakClusters'
 
     #: List of child classes.
     _childClasses = []
@@ -175,8 +177,8 @@ class PeakCluster(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
-@newObject(PeakCluster)
-def _newPeakCluster(self: Project, peaks: Sequence[Union['Peak', str]] = None, annotation: str = None) -> PeakCluster:
+@newObject(_PeakCluster)
+def _newPeakCluster(self: Project, peaks: Sequence[Union['Peak', str]] = None, annotation: str = None) -> _PeakCluster:
     """Create new PeakCluster.
 
     See the PeakCluster class for details.
@@ -196,7 +198,7 @@ def _newPeakCluster(self: Project, peaks: Sequence[Union['Peak', str]] = None, a
 
     result = self._project._data2Obj.get(apiPeakCluster)
     if result is None:
-        raise RuntimeError('Unable to generate new PeakCluster item')
+        raise RuntimeError('Unable to generate new _PeakCluster item')
 
     return result
 

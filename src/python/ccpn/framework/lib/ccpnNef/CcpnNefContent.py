@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-09 18:56:05 +0000 (Wed, February 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-01 17:25:27 +0100 (Thu, September 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -438,56 +438,56 @@ class CcpnNefContent:
 
     contents['ccpn_multiplet_peaks'] = _noLoopContent
 
-    # def content_ccpn_peak_cluster_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-    #     """Get the contents ccpn_peak_cluster_list saveFrame"""
-    #     serialList = 'ccpn_peak_cluster_serial'
-    #     results = {serialList   : OrderedSet()}
+    # # def content_ccpn_peak_cluster_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+    # #     """Get the contents ccpn_peak_cluster_list saveFrame"""
+    # #     serialList = 'ccpn_peak_cluster_serial'
+    # #     results = {serialList   : OrderedSet()}
+    # #
+    # #     self._contentLoops(project, saveFrame)
+    # #
+    # #
+    # #     self.updateContent(saveFrame, results)
     #
-    #     self._contentLoops(project, saveFrame)
-    #
-    #
-    #     self.updateContent(saveFrame, results)
-
-    contents['ccpn_peak_cluster_list'] = _contentLoops
+    # contents['ccpn_peak_cluster_list'] = _contentLoops
 
     # contents['ccpn_peak_cluster_list'] = content_ccpn_peak_cluster_list
 
-    def content_ccpn_peak_cluster(self, project: Project, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
-                                  name=None, itemLength=None):
-        peakClusters = OrderedSet()
-        _serialName = 'ccpn_peak_cluster_serial'
-        # _serialErrors = parentFrame._contents[_serialName] = OrderedSet()
+    # def content_ccpn_peak_cluster(self, project: Project, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
+    #                               name=None, itemLength=None):
+    #     peakClusters = OrderedSet()
+    #     _serialName = 'ccpn_peak_cluster_serial'
+    #     # _serialErrors = parentFrame._contents[_serialName] = OrderedSet()
+    #
+    #     mapping = nef2CcpnMap.get(loop.name) or {}
+    #     map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+    #     for row in loop.data:
+    #         parameters = _parametersFromLoopRow(row, map2)
+    #         result = (parameters['serial'],)
+    #         listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
+    #         peakClusters.add(listName)
+    #         # _serialErrors.add(str(parameters['serial']))  # add the serial list name - hack for the minute
+    #
+    #     return peakClusters
+    #
+    # contents['ccpn_peak_cluster'] = content_ccpn_peak_cluster
 
-        mapping = nef2CcpnMap.get(loop.name) or {}
-        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-        for row in loop.data:
-            parameters = _parametersFromLoopRow(row, map2)
-            result = (parameters['serial'],)
-            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
-            peakClusters.add(listName)
-            # _serialErrors.add(str(parameters['serial']))  # add the serial list name - hack for the minute
-
-        return peakClusters
-
-    contents['ccpn_peak_cluster'] = content_ccpn_peak_cluster
-
-    def content_ccpn_peak_cluster_peaks(self, project: Project, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame):
-        """Get the contents of ccpn_peak_cluster_peaks loop"""
-        clusterPeaks = OrderedSet()
-
-        mapping = nef2CcpnMap.get(loop.name) or {}
-        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-        for row in loop.data:
-            parameters = _parametersFromLoopRow(row, map2)
-            parameters['peak_list_serial'] = row.get('peak_list_serial')
-            parameters['peak_spectrum'] = row.get('peak_spectrum')
-
-            result = tuple(parameters[col] for col in ('peak_spectrum', 'peak_list_serial', 'serial'))
-            clusterPeaks.add(result)
-
-        return clusterPeaks
-
-    contents['ccpn_peak_cluster_peaks'] = content_ccpn_peak_cluster_peaks
+    # def content_ccpn_peak_cluster_peaks(self, project: Project, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame):
+    #     """Get the contents of ccpn_peak_cluster_peaks loop"""
+    #     clusterPeaks = OrderedSet()
+    #
+    #     mapping = nef2CcpnMap.get(loop.name) or {}
+    #     map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+    #     for row in loop.data:
+    #         parameters = _parametersFromLoopRow(row, map2)
+    #         parameters['peak_list_serial'] = row.get('peak_list_serial')
+    #         parameters['peak_spectrum'] = row.get('peak_spectrum')
+    #
+    #         result = tuple(parameters[col] for col in ('peak_spectrum', 'peak_list_serial', 'serial'))
+    #         clusterPeaks.add(result)
+    #
+    #     return clusterPeaks
+    #
+    # contents['ccpn_peak_cluster_peaks'] = content_ccpn_peak_cluster_peaks
 
     def content_ccpn_group_spectrum(self, parent: SpectrumGroup, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame):
         """Get the contents of ccpn_group_spectrum loop"""

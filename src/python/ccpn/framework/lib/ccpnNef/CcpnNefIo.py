@@ -9,12 +9,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-15 14:14:48 +0100 (Mon, August 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-01 17:25:27 +0100 (Thu, September 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -64,7 +64,7 @@ from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Integral import Integral
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Multiplet import Multiplet
-from ccpn.core.PeakCluster import PeakCluster
+# from ccpn.core._PeakCluster import _PeakCluster
 from ccpn.core.Peak import Peak
 from ccpn.core.Sample import Sample
 # from ccpn.core.SampleComponent import SampleComponent
@@ -121,7 +121,7 @@ STRUCTUREDATA = 'structureData'
 COMPLEXES = 'complexes'
 SPECTRUMGROUPS = 'spectrumGroups'
 NOTES = 'notes'
-PEAKCLUSTERS = 'peakClusters'
+# _PEAKCLUSTERS = '_peakClusters'
 VIOLATIONTABLES = 'violationTables'
 DATATABLES = 'dataTables'
 COLLECTIONS = 'collections'
@@ -143,7 +143,7 @@ NEFEXTENSION = '.nef'
 DEFAULTUPDATEPARAMETERS = ('comment',)
 
 # NAMETOOBJECTMAPPING = {obj.className.lower(): obj for obj in (Project, Spectrum, SpectrumGroup, Complex, PeakList,
-#                                                               IntegralList, MultipletList, PeakCluster, Sample,
+#                                                               IntegralList, MultipletList, _PeakCluster, Sample,
 #                                                               Substance, Chain, NmrChain, ChemicalShiftList, StructureData,
 #                                                               RestraintTable, Note)}
 
@@ -152,7 +152,7 @@ NAMETOOBJECTMAPPING = {'nef_chemical_shift_list'               : ChemicalShiftLi
                        'nef_nmr_spectrum'                      : PeakList,
                        'integral'                              : IntegralList,
                        'multiplet'                             : MultipletList,
-                       'ccpn_peak_cluster_list'                : PeakCluster,
+                       # 'ccpn_peak_cluster_list'                : _PeakCluster,
                        'ccpn_sample'                           : Sample,
                        'ccpn_complex'                          : Complex,
                        'ccpn_substance'                        : Substance,
@@ -451,7 +451,7 @@ class CcpnNefWriter:
                       complexes: typing.Sequence[Complex] = (),
                       spectrumGroups: typing.Sequence[SpectrumGroup] = (),
                       notes: typing.Sequence[Note] = (),
-                      peakClusters: typing.Sequence[PeakCluster] = (),
+                      # peakClusters: typing.Sequence[_PeakCluster] = (),
                       violationTables: typing.Sequence[ViolationTable] = (),
                       dataTables: typing.Sequence[DataTable] = (),
                       collections: typing.Sequence[Collection] = (),
@@ -510,11 +510,11 @@ class CcpnNefWriter:
             integralLists = sorted(integralLists)
             multipletLists = sorted(multipletLists)
 
-            # PeakClusters
-            peakClusterLists = set(peakClusters)
-            for peakCluster in peakClusterLists:
-                peakClusterLists.add(peakCluster)
-            peakClusterLists = sorted(peakClusters)
+            # # PeakClusters
+            # peakClusterLists = set(peakClusters)
+            # for peakCluster in peakClusterLists:
+            #     peakClusterLists.add(peakCluster)
+            # peakClusterLists = sorted(peakClusters)
 
             # ChemicalShiftLists
             chemicalShiftListSet = set(chemicalShiftLists)
@@ -676,10 +676,10 @@ class CcpnNefWriter:
         for obj in project.spectrumGroups:
             saveFrames.append(self.spectrumGroup2Nef(obj))
 
-        # PeakClusters
-        saveFrame = self.peakClusters2Nef(sorted(peakClusters))
-        if saveFrame:
-            saveFrames.append(saveFrame)
+        # # PeakClusters
+        # saveFrame = self.peakClusters2Nef(sorted(peakClusters))
+        # if saveFrame:
+        #     saveFrames.append(saveFrame)
 
         # Samples
         saveFrames.extend(sampleFrames)
@@ -776,7 +776,8 @@ class CcpnNefWriter:
                                       samples=project.samples, substances=project.substances,
                                       nmrChains=project.nmrChains, structureData=project.structureData,
                                       complexes=project.complexes, spectrumGroups=project.spectrumGroups,
-                                      notes=project.notes, peakClusters=project.peakClusters,
+                                      notes=project.notes,
+                                      # peakClusters=project.peakClusters,
                                       violationTables=project.violationTables, dataTables=project.dataTables,
                                       collections=project.collections)
         else:
@@ -799,7 +800,7 @@ class CcpnNefWriter:
             self.complexes = []
             self.spectrumGroups = []
             self.notes = []
-            self.peakClusters = []
+            # self._peakClusters = []
             self.violationTables = []
             self.dataTables = []
             self.collections = []
@@ -807,7 +808,8 @@ class CcpnNefWriter:
             checkList = [CHAINS, CHEMICALSHIFTLISTS, RESTRAINTTABLES, PEAKLISTS,
                          INTEGRALLISTS, MULTIPLETLISTS,
                          SAMPLES, SUBSTANCES, NMRCHAINS,
-                         STRUCTUREDATA, COMPLEXES, SPECTRUMGROUPS, NOTES, PEAKCLUSTERS,
+                         STRUCTUREDATA, COMPLEXES, SPECTRUMGROUPS, NOTES,
+                         # _PEAKCLUSTERS,
                          VIOLATIONTABLES, DATATABLES, COLLECTIONS]
 
             # put the pids in the correct lists
@@ -834,7 +836,8 @@ class CcpnNefWriter:
                                       samples=self.samples, substances=self.substances,
                                       nmrChains=self.nmrChains, structureData=self.structureData,
                                       complexes=self.complexes, spectrumGroups=self.spectrumGroups,
-                                      notes=self.notes, peakClusters=self.peakClusters,
+                                      notes=self.notes,
+                                      # peakClusters=self.peakClusters,
                                       violationTables=self.violationTables, dataTables=self.dataTables,
                                       collections=self.collections
                                       )
@@ -994,31 +997,31 @@ class CcpnNefWriter:
         else:
             return self._newNefSaveFrame(None, category, category)
 
-    def peakClusters2Nef(self, peakClusters) -> StarIo.NmrSaveFrame:
-        """Convert PeakClusters to saveframe"""
-
-        category = 'ccpn_peak_cluster_list'
-        if peakClusters:
-            result = self._newNefSaveFrame(peakClusters[0].project, category, category)
-
-            loopName = 'ccpn_peak_cluster'
-            loop = result[loopName]
-            for peakCluster in sorted(peakClusters[0].project.peakClusters):
-                row = loop.newRow(self._loopRowData(loopName, peakCluster))
-                row['serial'] = peakCluster.serial
-
-            loopName = 'ccpn_peak_cluster_peaks'
-            loop = result[loopName]
-            for peakCluster in sorted(peakClusters[0].project.peakClusters):
-
-                for peak in peakCluster.peaks:
-                    row = loop.newRow(self._loopRowData(loopName, peak))
-                    row['peak_cluster_serial'] = peakCluster.serial
-                    row['peak_spectrum'] = peak.peakList.spectrum.name
-                    row['peak_list_serial'] = peak.peakList.serial
-                    row['peak_serial'] = peak.serial
-                    # row['peak_pid'] = peak.pid
-            return result
+    # def peakClusters2Nef(self, peakClusters) -> StarIo.NmrSaveFrame:
+    #     """Convert PeakClusters to saveframe"""
+    #
+    #     category = 'ccpn_peak_cluster_list'
+    #     if peakClusters:
+    #         result = self._newNefSaveFrame(peakClusters[0].project, category, category)
+    #
+    #         loopName = 'ccpn_peak_cluster'
+    #         loop = result[loopName]
+    #         for peakCluster in sorted(peakClusters[0].project.peakClusters):
+    #             row = loop.newRow(self._loopRowData(loopName, peakCluster))
+    #             row['serial'] = peakCluster.serial
+    #
+    #         loopName = 'ccpn_peak_cluster_peaks'
+    #         loop = result[loopName]
+    #         for peakCluster in sorted(peakClusters[0].project.peakClusters):
+    #
+    #             for peak in peakCluster.peaks:
+    #                 row = loop.newRow(self._loopRowData(loopName, peak))
+    #                 row['peak_cluster_serial'] = peakCluster.serial
+    #                 row['peak_spectrum'] = peak.peakList.spectrum.name
+    #                 row['peak_list_serial'] = peak.peakList.serial
+    #                 row['peak_serial'] = peak.serial
+    #                 # row['peak_pid'] = peak.pid
+    #         return result
 
     def assignments2Nef(self, project: Project) -> StarIo.NmrSaveFrame:
         """Convert NmrChains, NmrResidues and NmrAtoms to saveframe"""
@@ -4505,32 +4508,32 @@ class CcpnNefReader(CcpnNefContent):
 
         return newName
 
-    def rename_ccpn_peak_cluster_list(self, project: Project,
-                                      dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
-                                      saveFrame: StarIo.NmrSaveFrame,
-                                      itemName=None, newName=None):
-        """Rename a ccpn_peak_cluster in ccpn_peak_cluster_list
-        :param itemName: name of the item to rename - dependent on saveFrame type
-        :param newName: new item name or None to autorename to next available name
-        """
-        if not itemName or newName == itemName:
-            return
-
-        newName = self._getNewSerial(contentDataBlocks, saveFrame, itemName, newName, 'ccpn_peak_cluster', 'PeakCluster')
-
-        try:
-            oldSerial = int(itemName)
-            newSerial = int(newName)
-        except Exception as es:
-            raise TypeError('Incorrect PeakCluster definition; must be <int>')
-
-        frameList = ('None',)
-        loopList = ('ccpn_peak_cluster', 'ccpn_peak_cluster_peaks')
-        replaceList = ('serial', 'peak_cluster_serial')
-        self.searchReplace(project, dataBlock, True, None, oldSerial, newSerial, replace=True,
-                           frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
-
-        return newName
+    # def rename_ccpn_peak_cluster_list(self, project: Project,
+    #                                   dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
+    #                                   saveFrame: StarIo.NmrSaveFrame,
+    #                                   itemName=None, newName=None):
+    #     """Rename a ccpn_peak_cluster in ccpn_peak_cluster_list
+    #     :param itemName: name of the item to rename - dependent on saveFrame type
+    #     :param newName: new item name or None to autorename to next available name
+    #     """
+    #     if not itemName or newName == itemName:
+    #         return
+    #
+    #     newName = self._getNewSerial(contentDataBlocks, saveFrame, itemName, newName, 'ccpn_peak_cluster', 'PeakCluster')
+    #
+    #     try:
+    #         oldSerial = int(itemName)
+    #         newSerial = int(newName)
+    #     except Exception as es:
+    #         raise TypeError('Incorrect PeakCluster definition; must be <int>')
+    #
+    #     frameList = ('None',)
+    #     loopList = ('ccpn_peak_cluster', 'ccpn_peak_cluster_peaks')
+    #     replaceList = ('serial', 'peak_cluster_serial')
+    #     self.searchReplace(project, dataBlock, True, None, oldSerial, newSerial, replace=True,
+    #                        frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
+    #
+    #     return newName
 
     def rename_ccpn_substance(self, project: Project,
                               dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
@@ -4731,12 +4734,12 @@ class CcpnNefReader(CcpnNefContent):
         self.searchReplace(project, dataBlock, True, None, oldSerial, newSerial, replace=True,
                            frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
 
-        # replace the spectrum/serial in the peak clusters
-        frameList = ('None',)
-        loopList = ('ccpn_peak_cluster_peaks', 'ccpn_multiplet_peaks')
-        replaceList = ('peak_spectrum', 'peak_list_serial')
-        self.searchReplaceList(project, dataBlock, True, None, (subName, oldSerial), (subName, newSerial), replace=True,
-                               frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
+        # # replace the spectrum/serial in the peak clusters
+        # frameList = ('None',)
+        # loopList = ('ccpn_peak_cluster_peaks', 'ccpn_multiplet_peaks')
+        # replaceList = ('peak_spectrum', 'peak_list_serial')
+        # self.searchReplaceList(project, dataBlock, True, None, (subName, oldSerial), (subName, newSerial), replace=True,
+        #                        frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
 
         # need to rename the key in dataBlock
         self._renameDataBlock(project, dataBlock, saveFrame, newFrameCode)
@@ -4802,7 +4805,7 @@ class CcpnNefReader(CcpnNefContent):
     renames['ccpn_multiplet_list'] = partial(rename_ccpn_list, _lowerCaseName='multiplet')
     renames['ccpn_peak_list'] = partial(rename_ccpn_peak_list, _lowerCaseName='peak')
     renames['ccpn_note'] = rename_ccpn_note
-    renames['ccpn_peak_cluster_list'] = rename_ccpn_peak_cluster_list
+    # renames['ccpn_peak_cluster_list'] = rename_ccpn_peak_cluster_list
     renames['ccpn_substance'] = rename_ccpn_substance
     renames['ccpn_distance_restraint_violation_list'] = rename_ccpn_table
     renames['ccpn_dihedral_restraint_violation_list'] = rename_ccpn_table
@@ -6233,114 +6236,114 @@ class CcpnNefReader(CcpnNefContent):
 
     verifiers['ccpn_multiplet_peaks'] = verify_ccpn_multiplet_peaks
 
-    def load_ccpn_peak_cluster_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-
-        # load ccpn_peak_cluster
-        loopName = 'ccpn_peak_cluster'
-        loop = saveFrame[loopName]
-        creatorFunc = project.newPeakCluster
-
-        result = []
-        mapping = nef2CcpnMap.get(loopName) or {}
-        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-        for row in loop.data:
-            parameters = _parametersFromLoopRow(row, map2)
-            self._updateStringParameters(parameters, attribs=('comment', 'annotation'))
-
-            # NOTE:ED - adding flags to restrict importing to the selection
-            serial = parameters.pop('serial', 1)
-            if not self._checkImport(saveFrame, str(serial)):
-                continue
-
-            obj = creatorFunc(**parameters)
-            obj._resetSerial(serial)
-            result.append(obj)
-
-        # load ccpn_peak_cluster
-        loopName = 'ccpn_peak_cluster_peaks'
-        loop = saveFrame[loopName]
-
-        for row in loop.data:
-            pClSerial = row['peak_cluster_serial']
-            pSpectrum = row['peak_spectrum']
-            pList = row['peak_list_serial']
-            pSerial = row['peak_serial']
-
-            # NOTE:ED - adding flags to restrict importing to the selection
-            if not self._checkImport(saveFrame, str(pClSerial)):
-                continue
-
-            pPeak = Pid.IDSEP.join(('' if x is None else str(x)) for x in ['PK:' + pSpectrum, pList, pSerial])
-            # pPeak = row['peak_pid']
-
-            pcs = [pc for pc in project.peakClusters if pc.serial == pClSerial]
-            peak = project.getByPid(pPeak)
-            if pcs and peak:
-                pcs[0].addPeaks(peak)
-
-        return result
-
-    importers['ccpn_peak_cluster_list'] = load_ccpn_peak_cluster_list
-
-    def verify_ccpn_peak_cluster_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-        """Verify the peakClusters"""
-        self._verifyLoops(project, saveFrame)
-
-        # TODO:ED - get serials from peak_cluster, put into ccpn_peak_cluster_list error
-
-    verifiers['ccpn_peak_cluster_list'] = verify_ccpn_peak_cluster_list
-
-    def verify_ccpn_peak_cluster(self, project: Project, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, **kwds):
-        """Verify the peakClusters"""
-        _ID = 'ccpn_peak_cluster'
-        _serialName = 'ccpn_peak_cluster_serial'
-        _serialErrors = parentFrame._rowErrors[_serialName] = OrderedSet()
-        _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
-
-        mapping = nef2CcpnMap.get(loop.name) or {}
-        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-
-        verifyFunc = project.getPeakCluster
-        for row in loop.data:
-            parameters = _parametersFromLoopRow(row, map2)
-            peakCluster = verifyFunc(parameters['serial'])
-            if peakCluster is not None:
-                self.error('{} - PeakCluster {} already exists'.format(_ID, peakCluster), loop, (peakCluster,))
-                _rowErrors.add(loop.data.index(row))
-                listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [parameters['serial']])
-                _serialErrors.add(listName)
-                parentFrame._rowErrors['_'.join([_ID, listName])] = OrderedSet([loop.data.index(row)])
-
-    verifiers['ccpn_peak_cluster'] = verify_ccpn_peak_cluster
-
-    def verify_ccpn_peak_cluster_peaks(self, project: Project, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame):
-        """verify ccpn_peak_cluster_peaks loop"""
-        _ID = 'ccpn_peak_cluster_peaks'
-        _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
-
-        mapping = nef2CcpnMap.get(loop.name) or {}
-        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-        for row in loop.data:
-            parameters = _parametersFromLoopRow(row, map2)
-            parameters['peak_list_serial'] = row.get('peak_list_serial')
-            parameters['peak_spectrum'] = row.get('peak_spectrum')
-            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [row['peak_cluster_serial']])
-            clusterID = '_'.join([_ID, listName])
-
-            tt = [parameters[col] for col in ('peak_spectrum', 'peak_list_serial', 'serial')]
-            peakName = Pid.IDSEP.join(('' if x is None else str(x)) for x in tt)
-
-            peak = project.getPeak(peakName)
-            if peak is not None:
-                self.error('ccpn_peak_cluster_peaks - PeakCluster contains {}'.format(peak), loop, (peak,))
-                _rowErrors.add(loop.data.index(row))
-
-                if clusterID not in parentFrame._rowErrors:
-                    parentFrame._rowErrors[clusterID] = OrderedSet([loop.data.index(row)])
-                else:
-                    parentFrame._rowErrors[clusterID].add(loop.data.index(row))
-
-    verifiers['ccpn_peak_cluster_peaks'] = verify_ccpn_peak_cluster_peaks
+    # def load_ccpn_peak_cluster_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+    #
+    #     # load ccpn_peak_cluster
+    #     loopName = 'ccpn_peak_cluster'
+    #     loop = saveFrame[loopName]
+    #     creatorFunc = project.newPeakCluster
+    #
+    #     result = []
+    #     mapping = nef2CcpnMap.get(loopName) or {}
+    #     map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+    #     for row in loop.data:
+    #         parameters = _parametersFromLoopRow(row, map2)
+    #         self._updateStringParameters(parameters, attribs=('comment', 'annotation'))
+    #
+    #         # NOTE:ED - adding flags to restrict importing to the selection
+    #         serial = parameters.pop('serial', 1)
+    #         if not self._checkImport(saveFrame, str(serial)):
+    #             continue
+    #
+    #         obj = creatorFunc(**parameters)
+    #         obj._resetSerial(serial)
+    #         result.append(obj)
+    #
+    #     # load ccpn_peak_cluster
+    #     loopName = 'ccpn_peak_cluster_peaks'
+    #     loop = saveFrame[loopName]
+    #
+    #     for row in loop.data:
+    #         pClSerial = row['peak_cluster_serial']
+    #         pSpectrum = row['peak_spectrum']
+    #         pList = row['peak_list_serial']
+    #         pSerial = row['peak_serial']
+    #
+    #         # NOTE:ED - adding flags to restrict importing to the selection
+    #         if not self._checkImport(saveFrame, str(pClSerial)):
+    #             continue
+    #
+    #         pPeak = Pid.IDSEP.join(('' if x is None else str(x)) for x in ['PK:' + pSpectrum, pList, pSerial])
+    #         # pPeak = row['peak_pid']
+    #
+    #         pcs = [pc for pc in project.peakClusters if pc.serial == pClSerial]
+    #         peak = project.getByPid(pPeak)
+    #         if pcs and peak:
+    #             pcs[0].addPeaks(peak)
+    #
+    #     return result
+    #
+    # importers['ccpn_peak_cluster_list'] = load_ccpn_peak_cluster_list
+    #
+    # def verify_ccpn_peak_cluster_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+    #     """Verify the peakClusters"""
+    #     self._verifyLoops(project, saveFrame)
+    #
+    #     # TODO:ED - get serials from peak_cluster, put into ccpn_peak_cluster_list error
+    #
+    # verifiers['ccpn_peak_cluster_list'] = verify_ccpn_peak_cluster_list
+    #
+    # def verify_ccpn_peak_cluster(self, project: Project, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, **kwds):
+    #     """Verify the peakClusters"""
+    #     _ID = 'ccpn_peak_cluster'
+    #     _serialName = 'ccpn_peak_cluster_serial'
+    #     _serialErrors = parentFrame._rowErrors[_serialName] = OrderedSet()
+    #     _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
+    #
+    #     mapping = nef2CcpnMap.get(loop.name) or {}
+    #     map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+    #
+    #     verifyFunc = project.getPeakCluster
+    #     for row in loop.data:
+    #         parameters = _parametersFromLoopRow(row, map2)
+    #         peakCluster = verifyFunc(parameters['serial'])
+    #         if peakCluster is not None:
+    #             self.error('{} - PeakCluster {} already exists'.format(_ID, peakCluster), loop, (peakCluster,))
+    #             _rowErrors.add(loop.data.index(row))
+    #             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [parameters['serial']])
+    #             _serialErrors.add(listName)
+    #             parentFrame._rowErrors['_'.join([_ID, listName])] = OrderedSet([loop.data.index(row)])
+    #
+    # verifiers['ccpn_peak_cluster'] = verify_ccpn_peak_cluster
+    #
+    # def verify_ccpn_peak_cluster_peaks(self, project: Project, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame):
+    #     """verify ccpn_peak_cluster_peaks loop"""
+    #     _ID = 'ccpn_peak_cluster_peaks'
+    #     _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
+    #
+    #     mapping = nef2CcpnMap.get(loop.name) or {}
+    #     map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+    #     for row in loop.data:
+    #         parameters = _parametersFromLoopRow(row, map2)
+    #         parameters['peak_list_serial'] = row.get('peak_list_serial')
+    #         parameters['peak_spectrum'] = row.get('peak_spectrum')
+    #         listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [row['peak_cluster_serial']])
+    #         clusterID = '_'.join([_ID, listName])
+    #
+    #         tt = [parameters[col] for col in ('peak_spectrum', 'peak_list_serial', 'serial')]
+    #         peakName = Pid.IDSEP.join(('' if x is None else str(x)) for x in tt)
+    #
+    #         peak = project.getPeak(peakName)
+    #         if peak is not None:
+    #             self.error('ccpn_peak_cluster_peaks - PeakCluster contains {}'.format(peak), loop, (peak,))
+    #             _rowErrors.add(loop.data.index(row))
+    #
+    #             if clusterID not in parentFrame._rowErrors:
+    #                 parentFrame._rowErrors[clusterID] = OrderedSet([loop.data.index(row)])
+    #             else:
+    #                 parentFrame._rowErrors[clusterID].add(loop.data.index(row))
+    #
+    # verifiers['ccpn_peak_cluster_peaks'] = verify_ccpn_peak_cluster_peaks
 
     # def load_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop) -> List[Peak]:
     def load_nef_peak(self, spectrum: Spectrum, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,

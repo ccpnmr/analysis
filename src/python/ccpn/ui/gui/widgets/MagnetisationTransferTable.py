@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-30 13:11:15 +0100 (Tue, August 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-01 16:05:27 +0100 (Thu, September 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,8 @@ from PyQt5 import QtCore, QtWidgets
 from functools import partial
 import pandas as pd
 import time
-from ccpn.core.lib.SpectrumLib import MagnetisationTransferTypes, MagnetisationTransferParameters, MagnetisationTransferTuple
+from ccpn.core.lib.SpectrumLib import MagnetisationTransferTypes, MagnetisationTransferParameters, \
+    MagnetisationTransferTuple
 from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableView, _SimplePandasTableModel, \
     _updateSimplePandasTable
 from ccpn.ui.gui.widgets.Font import setWidgetFont
@@ -53,17 +54,19 @@ class MagnetisationTransferTable(_SimplePandasTableView):
     def __init__(self, parent, spectrum=None, *args, **kwds):
         """Initialise the table
 
-        :param parent: parent widget
-        :param spectrum: target spectrum
-        :param args: additional arguments to pass to table-initialisation
-        :param kwds: additional keywords to pass to table-initialisation
+        :param parent: parent widget.
+        :param spectrum: target spectrum.
+        :param args: additional arguments to pass to table-initialisation.
+        :param kwds: additional keywords to pass to table-initialisation.
         """
         super().__init__(parent, *args, **kwds)
 
+        # set teh spectrum-specific information
         self.spectrum = spectrum
         self.dimensions = self.spectrum and self.spectrum.dimensionCount or 0
         self._magTransfers = self.spectrum and self.spectrum.magnetisationTransfers or None
 
+        # define the column definitions
         colDefs = ((int, [val + 1 for val in range(self.dimensions)]),
                    (int, [val + 1 for val in range(self.dimensions)]),
                    (str, MagnetisationTransferTypes),
@@ -103,7 +106,7 @@ class MagnetisationTransferTable(_SimplePandasTableView):
     #=========================================================================================
 
     def getMagnetisationTransfers(self):
-        """Get the magnetisationTransfers from the table.
+        """Get the magnetisation-transfers from the table.
         """
         magTransfers = tuple(MagnetisationTransferTuple(*row) for row in self._df.itertuples(index=False))
         return magTransfers
@@ -172,7 +175,7 @@ class MagnetisationTransferTable(_SimplePandasTableView):
     def _raiseTableContextMenu(self, pos):
         """Create a new menu and popup at cursor position.
 
-        :param pos: QPoint - position to raise the table
+        :param pos: QPoint - position to raise the table.
         :return:
         """
         pos = QtCore.QPoint(pos.x() + 10, pos.y() + 10)
@@ -265,49 +268,6 @@ class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
         self._parent = parent
         self._objectColumn = objectColumn
 
-    def setEditorData(self, widget, index) -> None:
-        """Populate the editor widget when the cell is edited.
-
-        :param widget: the editor widget.
-        :param index: QModelIndex of the cell in the table.
-        :return:
-        """
-        if self.customWidget:
-            model = index.model()
-            value = model.data(index, EDIT_ROLE)
-
-            if not isinstance(value, (list, tuple)):
-                value = (value,)
-
-            if hasattr(widget, 'selectValue'):
-                widget.selectValue(*value)
-            else:
-                msg = f'Widget {widget} does not expose "setData", "set" or "setValue" method; '
-                msg += 'required for table proxy editing'
-                raise Exception(msg)
-
-        else:
-            super().setEditorData(widget, index)
-
-    def setModelData(self, widget, mode, index):
-        """Set the object to the new value.
-
-        :param widget: the editor widget.
-        :param mode: editing mode.
-        :param index: QModelIndex of the cell in the table.
-        """
-        if hasattr(widget, 'get'):
-            value = widget.get()
-
-        else:
-            msg = f'Widget {widget} does not expose "get", "value" or "text" method; required for table editing'
-            raise Exception(msg)
-
-        try:
-            self._parent.model().setData(index, value)
-        except Exception as es:
-            getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}  {value}')
-
     def createEditor(self, parentWidget, itemStyle, index):
         """Returns the edit widget.
 
@@ -326,12 +286,58 @@ class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
             widget.closeOnLineEditClick = False
 
             self.customWidget = widget
+
             return widget
 
         else:
             self.customWidget = None
 
             return super().createEditor(parentWidget, itemStyle, index)
+
+    def setEditorData(self, widget, index) -> None:
+        """Populate the editor widget when the cell is edited.
+
+        :param widget: the editor widget.
+        :param index: QModelIndex of the cell in the table.
+        :return:
+        """
+        if self.customWidget:
+            model = index.model()
+            value = model.data(index, EDIT_ROLE)
+
+            if not isinstance(value, (list, tuple)):
+                value = (value,)
+
+            if hasattr(widget, 'selectValue'):
+                widget.selectValue(*value)
+            else:
+                raise Exception(f'Widget {widget} does not expose a set method; required for table editing')
+
+        else:
+            super().setEditorData(widget, index)
+
+    def setModelData(self, widget, mode, index):
+        """Set the object to the new value.
+
+        :param widget: the editor widget.
+        :param mode: editing mode.
+        :param index: QModelIndex of the cell in the table.
+        """
+        if self.customWidget:
+            if hasattr(widget, 'get'):
+                value = widget.get()
+
+            else:
+                raise Exception(f'Widget {widget} does not expose a get method; required for table editing')
+
+            try:
+                self._parent.model().setData(index, value)
+
+            except Exception as es:
+                getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}  {value}')
+
+        else:
+            super(_SimplePulldownTableDelegate, self).setModelData(widget, mode, index)
 
     def updateEditorGeometry(self, widget, itemStyle, index):
         """Ensures that the editor is displayed correctly.

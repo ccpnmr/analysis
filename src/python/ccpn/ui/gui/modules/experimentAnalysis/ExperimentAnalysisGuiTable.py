@@ -44,7 +44,7 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
     Wrapper GuiTable built from the backend outputDataTable.
     See SeriesTablesBC for more information about the underlined dataframe.
     """
-    className = guiNameSpaces.CSMTablePanel
+    className = guiNameSpaces.TablePanel
     OBJECT = 'object'
     TABLE = 'table'
 

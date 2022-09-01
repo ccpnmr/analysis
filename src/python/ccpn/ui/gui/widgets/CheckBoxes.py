@@ -35,7 +35,7 @@ UNCHECKED = QtCore.Qt.Unchecked
 class CheckBoxes(Widget):
 
     def __init__(self, parent, texts=None, selectedInd=None, exclusive=False, selectAll=None, deselectAll=None,
-                 callback=None, direction='h', tipTexts=None, **kwds):
+                 callback=None, direction='h', tipTexts=None, hAlign='r', **kwds):
 
         super().__init__(parent, setLayout=True, **kwds)
 
@@ -52,7 +52,7 @@ class CheckBoxes(Widget):
             tipTexts = [None] * len(texts)
 
         self.checkBoxes = []
-        self.setCheckBoxes(texts, selectedInd, direction, tipTexts)
+        self.setCheckBoxes(texts, selectedInd, direction, hAlign, tipTexts)
 
         checkBoxGroup.buttonClicked.connect(self._callback)
 
@@ -62,7 +62,7 @@ class CheckBoxes(Widget):
         if deselectAll:
             self.deselectAll()
 
-    def setCheckBoxes(self, texts=None, selectedInd=None, direction='h', tipTexts=None):
+    def setCheckBoxes(self, texts=None, selectedInd=None, direction='h',hAlign='r', tipTexts=None):
         """Change the checkBoxes in the checkBox group
         """
         # clear the original checkBoxs
@@ -83,7 +83,7 @@ class CheckBoxes(Widget):
                 grid = (0, i)
             else:
                 grid = (i, 0)
-            checkBox = CheckBox(self, text=text, tipText=tipTexts[i], grid=grid, hAlign='r')
+            checkBox = CheckBox(self, text=text, tipText=tipTexts[i], grid=grid, hAlign=hAlign)
             self.checkBoxes.append(checkBox)
 
             self.checkBoxGroup.addButton(checkBox)

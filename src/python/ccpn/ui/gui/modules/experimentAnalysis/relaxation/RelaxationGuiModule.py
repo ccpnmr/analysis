@@ -32,7 +32,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import ToolBarPanel
 from ccpn.ui.gui.modules.experimentAnalysis.relaxation.RelaxationBarPlotPanel import RelaxationBarPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.relaxation.RelaxationFitPlotPanel import RelaxationFitPlotPanel
-from ccpn.ui.gui.modules.experimentAnalysis.relaxation.RelaxationGuiTable import RelaxationTablePanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import ExperimentAnalysisGuiModuleBC
 import ccpn.ui.gui.modules.experimentAnalysis.relaxation.RelaxationSettingsPanel as settingsPanel
 
@@ -60,7 +60,7 @@ class RelaxationGuiModule(ExperimentAnalysisGuiModuleBC):
         Each Panel is a stand-alone frame with information where about to be added on the general GUI.
         Override in Subclasses"""
         self.panelHandler.addToolBar(ToolBarPanel(self))
-        self.panelHandler.addPanel(RelaxationTablePanel(self))
+        self.panelHandler.addPanel(TablePanel(self))
         self.panelHandler.addPanel(RelaxationFitPlotPanel(self))
         self.panelHandler.addPanel(RelaxationBarPlotPanel(self))
 

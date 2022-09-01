@@ -32,10 +32,10 @@ from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 import ccpn.ui.gui.modules.experimentAnalysis.chemicalShiftMapping.CSMSettingsPanel as settingsPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import CSMToolBarPanel
-from ccpn.ui.gui.modules.experimentAnalysis.chemicalShiftMapping.CSMGuiTable import CSMTablePanel
 from ccpn.ui.gui.modules.experimentAnalysis.chemicalShiftMapping.CSMBarPlotPanel import CSMBarPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.chemicalShiftMapping.CSMFitPlotPanel import CSMFitPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import ExperimentAnalysisGuiModuleBC
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel
 
 #####################################################################
 #######################  The main GUI Module ########################
@@ -61,7 +61,7 @@ class ChemicalShiftMappingGuiModule(ExperimentAnalysisGuiModuleBC):
         Each Panel is a stand-alone frame with information where about to be added on the general GUI.
         Override in Subclasses"""
         self.panelHandler.addToolBar(CSMToolBarPanel(self))
-        self.panelHandler.addPanel(CSMTablePanel(self))
+        self.panelHandler.addPanel(TablePanel(self))
         self.panelHandler.addPanel(CSMFitPlotPanel(self))
         self.panelHandler.addPanel(CSMBarPlotPanel(self))
 

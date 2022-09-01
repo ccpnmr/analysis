@@ -31,6 +31,7 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.CheckBoxes import CheckBoxes
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.Entry import Entry
 from ccpn.ui.gui.widgets.Label import Label
@@ -854,6 +855,93 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
         """
         return self.set(value)
 
+
+class CheckBoxesCompoundWidget(CompoundBaseWidget):
+    """
+    Compound class comprising a Label and a CheckBoxes group, combined in a CompoundBaseWidget (i.e. a Frame)
+
+      orientation       widget layout
+      ------------      ------------------------
+      left:             Label       CheckBoxes
+
+      right:            CheckBoxes    Label
+
+      top:              Label
+                        CheckBoxes
+
+      bottom:           CheckBoxes
+                        Label
+
+    """
+    layoutDict = dict(
+            # grid positions for label and checkBoxes for the different orientations
+            left=[(0, 0), (0, 1)],
+            right=[(0, 1), (0, 0)],
+            top=[(0, 0), (1, 0)],
+            bottom=[(1, 0), (0, 0)],
+            )
+
+    def __init__(self, parent=None, mainWindow=None,
+                 showBorder=False, orientation='left',
+                 minimumWidths=None, maximumWidths=None, fixedWidths=None,
+                 labelText='', texts=[], callback=None, compoundKwds=None,
+                 **kwds):
+        """
+        :param parent: parent widget
+        :param showBorder: flag to display the border of Frame (True, False)
+        :param orientation: flag to determine the orientation of the labelText relative to the CheckBox widget.
+                            Allowed values: 'left', 'right', 'top', 'bottom'
+        :param minimumWidths: tuple of two values specifying the minimum width of the Label and CheckBox widget, respectively
+        :param maximumWidths: tuple of two values specifying the maximum width of the Label and CheckBox widget, respectively
+        :param labelText: Text for the Label
+        :param texts: (optional) texts for the Checkboxes
+        :param callback: (optional) callback for the CheckBox
+        :param kwds: (optional) keyword, value pairs for the gridding of Frame
+        """
+
+        CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
+                                    showBorder=showBorder, **kwds)
+
+        self.label = Label(parent=self, text=labelText, vAlign='center')
+        self._addWidget(self.label)
+
+        checkboxKwds = {
+                        'texts'     : texts,
+                        'callback'  : callback,
+                        }
+        checkboxKwds.update(compoundKwds or {})
+        self.checkBoxes = CheckBoxes(parent=self, **checkboxKwds)
+        self.checkBoxes.setObjectName(labelText)
+        self.setObjectName(labelText)
+        self._addWidget(self.checkBoxes)
+
+        if minimumWidths is not None:
+            self.setMinimumWidths(minimumWidths)
+
+        if maximumWidths is not None:
+            self.setMaximumWidths(maximumWidths)
+
+        if fixedWidths is not None:
+            self.setFixedWidths(fixedWidths)
+
+    def get(self):
+        return self.checkBoxes.getSelectedText()
+
+    def set(self, texts):
+        """Set Checked the given texts, and untick the rest."""
+        self.checkBoxes.setSelectedByText(texts, checkFlag=True)
+
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.get()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.set(value)
 
 class ButtonCompoundWidget(CompoundBaseWidget):
     """

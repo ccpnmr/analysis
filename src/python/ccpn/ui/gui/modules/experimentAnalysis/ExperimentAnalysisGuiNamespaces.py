@@ -279,6 +279,14 @@ Label_MolStructureFile                  = 'Molecular Structure File'
 TipText_MolStructureFile                = 'Select the molecular structure file path. (.pdb only)'
 
 
+WidgetVarName_TableSeparator            = 'TableSeparator'
+Label_TableSeparator                    = 'Table Options'
+TipText_TableSeparator                  = ''
+
+WidgetVarName_TableView                 = 'TableView'
+Label_TableView                         = 'Display Columns'
+TipText_TableView                       = 'Select the group of columns to display'
+
 ############################################################
 ##########  Panel: TABLES                         ##########
 ############################################################
@@ -317,25 +325,19 @@ ShowStructureButton = 'showStructureButton'
 Callback = 'Callback'
 RefitButton = 'refitButton'
 
-############################################################
-##########  Panel: ChemicalShiftMapping          ##########
-############################################################
 
-RelaxationTablePanel = 'RelaxationTablePanel'
+
 RelaxationBarPlotPanel = 'RelaxationBarPlotPanel'
 RelaxationFittingPlotPanel = 'RelaxationFittingPlotPanel'
 
-############################################################
-##########  Panel: ChemicalShiftMapping          ##########
-############################################################
 
-CSMTablePanel = 'CSMTablePanel'
+
 CSMBarPlotPanel = 'CSMBarPlotPanel'
 CSMFittingPlotPanel = 'CSMFittingPlotPanel'
 
 RelativeDisplacement = 'Relative Displacement'
 ToolbarPanel = 'ToolbarPanel'
-
+TablePanel = 'TablePanel'
 PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
 PYMOL = 'pymol'
 

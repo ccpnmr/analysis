@@ -719,6 +719,30 @@ class AppearancePanel(GuiSettingPanel):
                        'selectItem': guiNameSpaces.BAR_thresholdLine,
                        'compoundKwds': {'includeGradients': False,
                                         }}}),
+            (guiNameSpaces.WidgetVarName_TableSeparator,
+             {'label': guiNameSpaces.Label_TableSeparator,
+              'type': LabeledHLine,
+              'kwds': {'text': guiNameSpaces.Label_TableSeparator,
+                       'height': 30,
+                       'colour': DividerColour,
+                       'gridSpan': (1, 2),
+                       'tipText': guiNameSpaces.TipText_TableSeparator}}),
+            (guiNameSpaces.WidgetVarName_TableView,
+             {'label': guiNameSpaces.Label_TableView,
+              'tipText': guiNameSpaces.TipText_TableView,
+              'enabled': False,
+              'type': compoundWidget.CheckBoxesCompoundWidget,
+              'kwds': {
+                  'labelText': guiNameSpaces.Label_TableView,
+                  'tipText': guiNameSpaces.TipText_TableView,
+                  'texts': ['Assignments', 'Raw Data', 'Calculation', 'Fitting', 'Stats', 'Errors', ],
+                  'callback': self._mainTableColumnViewCallback,
+                  'fixedWidths': SettingsWidgetFixedWidths,
+                  'compoundKwds': {'direction': 'v',
+                                   'selectAll':True,
+                                   'hAlign':'left'
+                                   }
+              }}),
             (guiNameSpaces.WidgetVarName_MolStrucSeparator,
              {'label': guiNameSpaces.Label_MolStrucSeparator,
               'type': LabeledHLine,
@@ -793,10 +817,22 @@ class AppearancePanel(GuiSettingPanel):
         """Callback when a core settings has changed.
         E.g.: the fittingModel and needs to update some of the appearance Widgets"""
         # reset the Ywidget options
-        print('SOmething chan', settingsDict)
         yColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
         if yColumnNameW:
             yColumnNameW.setTexts(self._axisYOptions)
+
+
+    def _mainTableColumnViewCallback(self, *args):
+
+        widget = self.getWidget(guiNameSpaces.WidgetVarName_TableView)
+        if not widget:
+            return
+        checked = widget.get() #get the checked values
+        tablePanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.TablePanel)
+        if tablePanel is not None:
+            table = tablePanel.mainTable
+            print(f'NYI: TODO: Need to tick {checked} in {table}')
+            # TODO change the column view on table!
 
 
 TABPOS += 1

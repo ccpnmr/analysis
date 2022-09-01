@@ -28,13 +28,13 @@ from ccpn.framework.Application import getApplication, getCurrent, getProject
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisNotifierHandler import CoreNotifiersHandler
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 from ccpn.util.Logging import getLogger
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from PyQt5.QtCore import pyqtSignal
 
 ######## gui/ui imports ########
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import PanelHandler,\
-    SettingsPanelHandler, IOHandler
+    SettingsPanelHandler, IOHandler, ExtensionsHandler
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiSettingsPanel as settingsPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import ToolBarPanel, PanelUpdateState
@@ -63,7 +63,7 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         self.application = getApplication()
         self.current = getCurrent()
 
-        ## link to the Non-Gui backend and its Settings
+        ## link to the Non-Gui backend
         self.backendHandler = backendHandler or SeriesAnalysisABC()
 
         ## link to Gui Setting-Panels. Needs to be before the GuiPanels
@@ -77,18 +77,17 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         ## link to Core Notifiers (Project/Current)
         self.coreNotifiersHandler = CoreNotifiersHandler(guiModule=self)
 
-        ## link to Input/output to external programs. (NYI)
+        ## link to Input/output. (NYI)
         self.ioHandler = IOHandler(guiModule=self)
 
-        ## Startup with the first Data available
-        if self.project:
-            pass
+        ## link to user extestions - external programs. (NYI)
+        self.extensionsHandler = ExtensionsHandler(guiModule=self)
 
     #################################################################
     #####################      Data       ###########################
     #################################################################
 
-    ### Get the input/output dataTables via the backend.
+    ### Get the input/output dataTables via the backendHandler.
     @property
     def inputDataTables(self) -> list:
         return self.backendHandler.inputDataTables
@@ -158,39 +157,6 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         ## de-register/close all notifiers
         self.coreNotifiersHandler.close()
         self.panelHandler.close()
-        self.ioHandler.close()
+        self.extensionsHandler.close()
         self.settingsPanelHandler.close()
         super()._closeModule()
-
-    #####################################################################
-    #####################  convenient methods  ##########################
-    #####################################################################
-
-    def getCurrentFittingModel(self):
-        """ Get the fitting model from the selected settings """
-        return self.backendHandler.currentFittingModel
-        _fittingPanel = self.settingsPanelHandler.getTab(guiNameSpaces.Label_Fitting)
-        if _fittingPanel:
-            w = _fittingPanel.getWidget(guiNameSpaces.WidgetVarName_FittingModel)
-            if w:
-                modelName = w.getByText()
-                model = self.backendHandler.getFittingModelByName(modelName)
-                return model
-
-
-
-#################################
-######    Testing GUI   #########
-#################################
-if __name__ == '__main__':
-    from ccpn.ui.gui.widgets.Application import TestApplication
-    from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-    app = TestApplication()
-    win = QtWidgets.QMainWindow()
-    moduleArea = CcpnModuleArea(mainWindow=None, )
-    m = ExperimentAnalysisGuiModuleBC(mainWindow=None)
-    moduleArea.addModule(m)
-    win.setCentralWidget(moduleArea)
-    win.resize(1000, 500)
-    win.show()
-    app.start()

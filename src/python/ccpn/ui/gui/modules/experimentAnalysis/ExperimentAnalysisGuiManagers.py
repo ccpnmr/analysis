@@ -255,3 +255,9 @@ class IOHandler(ExperimentAnalysisHandlerABC):
     Manages the I/O machinery of the GuiModule.
     """
     pass
+
+class ExtensionsHandler(ExperimentAnalysisHandlerABC):
+    """
+    Manages extensions of the GuiModule.
+    """
+    pass

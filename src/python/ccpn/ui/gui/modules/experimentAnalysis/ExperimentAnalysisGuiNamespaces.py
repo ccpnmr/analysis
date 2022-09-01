@@ -68,7 +68,7 @@ Label_SpectrumGroups                    = 'SpectrumGroups'
 TipText_SpectrumGroupsSeparator         = 'SpectrumGroup Section. Create here a new input DataTable if none is already available.'
 
 WidgetVarName_SpectrumGroupsSelection   = 'SpectrumGroupsSelection'
-Label_SelectSpectrumGroups              = 'Select SpectrumGroup'
+Label_SelectSpectrumGroups              = 'SpectrumGroup'
 TipText_SpectrumGroupSelectionWidget    = 'Select the SpectrumGroup containing the series of interest'
 
 WidgetVarName_DataTableName             = 'dataTableName'
@@ -84,9 +84,12 @@ Label_DataTables                        = 'DataTables'
 TipText_DataTableSeparator              = 'DataTable Section. Select input DataTable(s) to start the Experiment Analysis'
 
 WidgetVarName_DataTablesSelection       = 'DataTablesSelection'
-Label_SelectDataTable                   = 'Select DataTable(s)'
+Label_SelectDataTable                   = 'Input DataTable(s)'
 TipText_DataTableSelection              = 'Select input DataTable(s) to start the Experiment Analysis'
 
+WidgetVarName_OutputDataTablesSelection = 'OutputDataTablesSelection'
+Label_SelectOutputDataTable             = 'Output DataTable'
+TipText_OutputDataTableSelection        = 'Select Output DataTable(s) to display the Experiment Analysis results'
 
 #############################################################
 ##########  TAB: Calculation

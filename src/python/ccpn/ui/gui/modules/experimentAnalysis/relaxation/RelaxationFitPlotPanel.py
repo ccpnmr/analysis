@@ -61,7 +61,7 @@ class RelaxationFitPlotPanel(FitPlotPanel):
             modelName = filteredDf[sv.MODEL_NAME].values[-1]
             model = self.guiModule.backendHandler.getFittingModelByName(modelName)
             if model is None: ## get it from settings
-                model = self.guiModule.getCurrentFittingModel()
+                model = self.guiModule.backendHandler.currentFittingModel
             if model.PeakProperty in filteredDf:
                 return # no point continuing
             seriesSteps = filteredDf[sv.SERIESSTEP].values
@@ -130,7 +130,7 @@ class RelaxationFitPlotPanel(FitPlotPanel):
         modelName = filteredDf[sv.MODEL_NAME].values[-1]
         model = self.guiModule.backendHandler.getFittingModelByName(modelName)
         if model is None:  ## get it from settings
-            model = self.guiModule.getCurrentFittingModel()
+            model = self.guiModule.backendHandler.currentFittingModel
         func = model.getFittingFunc(model)
         if decay is None:
             decay = filteredDf[sv.DECAY].values[0]

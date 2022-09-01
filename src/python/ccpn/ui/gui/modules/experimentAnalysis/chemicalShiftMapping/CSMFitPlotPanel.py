@@ -65,7 +65,7 @@ class CSMFitPlotPanel(FitPlotPanel):
             modelName = filteredDf[sv.MODEL_NAME].values[-1]
             model = self.guiModule.backendHandler.getFittingModelByName(modelName)
             if model is None: ## get it from settings
-                model = self.guiModule.getCurrentFittingModel()
+                model = self.guiModule.backendHandler.currentFittingModel
             func = model.getFittingFunc(model)
             if kd is None:
                 kd = filteredDf[sv.KD].values[0]
@@ -120,7 +120,7 @@ class CSMFitPlotPanel(FitPlotPanel):
         modelName = filteredDf[sv.MODEL_NAME].values[-1]
         model = self.guiModule.backendHandler.getFittingModelByName(modelName)
         if model is None:  ## get it from settings
-            model = self.guiModule.getCurrentFittingModel()
+            model = self.guiModule.backendHandler.currentFittingModel
         func = model.getFittingFunc(model)
         if kd is None:
             kd = filteredDf[sv.KD].values[0]

@@ -36,6 +36,7 @@ from ccpn.util.isotopes import name2IsotopeCode
 from PyQt5 import QtCore, QtWidgets, QtGui
 from ccpn.ui.gui.widgets.Label import Label, DividerLabel
 import ccpn.ui.gui.widgets.CompoundWidgets as compoundWidget
+import ccpn.ui.gui.widgets.PulldownListsForObjects as objectPulldowns
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons, EditableRadioButtons
 import ccpn.ui.gui.widgets.SettingsWidgets as settingWidgets
@@ -226,6 +227,14 @@ class GuiInputDataPanel(GuiSettingPanel):
                   'standardListItems': [],
                   'objectName': guiNameSpaces.WidgetVarName_DataTablesSelection,
                   'fixedWidths': SettingsWidgetFixedWidths}, }),
+            (guiNameSpaces.WidgetVarName_OutputDataTablesSelection,
+             {'label': guiNameSpaces.Label_SelectOutputDataTable,
+              'tipText': guiNameSpaces.TipText_OutputDataTableSelection,
+              'type': objectPulldowns.DataTablePulldown,
+              'kwds': {'labelText': guiNameSpaces.Label_SelectOutputDataTable,
+                       'tipText': guiNameSpaces.TipText_OutputDataTableSelection,
+                       'filterFunction': self._filterOutputDataOnPulldown,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
             ))
         return self.widgetDefinitions
 
@@ -244,6 +253,14 @@ class GuiInputDataPanel(GuiSettingPanel):
                 getLogger().info(f'{self.guiModule.className}:{self.tabName}. {obj} added to inputDataTables')
 
         self.guiModule.updateAll()
+
+    def _filterOutputDataOnPulldown(self, pids, *args):
+        from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC
+
+        objs = self.guiModule.project.getByPids(pids)
+        objs = [dt for dt in objs if isinstance(dt, SeriesFrameBC)]
+        pids = self.guiModule.project.getPidsByObjects(objs)
+        return pids
 
     def _setCreateDataTableButtonCallback(self):
         "Set callback for create-input-DataTable button."

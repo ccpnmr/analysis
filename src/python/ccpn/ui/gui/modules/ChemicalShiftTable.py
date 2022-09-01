@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-25 13:13:37 +0100 (Mon, July 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-01 16:03:46 +0100 (Thu, September 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -813,18 +813,20 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
 #=========================================================================================
 
 EDIT_ROLE = QtCore.Qt.EditRole
+_EDITOR_SETTER = ('setColor', 'selectValue', 'setData', 'set', 'setValue', 'setText', 'setFile')
+_EDITOR_GETTER = ('get', 'value', 'text', 'getFile')
 
 
 class _CSLTableDelegate(QtWidgets.QStyledItemDelegate):
     """handle the setting of data when editing the table
     """
+    _objectColumn = '_object'
 
     def __init__(self, parent):
         """Initialise the delegate
-        :param parent - link to the handling table:
+        :param parent: link to the handling table
         """
         QtWidgets.QStyledItemDelegate.__init__(self, parent)
-        self.customWidget = False
         self._parent = parent
 
     def setEditorData(self, widget, index) -> None:
@@ -836,62 +838,43 @@ class _CSLTableDelegate(QtWidgets.QStyledItemDelegate):
         if not isinstance(value, (list, tuple)):
             value = (value,)
 
-        if hasattr(widget, 'setColor'):
-            widget.setColor(*value)
+        for attrib in _EDITOR_SETTER:
+            # get the method from the widget, and call with appropriate parameters
+            if (func := getattr(widget, attrib, None)):
+                if not callable(func):
+                    raise TypeError(f"widget.{attrib} is not callable")
 
-        elif hasattr(widget, 'setData'):
-            widget.setData(*value)
-
-        elif hasattr(widget, 'set'):
-            widget.set(*value)
-
-        elif hasattr(widget, 'setValue'):
-            widget.setValue(*value)
-
-        elif hasattr(widget, 'setText'):
-            widget.setText(*value)
-
-        elif hasattr(widget, 'setFile'):
-            widget.setFile(*value)
+                func(*value)
+                break
 
         else:
-            msg = 'Widget %s does not expose "setData", "set" or "setValue" method; ' % widget
-            msg += 'required for table proxy editing'
-            raise Exception(msg)
+            raise Exception(f'Widget {widget} does not expose a set method; required for table editing')
 
     def setModelData(self, widget, mode, index):
         """Set the object to the new value
         :param widget - typically a lineedit handling the editing of the cell
-        :param mode - editing mode:
+        :param mode - editing mode
         :param index - QModelIndex of the cell
         """
-        if hasattr(widget, 'get'):
-            value = widget.get()
+        for attrib in _EDITOR_GETTER:
+            if (func := getattr(widget, attrib, None)):
+                if not callable(func):
+                    raise TypeError(f"widget.{attrib} is not callable")
 
-        elif hasattr(widget, 'value'):
-            value = widget.value()
-
-        elif hasattr(widget, 'text'):
-            value = widget.text()
-
-        elif hasattr(widget, 'getFile'):
-            files = widget.selectedFiles()
-            if not files:
-                return
-            value = files[0]
+                value = func()
+                break
 
         else:
-            msg = f'Widget {widget} does not expose "get", "value" or "text" method; required for table editing'
-            raise Exception(msg)
+            raise Exception(f'Widget {widget} does not expose a get method; required for table editing')
 
-        row = index.row()
-        col = index.column()
-
+        row, col = index.row(), index.column()
         try:
             # get the sorted element from the dataFrame
             df = self._parent._df
-            _iRow = self._parent.model()._sortOrder[row]
-            obj = df.iloc[_iRow]['_object']
+            iRow = self._parent.model()._sortOrder[row]
+            iCol = df.columns.get_loc(self._objectColumn)
+            # get the object
+            obj = df.iat[iRow, iCol]
 
             # set the data which will fire notifiers to populate all tables (including this)
             func = self._parent._dataFrameObject.setEditValues[col]

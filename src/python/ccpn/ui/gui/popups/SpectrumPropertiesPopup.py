@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-30 13:11:15 +0100 (Tue, August 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-02 13:20:44 +0100 (Fri, September 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ from functools import partial
 from PyQt5 import QtWidgets, QtCore, QtGui
 from itertools import permutations
 from collections.abc import Iterable
+import typing
 import pandas as pd
 
 from ccpn.core.Spectrum import Spectrum
@@ -62,11 +63,11 @@ from ccpn.ui.gui.popups.ExperimentTypePopup import _getExperimentTypes
 from ccpn.ui.gui.popups.ValidateSpectraPopup import SpectrumPathRow
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, handleDialogApply, _verifyPopupApply
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
+from ccpn.ui.gui.lib.DynamicSizeAdjust import dynamicSizeAdjust
 
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, \
     colourNameNoSpace, _setColourPulldown, getSpectrumColour
-from ccpn.util.Logging import getLogger
 from ccpn.util.isotopes import isotopeRecords
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import getAttributeTipText
@@ -78,6 +79,14 @@ TABMARGINS = (1, 10, 1, 5)  # l, t, r, b
 SELECTALL = '<All>'
 SELECT1D = '<All 1D Spectra>'
 SELECTND = '<All nD Spectra>'
+
+ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
+                'horizontal'        : QtCore.Qt.Horizontal,
+                'v'                 : QtCore.Qt.Vertical,
+                'vertical'          : QtCore.Qt.Vertical,
+                QtCore.Qt.Horizontal: QtCore.Qt.Horizontal,
+                QtCore.Qt.Vertical  : QtCore.Qt.Vertical,
+                }
 
 
 def _updateGl(self, spectrumList):
@@ -91,6 +100,10 @@ def _updateGl(self, spectrumList):
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitPaintEvent()
 
+
+#=========================================================================================
+# SpectrumPropertiesPopupABC - Base-class for dialogs
+#=========================================================================================
 
 class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
     # The values on the 'General' and 'Dimensions' tabs are queued as partial functions when set.
@@ -116,7 +129,9 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
         self.spectrum = spectrum
 
         self.tabWidget = Tabs(self.mainWidget, setLayout=True, grid=(0, 0), focusPolicy='strong')
-        self.tabWidget.setTabClickCallback(self._resizeWidth)
+
+        # dynamically change the width of the popup when the tab is changed
+        self.tabWidget.currentChanged.connect(self._resizeWidthToTab)
 
         # enable the buttons
         self.setOkButton(callback=self._okClicked)
@@ -258,45 +273,38 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
 
-    def _resizeWidth(self, tab):
-        """change the width to the new tab
+    def _resizeWidthToTab(self, tab):
+        """change the width to the selected tab
         """
-        if tab != self.tabWidget.currentIndex():
-            # create a singleshot - waits until gui is up-to-date before firing
-            QtCore.QTimer.singleShot(0, self._widthAdjust)
+        # create a single-shot - waits until gui is up-to-date before firing first iteration of size adjust
+        QtCore.QTimer.singleShot(0, partial(dynamicSizeAdjust, self, sizeFunction=self._targetSize,
+                                            adjustWidth=True, adjustHeight=False))
 
-    def _widthAdjust(self, step=1024, _lastStep=None, _lastWidth=None):
-        """iterate until the width matches the tab contents
+    def _targetSize(self) -> typing.Optional[tuple[QtCore.QSize, QtCore.QSize]]:
+        """Get the size of the widget to match the popup to.
+
+        Returns the size of the clicked tab, or None if there is an error.
+        None will terminate the iteration.
+
+        :return: size of target widget, or None.
         """
         try:
-            if step < 1:
-                # exit as close enough to target width - don't want widget iterating forever
-                return
-
             # get the widths of the tabWidget and the current tab to match against
             tab = self.tabWidget.currentWidget()
-            width = self.tabWidget.width()
-            target = tab._scrollContents.sizeHint().width() + self.BORDER_OFFSET
+            targetSize = tab._scrollContents.sizeHint() + QtCore.QSize(self.BORDER_OFFSET, 2 * self.BORDER_OFFSET)
 
-            if (_lastStep == step) and (_lastWidth == width):
-                # stop if widget can't be resizing to the target width
-                return
+            # match against the tab-container
+            sourceSize = self.tabWidget.size()
 
-            _lastStep, _lastWidth = step, width
-            while abs(width - target) < step:
-                step /= 2
-                if step < 1:
-                    # if too small then stop iteration
-                    break
-            else:
-                # adjust the width
-                self.resize(self.width() + (int(step) if width < target else -int(step)), self.height())
-                # create another singleshot - waits until gui is up-to-date before firing
-                QtCore.QTimer.singleShot(0, partial(self._widthAdjust, step, _lastStep, _lastWidth))
+            return targetSize, sourceSize
 
-        except Exception as es:
-            getLogger().debug2(f'_widthAdjust failed {es}')
+        except Exception:
+            return None
 
+
+#=========================================================================================
+# _SpectrumPropertiesFrame
+#=========================================================================================
 
 class _SpectrumPropertiesFrame(ScrollableFrame):
 
@@ -324,6 +332,10 @@ class _SpectrumPropertiesFrame(ScrollableFrame):
         self._widget = widget
 
 
+#=========================================================================================
+# SpectrumPropertiesPopup
+#=========================================================================================
+
 class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
     # The values on the 'General' and 'Dimensions' tabs are queued as partial functions when set.
     # The apply button then steps through each tab, and calls each function in the _changes dictionary
@@ -335,7 +347,7 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
         super().__init__(parent=parent, mainWindow=mainWindow,
                          spectrum=spectrum, title=title, **kwds)
 
-        # define first, as calling routines are dependant on existance of attributes
+        # define first, as calling routines are dependant on existence of attributes
         self._generalTab = None
         self._dimensionsTab = None
         self._contoursTab = None
@@ -419,6 +431,10 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
         return tuple(tab for tab in (self._generalTab, self._dimensionsTab, self._contoursTab) if tab is not None)
 
 
+#=========================================================================================
+# SpectrumDisplayPropertiesPopupNd
+#=========================================================================================
+
 class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
     """All spectra in the current display are added as tabs
     The apply button then steps through each tab, and calls each function in the _changes dictionary
@@ -488,6 +504,10 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
         """
         return tuple(self.tabWidget.widget(ii) for ii in range(self.tabWidget.count()))
 
+
+#=========================================================================================
+# SpectrumDisplayPropertiesPopup1d
+#=========================================================================================
 
 class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
     """All spectra in the current display are added as tabs
@@ -560,6 +580,10 @@ class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
         """
         return tuple(self.tabWidget.widget(ii) for ii in range(self.tabWidget.count()))
 
+
+#=========================================================================================
+# GeneralTab
+#=========================================================================================
 
 class GeneralTab(Widget):
     def __init__(self, parent=None, mainWindow=None, spectrum=None, item=None, colourOnly=False):
@@ -932,6 +956,10 @@ class GeneralTab(Widget):
     def _setTemperature(self, spectrum, value):
         spectrum.temperature = float(value)
 
+
+#=========================================================================================
+# DimensionsTab
+#=========================================================================================
 
 class DimensionsTab(Widget):
     def __init__(self, parent=None, mainWindow=None, spectrum=None, dimensions=None):
@@ -1766,6 +1794,10 @@ class DimensionsTab(Widget):
         spectrum.displayFoldedContours = bool(value)
 
 
+#=========================================================================================
+# ContoursTab
+#=========================================================================================
+
 class ContoursTab(Widget):
 
     def __init__(self, parent=None, mainWindow=None, spectrum=None, showCopyOptions=False, copyToSpectra=None):
@@ -2322,6 +2354,10 @@ class ContoursTab(Widget):
             widg.setVisible(value)
 
 
+#=========================================================================================
+# ColourTab
+#=========================================================================================
+
 class ColourTab(Widget):
     def __init__(self, parent=None, mainWindow=None, spectrum=None, item=None, colourOnly=False,
                  showCopyOptions=False, copyToSpectra=None):
@@ -2562,6 +2598,10 @@ class ColourTab(Widget):
         self._changes.clear()
 
 
+#=========================================================================================
+# ColourFrameABC
+#=========================================================================================
+
 class ColourFrameABC(Frame):
     POSITIVECOLOUR = False
     NEGATIVECOLOUR = False
@@ -2766,11 +2806,19 @@ class ColourFrameABC(Frame):
         self._changes.clear()
 
 
+#=========================================================================================
+# Colour1dFrame
+#=========================================================================================
+
 class Colour1dFrame(ColourFrameABC):
     POSITIVECOLOUR = False
     NEGATIVECOLOUR = False
     SLICECOLOUR = True
 
+
+#=========================================================================================
+# ColourNdFrame
+#=========================================================================================
 
 class ColourNdFrame(ColourFrameABC):
     POSITIVECOLOUR = True

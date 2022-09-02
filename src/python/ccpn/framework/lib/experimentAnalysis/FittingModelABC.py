@@ -59,7 +59,7 @@ class FittingModelABC(ABC):
     FullDescription = f'{Info} \n {Description}\nSee References: {References}'
     PeakProperty    = sv._HEIGHT        # The peak property to fit. One of ['height', 'lineWidth', 'volume', 'ppmPosition']
 
-    def __init__(self, applyScaleMinMax=False, applyStandardScaler=False, **kwargs):
+    def __init__(self, applyScaleMinMax=False, applyStandardScaler=False, *args, **kwargs):
 
         self.application = getApplication()
         self.project = getProject()

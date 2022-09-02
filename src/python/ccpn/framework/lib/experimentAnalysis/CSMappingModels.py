@@ -140,13 +140,9 @@ class EuclideanCalculationModel(CalculationModel):
                   '''
     FullDescription = f'{Info} \n {Description}\nSee References: {References}'
 
-    _euclideanCalculationMethod = 'mean' # mean or sum.
-
-    def __init__(self, alphaFactors=None):
+    def __init__(self):
         super().__init__()
-        self._alphaFactors = alphaFactors
-        self._filteringAtoms = []
-        self._excludedResidueTypes = []
+        self._alphaFactors = {}
         self._euclideanCalculationMethod = 'mean'
 
     @property
@@ -158,40 +154,7 @@ class EuclideanCalculationModel(CalculationModel):
     def setAlphaFactors(self, values):
         self._alphaFactors = values
 
-    def setFilteringAtoms(self, values):
-        self._filteringAtoms = values
-
-    def setExcludedResidueTypes(self, values):
-        self._excludedResidueTypes = values
-
     def calculateValues(self, inputData:TableFrame) -> TableFrame:
-        """
-        Calculate the DeltaDeltas for an input SeriesTable.
-        :param inputData: CSMInputFrame
-        :return: outputFrame
-        """
-        outputFrame = self._getDeltaDeltasOutputFrame(inputData)
-        return outputFrame
-
-    #########################
-    ### Private functions ###
-    #########################
-
-    @staticmethod
-    def _calculateDeltaDeltas(data, alphaFactors):
-        """
-        :param data: 2D array containing A and B coordinates to measure.
-        e.g.: for two HN peaks data will be a 2D array, e.g.: [[  8.15842 123.49895][  8.17385 123.98413]]
-        :return: float
-        """
-        deltaDeltas = []
-        origin = data[0] # first set of positions (any dimensionality)
-        for coord in data:# the other set of positions (same dim as origin)
-            dd = lf.euclideanDistance_func(origin, coord, alphaFactors)
-            deltaDeltas.append(dd)
-        return deltaDeltas
-
-    def _getDeltaDeltasOutputFrame(self, inputData):
         """
         Calculate the DeltaDeltas for an input SeriesTable.
         :param inputData: CSMInputFrame
@@ -212,15 +175,15 @@ class EuclideanCalculationModel(CalculationModel):
                         dimRow = groupDf[groupDf[sv.DIMENSION] == dim]
                         dataPerDimensionDict[dim] = dimRow[sv._PPMPOSITION].values
                     alphaFactors = []
-                    for i in dataPerDimensionDict: # get the correct alpha factors per IsotopeCode/dimension and not derive it by atomName.
+                    for i in dataPerDimensionDict:  # get the correct alpha factors per IsotopeCode/dimension and not derive it by atomName.
                         ic = groupDf[groupDf[sv.DIMENSION] == i][sv.ISOTOPECODE].unique()[-1]
                         alphaFactors.append(self._alphaFactors.get(ic, 1))
                     values = np.array(list(dataPerDimensionDict.values()))
                     seriesValues4residue = values.T  ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
                     deltaDeltas = EuclideanCalculationModel._calculateDeltaDeltas(seriesValues4residue, alphaFactors)
-                    csmValue = np.mean(deltaDeltas[1:])      ## first item is excluded from as it is always 0 by definition.
+                    csmValue = np.mean(deltaDeltas[1:])  ## first item is excluded from as it is always 0 by definition.
                     csmValueError = None
-                    nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf) # join the atom names from different rows in a list
+                    nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf)
                     seriesSteps = groupDf[sv.SERIESSTEP].unique()
                     seriesUnits = groupDf[sv.SERIESUNIT].unique()
                     peakPids = groupDf[sv.PEAKPID].unique()
@@ -232,14 +195,29 @@ class EuclideanCalculationModel(CalculationModel):
                         outputFrame.loc[rowIndex, sv.SERIESSTEPVALUE] = delta
                         outputFrame.loc[rowIndex, sv.SERIESSTEP] = seriesStep
                         outputFrame.loc[rowIndex, sv.SERIESUNIT] = seriesUnits[-1]
-                        outputFrame.loc[rowIndex, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
-                        outputFrame.loc[rowIndex, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''
+                        outputFrame.loc[rowIndex, sv.GROUPBYAssignmentHeaders] = \
+                        groupDf[sv.GROUPBYAssignmentHeaders].values[0]
+                        outputFrame.loc[rowIndex, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames) > 0 else ''
                         if len(self.modelArgumentNames) == 2:
                             for header, value in zip(self.modelArgumentNames, [csmValue, csmValueError]):
                                 outputFrame.loc[rowIndex, header] = value
                         rowIndex += 1
                 break
         return outputFrame
+
+    @staticmethod
+    def _calculateDeltaDeltas(data, alphaFactors):
+        """
+        :param data: 2D array containing A and B coordinates to measure.
+        e.g.: for two HN peaks data will be a 2D array, e.g.: [[  8.15842 123.49895][  8.17385 123.98413]]
+        :return: float
+        """
+        deltaDeltas = []
+        origin = data[0] # first set of positions (any dimensionality)
+        for coord in data:# the other set of positions (same dim as origin)
+            dd = lf.euclideanDistance_func(origin, coord, alphaFactors)
+            deltaDeltas.append(dd)
+        return deltaDeltas
 
 
 

@@ -54,27 +54,6 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
 
     def fitInputData(self):
         """
-        Perform calculation using the currentFittingModel and currentCalculationModel to the inputDataTables
-        and save outputs to a single newDataTable.
-        Resulting dataTables are available in the outputDataTables.
-        :return: None. Creates a new output dataTable in outputDataTables
+        Perform calculation using the currentFittingModel and currentCalculationModel
         """
-        getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
-
-        if len(self.inputDataTables) == 0:
-            getLogger().warning('Cannot run any fitting models. Add a valid inputData first')
-            return
-
-        inputFrame = self.inputDataTables[-1].data
-        fittingFrame = self.currentFittingModel.fitSeries(inputFrame)
-        calculationFrame = self.currentCalculationModel.calculateValues(inputFrame)
-        # merge the frames on CollectionPid/id, Assignment, model-results/statistics and calculation
-        cdf = calculationFrame[[sv.COLLECTIONPID] + self.currentCalculationModel.modelArgumentNames] #keep only minimal info and not duplicates to the fitting frame (except the collectionPid)
-        merged = pd.merge(fittingFrame, cdf, on=[sv.COLLECTIONPID], how='left')
-        #  .reset_index(drop=True, inplace=True)
-        fittingFrame.to_csv('/Users/luca/Documents/temp/fittingFrame.csv')
-        calculationFrame.to_csv('/Users/luca/Documents/temp/calculationFrame.csv')
-        merged.to_csv('/Users/luca/Documents/temp/merged.csv')
-        outputDataTable = self._fetchOutputDataTable(name= f'Untitled_output', overrideExisting=True)
-        outputDataTable.data = merged
-        self.addOutputData(outputDataTable)
+        super().fitInputData()

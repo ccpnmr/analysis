@@ -28,11 +28,11 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 
 import numpy as np
 from scipy import stats
+import pandas as pd
 from abc import ABC
 from collections import defaultdict
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Logging import getLogger
-
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.framework.Application import getApplication, getCurrent, getProject
@@ -47,7 +47,7 @@ class SeriesAnalysisABC(ABC):
     _allowedPeakProperties = [sv._HEIGHT, sv._VOLUME, sv._PPMPOSITION, sv._LINEWIDTH]
 
     @property
-    def inputDataTables(self, ) -> list:
+    def inputDataTables(self) -> list:
         """
         Get the attached input DataTables
         Lists of DataTables.
@@ -135,24 +135,29 @@ class SeriesAnalysisABC(ABC):
         else:
             getLogger().warning(f'Impossible to set untraceableValue to {value}. Use type int or float.')
 
-    @classmethod
-    def fitInputData(self, *args, **kwargs):
+    def fitInputData(self):
         """
-        override on custom implementation
-        :param args:
-        :param kwargs:
-        :return: None
-            kwargs
-            =======================
-            :key: outputName: outputDataTable name
-            :key: fittingModels:  list of fittingModel classes (not initialised).
-                            So to use only the specif given, rather that all available.
-            :key: overrideOutputDataTables: bool, True to rewrite the output result in the last available dataTable.
-                                    When multiple fittingModels are available, each will output in a different dataTable
-                                    according to its definitions.
+        Perform calculation using the currentFittingModel and currentCalculationModel to the inputDataTables
+        and save outputs to a single newDataTable.
+        Resulting dataTables are available in the outputDataTables.
+        :return: None. Creates a new output dataTable in outputDataTables
+        """
+        getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
 
-        """
-        pass
+        if len(self.inputDataTables) == 0:
+            getLogger().warning('Cannot run any fitting models. Add a valid inputData first')
+            return
+
+        inputFrame = self.inputDataTables[-1].data
+        fittingFrame = self.currentFittingModel.fitSeries(inputFrame)
+        calculationFrame = self.currentCalculationModel.calculateValues(inputFrame)
+        # merge the frames on CollectionPid/id, Assignment, model-results/statistics and calculation
+        # keep only minimal info and not duplicates to the fitting frame (except the collectionPid)
+        cdf = calculationFrame[[ sv.COLLECTIONPID] + self.currentCalculationModel.modelArgumentNames]
+        merged = pd.merge(fittingFrame, cdf, on=[sv.COLLECTIONPID], how='left')
+        outputDataTable = self._fetchOutputDataTable(name=f'Untitled_output', overrideExisting=True)
+        outputDataTable.data = merged
+        self.addOutputData(outputDataTable)
 
     @property
     def currentFittingModel(self):

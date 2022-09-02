@@ -26,11 +26,11 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
+import pandas as pd
 from ccpn.util.Logging import getLogger
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.CSMappingModels import FittingModels, CalculationModels
-
+from ccpn.framework.lib.experimentAnalysis.CSMappingModels import FittingModels, CalculationModels, EuclideanCalculationModel
 
 class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
     """
@@ -54,8 +54,7 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         if fittingModel:
             self._currentFittingModel = fittingModel()
         if calculationModel:
-            self._currentCalculationModel = calculationModel(self._alphaFactors)
-
+            self._currentCalculationModel = calculationModel()
 
     @property
     def inputDataTables(self, ) -> list:
@@ -66,7 +65,6 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         for dataTable in dataTables:
             self._restoreInputDataTableData(dataTable)
         return dataTables
-
 
     def getAlphaFactor(self, isotopeCode):
         """Get the Alpha Factor for the DeltaDeltas calculation
@@ -89,82 +87,25 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         if isinstance(_Other, (float, int)):
             self._alphaFactors.update({sv._OTHER: _Other})
 
-    def calculateDeltaDeltaShifts(self, inputData, **kwargs):
-        """
-        Calculate the DeltaDeltas Chemical shift distances for an input SeriesTable.
-        :param inputData: CSMInputFrame
-        :return: outputFrame
-        """
-        from ccpn.framework.lib.experimentAnalysis.CSMappingModels import EuclideanCalculationModel
-        if self.currentCalculationModel is None: # it shouldn't happen
-            self.currentCalculationModel = EuclideanCalculationModel(alphaFactors=self._alphaFactors)
-        frame = self.currentCalculationModel.calculateValues(inputData)
-        return frame
-
     def fitInputData(self, *args, **kwargs):
         """
-        Perform the registered FittingModels to the inputDataTables and add the outputs to a newDataTable or
-         override last available.
-        :param args:
-        :param kwargs:
-            :key: outputName:       outputDataTable name
-            :key: fittingModels:    list of fittingModel classes (not initialised).So to use only the specif given,
-                                    rather than all available.
-            :key: overrideOutputDataTables: bool, True to rewrite the output result in the last available dataTable.
-                                    When multiple fittingModels are available, each will output in a different dataTable
-                                    according to its definitions.
-        :return: None
+        Perform calculation using the currentFittingModel and currentCalculationModel
         """
-        getLogger().info('Started fitting InputData...')
-        if not self.inputDataTables:
-            raise RuntimeError('CSM. Cannot run any fitting models. Add a valid inputData first')
+        getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
 
-        fittingModel = self.currentFittingModel
-        if not fittingModel:
-            raise RuntimeError('CSM. Cannot run any fitting models. Select a FittingModel first')
-        ovverideOutputDataTable = True
-        outputDataTableName = kwargs.get(sv.OUTPUT_DATATABLE_NAME, None)
+        if isinstance(self.currentCalculationModel, EuclideanCalculationModel):
+            self.currentCalculationModel.setAlphaFactors(self._alphaFactors)
+        else:
+            getLogger().warning("This fitting option has not been implemented yet. Only available with EuclideanCalculationModel ")
 
-        inputDataTable = self.inputDataTables[-1]
-        outputFrame = self.calculateDeltaDeltaShifts(inputDataTable.data)
-        outputFrame = fittingModel.fitSeries(outputFrame)
+        if len(self.inputDataTables) == 0:
+            getLogger().warning('Cannot run any fitting models. Add a valid inputData first')
+            return
 
-        if not outputDataTableName:
-            outputDataTableName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'.replace(" ", "")
-        outputDataTable = self._fetchOutputDataTable(name=outputDataTableName,
-                                                     overrideExisting=ovverideOutputDataTable)
-        outputDataTable.data = outputFrame
+        inputFrame = self.inputDataTables[-1].data
+        calculationFrame = self.currentCalculationModel.calculateValues(inputFrame)
+        fittingFrame = self.currentFittingModel.fitSeries(calculationFrame)
+        outputDataTable = self._fetchOutputDataTable(name=f'Untitled_output', overrideExisting=True)
+        outputDataTable.data = fittingFrame
         self.addOutputData(outputDataTable)
-        self._needsRefitting = False
-        getLogger().info('Fitting InputData completed.')
-
-
-    def plotResults(self, *args, **kwargs):
-        getLogger().warning('Not implemented yet. Available: plotDeltaDeltas')
-
-    def plotDeltaDeltas(self, deltaDeltaShiftsFrame,
-                        yColumnName=sv.DELTA_DELTA,
-                        unitLabels = 'minimal',
-                        unitLabelRotation=45,
-                        majorTick=5,
-                        minorTicks=1,
-                        orientation='v',
-                        *args, **kwargs):
-        """
-        Plot a bargraph of the deltaDeltas
-        :param deltaDeltaShiftsFrame:
-        :param yColumnName:
-        :param unitLabels:
-                        - minimal: only RESIDUE_CODE
-                        - full: RESIDUE_TYPE + RESIDUE_CODE
-        :param unitLabelRotation: degree of the text rotation
-        :param unitLabelsInterval:
-                        - None: default show all labels as in the original data
-                        - int: e.g.: 5 show a scale at 5 numbers gaps. [0,5,10,15,20...]
-        :param orientation : v or h
-        :param args:
-        :param kwargs:
-        :return:
-        """
-        pass
 

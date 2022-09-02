@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-02 13:20:44 +0100 (Fri, September 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-02 14:26:33 +0100 (Fri, September 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,15 +42,19 @@ def dynamicSizeAdjust(widget, sizeFunction: callable = None, step: int = _INITIA
                       _maxIterations: int = _MAX_ITERATIONS):
     """Iterator to adjust the size of the widget to a target-size.
 
-    The size of the widget is altered geometrically every frame until the target-size is reached,
+        The size of the widget is altered geometrically every frame until the target-size is reached,
     from an initial step-size set by step, which halves each iteration.
 
     The target-size is defined by the sizeFunction method;
-    sizeFunction must return a tuple(QtCore.QSize, QtCore.QSize), or None to terminate the iteration at any time.
-     - the first value is the size to iterate towards, and the second value is the size of the changing widget.
+    sizeFunction must return a tuple(target-size: QtCore.QSize, dynamic-size: QtCore.QSize), or None to terminate the iteration at any time.
+    - the first value is the size to iterate towards, and the second value is the size of the changing widget.
 
     step is the initial step-size, and must be of the form 2^n, the default initial step-size is 1024.
     Set adjustWidth/Height to adjust the required dimension, the default is adjustWidth is True, adjustWidth is False.
+
+        To start the size operation, call as follows:
+
+        >>> QtCore.QTimer.singleShot(0, partial(dynamicSizeAdjust, widget, sizeFunction, adjustWidth=True, adjustHeight=False))
 
     :param callable sizeFunction: function to return the target-size, match-size
     :param int step: step to change widget size

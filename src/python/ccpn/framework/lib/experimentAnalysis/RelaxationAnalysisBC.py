@@ -27,13 +27,11 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 #=========================================================================================
 
 import pandas as pd
-from functools import reduce
 from ccpn.util.Logging import getLogger
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 from ccpn.framework.lib.experimentAnalysis.RelaxationModels import FittingModels, CalculationModels
-from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC
-
+from ccpn.framework.lib.experimentAnalysis.BlankModels import BlankFittingModel, BlankCalculationModel
 
 class RelaxationAnalysisBC(SeriesAnalysisABC):
     """
@@ -44,8 +42,8 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
 
     def __init__(self):
         super().__init__()
-        self.fittingModels = self._registerModels(FittingModels)
-        self.calculationModels = self._registerModels(CalculationModels)
+        self.fittingModels = self._registerModels([BlankFittingModel] + FittingModels)
+        self.calculationModels = self._registerModels([BlankCalculationModel] + CalculationModels)
         fittingModel = self._getFirstModel(self.fittingModels)
         calculationModel = self._getFirstModel(self.calculationModels)
         if fittingModel:
@@ -53,48 +51,30 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
         if calculationModel:
             self._currentCalculationModel = calculationModel()
 
-    def fitInputData(self, *args, **kwargs):
+
+    def fitInputData(self):
         """
-        Perform the registered FittingModels to the inputDataTables and add the outputs to a newDataTable or
-         override last available.
-        :param args:
-        :param kwargs:
-            :key: modelName:        If given, find and use only this model. E.g.: T1
-            :key: fittingModels:    Alternatively to a specific model name,
-                                    provide a list of fittingModel classes (not initialised). Use only the specif given,
-                                    rather than all available.
-            :key: overrideOutputDataTables: bool, True to rewrite the output result in the last available dataTable.
-                                    When multiple fittingModels are available, each will output in a different dataTable
-                                    according to its definitions.
+        Perform calculation using the currentFittingModel and currentCalculationModel to the inputDataTables
+        and save outputs to a single newDataTable.
+        Resulting dataTables are available in the outputDataTables.
         :return: None. Creates a new output dataTable in outputDataTables
         """
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
 
+        if len(self.inputDataTables) == 0:
+            getLogger().warning('Cannot run any fitting models. Add a valid inputData first')
+            return
 
-        if not self.inputDataTables:
-            raise RuntimeError('Cannot run any fitting models. Add a valid inputData first')
-
-        fittingModel = self.currentFittingModel
-        calculationModel = self.currentCalculationModel
-        inputDataTable = self.inputDataTables[-1]
-        inputFrame = inputDataTable.data
-        rawDataFrame = fittingModel.getRawData(inputFrame)
-        fittingFrame = fittingModel.fitSeries(inputFrame)
-        calculationFrame = calculationModel.calculateValues(inputFrame)
-        fittingFrame = self._getGuiOutputDataFrame(fittingFrame)
-        calculationFrame = self._getGuiOutputDataFrame(calculationFrame)
-
-        #create the output frame by merging the 3 frames on CollectionPid/id, Assignment, model-results/statistics and calculation
-
-        cdf = calculationFrame[[sv.COLLECTIONPID] + calculationModel.modelArgumentNames]
-        fdf = fittingFrame[[sv.COLLECTIONPID] + fittingModel.modelArgumentNames + fittingModel.modelStatsNames]
-        rawDataFrame.reset_index(drop=True, inplace=True)
-        fdf.reset_index(drop=True, inplace=True)
-        cdf.reset_index(drop=True, inplace=True)
-        merged = reduce(lambda left, right: pd.merge(left, right, on=[sv.COLLECTIONPID],
-                                                        how='outer'), [rawDataFrame, cdf, fdf])
-        outputName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'
-        outputDataTable = self._fetchOutputDataTable(name=outputName,
-                                               overrideExisting=True)
+        inputFrame = self.inputDataTables[-1].data
+        fittingFrame = self.currentFittingModel.fitSeries(inputFrame)
+        calculationFrame = self.currentCalculationModel.calculateValues(inputFrame)
+        # merge the frames on CollectionPid/id, Assignment, model-results/statistics and calculation
+        cdf = calculationFrame[[sv.COLLECTIONPID] + self.currentCalculationModel.modelArgumentNames] #keep only minimal info and not duplicates to the fitting frame (except the collectionPid)
+        merged = pd.merge(fittingFrame, cdf, on=[sv.COLLECTIONPID], how='left')
+        #  .reset_index(drop=True, inplace=True)
+        fittingFrame.to_csv('/Users/luca/Documents/temp/fittingFrame.csv')
+        calculationFrame.to_csv('/Users/luca/Documents/temp/calculationFrame.csv')
+        merged.to_csv('/Users/luca/Documents/temp/merged.csv')
+        outputDataTable = self._fetchOutputDataTable(name= f'Untitled_output', overrideExisting=True)
         outputDataTable.data = merged
         self.addOutputData(outputDataTable)

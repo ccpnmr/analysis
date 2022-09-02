@@ -54,6 +54,7 @@ SEP              =  '_'                  # the prefix-name-suffix global separat
 VALUE_           = f'{VALUE}{SEP}'
 TIME_            = f'{TIME}{SEP}'
 
+
 DIMENSION        = 'dimension'
 ISOTOPECODE      = 'isotopeCode'
 CLUSTERID        = 'clusterId'
@@ -112,7 +113,7 @@ MERGINGHEADERS = [COLLECTIONID, COLLECTIONPID, NMRCHAINNAME, NMRRESIDUECODE, NMR
 
 _ERR = '_err'
 ERROR = 'Error'
-
+VALUE_ERR = f'{VALUE}{_ERR}'
 ## CSM Fitting Variables
 KD = 'Kd'
 BMAX = 'BMax'
@@ -206,7 +207,7 @@ MODEL_NAME = 'modelName'
 FITTING_MODELS = f'{FITTING_MODEL}s'
 OVERRIDE_OUTPUT_DATATABLE = 'overrideOutputDataTables'
 OUTPUT_DATATABLE_NAME = 'outputDataTableName'
-
+BLANKMODELNAME = 'Blank'
 
 ## OneSiteBindingModel
 ONE_BINDING_SITE_MODEL = 'One Site Binding'
@@ -230,8 +231,4 @@ NIY_WARNING = f'''This functionality has not been implemented yet.'''
 OMIT_MODE = 'omit'
 RAISE_MODE = 'raise'
 
-
-# FLAG
-FLAG_EXCLUDED = 'Excluded'
-FLAG_INCLUDED = 'Included'
 

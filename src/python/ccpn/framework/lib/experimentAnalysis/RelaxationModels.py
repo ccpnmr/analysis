@@ -29,8 +29,7 @@ import pandas as pd
 
 from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult,\
-    CalculationModel, BlankFittingModel, BlankCalculationModel
+from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult, CalculationModel
 from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationOutputFrame, HetNoeOutputFrame
 from ccpn.util.Logging import getLogger
 import numpy as np
@@ -129,13 +128,15 @@ class _RelaxationBaseFittingModel(FittingModelABC):
                 getLogger().warning(f'Fitting Failed for collectionId: {collectionId} data.')
                 params = minimiser.params
                 result = MinimiserResult(minimiser, params)
-            inputData.loc[collectionId, sv.MODEL_NAME] = self.ModelName
-            inputData.loc[collectionId, sv.MINIMISER_METHOD] = minimiser.method
-            nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf)  # join the atom names from different rows in a list
-            inputData.loc[collectionId, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames) > 0 else ''
+
             for ix, row in groupDf.iterrows():
                 for resultName, resulValue in result.getAllResultsAsDict().items():
                     inputData.loc[ix, resultName] = resulValue
+                inputData.loc[ix, sv.MODEL_NAME] = self.ModelName
+                inputData.loc[ix, sv.MINIMISER_METHOD] = minimiser.method
+                nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf)
+                inputData.loc[ix, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames) > 0 else ''
+
         return inputData
 
 class InversionRecoveryFittingModel(_RelaxationBaseFittingModel):
@@ -249,15 +250,8 @@ class HetNoeCalculation(CalculationModel):
             outputFrame.loc[collectionId, sv.SERIESUNIT] = seriesUnits[-1]
             outputFrame.loc[collectionId,self.modelArgumentNames[0]] = ratio
             outputFrame.loc[collectionId, self.modelArgumentNames[1]] = error
-
             outputFrame.loc[collectionId, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
             outputFrame.loc[collectionId, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''
-            outputFrame.loc[collectionId, sv.FLAG] = sv.FLAG_INCLUDED
-            # if len(self.modelArgumentNames) == 2:
-            #     for header, value in zip(self.modelArgumentNames, [ratio, error]):
-            #         outputFrame.loc[collectionId, header] = value
-            #         print('£££', collectionId, header, value)
-        print('OTUTRA',outputFrame)
         return outputFrame
 
     def _calculateHetNoeErrorFromPids(self, satPeakPid, unSatPeakPid, satValue=None, unSatValue=None):
@@ -285,14 +279,12 @@ class HetNoeCalculation(CalculationModel):
 ###########      Register models    #################
 #####################################################
 FittingModels            = [
-                    BlankFittingModel,
                     ExponentialDecayFittingModel,
                     InversionRecoveryFittingModel,
                     ]
 
 
 CalculationModels = [
-                    BlankCalculationModel,
                     HetNoeCalculation
                     ]
 

@@ -162,44 +162,20 @@ class CalculationModel(FittingModelABC):
     MaTex       = r''               ## MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
     References  = 'References'      ## A list of journal article references that help to identify the employed calculation equations. E.g.: DOIs or title/authors/year/journal; web-pages.
 
-
+    @abstractmethod
     def calculateValues(self, inputData: TableFrame) -> TableFrame:
         """
         Calculate the required values for an input SeriesTable.
+        This method must be overridden in subclass'.
+        Return one row for each collection pid. Index by collection pid
         :param inputData: InputFrame
         :return: outputFrame
         """
         raise RuntimeError('This method must be overridden in subclass')
 
     def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
-        raise RuntimeError('This method cannot be used in this class')
+        raise RuntimeError('This method cannot be used in this class. Use calculateValues instead ')
 
-
-
-class BlankCalculationModel(CalculationModel):
-    """
-    Blank Calculation model for Series Analysis
-    """
-
-    ModelName   = 'None'
-    Info        = 'Blank Model'
-    Description = 'Blank Model'
-
-    def calculateValues(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
-        return self.getRawData(inputData)
-
-
-class BlankFittingModel(FittingModelABC):
-    """
-    Blank Fitting model for Series Analysis
-    """
-
-    ModelName   = 'None'
-    Info        = 'Blank Model'
-    Description = 'Blank Model'
-
-    def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
-        return self.getRawData(inputData)
 
 class MinimiserModel(Model):
     """

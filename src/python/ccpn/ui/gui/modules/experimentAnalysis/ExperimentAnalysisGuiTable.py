@@ -36,152 +36,55 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Column import ColumnClass, Column
 import ccpn.ui.gui.widgets.GuiTable as gt
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
+from ccpn.ui.gui.lib._SimplePandasTable import _updateSimplePandasTable, _SimplePandasTableView, _SearchTableView, _clearSimplePandasTable
 
 
-class _ExperimentalAnalysisTableABC(gt.GuiTable):
+class _ExperimentalAnalysisTableABC(_SimplePandasTableView, _SearchTableView):
     """
     Table containing fitting results.
     Wrapper GuiTable built from the backend outputDataTable.
     See SeriesTablesBC for more information about the underlined dataframe.
     """
+
     className = guiNameSpaces.TablePanel
-    OBJECT = 'object'
-    TABLE = 'table'
+    defaultHidden = []
+    _internalColumns = []
+    _hiddenColumns = []
 
-    _commonColumnsDefs = {
+    def __init__(self, parent=None, guiModule=None, **kwds):
+        """Initialise the widgets for the module.
+        """
 
-        sv.COLLECTIONID: {gt.NAME: sv.COLLECTIONID,
-            gt.GETTER: lambda row: gt._getValueByHeader(row, sv.COLLECTIONID),
-            gt.TIPTEXT: gt._makeTipText(guiNameSpaces.ColumnID, "Collection ID"),
-            gt.WIDTH: 50,
-            gt.HIDDEN: True
-            },
-        sv.COLLECTIONPID: {gt.NAME: sv.COLLECTIONPID,
-            gt.GETTER: lambda row: gt._getValueByHeader(row, sv.COLLECTIONPID),
-            gt.TIPTEXT: gt._makeTipText(sv.COLLECTIONPID, "Pid for collection containg clustered peaks"),
-            gt.WIDTH: 50,
-            gt.HIDDEN: False
-            },
-        sv.NMRCHAINNAME: {gt.NAME: sv.NMRCHAINNAME,
-            gt.GETTER: lambda row: gt._getValueByHeader(row, sv.NMRCHAINNAME),
-            gt.TIPTEXT: gt._makeTipText(guiNameSpaces.ColumnChainCode, "NmrChain code"),
-            gt.WIDTH: 50,
-            gt.HIDDEN: False
-            },
-        sv.NMRRESIDUECODE: {gt.NAME: sv.NMRRESIDUECODE,
-            gt.GETTER: lambda row: gt._getValueByHeader(row, sv.NMRRESIDUECODE),
-            gt.TIPTEXT: gt._makeTipText(guiNameSpaces.ColumnResidueCode, "NmrResidue sequence code"),
-            gt.WIDTH: 60,
-            gt.HIDDEN: False
-            },
-        sv.NMRRESIDUETYPE: {gt.NAME: sv.NMRRESIDUETYPE,
-            gt.GETTER: lambda row: gt._getValueByHeader(row, sv.NMRRESIDUETYPE),
-            gt.TIPTEXT: gt._makeTipText(guiNameSpaces.ColumnResidueType, "NmrResidue Type"),
-            gt.WIDTH: 50,
-            gt.HIDDEN: False
-            },
-        sv.NMRATOMNAMES: {gt.NAME: sv.NMRATOMNAMES,
-            gt.GETTER: lambda row: gt._getValueByHeader(row, sv.NMRATOMNAMES),
-            gt.TIPTEXT: gt._makeTipText(guiNameSpaces.ColumnAtoms, "Nmr Atom names included in the calculation"),
-            gt.WIDTH: 60,
-            gt.HIDDEN: False
-            },
+        kwds['setLayout'] = True
 
-        sv._ROW_UID: {gt.NAME: sv._ROW_UID,
-                      gt.GETTER: lambda row: gt._getValueByHeader(row, sv._ROW_UID),
-                      gt.TIPTEXT: gt._makeTipText(sv._ROW_UID, ""),
-                      gt.WIDTH: 100,
-                      gt.HIDDEN: True
-                      }}
+        # Initialise the scroll widget and common settings
+        self._initTableCommonWidgets(parent, **kwds)
 
-
-    def __init__(self, parent, guiModule,  **kwds):
-        self.mainWindow = guiModule.mainWindow
+        # initialise the currently attached dataFrame
+        self._hiddenColumns = []
         self.dataFrameObject = None
 
-        super().__init__(parent=parent, mainWindow=self.mainWindow, dataFrameObject=None,  # class collating table and objects and headings,
-                        setLayout=True, autoResize=True, multiSelect=True,
-                        enableMouseMoveEvent=False,
-                        selectionCallback=self.selection,
-                        actionCallback=self.selection,
-                        checkBoxCallback=self.actionCheckBox,  grid=(0, 0))
+        # initialise the table
+        super().__init__(parent=parent,
+                         showHorizontalHeader=True,
+                         showVerticalHeader=False,
+                         multiSelect=True,
+                         grid=(3, 0), gridSpan=(1, 6))
+
         self.guiModule = guiModule
+        self.moduleParent = guiModule
         self.current = self.guiModule.current
-        self._columns = None
-        self._hiddenColumns = []
-        self._dataFrame = None
-        self._dataFrameObject = None
-        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
-        self._selectOverride = True # otherwise very odd behaviour
-        gt._resizeColumnWidths(self)
-        self.setMinimumWidth(200)
 
-    def buildColumns(self):
-        """build columns on the fly from the definitions """
-        self._columns = ColumnClass([])
-        mapping = {}
-        for colName, defs in self._columnsDefs.items():
-            mapping[defs.get(gt.NAME)] = colName
-            columnObject = Column(colName, defs.get(gt.GETTER), tipText= defs.get(gt.TIPTEXT),
-                                  setEditValue= defs.get(gt.SETTER), format=defs.get(gt.FORMAT))
-            self._columns.columns.append(columnObject)
-        return mapping
+        # Initialise the notifier for processing dropped items
+        self._postInitTableCommonWidgets()
+
+        # may refactor the remaining modules so this isn't needed
+        self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
+        self._initSearchTableView()
 
     @property
-    def _columnsDefs(self) -> dict:
-        dd = dict()
-        dd.update(self._commonColumnsDefs)
-        dd.update(self._rawDataColumnsDefs)
-        dd.update(self._calculationColumnsDefs)
-        dd.update(self._fittingColumnsDefs)
-        dd.update(self._statsColumnsDefs)
-        return dd
-
-    def _getModelColumnDefs(self, model, headerNames):
-        """Create the fitting Columns based on the function arguments defined in the FittingModel.
-         Most of the time are 2 columns + the corresponding error column. E.g.: decay, decay_err, amplitude, amplitude_err
-         But it might be more in future implementations """
-
-        defs = {}
-        if model is None:
-            return defs
-        for headerName in headerNames:
-            # hidden = True if sv._ERR in headerName else False # don't show the error column as default
-            hidden = False
-            dd = {headerName :{gt.NAME: headerName,
-                   gt.GETTER: lambda row: gt._getValueByHeader(row, headerName),
-                   gt.TIPTEXT: gt._makeTipText(headerName, ""),
-                   gt.FORMAT: guiNameSpaces._COLUM_FLOAT_FORM,
-                   gt.WIDTH: 70,
-                   gt.HIDDEN: hidden
-                   }}
-            defs.update(dd)
-        return defs
-
-    @property
-    def _fittingColumnsDefs(self) -> dict:
-        """ Populate the columns from the FittingModel parameters """
-        model = self.guiModule.backendHandler.currentFittingModel
-        return self._getModelColumnDefs(model, model.modelArgumentNames) if model else {}
-
-    @property
-    def _calculationColumnsDefs(self) -> dict:
-        """ Populate the columns from the CalculationModel parameters """
-        model = self.guiModule.backendHandler.currentCalculationModel
-        return self._getModelColumnDefs(model, model.modelArgumentNames) if model else {}
-
-    @property
-    def _statsColumnsDefs(self) -> dict:
-        """ Populate the columns from the FittingModel modelStatsNames """
-        model = self.guiModule.backendHandler.currentFittingModel
-        return self._getModelColumnDefs(model, model.modelStatsNames) if model else {}
-
-    @property
-    def _rawDataColumnsDefs(self) -> dict:
-        """ Populate the columns from the FittingModel parameters """
-        model = self.guiModule.backendHandler.currentFittingModel
-        return self._getModelColumnDefs(model, model.rawDataHeaders) if model else {}
+    def _df(self):
+        return self._dataFrame
 
     @property
     def dataFrame(self):
@@ -193,18 +96,27 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
         self.build(dataFrame)
 
     def build(self, dataFrame):
-        self.clear()
+        _clearSimplePandasTable(self)
         if dataFrame is not None:
-            self.setData(dataFrame)
-            # TODO FIX the COLUMNs!!
-            # colu mnsMap = self.buildColumns()
-            # self.dfo = self.dataFrameObject = self.getDataFromFrame(table=self, df=dataFrame, colDefs=self._columns, columnsMap=columnsMap)
-            # self.setTableFromDataFrameObject(dataFrameObject=self.dfo, columnDefs=self._columns)
-            # self.setHiddenColumns(gt._getHiddenColumns(self))
-            # gt._resizeColumnWidths(self)
+            _updateSimplePandasTable(self, dataFrame)
+            self._defaultDf = dataFrame
+
+    def _processDroppedItems(self, data):
+        """
+        CallBack for Drop events
+        """
+        pids = data.get('pids', [])
+        print('Not implemented')
+
+    def _close(self):
+        """
+        Cleanup the notifiers when the window is closed
+        """
+        pass
 
     def mousePressEvent(self, event):
-        if self.itemAt(event.pos()) is None:
+        self._currentIndex = self.indexAt(event.pos())
+        if  self._currentIndex is None:
             self.clearSelection()
             return
         else:
@@ -213,6 +125,32 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
     def clearSelection(self):
         super().clearSelection()
         self.current.collections = []
+
+    def getSelectedObjects(self, fromSelection=None):
+        """
+        :param fromSelection:
+        :return: get a list of table objects. If the table has a header called pid, the object is a ccpn Core obj like Peak,
+         otherwise is a Pandas series object corresponding to the selected row(s).
+        """
+        from collections import defaultdict
+        model = self.selectionModel()
+        # selects all the items in the row
+        selection = fromSelection if fromSelection else model.selectedIndexes()
+        if selection:
+            selectedObjects = []
+            valuesDict = defaultdict(list)
+            for iSelect in selection:
+                row = iSelect.row()
+                col = iSelect.column()
+                if self.dataFrame is not None and len(self.dataFrame.columns)>col: #just in case
+                    h = self.dataFrame.columns[col]
+                    v = self.dataFrame.iloc[row, col]
+                    valuesDict[h].append(v)
+            if valuesDict:
+                selectedObjects = [row for i, row in pd.DataFrame(valuesDict).iterrows()]
+            return selectedObjects
+        else:
+            return None
 
     def getSelectedCollections(self):
         selectedObjs = self.getSelectedObjects()
@@ -232,7 +170,6 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
 
     def selection(self, data, *args):
         """
-
         :param args:
         :return:
         """
@@ -249,8 +186,6 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
     def actionCheckBox(self, data):
         pass
 
-    def _rebuild(self):
-        self.build(self._dataFrame)
 
     def _setContextMenu(self):
         """Subclass guiTable to add new items to context menu
@@ -289,7 +224,7 @@ class TablePanel(GuiPanel):
         row = 0
         Label(self, 'TablePanel', grid=(row, 0))
         self.mainTable = self.TABLE(self,
-                                     dataFrame=pd.DataFrame(),
+                                     mainWindow=self.mainWindow,
                                      guiModule = self.guiModule, grid=(0, 0))
 
     

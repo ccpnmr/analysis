@@ -60,8 +60,7 @@ class _RelaxationBaseMinimiser(MinimiserModel):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
         super().__init__(lf.exponentialDecay_func, **kwargs)
         self.name = self.MODELNAME
-        self.amplitude = None  # this will be a Parameter Obj . Set on the fly by the minimiser while inspecting the Fitting Func signature
-        self.decay = None      # this will be a Parameter Obj
+        self.params = self.make_params(**self.defaultParams)
 
     def guess(self, data, x, **kwargs):
         """Estimate initial model parameter values from data."""

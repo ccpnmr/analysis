@@ -60,6 +60,7 @@ class GuiPanel(Frame):
         self.project = self.guiModule.project
         self.application = self.guiModule.application
         self.current = self.guiModule.current
+        self.mainWindow = self.application.mainWindow
         self.widgetDefinitions = self.getWidgetDefinitions()
         self.initWidgets()
 

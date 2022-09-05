@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:18 +0000 (Thu, December 23, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-09-05 16:58:03 +0100 (Mon, September 05, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,21 +32,33 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.MessageDialog import progressManager
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.popups.ExportDialog import ExportDialogABC
 from ccpn.util.Path import aPath
 
 
-class SpectrumProjectionPopup(ExportDialogABC):
-
+class SpectrumProjectionPopup(CcpnDialogMainWidget):  # ExportDialogABC):
     FIXEDHEIGHT = True
 
     def __init__(self, parent=None, mainWindow=None, title='Spectrum Projection', **kwds):
 
-        super().__init__(parent=parent, mainWindow=mainWindow, title=title,
-                         fileMode='anyFile',
-                         acceptMode='export',
-                         selectFile=None,
+        # # for ExportDialogABC
+        # super().__init__(parent=parent, mainWindow=mainWindow, title=title,
+        #                  fileMode='anyFile',
+        #                  acceptMode='export',
+        #                  selectFile=None,
+        #                  **kwds)
+
+        # for CcpnDialogMainWidget:
+        super().__init__(parent=parent, setLayout=True, windowTitle=title,
                          **kwds)
+
+        if mainWindow:
+            self.mainWindow = mainWindow
+            self.project = self.mainWindow.project
+            self.application = self.mainWindow.application
+        else:
+            self.mainWindow = self.project = self.application = None
 
         if self.project:
             # Only select 3D's for now
@@ -58,19 +70,21 @@ class SpectrumProjectionPopup(ExportDialogABC):
                 showWarning('No valid spectra', 'No 3D spectra in current dataset')
                 self.reject()
 
-        if self.mainWindow:
-            self.mainWindow = mainWindow
-            self.project = self.mainWindow.project
-            self.application = self.mainWindow.application
-        else:
-            self.mainWindow = None
-            self.project = None
-            self.application = None
+        # for CcpnDialogMainWidget:
+        self.initialise(self.mainWidget)
+        self.populate(self.mainWidget)
+        self.actionButtons()
+
+        self.__postInit__()
 
     def actionButtons(self):
         self.setOkButton(callback=self.makeProjection, text='Make Projection', tipText='Export the projection to file and close dialog')
         self.setCloseButton(callback=self._rejectDialog, text='Close', tipText='Close')
         self.setDefaultButton(ExportDialogABC.CLOSEBUTTON)
+
+    def _rejectDialog(self):
+        # NOTE:ED - not required for exportDialogABC
+        self.reject()
 
     def initialise(self, userFrame):
         """Create the widgets for the userFrame
@@ -156,14 +170,35 @@ class SpectrumProjectionPopup(ExportDialogABC):
         ac.remove(self.projectionAxisCode)
         return ac
 
-    def makeProjection(self):
-        self._acceptDialog()
+    # def makeProjection(self):
+    #     self._acceptDialog()
+    #
+    #     if self.accepted:
+    #         spectrum = self.project.getByPid(self.spectrumPulldown.currentText())
+    #         axisCodes = self.axisCodes
+    #         method = self.methodPulldown.currentText()
+    #         threshold = self.thresholdData.get()
+    #
+    #         with progressManager(self, 'Making %s projection from %s' % ('-'.join(axisCodes), spectrum.name)):
+    #             projectedSpectrum = spectrum.extractProjectionToFile(axisCodes, method=method, threshold=threshold)
+    #             if not self.contourCheckBox.get():
+    #                 # settings are copied by default from the originating spectrum
+    #                 projectedSpectrum._setDefaultContourColours()
 
-        if self.accepted:
-            spectrum = self.project.getByPid(self.spectrumPulldown.currentText())
+    def makeProjection(self):
+        """Make projection from the specified spectrum.
+
+        Spectrum is saved alongside the original spectrum, if this folder is not available then
+        the spectrum is saved in the project/data/spectra folder.
+        """
+        # get options
+        if (spectrum := self.project.getByPid(self.spectrumPulldown.currentText())):
             axisCodes = self.axisCodes
             method = self.methodPulldown.currentText()
             threshold = self.thresholdData.get()
+
+            # default path is spectrum
+            defaultPath = spectrum.dataSource.parentPath
 
             with progressManager(self, 'Making %s projection from %s' % ('-'.join(axisCodes), spectrum.name)):
                 projectedSpectrum = spectrum.extractProjectionToFile(axisCodes, method=method, threshold=threshold)
@@ -171,11 +206,17 @@ class SpectrumProjectionPopup(ExportDialogABC):
                     # settings are copied by default from the originating spectrum
                     projectedSpectrum._setDefaultContourColours()
 
+        else:
+            raise RuntimeError(f'Error getting spectrum from pulldown')
 
-if __name__ == '__main__':
+
+def main():
     from ccpn.ui.gui.widgets.Application import newTestApplication
-
 
     app = newTestApplication()
     dialog = SpectrumProjectionPopup()
     dialog.exec_()
+
+
+if __name__ == '__main__':
+    main()

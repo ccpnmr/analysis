@@ -46,12 +46,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-10 19:25:40 +0100 (Wed, August 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-05 16:58:03 +0100 (Mon, September 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2596,6 +2596,9 @@ class Spectrum(AbstractWrapperObject):
         extractProjectionToFile.
         :return: new Spectrum instance
         """
+        from ccpn.framework.PathsAndUrls import CCPN_SPECTRA_DIRECTORY
+        from ccpn.util.SafeFilename import getSafeFilename
+
         dimensions = self.getByAxisCodes('dimensions', axisCodes)
 
         dataFormats = getDataFormats()
@@ -2611,8 +2614,37 @@ class Spectrum(AbstractWrapperObject):
         if path is None:
             appendToFilename = '_%s_%s' % (tagStr, '_'.join([str(p) for p in position]))
             path = self.dataSource.parentPath / self.name + appendToFilename
+            path = path.withSuffix(suffix)
 
-        dataStore = DataStore.newFromPath(path=path,
+            try:
+                # try saving to the same folder as the original spectrum
+                path = aPath(getSafeFilename(path))
+                with open(path, 'w'):
+                    pass
+                path.removeFile()
+
+            except Exception as es:
+                _oldPath = path
+                getLogger().debug(f'Cannot extract to path: {es}')
+
+                # error opening file in existing folder
+                try:
+                    # try saving to the default sub-folder in the project
+                    path = aPath(self.project.path).filepath / CCPN_SPECTRA_DIRECTORY / self.name + appendToFilename
+                    path = path.withSuffix(suffix)
+
+                    # try to open and remove the file
+                    path = aPath(getSafeFilename(path))
+                    with open(path, 'w'):
+                        pass
+                    path.removeFile()
+
+                    # It should now save the file to this folder as 'path'
+
+                except Exception as es2:
+                    raise RuntimeError(f'Cannot extract to path:\n\n{es}\n\n{es2}')
+
+        dataStore = DataStore.newFromPath(path=path.withoutSuffix(),
                                           autoVersioning=True, withSuffix=suffix,
                                           dataFormat=klass.dataFormat)
 
@@ -3540,7 +3572,7 @@ def _extractRegionToFile(spectrum, dimensions, position, dataStore, name=None) -
     for dim in dimensions[1:]:
         sliceTuples[dim - 1] = (1, spectrum.pointCounts[dim - 1])
 
-    with spectrum.dataSource.openExistingFile() as inputFile:
+    with spectrum.dataSource.openExistingFile(spectrum.dataSource.path) as inputFile:
         with dataSource.openNewFile(path=dataStore.aPath()) as output:
             # loop over all requested slices
             for position, aliased in inputFile._selectedPointsIterator(sliceTuples=sliceTuples,

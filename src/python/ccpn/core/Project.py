@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-01 18:15:12 +0100 (Thu, September 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-05 15:02:31 +0100 (Mon, September 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1531,13 +1531,17 @@ class Project(AbstractWrapperObject):
         else:
             return list(filter(None, map(lambda x: self.getByPid(x) if isinstance(x, str) else x, pids)))
 
-    def getByPids(self, pids: list):
+    def getByPids(self, pids: Iterable):
         """Optimise method to get all found objects from a list of pids. Remove any None.
         """
+        if not isinstance(pids, Iterable):
+            raise ValueError(f'{self.__class__.__name__}.getByPids: pids must be an iterable')
+
         objs = [self.getByPid(pid) if isinstance(pid, str) else pid for pid in pids]
         return list(filter(lambda obj: self.isCoreObject(obj), objs))
 
-    def getPidsByObjects(self, objs: list):
+    @staticmethod
+    def getPidsByObjects(objs: list):
         """Optimise method to get all found pids from a list of objects. Remove any None.
          Warning: do not use with zip"""
         return list(filter(None, map(lambda x: x.pid if isinstance(x, AbstractWrapperObject) else None, objs)))

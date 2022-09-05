@@ -41,6 +41,7 @@ from ccpn.ui.gui.widgets.Action import Action
 from ccpn.core.Peak import Peak
 from ccpn.ui.gui.widgets.ViewBox import CrossHair
 from ccpn.util.Common import percentage
+from ccpn.core.lib.Notifiers import Notifier
 
 class ExperimentAnalysisPlotToolBar(ToolBar):
 
@@ -297,12 +298,15 @@ class FitPlotPanel(GuiPanel):
 
     def __init__(self, guiModule, *args, **Framekwargs):
         GuiPanel.__init__(self, guiModule, showBorder=True, *args , **Framekwargs)
+        self.fittedCurve = None #not sure if this var should Exist
 
 
     def initWidgets(self):
 
         self.backgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
         self._setExtraWidgets()
+        self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
+                                                 callback=self._currentCollectionCallback, onceOnly=True)
 
     def setXLabel(self, label=''):
         self.bindingPlot.setLabel('bottom', label)
@@ -324,6 +328,8 @@ class FitPlotPanel(GuiPanel):
     def _replot(self,  *args, **kwargs):
         pass
 
+    def _currentCollectionCallback(self, *args):
+        self.plotCurrentData()
 
     def plotCurve(self, xs, ys):
         self.clearData()
@@ -331,3 +337,6 @@ class FitPlotPanel(GuiPanel):
 
     def clearData(self):
         self.bindingPlot.clear()
+
+    def close(self):
+        self._selectCurrentCONotifier.unRegister()

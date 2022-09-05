@@ -117,8 +117,6 @@ class _RelaxationBaseFittingModel(FittingModelABC):
             pid = groupDf[sv.COLLECTIONPID].values[-1]
             xArray = seriesSteps.values
             yArray = seriesValues.values
-            if self.applyScaleMinMax:
-                yArray = self.scaleMinMax(yArray)
             minimiser = self.Minimiser()
             try:
                 params = minimiser.guess(yArray, xArray)

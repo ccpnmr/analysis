@@ -44,8 +44,6 @@ class CSMFitPlotPanel(FitPlotPanel):
         FitPlotPanel.__init__(self, guiModule, *args , **Framekwargs)
         self.setXLabel(label='X')
         self.setYLabel(label=guiNameSpaces.RelativeDisplacement)
-        self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
-                                                 callback=self._currentCollectionCallback, onceOnly=True)
         self.labels = []
 
     def getPlottingData(self):
@@ -53,7 +51,10 @@ class CSMFitPlotPanel(FitPlotPanel):
 
     def plotCurrentData(self, kd=None, bmax=None, *args):
         collections = self.current.collections
-        dataFrame = self.guiModule.backendHandler.getLastOutputDataFrame()
+        outputData = self.guiModule.getSelectedOutputDataTable()
+        if outputData is None:
+            return
+        dataFrame = outputData.data
 
         for collection in collections:
             filteredDf = dataFrame[dataFrame[sv.COLLECTIONPID] == collection.pid]
@@ -104,14 +105,18 @@ class CSMFitPlotPanel(FitPlotPanel):
             self.bindingPlot.fittingHandle.setPos(kd, bmax)
 
     def _replot(self, *args, **kwargs):
+        collections = self.current.collections
+        outputData = self.guiModule.getSelectedOutputDataTable()
+        if outputData is None:
+            return
+        dataFrame = outputData.data
+
         pos = kwargs.get('pos', [])
         kd = None
         bmax = None
         if pos and len(pos) > 0:
             kd = pos[0]
             bmax = pos[1]
-        collections = self.current.collections
-        dataFrame = self.guiModule.backendHandler.getLastOutputDataFrame()
         if len(collections)== 0:
             return
         collection = collections[-1]
@@ -137,14 +142,5 @@ class CSMFitPlotPanel(FitPlotPanel):
         # self.bindingPlot.zoomFull()
         label = f'Kd: {round(kd,2)} \nbmax: {round(bmax,2)}'
         self.bindingPlot.crossHair.hLine.label.setText(label)
-
-    def _currentCollectionCallback(self, *args):
-        getLogger().info('Selected Current. Callback in FitPlot')
-        self.plotCurrentData()
-
-    def close(self):
-        self._selectCurrentCONotifier.unRegister()
-
-
 
 

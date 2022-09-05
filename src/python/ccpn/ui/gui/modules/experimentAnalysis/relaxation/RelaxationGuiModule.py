@@ -73,20 +73,3 @@ class RelaxationGuiModule(ExperimentAnalysisGuiModuleBC):
         self.settingsPanelHandler.append(settingsPanel.RelaxationFittingPanel(self))
         self.settingsPanelHandler.append(settingsPanel.RelaxationAppearancePanel(self))
 
-
-
-#################################
-######    Testing GUI   #########
-#################################
-if __name__ == '__main__':
-    from ccpn.ui.gui.widgets.Application import TestApplication
-    from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-    app = TestApplication()
-    win = QtWidgets.QMainWindow()
-    moduleArea = CcpnModuleArea(mainWindow=None, )
-    m = RelaxationGuiModule(mainWindow=None)
-    moduleArea.addModule(m)
-    win.setCentralWidget(moduleArea)
-    win.resize(1000, 500)
-    win.show()
-    app.start()

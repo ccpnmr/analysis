@@ -79,42 +79,9 @@ class ChemicalShiftMappingGuiModule(ExperimentAnalysisGuiModuleBC):
     #####################  Widgets callbacks  ###########################
     #####################################################################
 
-    def updateAll(self):
-        """ Update all Gui panels"""
-        if not self.outputDataTables:
-            if self.inputDataTables:
-                self.backendHandler.fitInputData()
-                getLogger().warn('Requested an update before fitting data. Fitting available InputData ')
-            else:
-                showWarning('InputData','Add/create an Input DataTable from Settings')
-        super(ChemicalShiftMappingGuiModule, self).updateAll()
-
-
-    def restoreWidgetsState(self, **widgetsState):
-        # with self.blockWidgetSignals():
-        super().restoreWidgetsState(**widgetsState)
-        ## restore and apply filters correctly
-
-    def _closeModule(self):
-        ## de-register/close all notifiers
-        super()._closeModule()
 
 
 
 
 
-#################################
-######    Testing GUI   #########
-#################################
-if __name__ == '__main__':
-    from ccpn.ui.gui.widgets.Application import TestApplication
-    from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-    app = TestApplication()
-    win = QtWidgets.QMainWindow()
-    moduleArea = CcpnModuleArea(mainWindow=None, )
-    m = ChemicalShiftMappingGuiModule(mainWindow=None)
-    moduleArea.addModule(m)
-    win.setCentralWidget(moduleArea)
-    win.resize(1000, 500)
-    win.show()
-    app.start()
+

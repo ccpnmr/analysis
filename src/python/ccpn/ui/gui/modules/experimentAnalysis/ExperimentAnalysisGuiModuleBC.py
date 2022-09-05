@@ -101,9 +101,6 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         dataTable = self.project.getByPid(outputDataPid)
         return dataTable
 
-    def getSelectedInputDataTables(self) -> list:
-        return []
-
     def getGuiOutputDataFrame(self):
         """Get the SelectedOutputDataTable and transform the raw data to a displayable table for the main widgets.
         """

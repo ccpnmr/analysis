@@ -238,10 +238,19 @@ class SettingsPanelHandler(ExperimentAnalysisHandlerABC):
     def getTab(self, name):
         return self.tabs.get(name, None)
 
-    def getAllSettings(self) -> dict:
+    def getAllSettings(self, grouped=True) -> dict:
+        """
+        Get all settings set in the Settings panel in a dict of dict dived by Tab.
+        :param grouped: Bool. True to get a dict of dict. False to get a flat dict with all settings in it.
+        :return:  dict of dict as default, dict if grouped = False.
+        """
         settings = {}
         for tabName, tab in self.tabs.items():
-            settings[tabName] = tab.getSettingsAsDict()
+            tabSettings = tab.getSettingsAsDict()
+            if grouped:
+                settings[tabName] = tabSettings
+            else:
+                settings.update(tabSettings)
         return settings
 
     def getInputDataSettings(self) -> dict:

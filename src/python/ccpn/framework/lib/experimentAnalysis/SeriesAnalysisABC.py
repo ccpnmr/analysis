@@ -72,57 +72,26 @@ class SeriesAnalysisABC(ABC):
         """
         self._inputDataTables = OrderedSet()
 
-    def getLastOutputDataFrame(self):
-        """Get the last created dataFrame from the outputDataTable. """
-        if len(self.inputDataTables) == 0:
-            return
-        if not self.getOutputDataTables():
-            return
-        outputDataTable = self.getOutputDataTables()[-1]
-        return outputDataTable.data
+    @property
+    def outputDataTableName(self):
+        """The name for the outputDataTable created after a fitData routine """
+        return self._outputDataTableName
 
-    def getOutputDataTables(self, seriesFrameType:str=None):
-        """
-        Get the attached Lists of DataTables using SeriesFrame with Output format.
-        """
-        from ccpn.util.Common import flattenLists # circular imports in common
-        dataTablesByDataType = defaultdict(list)
-        for dataTable in self._outputDataTables:
-            seriesFrame = dataTable.data
-            if dataTable.data is not None:
-                if hasattr(seriesFrame, sv.SERIESFRAMETYPE):
-                    dataTablesByDataType[seriesFrame.SERIESFRAMETYPE].append(dataTable)
-        if seriesFrameType:
-            return flattenLists(dataTablesByDataType.get(seriesFrameType))
-        else:
-            return flattenLists(list(dataTablesByDataType.values()))
+    @outputDataTableName.setter
+    def outputDataTableName(self, name):
+        self._outputDataTableName =name
 
-    def _fetchOutputDataTable(self, name=None, overrideExisting=True):
+    def _fetchOutputDataTable(self, name=None):
         """
         Interanl. Called after 'fit()' to get a valid Datatable to attach the fitting output SeriesFrame
         :param seriesFrameType: str,  A filtering serieFrameType.
-        :param overrideExistingOutput: True, to get last available dataTable. False, to create always a new one
         :return: DataTable
         """
-        dataTable = None
-        if overrideExisting:
-            dataTable = self.project.getDataTable(name)
+        dataTable = self.project.getDataTable(name)
         if not dataTable:
             dataTable = self.project.newDataTable(name)
+        dataTable.setMetadata(sv.DATATABLETYPE, sv.SERIESANALYSISOUTPUTDATA)
         return dataTable
-
-    def addOutputData(self, dataTable):
-        self._outputDataTables.add(dataTable)
-
-    def removeOutputData(self, dataTable):
-        self._outputDataTables.discard(dataTable)
-
-    def _setDataType(self, dataTables, theType):
-        """set the dataTable.data (dataFrame) to the given type.
-         Used when restored project lost the dataTable.data Type """
-        for dataTable in dataTables:
-            if not isinstance(dataTable.data, theType):
-                dataTable.data.__class__ = theType
 
     @property
     def untraceableValue(self) -> float:
@@ -147,7 +116,6 @@ class SeriesAnalysisABC(ABC):
         if len(self.inputDataTables) == 0:
             getLogger().warning('Cannot run any fitting models. Add a valid inputData first')
             return
-
         inputFrame = self.inputDataTables[-1].data
         fittingFrame = self.currentFittingModel.fitSeries(inputFrame)
         calculationFrame = self.currentCalculationModel.calculateValues(inputFrame)
@@ -155,9 +123,8 @@ class SeriesAnalysisABC(ABC):
         # keep only minimal info and not duplicates to the fitting frame (except the collectionPid)
         cdf = calculationFrame[[ sv.COLLECTIONPID] + self.currentCalculationModel.modelArgumentNames]
         merged = pd.merge(fittingFrame, cdf, on=[sv.COLLECTIONPID], how='left')
-        outputDataTable = self._fetchOutputDataTable(name=f'Untitled_output', overrideExisting=True)
+        outputDataTable = self._fetchOutputDataTable(name=self._outputDataTableName)
         outputDataTable.data = merged
-        self.addOutputData(outputDataTable)
 
     @property
     def currentFittingModel(self):
@@ -231,8 +198,6 @@ class SeriesAnalysisABC(ABC):
         model = models.get(first)
         return model
 
-
-
     def newInputDataTableFromSpectrumGroup(self, spectrumGroup:SpectrumGroup, peakListIndices=None, dataTableName:str=None):
         """
         :param spectrumGroup: object of type SpectrumGroup
@@ -247,6 +212,7 @@ class SeriesAnalysisABC(ABC):
         seriesFrame = InputSeriesFrameBC()
         seriesFrame.buildFromSpectrumGroup(spectrumGroup, peakListIndices=peakListIndices)
         dataTable = project.newDataTable(name=dataTableName, data=seriesFrame)
+        dataTable.setMetadata(sv.DATATABLETYPE, sv.SERIESANALYSISINPUTDATA)
         self._setRestoringMetadata(dataTable, seriesFrame, spectrumGroup)
         return dataTable
 
@@ -263,25 +229,6 @@ class SeriesAnalysisABC(ABC):
             raise TypeError(f'spectrumGroup argument must be a SpectrumGroup Type. Given: {type(spectrumGroup)}')
         collections = createCollectionsFromSpectrumGroup(spectrumGroup, peakListIndices)
         return collections
-
-    def _getGuiOutputDataFrame(self, dataFrame=None, *args):
-        """ internal. Used to get a df to display in GuiTables
-         Return the outputDataFrame grouped by COLLECTIONPID.
-         """
-        # TODO needs more error checking
-        if dataFrame is None:
-            dataFrame = self.getLastOutputDataFrame()
-        if dataFrame is None:
-            return
-        if not sv.COLLECTIONID in dataFrame:
-            return dataFrame
-        ## group by id and keep only first row as all duplicated except the series steps, which are not needed here.
-        ## reset index otherwise you lose the column collectionId
-        outDataFrame = dataFrame.groupby(sv.COLLECTIONID).first().reset_index()
-        outDataFrame.set_index(sv.COLLECTIONPID, drop=False, inplace=True)
-        # add Code+type Column #TODO. shouldn't do here
-        outDataFrame.joinNmrResidueCodeType()
-        return outDataFrame
 
     def getThresholdValueForData(self, data, columnName, calculationMode=sv.MAD, factor=1.):
         """ Get the Threshold value for the ColumnName values.
@@ -352,14 +299,12 @@ class SeriesAnalysisABC(ABC):
     def plotResults(self, *args, **kwargs):
         pass
 
-
     def __init__(self):
-
         self.project = getProject()
         self.application = getApplication()
         self.current = getCurrent()
         self._inputDataTables = OrderedSet()
-        self._outputDataTables = OrderedSet()
+        self._outputDataTableName = sv.SERIESANALYSISOUTPUTDATA
         self._untraceableValue = 1.0   # default value for replacing NaN values in untraceableValues.
         self.fittingModels = dict()
         self.calculationModels = dict()

@@ -133,15 +133,17 @@ SERIAL = 'Serial'
 ############################################################################################
 ### Used in SeriesFrame tables ABCs
 ############################################################################################
-SERIESANALYSISINPUTDATA = 'SeriesAnalysisInputData'
-RELAXATION_OUTPUT_FRAME = 'RelaxationOutputFrame'
-HetNoe_OUTPUT_FRAME     = 'HetNoeOutputFrame'
-CSM_OUTPUT_FRAME        = 'CSMOutputFrame'
-
-SERIESFRAMETYPE         = 'SERIESFRAMETYPE'
-_assignmentHeaders      = '_assignmentHeaders'
-_valuesHeaders          = '_valuesHeaders'
-_peakPidHeaders         = '_peakPidHeaders'
+DATATABLETYPE               = 'DATATABLETYPE'
+SERIESANALYSISDATATABLE     = 'SERIESANALYSISDATATABLE'
+SERIESANALYSISOUTPUTDATA    = 'SeriesAnalysisOutputData'
+SERIESANALYSISINPUTDATA     = 'SeriesAnalysisInputData'
+RELAXATION_OUTPUT_FRAME     = 'RelaxationOutputFrame'
+HetNoe_OUTPUT_FRAME         = 'HetNoeOutputFrame'
+CSM_OUTPUT_FRAME            = 'CSMOutputFrame'
+SERIESFRAMETYPE             = 'SERIESFRAMETYPE'
+_assignmentHeaders          = '_assignmentHeaders'
+_valuesHeaders              = '_valuesHeaders'
+_peakPidHeaders             = '_peakPidHeaders'
 
 _SpectrumPropertiesHeaders = 'spectrumPropertiesHeaders'
 

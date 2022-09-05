@@ -80,12 +80,24 @@ Label_CreateInput                       = 'Create Input DataTable'
 TipText_createInputdataTableWidget      = 'Create the new input DataTable for the selected SpectrumGroup'
 
 WidgetVarName_DataTableSeparator        = 'DataTableSeparator'
-Label_DataTables                        = 'DataTables'
+Label_DataTables                        = 'Input DataTables'
 TipText_DataTableSeparator              = 'DataTable Section. Select input DataTable(s) to start the Experiment Analysis'
 
 WidgetVarName_DataTablesSelection       = 'DataTablesSelection'
 Label_SelectDataTable                   = 'Input DataTable(s)'
 TipText_DataTableSelection              = 'Select input DataTable(s) to start the Experiment Analysis'
+
+WidgetVarName_OutPutDataTableName       = 'OutputDataTableName'
+Label_OutputDataTableName               = 'Output DataTable Name'
+TipText_OutputDataTableName             = 'Select the name for the DataTable Output. Create new if not existing, otherwise override exsiting.'
+
+WidgetVarName_OutputDataTableSeparator  = 'DataTableSeparator2'
+Label_OutputDataTable                   = 'Output DataTable'
+TipText_OutputDataTableSeparator        = 'Output DataTable Section. Select the output DataTable to display results'
+
+WidgetVarName_FitInputData              = 'FitInputData'
+Label_FitInput                          = 'Fit and Fetch Output Data'
+TipText_createOutputdataTableWidget     = 'Fit or refit input DataTable and store result in an output dataTable.'
 
 WidgetVarName_OutputDataTablesSelection = 'OutputDataTablesSelection'
 Label_SelectOutputDataTable             = 'Output DataTable'

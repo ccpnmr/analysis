@@ -24,11 +24,12 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 #=========================================================================================
 
 ######## core imports ########
+from PyQt5.QtCore import pyqtSignal
 from ccpn.framework.Application import getApplication, getCurrent, getProject
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisNotifierHandler import CoreNotifiersHandler
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 from ccpn.util.Logging import getLogger
-from PyQt5.QtCore import pyqtSignal
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 
 ######## gui/ui imports ########
 from PyQt5 import QtWidgets
@@ -92,9 +93,44 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     def inputDataTables(self) -> list:
         return self.backendHandler.inputDataTables
 
-    @property
-    def outputDataTables(self) -> list:
-        return self.backendHandler.getOutputDataTables()
+    def getSelectedOutputDataTable(self):
+        """ Get the datatable from the selected Setting.
+        Impl. Note: Do not use/set current.dataTable so to allow multiple GuiModules to display different tables."""
+        settings = self.getSettings(grouped=False)
+        outputDataPid = settings.get(guiNameSpaces.WidgetVarName_OutputDataTablesSelection)
+        dataTable = self.project.getByPid(outputDataPid)
+        return dataTable
+
+    def getSelectedInputDataTables(self) -> list:
+        return []
+
+    def getGuiOutputDataFrame(self):
+        """Get the SelectedOutputDataTable and transform the raw data to a displayable table for the main widgets.
+        """
+        dataTable = self.getSelectedOutputDataTable()
+        if dataTable is None:
+            return
+        dataFrame = dataTable.data
+        if len(dataFrame)==0:
+            return
+        if not sv.COLLECTIONPID in dataFrame:
+            return dataFrame
+        ## group by id and keep only first row as all duplicated except the series steps, which are not needed here.
+        ## reset index otherwise you lose the column collectionId
+        outDataFrame = dataFrame.groupby(sv.COLLECTIONPID).first().reset_index()
+        outDataFrame.set_index(sv.COLLECTIONPID, drop=False, inplace=True)
+        # add Code+type Column #TODO. shouldn't do here
+        outDataFrame.joinNmrResidueCodeType()
+        return outDataFrame
+
+    def getSettings(self, grouped=True) -> dict:
+        """
+        Get all settings set in the Settings panel
+        :param grouped: Bool. True to get a dict of dict, key: tabName; value: dict of settings per tab.
+                              False to get a flat dict with all settings in it.
+        :return:  dict of dict as default, dict if grouped = False.
+        """
+        return self.settingsPanelHandler.getAllSettings(grouped)
 
     #################################################################
     #####################      Widgets    ###########################
@@ -131,13 +167,13 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     #####################  Widgets callbacks  ###########################
     #####################################################################
 
-    def updateAll(self):
+    def updateAll(self, refit=False):
         """ Update all Gui panels"""
         getLogger().info(f'Updating All ...')
         backend = self.backendHandler
-        if backend._needsRefitting:
-            if self.inputDataTables:
-                backend.fitInputData()
+        if refit or backend._needsRefitting:
+            getLogger().info(f'{self.className}: Refitting  Input DataTable(s)...')
+            backend.fitInputData()
         getLogger().info(f'{self.className}: Updating all Gui Panels...')
         settingsDict = self.settingsPanelHandler.getAllSettings()
         for panelName, panel in self.panelHandler.panels.items():

@@ -212,7 +212,7 @@ class BarPlotPanel(GuiPanel):
 
     def updatePanel(self, *args, **kwargs):
         getLogger().info('Updating  barPlot panel')
-        dataFrame = self.guiModule.backendHandler._getGuiOutputDataFrame()
+        dataFrame = self.guiModule.getGuiOutputDataFrame()
         if dataFrame is not None:
             self.plotDataFrame(dataFrame)
         else:

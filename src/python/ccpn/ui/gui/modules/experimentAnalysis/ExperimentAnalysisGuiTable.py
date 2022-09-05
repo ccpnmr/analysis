@@ -234,7 +234,7 @@ class TablePanel(GuiPanel):
 
     def updatePanel(self, *args, **kwargs):
         getLogger().info('Updating Relaxation table panel')
-        dataFrame = self.guiModule.backendHandler._getGuiOutputDataFrame()
+        dataFrame = self.guiModule.getGuiOutputDataFrame()
         self.setInputData(dataFrame)
 
     def clearData(self):

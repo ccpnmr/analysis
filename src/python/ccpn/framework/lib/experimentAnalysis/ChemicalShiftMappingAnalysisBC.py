@@ -87,7 +87,7 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         if isinstance(_Other, (float, int)):
             self._alphaFactors.update({sv._OTHER: _Other})
 
-    def fitInputData(self, *args, **kwargs):
+    def fitInputData(self,  *args, **kwargs):
         """
         Perform calculation using the currentFittingModel and currentCalculationModel
         """
@@ -105,7 +105,6 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         inputFrame = self.inputDataTables[-1].data
         calculationFrame = self.currentCalculationModel.calculateValues(inputFrame)
         fittingFrame = self.currentFittingModel.fitSeries(calculationFrame)
-        outputDataTable = self._fetchOutputDataTable(name=f'Untitled_output', overrideExisting=True)
+        outputDataTable = self._fetchOutputDataTable(name=self._outputDataTableName)
         outputDataTable.data = fittingFrame
-        self.addOutputData(outputDataTable)
 

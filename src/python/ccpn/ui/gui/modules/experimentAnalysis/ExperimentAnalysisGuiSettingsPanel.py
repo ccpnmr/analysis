@@ -44,7 +44,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Label import maTex2Pixmap
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
-from ccpn.ui.gui.widgets.HLine import LabeledHLine
+from ccpn.ui.gui.widgets.HLine import LabeledHLine, HLine
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import PanelUpdateState
@@ -138,6 +138,32 @@ class GuiSettingPanel(Frame):
         To be Subclassed"""
         self._setUpdatedDetectedState()
 
+    def _getCoreSettings(self):
+        """
+        Get a dict of core settings used in the generation of Fitting/calculation data.
+        Used to set as metaData in the OutputDataTable
+        :return: orderedDict
+
+        NIY
+
+        """
+
+        dd = {
+            'spectrumGroups' : [],
+            'inputDataTables' : [],
+            'calculationPeakProperty' : '',
+            'calculationOption' : '',
+            'filteringNmrGroup' : '',
+            'excludedNmrResidues' : [],
+            'fittingOptimiser' : '',
+            'fittingErrorMethod' : '',
+            'fittingModel' : '',
+            'thresholdValueMode' : '',
+            'thresholdValue' : ''
+            }
+        return dd
+        
+
 TABPOS = 0
 ## Make a default tab ordering as they are added to this file.
 ## Note: Tabs are not added automatically.
@@ -158,10 +184,10 @@ class GuiInputDataPanel(GuiSettingPanel):
         GuiSettingPanel.__init__(self, guiModule, *args, **Framekwargs)
 
         self._limitSelectionOnInputData() ## This constrain might be removed on future implementations
-        self._setCreateDataTableButtonCallback()
 
     def setWidgetDefinitions(self):
         """ Define the widgets in a dict."""
+        backend = self.guiModule.backendHandler
         self.widgetDefinitions = od((
             (guiNameSpaces.WidgetVarName_SpectrumGroupsSeparator,
              {'label': guiNameSpaces.Label_SpectrumGroups,
@@ -192,13 +218,13 @@ class GuiInputDataPanel(GuiSettingPanel):
                                 'type': compoundWidget.EntryCompoundWidget,
                                 '_init': None,
                                 'kwds': {'labelText': guiNameSpaces.Label_InputDataTableName,
-                                         'entryText': 'SeriesAnalysis_DataTable',
+                                         'entryText': sv.SERIESANALYSISINPUTDATA,
                                          'tipText': guiNameSpaces.TipText_dataTableNameSelectionWidget,
                                          'fixedWidths': SettingsWidgetFixedWidths}, }),
             (guiNameSpaces.WidgetVarName_CreateDataTable,
              {'label': guiNameSpaces.Label_CreateInput,
                                 'tipText': guiNameSpaces.TipText_createInputdataTableWidget,
-                                'callBack': None,
+                                'callBack': self._createInputDataTableCallback,
                                 'type': compoundWidget.ButtonCompoundWidget,
                                 '_init': None,
                                 'kwds': {'labelText': guiNameSpaces.Label_CreateInput,
@@ -227,6 +253,39 @@ class GuiInputDataPanel(GuiSettingPanel):
                   'standardListItems': [],
                   'objectName': guiNameSpaces.WidgetVarName_DataTablesSelection,
                   'fixedWidths': SettingsWidgetFixedWidths}, }),
+
+            (guiNameSpaces.WidgetVarName_OutPutDataTableName,
+             {'label': guiNameSpaces.Label_OutputDataTableName,
+              'tipText': guiNameSpaces.TipText_OutputDataTableName,
+              'callBack': None,
+              'enabled': True,
+              'type': compoundWidget.EntryCompoundWidget,
+              '_init': None,
+              'kwds': {'labelText': guiNameSpaces.Label_OutputDataTableName,
+                       'entryText': backend.outputDataTableName,
+                       'tipText': guiNameSpaces.TipText_OutputDataTableName,
+                       'fixedWidths': SettingsWidgetFixedWidths},}),
+            (guiNameSpaces.WidgetVarName_FitInputData,
+             {'label': guiNameSpaces.Label_FitInput,
+              'tipText': guiNameSpaces.TipText_createOutputdataTableWidget,
+              'callBack': self._fitAndFecthOutputData,
+              'type': compoundWidget.ButtonCompoundWidget,
+              '_init': None,
+              'kwds': {'labelText': guiNameSpaces.Label_FitInput,
+                       'text': 'Fit',  # this is the Button name
+                       'hAlign': 'left',
+                       'tipText': guiNameSpaces.TipText_createOutputdataTableWidget,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+
+            (guiNameSpaces.WidgetVarName_OutputDataTableSeparator,
+             {'label': guiNameSpaces.Label_OutputDataTable,
+              'type': LabeledHLine,
+              'kwds': {'text': guiNameSpaces.Label_OutputDataTable,
+                       # 'height': 30,
+                       'gridSpan': (1, 2),
+                       'colour': DividerColour,
+                       'tipText': guiNameSpaces.TipText_OutputDataTableSeparator}}),
+
             (guiNameSpaces.WidgetVarName_OutputDataTablesSelection,
              {'label': guiNameSpaces.Label_SelectOutputDataTable,
               'tipText': guiNameSpaces.TipText_OutputDataTableSelection,
@@ -234,6 +293,7 @@ class GuiInputDataPanel(GuiSettingPanel):
               'kwds': {'labelText': guiNameSpaces.Label_SelectOutputDataTable,
                        'tipText': guiNameSpaces.TipText_OutputDataTableSelection,
                        'filterFunction': self._filterOutputDataOnPulldown,
+                       'objectName': guiNameSpaces.WidgetVarName_OutputDataTablesSelection,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
             ))
         return self.widgetDefinitions
@@ -252,21 +312,36 @@ class GuiInputDataPanel(GuiSettingPanel):
                 backend.addInputDataTable(obj)
                 getLogger().info(f'{self.guiModule.className}:{self.tabName}. {obj} added to inputDataTables')
 
+    def _fitAndFecthOutputData(self, *args):
+        getLogger().info('Starting fit')
+        backend = self.guiModule.backendHandler
+        name = self.getSettingsAsDict().get(guiNameSpaces.WidgetVarName_OutPutDataTableName, sv.SERIESANALYSISOUTPUTDATA)
+        backend.outputDataTableName = name
+        if len(backend.inputDataTables) == 0:
+            dataTablePids = self.getSettingsAsDict().get(guiNameSpaces.WidgetVarName_DataTablesSelection, [])
+            if len(dataTablePids) == 0:
+                getLogger().warning('Cannot create any output DataTable. Select an input DataTable first.')
+            for pid in dataTablePids:
+                obj = self.guiModule.project.getByPid(pid)
+                if obj:
+                    backend.addInputDataTable(obj)
+        backend.fitInputData()
+        outputPulldown = self.getWidget(guiNameSpaces.WidgetVarName_OutputDataTablesSelection)
+        if outputPulldown:
+            outputPulldown.update() #there seems to be a bug on pulldown not updating straight-away
+            outputPulldown.select(name)
         self.guiModule.updateAll()
 
     def _filterOutputDataOnPulldown(self, pids, *args):
-        from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC
-
-        objs = self.guiModule.project.getByPids(pids)
-        objs = [dt for dt in objs if isinstance(dt, SeriesFrameBC)]
-        pids = self.guiModule.project.getPidsByObjects(objs)
+        dataTables = self.guiModule.project.getByPids(pids)
+        # filter out only the SeriesAnalysisDtaTable by its metadata
+        filteredDataTables = []
+        for dataTable in dataTables:
+            if dataTable.getMetadata(sv.DATATABLETYPE) == sv.SERIESANALYSISOUTPUTDATA:
+                filteredDataTables.append(dataTable)
+        pids = self.guiModule.project.getPidsByObjects(filteredDataTables)
         return pids
 
-    def _setCreateDataTableButtonCallback(self):
-        "Set callback for create-input-DataTable button."
-        buttonWidget = self.getWidget(guiNameSpaces.WidgetVarName_CreateDataTable)
-        if buttonWidget:
-            buttonWidget.button.clicked.connect(self._createInputDataTableCallback)
 
     def _limitSelectionOnInputData(self):
         "Allow only one selection on SpectrumGroups and DataTable. "
@@ -442,7 +517,6 @@ class GuiCalculationPanel(GuiSettingPanel):
 
     def _commonCallback(self, *args):
         print('setting callback')
-
         calculationSettings = self.getSettingsAsDict()
         selectedCalcPeakProperty = calculationSettings.get(guiNameSpaces.WidgetVarName_CalcPeakProperty, None)
 
@@ -566,12 +640,6 @@ class GuiFittingPanel(GuiSettingPanel):
         # todo Add the optimiser options (method, fitting Error etc)
         # set update detected.
         backend._needsRefitting = True
-
-    def _calculateFittingCallback(self, *args):
-        getLogger().info(f'Recalculating Fitting values ...')
-        backend = self.guiModule.backendHandler
-        backend.fitInputData()
-        self.guiModule.updateAll()
 
 
 TABPOS += 1

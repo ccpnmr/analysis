@@ -73,28 +73,6 @@ class RelaxationGuiModule(ExperimentAnalysisGuiModuleBC):
         self.settingsPanelHandler.append(settingsPanel.RelaxationFittingPanel(self))
         self.settingsPanelHandler.append(settingsPanel.RelaxationAppearancePanel(self))
 
-    #####################################################################
-    #####################  Widgets callbacks  ###########################
-    #####################################################################
-
-    def updateAll(self):
-        """ Update all Gui panels"""
-        if not self.outputDataTables:
-            if self.inputDataTables:
-                self.backendHandler.fitInputData()
-                getLogger().warn('Requested an update before fitting data. Fitting available InputData ')
-            else:
-                showWarning('InputData','Add/create an Input DataTable from Settings')
-        super(RelaxationGuiModule, self).updateAll()
-
-    def restoreWidgetsState(self, **widgetsState):
-        # with self.blockWidgetSignals():
-        super().restoreWidgetsState(**widgetsState)
-        ## restore and apply filters correctly
-
-    def _closeModule(self):
-        ## de-register/close all notifiers
-        super()._closeModule()
 
 
 #################################

@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-01 15:55:39 +0100 (Thu, September 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-05 11:51:23 +0100 (Mon, September 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,7 @@ from dataclasses import dataclass
 from functools import partial
 from time import time_ns
 from types import SimpleNamespace
+import typing
 
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.CcpnSorting import universalSortKey
@@ -69,6 +70,8 @@ ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
 # define a role to return a cell-value
 DTYPE_ROLE = QtCore.Qt.UserRole + 1000
 VALUE_ROLE = QtCore.Qt.UserRole + 1001
+INDEX_ROLE = QtCore.Qt.UserRole + 1002
+
 EDIT_ROLE = QtCore.Qt.EditRole
 _EDITOR_SETTER = ('setColor', 'selectValue', 'setData', 'set', 'setValue', 'setText', 'setFile')
 _EDITOR_GETTER = ('get', 'value', 'text', 'getFile')
@@ -100,11 +103,14 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
                     }
                     """
 
-    # overrides QtCore.Qt.ForegroundRole
+    # NOTE:ED overrides QtCore.Qt.ForegroundRole
     # QTableView::item - color: %(GUITABLE_ITEM_FOREGROUND)s;
     # QTableView::item:selected - color: %(GUITABLE_SELECTED_FOREGROUND)s;
 
     _columnDefs = None
+    _enableExport = True
+    _enableDelete = False
+    _enableSearch = False
 
     def __init__(self, parent=None,
                  multiSelect=False, selectRows=True,
@@ -185,6 +191,8 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
         _header.setDefaultSectionSize(_height)
         _header.setMinimumSectionSize(_height)
         self.setMinimumSize(3 * _height, 3 * _height + self.horizontalScrollBar().height())
+
+        self._setContextMenu()
 
         # set a default empty model
         _clearSimplePandasTable(self)
@@ -334,6 +342,36 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
     # Other methods
     #=========================================================================================
 
+    def setExportEnabled(self, value):
+        """Enable/disable the export option from the right-mouse menu.
+        
+        :param bool value: enabled True/False
+        """
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}.setExportEnabled: value must be True/False')
+
+        self._enableExport = value
+
+    def setDeleteEnabled(self, value):
+        """Enable/disable the delete option from the right-mouse menu.
+
+        :param bool value: enabled True/False
+        """
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}.setDeleteEnabled: value must be True/False')
+
+        self._enableDelete = value
+
+    def setSearchEnabled(self, value):
+        """Enable/disable the search option from the right-mouse menu.
+
+        :param bool value: enabled True/False
+        """
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}.setSearchEnabled: value must be True/False')
+
+        self._enableSearch = value
+
     def setWidthToColumns(self):
         """Set the width of the table to the column widths
         """
@@ -357,6 +395,179 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
                 height += (self.rowHeight(nn) + 1)
 
         self.setFixedHeight(height)
+
+    def mapToSource(self, positions=None):
+        """Return a tuple of the locations of the specified visible-table positions in the dataFrame.
+
+        positions must be an iterable of table-positions, each a list|tuple of the form [row, col].
+
+        :param positions: iterable of list|tuples
+        :return: tuple to tuples
+        """
+        if not isinstance(positions, typing.Iterable):
+            raise TypeError(f'{self.__class__.__name__}.mapToSource: positions must be an iterable of list|tuples of the form [row, col]')
+        if not all(isinstance(pos, (list, tuple)) and
+                   len(pos) == 2 and isinstance(pos[0], int) and isinstance(pos[1], int) for pos in positions):
+            raise TypeError(f'{self.__class__.__name__}.mapToSource: positions must be an iterable of list|tuples of the form [row, col]')
+
+        sortIndex = self.model()._sortIndex
+        df = self.model().df
+        if not all((0 <= pos[0] < df.shape[0]) and (0 <= pos[1] < df.shape[1]) for pos in positions):
+            raise TypeError(f'{self.__class__.__name__}.mapToSource: positions contains invalid values')
+
+        return tuple((sortIndex[pos[0]], pos[1]) for pos in positions)
+
+    def mapRowsToSource(self, rows=None) -> tuple:
+        """Return a tuple of the source rows in the dataFrame.
+
+        rows must be an iterable of integers, or None.
+        None will return the source rows for the whole table.
+
+        :param rows: iterable of ints
+        :return: tuple of ints
+        """
+        sortIndex = self.model()._sortIndex
+        if rows is None:
+            return tuple(self.model()._sortIndex)
+
+        if not isinstance(rows, typing.Iterable):
+            raise TypeError(f'{self.__class__.__name__}.mapRowsToSource: rows must be an iterable of ints')
+        if not all(isinstance(row, int) for row in rows):
+            raise TypeError(f'{self.__class__.__name__}.mapRowsToSource: rows must be an iterable of ints')
+
+        df = self.model().df
+        if not all((0 <= row < df.shape[0]) for row in rows):
+            raise TypeError(f'{self.__class__.__name__}.mapToSource: rows contains invalid values')
+
+        return tuple(sortIndex[row] if 0 <= row < len(sortIndex) else None for row in rows)
+
+    #=========================================================================================
+    # Table context menu
+    #=========================================================================================
+
+    def _setContextMenu(self):
+        """Set up the context menu for the main table
+        """
+        self.tableMenu = Menu('', self, isFloatWidget=True)
+        setWidgetFont(self.tableMenu, )
+        self.tableMenu.addAction('Copy clicked cell value', self._copySelectedCell)
+        if self._enableExport:
+            self.tableMenu.addAction('Export Visible Table', partial(self.exportTableDialog, exportAll=False))
+            self.tableMenu.addAction('Export All Columns', partial(self.exportTableDialog, exportAll=True))
+
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self._raiseTableContextMenu)
+
+        return self.tableMenu
+
+    def _raiseTableContextMenu(self, pos):
+        """Create a new menu and popup at cursor position
+        """
+        pos = QtCore.QPoint(pos.x() + 10, pos.y() + 10)
+        self.tableMenu.exec_(self.mapToGlobal(pos))
+
+    #=========================================================================================
+    # Table functions
+    #=========================================================================================
+
+    def _copySelectedCell(self):
+        """Copy the current cell-value to the clipboard
+        """
+        idx = self.currentIndex()
+        if idx is not None:
+            text = idx.data().strip()
+            copyToClipboard([text])
+
+    def exportTableDialog(self, exportAll=True):
+        """export the contents of the table to a file
+        The actual data values are exported, not the visible items which may be rounded due to the table settings
+
+        :param exportAll: True/False - True implies export whole table - but in visible order
+                                    False, export only the visible table
+        """
+        model = self.model()
+        df = model.df
+        rows, cols = model.rowCount(), model.columnCount()
+
+        if df is None or df.empty:
+            MessageDialog.showWarning('Export Table to File', 'Table does not contain a dataFrame')
+
+        else:
+            rowList = [model._sortIndex[row] for row in range(rows)]
+            if exportAll:
+                colList = list(self.model().df.columns)
+            else:
+                colList = [col for ii, col, in enumerate(list(self.model().df.columns)) if not self.horizontalHeader().isSectionHidden(ii)]
+
+            self._exportTableDialog(df, rowList=rowList, colList=colList)
+
+    #=========================================================================================
+    # Exporters
+    #=========================================================================================
+
+    @staticmethod
+    def _dataFrameToExcel(dataFrame, path, sheet_name='Table', columns=None):
+        if dataFrame is not None:
+            path = aPath(path)
+            path = path.assureSuffix('xlsx')
+            if columns is not None and isinstance(columns, list):  #this is wrong. columns can be a 1d array
+                dataFrame.to_excel(path, sheet_name=sheet_name, columns=columns, index=False)
+            else:
+                dataFrame.to_excel(path, sheet_name=sheet_name, index=False)
+
+    @staticmethod
+    def _dataFrameToCsv(dataFrame, path, *args):
+        dataFrame.to_csv(path)
+
+    @staticmethod
+    def _dataFrameToTsv(dataFrame, path, *args):
+        dataFrame.to_csv(path, sep='\t')
+
+    @staticmethod
+    def _dataFrameToJson(dataFrame, path, *args):
+        dataFrame.to_json(path, orient='split', default_handler=str)
+
+    def findExportFormats(self, path, dataFrame, sheet_name='Table', filterType=None, columns=None):
+        formatTypes = OrderedDict([
+            ('.xlsx', self._dataFrameToExcel),
+            ('.csv', self._dataFrameToCsv),
+            ('.tsv', self._dataFrameToTsv),
+            ('.json', self._dataFrameToJson)
+            ])
+
+        # extension = os.path.splitext(path)[1]
+        extension = aPath(path).suffix
+        if not extension:
+            extension = '.xlsx'
+        if extension in formatTypes.keys():
+            formatTypes[extension](dataFrame, path, sheet_name, columns)
+            return
+        else:
+            try:
+                self._findExportFormats(str(path) + filterType, sheet_name)
+            except:
+                MessageDialog.showWarning('Could not export', 'Format file not supported or not provided.'
+                                                              '\nUse one of %s' % ', '.join(formatTypes))
+                getLogger().warning('Format file not supported')
+
+    def _exportTableDialog(self, dataFrame, rowList=None, colList=None):
+
+        self.saveDialog = TablesFileDialog(parent=None, acceptMode='save', selectFile='ccpnTable.xlsx',
+                                           fileFilter=".xlsx;; .csv;; .tsv;; .json ")
+        self.saveDialog._show()
+        path = self.saveDialog.selectedFile()
+        if path:
+            sheet_name = 'Table'
+            if dataFrame is not None and not dataFrame.empty:
+
+                if colList:
+                    dataFrame = dataFrame[colList]  # returns a new dataFrame
+                if rowList:
+                    dataFrame = dataFrame[:].iloc[rowList]
+
+                ft = self.saveDialog.selectedNameFilter()
+
+                self.findExportFormats(path, dataFrame, sheet_name=sheet_name, filterType=ft, columns=colList)
 
 
 #=========================================================================================
@@ -632,6 +843,9 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
                 return data
 
+            elif role == INDEX_ROLE:
+                return (row, col)
+
             # elif role == QtCore.Qt.DecorationRole:
             #     # return the pixmap - this works, transfer to _MultiHeader
             #     return self._editableIcon
@@ -790,6 +1004,14 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         series = pd.Series(universalSortKey(val) for val in values)
         return series
 
+    def _setSortOrder(self, column: int, order: QtCore.Qt.SortOrder = ...):
+        """Get the new sort order based on the sort column and sort direction
+        """
+        self._oldSortIndex = self._sortIndex
+        col = self._df.columns[column]
+        newData = self._universalSort(self._df[col])
+        self._sortIndex = list(newData.sort_values(ascending=True if order == QtCore.Qt.AscendingOrder else False).index)
+
     def sort(self, column: int, order: QtCore.Qt.SortOrder = ...) -> None:
         """Sort the underlying pandas DataFrame
         Required as there is no proxy model to handle the sorting
@@ -805,14 +1027,6 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
         # emit a signal to spawn an update of the table and notify headers to update
         self.layoutChanged.emit()
-
-    def _setSortOrder(self, column: int, order: QtCore.Qt.SortOrder = ...):
-        """Get the new sort order based on the sort column and sort direction
-        """
-        self._oldSortIndex = self._sortIndex
-        col = self._df.columns[column]
-        newData = self._universalSort(self._df[col])
-        self._sortIndex = list(newData.sort_values(ascending=True if order == QtCore.Qt.AscendingOrder else False).index)
 
     def mapToSource(self, indexes):
         """Map the cell index to the co-ordinates in the pandas dataFrame
@@ -1033,6 +1247,11 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                  **kwds):
         """Initialise the widgets for the module.
         """
+        # required before initialising
+        self._enableExport = enableExport
+        self._enableDelete = enableDelete
+        self._enableSearch = enableSearch
+
         super().__init__(parent=parent,
                          multiSelect=multiSelect, selectRows=selectRows,
                          showHorizontalHeader=showHorizontalHeader, showVerticalHeader=showVerticalHeader,
@@ -1068,11 +1287,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         # enable the right click menu
         self.searchWidget = None
         self._setHeaderContextMenu()
-        self._enableExport = enableExport
-        self._enableDelete = enableDelete
-        self._enableSearch = enableSearch
 
-        self._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
         self._rightClickedTableIndex = None  # last selected item in a table before raising the context menu. Enabled with mousePress event filter
 
         self._enableDoubleClick = enableDoubleClick
@@ -1263,19 +1478,20 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     # Table context menu
     #=========================================================================================
 
-    def _setContextMenu(self, enableExport=True, enableDelete=True):
+    def _setContextMenu(self):
         """Set up the context menu for the main table
         """
         self.tableMenu = Menu('', self, isFloatWidget=True)
         setWidgetFont(self.tableMenu, )
         self.tableMenu.addAction('Copy clicked cell value', self._copySelectedCell)
-        if enableExport:
+
+        if self._enableExport:
             self.tableMenu.addAction('Export Visible Table', partial(self.exportTableDialog, exportAll=False))
             self.tableMenu.addAction('Export All Columns', partial(self.exportTableDialog, exportAll=True))
 
         self.tableMenu.addSeparator()
 
-        if enableDelete:
+        if self._enableDelete:
             self.tableMenu.addAction('Delete Selection', self.deleteObjFromTable)
 
         self.tableMenu.addAction('Clear Selection', self._clearSelectionCallback)
@@ -1311,50 +1527,50 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     # Exporters
     #=========================================================================================
 
-    @staticmethod
-    def _dataFrameToExcel(dataFrame, path, sheet_name='Table', columns=None):
-        if dataFrame is not None:
-            path = aPath(path)
-            path = path.assureSuffix('xlsx')
-            if columns is not None and isinstance(columns, list):  #this is wrong. columns can be a 1d array
-                dataFrame.to_excel(path, sheet_name=sheet_name, columns=columns, index=False)
-            else:
-                dataFrame.to_excel(path, sheet_name=sheet_name, index=False)
-
-    @staticmethod
-    def _dataFrameToCsv(dataFrame, path, *args):
-        dataFrame.to_csv(path)
-
-    @staticmethod
-    def _dataFrameToTsv(dataFrame, path, *args):
-        dataFrame.to_csv(path, sep='\t')
-
-    @staticmethod
-    def _dataFrameToJson(dataFrame, path, *args):
-        dataFrame.to_json(path, orient='split', default_handler=str)
-
-    def findExportFormats(self, path, dataFrame, sheet_name='Table', filterType=None, columns=None):
-        formatTypes = OrderedDict([
-            ('.xlsx', self._dataFrameToExcel),
-            ('.csv', self._dataFrameToCsv),
-            ('.tsv', self._dataFrameToTsv),
-            ('.json', self._dataFrameToJson)
-            ])
-
-        # extension = os.path.splitext(path)[1]
-        extension = aPath(path).suffix
-        if not extension:
-            extension = '.xlsx'
-        if extension in formatTypes.keys():
-            formatTypes[extension](dataFrame, path, sheet_name, columns)
-            return
-        else:
-            try:
-                self._findExportFormats(str(path) + filterType, sheet_name)
-            except:
-                MessageDialog.showWarning('Could not export', 'Format file not supported or not provided.'
-                                                              '\nUse one of %s' % ', '.join(formatTypes))
-                getLogger().warning('Format file not supported')
+    # @staticmethod
+    # def _dataFrameToExcel(dataFrame, path, sheet_name='Table', columns=None):
+    #     if dataFrame is not None:
+    #         path = aPath(path)
+    #         path = path.assureSuffix('xlsx')
+    #         if columns is not None and isinstance(columns, list):  #this is wrong. columns can be a 1d array
+    #             dataFrame.to_excel(path, sheet_name=sheet_name, columns=columns, index=False)
+    #         else:
+    #             dataFrame.to_excel(path, sheet_name=sheet_name, index=False)
+    #
+    # @staticmethod
+    # def _dataFrameToCsv(dataFrame, path, *args):
+    #     dataFrame.to_csv(path)
+    #
+    # @staticmethod
+    # def _dataFrameToTsv(dataFrame, path, *args):
+    #     dataFrame.to_csv(path, sep='\t')
+    #
+    # @staticmethod
+    # def _dataFrameToJson(dataFrame, path, *args):
+    #     dataFrame.to_json(path, orient='split', default_handler=str)
+    #
+    # def findExportFormats(self, path, dataFrame, sheet_name='Table', filterType=None, columns=None):
+    #     formatTypes = OrderedDict([
+    #         ('.xlsx', self._dataFrameToExcel),
+    #         ('.csv', self._dataFrameToCsv),
+    #         ('.tsv', self._dataFrameToTsv),
+    #         ('.json', self._dataFrameToJson)
+    #         ])
+    #
+    #     # extension = os.path.splitext(path)[1]
+    #     extension = aPath(path).suffix
+    #     if not extension:
+    #         extension = '.xlsx'
+    #     if extension in formatTypes.keys():
+    #         formatTypes[extension](dataFrame, path, sheet_name, columns)
+    #         return
+    #     else:
+    #         try:
+    #             self._findExportFormats(str(path) + filterType, sheet_name)
+    #         except:
+    #             MessageDialog.showWarning('Could not export', 'Format file not supported or not provided.'
+    #                                                           '\nUse one of %s' % ', '.join(formatTypes))
+    #             getLogger().warning('Format file not supported')
 
     # def _rawDataToDF(self):
     #     try:
@@ -1387,24 +1603,24 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 
             self._exportTableDialog(df, rowList=rowList, colList=colList)
 
-    def _exportTableDialog(self, dataFrame, rowList=None, colList=None):
-
-        self.saveDialog = TablesFileDialog(parent=None, acceptMode='save', selectFile='ccpnTable.xlsx',
-                                           fileFilter=".xlsx;; .csv;; .tsv;; .json ")
-        self.saveDialog._show()
-        path = self.saveDialog.selectedFile()
-        if path:
-            sheet_name = 'Table'
-            if dataFrame is not None and not dataFrame.empty:
-
-                if colList:
-                    dataFrame = dataFrame[colList]  # returns a new dataFrame
-                if rowList:
-                    dataFrame = dataFrame[:].iloc[rowList]
-
-                ft = self.saveDialog.selectedNameFilter()
-
-                self.findExportFormats(path, dataFrame, sheet_name=sheet_name, filterType=ft, columns=colList)
+    # def _exportTableDialog(self, dataFrame, rowList=None, colList=None):
+    #
+    #     self.saveDialog = TablesFileDialog(parent=None, acceptMode='save', selectFile='ccpnTable.xlsx',
+    #                                        fileFilter=".xlsx;; .csv;; .tsv;; .json ")
+    #     self.saveDialog._show()
+    #     path = self.saveDialog.selectedFile()
+    #     if path:
+    #         sheet_name = 'Table'
+    #         if dataFrame is not None and not dataFrame.empty:
+    #
+    #             if colList:
+    #                 dataFrame = dataFrame[colList]  # returns a new dataFrame
+    #             if rowList:
+    #                 dataFrame = dataFrame[:].iloc[rowList]
+    #
+    #             ft = self.saveDialog.selectedNameFilter()
+    #
+    #             self.findExportFormats(path, dataFrame, sheet_name=sheet_name, filterType=ft, columns=colList)
 
     def deleteObjFromTable(self):
         """Delete all objects in the selection from the project

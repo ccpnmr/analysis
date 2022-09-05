@@ -50,6 +50,7 @@ from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import PanelUpdateState
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.ui.gui.widgets.SettingsWidgets import ALL, UseCurrent
 
 SettingsWidgeMinimumWidths =  (180, 180, 180)
 SettingsWidgetFixedWidths = (200, 350, 350)
@@ -666,12 +667,12 @@ class AppearancePanel(GuiSettingPanel):
             (guiNameSpaces.WidgetVarName_SpectrumDisplSelection,
              {'label': guiNameSpaces.Label_SpectrumDisplSelection,
               'callBack': None,
-              'enabled': False,
+              'enabled': True,
               '_init': None,
               'type': settingWidgets.SpectrumDisplaySelectionWidget,
               'kwds': {'texts': ['Current'],
-                       'displayText': ['Current'],
-                       'defaults': ['Current'],
+                       'displayText': [UseCurrent],
+                       'defaults': [UseCurrent],
                        'objectName': guiNameSpaces.WidgetVarName_SpectrumDisplSelection,
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'tipText': guiNameSpaces.TipText_SpectrumDisplSelection}}),
@@ -889,6 +890,12 @@ class AppearancePanel(GuiSettingPanel):
         if yColumnNameW:
             yColumnNameW.setTexts(self._axisYOptions)
 
+    def _getSelectedDisplays(self):
+        displays = []
+        displayWidget = self.getWidget(guiNameSpaces.WidgetVarName_SpectrumDisplSelection)
+        if displayWidget:
+            displays = displayWidget.getDisplays()
+        return displays
 
     def _mainTableColumnViewCallback(self, *args):
 

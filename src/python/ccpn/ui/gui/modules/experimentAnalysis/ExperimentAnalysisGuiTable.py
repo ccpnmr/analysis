@@ -39,7 +39,7 @@ import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as
 from ccpn.ui.gui.lib._SimplePandasTable import _updateSimplePandasTable, _SimplePandasTableView, _SearchTableView, _clearSimplePandasTable
 
 
-class _ExperimentalAnalysisTableABC(_SimplePandasTableView, _SearchTableView):
+class _ExperimentalAnalysisTableABC(gt.GuiTable):
     """
     Table containing fitting results.
     Wrapper GuiTable built from the backend outputDataTable.
@@ -51,40 +51,26 @@ class _ExperimentalAnalysisTableABC(_SimplePandasTableView, _SearchTableView):
     _internalColumns = []
     _hiddenColumns = []
 
-    def __init__(self, parent=None, guiModule=None, **kwds):
-        """Initialise the widgets for the module.
-        """
-
-        kwds['setLayout'] = True
-
-        # Initialise the scroll widget and common settings
-        self._initTableCommonWidgets(parent, **kwds)
-
-        # initialise the currently attached dataFrame
-        self._hiddenColumns = []
+    def __init__(self, parent, guiModule,  **kwds):
+        self.mainWindow = guiModule.mainWindow
         self.dataFrameObject = None
-
-        # initialise the table
-        super().__init__(parent=parent,
-                         showHorizontalHeader=True,
-                         showVerticalHeader=False,
-                         multiSelect=True,
-                         grid=(3, 0), gridSpan=(1, 6))
-
+        super().__init__(parent=parent, mainWindow=self.mainWindow, dataFrameObject=None,  # class collating table and objects and headings,
+                        setLayout=True, autoResize=True, multiSelect=True,
+                        enableMouseMoveEvent=False,
+                        selectionCallback=self.selection,
+                        actionCallback=self.action,
+                        checkBoxCallback=self.actionCheckBox,  grid=(0, 0))
         self.guiModule = guiModule
-        self.moduleParent = guiModule
         self.current = self.guiModule.current
-
-        # Initialise the notifier for processing dropped items
-        self._postInitTableCommonWidgets()
-
-        # may refactor the remaining modules so this isn't needed
-        self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
-        self._initSearchTableView()
-
-    @property
-    def _df(self):
-        return self._dataFrame
+        self._columns = None
+        self._hiddenColumns = []
+        self._dataFrame = None
+        self._dataFrameObject = None
+        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
+        self._selectOverride = True # otherwise very odd behaviour
+        self.setMinimumWidth(200)
+        self._navigateToPeakOnSelection = True
 
     @property
     def dataFrame(self):
@@ -96,10 +82,8 @@ class _ExperimentalAnalysisTableABC(_SimplePandasTableView, _SearchTableView):
         self.build(dataFrame)
 
     def build(self, dataFrame):
-        _clearSimplePandasTable(self)
         if dataFrame is not None:
-            _updateSimplePandasTable(self, dataFrame)
-            self._defaultDf = dataFrame
+            self.setData(dataFrame)
 
     def _processDroppedItems(self, data):
         """
@@ -150,10 +134,11 @@ class _ExperimentalAnalysisTableABC(_SimplePandasTableView, _SearchTableView):
                 selectedObjects = [row for i, row in pd.DataFrame(valuesDict).iterrows()]
             return selectedObjects
         else:
-            return None
+            return []
 
     def getSelectedCollections(self):
         selectedObjs = self.getSelectedObjects()
+
         collections = set()
         for selectedRow in selectedObjs:
             coPid = selectedRow[sv.COLLECTIONPID]
@@ -179,9 +164,31 @@ class _ExperimentalAnalysisTableABC(_SimplePandasTableView, _SearchTableView):
             peaks.update(self.getPeaksFromCollection(collection))
         self.current.collections = collections
         self.current.peaks = list(peaks)
+        if self._navigateToPeakOnSelection:
+            self._navigateToPeak()
 
     def action(self, *args):
-        pass
+        self._navigateToPeak()
+
+    def _navigateToPeak(self):
+        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
+
+        # peaks should have been set to current by the click
+        peaks = self.current.peaks
+        if len(peaks)== 0:
+            return
+        peak = peaks[-1]
+        # get the display from settings
+        appearanceTab = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
+        displayWidget = appearanceTab.getWidget(guiNameSpaces.WidgetVarName_SpectrumDisplSelection)
+        if displayWidget is None:
+            getLogger().debug(f'Not found widget in Appearance tab {guiNameSpaces.WidgetVarName_SpectrumDisplSelection}')
+            return
+        displays = displayWidget.getDisplays()
+        for display in displays:
+            for strip in display.strips:
+                widths = _getCurrentZoomRatio(strip.viewRange())
+                navigateToPositionInStrip(strip=strip, positions=peak.position, widths=widths)
 
     def actionCheckBox(self, data):
         pass

@@ -114,7 +114,7 @@ class CoreNotifiersHandler(ExperimentAnalysisHandlerABC):
     @staticmethod
     def _onCurrentPeak(guiModule, data):
         peak = data[Notifier.OBJECT]
-        getLogger().warn('_onCurrentPeak notifier not implemented', peak)
+
         pass
 
     @staticmethod

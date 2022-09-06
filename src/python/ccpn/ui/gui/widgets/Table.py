@@ -245,8 +245,10 @@ class ObjectTable(QtWidgets.QTableView, Base):
         self.setDropIndicatorShown(True)
 
         self.searchWidget = None
+        self._enableExport = enableExport
+        self._enableDelete = enableDelete
         self._setHeaderContextMenu()
-        self._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
+        self._setContextMenu()
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.RightButton:
@@ -259,11 +261,11 @@ class ObjectTable(QtWidgets.QTableView, Base):
         headers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         headers.customContextMenuRequested.connect(self._raiseHeaderContextMenu)
 
-    def _setContextMenu(self, enableExport=True, enableDelete=True):
+    def _setContextMenu(self):
         self.tableMenu = QtWidgets.QMenu()
-        if enableExport:
+        if self._enableExport:
             self.tableMenu.addAction("Export Table", self.exportDialog)
-        if enableDelete:
+        if self._enableDelete:
             self.tableMenu.addAction("Delete", self.deleteObjFromTable)
 
         # ejb - added these but don't think they are needed

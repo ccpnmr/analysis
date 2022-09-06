@@ -390,7 +390,7 @@ class GuiTable(TableWidget, Base):
         self._setHeaderContextMenu()
         self._enableExport = enableExport
         self._enableDelete = enableDelete
-        self._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
+        self._setContextMenu()
         self._enableSearch = enableSearch
         self._rightClickedTableItem = None  # last selected item in a table before raising the context menu. Enabled with mousePress event filter
 
@@ -1331,17 +1331,17 @@ class GuiTable(TableWidget, Base):
             visCol = self._dataFrameObject.visibleColumnHeadings
             return visCol
 
-    def _setContextMenu(self, enableExport=True, enableDelete=True):
+    def _setContextMenu(self):
         self.tableMenu = Menu('', self, isFloatWidget=True)
         setWidgetFont(self.tableMenu, )
         self.tableMenu.addAction("Copy clicked cell value", self._copySelectedCell)
-        if enableExport:
+        if self._enableExport:
             self.tableMenu.addAction("Export Visible Table", partial(self.exportTableDialog, exportAll=False))
             self.tableMenu.addAction("Export All Columns", partial(self.exportTableDialog, exportAll=True))
 
         self.tableMenu.addSeparator()
 
-        if enableDelete:
+        if self._enableDelete:
             self.tableMenu.addAction("Delete Selection", self.deleteObjFromTable)
 
         # ejb - added these but don't think they are needed

@@ -258,7 +258,7 @@ class _CustomLabel(QtWidgets.QGraphicsSimpleTextItem):
         self.obj = obj
         self.displayProperty(self.textProperty)
         self.setRotation(labelRotation)
-        self.setDefaultFont()
+        # self.setDefaultFont() #this oddly set the font to everything in the program!
         self.setBrushByObject()
         self.setFlag(self.ItemIgnoresTransformations + self.ItemIsSelectable)
         self.application = application
@@ -267,7 +267,7 @@ class _CustomLabel(QtWidgets.QGraphicsSimpleTextItem):
         font = getFont()
         # height = getFontHeight(size='SMALL') #SMALL is still to large
         font.setPointSize(10)
-        self.setFont(font)
+        self.setFont(font) #this oddly set the font to everything in the program!
 
     def setBrushByObject(self):
         brush = None

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-05 11:51:23 +0100 (Mon, September 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-08 11:41:10 +0100 (Thu, September 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1199,6 +1199,9 @@ class _BlockingContent:
     rootBlocker = None
 
 
+from ccpn.ui._implementation.QueueHandler import QueueHandler
+
+
 class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     _tableSelectionChanged = QtCore.pyqtSignal(list)
 
@@ -1295,11 +1298,12 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             self.doubleClicked.connect(self._doubleClickCallback)
 
         # notifier queue handling
-        self._scheduler = UpdateScheduler(self.project, self._queueProcess, name=f'PandasTableNotifierHandler-{self}',
-                                          startOnAdd=False, log=False, completeCallback=self.update)
-        self._queuePending = UpdateQueue()
-        self._queueActive = None
-        self._lock = QtCore.QMutex()
+        self._queueHandler = QueueHandler(self,
+                                          completeCallback=self.update,
+                                          queueFullCallback=self.queueFull,
+                                          name=f'PandasTableNotifierHandler-{self}',
+                                          maximumQueueLength=self._maximumQueueLength,
+                                          log=self._logQueue)
 
         if self.enableEditDelegate:
             # set the delegate for editing
@@ -1988,7 +1992,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     def _queueGeneralNotifier(self, func, data):
         """Add the notifier to the queue handler
         """
-        self._queueAppend([func, data])
+        self._queueHandler.queueAppend([func, data])
 
     def _clearTableNotifiers(self):
         """Clean up the notifiers
@@ -2353,53 +2357,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         Apply overall operation instead of all individual notifiers.
         """
         # MUST BE SUBCLASSED
-        raise NotImplementedError(f'Code error: {self.__class__.__name__}._updateTableCallback not implemented')
-
-    def _queueProcess(self):
-        """Process current items in the queue
-        """
-        with QtCore.QMutexLocker(self._lock):
-            # protect the queue switching
-            self._queueActive = self._queuePending
-            self._queuePending = UpdateQueue()
-
-        _startTime = time_ns()
-        _useQueueFull = (self._maximumQueueLength not in [0, None] and len(self._queueActive) > self._maximumQueueLength)
-        if self._logQueue:
-            # log the queue-time if required
-            getLogger().debug(f'_queueProcess  {self}  len: {len(self._queueActive)}  useQueueFull: {_useQueueFull}')
-
-        if _useQueueFull:
-            # rebuild from scratch if the queue is too big
-            try:
-                self._queueActive = None
-                self.queueFull()
-            except Exception as es:
-                getLogger().debug(f'Error in {self.__class__.__name__} update queueFull: {es}')
-
-        else:
-            executeQueue = _removeDuplicatedNotifiers(self._queueActive)
-            for itm in executeQueue:
-                # process item if different from previous
-                try:
-                    func, data = itm
-                    func(data)
-                except Exception as es:
-                    getLogger().debug(f'Error in {self.__class__.__name__} update - {es}')
-
-        if self._logQueue:
-            getLogger().debug(f'elapsed time {(time_ns() - _startTime) / 1e9}')
-
-    def _queueAppend(self, itm):
-        """Append a new item to the queue
-        """
-        self._queuePending.put(itm)
-        if not self._scheduler.isActive and not self._scheduler.isBusy:
-            self._scheduler.start()
-
-        elif self._scheduler.isBusy:
-            # caught during the queue processing event, need to restart
-            self._scheduler.signalRestart()
+        raise NotImplementedError(f'Code error: {self.__class__.__name__}.queueFull not implemented')
 
     #=========================================================================================
     # Common object properties

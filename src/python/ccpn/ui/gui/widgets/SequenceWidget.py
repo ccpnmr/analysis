@@ -15,12 +15,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-19 10:14:39 +0100 (Thu, May 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-08 16:33:04 +0100 (Thu, September 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import typing
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from collections import OrderedDict
 from collections.abc import Iterable
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
@@ -43,65 +44,147 @@ from ccpn.core.lib.Notifiers import Notifier
 
 from ccpn.ui.gui.guiSettings import getColours
 from ccpn.ui.gui.guiSettings import GUICHAINLABEL_TEXT, \
-    GUICHAINRESIDUE_DRAGENTER, GUICHAINRESIDUE_DRAGLEAVE, \
     GUICHAINRESIDUE_UNASSIGNED, GUICHAINRESIDUE_ASSIGNED, \
     GUICHAINRESIDUE_POSSIBLE, GUICHAINRESIDUE_WARNING, \
     SEQUENCEMODULE_DRAGMOVE, SEQUENCEMODULE_TEXT, BORDERNOFOCUS, BORDERFOCUS
 from ccpn.ui.gui.widgets.Base import Base
-# from ccpn.ui.gui.guiSettings import fixedWidthFont, fixedWidthLargeFont, helvetica8
-# from ccpn.ui.gui.guiSettings import textFontHugeSpacing as fontSpacing
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.MessageDialog import progressManager, showWarning
-from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 
 
+#==========================================================================================
+# Sequence Widget scenes and graphics-views
+#==========================================================================================
+
+class _SequenceWidgetScene(QtWidgets.QGraphicsScene):
+    """Scene with drop-event to handle dropping nmrResidues onto a chain.
+    """
+
+    def __init__(self, parent, moduleParent=None, *args, **kwds):
+        """Initialise the widget.
+        """
+
+        self.moduleParent = moduleParent
+        super(_SequenceWidgetScene, self).__init__(parent, *args, **kwds)
+
+    def dragMoveEvent(self, event):
+        """Handle dragging of items from the sequence-graph to the sequence-widget.
+        """
+        parent = self.moduleParent
+
+        # pos = event.scenePos()
+        # pos = QtCore.QPointF(pos.x(), pos.y() - 25)  # WB: TODO: -25 is a hack to take account of scrollbar height
+
+        item = parent._getGuiItem(self)
+        if item:
+            # _highlight is an overlay of the guiNmrResidue but with a highlight colour
+            parent._highlight.setHtml('<div style="color: %s; text-align: center;"><strong>' % parent.colours[SEQUENCEMODULE_DRAGMOVE] +
+                                      item.toPlainText() + '</strong></div>')
+            parent._highlight.setPos(item.pos())
+        else:
+            parent._highlight.setPlainText('')
+
+        event.accept()
+
+        super(_SequenceWidgetScene, self).dragMoveEvent(event)
+
+    def dropEvent(self, event):
+        """Handle dropping items onto the sequence-widget.
+        """
+        parent = self.moduleParent
+
+        parent._highlight.setPlainText('')
+        data, dataType = _interpretEvent(event)
+
+        if dataType == 'pids':
+
+            # check that the drop event contains the correct information
+            # if isinstance(data, Iterable) and len(data) == 2:
+            #   nmrChain = self.mainWindow.project.getByPid(data[0])
+            #   nmrResidue = self.mainWindow.project.getByPid(data[1])
+            #   if isinstance(nmrChain, NmrChain) and isinstance(nmrResidue, NmrResidue):
+            #     if nmrResidue.nmrChain == nmrChain:
+            #       self._processNmrChains(data, event)
+
+            if isinstance(data, Iterable):
+                for dataItem in data:
+                    obj = parent.mainWindow.project.getByPid(dataItem)
+                    if isinstance(obj, NmrChain) or isinstance(obj, NmrResidue):
+                        parent._processNmrChains(obj)
+                        break
+
+        super(_SequenceWidgetScene, self).dropEvent(event)
+
+
+class _SequenceWidgetGraphicsView(QtWidgets.QGraphicsView):
+    """Graphics-view with a left-mouse drag.
+    """
+    _lastDragMode = None
+
+    def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
+        """Handle the press-event.
+        """
+        if event.button() == QtCore.Qt.LeftButton:
+            # set the drag-mode
+            self._lastDragMode = self.dragMode()
+            self.setDragMode(self.ScrollHandDrag)
+
+        super().mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event: QtGui.QMouseEvent) -> None:
+        """Handle the release-event.
+        """
+        super().mouseReleaseEvent(event)
+
+        if self._lastDragMode is not None:
+            # undo the drag-mode
+            self.setDragMode(self._lastDragMode)
+            self._lastDragMode = None
+
+    def dragMoveEvent(self, event: QtGui.QDragMoveEvent) -> None:
+        """Handle the drag-move-event.
+        """
+        super().dragMoveEvent(event)
+
+        if self._lastDragMode is not None:
+            # undo the drag-mode
+            self.setDragMode(self._lastDragMode)
+            self._lastDragMode = None
+
+
+#==========================================================================================
+# Sequence-widget
+#==========================================================================================
+
 class SequenceWidget():
     """
-    The module displays all chains in the project as one-letter amino acids. The one letter residue
+    The widget displays all chains in the project as one-letter amino acids. The one letter residue
     sequence codes are all instances of the GuiChainResidue class and the style applied to a residue
     indicates its assignment state and, when coupled with the Sequence Graph module, indicates if a
     stretch of residues matches a given stretch of connected NmrResidues. The QGraphicsScene and
     QGraphicsView instances provide the canvas on to which the amino acids representations are drawn.
     """
 
-    # includeSettingsWidget = False
-    # maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
-    # settingsPosition = 'left'
-    #
-    # _alreadyOpened = False
-    # _onlySingleInstance = True
-    # _currentModule = None
-    #
-    # className = 'SequenceModule'
-
     def __init__(self, moduleParent=None, parent=None, mainWindow=None, name='Sequence', chains=None):
-        #CcpnModule.__init__(self, size=(10, 30), name='Sequence', closable=False)
-        #TODO: make closable
-        # CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
-
-        # super(SequenceModule, self).__init__(setLayout=True)
+        """Initialise the widget
+        """
 
         self.moduleParent = moduleParent
         self._parent = parent
         self.mainWindow = mainWindow
         self.project = mainWindow.application.project
-        #self.label.hide()
-
         self._chains = chains or []
 
-        # self.setAcceptDrops(True)
         self._parent.setAcceptDrops(True)
 
         self.scrollArea = QtWidgets.QScrollArea()
         self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.scene = QtWidgets.QGraphicsScene(self._parent)
-        self.scrollContents = QtWidgets.QGraphicsView(self.scrollArea.scene, self._parent)
+        self.scrollArea.scene = _SequenceWidgetScene(self._parent, moduleParent=self)
+        self.scrollContents = _SequenceWidgetGraphicsView(self.scrollArea.scene)
         self.scrollContents.setAcceptDrops(True)
         self.scrollContents.setInteractive(True)
-
         self.scrollContents.setAlignment(QtCore.Qt.AlignTop)
         self.scrollContents.setGeometry(QtCore.QRect(0, 0, 380, 1000))
         self.horizontalLayout2 = QtWidgets.QHBoxLayout(self.scrollContents)
@@ -113,14 +196,9 @@ class SequenceWidget():
         #                   """)
         self.residueCount = 0
 
-        # self.mainWidget.layout().addWidget(self.scrollArea)
         self._parent.layout().addWidget(self.scrollArea)
 
-        # connect graphics scene dragMoveEvent to CcpnModule dragMoveEvent - required for drag-and-drop
-        # assignment routines.
-        self.scrollArea.scene.dragMoveEvent = self._dragMoveEvent
-        self.scrollArea.scene.dropEvent = self._dropEvent
-        self.chainLabels = []
+        self.chainLabels = OrderedDict()
         self._highlight = None
         self._initialiseChainLabels()
 
@@ -131,14 +209,13 @@ class SequenceWidget():
         # self.scrollContents.setMaximumHeight(100)
         self._setFocusColour()
 
-        #GWV: explicit intialisation to prevent crashes
+        #GWV: explicit initialisation to prevent crashes
         self._chainNotifier = None
         self._residueNotifier = None
+        self._residueDeleteNotifier = None
         self._chainDeleteNotifier = None
+        self._nmrResidueNotifier = None
         self._registerNotifiers()
-
-        # TODO:ED add highlight if an nmrChain already selected
-        # generate a create graph event? and let the response populate the module
 
     def _setFocusColour(self, focusColour=None, noFocusColour=None):
         """Set the focus/noFocus colours for the widget
@@ -164,41 +241,6 @@ class SequenceWidget():
                     return item
         else:
             return None
-
-    def _dragMoveEvent(self, event):
-        pos = event.scenePos()
-        pos = QtCore.QPointF(pos.x(), pos.y() - 25)  # WB: TODO: -25 is a hack to take account of scrollbar height
-
-        item = self._getGuiItem(self.scrollArea.scene)
-        if item:
-            # _highlight is an overlay of the guiNmrResidue but with a highlight colour
-            self._highlight.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colours[SEQUENCEMODULE_DRAGMOVE] +
-                                    item.toPlainText() + '</strong></div>')
-            self._highlight.setPos(item.pos())
-        else:
-            self._highlight.setPlainText('')
-
-        event.accept()
-
-    def _dropEvent(self, event):
-
-        self._highlight.setPlainText('')
-        data, dataType = _interpretEvent(event)
-        if dataType == 'pids':
-
-            # check that the drop event contains the correct information
-            # if isinstance(data, Iterable) and len(data) == 2:
-            #   nmrChain = self.mainWindow.project.getByPid(data[0])
-            #   nmrResidue = self.mainWindow.project.getByPid(data[1])
-            #   if isinstance(nmrChain, NmrChain) and isinstance(nmrResidue, NmrResidue):
-            #     if nmrResidue.nmrChain == nmrChain:
-            #       self._processNmrChains(data, event)
-
-            if isinstance(data, Iterable):
-                for dataItem in data:
-                    obj = self.mainWindow.project.getByPid(dataItem)
-                    if isinstance(obj, NmrChain) or isinstance(obj, NmrResidue):
-                        self._processNmrChains(obj)
 
     def _processNmrChains(self, data: typing.Union[NmrChain, NmrResidue]):
         """
@@ -302,8 +344,8 @@ class SequenceWidget():
                         # toAssign is the list of mainNmrResidues of the chain
                         for ii in range(len(toAssign) - 1):
                             resid = residues[ii]
-                            next = resid.nextResidue  #TODO:ED may not have a .nextResidue
-                            residues.append(next)
+                            nxt = resid.nextResidue  #TODO:ED may not have a .nextResidue
+                            residues.append(nxt)
 
                         try:
                             nmrChain.assignConnectedResidues(residues[0])
@@ -314,12 +356,18 @@ class SequenceWidget():
                     # highlight the new items in the chain
                     if update:
                         thisChain = residues[0].chain
-                        for chainLabel in self.chainLabels:
-                            if chainLabel.chain == thisChain:
-                                for ii, res in enumerate(residues):
-                                    guiResidue = chainLabel.residueDict.get(res.sequenceCode)
-                                    guiResidue._setStyleAssigned()
-                                break
+
+                        if (chLabel := self.chainLabels.get(thisChain)):
+                            for ii, res in enumerate(residues):
+                                guiResidue = chLabel.residueDict.get(res.sequenceCode)
+                                guiResidue._setStyleAssigned()
+
+                        # for chainLabel in self.chainLabels:
+                        #     if chainLabel.chain == thisChain:
+                        #         for ii, res in enumerate(residues):
+                        #             guiResidue = chainLabel.residueDict.get(res.sequenceCode)
+                        #             guiResidue._setStyleAssigned()
+                        #         break
 
     def populateFromSequenceGraphs(self):
         """
@@ -339,16 +387,16 @@ class SequenceWidget():
         #   except Exception as es:
         #     getLogger().warning('Error: no predictedStretch found: %s' % str(es))
 
-    def _clearStretches(self, chainNum):
+    def _clearStretches(self, chain):
         """
         CCPN INTERNAL called in predictSequencePosition method of SequenceGraph.
         Highlights regions on the sequence specified by the list of residues passed in.
         """
-        if self.chainLabels and chainNum in range(len(self.chainLabels)):
-            for res1 in self.chainLabels[chainNum].residueDict.values():
+        if (chLabel := self.chainLabels.get(chain)):
+            for res1 in chLabel.residueDict.values():
                 res1._styleResidue()
 
-    def _highlightPossibleStretches(self, chainNum, residues: typing.List[Residue]):
+    def _highlightPossibleStretches(self, chain, residues: typing.List[Residue]):
         """
         CCPN INTERNAL called in predictSequencePosition method of SequenceGraph.
         Highlights regions on the sequence specified by the list of residues passed in.
@@ -360,7 +408,7 @@ class SequenceWidget():
             # self._clearStretches(chainNum)
 
             guiResidues = []
-            _labelDict = self.chainLabels[chainNum].residueDict
+            _labelDict = self.chainLabels[chain].residueDict
             for residue in residues:
                 guiResidue = _labelDict[residue.sequenceCode]
                 guiResidues.append(guiResidue)
@@ -373,74 +421,40 @@ class SequenceWidget():
         except Exception as es:
             getLogger().warning('_highlightPossibleStretches: %s' % str(es))
 
-    def _chainCallBack(self, data):
-        """callback for chain notifier
-        """
-        chain = data[Notifier.OBJECT]
-        self._addChainLabel(chain=chain)
-
     def _addChainLabel(self, chain: Chain, placeholder=False, tryToUseSequenceCodes=False):
         """Creates and adds a GuiChainLabel to the sequence module.
+
+        :param chain: core Chain or None
+        :param placeholder: True|False, if True, adds an empty object
+        :param tryToUseSequenceCodes: True|False use sequence codes
+        :return:
         """
         if len(self._chains) == 1 and len(self.chainLabels) == 1:
-            # first new chain created so get rid of placeholder label
-            self.chainLabels = []
-            self.scrollArea.scene.removeItem(self.chainLabel)
+            self.scrollArea.scene.clear()  # remove and delete all contents
+            self.chainLabels.clear()
             self.widgetHeight = 0
 
         self.chainLabel = GuiChainLabel(self, self.mainWindow, self.scrollArea.scene, position=[0, self.widgetHeight],
                                         chain=chain, placeholder=placeholder, tryToUseSequenceCodes=tryToUseSequenceCodes)
         self.scrollArea.scene.addItem(self.chainLabel)
-        self.chainLabels.append(self.chainLabel)
-        self.widgetHeight += (0.8 * (self.chainLabel.boundingRect().height()))
-
-    def _addChainResidueCallback(self, data):
-        """callback for residue change notifier
-        """
-        residue = data[Notifier.OBJECT]
-        self._refreshChainLabels()
-
-        # residue = data[Notifier.OBJECT]
-        #
-        # if self.chainLabel.chain is not residue.chain: # they should always be equal if function just called as a notifier
-        #   return
-        # number = residue.chain.residues.index(residue)
-        # self.chainLabel._addResidue(number, residue)
-        # self.populateFromSequenceGraphs()
-
-    def _deleteChainResidueCallback(self, data):
-        """callback for residue change notifier
-        """
-        residue = data[Notifier.OBJECT]
-        self._refreshChainLabels()
-
-        # if self.chainLabel.chain is not residue.chain: # they should always be equal if function just called as a notifier
-        #   return
-        # number = residue.chain.residues.index(residue)
-        # self.chainLabel._addResidue(number, residue)
-        # self.populateFromSequenceGraphs()
+        self.chainLabels[chain] = self.chainLabel
+        self.widgetHeight = (0.9 * (self.chainLabel.boundingRect().height())) * len(self.chainLabels)
 
     def _registerNotifiers(self):
         """register notifiers
         """
-        self._chainNotifier = Notifier(self.project,
-                                       [Notifier.CREATE],
-                                       'Chain',
-                                       self._chainCallBack)
         self._residueNotifier = Notifier(self.project,
                                          [Notifier.CREATE, Notifier.CHANGE],
                                          'Residue',
-                                         self._addChainResidueCallback,
+                                         # self._addChainResidueCallback,
+                                         self._refreshChainLabels,  # testing
                                          onceOnly=True)
         self._residueDeleteNotifier = Notifier(self.project,
                                                [Notifier.DELETE],
                                                'Residue',
-                                               self._deleteChainResidueCallback,
+                                               # self._deleteChainResidueCallback,
+                                               self._refreshChainLabels,
                                                onceOnly=True)
-        self._chainDeleteNotifier = Notifier(self.project,
-                                             [Notifier.DELETE],
-                                             'Chain',
-                                             self._refreshChainLabels)
         self._nmrResidueNotifier = Notifier(self.project,
                                             [Notifier.CHANGE],
                                             'NmrResidue',
@@ -485,11 +499,8 @@ class SequenceWidget():
     def _initialiseChainLabels(self):
         """initialise the chain label widgets
         """
-        for chainLabel in self.chainLabels:
-            for item in chainLabel.items:
-                self.scrollArea.scene.removeItem(item)
-            chainLabel.items = []  # probably don't need to do this
-        self.chainLabels = []
+        self.scrollArea.scene.clear()
+        self.chainLabels.clear()
         self.widgetHeight = 0  # dynamically calculated from the number of chains
 
         if not self._chains:
@@ -499,8 +510,6 @@ class SequenceWidget():
                 if not chain.isDeleted:
                     self._addChainLabel(chain, tryToUseSequenceCodes=True)
 
-        if self._highlight:
-            self.scrollArea.scene.removeItem(self._highlight)
         self._highlight = QtWidgets.QGraphicsTextItem()
         self._highlight.setDefaultTextColor(QtGui.QColor(self.colours[SEQUENCEMODULE_TEXT]))
 
@@ -511,7 +520,11 @@ class SequenceWidget():
     def _refreshChainLabels(self, data=None):
         """callback to refresh chains notifier
         """
+        if not data:
+            return
+
         self._initialiseChainLabels()
+
         # highlight any predicted stretches
         self.populateFromSequenceGraphs()
 
@@ -600,6 +613,10 @@ class GuiChainLabel(QtWidgets.QGraphicsTextItem):
         self.currentIndex += 1
 
 
+#==========================================================================================
+# functions
+#==========================================================================================
+
 # WB: TODO: this used to be in some util library but the
 # way drag and drop is done now has changed but
 # until someone figures out how to do it the new
@@ -633,6 +650,10 @@ def _interpretEvent(event):
     return (None, None)
 
 
+#==========================================================================================
+# GuiChainResidue
+#==========================================================================================
+
 class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
     fontSize = 20
 
@@ -662,9 +683,6 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
 
         self.setFlags(QtWidgets.QGraphicsItem.ItemIsSelectable | self.flags())
         self._styleResidue()
-
-    # def mousePressEvent(self, ev):
-    #   pass
 
     def _styleResidue(self):
         """
@@ -698,8 +716,8 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
     def _setFontBold(self):
         """
         Sets font to bold, necessary as QtWidgets.QGraphicsTextItems are used for display of residue
-        one letter codes.
+        one-letter codes.
         """
-        format = QtGui.QTextCharFormat()
-        format.setFontWeight(75)
-        self.textCursor().mergeCharFormat(format)
+        fmt = QtGui.QTextCharFormat()
+        fmt.setFontWeight(75)
+        self.textCursor().mergeCharFormat(fmt)

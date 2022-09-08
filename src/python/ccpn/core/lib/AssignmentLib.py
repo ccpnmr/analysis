@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-16 13:31:12 +0100 (Tue, August 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-08 16:33:04 +0100 (Thu, September 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -114,8 +114,11 @@ PROTEIN_NEF_ATOM_NAMES = {
             'HGx%', 'HGy%', 'HG1%', 'HG2%', 'HG%']
     }
 
-from ccpn.util import Common as commonUtil, Constants
+from itertools import combinations
+import typing
+import numpy
 from typing import Sequence
+from collections import defaultdict
 from ccpn.core.NmrAtom import NmrAtom, UnknownIsotopeCode
 from ccpn.core.Chain import Chain
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
@@ -123,14 +126,10 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList, GAUSSIANMETHOD
 from ccpn.core.Project import Project
-from collections import defaultdict
-from itertools import combinations
 import ccpn.core.lib.AxisCodeLib as AxisCodeLib
-from ccpn.util.Common import makeIterableList
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms, getCcpCodes, \
     getSpinSystemScore
-import typing
-import numpy
+from ccpn.util import Common as commonUtil
 from ccpn.util.Logging import getLogger
 
 
@@ -436,8 +435,8 @@ def getAllSpinSystems(project: Project, nmrResidues: typing.List[NmrResidue],
         probs = {}
         for ii, (apiChain, setChainCode, priorCode) in enumerate(zip(apiChains, setChainCodes, priorCodes)):
 
-            hash = ii
-            probHash = probs[hash] = {}
+            hsh = ii
+            probHash = probs[hsh] = {}
 
             for jj, _spinSystems in enumerate(shifts):
 
@@ -496,9 +495,9 @@ def getAllSpinSystems(project: Project, nmrResidues: typing.List[NmrResidue],
 
         matchesDict = {}
 
-        for ii, (apiChain, probsLists) in enumerate(zip(apiChains, probs.values())):
+        for ii, (chain, apiChain, probsLists) in enumerate(zip(chains, apiChains, probs.values())):
 
-            matchesChain = matchesDict[ii] = []
+            matchesChain = matchesDict.setdefault(chain, [])
 
             for jj, probsList in enumerate(probsLists.values()):
                 window = len(nmrResidues)

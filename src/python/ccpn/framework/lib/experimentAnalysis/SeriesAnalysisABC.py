@@ -33,11 +33,19 @@ from abc import ABC
 from collections import defaultdict
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Logging import getLogger
-import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.core.Peak import Peak
+from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
+from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.Collection import Collection
+from ccpn.util.traits.TraitBase import TraitBase
+from ccpn.util.traits.CcpNmrTraits import Any, List, Bool, Odict, CString, Set
 from ccpn.framework.Application import getApplication, getCurrent, getProject
 from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC, InputSeriesFrameBC, ALL_SERIES_DATA_TYPES
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+
 
 class SeriesAnalysisABC(ABC):
     """
@@ -79,7 +87,7 @@ class SeriesAnalysisABC(ABC):
 
     @outputDataTableName.setter
     def outputDataTableName(self, name):
-        self._outputDataTableName =name
+        self._outputDataTableName = name
 
     def _fetchOutputDataTable(self, name=None):
         """
@@ -90,8 +98,20 @@ class SeriesAnalysisABC(ABC):
         dataTable = self.project.getDataTable(name)
         if not dataTable:
             dataTable = self.project.newDataTable(name)
+        ## update the exclusionHandler
+        if not self._exclusionHandler._dataTable:
+            self._exclusionHandler._dataTable = dataTable
+        self._exclusionHandler.save()
+        ## update the DATATABLETYPE
         dataTable.setMetadata(sv.DATATABLETYPE, sv.SERIESANALYSISOUTPUTDATA)
         return dataTable
+
+    @property
+    def exclusionHandler(self):
+        dataTable = self.project.getDataTable(self.outputDataTableName)
+        if dataTable is not None:
+            self._exclusionHandler._dataTable = dataTable
+        return self._exclusionHandler
 
     @property
     def untraceableValue(self) -> float:
@@ -311,11 +331,63 @@ class SeriesAnalysisABC(ABC):
         self._currentFittingModel = None     ## e.g.: ExponentialDecay for relaxation
         self._currentCalculationModel = None ## e.g.: HetNoe for Relaxation
         self._needsRefitting = False
+        self._exclusionHandler = ExclusionHandler()
+
+    def close(self):
+        self.exclusionHandler.save()
+        self.clearInputDataTables()
+        self._currentCalculationModel = None
+        self._currentFittingModel = None
 
     def __str__(self):
         return f'<{self.__class__.__name__}: {self.seriesAnalysisName}>'
 
     __repr__ = __str__
+
+
+
+class ExclusionHandler(TraitBase):
+    """A class that holds pids of objects to be excluded from calculations. E.g.: peaks from fitting etc.
+     Return True if a pid is present in the handler.
+     Traits:
+        - peaks
+        - collections
+        - nmrResidues
+        - nmrAtoms
+        - spectra
+     """
+
+    _excludedObjectTypes = [Collection, Peak, Spectrum, NmrAtom, NmrResidue]
+    _traitNames = [f'{sv.EXCLUDED_}{object._pluralLinkName}' for object in _excludedObjectTypes]
+
+    def __init__(self, dataTable=None, *args, **kwargs):
+        super().__init__()
+        self._dataTable = dataTable # used to store/restore exclusions as metadata
+        for name in self._traitNames:
+            self.add_traits(**{name:List()})
+            self.update({name: []}) ## ensures all starts correctly and a list works as a list!
+
+    def clear(self):
+        """Reset all to empty """
+        for name in self._traitNames:
+            self.update({name: []})
+
+    def save(self):
+        """Save metadata do the dataTable """
+        if not self._dataTable:
+            getLogger().warn('Impossible to save to DataTable. No DataTable available.')
+            return
+        self._dataTable.updateMetadata(self.asDict())
+
+    def restore(self):
+        """Restore metadata from the dataTable """
+        if not self._dataTable:
+            getLogger().warn('Impossible restore from DataTable. No DataTable available.')
+            return
+        for name, value in self._dataTable.metadata.items():
+            if name in self._traitNames:
+                self.update({name: value})
+
 
 
 class GroupingNmrAtomABC(ABC):

@@ -187,7 +187,8 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         ## restore and apply filters correctly
 
     def _closeModule(self):
-        ## de-register/close all notifiers
+        ## de-register/close all notifiers. Handler
+        self.backendHandler.close()
         self.coreNotifiersHandler.close()
         self.panelHandler.close()
         self.extensionsHandler.close()

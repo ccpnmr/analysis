@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-08 11:41:10 +0100 (Thu, September 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-09 21:10:30 +0100 (Fri, September 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -40,7 +40,7 @@ import typing
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptions
-from ccpn.core.lib.Notifiers import Notifier, _removeDuplicatedNotifiers
+from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
 from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
@@ -55,8 +55,6 @@ from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import copyToClipboard
 from ccpn.util.OrderedSet import OrderedSet
-from ccpn.util.UpdateScheduler import UpdateScheduler
-from ccpn.util.UpdateQueue import UpdateQueue
 
 
 ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,

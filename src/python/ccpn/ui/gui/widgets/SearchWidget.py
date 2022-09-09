@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-01 16:01:03 +0100 (Mon, August 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-09 21:14:07 +0100 (Fri, September 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -230,8 +230,8 @@ class GuiTableFilter(ScrollArea):
 
     def hideSearch(self):
         self.restoreTable(self.table)
-        if self.table.searchWidget is not None:
-            self.table.searchWidget.hide()
+        # if self.table.searchWidget is not None:
+        self.table.hideSearchWidget()
 
     def restoreTable(self, table):
         self.table.refreshTable()
@@ -427,8 +427,8 @@ class _TableFilterABC(ScrollArea):
 
     def hideSearch(self):
         self.restoreTable(self.table)
-        if self.table.searchWidget is not None:
-            self.table.searchWidget.hide()
+        # if self.table.searchWidget is not None:
+        self.table.hideSearchWidget()
 
     def restoreTable(self, table):
         self.table.refreshTable()
@@ -628,7 +628,7 @@ def attachDFSearchWidget(parent, tableView):
     """
     returnVal = False
     try:
-        parentLayout = tableView.parent().getLayout()
+        parentLayout = tableView.parent().layout()
 
         if isinstance(parentLayout, QtWidgets.QGridLayout):
             idx = parentLayout.indexOf(tableView)
@@ -648,13 +648,13 @@ def attachDFSearchWidget(parent, tableView):
         return returnVal
 
 
-def attachSimpleSearchWidget(parent, tableView):
+def attachSimpleSearchWidget(parent, tableView, searchWidget=None):
     """Attach the search widget to the bottom of the table widget
     Search widget is applied to QTableView object
     """
     returnVal = False
     try:
-        parentLayout = tableView.parent().getLayout()
+        parentLayout = tableView.parent().layout()
 
         if isinstance(parentLayout, QtWidgets.QGridLayout):
             idx = parentLayout.indexOf(tableView)
@@ -662,8 +662,10 @@ def attachSimpleSearchWidget(parent, tableView):
             if location is not None:
                 if len(location) > 0:
                     row, column, rowSpan, columnSpan = location
-                    tableView.searchWidget = _SimplerDFTableFilter(parent=parent, table=tableView, vAlign='b')
-                    parentLayout.addWidget(tableView.searchWidget, row + 1, column, 1, columnSpan)
+                    widget = _SimplerDFTableFilter(parent=parent, table=tableView, vAlign='b')
+                    setattr(tableView, searchWidget or 'searchWidget', widget)  # not nice
+
+                    parentLayout.addWidget(widget, row + 1, column, 1, columnSpan)
                     tableView.searchWidget.hide()
 
                 returnVal = True

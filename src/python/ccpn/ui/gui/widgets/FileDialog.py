@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-30 16:14:19 +0100 (Thu, June 30, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-09-09 21:11:10 +0100 (Fri, September 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -146,7 +146,9 @@ class FileDialogABC(QtWidgets.QFileDialog):
             self._preferences = application.preferences
             _general = self._preferences.general
         except:
-            raise RuntimeError('application is not defined')
+            directory = aPath('~')
+            # raise RuntimeError('application is not defined')
+            getLogger().debug('application is not defined')
 
         if directory is None:
             _path = aPath(_general.get(self._initialPath))
@@ -198,7 +200,10 @@ class FileDialogABC(QtWidgets.QFileDialog):
         if useNative is not None:
             self.useNative = useNative
         else:
-            self.useNative = self._preferences.general.useNative
+            try:
+                self.useNative = self._preferences.general.useNative
+            except:
+                self.useNative = True
 
         # need to do this before setting DontUseNativeDialog (only for non-native?)
         if self.restrictDirToFilter:

@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-27 15:24:37 +0000 (Thu, January 27, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-09-10 17:16:59 +0100 (Sat, September 10, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -67,6 +67,10 @@ GLGlyphTuple = namedtuple('GLGlyphTuple', 'GlyphXpos GlyphYpos GlyphWidth GlyphH
                                           'GlyphPX0 GlyphPY0 GlyphPX1 GlyphPY1')
 
 
+#=========================================================================================
+# CcpnGLFont
+#=========================================================================================
+
 class CcpnGLFont():
     def __init__(self, fileName=None, base=0, fontTransparency=None, activeTexture=0, scale=None):
         self.fontName = None
@@ -74,7 +78,7 @@ class CcpnGLFont():
         self.base = base
         self.scale = scale
 
-        if scale == None:
+        if scale is None:
             raise Exception('scale must be defined for font %s ' % fileName)
         with open(fileName, 'r') as op:
             self.fontInfo = op.read().split('\n')
@@ -122,11 +126,17 @@ class CcpnGLFont():
         GL.glActiveTexture(self.activeTexture)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.textureId)
 
-        # need to map ALPHA-ALPHA and use the alpha channel (.w) in the shader
+        # need to map ALPHA-ALPHA and use the alpha channel (.a) in the shader
         GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_ALPHA,
                         self._fontArray.shape[1], self._fontArray.shape[0],
                         0,
                         GL.GL_ALPHA, GL.GL_UNSIGNED_BYTE, self._fontArray)
+
+        # # need to map ALPHA-ALPHA and use the alpha channel (.a) in the shader - need to upgrade shader glsl-level for usampler2D
+        # GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_R8UI,
+        #                 self._fontArray.shape[1], self._fontArray.shape[0],
+        #                 0,
+        #                 GL.GL_ALPHA_INTEGER, GL.GL_UNSIGNED_BYTE, self._fontArray)
 
         # nearest is the quickest gl plotting and gives a slightly brighter image
         # GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
@@ -208,7 +218,8 @@ class CcpnGLFont():
             if (32 < chrNum < 256) and (32 < chrNext < 256):
                 _glyphs.glyphs[chrNum].GlyphKerns[chrNext] = val
 
-    def get_kerning(self, fromChar, prevChar, glyphs):
+    @staticmethod
+    def get_kerning(fromChar, prevChar, glyphs):
         """Get the kerning required between the characters
         """
         _glyph = glyphs[ord(fromChar)]
@@ -231,6 +242,10 @@ class CcpnGLFont():
         _size = min(list(self.fontGlyph.keys()), key=lambda x: abs(x - size))
         return self.fontGlyph[_size]
 
+
+#=========================================================================================
+# GLString
+#=========================================================================================
 
 class GLString(GLVertexArray):
     def __init__(self, text=None, font=None, obj=None, colour=(1.0, 1.0, 1.0, 1.0),

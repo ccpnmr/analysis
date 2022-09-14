@@ -170,13 +170,7 @@ class CSMGuiFittingPanel(GuiFittingPanel):
 
 class CSMAppearancePanel(AppearancePanel):
 
-    def _getThresholdValueFromBackend(self, columnName, calculationMode, factor):
-        """ Get the threshold value based on selected Y axis. called from _setThresholdValueForData"""
-        mo = self.guiModule
-        be = mo.backenedHandler
-        value = be.getThresholdValueForData(data= mo.getGuiOutputDataFrame(), columnName=columnName,
-                                           calculationMode=calculationMode, factor=factor)
-        return value
+    pass #TODO remove
 
 
 #####################################################################

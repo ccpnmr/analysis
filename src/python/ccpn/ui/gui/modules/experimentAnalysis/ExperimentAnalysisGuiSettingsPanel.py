@@ -879,8 +879,12 @@ class AppearancePanel(GuiSettingPanel):
                     thresholdValueW.setValue(round(value, 3))
 
     def _getThresholdValueFromBackend(self, columnName, calculationMode, factor):
-        """Subclassed. Backend/values may vary for experiment """
-        pass
+
+        """ Get the threshold value based on selected Y axis. called from _setThresholdValueForData"""
+        mo = self.guiModule
+        value = mo.backendHandler.getThresholdValueForData(data=mo.getGuiOutputDataFrame(), columnName=columnName,
+                                            calculationMode=calculationMode, factor=factor)
+        return value
 
     def _settingsChangedCallback(self, settingsDict, *args):
         """Callback when a core settings has changed.

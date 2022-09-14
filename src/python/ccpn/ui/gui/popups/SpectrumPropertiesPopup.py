@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-02 13:20:44 +0100 (Fri, September 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-14 16:11:15 +0100 (Wed, September 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -58,7 +58,7 @@ from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.widgets.MagnetisationTransferTable import newMagnetisationTransferTable
+from ccpn.ui.gui.widgets.MagnetisationTransferTable import MagnetisationTransferTable
 from ccpn.ui.gui.popups.ExperimentTypePopup import _getExperimentTypes
 from ccpn.ui.gui.popups.ValidateSpectraPopup import SpectrumPathRow
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, handleDialogApply, _verifyPopupApply
@@ -1139,12 +1139,15 @@ class DimensionsTab(Widget):
             if i == 0:
                 # magnetisation transfer table
                 _data = pd.DataFrame(columns=MagnetisationTransferParameters)
-                _refMagTransfer = self.magnetisationTransferTable = newMagnetisationTransferTable(self, _data,
-                                                                                                  spectrum=self.spectrum,
-                                                                                                  showVerticalHeader=False,
-                                                                                                  borderWidth=1,
-                                                                                                  setHeightToRows=True,
-                                                                                                  setWidthToColumns=True)
+                _refMagTransfer = self.magnetisationTransferTable = MagnetisationTransferTable(self,
+                                                                                               spectrum=self.spectrum,
+                                                                                               df=_data,
+                                                                                               showVerticalHeader=False,
+                                                                                               borderWidth=1,
+                                                                                               _resize=True,
+                                                                                               setHeightToRows=True,
+                                                                                               setWidthToColumns=True,
+                                                                                               setOnHeaderOnly=True)
                 _refMagTransfer.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
                 self.getLayout().addWidget(_refMagTransfer, row, i + 1, 1, dimensions + 2)
 

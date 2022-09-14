@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-12 13:08:42 +0100 (Fri, August 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-14 16:09:43 +0100 (Wed, September 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,32 +28,12 @@ __date__ = "$Date: 2022-04-29 16:52:01 +0100 (Fri, April 29, 2022) $"
 
 import pandas as pd
 from collections import OrderedDict
-from ccpn.core.lib import CcpnSorting
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.widgets.PulldownListsForObjects import ChainPulldown
-from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, showNotImplementedMessage
-from ccpn.ui.gui.widgets.GuiTable import GuiTable, GuiTableFrame
-from ccpn.ui.gui.widgets.Column import ColumnClass
-from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.core.Chain import Chain
-from ccpn.core.Residue import Residue
-from ccpn.core.Atom import Atom
 from PyQt5 import QtWidgets
-from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
-from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT, DataFrameObject
-from ccpn.core.lib.CallBack import CallBack
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.ui.gui.widgets.Column import ColumnClass
+from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.lib.StripLib import navigateToNmrResidueInDisplay, navigateToNmrAtomsInStrip
-from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableViewProjectSpecific, _updateSimplePandasTable
+from ccpn.ui.gui.widgets.table._ProjectTable import _ProjectTableABC
 from ccpn.util.Logging import getLogger
 
 
@@ -61,26 +41,21 @@ from ccpn.util.Logging import getLogger
 # _NewResidueTableWidget
 #=========================================================================================
 
-class _CoreTableWidgetABC(_SimplePandasTableViewProjectSpecific):
+class _CoreTableWidgetABC(_ProjectTableABC):
     """Class to present a table for core objects
     """
 
-    def __init__(self, parent=None, mainWindow=None, moduleParent=None,
-                 actionCallback=None, selectionCallback=None,
-                 hiddenColumns=None,
-                 enableExport=True, enableDelete=True, enableSearch=False,
+    def __init__(self, parent=None,
                  showHorizontalHeader=True, showVerticalHeader=False,
+                 hiddenColumns=None,
                  **kwds):
         """Initialise the widgets for the module.
         """
 
         self._hiddenColumns = [self.columnHeaders.get(col) or col for col in hiddenColumns] if hiddenColumns else \
             [self.columnHeaders.get(col) or col for col in self.defaultHidden]
-        # self.dataFrameObject = None
 
-        super().__init__(parent=parent,
-                         mainWindow=mainWindow,
-                         moduleParent=moduleParent,
+        super().__init__(parent,
                          multiSelect=True,
                          showHorizontalHeader=showHorizontalHeader,
                          showVerticalHeader=showVerticalHeader,
@@ -119,19 +94,18 @@ class _CoreTableWidgetABC(_SimplePandasTableViewProjectSpecific):
         raise NotImplementedError(f'Code error: {self.__class__.__name__}._sourceCurrent not implemented')
 
     #=========================================================================================
-    # Action callbacks
+    # Selection/Action callbacks
     #=========================================================================================
 
-    # def actionCallback(self, data):
-    #     """Not implemented yet
-    #     """
-    #     pass
-
-    def selectionCallback(self, data):
+    def selectionCallback(self, selected, deselected, selection, lastItem):
         """set as current the selected core-objects on the table
         """
-        objs = data[Notifier.OBJECT]
-        self._sourceCurrent = objs
+        try:
+            objs = list(selection[self._OBJECT])
+            self._sourceCurrent = objs
+
+        except Exception as es:
+            getLogger().debug2(f'{self.__class__.__name__}.selectionCallback: No selection\n{es}')
 
     #=========================================================================================
     # Create table and row methods
@@ -196,25 +170,6 @@ class _CoreTableWidgetABC(_SimplePandasTableViewProjectSpecific):
                                     table=self)
 
         return _dfObject
-
-    def refreshTable(self):
-        # subclass to refresh the groups
-        if self._defaultDf is not None:
-            _updateSimplePandasTable(self, self._defaultDf)
-        else:
-            getLogger().warning(f'{self.__class__.__name__}.refreshTable: defaultDf is not defined')
-        # self.updateTableExpanders()
-
-    def setDataFromSearchWidget(self, dataFrame):
-        """Set the data for the table from the search widget
-        """
-        _updateSimplePandasTable(self, dataFrame)
-        # self._updateGroups(dataFrame)
-        # self.updateTableExpanders()
-
-    # def _updateTableCallback(self, data):
-    #     # print(f'>>> _updateTableCallback')
-    #     pass
 
     def getCellToRows(self, cellItem, attribute=None):
         """Get the list of objects which cellItem maps to for this table

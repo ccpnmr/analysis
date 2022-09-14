@@ -294,6 +294,7 @@ class GuiInputDataPanel(GuiSettingPanel):
               'kwds': {'labelText': guiNameSpaces.Label_SelectOutputDataTable,
                        'tipText': guiNameSpaces.TipText_OutputDataTableSelection,
                        'filterFunction': self._filterOutputDataOnPulldown,
+                       'showSelectName':True,
                        'objectName': guiNameSpaces.WidgetVarName_OutputDataTablesSelection,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
             ))

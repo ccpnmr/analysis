@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-14 16:07:04 +0100 (Wed, September 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-14 18:29:01 +0100 (Wed, September 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -550,7 +550,7 @@ class _ProjectTableABC(TableABC, Base):
         """Handle item selection has changed in table - call user callback
         """
         # MUST BE SUBCLASSED
-        raise NotImplementedError(f'Code error: {self.__class__.__name__}._selectionChangedCallback not implemented')
+        raise NotImplementedError(f'Code error: {self.__class__.__name__}.actionCallback not implemented')
 
     def setActionCallback(self, actionCallback=None):
         # enable callbacks

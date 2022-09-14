@@ -237,6 +237,8 @@ class InputSeriesFrameBC(SeriesFrameBC):
                                 self.loc[i, sv.NMRRESIDUETYPE] = nmrAtom.nmrResidue.residueType
                                 self.loc[i, sv.NMRATOMNAME] = nmrAtom.name
                                 self.loc[i, sv.NMRATOMPID] = nmrAtom.pid
+                            for excludedFlag in sv.EXCLUDED_OBJECTS:
+                                self.loc[i, excludedFlag] = False
                             i += 1
                         except Exception as e:
                             getLogger().warn(f'Cannot add row {i} for peak {pk.pid}. Skipping with error: {e}')
@@ -372,18 +374,13 @@ INPUT_SERIESFRAME_DICT = {
                     InputSeriesFrameBC.SERIESFRAMETYPE: InputSeriesFrameBC
                     }
 
-OUTPUT_CSM_SERIESFRAMES_DICT = {
+OUTPUT_SERIESFRAMES_DICT = {
                               sv.CSM_OUTPUT_FRAME: CSMOutputFrame,
-                              }
-
-OUTPUT_RELAXATION_SERIESFRAMES_DICT = {
-                              sv.RELAXATION_OUTPUT_FRAME: RelaxationOutputFrame
-                              }
+                            }
 
 
 
 ALL_SERIES_DATA_TYPES = {
                         **INPUT_SERIESFRAME_DICT,
-                        **OUTPUT_CSM_SERIESFRAMES_DICT,
-                        **OUTPUT_RELAXATION_SERIESFRAMES_DICT
+                        **OUTPUT_SERIESFRAMES_DICT
                          }

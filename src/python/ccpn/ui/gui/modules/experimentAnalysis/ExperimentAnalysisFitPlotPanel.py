@@ -252,14 +252,17 @@ class FittingPlot(pg.PlotItem):
 class _CustomLabel(QtWidgets.QGraphicsSimpleTextItem):
     """ A text annotation of a scatterPlot.
         """
-    def __init__(self, obj, textProperty='pid', labelRotation = 0, application=None):
+    def __init__(self, obj, brush=None, textProperty='pid', labelRotation = 0, application=None):
         QtWidgets.QGraphicsSimpleTextItem.__init__(self)
         self.textProperty = textProperty
         self.obj = obj
         self.displayProperty(self.textProperty)
         self.setRotation(labelRotation)
         # self.setDefaultFont() #this oddly set the font to everything in the program!
-        self.setBrushByObject()
+        if brush:
+            self.setBrush(brush)
+        else:
+            self.setBrushByObject()
         self.setFlag(self.ItemIgnoresTransformations + self.ItemIsSelectable)
         self.application = application
 

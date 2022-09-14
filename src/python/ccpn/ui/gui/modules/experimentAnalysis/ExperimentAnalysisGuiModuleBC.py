@@ -116,8 +116,6 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         ## reset index otherwise you lose the column collectionId
         outDataFrame = dataFrame.groupby(sv.COLLECTIONPID).first().reset_index()
         outDataFrame.set_index(sv.COLLECTIONPID, drop=False, inplace=True)
-        # add Code+type Column #TODO. shouldn't do here
-        outDataFrame.joinNmrResidueCodeType()
         return outDataFrame
 
     def getSettings(self, grouped=True) -> dict:

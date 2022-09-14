@@ -42,7 +42,7 @@ from ccpn.core.Collection import Collection
 from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.CcpNmrTraits import Any, List, Bool, Odict, CString, Set
 from ccpn.framework.Application import getApplication, getCurrent, getProject
-from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC, InputSeriesFrameBC, ALL_SERIES_DATA_TYPES
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC, InputSeriesFrameBC
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 
@@ -59,14 +59,14 @@ class SeriesAnalysisABC(ABC):
         """
         Get the attached input DataTables
         Lists of DataTables.
-        Add decorator to ensure the input dataFrame is of the write type as in the subclass.
-        (especially when restoring a project)
         """
+        self._ensureDataType()
         return list(self._inputDataTables)
 
     @inputDataTables.setter
     def inputDataTables(self, values):
         self._inputDataTables = OrderedSet(values)
+        self._ensureDataType()
 
     def addInputDataTable(self, dataTable):
         """
@@ -96,6 +96,10 @@ class SeriesAnalysisABC(ABC):
         :return: DataTable
         """
         dataTable = self.project.getDataTable(name)
+        if dataTable:
+            # restore the type in case is from a reopened project.
+            dataTable.data.__class__ = SeriesFrameBC
+
         if not dataTable:
             dataTable = self.project.newDataTable(name)
         ## update the exclusionHandler
@@ -108,10 +112,12 @@ class SeriesAnalysisABC(ABC):
 
     @property
     def exclusionHandler(self):
+        """Get an object containing all excluded pids"""
+        exclusionHandler = self._exclusionHandler
         dataTable = self.project.getDataTable(self.outputDataTableName)
         if dataTable is not None:
-            self._exclusionHandler._dataTable = dataTable
-        return self._exclusionHandler
+            exclusionHandler._dataTable = dataTable
+        return exclusionHandler
 
     @property
     def untraceableValue(self) -> float:
@@ -138,6 +144,7 @@ class SeriesAnalysisABC(ABC):
             return
         inputFrame = self.inputDataTables[-1].data
         fittingFrame = self.currentFittingModel.fitSeries(inputFrame)
+        fittingFrame.joinNmrResidueCodeType()
         calculationFrame = self.currentCalculationModel.calculateValues(inputFrame)
         # merge the frames on CollectionPid/id, Assignment, model-results/statistics and calculation
         # keep only minimal info and not duplicates to the fitting frame (except the collectionPid)
@@ -287,19 +294,15 @@ class SeriesAnalysisABC(ABC):
         dataTable.setMetadata(spectrumGroup.className, spectrumGroup.pid)
         dataTable.setMetadata(sv.SERIESFRAMETYPE, seriesFrame.SERIESFRAMETYPE)
 
-    def _restoreInputDataTableData(self, dataTable):
+    def _ensureDataType(self):
         """
         Reset variables and Obj type after restoring a project from its metadata.
         :return: dataTable
         """
-        spectrumGroupPid = dataTable.metadata.get(SpectrumGroup.className, None)
-        spectrumGroup = self.project.getByPid(spectrumGroupPid)
-        dataTypeStr = dataTable.metadata.get(sv.SERIESFRAMETYPE, None)
-        dataType = ALL_SERIES_DATA_TYPES.get(dataTypeStr, InputSeriesFrameBC)
-        data = dataTable.data
-        if spectrumGroup and data is not None:
-            data.__class__ = dataType
-        return dataTable
+        for dataTable in self._inputDataTables:
+            if not isinstance(dataTable.data.__class__ , InputSeriesFrameBC):
+                dataTable.data.__class__ = InputSeriesFrameBC
+
 
     @classmethod
     def exportToFile(cls, path, fileType, *args, **kwargs):
@@ -345,32 +348,42 @@ class SeriesAnalysisABC(ABC):
     __repr__ = __str__
 
 
-
 class ExclusionHandler(TraitBase):
-    """A class that holds pids of objects to be excluded from calculations. E.g.: peaks from fitting etc.
-     Return True if a pid is present in the handler.
-     Traits:
+    """ A class that holds pids of objects to be excluded from calculations. E.g.: peaks from fitting etc.
+    Available Objects: (traitName are taken from the object's _pluralLinkName property):
         - peaks
         - collections
         - nmrResidues
         - nmrAtoms
         - spectra
-     """
+    Use save/restore to save/restore traits as metadata into/from a datatable
+    """
 
-    _excludedObjectTypes = [Collection, Peak, Spectrum, NmrAtom, NmrResidue]
-    _traitNames = [f'{sv.EXCLUDED_}{object._pluralLinkName}' for object in _excludedObjectTypes]
+    _traitNames = [f'{tag}s' for tag in sv.EXCLUDED_OBJECTS]
 
     def __init__(self, dataTable=None, *args, **kwargs):
         super().__init__()
         self._dataTable = dataTable # used to store/restore exclusions as metadata
         for name in self._traitNames:
             self.add_traits(**{name:List()})
-            self.update({name: []}) ## ensures all starts correctly and a list works as a list!
+            self.update({name:[]}) ## ensures all starts correctly and a list works as a list!
 
     def clear(self):
         """Reset all to empty """
         for name in self._traitNames:
-            self.update({name: []})
+            self.update({name:[]})
+
+    def updataDataTable(self):
+        """ Update the datatable data flags
+         to do, update the dataFrame with True/False if the pid is in Data
+            syntax DataFrame.loc[condition, (column_1, column_2)] = new_value
+        """
+        df = self._dataTable.data
+        ## eg: for peaks to be like:
+        # for pid in self.excluded_peakPids:
+        #     df.loc[df[sv.PEAKPID] == pid, 'excluded_peakPids'] = True
+        # self._dataTable.data = df
+        pass
 
     def save(self):
         """Save metadata do the dataTable """
@@ -389,6 +402,8 @@ class ExclusionHandler(TraitBase):
                 self.update({name: value})
 
 
+####
+## Below objects are not implemeted yet and will be done with NTDB definitions
 
 class GroupingNmrAtomABC(ABC):
     """

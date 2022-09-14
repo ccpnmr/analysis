@@ -56,16 +56,6 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         if calculationModel:
             self._currentCalculationModel = calculationModel()
 
-    @property
-    def inputDataTables(self, ) -> list:
-        """
-        List of inputDataTables.
-        """
-        dataTables = super(ChemicalShiftMappingAnalysisBC, self).inputDataTables
-        for dataTable in dataTables:
-            self._restoreInputDataTableData(dataTable)
-        return dataTables
-
     def getAlphaFactor(self, isotopeCode):
         """Get the Alpha Factor for the DeltaDeltas calculation
         :param isotopeCode =  str, one of 1H, 15N, 13C or Other"""
@@ -105,6 +95,7 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         inputFrame = self.inputDataTables[-1].data
         calculationFrame = self.currentCalculationModel.calculateValues(inputFrame)
         fittingFrame = self.currentFittingModel.fitSeries(calculationFrame)
+        fittingFrame.joinNmrResidueCodeType()
         outputDataTable = self._fetchOutputDataTable(name=self._outputDataTableName)
         outputDataTable.data = fittingFrame
 

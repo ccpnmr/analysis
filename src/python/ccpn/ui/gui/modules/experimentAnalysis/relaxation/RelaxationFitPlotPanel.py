@@ -26,13 +26,13 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 
 import pyqtgraph as pg
 from PyQt5 import QtCore, QtWidgets, QtGui
-from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel, _CustomLabel
 import numpy as np
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import percentage
+from ccpn.util.Colour import hexToRgb, colourNameToHexDict
 
 class RelaxationFitPlotPanel(FitPlotPanel):
 
@@ -98,12 +98,15 @@ class RelaxationFitPlotPanel(FitPlotPanel):
                     dd = {'pos': [0, 0], 'data': 'obj', 'brush': pg.mkBrush(255, 0, 0), 'symbol': 'o', 'size': 10, 'pen': None}  # red default
                     dd['pos'] = [x,y]
                     dd['data'] = obj
-
+                    excludedBrush = None
                     if hasattr(obj.spectrum, 'positiveContourColour'):  # colour from the spectrum. The only CCPN obj implemeted so far
                         brush = pg.functions.mkBrush(hexToRgb(obj.spectrum.positiveContourColour))
+                        # if obj.pid in self.guiModule.backendHandler.exclusionHandler.peaks:
+                        #     grey = colourNameToHexDict.get('grey', '#808080')
+                        #     excludedBrush = brush = pg.functions.mkBrush(hexToRgb('#808080'))
                         dd['brush'] = brush
                     spots.append(dd)
-                    label = _CustomLabel(obj=obj, textProperty='id')
+                    label = _CustomLabel(obj=obj, brush=excludedBrush, textProperty='id')
                     self.bindingPlot.addItem(label)
                     label.setPos(x,y)
                     self.labels.append(label)

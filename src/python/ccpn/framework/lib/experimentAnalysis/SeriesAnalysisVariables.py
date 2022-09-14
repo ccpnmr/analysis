@@ -53,7 +53,16 @@ TIME             = 'Time'                # -> str   | A general prefix in a Seri
 SEP              =  '_'                  # the prefix-name-suffix global separator. E.g., used in Value columns: Value_height_at_0
 VALUE_           = f'{VALUE}{SEP}'
 TIME_            = f'{TIME}{SEP}'
-
+EXCLUDED         = 'excluded'
+EXCLUDED_        = f'{EXCLUDED}{SEP}'
+_ERR             = '_err'
+ERROR            = 'Error'
+VALUE_ERR        = f'{VALUE}{_ERR}'
+## CSM Fitting Variables
+KD               = 'Kd'
+BMAX             = 'BMax'
+KD_ERR           = f'{KD}{_ERR}'
+BMAX_ERR         = f'{BMAX}{_ERR}'
 
 DIMENSION        = 'dimension'
 ISOTOPECODE      = 'isotopeCode'
@@ -68,6 +77,11 @@ NMRATOMPID       = 'nmrAtomPid'
 COLLECTIONPID    = 'collectionPid'
 PID              = 'pid'
 ASSIGNEDNMRATOMS = 'assignedNmrAtoms'
+
+EXCLUDED_PEAKPID        = f'{EXCLUDED_}peakPid'
+EXCLUDED_SPECTRUMPID    = f'{EXCLUDED_}spectrumPid'
+EXCLUDED_NMRATOMPID     = f'{EXCLUDED_}nmrAtomPid'
+EXCLUDED_COLLECTIONPID  = f'{EXCLUDED_}collectionPid'
 
 # fitting output Stat variables
 MINIMISER        = 'minimiser'
@@ -102,25 +116,6 @@ _15N = '15N'
 _13C = '13C'
 
 
-CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, MINIMISER_MODEL, R2, CHISQR, REDCHI, AIC, BIC]
-SpectrumPropertiesHeaders = [DIMENSION, ISOTOPECODE, SERIESSTEP, SERIESUNIT]
-PeakPropertiesHeaders = [COLLECTIONID, _PPMPOSITION, _HEIGHT, _LINEWIDTH, _VOLUME]
-AssignmentPropertiesHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE, NMRATOMNAME]
-GROUPBYAssignmentHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE]
-PidHeaders = [COLLECTIONPID, SPECTRUMPID, PEAKPID, NMRATOMPID]
-
-MERGINGHEADERS = [COLLECTIONID, COLLECTIONPID, NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE]
-
-EXCLUDED = 'excluded'
-EXCLUDED_ = f'{EXCLUDED}{SEP}'
-_ERR = '_err'
-ERROR = 'Error'
-VALUE_ERR = f'{VALUE}{_ERR}'
-## CSM Fitting Variables
-KD = 'Kd'
-BMAX = 'BMax'
-KD_ERR = f'{KD}{_ERR}'
-BMAX_ERR = f'{BMAX}{_ERR}'
 
 ## Relaxation  Fitting Variables
 AMPLITUDE = 'amplitude'
@@ -132,6 +127,17 @@ HETNOE = 'HetNoe'
 
 FLAG = 'Flag'
 SERIAL = 'Serial'
+
+CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, MINIMISER_MODEL, R2, CHISQR, REDCHI, AIC, BIC]
+SpectrumPropertiesHeaders = [DIMENSION, ISOTOPECODE, SERIESSTEP, SERIESUNIT]
+PeakPropertiesHeaders = [_PPMPOSITION, _HEIGHT, _LINEWIDTH, _VOLUME]
+AssignmentPropertiesHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE, NMRATOMNAME]
+GROUPBYAssignmentHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE]
+PidHeaders = [COLLECTIONID, COLLECTIONPID, SPECTRUMPID, PEAKPID, NMRATOMPID]
+
+MERGINGHEADERS = [COLLECTIONID, COLLECTIONPID, NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE]
+EXCLUDED_OBJECTS = [EXCLUDED_COLLECTIONPID, EXCLUDED_COLLECTIONPID, EXCLUDED_NMRATOMPID, EXCLUDED_SPECTRUMPID]
+
 ############################################################################################
 ### Used in SeriesFrame tables ABCs
 ############################################################################################

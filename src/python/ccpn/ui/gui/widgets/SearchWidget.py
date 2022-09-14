@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-09 21:14:07 +0100 (Fri, September 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-14 16:12:52 +0100 (Wed, September 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -460,6 +460,7 @@ class _TableFilterABC(ScrollArea):
         _model = self.table.model()
         # check using the actual table - not the underlying dataframe
         df = self.df
+        dfIndex = list(df.index)  # table must have unique row-indexes
         if condition != Exclude:
             rows = OrderedSet()
         else:
@@ -487,23 +488,25 @@ class _TableFilterABC(ScrollArea):
 
                     if match:
                         if condition != Exclude:
-                            # add the found sorted row to the found list
-                            if self._listRows is not None:
-                                rows.add(list(self._listRows)[_row])
-                            else:
-                                rows.add(_row)
+                            # # add the found sorted row to the found list
+                            # if self._listRows is not None:
+                            #     rows.add(list(self._listRows)[_row])
+                            # else:
+                            #     rows.add(_row)
+                            rows.add(dfIndex[_row])
+                            # rows.add(row)  # store the found table row
                         else:
-                            # remove the found sorted values from the list
-                            if self._listRows is not None:
-                                rows -= {list(self._listRows)[_row]}
-                            else:
-                                rows -= {_row}
+                            # # remove the found sorted values from the list
+                            # if self._listRows is not None:
+                            #     rows -= {list(self._listRows)[_row]}
+                            # else:
+                            #     rows -= {_row}
+                            rows -= {dfIndex[_row]}  # store the found table row
 
         if _compareErrorCount > 0:
             getLogger().debug('Error in comparing values for GuiTable filters, use debug2 for details')
 
         try:
-            # self._searchedDataFrame = df.iloc[list(rows)].copy()  # changed from iloc
             self._searchedDataFrame = self.searchRows(df, rows)
         except Exception as es:
             getLogger().warning(f'Encountered a problem searching the table {es}')
@@ -512,18 +515,12 @@ class _TableFilterABC(ScrollArea):
             self._listRows = rows
 
             if not self._searchedDataFrame.empty:
-
-                # with self.table._guiTableUpdate(self.table._dataFrameObject):
                 self.table.setDataFromSearchWidget(self._searchedDataFrame)
-                # self.table._setDefaultRowHeight()
-
                 self.searchButtons.getButton('Reset').setEnabled(True)
-            else:
-                self.searchButtons.getButton('Reset').setEnabled(False)
-                self.restoreTable(table)
-                if not ignoreNotFound:
-                    MessageDialog.showWarning('Not found', 'Query value(s) not found in selected columns.'
-                                                           'Try by filtering in a specific column or double check your query.')
+
+            elif not ignoreNotFound:
+                MessageDialog.showWarning('Not found', 'Query value(s) not found in selected columns.'
+                                                       'Try by filtering in a specific column or double check your query.')
 
     def selectSearchOption(self, sourceTable, columnObject, value):
         try:
@@ -572,7 +569,7 @@ class _SimplerDFTableFilter(_TableFilterABC):
     def searchRows(self, df, rows):
         """Return the subset of the df based on rows
         """
-        return df.loc[list(rows)].copy()
+        return df.loc[list(rows)]
 
     @property
     def columns(self):

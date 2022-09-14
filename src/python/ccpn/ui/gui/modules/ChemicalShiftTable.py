@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-05 11:51:23 +0100 (Mon, September 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-14 16:33:29 +0100 (Wed, September 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -44,7 +44,6 @@ from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_PID, \
     CS_TABLECOLUMNS, ChemicalShiftState
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT
-from ccpn.core.lib.CallBack import CallBack
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
@@ -56,13 +55,24 @@ from ccpn.ui.gui.widgets.MessageDialog import showYesNo, showWarning
 from ccpn.ui.gui.widgets.SettingsWidgets import ALL
 from ccpn.ui.gui.widgets.Column import COLUMN_COLDEFS, COLUMN_SETEDITVALUE, COLUMN_FORMAT
 from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
-from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableViewProjectSpecific, _updateSimplePandasTable
+from ccpn.ui.gui.widgets.table._ProjectTable import _ProjectTableABC
 from ccpn.util.Logging import getLogger
 
 
 logger = getLogger()
 
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
+
+#=========================================================================================
+# Chemical Shift Table Options
+#=========================================================================================
+
+_NAVIGATE_CST = 'Navigate to:'
+_MERGE_CST = 'Merge NmrAtoms'
+_EDIT_CST = 'Edit NmrAtom'
+_REMOVE_CST = 'Remove assignments'
+_REMOVEDEL_CST = 'Remove assignments and Delete'
+_INTO_CSL = 'into'
 
 
 #=========================================================================================
@@ -204,7 +214,7 @@ OBJECT_PARENT = 1
 MODULEIDS = {}
 
 
-class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
+class _NewChemicalShiftTable(_ProjectTableABC):
     """New chemicalShiftTable based on faster QTableView
     Actually more like the original table but with pandas dataFrame
     """
@@ -305,7 +315,8 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
     # Widget callbacks
     #=========================================================================================
 
-    def _getValidChemicalShift4Callback(self, objs):
+    @staticmethod
+    def _getValidChemicalShift4Callback(objs):
         if not objs or not all(objs):
             return
         if isinstance(objs, (tuple, list)):
@@ -318,22 +329,35 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
 
         return cShift
 
-    def actionCallback(self, data):
+    def actionCallback(self, selection, lastItem):
         """Notifier DoubleClick action on item in table. Mark a chemicalShift based on attached nmrAtom
         """
         from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import markNmrAtoms
 
-        cShift = self._getValidChemicalShift4Callback(data.get(CallBack.OBJECT, []))
+        try:
+            if not (objs := list(lastItem[self._OBJECT])):
+                return
+        except Exception as es:
+            getLogger().debug2(f'{self.__class__.__name__}.actionCallback: No selection\n{es}')
+            return
+
+        cShift = self._getValidChemicalShift4Callback(objs)
         if len(self.mainWindow.marks):
             if self.moduleParent.autoClearMarksWidget.checkBox.isChecked():
                 self.mainWindow.clearMarks()
         if cShift and cShift.nmrAtom:
             markNmrAtoms(self.mainWindow, [cShift.nmrAtom])
 
-    def selectionCallback(self, data):
+    def selectionCallback(self, selected, deselected, selection, lastItem):
         """Notifier Callback for selecting rows in the table
         """
-        objs = data[CallBack.OBJECT]
+        try:
+            if not (objs := list(selection[self._OBJECT])):
+                return
+        except Exception as es:
+            getLogger().debug2(f'{self.__class__.__name__}.selectionCallback: No selection\n{es}')
+            return
+
         self.current.chemicalShifts = objs or []
 
         if objs:
@@ -378,7 +402,8 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
 
         return list(newRow)
 
-    def _derivedFromObject(self, obj):
+    @staticmethod
+    def _derivedFromObject(obj):
         """Get a tuple of derived values from obj
         Not very generic yet - column class now seems redundant
         """
@@ -469,23 +494,6 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
                                     )
 
         return _dfObject
-
-    def refreshTable(self):
-        # subclass to refresh the groups
-        # _updateSimplePandasTable(self, self._df)
-        # # self.updateTableExpanders()
-
-        # easier to re-populate from scratch
-        self.populateTable(selectedObjects=self.current.chemicalShifts)
-
-    def setDataFromSearchWidget(self, dataFrame):
-        """Set the data for the table from the search widget.
-        """
-        # update to the new sub-table
-        _updateSimplePandasTable(self, dataFrame)
-        self._df = dataFrame
-        # self._updateGroups(dataFrame)
-        # self.updateTableExpanders()
 
     def _updateTableCallback(self, data):
         """Respond to table notifier.
@@ -601,12 +609,6 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         objs = data['value']
         self._selectOnTableCurrent(objs)
 
-    def _selectionChangedCallback(self, selected, deselected):
-        """Handle item selection as changed in table - call user callback
-        Includes checking for clicking below last row
-        """
-        self._changeTableSelection(None)
-
     def _selectOnTableCurrent(self, objs):
         """Highlight the list of objects on the table
         :param objs:
@@ -628,32 +630,36 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
     # Table context menu
     #=========================================================================================
 
-    def _setContextMenu(self):
-        """Subclass guiTable to insert new merge items to top of context menu
+    def addTableMenuOptions(self, menu):
+        """Add options to the right-mouse menu
         """
-        super()._setContextMenu()
+        super().addTableMenuOptions(menu)
 
-        # add extra items to the menu
-        _actions = self.tableMenu.actions()
+        _actions = menu.actions()
+        self._mergeMenuAction = menu.addAction(_MERGE_CST, self._mergeNmrAtoms)
+        self._editMenuAction = menu.addAction(_EDIT_CST, self._editNmrAtom)
+        self._removeAssignmentsMenuAction = menu.addAction(_REMOVE_CST, partial(self._removeAssignments, delete=False))
+        self._removeAssignmentsDeleteMenuAction = menu.addAction(_REMOVEDEL_CST, partial(self._removeAssignments, delete=True))
+
         if _actions:
             _topMenuItem = _actions[0]
-            _topSeparator = self.tableMenu.insertSeparator(_topMenuItem)
-            self._navigateMenu = self.tableMenu.addMenu('Navigate to:')
-            self._mergeMenuAction = self.tableMenu.addAction('Merge NmrAtoms', self._mergeNmrAtoms)
-            self._editMenuAction = self.tableMenu.addAction('Edit NmrAtom', self._editNmrAtom)
-            self._removeAssignmentsMenuAction = self.tableMenu.addAction('Remove assignments', partial(self._removeAssignments, delete=False))
-            self._removeAssignmentsDeleteMenuAction = self.tableMenu.addAction('Remove assignments and Delete', partial(self._removeAssignments, delete=True))
+            _topSeparator = menu.insertSeparator(_topMenuItem)
 
             # move new actions to the top of the list
-            self.tableMenu.insertAction(_topSeparator, self._removeAssignmentsDeleteMenuAction)
-            self.tableMenu.insertAction(self._removeAssignmentsDeleteMenuAction, self._removeAssignmentsMenuAction)
-            self.tableMenu.insertAction(self._removeAssignmentsMenuAction, self._mergeMenuAction)
-            self.tableMenu.insertAction(self._mergeMenuAction, self._editMenuAction)
+            menu.insertAction(_topSeparator, self._removeAssignmentsDeleteMenuAction)
+            menu.insertAction(self._removeAssignmentsDeleteMenuAction, self._removeAssignmentsMenuAction)
+            menu.insertAction(self._removeAssignmentsMenuAction, self._mergeMenuAction)
+            menu.insertAction(self._mergeMenuAction, self._editMenuAction)
 
-    def _raiseTableContextMenu(self, pos):
-        """Create a new menu and popup at cursor position
-        Add merge item
+        # add navigate option to the bottom
+        menu.addSeparator()
+        self._navigateMenu = menu.addMenu(_NAVIGATE_CST)
+
+    def setTableMenuOptions(self, menu):
+        """Update options in the right-mouse menu
         """
+        super().setTableMenuOptions(menu)
+
         selection = self.getSelectedObjects()
         data = self.getRightMouseItem()
         if (data is not None and not data.empty):
@@ -662,12 +668,12 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
 
             selection = [ch.nmrAtom for ch in selection or [] if ch.nmrAtom]
             _check = (currentNmrAtom and 1 < len(selection) and currentNmrAtom in selection) or False
-            _option = 'into {}'.format(currentNmrAtom.id if currentNmrAtom else '') if _check else ''
-            self._mergeMenuAction.setText('Merge NmrAtoms {}'.format(_option))
+            _option = f'{_INTO_CSL} {currentNmrAtom.id if currentNmrAtom else ""}' if _check else ''
+            self._mergeMenuAction.setText(f'{_MERGE_CST} {_option}')
             self._mergeMenuAction.setEnabled(_check)
 
             current = True if (currentNmrAtom and selection) else False
-            self._editMenuAction.setText('Edit NmrAtom {}'.format(currentNmrAtom.id if current else ''))
+            self._editMenuAction.setText(f'{_EDIT_CST} {currentNmrAtom.id if current else ""}')
             self._editMenuAction.setEnabled(True if current else False)
             self._addNavigationStripsToContextMenu()
 
@@ -676,18 +682,27 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
 
         else:
             # disabled but visible lets user know that menu items exist
-            self._mergeMenuAction.setText('Merge NmrAtoms')
+            self._mergeMenuAction.setText(_MERGE_CST)
             self._mergeMenuAction.setEnabled(False)
-            self._editMenuAction.setText('Edit NmrAtom')
+            self._editMenuAction.setText(_EDIT_CST)
             self._editMenuAction.setEnabled(False)
             self._removeAssignmentsMenuAction.setEnabled(False)
             self._removeAssignmentsDeleteMenuAction.setEnabled(False)
 
-        # raise the menu
-        super()._raiseTableContextMenu(pos)
+    #=========================================================================================
+    # Properties
+    #=========================================================================================
+
+    pass
 
     #=========================================================================================
-    # Table functions
+    # Class methods
+    #=========================================================================================
+
+    pass
+
+    #=========================================================================================
+    # Table Implementation
     #=========================================================================================
 
     def _mergeNmrAtoms(self):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-14 16:07:05 +0100 (Wed, September 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-14 17:40:53 +0100 (Wed, September 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -140,16 +140,16 @@ class _TableModel(QtCore.QAbstractTableModel):
         :param values: list of str containing new headers
         :return:
         """
-        orientation = ORIENTATIONS.get(orientation)
-        if orientation is None:
+        if not (orientation := ORIENTATIONS.get(orientation)):
             raise ValueError(f'orientation not in {list(ORIENTATIONS.keys())}')
+        if not (isinstance(values, (list, tuple)) and all(isinstance(val, (type(None), str)) for val in values)):
+            raise ValueError(f'values must be a list|tuple of str|None')
 
         try:
-            header = self._headerToolTips[orientation]
-            for ind, hText in enumerate(values):
-                header[ind] = hText
-        except:
-            raise ValueError(f'{self.__class__.__name__}.setToolTips: Error setting values {orientation} -> {values}')
+            self._headerToolTips[orientation] = values
+
+        except Exception as es:
+            raise ValueError(f'{self.__class__.__name__}.setToolTips: Error setting values {orientation} -> {values}\n{es}')
 
     def _insertRow(self, row, newRow):
         """Insert a new row into the table.

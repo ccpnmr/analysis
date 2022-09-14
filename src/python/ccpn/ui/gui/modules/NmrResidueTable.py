@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-05 11:51:23 +0100 (Mon, September 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-14 16:14:33 +0100 (Wed, September 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -53,6 +53,10 @@ logger = getLogger()
 
 ALL = '<all>'
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
+_MERGE_OPTION = 'Merge NmrResidues'
+_EDIT_OPTION = 'Edit NmrResidue'
+_MARK_OPTION = 'Mark Position'
+_INTO = 'into'
 
 
 #=========================================================================================
@@ -222,19 +226,25 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
             self.current.clearNmrResidues()
 
     #=========================================================================================
-    # Action callbacks
+    # Selection/Action callbacks
     #=========================================================================================
 
-    def actionCallback(self, data):
+    def actionCallback(self, selection, lastItem):
         """If current strip contains the double-clicked peak will navigateToPositionInStrip
         """
         from ccpn.ui.gui.lib.StripLib import _getCurrentZoomRatio
 
-        nmrResidue = data[Notifier.OBJECT]
-        if isinstance(nmrResidue, list) and nmrResidue:
-            nmrResidue = nmrResidue[0]  # select the first in the list
-        if not nmrResidue:
+        try:
+            if not (objs := list(lastItem[self._OBJECT])):
+                return
+        except Exception as es:
+            getLogger().debug2(f'{self.__class__.__name__}.actionCallback: No selection\n{es}')
             return
+
+        if isinstance(objs, (list, tuple)):
+            nmrResidue = objs[0]
+        else:
+            nmrResidue = objs
 
         if self.current.strip is not None:
             self.application.ui.mainWindow.clearMarks()
@@ -263,27 +273,31 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
     # Table context menu
     #=========================================================================================
 
-    def _setContextMenu(self):
-        """Subclass guiTable to add new items to context menu
+    def addTableMenuOptions(self, menu):
+        """Add options to the right-mouse menu
         """
-        super()._setContextMenu()
+        super(_NewNmrResidueTableWidget, self).addTableMenuOptions(menu)
 
         # add extra items to the menu
-        _actions = self.tableMenu.actions()
+        self._mergeMenuAction = menu.addAction(_MERGE_OPTION, self._mergeNmrResidues)
+        self._editMenuAction = menu.addAction(_EDIT_OPTION, self._editNmrResidue)
+        self._markMenuAction = menu.addAction(_MARK_OPTION, self._markNmrResidue)
+
+        _actions = menu.actions()
         if _actions:
             _topMenuItem = _actions[0]
-            _topSeparator = self.tableMenu.insertSeparator(_topMenuItem)
-            self._mergeMenuAction = self.tableMenu.addAction('Merge NmrResidues', self._mergeNmrResidues)
-            self._editMenuAction = self.tableMenu.addAction('Edit NmrResidue', self._editNmrResidue)
-            self._markMenuAction = self.tableMenu.addAction('Mark Position', self._markNmrResidue)
-            # move new actions to the top of the list
-            self.tableMenu.insertAction(_topSeparator, self._markMenuAction)
-            self.tableMenu.insertAction(self._markMenuAction, self._mergeMenuAction)
-            self.tableMenu.insertAction(self._mergeMenuAction, self._editMenuAction)
+            _topSeparator = menu.insertSeparator(_topMenuItem)
 
-    def _raiseTableContextMenu(self, pos):
-        """Raise the right-mouse menu
+            # move new actions to the top of the list
+            menu.insertAction(_topSeparator, self._markMenuAction)
+            menu.insertAction(self._markMenuAction, self._mergeMenuAction)
+            menu.insertAction(self._mergeMenuAction, self._editMenuAction)
+
+    def setTableMenuOptions(self, menu):
+        """Update options in the right-mouse menu
         """
+        super(_NewNmrResidueTableWidget, self).setTableMenuOptions(menu)
+
         selection = self.getSelectedObjects()
         data = self.getRightMouseItem()
         if data is not None and not data.empty:
@@ -291,22 +305,19 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
 
             selection = selection or []
             _check = (currentNmrResidue and (1 < len(selection) < 5) and currentNmrResidue in selection)
-            _option = ' into {}'.format(currentNmrResidue.id if currentNmrResidue else '') if _check else ''
-            self._mergeMenuAction.setText('Merge NmrResidues {}'.format(_option))
+            _option = f' {_INTO} {currentNmrResidue.id if currentNmrResidue else ""}' if _check else ''
+            self._mergeMenuAction.setText(f'{_MERGE_OPTION} {_option}')
             self._mergeMenuAction.setEnabled(_check)
 
-            self._editMenuAction.setText('Edit NmrResidue {}'.format(currentNmrResidue.id if currentNmrResidue else ''))
+            self._editMenuAction.setText(f'{_EDIT_OPTION} {currentNmrResidue.id if currentNmrResidue else ""}')
             self._editMenuAction.setEnabled(True if currentNmrResidue else False)
 
         else:
             # disabled but visible lets user know that menu items exist
-            self._mergeMenuAction.setText('Merge NmrResidues')
+            self._mergeMenuAction.setText(_MERGE_OPTION)
             self._mergeMenuAction.setEnabled(False)
-            self._editMenuAction.setText('Edit NmrResidue')
+            self._editMenuAction.setText(_EDIT_OPTION)
             self._editMenuAction.setEnabled(False)
-
-        # raise the menu
-        super()._raiseTableContextMenu(pos)
 
     def _mergeNmrResidues(self):
         """Merge the nmrResidues in the selection into the nmrResidue that has been right-clicked
@@ -478,15 +489,16 @@ class NmrResidueTableFrame(_CoreTableFrameABC):
     def _tableCurrent(self, value):
         self.current.nmrChain = value
 
-    def navigateToNmrResidueCallBack(self, data):
+    def navigateToNmrResidueCallBack(self, selection, lastItem):
         """Navigate in selected displays to nmrResidue; skip if none defined
         """
-        from ccpn.core.lib.CallBack import CallBack
-
-        # handle a single nmrResidue - should always contain an object
-        objs = data[CallBack.OBJECT]
-        if not objs or not all(objs):
+        try:
+            if not (objs := list(lastItem[self._tableWidget._OBJECT])):
+                return
+        except Exception as es:
+            getLogger().debug2(f'{self.__class__.__name__}.navigateToNmrResidueCallBack: No selection\n{es}')
             return
+
         if isinstance(objs, (tuple, list)):
             nmrResidue = objs[0]
         else:
@@ -566,19 +578,6 @@ class NmrResidueTableFrame(_CoreTableFrameABC):
 class _NewCSMNmrResidueTableWidget(_NewNmrResidueTableWidget):
     """Custom nmrResidue Table with extra columns used in the ChemicalShiftsMapping Module
     """
-
-    def setActionCallback(self, actionCallback=None):
-        # enable callbacks
-        self.actionCallback = actionCallback
-
-        for act in [self._doubleClickCallback]:
-            try:
-                self.doubleClicked.disconnect(act)
-            except Exception:
-                getLogger().debug2('nothing to disconnect')
-
-        if self.actionCallback:
-            self.doubleClicked.connect(self._doubleClickCallback)
 
     def setCheckBoxCallback(self, checkBoxCallback):
         # enable callback on the checkboxes

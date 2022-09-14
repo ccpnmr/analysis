@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-09 21:15:59 +0100 (Fri, September 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-14 16:07:05 +0100 (Wed, September 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,57 +26,157 @@ __date__ = "$Date: 2022-09-09 18:02:40 +0100 (Fri, September 09, 2022) $"
 # Start of code
 #=========================================================================================
 
-import numpy as np
-import pandas as pd
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtWidgets
 from collections import OrderedDict
-# from contextlib import contextmanager
-# from dataclasses import dataclass
 from functools import partial
-# from time import time_ns
-# from types import SimpleNamespace
-import typing
 
-# from ccpn.core.lib.CallBack import CallBack
-# from ccpn.core.lib.CcpnSorting import universalSortKey
-# from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptions
-# from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
-from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
-from ccpn.ui.gui.widgets.Frame import ScrollableFrame
-# from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.SearchWidget import attachSimpleSearchWidget
-from ccpn.ui.gui.widgets.SearchWidget import attachSimpleSearchWidget
-# from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.FileDialog import TablesFileDialog
-from ccpn.ui.gui.widgets.table._TableModel import _TableModel
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import copyToClipboard
 
 
-# from ccpn.util.OrderedSet import OrderedSet
+#=========================================================================================
+# ABCs
+#=========================================================================================
+
+class _TableMenuABC(QtWidgets.QTableView):
+    """Class to handle adding options to a right-mouse menu.
+    """
+
+    # add internal labels here
+
+    def addTableMenuOptions(self, menu):
+        """Add options to the right-mouse menu on the table or headers.
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
+
+    def setTableMenuOptions(self, menu):
+        """Update search options in the right-mouse menu
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
+
+    #=========================================================================================
+    # Properties
+    #=========================================================================================
+
+    pass
+
+    #=========================================================================================
+    # Class methods
+    #=========================================================================================
+
+    pass
+
+    #=========================================================================================
+    # Implementation
+    #=========================================================================================
+
+    pass
 
 
-# ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
-#                 'horizontal'        : QtCore.Qt.Horizontal,
-#                 'v'                 : QtCore.Qt.Vertical,
-#                 'vertical'          : QtCore.Qt.Vertical,
-#                 QtCore.Qt.Horizontal: QtCore.Qt.Horizontal,
-#                 QtCore.Qt.Vertical  : QtCore.Qt.Vertical,
-#                 }
+class _TableHeaderABC(QtWidgets.QTableView):
+    """Class to handle adding options to a right-mouse menu.
+    """
 
-# # define a role to return a cell-value
-# DTYPE_ROLE = QtCore.Qt.UserRole + 1000
-# VALUE_ROLE = QtCore.Qt.UserRole + 1001
-# INDEX_ROLE = QtCore.Qt.UserRole + 1002
-#
-# EDIT_ROLE = QtCore.Qt.EditRole
-# _EDITOR_SETTER = ('setColor', 'selectValue', 'setData', 'set', 'setValue', 'setText', 'setFile')
-# _EDITOR_GETTER = ('get', 'value', 'text', 'getFile')
+    # add internal labels here
+
+    def addHeaderMenuOptions(self, menu):
+        """Add options to the right-mouse menu on the table or headers.
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
+
+    def setHeaderMenuOptions(self, menu):
+        """Update search options in the right-mouse menu
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
+
+    #=========================================================================================
+    # Properties
+    #=========================================================================================
+
+    pass
+
+    #=========================================================================================
+    # Class methods
+    #=========================================================================================
+
+    pass
+
+    #=========================================================================================
+    # Implementation
+    #=========================================================================================
+
+    pass
+
+
+#=========================================================================================
+# Table Menu - Copy cell
+#=========================================================================================
+
+_COPYCELL_OPTION = 'Copy clicked cell value'
+
+
+class _TableCopyCell(_TableMenuABC):
+    """Class to handle copy-cell option on a menu
+    """
+    _enableCopyCell = True
+
+    def addTableMenuOptions(self, menu):
+        """Add copy-cell option to the right-mouse menu
+        """
+        self._copySelectedCellAction = menu.addAction(_COPYCELL_OPTION, self._copySelectedCell)
+
+    def setTableMenuOptions(self, menu):
+        """Update copy-cell option in the right-mouse menu
+        """
+        # disable the copyCell options if not available
+        if (actions := [act for act in menu.actions() if act.text() == _COPYCELL_OPTION]):
+            actions[0].setEnabled(self._enableCopyCell)
+
+    #=========================================================================================
+    # Properties
+    #=========================================================================================
+
+    @property
+    def enableCopyCell(self):
+        """Return True of the copy-cell options are enabled in the table menu
+        """
+        return self._enableCopyCell
+
+    #=========================================================================================
+    # Class methods
+    #=========================================================================================
+
+    def setCopyCellEnabled(self, value):
+        """Enable/disable the copy-cell option from the right-mouse menu.
+
+        :param bool value: enabled True/False
+        """
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}.setCopyCellEnabled: value must be True/False')
+
+        self._enableCopyCell = value
+
+    #=========================================================================================
+    # Implementation
+    #=========================================================================================
+
+    def _copySelectedCell(self):
+        """Copy the current cell-value to the clipboard
+        """
+        idx = self.currentIndex()
+        if idx is not None:
+            text = idx.data().strip()
+            copyToClipboard([text])
+
 
 #=========================================================================================
 # Table Header Menu
@@ -85,8 +185,8 @@ from ccpn.util.Common import copyToClipboard
 _COLUMN_SETTINGS = 'Column Settings...'
 
 
-class _TableHeaderColumns(QtWidgets.QTableView):
-    """Class to handle column-settings on a menu
+class _TableHeaderColumns(_TableHeaderABC):
+    """Class to handle column-settings on a header-menu
     """
     _parent = None
     _df = None
@@ -95,7 +195,7 @@ class _TableHeaderColumns(QtWidgets.QTableView):
     _showColumns = True
     _enableColumns = True
 
-    def setHeaderMenu(self, menu):
+    def addHeaderMenuOptions(self, menu):
         """Add table-header items to the right-mouse menu
         """
         menu.addSeparator()
@@ -216,12 +316,12 @@ _EXPORT_OPTION_VISIBLE = 'Export Visible Table'
 _EXPORT_OPTION_ALL = 'Export All Columns'
 
 
-class _TableExport(QtWidgets.QTableView):
+class _TableExport(_TableMenuABC):
     """Class to handle export options on a menu
     """
     _enableExport = True
 
-    def setTableMenu(self, menu):
+    def addTableMenuOptions(self, menu):
         """Add export options to the right-mouse menu
         """
         menu.addSeparator()
@@ -358,22 +458,24 @@ class _TableExport(QtWidgets.QTableView):
 
 
 #=========================================================================================
-# Table Menu - Delete
+# Table Menu - Delete/Clear
 #=========================================================================================
 
 _DELETE_OPTION = 'Delete Selection'
+_CLEAR_OPTION = 'Clear Selection'
 
 
-class _TableDelete(QtWidgets.QTableView):
+class _TableDelete(_TableMenuABC):
     """Class to handle delete options on a menu
     """
     _enableDelete = True
 
-    def setTableMenu(self, menu):
+    def addTableMenuOptions(self, menu):
         """Add delete options to the right-mouse menu
         """
         menu.addSeparator()
         self._deleteAction = menu.addAction(_DELETE_OPTION, self.deleteSelectionFromTable)
+        self._clearAction = menu.addAction(_CLEAR_OPTION, self._clearSelection)
 
     def setTableMenuOptions(self, menu):
         """Update delete options in the right-mouse menu
@@ -416,6 +518,11 @@ class _TableDelete(QtWidgets.QTableView):
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
 
+    def _clearSelection(self):
+        """Clear the table-selection
+        """
+        self.clearSelection()
+
 
 #=========================================================================================
 # Table Menu - Search
@@ -424,7 +531,7 @@ class _TableDelete(QtWidgets.QTableView):
 _SEARCH_OPTION = 'Filter...'
 
 
-class _TableSearch(QtWidgets.QTableView):
+class _TableSearch(_TableMenuABC):
     """Class to handle search options from a right-mouse menu.
     """
     _enableSearch = True
@@ -433,7 +540,7 @@ class _TableSearch(QtWidgets.QTableView):
     # initialise the internal data storage
     _defaultDf = None
 
-    def setTableMenu(self, menu):
+    def addTableMenuOptions(self, menu):
         """Add search options to the right-mouse menu
         """
         menu.addSeparator()
@@ -445,7 +552,7 @@ class _TableSearch(QtWidgets.QTableView):
         self._initSearchWidget()
 
         # disable the search action if not available
-        if (actions := [act for act in self.tableMenu.actions() if act.text() == _SEARCH_OPTION]):
+        if (actions := [act for act in menu.actions() if act.text() == _SEARCH_OPTION]):
             actions[0].setEnabled(self._searchWidget is not None)
 
     #=========================================================================================
@@ -483,8 +590,8 @@ class _TableSearch(QtWidgets.QTableView):
         self._enableSearch = value
 
     def showSearchSettings(self):
-        """ Display the search frame in the table"""
-
+        """Display the search frame in the table
+        """
         self._initSearchWidget()
 
         if self._searchWidget is not None:
@@ -506,30 +613,19 @@ class _TableSearch(QtWidgets.QTableView):
             if not attachSimpleSearchWidget(self._parent, self):
                 getLogger().warning('Filter option not available')
 
-    # def hideSearchWidget(self):
-    #     if self._searchWidget is not None:
-    #         self._searchWidget.hide()
-    #
-    # def showSearchSettings(self):
-    #     """ Display the search frame in the table"""
-    #
-    #     self._initSearchWidget()
-    #
-    #     if self._searchWidget is not None:
-    #         if not self._searchWidget.isVisible():
-    #             self._searchWidget.show()
-    #         else:
-    #             self._searchWidget.hideSearch()
+            else:
+                self._defaultDf = self._df
 
     def refreshTable(self):
-        # subclass to refresh the groups
+        """Refresh the table from the search-widget
+        """
         if self._defaultDf is not None:
-            _updateSimplePandasTable(self, self._defaultDf)
+            self.updateDf(self._defaultDf)
         else:
             getLogger().warning(f'{self.__class__.__name__}.refreshTable: defaultDf is not defined')
-        # self.updateTableExpanders()
 
-    def setDataFromSearchWidget(self, dataFrame):
-        """Set the data for the table from the search widget
+    def setDataFromSearchWidget(self, df):
+        """Set the data from the search-widget
         """
-        _updateSimplePandasTable(self, dataFrame)
+        # this may be a subset of self._defaultDf
+        self.updateDf(df)

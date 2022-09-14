@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-09 21:15:58 +0100 (Fri, September 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-14 16:07:04 +0100 (Wed, September 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,61 +29,34 @@ __date__ = "$Date: 2022-09-08 17:12:49 +0100 (Thu, September 08, 2022) $"
 import numpy as np
 import pandas as pd
 from PyQt5 import QtWidgets, QtCore, QtGui
-from collections import OrderedDict
-# from contextlib import contextmanager
-# from dataclasses import dataclass
+from dataclasses import dataclass
+from contextlib import contextmanager
 from functools import partial
-# from time import time_ns
-# from types import SimpleNamespace
 import typing
 
-# from ccpn.core.lib.CallBack import CallBack
-# from ccpn.core.lib.CcpnSorting import universalSortKey
-# from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptions
-# from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
+from ccpn.ui.gui.guiSettings import getColours
 from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
-# from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
-from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.SearchWidget import attachSimpleSearchWidget
-# from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.FileDialog import TablesFileDialog
-from ccpn.ui.gui.widgets.table._TableModel import _TableModel
-from ccpn.ui.gui.widgets.table._TableAdditions import _TableHeaderColumns, _TableExport, _TableSearch, _TableDelete
-from ccpn.util.Path import aPath
+from ccpn.ui.gui.widgets.table._TableModel import _TableModel, VALUE_ROLE, INDEX_ROLE
+from ccpn.ui.gui.widgets.table._TableAdditions import _TableHeaderColumns, \
+    _TableCopyCell, _TableExport, _TableSearch, _TableDelete
+from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Logging import getLogger
-from ccpn.util.Common import copyToClipboard
 
 
-# from ccpn.util.OrderedSet import OrderedSet
-
-
-# ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
-#                 'horizontal'        : QtCore.Qt.Horizontal,
-#                 'v'                 : QtCore.Qt.Vertical,
-#                 'vertical'          : QtCore.Qt.Vertical,
-#                 QtCore.Qt.Horizontal: QtCore.Qt.Horizontal,
-#                 QtCore.Qt.Vertical  : QtCore.Qt.Vertical,
-#                 }
-
-# # define a role to return a cell-value
-# DTYPE_ROLE = QtCore.Qt.UserRole + 1000
-# VALUE_ROLE = QtCore.Qt.UserRole + 1001
-# INDEX_ROLE = QtCore.Qt.UserRole + 1002
-#
-# EDIT_ROLE = QtCore.Qt.EditRole
-# _EDITOR_SETTER = ('setColor', 'selectValue', 'setData', 'set', 'setValue', 'setText', 'setFile')
-# _EDITOR_GETTER = ('get', 'value', 'text', 'getFile')
+# simple class to store the blocking state of the table
+@dataclass
+class _BlockingContent:
+    modelBlocker = None
+    rootBlocker = None
 
 
 #=========================================================================================
 # TableABC
 #=========================================================================================
 
-class TableABC(_TableHeaderColumns, _TableExport, _TableSearch, _TableDelete, QtWidgets.QTableView):
+class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, _TableDelete, QtWidgets.QTableView):
     styleSheet = """QTableView {
                         background-color: %(GUITABLE_BACKGROUND)s;
                         alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
@@ -97,9 +70,15 @@ class TableABC(_TableHeaderColumns, _TableExport, _TableSearch, _TableDelete, Qt
                         border-radius: 2px;
                     }
                     QTableView::item {
+                        margin: 0px;
                         padding: %(_CELL_PADDING)spx;
                     }
-                    QTableView::item::selected {
+                    QTableView::item:focus {
+                        margin: 0px;
+                        border: %(_FOCUS_BORDER_WIDTH)spx solid %(BORDER_FOCUS)s;
+                        padding: %(_CELL_PADDING_OFFSET)spx;
+                    }
+                    QTableView::item:selected {
                         background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
                         color: %(GUITABLE_SELECTED_FOREGROUND)s;
                     }
@@ -109,36 +88,47 @@ class TableABC(_TableHeaderColumns, _TableExport, _TableSearch, _TableDelete, Qt
     # QTableView::item - color: %(GUITABLE_ITEM_FOREGROUND)s;
     # QTableView::item:selected - color: %(GUITABLE_SELECTED_FOREGROUND)s;
 
-    # columnDefs = None
-    # _enableExport = True
-    # _enableDelete = False
-    # _enableSearch = True
-
-    # _tableBlockingLevel = 0
-
+    _defaultDf = None
     _enableSelectionCallback = False
     _enableActionCallback = False
+    defaultEditable = True
 
     def __init__(self, parent=None, df=None,
                  multiSelect=True, selectRows=True,
                  showHorizontalHeader=True, showVerticalHeader=True,
-                 borderWidth=2, cellPadding=2,
-                 _resize=False, setWidthToColumns=False, setHeightToRows=False
+                 borderWidth=2, cellPadding=2, focusBorderWidth=0,
+                 _resize=False, setWidthToColumns=False, setHeightToRows=False,
+                 setOnHeaderOnly=False, showGrid=False,
                  ):
+        """Initialise the table.
+
+        :param parent:
+        :param df:
+        :param multiSelect:
+        :param selectRows:
+        :param showHorizontalHeader:
+        :param showVerticalHeader:
+        :param borderWidth:
+        :param cellPadding:
+        :param focusBorderWidth:
+        :param _resize:
+        :param setWidthToColumns:
+        :param setHeightToRows:
+        :param setOnHeaderOnly:
+        :param showGrid:
+        """
         super().__init__(parent)
-        # Base._init(self, **kwds)
 
+        self.setShowGrid(showGrid)
         self._parent = parent
-
-        # # initialise the internal data storage
-        # self._defaultDf = None
-        # self._tableBlockingLevel = 0
 
         # set stylesheet
         colours = getColours()
         # add border-width/cell-padding options
         self._borderWidth = colours['_BORDER_WIDTH'] = borderWidth
         self._cellPadding = colours['_CELL_PADDING'] = cellPadding  # the extra padding for the selected cell-item
+        self._focusBorderWidth = colours['_FOCUS_BORDER_WIDTH'] = focusBorderWidth
+        self._cellPaddingOffset = colours['_CELL_PADDING_OFFSET'] = cellPadding - focusBorderWidth
         self._defaultStyleSheet = self.styleSheet % colours
         self.setStyleSheet(self._defaultStyleSheet)
         self.setAlternatingRowColors(True)
@@ -174,19 +164,23 @@ class TableABC(_TableHeaderColumns, _TableExport, _TableSearch, _TableDelete, Qt
         self.setTableMenu()
         self.setHeaderMenu()
 
+        self._tableBlockingLevel = 0
+
         # initialise the table
-        self._initialiseDf(df, _resize, setHeightToRows, setWidthToColumns)
+        self.updateDf(df, _resize, setHeightToRows, setWidthToColumns, setOnHeaderOnly=setOnHeaderOnly, resetDefault=True)
 
         # set selection/action callbacks
         self.doubleClicked.connect(self._actionConnect)
 
-    def _initialiseDf(self, df, resize, setHeightToRows, setWidthToColumns):
+    def updateDf(self, df, resize=True, setHeightToRows=False, setWidthToColumns=False, setOnHeaderOnly=False, resetDefault=False):
         """Initialise the dataFrame
         """
-        if df is not None and not df.empty:
+        if not isinstance(df, (type(None), pd.DataFrame)):
+            raise ValueError(f'data is not of type pd.DataFrame - {type(df)}')
+
+        if df is not None and (setOnHeaderOnly or not df.empty):
             # set the model
-            data = pd.DataFrame(df)
-            model = _TableModel(data, view=self)
+            model = _TableModel(df, view=self)
             self.setModel(model)
 
             self.resizeColumnsToContents()
@@ -201,9 +195,14 @@ class TableABC(_TableHeaderColumns, _TableExport, _TableSearch, _TableDelete, Qt
 
         else:
             # set a default empty model
-            data = pd.DataFrame({})
-            model = _TableModel(data, view=self)
+            df = pd.DataFrame({})
+            model = _TableModel(df, view=self)
             self.setModel(model)
+
+        if resetDefault:
+            self._defaultDf = df  # model changes so need to keep it here
+
+        return model
 
     def setModel(self, model: QtCore.QAbstractItemModel) -> None:
         """Set the model for the view
@@ -216,6 +215,7 @@ class TableABC(_TableHeaderColumns, _TableExport, _TableSearch, _TableDelete, Qt
 
         # set selection callback because the model has changed?
         self.selectionModel().selectionChanged.connect(self._selectionConnect)
+        self.model().defaultEditable = self.defaultEditable
 
     def _initTableCommonWidgets(self, parent, height=35, setGuiNotifier=None, **kwds):
         """Initialise the common table elements
@@ -333,24 +333,6 @@ class TableABC(_TableHeaderColumns, _TableExport, _TableSearch, _TableDelete, Qt
     def _df(self, value):
         self.model().df = value
 
-    # @property
-    # def enableExport(self):
-    #     """Return True of the export options are enabled in the table menu
-    #     """
-    #     return self._enableExport
-
-    # @property
-    # def enableDelete(self):
-    #     """Return True of the delete options are enabled in the table menu
-    #     """
-    #     return self._enableDelete
-
-    # @property
-    # def enableSearch(self):
-    #     """Return True of the search options are enabled in the table menu
-    #     """
-    #     return self._enableSearch
-
     #=========================================================================================
     # Notifier callbacks
     #=========================================================================================
@@ -360,18 +342,47 @@ class TableABC(_TableHeaderColumns, _TableExport, _TableSearch, _TableDelete, Qt
         """
         getLogger().debug2(f'selection {selected}  {deselected}')
         if self._enableSelectionCallback:
-            # currently passes QItemSelections
-            self.selectionCallback(selected, deselected)
+            # get the df-rows from the selections
+            newRows = OrderedSet([idx.data(INDEX_ROLE)[0] for sel in selected for idx in sel.indexes()])
+            oldRows = OrderedSet([idx.data(INDEX_ROLE)[0] for sel in deselected for idx in sel.indexes()])
+            sRows = OrderedSet([idx.data(INDEX_ROLE)[0] for idx in self.selectedIndexes()])
+
+            new = self._df.iloc[list(newRows)]
+            old = self._df.iloc[list(oldRows)]
+            sel = self._df.iloc[list(sRows)]
+            try:
+                last = self._df.iloc[[self.currentIndex().data(INDEX_ROLE)[0]]]
+            except Exception:
+                last = []
+
+            with self._blockTableSignals('_selectionCallback', blanking=False, disableScroll=True):
+                # pass the dfs to the user-callback
+                self.selectionCallback(new, old, sel, last)
 
     def _actionConnect(self, modelIndex):
         """Handle the callback for a selection
         """
+        if bool(modelIndex.flags() & QtCore.Qt.ItemIsEditable):
+            # item is editable so skip the action
+            return
+        if not self.actionCallback:
+            return
+
         getLogger().debug2(f'action {modelIndex}')
         if self._enableActionCallback:
-            # currently passes a QModelIndex
-            self.actionCallback(modelIndex)
+            # get the df-rows from the selection
+            sRows = OrderedSet([idx.data(INDEX_ROLE)[0] for idx in self.selectedIndexes()])
 
-    def selectionCallback(self, selected, deselected):
+            sel = self._df.iloc[list(sRows)]
+            try:
+                last = self._df.iloc[[self.currentIndex().data(INDEX_ROLE)[0]] if sRows else []]
+            except Exception:
+                last = []
+
+            with self._blockTableSignals('_actionCallback', blanking=False, disableScroll=True):
+                self.actionCallback(sel, last)
+
+    def selectionCallback(self, selected, deselected, selection, lastItem):
         """Handle item selection has changed in table - call user callback
         :param selected: table indexes selected
         :param deselected: table indexes deselected
@@ -379,7 +390,7 @@ class TableABC(_TableHeaderColumns, _TableExport, _TableSearch, _TableDelete, Qt
         # MUST BE SUBCLASSED
         raise NotImplementedError(f'Code error: {self.__class__.__name__}.selectionCallback not implemented')
 
-    def actionCallback(self, index):
+    def actionCallback(self, selection, lastItem):
         """Handle item selection has changed in table - call user callback
         """
         # MUST BE SUBCLASSED
@@ -414,8 +425,8 @@ class TableABC(_TableHeaderColumns, _TableExport, _TableSearch, _TableDelete, Qt
         """
         super().keyPressEvent(event)
 
-        key = event.key()
-        cursors = [QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_Left, QtCore.Qt.Key_Right]
+        # key = event.key()
+        # cursors = [QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_Left, QtCore.Qt.Key_Right]
         enter = [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return]
         allKeyModifers = [QtCore.Qt.ShiftModifier, QtCore.Qt.ControlModifier, QtCore.Qt.AltModifier, QtCore.Qt.MetaModifier]
 
@@ -469,38 +480,79 @@ class TableABC(_TableHeaderColumns, _TableExport, _TableSearch, _TableDelete, Qt
                     return
 
     #=========================================================================================
-    # Other methods
+    # Block table signals
     #=========================================================================================
 
-    # def setExportEnabled(self, value):
-    #     """Enable/disable the export option from the right-mouse menu.
-    #
-    #     :param bool value: enabled True/False
-    #     """
-    #     if not isinstance(value, bool):
-    #         raise TypeError(f'{self.__class__.__name__}.setExportEnabled: value must be True/False')
-    #
-    #     self._enableExport = value
+    def _blockTableEvents(self, blanking=True, disableScroll=False, tableState=None):
+        """Block all updates/signals/notifiers in the table.
+        """
+        # block on first entry
+        if self._tableBlockingLevel == 0:
+            if disableScroll:
+                self._scrollOverride = True
 
-    # def setDeleteEnabled(self, value):
-    #     """Enable/disable the delete option from the right-mouse menu.
-    #
-    #     :param bool value: enabled True/False
-    #     """
-    #     if not isinstance(value, bool):
-    #         raise TypeError(f'{self.__class__.__name__}.setDeleteEnabled: value must be True/False')
-    #
-    #     self._enableDelete = value
+            # use the Qt widget to block signals - selectionModel must also be blocked
+            tableState.modelBlocker = QtCore.QSignalBlocker(self.selectionModel())
+            tableState.rootBlocker = QtCore.QSignalBlocker(self)
+            # tableState.enabledState = self.updatesEnabled()
+            # self.setUpdatesEnabled(False)
 
-    # def setSearchEnabled(self, value):
-    #     """Enable/disable the search option from the right-mouse menu.
-    #
-    #     :param bool value: enabled True/False
-    #     """
-    #     if not isinstance(value, bool):
-    #         raise TypeError(f'{self.__class__.__name__}.setSearchEnabled: value must be True/False')
-    #
-    #     self._enableSearch = value
+            if blanking and self.project:
+                if self.project:
+                    self.project.blankNotification()
+
+            # list to store any deferred functions until blocking has finished
+            self._deferredFuncs = []
+
+        self._tableBlockingLevel += 1
+
+    def _unblockTableEvents(self, blanking=True, disableScroll=False, tableState=None):
+        """Unblock all updates/signals/notifiers in the table.
+        """
+        if self._tableBlockingLevel > 0:
+            self._tableBlockingLevel -= 1
+
+            # unblock all signals on last exit
+            if self._tableBlockingLevel == 0:
+                if blanking and self.project:
+                    if self.project:
+                        self.project.unblankNotification()
+
+                tableState.modelBlocker = None
+                tableState.rootBlocker = None
+                # self.setUpdatesEnabled(tableState.enabledState)
+                # tableState.enabledState = None
+
+                if disableScroll:
+                    self._scrollOverride = False
+
+                self.update()
+
+                for func in self._deferredFuncs:
+                    # process simple deferred functions - required so that qt signals are not blocked
+                    func()
+                self._deferredFuncs = []
+
+        else:
+            raise RuntimeError('Error: tableBlockingLevel already at 0')
+
+    @contextmanager
+    def _blockTableSignals(self, callerId='', blanking=True, disableScroll=False):
+        """Block all signals from the table
+        """
+        tableState = _BlockingContent()
+        self._blockTableEvents(blanking, disableScroll=disableScroll, tableState=tableState)
+        try:
+            yield  # yield control to the calling process
+
+        except Exception as es:
+            raise es
+        finally:
+            self._unblockTableEvents(blanking, disableScroll=disableScroll, tableState=tableState)
+
+    #=========================================================================================
+    # Other methods
+    #=========================================================================================
 
     def setWidthToColumns(self):
         """Set the width of the table to the column widths
@@ -575,298 +627,108 @@ class TableABC(_TableHeaderColumns, _TableExport, _TableSearch, _TableDelete, Qt
     # Table context menu
     #=========================================================================================
 
-    def setTableMenu(self, menu=None):
+    def setTableMenu(self) -> Menu:
         """Set up the context menu for the main table
         """
-        self.tableMenu = menu or Menu('', self, isFloatWidget=True)
-        setWidgetFont(self.tableMenu, )
+        menu = Menu('', self, isFloatWidget=True)
+        setWidgetFont(menu, )
 
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(self._raiseTableContextMenu)
+        self.customContextMenuRequested.connect(partial(self._raiseTableContextMenu, menu))
 
-        self._copySelectedCellAction = self.tableMenu.addAction('Copy clicked cell value', self._copySelectedCell)
+        self.addTableMenuOptions(menu)
 
-        # NOTE:ED - call additional _inits here to add options to the table menu
-        _TableExport.setTableMenu(self, self.tableMenu)
-        _TableSearch.setTableMenu(self, self.tableMenu)
-        _TableDelete.setTableMenu(self, self.tableMenu)
+        return menu
 
-        # self.tableMenu.addAction('Export Visible Table', partial(self.exportTableDialog, exportAll=False))
-        # self.tableMenu.addAction('Export All Columns', partial(self.exportTableDialog, exportAll=True))
-        # self.tableMenu.addAction('Delete Selection', self.deleteObjFromTable)
+    def addTableMenuOptions(self, menu):
+        """Add options to the right-mouse menu
+        """
+        # self._copySelectedCellAction = menu.addAction('Copy clicked cell value', self._copySelectedCell)
 
-        # self._searchAction = self.tableMenu.addAction('Filter...', self.showSearchSettings)
+        # NOTE:ED - call additional addTableMenuOptions here to add options to the table menu
+        _TableCopyCell.addTableMenuOptions(self, menu)
+        _TableExport.addTableMenuOptions(self, menu)
+        _TableSearch.addTableMenuOptions(self, menu)
+        _TableDelete.addTableMenuOptions(self, menu)
 
-        return self.tableMenu
+    def setTableMenuOptions(self, menu):
+        """Update options in the right-mouse menu
+        """
+        # Subclass to add extra options
+        pass
 
-    def _raiseTableContextMenu(self, pos):
+    def _raiseTableContextMenu(self, menu, pos):
         """Create a new menu and popup at cursor position
         """
-        # self.initSearchWidget()
+        if not menu:
+            raise ValueError('menu is not defined')
 
-        # NOTE:ED - call additional _inits here to add options to the table menu
-        _TableExport.setTableMenuOptions(self, self.tableMenu)
-        _TableSearch.setTableMenuOptions(self, self.tableMenu)
+        # call the class setup
+        self.setTableMenuOptions(menu)
 
-        # # disable the export options if not available
-        # if (actions := [act for act in self.tableMenu.actions() if act.text() == 'Export Visible Table']):
-        #     actions[0].setEnabled(self._enableExport)
-        # if (actions := [act for act in self.tableMenu.actions() if act.text() == 'Export All Columns']):
-        #     actions[0].setEnabled(self._enableExport)
+        # NOTE:ED - call additional setTableMenuOptions here to update options in the table menu
+        _TableCopyCell.setTableMenuOptions(self, menu)
+        _TableExport.setTableMenuOptions(self, menu)
+        _TableSearch.setTableMenuOptions(self, menu)
+        _TableDelete.setTableMenuOptions(self, menu)
 
-        # disable the delete action if not available
-        if (actions := [act for act in self.tableMenu.actions() if act.text() == 'Delete Selection']):
-            actions[0].setEnabled(self._enableDelete)
-
-        # # disable the search action if not available
-        # if (actions := [act for act in self.tableMenu.actions() if act.text() == 'Filter...']):
-        #     actions[0].setEnabled(self.searchWidget is not None)
-
-        pos = QtCore.QPoint(pos.x() + 10, pos.y() + 10)
-        self.tableMenu.exec_(self.mapToGlobal(pos))
+        pos = QtCore.QPoint(pos.x() + 5, pos.y())
+        menu.exec_(self.mapToGlobal(pos))
 
     #=========================================================================================
     # Header context menu
     #=========================================================================================
 
-    def setHeaderMenu(self, menu=None):
+    def setHeaderMenu(self) -> Menu:
         """Set up the context menu for the table header
         """
+        menu = Menu('', self, isFloatWidget=True)
+        setWidgetFont(menu, )
+
         headers = self.horizontalHeader()
         headers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        headers.customContextMenuRequested.connect(self._raiseHeaderContextMenu)
+        headers.customContextMenuRequested.connect(partial(self._raiseHeaderContextMenu, menu))
 
-        self.tableHeaderMenu = menu or QtWidgets.QMenu()
-        setWidgetFont(self.tableHeaderMenu, )
+        self.addHeaderMenuOptions(menu)
 
-        # NOTE:ED - call additional _inits here to add options to the header menu
-        _TableHeaderColumns.setHeaderMenu(self, self.tableHeaderMenu)
+        return menu
 
-        return self.tableHeaderMenu
+    def addHeaderMenuOptions(self, menu):
+        """Add options to the right-mouse menu
+        """
+        # NOTE:ED - call additional setHeaderMenu here to add options to the header menu
+        _TableHeaderColumns.addHeaderMenuOptions(self, menu)
 
-    def _raiseHeaderContextMenu(self, pos):
+    def setHeaderMenuOptions(self, menu):
+        """Update options in the right-mouse menu
+        """
+        # Subclass to add extra options
+        pass
+
+    def _raiseHeaderContextMenu(self, menu, pos):
         """Raise the menu on the header
         """
+        if not menu:
+            raise ValueError('menu is not defined')
         if self._df is None or self._df.empty:
             return
 
-        pos = QtCore.QPoint(pos.x() + 10, pos.y() + 10)  # move the popup a bit down; otherwise can trigger an event if the pointer is just on top the first item
+        pos = QtCore.QPoint(pos.x() + 5, pos.y())  # move the popup a bit down; otherwise can trigger an event if the pointer is just on top the first item
 
-        # NOTE:ED - call additional _inits here to add enable/disable/hide to the header menu
-        _TableHeaderColumns.setHeaderMenuOptions(self, self.tableHeaderMenu)
+        # call the class setup
+        self.setHeaderMenuOptions(menu)
 
-        if len(self.tableHeaderMenu.actions()):
-            self.tableHeaderMenu.exec_(self.mapToGlobal(pos))
+        # NOTE:ED - call additional setHeaderMenuOptions here to add enable/disable/hide options in the header menu
+        _TableHeaderColumns.setHeaderMenuOptions(self, menu)
+
+        if len(menu.actions()):
+            menu.exec_(self.mapToGlobal(pos))
 
     #=========================================================================================
     # Table functions
     #=========================================================================================
 
-    def _copySelectedCell(self):
-        """Copy the current cell-value to the clipboard
-        """
-        idx = self.currentIndex()
-        if idx is not None:
-            text = idx.data().strip()
-            copyToClipboard([text])
-
-    # def exportTableDialog(self, exportAll=True):
-    #     """export the contents of the table to a file
-    #     The actual data values are exported, not the visible items which may be rounded due to the table settings
-    #
-    #     :param exportAll: True/False - True implies export whole table - but in visible order
-    #                                 False, export only the visible table
-    #     """
-    #     model = self.model()
-    #     df = model.df
-    #     rows, cols = model.rowCount(), model.columnCount()
-    #
-    #     if df is None or df.empty:
-    #         MessageDialog.showWarning('Export Table to File', 'Table does not contain a dataFrame')
-    #
-    #     else:
-    #         rowList = [model._sortIndex[row] for row in range(rows)]
-    #         if exportAll:
-    #             colList = list(self.model().df.columns)  # assumes that the dataFrame column-headings match the table
-    #         else:
-    #             colList = [col for ii, col, in enumerate(list(self.model().df.columns)) if not self.horizontalHeader().isSectionHidden(ii)]
-    #
-    #         self._exportTableDialog(df, rowList=rowList, colList=colList)
-
-    # def deleteObjFromTable(self):
-    #     """Delete all objects in the selection from the project
-    #     """
-    #     # MUST BE SUBCLASSED
-    #     raise NotImplementedError("Code error: function not implemented")
-
-    # #=========================================================================================
-    # # Exporters
-    # #=========================================================================================
-    #
-    # @staticmethod
-    # def _dataFrameToExcel(dataFrame, path, sheet_name='Table', columns=None):
-    #     if dataFrame is not None:
-    #         path = aPath(path)
-    #         path = path.assureSuffix('xlsx')
-    #         if columns is not None and isinstance(columns, list):  #this is wrong. columns can be a 1d array
-    #             dataFrame.to_excel(path, sheet_name=sheet_name, columns=columns, index=False)
-    #         else:
-    #             dataFrame.to_excel(path, sheet_name=sheet_name, index=False)
-    #
-    # @staticmethod
-    # def _dataFrameToCsv(dataFrame, path, *args):
-    #     dataFrame.to_csv(path)
-    #
-    # @staticmethod
-    # def _dataFrameToTsv(dataFrame, path, *args):
-    #     dataFrame.to_csv(path, sep='\t')
-    #
-    # @staticmethod
-    # def _dataFrameToJson(dataFrame, path, *args):
-    #     dataFrame.to_json(path, orient='split', default_handler=str)
-    #
-    # def findExportFormats(self, path, dataFrame, sheet_name='Table', filterType=None, columns=None):
-    #     formatTypes = OrderedDict([
-    #         ('.xlsx', self._dataFrameToExcel),
-    #         ('.csv', self._dataFrameToCsv),
-    #         ('.tsv', self._dataFrameToTsv),
-    #         ('.json', self._dataFrameToJson)
-    #         ])
-    #
-    #     # extension = os.path.splitext(path)[1]
-    #     extension = aPath(path).suffix
-    #     if not extension:
-    #         extension = '.xlsx'
-    #     if extension in formatTypes.keys():
-    #         formatTypes[extension](dataFrame, path, sheet_name, columns)
-    #         return
-    #     else:
-    #         try:
-    #             self._findExportFormats(str(path) + filterType, sheet_name)
-    #         except:
-    #             MessageDialog.showWarning('Could not export', 'Format file not supported or not provided.'
-    #                                                           '\nUse one of %s' % ', '.join(formatTypes))
-    #             getLogger().warning('Format file not supported')
-    #
-    # def _exportTableDialog(self, dataFrame, rowList=None, colList=None):
-    #
-    #     self.saveDialog = TablesFileDialog(parent=None, acceptMode='save', selectFile='ccpnTable.xlsx',
-    #                                        fileFilter=".xlsx;; .csv;; .tsv;; .json ")
-    #     self.saveDialog._show()
-    #     path = self.saveDialog.selectedFile()
-    #     if path:
-    #         sheet_name = 'Table'
-    #         if dataFrame is not None and not dataFrame.empty:
-    #
-    #             if colList:
-    #                 dataFrame = dataFrame[colList]  # returns a new dataFrame
-    #             if rowList:
-    #                 dataFrame = dataFrame[:].iloc[rowList]
-    #
-    #             ft = self.saveDialog.selectedNameFilter()
-    #
-    #             self.findExportFormats(path, dataFrame, sheet_name=sheet_name, filterType=ft, columns=colList)
-
-    # #=========================================================================================
-    # # Search methods
-    # #=========================================================================================
-    #
-    # def initSearchWidget(self):
-    #     if self._enableSearch and self.searchWidget is None:
-    #         if not attachSimpleSearchWidget(self._parent, self):
-    #             getLogger().warning('Filter option not available')
-    #
-    # def hideSearchWidget(self):
-    #     if self.searchWidget is not None:
-    #         self.searchWidget.hide()
-    #
-    # def showSearchSettings(self):
-    #     """ Display the search frame in the table"""
-    #
-    #     self.initSearchWidget()
-    #     if self.searchWidget is not None:
-    #         if not self.searchWidget.isVisible():
-    #             self.searchWidget.show()
-    #         else:
-    #             self.searchWidget.hideSearch()
-    #
-    # def refreshTable(self):
-    #     # subclass to refresh the groups
-    #     if self._defaultDf is not None:
-    #         _updateSimplePandasTable(self, self._defaultDf)
-    #     else:
-    #         getLogger().warning(f'{self.__class__.__name__}.refreshTable: defaultDf is not defined')
-    #     # self.updateTableExpanders()
-    #
-    # def setDataFromSearchWidget(self, dataFrame):
-    #     """Set the data for the table from the search widget
-    #     """
-    #     _updateSimplePandasTable(self, dataFrame)
-    #
-    #=========================================================================================
-    # hidden column information
-    #=========================================================================================
-
-    # def getHiddenColumns(self):
-    #     """
-    #     get a list of currently hidden columns
-    #     """
-    #     hiddenColumns = self._hiddenColumns
-    #     ll = list(set(hiddenColumns))
-    #     return [x for x in ll if x in self.columnTexts]
-    #
-    # def setHiddenColumns(self, texts, update=True):
-    #     """
-    #     set a list of columns headers to be hidden from the table.
-    #     """
-    #     ll = [x for x in texts if x in self.columnTexts and x not in self._internalColumns]
-    #     self._hiddenColumns = ll
-    #     if update:
-    #         self.showColumns(None)
-    #
-    # def hideDefaultColumns(self):
-    #     """If the table is empty then check visible headers against the last header hidden list
-    #     """
-    #     for i, columnName in enumerate(self.columnTexts):
-    #         # remember to hide the special column
-    #         if columnName in self._internalColumns:
-    #             self.hideColumn(i)
-    #
-    # @property
-    # def columnTexts(self):
-    #     """return a list of column texts.
-    #     """
-    #     try:
-    #         return list(self._df.columns)
-    #     except:
-    #         return []
-    #
-    # def showColumns(self, df):
-    #     # show the columns in the list
-    #     hiddenColumns = self.getHiddenColumns()
-    #
-    #     for i, colName in enumerate(self.columnTexts):
-    #         # always hide the internal columns
-    #         if colName in (hiddenColumns + self._internalColumns):
-    #             self._hideColumn(colName)
-    #         else:
-    #             self._showColumn(colName)
-    #
-    # def _showColumn(self, name):
-    #     if name not in self.columnTexts:
-    #         return
-    #     if name in self._hiddenColumns:
-    #         self._hiddenColumns.remove(name)
-    #     i = self.columnTexts.index(name)
-    #     self.showColumn(i)
-    #
-    # def _hideColumn(self, name):
-    #     if name not in self.columnTexts:
-    #         return
-    #     if name not in (self._hiddenColumns + self._internalColumns):
-    #         self._hiddenColumns.append(name)
-    #     i = self.columnTexts.index(name)
-    #     self.hideColumn(i)
+    pass
 
 
 #=========================================================================================
@@ -913,7 +775,7 @@ def main():
     layout = QtWidgets.QGridLayout()
     frame.setLayout(layout)
 
-    table = TableABC(df=df)
+    table = TableABC(df=df, focusBorderWidth=1)
     win.setCentralWidget(frame)
     frame.layout().addWidget(table, 0, 0)
 

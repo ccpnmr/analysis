@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-09 21:15:59 +0100 (Fri, September 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-14 16:07:05 +0100 (Wed, September 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,33 +28,12 @@ __date__ = "$Date: 2022-09-08 17:27:34 +0100 (Thu, September 08, 2022) $"
 
 import numpy as np
 import pandas as pd
-from PyQt5 import QtWidgets, QtCore, QtGui
-from collections import defaultdict, OrderedDict
-from contextlib import contextmanager
-from dataclasses import dataclass
-from functools import partial
-from time import time_ns
-from types import SimpleNamespace
-import typing
+from PyQt5 import QtCore, QtGui
 
-from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.CcpnSorting import universalSortKey
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptions
-from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
-from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
-from ccpn.ui.gui.widgets.Frame import ScrollableFrame
-from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
-from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.SearchWidget import attachDFSearchWidget
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.FileDialog import TablesFileDialog
-from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
-from ccpn.util.Common import copyToClipboard
-from ccpn.util.OrderedSet import OrderedSet
 
 
 ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
@@ -65,9 +44,11 @@ ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
                 QtCore.Qt.Vertical  : QtCore.Qt.Vertical,
                 }
 
-# define a role to return a cell-value
+# define roles to return cell-values
 DTYPE_ROLE = QtCore.Qt.UserRole + 1000
 VALUE_ROLE = QtCore.Qt.UserRole + 1001
+
+# a role to map the table-index to the cell in the df
 INDEX_ROLE = QtCore.Qt.UserRole + 1002
 
 EDIT_ROLE = QtCore.Qt.EditRole
@@ -92,7 +73,7 @@ class _TableModel(QtCore.QAbstractTableModel):
 
     showEditIcon = False
     defaultFlags = QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
-    defaultEditable = False
+    defaultEditable = True
 
     def __init__(self, data, view=None):
         """Initialise the pandas model.
@@ -362,13 +343,16 @@ class _TableModel(QtCore.QAbstractTableModel):
         """
         if not index.isValid():
             return False
-
         if role == EDIT_ROLE:
             # get the source cell
             row, col = self._sortIndex[index.row()], index.column()
             try:
                 if self._df.iat[row, col] != value:
                     self._df.iat[row, col] = value
+
+                    # need to store in the parent (unfiltered table)
+                    self._setParentDf(row, col, value)
+
                     self.dataChanged.emit(index, index)
 
                     return True
@@ -377,6 +361,18 @@ class _TableModel(QtCore.QAbstractTableModel):
                 getLogger().debug2(f'error accessing cell {index}  ({row}, {col})   {es}')
 
         return False
+
+    def _setParentDf(self, row, col, value):
+        try:
+            # can't think of a better way of doing this yet :|
+
+            # set in the top-level as well - map the index to the _defaultDf - background/foreground colours?
+            idx = self._df.index[row]
+            row = self._view._defaultDf.index.get_loc(idx)
+            self._view._defaultDf.iat[row, col] = value
+
+        except Exception as es:
+            getLogger().debug2(f'error accessing parent cell ({row}, {col})   {es}')
 
     def headerData(self, col, orientation, role=None):
         """Return the column headers
@@ -534,8 +530,8 @@ class _TableModel(QtCore.QAbstractTableModel):
         self.layoutChanged.emit()
 
     def mapToSource(self, indexes):
-        """Map the cell index to the co-ordinates in the pandas dataFrame
-        Return list of tuples of dataFrame positions
+        """Map the cell index to the co-ordinates in the pandas dataFrame.
+        Return list of tuples of dataFrame positions.
         """
         idxs = [(self._sortIndex[idx.row()], idx.column()) if idx.isValid() else (None, None) for idx in indexes]
         return idxs
@@ -548,11 +544,10 @@ class _TableModel(QtCore.QAbstractTableModel):
             return self.defaultFlags
 
     def _isColumnEditable(self, col):
-        """Return whether the column number is editable
+        """Return whether the column number is editable.
         """
         try:
             # return True if the column contains an edit function
             return self._view._dataFrameObject.setEditValues[col] is not None
         except:
             return self.defaultEditable
-

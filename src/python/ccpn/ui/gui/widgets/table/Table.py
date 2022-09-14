@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-09 21:15:58 +0100 (Fri, September 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-14 16:07:04 +0100 (Wed, September 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,35 +27,9 @@ __date__ = "$Date: 2022-09-08 17:12:59 +0100 (Thu, September 08, 2022) $"
 #=========================================================================================
 
 import numpy as np
-import pandas as pd
-from PyQt5 import QtWidgets, QtCore, QtGui
-from collections import defaultdict, OrderedDict
-from contextlib import contextmanager
-from dataclasses import dataclass
-from functools import partial
-from time import time_ns
-from types import SimpleNamespace
-import typing
-
-from ccpn.core.lib.CallBack import CallBack
-from ccpn.core.lib.CcpnSorting import universalSortKey
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptions
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
-from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
-from ccpn.ui.gui.widgets.Frame import ScrollableFrame
+from PyQt5 import QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
-from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.SearchWidget import attachDFSearchWidget
-from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.FileDialog import TablesFileDialog
 from ccpn.ui.gui.widgets.table.TableABC import TableABC
-from ccpn.util.Path import aPath
-from ccpn.util.Logging import getLogger
-from ccpn.util.Common import copyToClipboard
-from ccpn.util.OrderedSet import OrderedSet
 
 
 ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
@@ -91,30 +65,19 @@ class Table(TableABC, Base):
     def __init__(self, parent=None, df=None,
                  multiSelect=True, selectRows=True,
                  showHorizontalHeader=True, showVerticalHeader=True,
-                 borderWidth=2, cellPadding=2,
+                 borderWidth=2, cellPadding=2, focusBorderWidth=0,
                  _resize=False, setWidthToColumns=False, setHeightToRows=False,
+                 showGrid=False, ignoreStyleSheet=True,
                  **kwds):
         """Initialise the table
         """
         super().__init__(parent, df,
                          multiSelect=multiSelect, selectRows=selectRows,
                          showHorizontalHeader=showHorizontalHeader, showVerticalHeader=showVerticalHeader,
-                         borderWidth=borderWidth, cellPadding=cellPadding,
-                         _resize=_resize, setWidthToColumns=setWidthToColumns, setHeightToRows=setHeightToRows)
-        Base._init(self, **kwds)
-
-    #=========================================================================================
-    # Methods
-    #=========================================================================================
-
-    def selectionCallback(self, selected, deselected):
-        print(f'  Selection changed  {selected}  {deselected}')
-
-    def actionCallback(self, index):
-        print(f'  Action {index}')
-
-    def deleteSelectionFromTable(self):
-        pass
+                         borderWidth=borderWidth, cellPadding=cellPadding, focusBorderWidth=focusBorderWidth,
+                         _resize=_resize, setWidthToColumns=setWidthToColumns, setHeightToRows=setHeightToRows,
+                         showGrid=showGrid)
+        Base._init(self, ignoreStyleSheet=ignoreStyleSheet, **kwds)
 
 
 #=========================================================================================

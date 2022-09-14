@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-09 21:15:58 +0100 (Fri, September 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-14 16:07:04 +0100 (Wed, September 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,36 +26,21 @@ __date__ = "$Date: 2022-09-08 17:13:11 +0100 (Thu, September 08, 2022) $"
 # Start of code
 #=========================================================================================
 
-import numpy as np
 import pandas as pd
-from PyQt5 import QtWidgets, QtCore, QtGui
-from collections import defaultdict, OrderedDict
-from contextlib import contextmanager
-from dataclasses import dataclass
+from PyQt5 import QtWidgets, QtCore
+from collections import defaultdict
 from functools import partial
 from time import time_ns
 from types import SimpleNamespace
-import typing
 
-from ccpn.core.lib.CallBack import CallBack
-from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptions
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
-from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
-from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.SearchWidget import attachDFSearchWidget
-from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.FileDialog import TablesFileDialog
 from ccpn.ui.gui.widgets.table.TableABC import TableABC
+from ccpn.ui.gui.widgets.table._TableDelegate import _TableDelegate
 from ccpn.ui._implementation.QueueHandler import QueueHandler
-from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
-from ccpn.util.Common import copyToClipboard
 from ccpn.util.OrderedSet import OrderedSet
 
 
@@ -71,24 +56,12 @@ OBJECT_PARENT = 1
 MODULEIDS = {}
 
 
-# simple class to store the blocking state of the table
-@dataclass
-class _BlockingContent:
-    modelBlocker = None
-    rootBlocker = None
-
-
-
-
-class _ProjectTableABC(TableABC):
-    _tableSelectionChanged = QtCore.pyqtSignal(list)
-
+class _ProjectTableABC(TableABC, Base):
     className = '_ProjectTableABC'
     attributeName = '_ProjectTableABC'
 
     _OBJECT = '_object'
     _ISDELETED = 'isDeleted'
-    # _internalColumns = []
 
     OBJECTCOLUMN = '_object'
     INDEXCOLUMN = 'index'
@@ -111,20 +84,23 @@ class _ProjectTableABC(TableABC):
     search = False
     enableEditDelegate = True
 
+    _enableSelectionCallback = True
+    _enableActionCallback = True
+
     # set the queue handling parameters
     _maximumQueueLength = 0
     _logQueue = False
 
-    def __init__(self, parent=None, mainWindow=None, moduleParent=None,
-                 actionCallback=None, selectionCallback=None, checkBoxCallback=None,
-                 enableMouseMoveEvent=True,
-                 allowRowDragAndDrop=False,
-                 hiddenColumns=None,
-                 multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
+    def __init__(self, parent=None, df=None,
+                 multiSelect=True, selectRows=True,
+                 showHorizontalHeader=True, showVerticalHeader=True,
+                 borderWidth=2, cellPadding=2, focusBorderWidth=0,
+                 _resize=False, setWidthToColumns=False, setHeightToRows=False,
+                 setOnHeaderOnly=False,
+                 mainWindow=None, moduleParent=None,
                  enableExport=True, enableDelete=True, enableSearch=True,
-                 hideIndex=True, stretchLastSection=True,
-                 showHorizontalHeader=True, showVerticalHeader=False,
                  enableDoubleClick=True,
+                 showGrid=False, ignoreStyleSheet=True,
                  **kwds):
         """Initialise the widgets for the module.
         """
@@ -133,10 +109,15 @@ class _ProjectTableABC(TableABC):
         self._enableDelete = enableDelete
         self._enableSearch = enableSearch
 
-        super().__init__(parent=parent,
+        super().__init__(parent, df,
                          multiSelect=multiSelect, selectRows=selectRows,
                          showHorizontalHeader=showHorizontalHeader, showVerticalHeader=showVerticalHeader,
-                         **kwds)
+                         borderWidth=borderWidth, cellPadding=cellPadding, focusBorderWidth=focusBorderWidth,
+                         _resize=_resize, setWidthToColumns=setWidthToColumns, setHeightToRows=setHeightToRows,
+                         showGrid=showGrid, setOnHeaderOnly=setOnHeaderOnly
+                         )
+        # Base messes up styleSheets defined in superclass
+        Base._init(self, ignoreStyleSheet=ignoreStyleSheet, **kwds)
 
         # Derive application, project, and current from mainWindow
         if mainWindow:
@@ -165,15 +146,11 @@ class _ProjectTableABC(TableABC):
         self._selectOverride = False
         self._scrollOverride = False
 
-        # enable the right click menu
-        self.searchWidget = None
-        self._setHeaderContextMenu()
-
         self._rightClickedTableIndex = None  # last selected item in a table before raising the context menu. Enabled with mousePress event filter
 
         self._enableDoubleClick = enableDoubleClick
         if enableDoubleClick:
-            self.doubleClicked.connect(self._doubleClickCallback)
+            self._enableActionCallback = True
 
         # notifier queue handling
         self._queueHandler = QueueHandler(self,
@@ -185,98 +162,14 @@ class _ProjectTableABC(TableABC):
 
         if self.enableEditDelegate:
             # set the delegate for editing
-            delegate = _SimpleTableDelegate(self, objectColumn=self.OBJECTCOLUMN)
+            delegate = _TableDelegate(self, objectColumn=self.OBJECTCOLUMN)
             self.setItemDelegate(delegate)
 
     def setModel(self, model: QtCore.QAbstractItemModel) -> None:
         """Set the model for the view
         """
         super().setModel(model)
-
-        # # attach a handler to respond to the selection changing
-        # self.selectionModel().selectionChanged.connect(self._selectionChangedCallback)
         model.showEditIcon = True
-
-    # @property
-    # def _df(self):
-    #     """Return the Pandas-dataFrame holding the data
-    #     """
-    #     return self.model().df
-    #
-    # @_df.setter
-    # def _df(self, value):
-    #     self.model().df = value
-
-    #=========================================================================================
-    # Block table signals
-    #=========================================================================================
-
-    def _blockTableEvents(self, blanking=True, disableScroll=False, tableState=None):
-        """Block all updates/signals/notifiers in the table.
-        """
-        # block on first entry
-        if self._tableBlockingLevel == 0:
-            if disableScroll:
-                self._scrollOverride = True
-
-            # use the Qt widget to block signals - selectionModel must also be blocked
-            tableState.modelBlocker = QtCore.QSignalBlocker(self.selectionModel())
-            tableState.rootBlocker = QtCore.QSignalBlocker(self)
-            # tableState.enabledState = self.updatesEnabled()
-            # self.setUpdatesEnabled(False)
-
-            if blanking and self.project:
-                if self.project:
-                    self.project.blankNotification()
-
-            # list to store any deferred functions until blocking has finished
-            self._deferredFuncs = []
-
-        self._tableBlockingLevel += 1
-
-    def _unblockTableEvents(self, blanking=True, disableScroll=False, tableState=None):
-        """Unblock all updates/signals/notifiers in the table.
-        """
-        if self._tableBlockingLevel > 0:
-            self._tableBlockingLevel -= 1
-
-            # unblock all signals on last exit
-            if self._tableBlockingLevel == 0:
-                if blanking and self.project:
-                    if self.project:
-                        self.project.unblankNotification()
-
-                tableState.modelBlocker = None
-                tableState.rootBlocker = None
-                # self.setUpdatesEnabled(tableState.enabledState)
-                # tableState.enabledState = None
-
-                if disableScroll:
-                    self._scrollOverride = False
-
-                self.update()
-
-                for func in self._deferredFuncs:
-                    # process simple deferred functions - required so that qt signals are not blocked
-                    func()
-                self._deferredFuncs = []
-
-        else:
-            raise RuntimeError('Error: tableBlockingLevel already at 0')
-
-    @contextmanager
-    def _blockTableSignals(self, callerId='', blanking=True, disableScroll=False):
-        """Block all signals from the table
-        """
-        tableState = _BlockingContent()
-        self._blockTableEvents(blanking, disableScroll=disableScroll, tableState=tableState)
-        try:
-            yield  # yield control to the calling process
-
-        except Exception as es:
-            raise es
-        finally:
-            self._unblockTableEvents(blanking, disableScroll=disableScroll, tableState=tableState)
 
     #=========================================================================================
     # Mouse/Keyboard handling
@@ -316,193 +209,9 @@ class _ProjectTableABC(TableABC):
             self.current.guiTable = None
             # self.setStyleSheet(self._defaultStyleSheet)
 
-    # @staticmethod
-    # def pressingModifiers(self):
-    #     """Is the user clicking while holding a modifier
-    #     """
-    #     allKeyModifers = [QtCore.Qt.ShiftModifier, QtCore.Qt.ControlModifier, QtCore.Qt.AltModifier, QtCore.Qt.MetaModifier]
-    #     keyMod = QtWidgets.QApplication.keyboardModifiers()
-    #
-    #     return keyMod in allKeyModifers
-
-    # def keyPressEvent(self, event):
-    #     """Handle keyPress events on the table
-    #     """
-    #     super().keyPressEvent(event)
-    #
-    #     cursors = [QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_Left, QtCore.Qt.Key_Right]
-    #     enter = [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return]
-    #     allKeyModifers = [QtCore.Qt.ShiftModifier, QtCore.Qt.ControlModifier, QtCore.Qt.AltModifier, QtCore.Qt.MetaModifier]
-    #
-    #     # for MacOS ControlModifier is 'cmd' and MetaModifier is 'ctrl'
-    #     addSelectionMod = [QtCore.Qt.ControlModifier]
-    #
-    #     key = event.key()
-    #     if key in enter:
-    #
-    #         # enter/return pressed - select/deselect current item
-    #         keyMod = QtWidgets.QApplication.keyboardModifiers()
-    #
-    #         if keyMod in addSelectionMod:
-    #             idx = self.currentIndex()
-    #             if idx:
-    #                 # set the item, which toggles selection of the row
-    #                 self.setCurrentIndex(idx)
-    #
-    #         elif keyMod not in allKeyModifers and self._enableDoubleClick:
-    #             # fire the action callback (double-click on selected)
-    #             self._doubleClickCallback(self.currentIndex())
-    #
-    #     # elif key == QtCore.Qt.Key_Escape:
-    #     #     print(f' escape pressed')
-
-    #=========================================================================================
-    # Table context menu
-    #=========================================================================================
-
-    # def setTableMenu(self):
-    #     """Set up the context menu for the main table
-    #     """
-    #     self.tableMenu = Menu('', self, isFloatWidget=True)
-    #     setWidgetFont(self.tableMenu, )
-    #     self.tableMenu.addAction('Copy clicked cell value', self._copySelectedCell)
-    #
-    #     if self._enableExport:
-    #         self.tableMenu.addAction('Export Visible Table', partial(self.exportTableDialog, exportAll=False))
-    #         self.tableMenu.addAction('Export All Columns', partial(self.exportTableDialog, exportAll=True))
-    #
-    #     self.tableMenu.addSeparator()
-    #
-    #     if self._enableDelete:
-    #         self.tableMenu.addAction('Delete Selection', self.deleteObjFromTable)
-    #
-    #     self.tableMenu.addAction('Clear Selection', self._clearSelectionCallback)
-    #
-    #     self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-    #     self.customContextMenuRequested.connect(self._raiseTableContextMenu)
-    #
-    # def _raiseTableContextMenu(self, pos):
-    #     """Create a new menu and popup at cursor position
-    #     """
-    #     pos = QtCore.QPoint(pos.x() + 10, pos.y() + 10)
-    #     self.tableMenu.exec_(self.mapToGlobal(pos))
-
     #=========================================================================================
     # Table functions
     #=========================================================================================
-
-    def _copySelectedCell(self):
-        # from ccpn.util.Common import copyToClipboard
-
-        idx = self.currentIndex()
-        if idx is not None:
-            text = idx.data().strip()
-            copyToClipboard([text])
-
-    def _clearSelectionCallback(self):
-        """Callback for the context menu clear;
-        For now just a placeholder
-        """
-        self.clearSelection()
-
-    #=========================================================================================
-    # Exporters
-    #=========================================================================================
-
-    # @staticmethod
-    # def _dataFrameToExcel(dataFrame, path, sheet_name='Table', columns=None):
-    #     if dataFrame is not None:
-    #         path = aPath(path)
-    #         path = path.assureSuffix('xlsx')
-    #         if columns is not None and isinstance(columns, list):  #this is wrong. columns can be a 1d array
-    #             dataFrame.to_excel(path, sheet_name=sheet_name, columns=columns, index=False)
-    #         else:
-    #             dataFrame.to_excel(path, sheet_name=sheet_name, index=False)
-    #
-    # @staticmethod
-    # def _dataFrameToCsv(dataFrame, path, *args):
-    #     dataFrame.to_csv(path)
-    #
-    # @staticmethod
-    # def _dataFrameToTsv(dataFrame, path, *args):
-    #     dataFrame.to_csv(path, sep='\t')
-    #
-    # @staticmethod
-    # def _dataFrameToJson(dataFrame, path, *args):
-    #     dataFrame.to_json(path, orient='split', default_handler=str)
-    #
-    # def findExportFormats(self, path, dataFrame, sheet_name='Table', filterType=None, columns=None):
-    #     formatTypes = OrderedDict([
-    #         ('.xlsx', self._dataFrameToExcel),
-    #         ('.csv', self._dataFrameToCsv),
-    #         ('.tsv', self._dataFrameToTsv),
-    #         ('.json', self._dataFrameToJson)
-    #         ])
-    #
-    #     # extension = os.path.splitext(path)[1]
-    #     extension = aPath(path).suffix
-    #     if not extension:
-    #         extension = '.xlsx'
-    #     if extension in formatTypes.keys():
-    #         formatTypes[extension](dataFrame, path, sheet_name, columns)
-    #         return
-    #     else:
-    #         try:
-    #             self._findExportFormats(str(path) + filterType, sheet_name)
-    #         except:
-    #             MessageDialog.showWarning('Could not export', 'Format file not supported or not provided.'
-    #                                                           '\nUse one of %s' % ', '.join(formatTypes))
-    #             getLogger().warning('Format file not supported')
-
-    # def _rawDataToDF(self):
-    #     try:
-    #         # TODO:ED - check _rawData
-    #         df = pd.DataFrame(self._rawData)
-    #         return df
-    #     except:
-    #         return pd.DataFrame()
-
-    def exportTableDialog(self, exportAll=True):
-        """export the contents of the table to a file
-        The actual data values are exported, not the visible items which may be rounded due to the table settings
-
-        :param exportAll: True/False - True implies export whole table - but in visible order
-                                    False, export only the visible table
-        """
-        model = self.model()
-        df = model.df
-        rows, cols = model.rowCount(), model.columnCount()
-
-        if df is None or df.empty:
-            MessageDialog.showWarning('Export Table to File', 'Table does not contain a dataFrame')
-
-        else:
-            rowList = [model._sortIndex[row] for row in range(rows)]
-            if exportAll:
-                colList = self._dataFrameObject.userHeadings
-            else:
-                colList = self._dataFrameObject.visibleColumnHeadings
-
-            self._exportTableDialog(df, rowList=rowList, colList=colList)
-
-    # def _exportTableDialog(self, dataFrame, rowList=None, colList=None):
-    #
-    #     self.saveDialog = TablesFileDialog(parent=None, acceptMode='save', selectFile='ccpnTable.xlsx',
-    #                                        fileFilter=".xlsx;; .csv;; .tsv;; .json ")
-    #     self.saveDialog._show()
-    #     path = self.saveDialog.selectedFile()
-    #     if path:
-    #         sheet_name = 'Table'
-    #         if dataFrame is not None and not dataFrame.empty:
-    #
-    #             if colList:
-    #                 dataFrame = dataFrame[colList]  # returns a new dataFrame
-    #             if rowList:
-    #                 dataFrame = dataFrame[:].iloc[rowList]
-    #
-    #             ft = self.saveDialog.selectedNameFilter()
-    #
-    #             self.findExportFormats(path, dataFrame, sheet_name=sheet_name, filterType=ft, columns=colList)
 
     def deleteSelectionFromTable(self):
         """Delete all objects in the selection from the project
@@ -550,65 +259,9 @@ class _ProjectTableABC(TableABC):
     # Header context menu
     #=========================================================================================
 
-    # def _setHeaderContextMenu(self):
-    #     """Set up the context menu for the table header
-    #     """
-    #     headers = self.horizontalHeader()
-    #     headers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-    #     headers.customContextMenuRequested.connect(self._raiseHeaderContextMenu)
-    #
-    # def _raiseHeaderContextMenu(self, pos):
-    #     """Raise the menu on the header
-    #     """
-    #     if self._df is None or self._df.empty:
-    #         return
-    #
-    #     self.initSearchWidget()
-    #     pos = QtCore.QPoint(pos.x(), pos.y() + 10)  #move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item
-    #
-    #     self.headerContextMenumenu = QtWidgets.QMenu()
-    #     setWidgetFont(self.headerContextMenumenu, )
-    #     columnsSettings = self.headerContextMenumenu.addAction("Column Settings...")
-    #     searchSettings = None
-    #     if self._enableSearch and self.searchWidget is not None:
-    #         searchSettings = self.headerContextMenumenu.addAction("Filter...")
-    #     action = self.headerContextMenumenu.exec_(self.mapToGlobal(pos))
-    #
-    #     if action == columnsSettings:
-    #         settingsPopup = ColumnViewSettingsPopup(parent=self._parent, table=self,
-    #                                                 dataFrameObject=self._df,
-    #                                                 hiddenColumns=self.getHiddenColumns(),
-    #                                                 )
-    #         hiddenColumns = settingsPopup.getHiddenColumns()
-    #         self.setHiddenColumns(texts=hiddenColumns, update=False)
-    #         settingsPopup.raise_()
-    #         settingsPopup.exec_()  # exclusive control to the menu and return _hiddencolumns
-    #
-    #     if action == searchSettings:
-    #         self.showSearchSettings()
-
     #=========================================================================================
     # Search methods
     #=========================================================================================
-
-    # def initSearchWidget(self):
-    #     if self._enableSearch and self.searchWidget is None:
-    #         if not attachDFSearchWidget(self._parent, self):
-    #             getLogger().warning('Filter option not available')
-    #
-    # def hideSearchWidget(self):
-    #     if self.searchWidget is not None:
-    #         self.searchWidget.hide()
-    #
-    # def showSearchSettings(self):
-    #     """ Display the search frame in the table"""
-    #
-    #     self.initSearchWidget()
-    #     if self.searchWidget is not None:
-    #         if not self.searchWidget.isVisible():
-    #             self.searchWidget.show()
-    #         else:
-    #             self.searchWidget.hideSearch()
 
     #=========================================================================================
     # Handle dropped items
@@ -686,10 +339,8 @@ class _ProjectTableABC(TableABC):
                 sortColumn = oldModel._sortColumn
                 sortOrder = oldModel._sortOrder
 
-            # create new model and set in table
-            model = _SimplePandasTableModel(self._df, view=self)
-            self.setModel(model)
-            self._defaultDf = self._df.copy()  # make a copy for the search-widget
+            # update model to the new _df
+            model = self.updateDf(self._df, resetDefault=True)
 
             self.resizeColumnsToContents()
 
@@ -725,75 +376,9 @@ class _ProjectTableABC(TableABC):
             # use the object as the index, object always exists even if isDeleted
             self._df.set_index(self._df[self.OBJECTCOLUMN], inplace=True, )
 
-        _updateSimplePandasTable(self, self._df, _resize=True)
-        self._defaultDf = self._df.copy()  # make a copy for the search-widget
+        self.updateDf(self._df, resize=True, resetDefault=True)
 
         self.showColumns(None)
-
-    #=========================================================================================
-    # hidden column information
-    #=========================================================================================
-
-    def getHiddenColumns(self):
-        """
-        get a list of currently hidden columns
-        """
-        hiddenColumns = self._hiddenColumns
-        ll = list(set(hiddenColumns))
-        return [x for x in ll if x in self.columnTexts]
-
-    def setHiddenColumns(self, texts, update=True):
-        """
-        set a list of columns headers to be hidden from the table.
-        """
-        ll = [x for x in texts if x in self.columnTexts and x not in self._internalColumns]
-        self._hiddenColumns = ll
-        if update:
-            self.showColumns(None)
-
-    def hideDefaultColumns(self):
-        """If the table is empty then check visible headers against the last header hidden list
-        """
-        for i, columnName in enumerate(self.columnTexts):
-            # remember to hide the special column
-            if columnName in self._internalColumns:
-                self.hideColumn(i)
-
-    @property
-    def columnTexts(self):
-        """return a list of column texts.
-        """
-        try:
-            return list(self._df.columns)
-        except:
-            return []
-
-    def showColumns(self, df):
-        # show the columns in the list
-        hiddenColumns = self.getHiddenColumns()
-
-        for i, colName in enumerate(self.columnTexts):
-            # always hide the internal columns
-            if colName in (hiddenColumns + self._internalColumns):
-                self._hideColumn(colName)
-            else:
-                self._showColumn(colName)
-
-    def _showColumn(self, name):
-        if name not in self.columnTexts:
-            return
-        if name in self._hiddenColumns:
-            self._hiddenColumns.remove(name)
-        i = self.columnTexts.index(name)
-        self.showColumn(i)
-
-    def _hideColumn(self, name):
-        if name not in self.columnTexts:
-            return
-        if name not in (self._hiddenColumns + self._internalColumns):
-            self._hiddenColumns.append(name)
-        i = self.columnTexts.index(name)
-        self.hideColumn(i)
 
     #=========================================================================================
     # Build the dataFrame for the table
@@ -953,7 +538,7 @@ class _ProjectTableABC(TableABC):
         # MUST BE SUBCLASSED
         raise NotImplementedError(f'Code error: {self.__class__.__name__}._searchCallBack not implemented')
 
-    def _selectionChangedCallback(self, selected, deselected):
+    def selectionCallback(self, selected, deselected, selection, lastRow):
         """Handle item selection has changed in table - call user callback
         :param selected: table indexes selected
         :param deselected: table indexes deselected
@@ -961,83 +546,18 @@ class _ProjectTableABC(TableABC):
         # MUST BE SUBCLASSED
         raise NotImplementedError(f'Code error: {self.__class__.__name__}._selectionChangedCallback not implemented')
 
-    def actionCallback(self, data):
+    def actionCallback(self, selection, lastItem):
         """Handle item selection has changed in table - call user callback
         """
         # MUST BE SUBCLASSED
         raise NotImplementedError(f'Code error: {self.__class__.__name__}._selectionChangedCallback not implemented')
 
-    def _doubleClickCallback(self, itemSelection):
-
-        if bool(itemSelection.flags() & QtCore.Qt.ItemIsEditable):
-            # item is editable so skip the action
-            return
-
-        if not self.actionCallback:
-            return
-
-        # if not a _dataFrameObject is a normal guiTable.
-        if self._df is None or self._df.empty:
-            item = self.currentItem()
-            if item is not None:
-                data = CallBack(value=item.value,
-                                theObject=None,
-                                object=None,
-                                index=item.index,
-                                targetName=None,
-                                trigger=CallBack.CLICK,
-                                row=item.row(),
-                                col=item.column(),
-                                rowItem=item)
-                self.actionCallback(data)
-
-            return
-
-        self._lastClick = 'doubleClick'
-        with self._blockTableSignals('_doubleClickCallback', blanking=False, disableScroll=True):
-
-            idx = self.currentIndex()
-
-            # get the current selected objects from the table - objects now persistent after single-click
-            objList = []
-            if self._lastSelection is not None:
-                objList = self._lastSelection  #['selection']
-
-            if idx:
-                row = self.model()._sortIndex[idx.row()]
-                col = idx.column()
-                _data = self._df.iloc[row]
-                obj = _data.get(self._OBJECT)
-
-                if obj is not None and objList:
-                    if hasattr(obj, 'className'):
-                        targetName = obj.className
-
-                    # objIndex = idx  # item.index
-                    data = CallBack(theObject=self._df,
-                                    object=objList if self.multiSelect else obj,  # single object or multi-selection
-                                    index=idx,
-                                    targetName=targetName,
-                                    trigger=CallBack.DOUBLECLICK,
-                                    row=row,
-                                    col=col,
-                                    rowItem=_data,
-                                    rowObject=obj)
-
-                    self.actionCallback(data)
-
     def setActionCallback(self, actionCallback=None):
         # enable callbacks
+        if not (actionCallback is None or callable(actionCallback)):
+            raise ValueError(f'{self.__class__.__name__}.setActionCallback: actionCallback is not None|callable')
+
         self.actionCallback = actionCallback
-
-        for act in [self._doubleClickCallback]:
-            try:
-                self.doubleClicked.disconnect(act)
-            except Exception:
-                getLogger().debug2('nothing to disconnect')
-
-        if self.actionCallback:
-            self.doubleClicked.connect(self._doubleClickCallback)
 
     def setCheckBoxCallback(self, checkBoxCallback):
         # enable callback on the checkboxes
@@ -1101,72 +621,6 @@ class _ProjectTableABC(TableABC):
                     setattr(self.current, multiple, tuple(set(multipleAttr) - set(objList)))
 
             self._lastSelection = [None]
-
-        self._tableSelectionChanged.emit([])
-
-    def _changeTableSelection(self, itemSelection):
-        """Manually change the selection on the table and call the necessary callbacks
-        """
-        # print(f'>>>     _selectionTableCallback  {self} ')
-        # if not a _dataFrameObject is a normal guiTable.
-        if self._df is None or self._df.empty:
-            idx = self.selectionModel().currentIndex()
-            if idx is not None and self.selectionCallback:
-
-                # TODO:ED - check this bit
-                data = CallBack(value=idx.data(),
-                                theObject=None,
-                                object=None,
-                                index=idx,
-                                targetName=None,
-                                trigger=CallBack.CLICK,
-                                row=idx.row(),
-                                col=idx.column(),
-                                rowItem=idx)
-
-                delta = time_ns() - self._lastTimeClicked
-                # if interval large enough then reset timer and return True
-                if delta > self._clickInterval:
-                    self.selectionCallback(data)
-
-            return
-
-        objList = self.getSelectedObjects()
-        # if objList and isinstance(objList[0], pd.Series):
-        #     pass
-        # else:
-        #     if self._clickedInTable:
-        #         if not objList:
-        #             return
-        #         if set(objList or []) == set(self._lastSelection or []):  # pd.Series should never reach here or will crash here. Cannot use set([series])== because Series are mutable, thus they cannot be hashed
-        #             return
-
-        self._lastSelection = objList
-
-        with self._blockTableSignals('_changeTableSelection', blanking=False, disableScroll=True):
-
-            # get whether current row is defined
-            idx = self.currentIndex()
-            targetName = ''
-
-            # if objList is not None:
-            if objList and len(objList) > 0 and hasattr(objList[0], 'className'):
-                targetName = objList[0].className
-
-            if idx and self.selectionCallback:
-                data = CallBack(theObject=self._df,
-                                object=objList,
-                                index=0,
-                                targetName=targetName,
-                                trigger=CallBack.CLICK,
-                                row=0,
-                                col=0,
-                                rowItem=None)
-
-                delta = time_ns() - self._lastTimeClicked
-                # if interval large enough then reset timer and return True
-                if delta > self._clickInterval:
-                    self.selectionCallback(data)
 
     #=========================================================================================
     # Highlight objects in table

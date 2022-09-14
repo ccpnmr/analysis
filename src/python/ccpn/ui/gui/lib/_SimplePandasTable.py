@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-09 21:10:30 +0100 (Fri, September 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-14 17:01:04 +0100 (Wed, September 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2085,7 +2085,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         """Handle item selection has changed in table - call user callback
         """
         # MUST BE SUBCLASSED
-        raise NotImplementedError(f'Code error: {self.__class__.__name__}._selectionChangedCallback not implemented')
+        raise NotImplementedError(f'Code error: {self.__class__.__name__}.actionCallback not implemented')
 
     def _doubleClickCallback(self, itemSelection):
 

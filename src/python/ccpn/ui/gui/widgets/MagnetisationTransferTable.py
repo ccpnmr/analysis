@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-01 16:05:27 +0100 (Thu, September 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-14 16:11:39 +0100 (Wed, September 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,14 +30,13 @@ from PyQt5 import QtCore, QtWidgets
 from functools import partial
 import pandas as pd
 import time
-from ccpn.core.lib.SpectrumLib import MagnetisationTransferTypes, MagnetisationTransferParameters, \
-    MagnetisationTransferTuple
-from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableView, _SimplePandasTableModel, \
-    _updateSimplePandasTable
+from ccpn.core.lib.SpectrumLib import MagnetisationTransferTypes, \
+    MagnetisationTransferParameters, MagnetisationTransferTuple
 from ccpn.ui.gui.widgets.Font import setWidgetFont
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.table.TableABC import TableABC
 from ccpn.util.Logging import getLogger
 
 
@@ -45,7 +44,7 @@ from ccpn.util.Logging import getLogger
 # MagnetisationTransferTable
 #=========================================================================================
 
-class MagnetisationTransferTable(_SimplePandasTableView):
+class MagnetisationTransferTable(TableABC):
     """A table to contain the list of magnetisation-transfers for a spectrum.
     Transfers are set for a particular experiment-type or user defined.
     """
@@ -61,7 +60,7 @@ class MagnetisationTransferTable(_SimplePandasTableView):
         """
         super().__init__(parent, *args, **kwds)
 
-        # set teh spectrum-specific information
+        # set the spectrum-specific information
         self.spectrum = spectrum
         self.dimensions = self.spectrum and self.spectrum.dimensionCount or 0
         self._magTransfers = self.spectrum and self.spectrum.magnetisationTransfers or None
@@ -92,7 +91,6 @@ class MagnetisationTransferTable(_SimplePandasTableView):
         delegate = _SimplePulldownTableDelegate(self, objectColumn=None)
         self.setItemDelegate(delegate)
 
-        self._setContextMenu()
         self._rightClickedTableIndex = None  # last selected item in a table before raising the context menu. Enabled with mousePress event filter
 
     @property
@@ -128,10 +126,7 @@ class MagnetisationTransferTable(_SimplePandasTableView):
         else:
             df = pd.DataFrame(columns=MagnetisationTransferParameters)
 
-        _updateSimplePandasTable(self, df, _resize=True)
-        self.resizeColumnsToContents()
-        self.setWidthToColumns()
-        self.setHeightToRows()
+        self.updateDf(df, resize=True, setHeightToRows=True, setWidthToColumns=True, setOnHeaderOnly=True)
 
         self.setTableEnabled(editable)
         self.model().dataChanged.connect(self._dataChanged)
@@ -160,26 +155,19 @@ class MagnetisationTransferTable(_SimplePandasTableView):
     # Table context menu
     #=========================================================================================
 
-    def _setContextMenu(self):
+    def setTableMenu(self):
         """Set up the context menu for the main table.
         """
-        self.tableMenu = Menu('', self, isFloatWidget=True)
-        setWidgetFont(self.tableMenu, )
-        self._actions = [self.tableMenu.addAction('New', self._newTransfer),
-                         self.tableMenu.addAction('Remove selected', self._removeTransfer)
+        menu = Menu('', self, isFloatWidget=True)
+        setWidgetFont(menu, )
+
+        # no options from the super-class are required
+        self._actions = [menu.addAction('New', self._newTransfer),
+                         menu.addAction('Remove selected', self._removeTransfer)
                          ]
 
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(self._raiseTableContextMenu)
-
-    def _raiseTableContextMenu(self, pos):
-        """Create a new menu and popup at cursor position.
-
-        :param pos: QPoint - position to raise the table.
-        :return:
-        """
-        pos = QtCore.QPoint(pos.x() + 10, pos.y() + 10)
-        self.tableMenu.exec_(self.mapToGlobal(pos))
+        self.customContextMenuRequested.connect(partial(self._raiseTableContextMenu, menu))
 
     def _newTransfer(self):
         """Add new magnetisation-transfer to the table.
@@ -373,39 +361,3 @@ class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
         """
         # stop the closed-pulldownList from staying visible after selection
         widget.close()
-
-
-#=========================================================================================
-# New/Update objects
-#=========================================================================================
-
-def newMagnetisationTransferTable(parent, data,
-                                  _resize=False,
-                                  setWidthToColumns=False, setHeightToRows=False,
-                                  **kwds):
-    """Create a new MagnetisationTransferTable from a pd.DataFrame
-    """
-    if not parent:
-        raise ValueError('parent not defined')
-    if not isinstance(data, pd.DataFrame):
-        raise ValueError(f'data is not of type pd.DataFrame - {type(data)}')
-
-    # create a new table
-    table = MagnetisationTransferTable(parent, **kwds)
-
-    # set the model
-    data = pd.DataFrame(data)
-    model = _SimplePandasTableModel(data, view=table)
-    table.setModel(model)
-
-    table.resizeColumnsToContents()
-    if _resize:
-        # resize if required
-        table.resizeRowsToContents()
-
-    if setWidthToColumns:
-        table.setWidthToColumns()
-    if setHeightToRows:
-        table.setHeightToRows()
-
-    return table

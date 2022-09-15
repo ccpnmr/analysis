@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-14 18:29:01 +0100 (Wed, September 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-15 16:07:23 +0100 (Thu, September 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -544,7 +544,7 @@ class _ProjectTableABC(TableABC, Base):
         :param deselected: table indexes deselected
         """
         # MUST BE SUBCLASSED
-        raise NotImplementedError(f'Code error: {self.__class__.__name__}._selectionChangedCallback not implemented')
+        raise NotImplementedError(f'Code error: {self.__class__.__name__}.selectionCallback not implemented')
 
     def actionCallback(self, selection, lastItem):
         """Handle item selection has changed in table - call user callback

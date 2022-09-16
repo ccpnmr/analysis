@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-11 12:24:50 +0000 (Fri, February 11, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-09-16 15:02:26 +0100 (Fri, September 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,8 @@ __date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 # Start of code
 #=========================================================================================
 
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
+from typing import Tuple
 
 from ccpn.util.Path import Path, aPath
 from ccpn.util.traits.TraitBase import TraitBase
@@ -51,7 +52,11 @@ CCPNMRZIPCOMPRESSED = 'ccpNmrZipCompressed'
 
 SPARKYFILE = 'sparkyFile'
 
-def getDataLoaders():
+# NO_SUFFIX = 'No-suffix'
+# ANY_SUFFIX = 'Any-suffix'
+from ccpn.framework.constants import NO_SUFFIX, ANY_SUFFIX
+
+def getDataLoaders() -> dict:
     """Get data loader classes
     :return: a dictionary of (format-identifier-strings, DataLoader classes) as (key, value) pairs
     """
@@ -62,7 +67,7 @@ def getDataLoaders():
     #--------------------------------------------------------------------------------------------
     from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
     from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
-    from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
+    from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoaderABC
     from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
     from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
     from ccpn.framework.lib.DataLoaders.FastaDataLoader import FastaDataLoader
@@ -76,11 +81,76 @@ def getDataLoaders():
     return DataLoaderABC._dataLoaders
 
 
+def getSpectrumLoaders() -> dict:
+    """Get data spectrum-specific loader classes
+    :return: a dictionary of (format-identifier-strings, DataLoader classes) as (key, value) pairs
+    """
+    _loaders = getDataLoaders()
+    return dict( [(df, dl) for df, dl in _loaders.items() if dl.isSpectrumLoader])
+
+
+def _getSuffixDict() -> Tuple[dict, defaultdict]:
+    """
+    :return dict of (suffix, [dataLoader class]-list) (key, value) pairs
+
+    NB: Only to be used internally
+    """
+    _loadersDict = getDataLoaders()
+
+    # create an (suffix, [dataFormats]) dict
+    _suffixDict = defaultdict(list)
+
+    for dType, dl in _loadersDict.items():
+
+        suffixes =  [NO_SUFFIX, ANY_SUFFIX] if len(dl.suffixes) == 0 else dl.suffixes
+        for suffix in suffixes:
+
+            suffix = NO_SUFFIX if suffix is None else suffix
+            _suffixDict[suffix].append(dl)
+
+    return _suffixDict
+
+
+def _getPotentialDataLoaders(path) -> list:
+    """
+    :param path: path to evaluate
+    :return list of possible dataLoader classes based on suffix
+
+    NB: Only to be used internally
+    """
+
+    if path is None:
+        raise ValueError('Undefined path')
+    path = aPath(path)
+
+    # get the dict that maps the suffix to potential loaders
+    _suffixDict =  _getSuffixDict()
+    if len(path.suffixes) == 0:
+        # No suffix; return all loaders that are accept no-suffix
+        loaders = _suffixDict.get(NO_SUFFIX, [])
+    else:
+        # get the loaders for suffix; fall-back to those that accept any suffix
+        # in case there was none defined for suffix
+        loaders = _suffixDict.get(path.suffix,
+                                  _suffixDict.get(ANY_SUFFIX, []))
+
+    # filter for loaders that do not allow a directory
+    if path.is_dir():
+        # we have a dirrectory
+        loaders = [dl for dl in loaders if (dl.allowDirectory or dl.requireDirectory)]
+    else:
+        # we have a file; i.e. all the loaders that not requireDirectory
+        loaders = [dl for dl in loaders if (not dl.requireDirectory)]
+
+
+    return loaders
+
+
 def checkPathForDataLoader(path, pathFilter=None):
     """Check path if it corresponds to any defined data format.
-    Optionally exclude any dataLoader with types defined by filter
+    Optionally exclude any dataLoader with types not in pathFilter (default: all dataFormats)
 
-    :param pathFilter: a tuple/list of dataFormat strings
+    :param pathFilter: a tuple/list of dataFormat strings; expands to all dataFormat if None
     :return a DataLoader instance or None if there was no match
     """
     if not isinstance(path, (str, Path)):
@@ -93,7 +163,8 @@ def checkPathForDataLoader(path, pathFilter=None):
     if pathFilter is None:
         pathFilter = list(getDataLoaders().keys())
 
-    for fmt, cls in getDataLoaders().items():
+    _loaders = _getPotentialDataLoaders(path)
+    for cls in _loaders:
         instance = cls.checkForValidFormat(path)
         if instance is None:
             getLogger().debug2('%-20s %-20s: %s' % (cls.dataFormat, '(Not Valid)', path))
@@ -128,6 +199,8 @@ class DataLoaderABC(TraitBase):
     alwaysCreateNewProject = False
     canCreateNewProject = False
     allowDirectory = False  # Can/Can't open a directory
+    requireDirectory = False  # explicitly require a directory
+    isSpectrumLoader = False    # Subclassed for SpectrumLoaders
     loadFunction = (None, None) # A (function, attributeName) tuple;
                                 # :param function(obj:(Application,Project), path:Path) -> List[newObj]
                                 # :param attributeName := 'project' or 'application'
@@ -170,6 +243,32 @@ class DataLoaderABC(TraitBase):
         from ccpn.framework.Application import getApplication
         self.application = getApplication()
 
+    @classmethod
+    def _documentClass(cls) -> str:
+        """:return a documentation string comprised of __doc__ and some class attributes
+        """
+        if cls.requireDirectory:
+            _directory = 'Required'
+        elif cls.allowDirectory:
+            _directory = 'Allowed'
+        else:
+            _directory = 'Not allowed'
+
+        if cls.canCreateNewProject:
+            _newProject = 'Potentially'
+        elif cls.alwaysCreateNewProject:
+            _newProject = 'Always'
+        else:
+            _newProject = 'Never'
+
+        result = cls.__doc__ +\
+            f'\n' +\
+            f'    Valid suffixes:      {cls.suffixes}\n' +\
+            f'    Directory:           {_directory}\n' +\
+            f'    Creates new project: {_newProject}'
+
+        return result
+
     @property
     def project(self):
         """Current poject instance
@@ -207,6 +306,20 @@ class DataLoaderABC(TraitBase):
         return result
 
     @classmethod
+    def checkSuffix(cls, path) -> bool:
+        """Check if suffix of path confirms to settings of class attribute suffixes.
+        :returns True or False
+        """
+        _path = aPath(path)
+        if len(_path.suffixes) == 0 and NO_SUFFIX in cls.suffixes:
+            return True
+        if len(_path.suffixes) > 0 and ANY_SUFFIX in cls.suffixes:
+            return True
+        if len(_path.suffixes) > 0 and _path.suffix in cls.suffixes:
+            return True
+        return False
+
+    @classmethod
     def checkPath(cls, path):
         """Check if path exists and confirms to settings of class attributes suffixes and allowDirectory
         do not allow dot-file (e.g. .cshrc)
@@ -215,11 +328,15 @@ class DataLoaderABC(TraitBase):
         _path = aPath(path)
         if not _path.exists():
             return None
-        if len(cls.suffixes) > 0 and not _path.suffix in cls.suffixes:
+        if not cls.checkSuffix(path):
             return None
         if _path.basename == '':
             return None
         if _path.is_dir() and not cls.allowDirectory:
+            # path is a directory: cls does not allow
+            return None
+        if not _path.is_dir() and cls.requireDirectory:
+            # path is a file, but cls requires a directory
             return None
         return _path
 

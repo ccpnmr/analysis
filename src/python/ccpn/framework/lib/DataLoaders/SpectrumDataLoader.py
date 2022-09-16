@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:22:27 +0000 (Tue, February 15, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-09-16 15:02:26 +0100 (Fri, September 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,20 +30,33 @@ __date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
+from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC, NO_SUFFIX, ANY_SUFFIX
 from ccpn.core.Spectrum import _newSpectrumFromDataSource
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats, checkPathForSpectrumFormats, \
       DataSourceTrait
 from ccpn.core.lib.DataStore import DataStore, DataStoreTrait
-from ccpn.core.lib.ContextManagers import logCommandManager
 
 
-class SpectrumDataLoader(DataLoaderABC):
-    """Spectrum data loader
+class SpectrumDataLoaderABC(DataLoaderABC):
+    """Spectrum loader ABC; defined by a SpectrumDataSource derived class
+    that have essential settings (and do the actual work).
     """
-    dataFormat = 'Spectrum'
-    suffixes = list(set([suf for spec in getDataFormats().values()
-                         for suf in spec.suffixes if suf is not None]))  # a list of possible spectrum suffixes
+    spectumDataSourceClass = None
+
+    @classmethod
+    def _initClass(cls):
+        """Init the class attributes from the SpectrumDataSource class;
+        register the class
+        """
+        cls.__doc__ = cls.spectumDataSourceClass.__doc__
+        cls.dataFormat = cls.spectumDataSourceClass.dataFormat + 'Spectrum'
+        cls.suffixes = cls.spectumDataSourceClass.suffixes
+        cls.allowDirectory = cls.spectumDataSourceClass.allowDirectory
+        cls._registerFormat()
+
+    alwaysCreateNewProject = False
+    canCreateNewProject = False
+    isSpectrumLoader = True
 
     dataSource = DataSourceTrait(default_value=None)
     dataStore = DataStoreTrait(default_value=None)
@@ -51,51 +64,48 @@ class SpectrumDataLoader(DataLoaderABC):
     @classmethod
     def checkForValidFormat(cls, path):
         """check if path defines one of the valid spectrum data formats
+        :path: path to (binary) spectrum file; may contain redirections (e.g $DATA)
         :return: None or instance of the class
-        """
-        dataStore, dataSoure = cls._checkPathForSpectrumFormat(path)
-        if dataSoure is not None:
-            instance = cls(path)
-            instance.dataSource = dataSoure
-            instance.dataStore = dataStore
-            return instance
-
-        return None
-
-    @staticmethod
-    def _checkPathForSpectrumFormat(path):
-        """Check if path yields a valid Spectrum dataSource
-        return: (dataStore, dataSource) tuple, or None's if some failed
         """
         dataStore = DataStore.newFromPath(path)
         if not dataStore.exists():
-            return (None, None)
+            return None
 
-        dataSource = checkPathForSpectrumFormats(dataStore.aPath())
-        if dataSource is None:
-            return (dataStore, None)
-        dataStore.dataFormat = dataSource.dataFormat
+        if not cls.checkSuffix(path):
+            return None
 
-        return (dataStore, dataSource)
+        if (dataSource := cls.spectumDataSourceClass.checkForValidFormat(dataStore.aPath())) is None:
+            return None
+
+        instance = cls(dataStore.aPath())
+        instance.dataSource = dataSource
+        instance.dataStore = dataStore
+        return instance
+
+    @classmethod
+    def _documentClass(cls) -> str:
+        """:return a documentation string comprised of __doc__ and some class attributes
+        """
+        result = f'Spectrum binary data.\n'+\
+            super()._documentClass() + '\n' +\
+            f'    DataSource format:   {cls.spectumDataSourceClass.dataFormat}\n' +\
+            f'    Has writing ability: {cls.spectumDataSourceClass.hasWritingAbility}'
+        return result
 
     def load(self):
         """The actual spectrum loading method;
         raises RunTimeError on error
         :return: a list of [spectrum]
         """
-        with logCommandManager('application', 'loadData', self.path):
-            if self.dataSource is None:
-                self.dataStore, self.dataSource = self._checkPathForSpectrumFormat(self.path)
+        if self.dataSource is None:
+            raise RuntimeError('Error loading "%s"' % self.path)
 
-            if self.dataSource is None:
-                raise RuntimeError('Error loading "%s"' % self.path)
-
-            try:
-                spectrum = _newSpectrumFromDataSource(project=self.project,
-                                                      dataStore=self.dataStore,
-                                                      dataSource=self.dataSource)
-            except (RuntimeError, ValueError) as es:
-                raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
+        try:
+            spectrum = _newSpectrumFromDataSource(project=self.project,
+                                                  dataStore=self.dataStore,
+                                                  dataSource=self.dataSource)
+        except (RuntimeError, ValueError) as es:
+            raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
 
         return [spectrum]
 
@@ -109,5 +119,55 @@ class SpectrumDataLoader(DataLoaderABC):
         return False
 
 
+class BrukerSpectrumLoader(SpectrumDataLoaderABC):
+    from ccpn.core.lib.SpectrumDataSources.BrukerSpectrumDataSource import BrukerSpectrumDataSource
+    spectumDataSourceClass = BrukerSpectrumDataSource
+BrukerSpectrumLoader._initClass()  # also registers
 
-SpectrumDataLoader._registerFormat()
+
+class NmrPipeSpectrumLoader(SpectrumDataLoaderABC):
+    from ccpn.core.lib.SpectrumDataSources.NmrPipeSpectrumDataSource import NmrPipeSpectrumDataSource
+    spectumDataSourceClass = NmrPipeSpectrumDataSource
+NmrPipeSpectrumLoader._initClass()   # also registers
+
+
+class Hdf5SpectrumLoader(SpectrumDataLoaderABC):
+    from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
+    spectumDataSourceClass = Hdf5SpectrumDataSource
+Hdf5SpectrumLoader._initClass()   # also registers
+
+
+class UcsfSpectrumLoader(SpectrumDataLoaderABC):
+    from ccpn.core.lib.SpectrumDataSources.UcsfSpectrumDataSource import UcsfSpectrumDataSource
+    spectumDataSourceClass = UcsfSpectrumDataSource
+UcsfSpectrumLoader._initClass()   # also registers
+
+
+class AzaraSpectrumLoader(SpectrumDataLoaderABC):
+    from ccpn.core.lib.SpectrumDataSources.AzaraSpectrumDataSource import AzaraSpectrumDataSource
+    spectumDataSourceClass = AzaraSpectrumDataSource
+AzaraSpectrumLoader._initClass()   # also registers
+
+
+class FelixSpectrumLoader(SpectrumDataLoaderABC):
+    from ccpn.core.lib.SpectrumDataSources.FelixSpectrumDataSource import FelixSpectrumDataSource
+    spectumDataSourceClass = FelixSpectrumDataSource
+FelixSpectrumLoader._initClass()   # also registers
+
+
+class XeasySpectrumLoader(SpectrumDataLoaderABC):
+    from ccpn.core.lib.SpectrumDataSources.XeasySpectrumDataSource import XeasySpectrumDataSource
+    spectumDataSourceClass = XeasySpectrumDataSource
+XeasySpectrumLoader._initClass()   # also registers
+
+
+class NmrViewSpectrumLoader(SpectrumDataLoaderABC):
+    from ccpn.core.lib.SpectrumDataSources.NmrViewSpectrumDataSource import NmrViewSpectrumDataSource
+    spectumDataSourceClass = NmrViewSpectrumDataSource
+NmrViewSpectrumLoader._initClass()   # also registers
+
+
+class JcampSpectrumLoader(SpectrumDataLoaderABC):
+    from ccpn.core.lib.SpectrumDataSources.JcampSpectrumDataSource import JcampSpectrumDataSource
+    spectumDataSourceClass = JcampSpectrumDataSource
+JcampSpectrumLoader._initClass()   # also registers

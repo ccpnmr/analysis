@@ -5,7 +5,7 @@ This module defines the data loading mechanism for a V2 project
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -17,9 +17,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:01 +0100 (Tue, July 20, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-09-16 15:02:26 +0100 (Fri, September 16, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,7 +29,7 @@ __date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
+from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC, NO_SUFFIX
 from ccpn.framework.Framework import Framework
 
 from ccpnmodel.ccpncore.memops.metamodel import Constants as metaConstants
@@ -38,13 +38,15 @@ IMPLEMENTATION = metaConstants.implementationPackageName
 
 
 class CcpNmrV2ProjectDataLoader(DataLoaderABC):
-    """V2 project data loader
+    """A CcpNmr V2-project data-loader. Should be a directory.
     """
     dataFormat = 'ccpNmrV2Project'
-    suffixes = []  # a list of suffixes that get matched to path
-    allowDirectory = True  # Can/Can't open a directory
+    suffixes = [NO_SUFFIX]  # a list of suffixes that get matched to path
+    allowDirectory = True  # Have to allow a V2 project directory
+    requireDirectory = True  # Open V2-project a directory
     alwaysCreateNewProject = True
     canCreateNewProject = False
+
     loadFunction = (Framework._loadV2Project, 'application')
 
     @classmethod

@@ -25,7 +25,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-21 12:16:51 +0000 (Mon, March 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-16 15:02:25 +0100 (Fri, September 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -77,7 +77,7 @@ class String(bytes):
 
 class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     """
-    HDF5 spectral storage
+    CcpNmr HDF5-based binary nD (n=1-8) spectral data format. Allows for reading and writing.
     """
     #=========================================================================================
 

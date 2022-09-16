@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-08-25 17:30:42 +0100 (Thu, August 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-16 15:02:26 +0100 (Fri, September 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -303,18 +303,17 @@ class Gui(Ui):
         from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
         from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
-        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
+        from ccpn.framework.lib.DataLoaders.DataLoaderABC import _getPotentialDataLoaders
 
         if pathFilter is None:
             pathFilter =  tuple(getDataLoaders().keys())
-        dataLoader = checkPathForDataLoader(path, pathFilter=pathFilter)
 
-        if dataLoader is None:
-            txt = '_getDataLoader: Loading "%s" unsuccessful; unrecognised type, should be one of %r' % \
-                  (path, pathFilter)
-            getLogger().debug(txt)
+        if (dataLoader :=  checkPathForDataLoader(path, pathFilter=pathFilter)) is None:
+            dataFormats = [dl.dataFormat for dl in _getPotentialDataLoaders(path)]
+            txt = f'Loading "{path}" unsuccessful; tried all of {dataFormats}, but failed'
+            getLogger().warning(txt)
             return (None, False, False)
 
         createNewProject = dataLoader.createNewProject
@@ -379,7 +378,7 @@ class Gui(Ui):
         elif dataLoader.dataFormat == SparkyDataLoader.dataFormat:
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
 
-        elif dataLoader.dataFormat == SpectrumDataLoader.dataFormat and dataLoader.existsInProject():
+        elif dataLoader.isSpectrumLoader and dataLoader.existsInProject():
             ok = MessageDialog.showYesNoWarning('Loading Spectrum',
                                                 f'"{dataLoader.path}"\n' 
                                                 f'already exists in the project\n'
@@ -650,7 +649,7 @@ class Gui(Ui):
         :param paths: list of paths
         :return a list of Spectra instances
         """
-        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
+        from ccpn.framework.lib.DataLoaders.DataLoaderABC import getSpectrumLoaders, checkPathForDataLoader
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
         if len(paths) == 0:
@@ -663,6 +662,8 @@ class Gui(Ui):
         if not paths:
             return []
 
+        pathFilter = list(getSpectrumLoaders().keys())
+
         spectrumLoaders = []
         count = 0
         # Recursively search all paths
@@ -670,11 +671,11 @@ class Gui(Ui):
             _path = aPath(path)
             if _path.is_dir():
                 dirLoader = DirectoryDataLoader(path, recursive=False,
-                                                pathFilter=(SpectrumDataLoader.dataFormat,))
+                                                pathFilter=pathFilter)
                 spectrumLoaders.append(dirLoader)
                 count += len(dirLoader)
 
-            elif (sLoader := SpectrumDataLoader.checkForValidFormat(path)) is not None:
+            elif (sLoader := checkPathForDataLoader(path, pathFilter=pathFilter)) is not None:
                 spectrumLoaders.append(sLoader)
                 count += 1
 

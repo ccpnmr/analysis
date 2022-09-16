@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-08 14:05:36 +0100 (Wed, June 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-09-16 15:02:25 +0100 (Fri, September 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -91,7 +91,10 @@ nusMap = {NUS_TYPE_NONUS:"regular", NUS_TYPE_NUS:"nus", NUS_TYPE_ISTNUS:"ist-nus
 
 class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
     """
-    NmrPipe spectral storage
+    NmrPipe nD (n=1-4) binary spectral data reading:
+    The NmrPipe files are stored as either:
+    - a single file
+    - or for 3D/4D as a series of 2D planes defined by a template name; e.g. 'myFile%003d.ft3'
     """
 
     #=========================================================================================

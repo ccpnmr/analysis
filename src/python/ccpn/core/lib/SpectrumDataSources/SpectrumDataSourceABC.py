@@ -92,8 +92,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-28 16:09:46 +0100 (Thu, July 28, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-09-16 15:02:25 +0100 (Fri, September 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -128,7 +128,7 @@ from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, Bool, List, \
     CString, CList
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 
-from ccpn.framework.constants import CCPNMR_PREFIX
+from ccpn.framework.constants import CCPNMR_PREFIX, NO_SUFFIX, ANY_SUFFIX
 
 
 _BLOCK_CACHE = CCPNMR_PREFIX + 'block_cache'
@@ -213,7 +213,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
     isFloatData = True
     hasWritingAbility = False  # flag that defines if dataFormat implements writing methods
 
-    suffixes = []  # potential suffixes of data file; first is taken as default; [None] is defined as no suffix
+    suffixes = []  # potential suffixes of data file; first is taken as default;
+                   # NO_SUFFIX defines that no suffix is allowed
+                   # ANY_SUFFIX defines that any suffix is allowed
     allowDirectory = False  # Can/Can't open a directory
     openMethod = None  # method to open the file as openMethod(path, mode)
     defaultOpenReadMode = 'r+'
@@ -461,6 +463,24 @@ class SpectrumDataSourceABC(CcpNmrJson):
     # Convenience properties and methods
     #=========================================================================================
 
+    @classmethod
+    def _documentClass(cls) -> str:
+        """:return a documentation string comprised of __doc__ and some class attributes
+        This method mimics the identical one in the DataLoader's classes
+        """
+
+        _newProject = 'Never'
+
+        result = f'{cls.dataFormat} spectrum binary data format.\n'+\
+            cls.__doc__ +\
+            f'\n' +\
+            f'    Valid suffixes:      {cls.suffixes}\n' +\
+            f'    Allows directory:    {cls.allowDirectory}\n' +\
+            f'    Creates new project: {_newProject}\n' + \
+            f'    Has writing ability: {cls.hasWritingAbility}'
+
+        return result
+
     def isDimensionalParameter(self, parameterName) -> bool:
         """:return True if parameterName is dimensional"""
         return self.getMetadata(parameterName, 'isDimensional')
@@ -589,6 +609,20 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
         return (None if self.dataFile is None else self.path.parent)
 
+    @classmethod
+    def checkSuffix(cls, path) -> bool:
+        """Check if suffix of path confirms to settings of class attribute suffixes.
+        :returns True or False
+        """
+        _path = aPath(path)
+        if len(_path.suffixes) == 0 and NO_SUFFIX in cls.suffixes:
+            return True
+        if len(_path.suffixes) > 0 and ANY_SUFFIX in cls.suffixes:
+            return True
+        if len(_path.suffixes) > 0 and _path.suffix in cls.suffixes:
+            return True
+        return False
+
     def setPath(self, path, substituteSuffix=False):
         """define valid path to a (binary) data file, if needed appends or substitutes
         the suffix (if defined).
@@ -597,15 +631,15 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
         if path is None:
             self.dataFile = None  # A reset essentially
+            return self
 
-        else:
-            _p = aPath(path)
-            if self.suffixes[0] is not None and _p.suffix not in self.suffixes:
-                if substituteSuffix:
-                    _p = _p.with_suffix(self.suffixes[0])
-                else:
-                    _p = _p + self.suffixes[0]
-            self.dataFile = str(_p)
+        _p = aPath(path)
+        if not (validSuffix := self.checkSuffix(path)):
+            if substituteSuffix:
+                _p = _p.with_suffix(self.suffixes[0])
+            else:
+                _p = _p + self.suffixes[0]
+        self.dataFile = str(_p)
         return self
 
     def hasValidPath(self) -> bool:

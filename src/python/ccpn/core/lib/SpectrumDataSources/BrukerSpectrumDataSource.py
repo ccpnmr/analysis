@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-02 14:39:40 +0100 (Tue, August 02, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-09-16 15:02:25 +0100 (Fri, September 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -38,15 +38,16 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flatten
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
+from ccpn.framework.constants import NO_SUFFIX, ANY_SUFFIX
 
 
 class BrukerSpectrumDataSource(SpectrumDataSourceABC):
     """
-    Bruker spectral data reading
-    Intialization can be with:
-    - a directory with Bruker data
+    Bruker binary nD (n=1-8) spectral data reading
+    Initialization can be from:
+    - a directory with Bruker data (No-suffix)
     - a directory with Bruker processed data (pdata/x)
-    - Bruker processed data [1r, 2rr, etc]
+    - Bruker processed data file, e.g. 1r, 2rr, etc
     """
     dataFormat = 'Bruker'
 
@@ -56,7 +57,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
     blockHeaderSize = 0
     isFloatData = False
 
-    suffixes = [None]
+    suffixes = [NO_SUFFIX]
     allowDirectory = True  # Can supply a Bruker top directory or pdata directory
     openMethod = open
     defaultOpenReadMode = 'rb'

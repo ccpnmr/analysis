@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-15 14:14:48 +0100 (Mon, August 15, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-09-16 15:03:31 +0100 (Fri, September 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -5432,6 +5432,8 @@ class CcpnNefReader(CcpnNefContent):
         :return: the Spectrum instance
         """
         from ccpn.core.Spectrum import _newEmptySpectrum
+        from ccpn.framework.lib.DataLoaders.DataLoaderABC import _getPotentialDataLoaders
+
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
@@ -5473,9 +5475,16 @@ class CcpnNefReader(CcpnNefContent):
                 _params.update(ccpnDimensionParameters)
 
             _params['referencePoints'] = [1.0] * dimensionCount
+
             # create a new spectrum; first empty but change dataFormat if known
             filePath = _params.pop('filePath', None)
             dataFormat = _params.pop('dataFormat', None)
+            if filePath is not None and dataFormat is None:
+                # see if we can derive a dataFormat from the filePath
+                _loaders = _getPotentialDataLoaders(filePath)
+                if len(_loaders) == 1:
+                    dataFormat = _loaders[0].dataFormat
+
             expName = _params.pop('experimentName', None)
             expType = _params.pop('experimentType', None)
             refExpDims = _params.pop('referenceExperimentDimensions', None)

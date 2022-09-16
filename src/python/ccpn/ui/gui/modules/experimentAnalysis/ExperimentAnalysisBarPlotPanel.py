@@ -23,6 +23,7 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 # Start of code
 #=========================================================================================
 
+import math
 import pyqtgraph as pg
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
@@ -46,6 +47,7 @@ class BarPlotPanel(GuiPanel):
         GuiPanel.__init__(self, guiModule,*args , **Framekwargs)
         self._appearancePanel = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
         self._toolbarPanel = self.guiModule.panelHandler.getToolBarPanel()
+        self._plottedDf = None
         self._aboveX = []
         self._belowX = []
         self._untraceableX = []
@@ -83,6 +85,9 @@ class BarPlotPanel(GuiPanel):
         self.selectedPointPen = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
         self.selectedLabelPen = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
         self.barGraphWidget = BarGraphWidget(self, application=self.application, backgroundColour=self.backgroundColour,
+                                             actionCallback=self._mouseDoubleClickEvent,
+                                             selectionCallback=self._mouseSingleClickEvent,
+                                             hoverCallback=self._mouseHoverCallbackEvent,
                                              threshouldLine=0.1, grid=(1,0))
         self.barGraphWidget.showThresholdLine(True)
         self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._thresholdLineMoved)
@@ -263,7 +268,33 @@ class BarPlotPanel(GuiPanel):
                         list(ticks.items())[::1]]) # steps of 1, show all labels
         ## update labels on axes
         self._updateAxisLabels()
+        self._plottedDf = dataFrame
         return True
+
+    def _setCurrentObjs(self, df, ix):
+        from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import getPeaksFromCollection
+        if df is not None:
+            pid = df.loc[ix, sv.COLLECTIONPID]
+            collection = self.project.getByPid(pid)
+            peaks = getPeaksFromCollection(collection)
+            self.current.peaks = peaks
+            self.current.collection = collection
+
+    def _mouseDoubleClickEvent(self, x, y):
+        from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import _navigateToPeak
+        self._setCurrentObjs(self._plottedDf, x)
+        _navigateToPeak(self.guiModule, self.current.peaks[-1])
+
+    def _mouseSingleClickEvent(self, x, y):
+        self._setCurrentObjs(self._plottedDf, x)
+
+    def _mouseHoverCallbackEvent(self, x, y):
+        if self._plottedDf is not None:
+            pid = self._plottedDf.loc[x, sv.COLLECTIONPID]
+            # collection = self.project.getByPid(pid)
+
+            self.barGraphWidget._hoverBox.setText(pid)
+
 
     def _updateAxisLabels(self):
         self.setXLabel(label=self.xColumnName)

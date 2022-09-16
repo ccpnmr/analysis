@@ -192,3 +192,27 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         self.extensionsHandler.close()
         self.settingsPanelHandler.close()
         super()._closeModule()
+
+def _navigateToPeak(guiModule, peak):
+    from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
+    if peak is None:
+        return
+    # get the display from settings
+    appearanceTab = guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
+    displayWidget = appearanceTab.getWidget(guiNameSpaces.WidgetVarName_SpectrumDisplSelection)
+    if displayWidget is None:
+        getLogger().debug(f'Not found widget in Appearance tab {guiNameSpaces.WidgetVarName_SpectrumDisplSelection}')
+        return
+    displays = displayWidget.getDisplays()
+    for display in displays:
+        for strip in display.strips:
+            widths = _getCurrentZoomRatio(strip.viewRange())
+            navigateToPositionInStrip(strip=strip, positions=peak.position, widths=widths)
+
+def getPeaksFromCollection(collection):
+    from ccpn.core.Peak import Peak
+    peaks = set()
+    for item in collection.items:
+        if isinstance(item, Peak):
+            peaks.add(item)
+    return list(peaks)

@@ -27,7 +27,7 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 import pandas as pd
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
-from ccpn.core.Peak import Peak
+from ccpn.core.lib.Notifiers import Notifier
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
@@ -36,7 +36,6 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Column import ColumnClass, Column
 import ccpn.ui.gui.widgets.GuiTable as gt
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
-from ccpn.ui.gui.lib._SimplePandasTable import _updateSimplePandasTable, _SimplePandasTableView, _SearchTableView, _clearSimplePandasTable
 
 
 class _ExperimentalAnalysisTableABC(gt.GuiTable):
@@ -71,6 +70,8 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
         self._selectOverride = True # otherwise very odd behaviour
         self.setMinimumWidth(200)
         self._navigateToPeakOnSelection = True
+        self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
+                                                 callback=self._currentCollectionCallback, onceOnly=True)
 
     @property
     def dataFrame(self):
@@ -110,6 +111,11 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
         super().clearSelection()
         self.current.collections = []
 
+    def _currentCollectionCallback(self, *args):
+        # select collection on table.
+        getLogger().warn('Selection on Current Collection not implemented yet')
+        # self.clearSelection()
+
     def getSelectedObjects(self, fromSelection=None):
         """
         :param fromSelection:
@@ -146,53 +152,31 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
             collections.add(co)
         return list(collections)
 
-    def getPeaksFromCollection(self, collection):
-        peaks = set()
-        for item in collection.items:
-            if isinstance(item, Peak):
-                peaks.add(item)
-        return list(peaks)
 
     def selection(self, data, *args):
         """
         :param args:
         :return:
         """
+        from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import _navigateToPeak, \
+            getPeaksFromCollection
         collections = self.getSelectedCollections()
-        peaks = set()
-        for collection in collections:
-            peaks.update(self.getPeaksFromCollection(collection))
+        if len(collections)== 0:
+            return
+        peaks = getPeaksFromCollection(collections[-1])
         self.current.collections = collections
-        self.current.peaks = list(peaks)
-        if self._navigateToPeakOnSelection:
-            self._navigateToPeak()
-
-    def action(self, *args):
-        self._navigateToPeak()
-
-    def _navigateToPeak(self):
-        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
-
-        # peaks should have been set to current by the click
-        peaks = self.current.peaks
+        self.current.peaks = peaks
         if len(peaks)== 0:
             return
-        peak = peaks[-1]
-        # get the display from settings
-        appearanceTab = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
-        displayWidget = appearanceTab.getWidget(guiNameSpaces.WidgetVarName_SpectrumDisplSelection)
-        if displayWidget is None:
-            getLogger().debug(f'Not found widget in Appearance tab {guiNameSpaces.WidgetVarName_SpectrumDisplSelection}')
-            return
-        displays = displayWidget.getDisplays()
-        for display in displays:
-            for strip in display.strips:
-                widths = _getCurrentZoomRatio(strip.viewRange())
-                navigateToPositionInStrip(strip=strip, positions=peak.position, widths=widths)
+        if self._navigateToPeakOnSelection:
+            _navigateToPeak(self.guiModule, self.current.peaks[-1])
+
+    def action(self, *args):
+        from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import _navigateToPeak
+        _navigateToPeak(self.guiModule, self.current.peaks[-1])
 
     def actionCheckBox(self, data):
         pass
-
 
     def _setContextMenu(self):
         """Subclass guiTable to add new items to context menu

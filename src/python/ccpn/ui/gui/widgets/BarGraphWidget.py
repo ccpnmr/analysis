@@ -110,8 +110,8 @@ class YBarAxisItem(pg.AxisItem):
 
 class BarGraphWidget(Widget):
 
-    def __init__(self, parent, application=None, xValues=None, yValues=None, colour='r',
-                 objects=None, threshouldLine=0, backgroundColour='w', **kwds):
+    def __init__(self, parent, application=None, xValues=None, yValues=None, colour='r', actionCallback=None,
+                 selectionCallback=None, hoverCallback=None, objects=None, threshouldLine=0, backgroundColour='w', **kwds):
         super().__init__(parent, **kwds)
 
         self.application = application
@@ -130,10 +130,19 @@ class BarGraphWidget(Widget):
         self.belowBrush = 'r'
         self.disappearedBrush = 'b'
         self.threshouldLine = threshouldLine
+        self._hoverBox = pg.TextItem(text='TEXT', anchor=(-0.1,0.1), angle=0, border='w', fill=(0, 0, 255, 100))
+        self._hoverBox.hide()
         self.setData(viewBox=self.customViewBox, xValues=xValues, yValues=yValues, objects=objects, colour=colour, replace=True)
         self.xLine = self.customViewBox.xLine
         self.customViewBox.addItem(self.xLine)
         self.setThresholdLine()
+        self._actionCallback = actionCallback
+        self._selectionCallback = selectionCallback
+        self._hoverCallback = hoverCallback
+
+
+        # plot.addItem(text)
+
         self._dataDict = {
             AboveX            : [],
             AboveY            : [],
@@ -213,14 +222,34 @@ class BarGraphWidget(Widget):
             self.barGraphs = []
             self.customViewBox.clear()
 
-        self.barGraph = BarGraph(viewBox=viewBox, application=self.application,
+        self.barGraph = BarGraph(viewBox=viewBox, actionCallback = self._mouseDoubleClickCallback,
+                                 selectionCallback=self._mouseSingleClickCallback, application=self.application,
                                  xValues=xValues, yValues=yValues, objects=objects, brush=colour)
         self.barGraphs.append(self.barGraph)
         self.customViewBox.addItem(self.barGraph)
+        self.customViewBox.addItem(self._hoverBox)
         self.xValues = xValues
         self.yValues = yValues
         self.objects = objects
         self.updateViewBoxLimits()
+
+    def _mouseDoubleClickCallback(self, x, y):
+        if self._actionCallback:
+            self._actionCallback(x,y)
+
+    def _mouseSingleClickCallback(self, x, y):
+        if self._selectionCallback:
+            self._selectionCallback(x,y)
+
+    def _mouseHoverCallback(self, x, y):
+        if self._hoverCallback:
+            if x is not None:
+                self._hoverBox.show()
+                self._hoverBox.setPos(x,y)
+                self._hoverCallback(x,y)
+            else:
+                self._hoverBox.hide()
+        # self._hoverBox.hide()
 
     def setViewBoxLimits(self, xMin, xMax, yMin, yMax):
         self.customViewBox.setLimits(xMin=xMin, xMax=xMax, yMin=yMin, yMax=yMax)
@@ -326,20 +355,34 @@ class BarGraphWidget(Widget):
         disappearedX = np.array(disappearedX) - 0.5
         if len(aboveBrushes)>0:
             self.aboveThreshold = BarGraph(viewBox=self.customViewBox, application=self.application,
-                                           drawLabels=drawLabels,
-                                           xValues=aboveX, yValues=aboveY, objects=aboveObjects, useGradient=True, brushes=aboveBrushes)
+                                           drawLabels=drawLabels, actionCallback=self._mouseDoubleClickCallback,
+                                           selectionCallback=self._mouseSingleClickCallback,
+                                           hoverCallback = self._mouseHoverCallback,
+                                           xValues=aboveX, yValues=aboveY,
+                                           objects=aboveObjects, useGradient=True, brushes=aboveBrushes)
         else:
-            self.aboveThreshold = BarGraph(viewBox=self.customViewBox, application=self.application, drawLabels=drawLabels,
-                                       xValues=aboveX, yValues=aboveY, objects=aboveObjects, brush=self.aboveBrush)
-        self.belowThreshold = BarGraph(viewBox=self.customViewBox, application=self.application, drawLabels=drawLabels,
+            self.aboveThreshold = BarGraph(viewBox=self.customViewBox, application=self.application,
+                                           drawLabels=drawLabels,
+                                           actionCallback=self._mouseDoubleClickCallback,
+                                           selectionCallback=self._mouseSingleClickCallback,
+                                           hoverCallback=self._mouseHoverCallback,
+                                           xValues=aboveX, yValues=aboveY, objects=aboveObjects, brush=self.aboveBrush)
+        self.belowThreshold = BarGraph(viewBox=self.customViewBox, application=self.application,
+                                       actionCallback=self._mouseDoubleClickCallback, drawLabels=drawLabels,
+                                       selectionCallback=self._mouseSingleClickCallback,
+                                       hoverCallback=self._mouseHoverCallback,
                                        xValues=belowX, yValues=belowY, objects=belowObjects, brush=self.belowBrush)
         self.disappearedPeaks = BarGraph(viewBox=self.customViewBox, application=self.application, drawLabels=drawLabels,
+                                         actionCallback=self._mouseDoubleClickCallback,
+                                         selectionCallback=self._mouseSingleClickCallback,
+                                         hoverCallback=self._mouseHoverCallback,
                                          xValues=disappearedX, yValues=disappearedY, objects=disappearedObjects,
                                          brush=self.disappearedBrush)
 
         self.customViewBox.addItem(self.aboveThreshold)
         self.customViewBox.addItem(self.belowThreshold)
         self.customViewBox.addItem(self.disappearedPeaks)
+        self.customViewBox.addItem(self._hoverBox)
         self.barGraphs.append(self.aboveThreshold)
         self.barGraphs.append(self.belowThreshold)
         self.barGraphs.append(self.disappearedPeaks)

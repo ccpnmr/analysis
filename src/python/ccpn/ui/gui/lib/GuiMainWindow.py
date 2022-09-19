@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-16 15:02:26 +0100 (Fri, September 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-19 20:45:49 +0100 (Mon, September 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -527,11 +527,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                         kwDict[k] = QKeySequence('Ctrl+{}'.format(v[1:]))
                 menuAction = Action(self, action[0], callback=action[1], **kwDict)
                 menu.addAction(menuAction)
-
-    # def _isTemporaryProject(self):
-    #     """Return true if the project is temporary, i.e., not saved or updated.
-    #     """
-    #     return self.project.isTemporary
 
     def _checkForBadSpectra(self, project):
         """Report bad spectra in a popup

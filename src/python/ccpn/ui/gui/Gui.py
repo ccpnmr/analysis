@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-16 15:02:26 +0100 (Fri, September 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-19 20:45:49 +0100 (Mon, September 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -630,17 +630,41 @@ class Gui(Ui):
 
         dataLoaders = []
         for path in paths:
+
+            _path = aPath(path)
+            if not _path.exists():
+                txt = f'"{path}" does not exist'
+                getLogger().warning(txt)
+                MessageDialog.showError('Load Data', txt, parent=self)
+                if len(paths) == 1:
+                    return []
+                else:
+                    continue
+
             dataLoader, createNewProject, ignore = self._getDataLoader(path, pathFilter=pathFilter)
-            if ignore or dataLoader is None:
+            if ignore:
                 continue
+
             if dataLoader is None:
-                getLogger().warning('Unable to load "%s"' % path)
-                continue
+                txt = f'Unable to load "{path}"'
+                getLogger().warning(txt)
+                MessageDialog.showError('Load Data', txt, parent=self)
+                if len(paths) == 1:
+                    return []
+                else:
+                    continue
+
             dataLoaders.append(dataLoader)
 
         # load the project using the dataLoaders;
         # We'll ask framework who will pass it back as ui._loadData calls
-        return self.application._loadData(dataLoaders)
+        objs = self.application._loadData(dataLoaders)
+        if len(objs) == 0:
+            txt = f'No objects were loaded from {paths}'
+            getLogger().warning(txt)
+            MessageDialog.showError('Load Data', txt, parent=self)
+
+        return objs
 
     def loadSpectra(self, *paths) -> list:
         """Load all the spectra found in paths.

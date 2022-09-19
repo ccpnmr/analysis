@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-16 15:02:26 +0100 (Fri, September 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-19 21:37:24 +0100 (Mon, September 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -44,19 +44,19 @@ class SparkyDataLoader(DataLoaderABC):
     # def __init__(self, path):
     #     super(SparkyDataLoader, self).__init__(path)
 
-    @classmethod
-    def checkForValidFormat(cls, path):
-        """check if valid sparkyFormat
-        :return: None or instance of the class
-        """
-        if (_path := cls.checkPath(path)) is None:
-            return None
-
-        #TODO: implement additional checks?
-
-        instance = cls(path)
-        return instance
-        # return None
+    # @classmethod
+    # def checkForValidFormat(cls, path):
+    #     """check if valid sparkyFormat
+    #     :return: None or instance of the class
+    #     """
+    #     if (_path := cls.checkPath(path)) is None:
+    #         return None
+    #
+    #     #TODO: implement additional checks?
+    #
+    #     instance = cls(path)
+    #     return instance
+    #     # return None
 
     def load(self):
         """The actual Nef loading method; subclassed to account for special

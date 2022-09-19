@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-19 20:46:18 +0100 (Mon, September 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-19 21:37:24 +0100 (Mon, September 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -85,26 +85,26 @@ class SpectrumDataLoaderABC(DataLoaderABC):
         self.dataSource = dataSource
         return True
 
-    @classmethod
-    def checkForValidFormat(cls, path):
-        """check if path defines one of the valid spectrum data formats
-        :path: path to (binary) spectrum file; may contain redirections (e.g $DATA)
-        :return: None or instance of the class
-        """
-        dataStore = DataStore.newFromPath(path)
-        if not dataStore.exists():
-            return None
-
-        if not cls.checkSuffix(path):
-            return None
-
-        if (dataSource := cls.spectumDataSourceClass.checkForValidFormat(dataStore.aPath())) is None:
-            return None
-
-        instance = cls(dataStore.aPath())
-        instance.dataSource = dataSource
-        instance.dataStore = dataStore
-        return instance
+    # @classmethod
+    # def checkForValidFormat(cls, path):
+    #     """check if path defines one of the valid spectrum data formats
+    #     :path: path to (binary) spectrum file; may contain redirections (e.g $DATA)
+    #     :return: None or instance of the class
+    #     """
+    #     dataStore = DataStore.newFromPath(path)
+    #     if not dataStore.exists():
+    #         return None
+    #
+    #     if not cls.checkSuffix(path):
+    #         return None
+    #
+    #     if (dataSource := cls.spectumDataSourceClass.checkForValidFormat(dataStore.aPath())) is None:
+    #         return None
+    #
+    #     instance = cls(dataStore.aPath())
+    #     instance.dataSource = dataSource
+    #     instance.dataStore = dataStore
+    #     return instance
 
     @classmethod
     def _documentClass(cls) -> str:

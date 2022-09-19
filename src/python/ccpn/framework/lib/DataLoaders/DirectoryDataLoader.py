@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-16 15:02:26 +0100 (Fri, September 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-19 21:37:24 +0100 (Mon, September 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,18 +50,18 @@ class DirectoryDataLoader(DataLoaderABC):
     dataLoaders = List(default_value=[]).tag(info='List with dataLoader instances for the files of the directory "path"')
     count = Int(default_value=0).tag(info='Count of number of dataLoaders including the recursive ones')
 
-    @classmethod
-    def checkForValidFormat(cls, path):
-        """check if valid format corresponding to dataFormat
-        :return: None or instance of the class
-        """
-        if (_path := cls.checkPath(path)) is None:
-            return None
-        if not _path.is_dir():
-            return None
-        # assume that all is good for now
-        instance = cls(path)
-        return instance
+    # @classmethod
+    # def checkForValidFormat(cls, path):
+    #     """check if valid format corresponding to dataFormat
+    #     :return: None or instance of the class
+    #     """
+    #     if (_path := cls.checkPath(path)) is None:
+    #         return None
+    #     if not _path.is_dir():
+    #         return None
+    #     # assume that all is good for now
+    #     instance = cls(path)
+    #     return instance
 
     def load(self):
         """The actual loading method;

@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-19 20:46:18 +0100 (Mon, September 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-19 21:37:23 +0100 (Mon, September 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -63,20 +63,20 @@ class CcpNmrV3ProjectDataLoader(DataLoaderABC):
         self.errorString =  ''
         return True
 
-    @classmethod
-    def checkForValidFormat(cls, path):
-        """check if valid format corresponding to dataFormat
-        :return: None or instance of the class
-        """
-        if (instance := super().checkForValidFormat(path)) is None:
-            return None
-        if not instance.checkValid():
-            # instance.isValid = False
-            # instance.errorString = f'Invalid path "{instance.path}"; required sub-directory "{CCPN_API_DIRECTORY}" not found'
-            return None
-
-        instance.isValid = True
-        instance.errorString = ''
-        return instance
+    # @classmethod
+    # def checkForValidFormat(cls, path):
+    #     """check if valid format corresponding to dataFormat
+    #     :return: None or instance of the class
+    #     """
+    #     if (instance := super().checkForValidFormat(path)) is None:
+    #         return None
+    #     if not instance.checkValid():
+    #         # instance.isValid = False
+    #         # instance.errorString = f'Invalid path "{instance.path}"; required sub-directory "{CCPN_API_DIRECTORY}" not found'
+    #         return None
+    #
+    #     instance.isValid = True
+    #     instance.errorString = ''
+    #     return instance
 
 CcpNmrV3ProjectDataLoader._registerFormat()

@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-19 20:46:18 +0100 (Mon, September 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-19 21:37:24 +0100 (Mon, September 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -164,19 +164,18 @@ def checkPathForDataLoader(path, pathFilter=None):
 
     _loaders = _getPotentialDataLoaders(path)
     for cls in _loaders:
-        instance = cls.checkForValidFormat(path)
-        if instance is None:
-            getLogger().debug2('%-20s %-20s: %s' % (cls.dataFormat, '(Not Valid)', path))
-            continue
 
-        # we found an instance
-        if cls.dataFormat not in pathFilter:
-            getLogger().debug2('%-20s %-20s: %s' % (cls.dataFormat, '(Valid, not in filter)', path))
-            return None
-        else:
-            getLogger().debug2('%-20s %-20s: %s' % (cls.dataFormat, '(Valid, in filter)', path))
-            return instance  # we found a valid format for path
+        # create an instance and check
+        instance = cls.newFromPath(path)
+        if instance.checkValid():
+            # we found a valid format for path
+            if cls.dataFormat in pathFilter:
+                getLogger().debug2('%-20s %-20s: %s' % (cls.dataFormat, '(Valid, in filter)', path))
+                return instance
+            else:
+                getLogger().debug2('%-20s %-20s: %s' % (cls.dataFormat, '(Valid, not in filter)', path))
 
+    getLogger().debug2(f'No valid loader found for {path}')
     return None
 
 #--------------------------------------------------------------------------------------------
@@ -273,10 +272,20 @@ class DataLoaderABC(TraitBase):
         Can be subclassed
         """
         instance = cls(path)
-        if not instance._checkPath():
+        if not instance.checkValid():
+            # instance.isValid = False
+            # instance.errorString = f'Invalid path "{instance.path}"; required sub-directory "{CCPN_API_DIRECTORY}" not found'
             return None
-        # assume that all is good
+
+        instance.isValid = True
+        instance.errorString = ''
         return instance
+
+        # instance = cls(path)
+        # if not instance._checkPath():
+        #     return None
+        # # assume that all is good
+        # return instance
         #
         # if (_path := cls.checkPath(path)) is None:
         #     return None
@@ -301,40 +310,40 @@ class DataLoaderABC(TraitBase):
 
         return result
 
-    @classmethod
-    def checkSuffix(cls, path) -> bool:
-        """Check if suffix of path confirms to settings of class attribute suffixes.
-        :returns True or False
-        """
-        _path = aPath(path)
-        if len(_path.suffixes) == 0 and NO_SUFFIX in cls.suffixes:
-            return True
-        if len(_path.suffixes) > 0 and ANY_SUFFIX in cls.suffixes:
-            return True
-        if len(_path.suffixes) > 0 and _path.suffix in cls.suffixes:
-            return True
-        return False
+    # @classmethod
+    # def checkSuffix(cls, path) -> bool:
+    #     """Check if suffix of path confirms to settings of class attribute suffixes.
+    #     :returns True or False
+    #     """
+    #     _path = aPath(path)
+    #     if len(_path.suffixes) == 0 and NO_SUFFIX in cls.suffixes:
+    #         return True
+    #     if len(_path.suffixes) > 0 and ANY_SUFFIX in cls.suffixes:
+    #         return True
+    #     if len(_path.suffixes) > 0 and _path.suffix in cls.suffixes:
+    #         return True
+    #     return False
 
-    @classmethod
-    def checkPath(cls, path):
-        """Check if path exists and confirms to settings of class attributes suffixes and allowDirectory
-        do not allow dot-file (e.g. .cshrc)
-        :returns Path instance of path, or None
-        """
-        _path = aPath(path)
-        if not _path.exists():
-            return None
-        if not cls.checkSuffix(path):
-            return None
-        if _path.basename == '':
-            return None
-        if _path.is_dir() and not cls.allowDirectory:
-            # path is a directory: cls does not allow
-            return None
-        if not _path.is_dir() and cls.requireDirectory:
-            # path is a file, but cls requires a directory
-            return None
-        return _path
+    # @classmethod
+    # def checkPath(cls, path):
+    #     """Check if path exists and confirms to settings of class attributes suffixes and allowDirectory
+    #     do not allow dot-file (e.g. .cshrc)
+    #     :returns Path instance of path, or None
+    #     """
+    #     _path = aPath(path)
+    #     if not _path.exists():
+    #         return None
+    #     if not cls.checkSuffix(path):
+    #         return None
+    #     if _path.basename == '':
+    #         return None
+    #     if _path.is_dir() and not cls.allowDirectory:
+    #         # path is a directory: cls does not allow
+    #         return None
+    #     if not _path.is_dir() and cls.requireDirectory:
+    #         # path is a file, but cls requires a directory
+    #         return None
+    #     return _path
 
     def checkValid(self) -> bool:
         """Check if self.path is valid.

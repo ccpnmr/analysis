@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-16 15:02:26 +0100 (Fri, September 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-19 20:46:18 +0100 (Mon, September 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,7 @@ from typing import Tuple
 
 from ccpn.util.Path import Path, aPath
 from ccpn.util.traits.TraitBase import TraitBase
-from ccpn.util.traits.CcpNmrTraits import Unicode, Any, List, Bool, CPath, Odict
+from ccpn.util.traits.CcpNmrTraits import Unicode, Any, List, Bool, CPath, Odict, CString
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import singleton
 
@@ -134,14 +134,13 @@ def _getPotentialDataLoaders(path) -> list:
         loaders = _suffixDict.get(path.suffix,
                                   _suffixDict.get(ANY_SUFFIX, []))
 
-    # filter for loaders that do not allow a directory
-    if path.is_dir():
-        # we have a dirrectory
-        loaders = [dl for dl in loaders if (dl.allowDirectory or dl.requireDirectory)]
-    else:
-        # we have a file; i.e. all the loaders that not requireDirectory
-        loaders = [dl for dl in loaders if (not dl.requireDirectory)]
-
+    # # filter for loaders that do not allow a directory
+    # if path.is_dir():
+    #     # we have a directory
+    #     loaders = [dl for dl in loaders if (dl.allowDirectory or dl.requireDirectory)]
+    # else:
+    #     # we have a file; i.e. all the loaders that not requireDirectory
+    #     loaders = [dl for dl in loaders if (not dl.requireDirectory)]
 
     return loaders
 
@@ -212,8 +211,17 @@ class DataLoaderABC(TraitBase):
     # traits
     path = CPath().tag(info='a path to a file to be loaded')
     application = Any(default_value=None, allow_none=True)
-    createNewProject = Bool().tag(info='flag to indicate if a new project will be created')
-    makeArchive = Bool().tag(info='flag to indicate if a project needs to be archived before loading')
+
+    # project related
+    createNewProject = Bool(default_value=False).tag(info='flag to indicate if a new project will be created')
+    newProjectName = CString(default_value='newProject').tag(info='Name for a new project')
+    makeArchive = Bool(default_value=False).tag(info='flag to indicate if a project needs to be archived before loading')
+
+    # new implementation, using newFromPath method and validity testing later on
+    isValid = Bool(default_value=False).tag(info='flag to indicate if path denotes a valid dataType')
+    errorString = CString(default_value='').tag(info='error description for validity testing')
+
+    ignore = Bool(default_value=False).tag(info='flag to indicate if loader needs ignoring')
 
     # A dict of registered DataLoaders: filled by _registerFormat classmethod, called
     # once after each definition of a new derived class (e.g. PdbDataLoader)
@@ -232,8 +240,8 @@ class DataLoaderABC(TraitBase):
     def __init__(self, path):
         super().__init__()
         self.path = aPath(path)
-        if not self.path.exists():
-            raise ValueError('Invalid path "%s"' % path)
+        # if not self.path.exists():
+        #     raise ValueError('Invalid path "%s"' % path)
 
         # get default setting for project creation
         self.createNewProject = self.alwaysCreateNewProject or self.canCreateNewProject
@@ -243,37 +251,19 @@ class DataLoaderABC(TraitBase):
         from ccpn.framework.Application import getApplication
         self.application = getApplication()
 
-    @classmethod
-    def _documentClass(cls) -> str:
-        """:return a documentation string comprised of __doc__ and some class attributes
-        """
-        if cls.requireDirectory:
-            _directory = 'Required'
-        elif cls.allowDirectory:
-            _directory = 'Allowed'
-        else:
-            _directory = 'Not allowed'
-
-        if cls.canCreateNewProject:
-            _newProject = 'Potentially'
-        elif cls.alwaysCreateNewProject:
-            _newProject = 'Always'
-        else:
-            _newProject = 'Never'
-
-        result = cls.__doc__ +\
-            f'\n' +\
-            f'    Valid suffixes:      {cls.suffixes}\n' +\
-            f'    Directory:           {_directory}\n' +\
-            f'    Creates new project: {_newProject}'
-
-        return result
-
     @property
     def project(self):
-        """Current poject instance
+        """Current project instance
         """
         return self.application.project
+
+    @classmethod
+    def newFromPath(cls, path):
+        """New instance with path
+        :return: instance of the class
+        """
+        instance = cls(path)
+        return instance
 
     @classmethod
     def checkForValidFormat(cls, path):
@@ -282,11 +272,17 @@ class DataLoaderABC(TraitBase):
 
         Can be subclassed
         """
-        if (_path := cls.checkPath(path)) is None:
+        instance = cls(path)
+        if not instance._checkPath():
             return None
         # assume that all is good
-        instance = cls(path)
         return instance
+        #
+        # if (_path := cls.checkPath(path)) is None:
+        #     return None
+        # # assume that all is good
+        # instance = cls(path)
+        # return instance
 
     def load(self):
         """The actual file loading method;
@@ -339,6 +335,100 @@ class DataLoaderABC(TraitBase):
             # path is a file, but cls requires a directory
             return None
         return _path
+
+    def checkValid(self) -> bool:
+        """Check if self.path is valid.
+        Calls _checkPath and _checkSuffix
+        sets self.isValid and self.errorString
+        :returns True if ok or False otherwise
+        Can be subclassed
+        """
+        self.isValid = False
+        self.errorString = ''
+
+        if not self._checkSuffix():
+            return False
+        if not self._checkPath():
+            return False
+
+        self.isValid = True
+        return True
+
+    def _checkSuffix(self) -> bool:
+        """Check if suffix of self.path confirms to settings of class attribute suffixes.
+        sets self.isValid and self.errorString
+        :returns True if ok or False otherwise
+        """
+        _path = self.path
+        if len(_path.suffixes) == 0 and NO_SUFFIX in self.suffixes:
+            self.isValid = True
+            return True
+        if len(_path.suffixes) > 0 and ANY_SUFFIX in self.suffixes:
+            self.isValid = True
+            return True
+        if len(_path.suffixes) > 0 and _path.suffix in self.suffixes:
+            self.isValid = True
+            return True
+
+        self.isValid = False
+        self.errorString = f'Invalid path suffix for "{_path}"; should be one of {self.suffixes}'
+        return False
+
+    def _checkPath(self):
+        """Check if self.path exists and confirms to settings of class attributes suffixes and allowDirectory
+        do not allow dot-file (e.g. .cshrc)
+        :returns True if ok or False otherwise
+        """
+        _path = self.path
+        if not _path.exists():
+            self.errorString = f'Path "{_path}" does not exists'
+            self.isValid = False
+            return False
+        if not self._checkSuffix():
+            return False
+        if _path.basename == '':
+            self.errorString = f'Invalid path "{_path}"'
+            self.isValid = False
+            return False
+        if _path.is_dir() and not self.allowDirectory:
+            # path is a directory: cls does not allow
+            self.errorString = f'Invalid path "{_path}"; directory not allowed'
+            self.isValid = False
+            return False
+        if not _path.is_dir() and self.requireDirectory:
+            # path is a file, but cls requires a directory
+            self.errorString = f'Invalid path "{_path}"; directory required'
+            return False
+
+        self.errorString = ''
+        self.isValid = True
+        return True
+
+    @classmethod
+    def _documentClass(cls) -> str:
+        """:return a documentation string comprised of __doc__ and some class attributes
+        """
+        if cls.requireDirectory:
+            _directory = 'Required'
+        elif cls.allowDirectory:
+            _directory = 'Allowed'
+        else:
+            _directory = 'Not allowed'
+
+        if cls.canCreateNewProject:
+            _newProject = 'Potentially'
+        elif cls.alwaysCreateNewProject:
+            _newProject = 'Always'
+        else:
+            _newProject = 'Never'
+
+        result = cls.__doc__ +\
+            f'\n' +\
+            f'    Valid suffixes:      {cls.suffixes}\n' +\
+            f'    Directory:           {_directory}\n' +\
+            f'    Creates new project: {_newProject}'
+
+        return result
 
     def __str__(self):
         return '<%s: %s>' % (self.__class__.__name__, self.path)

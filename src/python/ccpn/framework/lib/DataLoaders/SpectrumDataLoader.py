@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-16 15:02:26 +0100 (Fri, September 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-19 20:46:18 +0100 (Mon, September 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -60,6 +60,30 @@ class SpectrumDataLoaderABC(DataLoaderABC):
 
     dataSource = DataSourceTrait(default_value=None)
     dataStore = DataStoreTrait(default_value=None)
+
+    def __init__(self, path):
+        """
+        :param path: path to (binary) spectrum file; may contain redirections (e.g $DATA)
+        """
+        dataStore = DataStore.newFromPath(path, dataFormat=self.spectumDataSourceClass.dataFormat)
+        super().__init__(path=dataStore.aPath())
+        self.dataStore = dataStore
+
+    def checkValid(self) -> bool:
+        """check if path defines one of the valid spectrum data formats
+        :param path: path to (binary) spectrum file; may contain redirections (e.g $DATA)
+        Calls _checkPath and _checkSuffix
+        sets self.isValid and self.errorString
+        :returns True if ok or False otherwise
+        """
+        if not super().checkValid():
+            return False
+        if (dataSource := self.spectumDataSourceClass.checkForValidFormat(self.path)) is None:
+            self.isValid = False
+            self.errorString = f'Failed to get a SpectrumDataSource for "{self.path}"'
+            return False
+        self.dataSource = dataSource
+        return True
 
     @classmethod
     def checkForValidFormat(cls, path):

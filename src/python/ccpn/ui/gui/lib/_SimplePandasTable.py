@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-14 17:01:04 +0100 (Wed, September 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 10:13:57 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -585,7 +585,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
     showEditIcon = False
     defaultFlags = QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
-    defaultEditable = False
+    _defaultEditable = False
 
     def __init__(self, data, view=None):
         """Initialise the pandas model.
@@ -1047,7 +1047,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             # return True if the column contains an edit function
             return self._view._dataFrameObject.setEditValues[col] is not None
         except:
-            return self.defaultEditable
+            return self._defaultEditable
 
 
 #=========================================================================================

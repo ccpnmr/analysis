@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-14 16:33:29 +0100 (Wed, September 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 10:41:16 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -287,7 +287,7 @@ class _NewChemicalShiftTable(_ProjectTableABC):
     def __init__(self, parent=None, mainWindow=None, moduleParent=None,
                  actionCallback=None, selectionCallback=None,
                  chemicalShiftList=None, hiddenColumns=None,
-                 enableExport=True, enableDelete=True, enableSearch=False,
+                 enableExport=True, enableDelete=True, enableSearch=False, enableCopyCell=False,
                  **kwds):
         """Initialise the widgets for the module.
         """
@@ -635,13 +635,12 @@ class _NewChemicalShiftTable(_ProjectTableABC):
         """
         super().addTableMenuOptions(menu)
 
-        _actions = menu.actions()
         self._mergeMenuAction = menu.addAction(_MERGE_CST, self._mergeNmrAtoms)
         self._editMenuAction = menu.addAction(_EDIT_CST, self._editNmrAtom)
         self._removeAssignmentsMenuAction = menu.addAction(_REMOVE_CST, partial(self._removeAssignments, delete=False))
         self._removeAssignmentsDeleteMenuAction = menu.addAction(_REMOVEDEL_CST, partial(self._removeAssignments, delete=True))
 
-        if _actions:
+        if (_actions := menu.actions()):
             _topMenuItem = _actions[0]
             _topSeparator = menu.insertSeparator(_topMenuItem)
 

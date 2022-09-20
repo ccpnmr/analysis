@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-14 16:12:52 +0100 (Wed, September 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 10:09:41 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -466,10 +466,11 @@ class _TableFilterABC(ScrollArea):
         else:
             # Exclude needs to remove values from the list
             # Start with the sorted values already found - from _sortIndex
-            if self._listRows is not None:
-                rows = OrderedSet(list(self._listRows)[row] for row in _model._sortIndex)
-            else:
-                rows = OrderedSet(_model._sortIndex)
+            # if self._listRows is not None:
+            #     rows = OrderedSet(list(self._listRows)[row] for row in _model._sortIndex)
+            # else:
+            #     rows = OrderedSet(_model._sortIndex)
+            rows = set(dfIndex[row] for row in _model._sortIndex)
 
         for row in range(_model.rowCount()):
             # the sorted row

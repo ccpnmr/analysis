@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-19 21:37:24 +0100 (Mon, September 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 09:30:43 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -49,29 +49,6 @@ class DirectoryDataLoader(DataLoaderABC):
     recursive = Bool(default_value=False).tag(info='Flag to define recursive behavior')
     dataLoaders = List(default_value=[]).tag(info='List with dataLoader instances for the files of the directory "path"')
     count = Int(default_value=0).tag(info='Count of number of dataLoaders including the recursive ones')
-
-    # @classmethod
-    # def checkForValidFormat(cls, path):
-    #     """check if valid format corresponding to dataFormat
-    #     :return: None or instance of the class
-    #     """
-    #     if (_path := cls.checkPath(path)) is None:
-    #         return None
-    #     if not _path.is_dir():
-    #         return None
-    #     # assume that all is good for now
-    #     instance = cls(path)
-    #     return instance
-
-    def load(self):
-        """The actual loading method;
-        :return: a list of [object(s)] representing the directory
-        """
-        result = []
-        for dataLoader in self.dataLoaders:
-            objs = dataLoader.load()  # This will automatically recurse
-            result.extend(objs)
-        return result
 
     def __init__(self, path, recursive: bool = False, pathFilter: (tuple, list) = None):
         """
@@ -112,6 +89,28 @@ class DirectoryDataLoader(DataLoaderABC):
                     # Loadable files were found
                     self.dataLoaders.append(dataLoader)
                     self.count += len(dataLoader)
+
+    def checkValid(self) -> bool:
+        """Check if self.path is valid.
+        Calls _checkPath and _checkSuffix
+        sets self.isValid and self.errorString
+        :returns True if ok or False otherwise
+        """
+        if not super().checkValid():
+            return False
+        if self.count == 0:
+            self.isValid = False
+            self.errorString = f'Invalid directory path "{self.path}"; no recognised files found'
+
+    def load(self):
+        """The actual loading method;
+        :return: a list of [object(s)] representing the directory
+        """
+        result = []
+        for dataLoader in self.dataLoaders:
+            objs = dataLoader.load()  # This will automatically recurse
+            result.extend(objs)
+        return result
 
     def __len__(self):
         return self.count

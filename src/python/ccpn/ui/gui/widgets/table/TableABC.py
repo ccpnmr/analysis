@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-14 17:40:53 +0100 (Wed, September 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 10:48:16 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -41,8 +41,10 @@ from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.table._TableModel import _TableModel, VALUE_ROLE, INDEX_ROLE
 from ccpn.ui.gui.widgets.table._TableAdditions import _TableHeaderColumns, \
     _TableCopyCell, _TableExport, _TableSearch, _TableDelete
+from ccpn.ui.gui.widgets.table._TableDelegate import _TableDelegateABC
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Logging import getLogger
+from ccpn.util.Common import NOTHING
 
 
 # simple class to store the blocking state of the table
@@ -89,17 +91,25 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     # QTableView::item:selected - color: %(GUITABLE_SELECTED_FOREGROUND)s;
 
     _columnDefs = None
-    _defaultDf = None
     _enableSelectionCallback = False
     _enableActionCallback = False
-    defaultEditable = True
+    _actionCallback = NOTHING
+    _selectionCallback = NOTHING
+    _defaultEditable = True
 
-    def __init__(self, parent=None, df=None,
+    # define the default TableModel class
+    defaultTableModel = _TableModel
+
+    def __init__(self, parent, df=None,
                  multiSelect=True, selectRows=True,
                  showHorizontalHeader=True, showVerticalHeader=True,
                  borderWidth=2, cellPadding=2, focusBorderWidth=0,
                  _resize=False, setWidthToColumns=False, setHeightToRows=False,
                  setOnHeaderOnly=False, showGrid=False,
+                 selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
+                 actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
+                 enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
+                 **kwds
                  ):
         """Initialise the table.
 
@@ -117,8 +127,24 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         :param setHeightToRows:
         :param setOnHeaderOnly:
         :param showGrid:
+        :param selectionCallback:
+        :param selectionCallbackEnabled:
+        :param actionCallback:
+        :param actionCallbackEnabled:
+        :param enableExport:
+        :param enableDelete:
+        :param enableSearch:
+        :param enableCopyCell:
+        :param kwds:
         """
         super().__init__(parent)
+
+        # parameters that are NOTHING can be set on the subclass, these are ignored in the parameter-list
+
+        _TableCopyCell._init(self, enableCopyCell)
+        _TableExport._init(self, enableExport)
+        _TableSearch._init(self, enableSearch)
+        _TableDelete._init(self, enableDelete)
 
         self.setShowGrid(showGrid)
         self._parent = parent
@@ -173,7 +199,18 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         # set selection/action callbacks
         self.doubleClicked.connect(self._actionConnect)
 
-    def updateDf(self, df, resize=True, setHeightToRows=False, setWidthToColumns=False, setOnHeaderOnly=False, resetDefault=False):
+        if selectionCallback is not NOTHING:
+            self.setSelectionCallback(selectionCallback)  # can set to None
+        if selectionCallbackEnabled is not NOTHING:
+            self.setSelectionCallbackEnabled(selectionCallbackEnabled)
+        if actionCallback is not NOTHING:
+            self.setActionCallback(actionCallback)  # can be set to None
+        if actionCallbackEnabled is not NOTHING:
+            self.setActionCallbackEnabled(actionCallbackEnabled)
+
+        self.setItemDelegate(_TableDelegateABC())
+
+    def updateDf(self, df, resize=True, setHeightToRows=False, setWidthToColumns=False, setOnHeaderOnly=False, resetDefault=False, newModel=False):
         """Initialise the dataFrame
         """
         if not isinstance(df, (type(None), pd.DataFrame)):
@@ -181,8 +218,12 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
 
         if df is not None and (setOnHeaderOnly or not df.empty):
             # set the model
-            model = _TableModel(df, view=self)
-            self.setModel(model)
+            if newModel or not (model := self.model()):
+                # create a new model if required
+                model = self.defaultTableModel(df, view=self)
+                self.setModel(model)
+            else:
+                model.df = df
 
             self.resizeColumnsToContents()
             if resize:
@@ -197,11 +238,15 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         else:
             # set a default empty model
             df = pd.DataFrame({})
-            model = _TableModel(df, view=self)
-            self.setModel(model)
+            if newModel or not (model := self.model()):
+                # create a new model if required
+                model = self.defaultTableModel(df, view=self)
+                self.setModel(model)
+            else:
+                model.df = df
 
         if resetDefault:
-            self._defaultDf = df  # model changes so need to keep it here
+            model.setDefaultDf(df)  # model changes so need to keep it here
 
         return model
 
@@ -211,12 +256,12 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         super().setModel(model)
 
         # attach a handler for updating the selection on sorting
-        self.model().layoutAboutToBeChanged.connect(self._preChangeSelectionOrderCallback)
-        self.model().layoutChanged.connect(self._postChangeSelectionOrderCallback)
+        model.layoutAboutToBeChanged.connect(self._preChangeSelectionOrderCallback)
+        model.layoutChanged.connect(self._postChangeSelectionOrderCallback)
 
         # set selection callback because the model has changed?
         self.selectionModel().selectionChanged.connect(self._selectionConnect)
-        self.model().defaultEditable = self.defaultEditable
+        model._defaultEditable = self._defaultEditable
 
     def _initTableCommonWidgets(self, parent, height=35, setGuiNotifier=None, **kwds):
         """Initialise the common table elements
@@ -334,15 +379,58 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     def _df(self, value):
         self.model().df = value
 
+    def isEditable(self):
+        """Return True if the default state of the table is editable
+        """
+        return self._defaultEditable
+
+    def setEditable(self, value):
+        """Set the default editable state of the table.
+        Individual columns can be set in the columns-settings.
+        """
+        if not isinstance(value, bool):
+            raise ValueError(f'{self.__class__.__name__}.setEditable: value is not True|False')
+
+        self._defaultEditable = value
+        if self.model():
+            # keep the model in-sync with the view
+            self.model()._defaultEditable = value
+
     #=========================================================================================
-    # Notifier callbacks
+    # Selection callbacks
     #=========================================================================================
+
+    def setSelectionCallback(self, selectionCallback):
+        """Set the selection-callback for the table.
+        """
+        # update callbacks - overwrite method
+        if not (selectionCallback is None or callable(selectionCallback)):
+            raise ValueError(f'{self.__class__.__name__}.setSelectionCallback: selectionCallback is not None|callable')
+
+        self._selectionCallback = selectionCallback
+
+    def resetSelectionCallback(self):
+        """Reset the selection-callback for the table back to the class-method.
+        """
+        self._selectionCallback = NOTHING
+
+    def selectionCallbackEnabled(self):
+        """Return True if selection-callback is enabled.
+        """
+        return self._enableSelectionCallback
+
+    def setSelectionCallbackEnabled(self, value):
+        """Enable/disable the selection-callback
+        """
+        if not isinstance(value, bool):
+            raise ValueError(f'{self.__class__.__name__}.setSelectionCallbackEnabled: value is not True|False')
+
+        self._enableSelectionCallback = value
 
     def _selectionConnect(self, selected, deselected):
         """Handle the callback for a selection
         """
-        getLogger().debug2(f'selection {selected}  {deselected}')
-        if self._enableSelectionCallback:
+        if self._enableSelectionCallback and self._selectionCallback is not None:
             # get the df-rows from the selections
             newRows = OrderedSet([idx.data(INDEX_ROLE)[0] for sel in selected for idx in sel.indexes()])
             oldRows = OrderedSet([idx.data(INDEX_ROLE)[0] for sel in deselected for idx in sel.indexes()])
@@ -357,8 +445,42 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
                 last = []
 
             with self._blockTableSignals('_selectionCallback', blanking=False, disableScroll=True):
-                # pass the dfs to the user-callback
-                self.selectionCallback(new, old, sel, last)
+                if self._selectionCallback is NOTHING:
+                    # pass the dfs to the class-method callback
+                    self.selectionCallback(new, old, sel, last)
+                else:
+                    self._selectionCallback(new, old, sel, last)
+
+    #=========================================================================================
+    # Action callbacks
+    #=========================================================================================
+
+    def setActionCallback(self, actionCallback):
+        """Set the action-callback for the table.
+        """
+        # update callbacks - overwrite method
+        if not (actionCallback is None or callable(actionCallback)):
+            raise ValueError(f'{self.__class__.__name__}.setActionCallback: actionCallback is not None|callable')
+
+        self._actionCallback = actionCallback
+
+    def resetActionCallback(self):
+        """Reset the action-callback for the table back to the class-method.
+        """
+        self._actionCallback = NOTHING
+
+    def actionCallbackEnabled(self):
+        """Return True if action-callback is enabled.
+        """
+        return self._enableActionCallback
+
+    def setActionCallbackEnabled(self, value):
+        """Enable/disable the action-callback
+        """
+        if not isinstance(value, bool):
+            raise ValueError(f'{self.__class__.__name__}.setActionCallbackEnabled: value is not True|False')
+
+        self._enableActionCallback = value
 
     def _actionConnect(self, modelIndex):
         """Handle the callback for a selection
@@ -369,8 +491,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         if not self.actionCallback:
             return
 
-        getLogger().debug2(f'action {modelIndex}')
-        if self._enableActionCallback:
+        if self._enableActionCallback and self._actionCallback is not None:
             # get the df-rows from the selection
             sRows = OrderedSet([idx.data(INDEX_ROLE)[0] for idx in self.selectedIndexes()])
 
@@ -381,7 +502,15 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
                 last = []
 
             with self._blockTableSignals('_actionCallback', blanking=False, disableScroll=True):
-                self.actionCallback(sel, last)
+                if self._actionCallback is NOTHING:
+                    # pass the dfs to the class-method callback
+                    self.actionCallback(sel, last)
+                else:
+                    self._actionCallback(sel, last)
+
+    #=========================================================================================
+    # Selection/Action methods
+    #=========================================================================================
 
     def selectionCallback(self, selected, deselected, selection, lastItem):
         """Handle item selection has changed in table - call user callback
@@ -624,6 +753,26 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
 
         return tuple(sortIndex[row] if 0 <= row < len(sortIndex) else None for row in rows)
 
+    def setForeground(self, row, column, colour):
+        """Set the foreground colour for cell at position (row, column).
+
+        :param row: row as integer
+        :param column: column as integer
+        :param colour: colour compatible with QtGui.QColor
+        """
+        if (model := self.model()):
+            model.setForeground(row, column, colour)
+
+    def setBackground(self, row, column, colour):
+        """Set the background colour for cell at position (row, column).
+
+        :param row: row as integer
+        :param column: column as integer
+        :param colour: colour compatible with QtGui.QColor
+        """
+        if (model := self.model()):
+            model.setBackground(row, column, colour)
+
     #=========================================================================================
     # Table context menu
     #=========================================================================================
@@ -754,7 +903,7 @@ def main():
 
     # multiIndex columnHeaders
     cols = ("No", "Toyota", "Ford", "Tesla", "Nio", "Other", "NO")
-    rowIndex = ["AAA", "BBB", "CCC", "DDD", "EEE"]
+    rowIndex = ["AAA", "BBB", "CCC", "DDD", "EEE"]  # duplicate index
 
     for ii in range(MAX_ROWS):
         chrs = ''.join(chr(random.randint(65, 68)) for _ in range(5))
@@ -776,7 +925,33 @@ def main():
     layout = QtWidgets.QGridLayout()
     frame.setLayout(layout)
 
-    table = TableABC(df=df, focusBorderWidth=1)
+    table = TableABC(None, df=df, focusBorderWidth=1)
+
+    # set some background colours
+    cells = ((0, 0, '#80C0FF'),
+             (1, 1, '#fe83cc'),
+             (1, 2, '#fe83cc'),
+             (2, 3, '#83fbcc'),
+             (3, 2, '#e0ff87'),
+             (3, 3, '#e0ff87'),
+             (3, 4, '#e0ff87'),
+             (3, 5, '#e0ff87'),
+             (4, 2, '#e0f08a'),
+             (4, 3, '#e0f08a'),
+             (4, 4, '#e0f08a'),
+             (4, 5, '#e0f08a'),
+             (6, 2, '#70a04f'),
+             (6, 6, '#70a04f'),
+             (7, 1, '#eebb43'),
+             (7, 2, '#eebb43'),
+             (8, 4, '#7090ef'),
+             (8, 5, '#7090ef'),
+             (9, 0, '#30f06f'),
+             (9, 1, '#30f06f'),
+             )
+    for row, col, colour in cells:
+        table.setBackground(row, col, colour)
+
     win.setCentralWidget(frame)
     frame.layout().addWidget(table, 0, 0)
 

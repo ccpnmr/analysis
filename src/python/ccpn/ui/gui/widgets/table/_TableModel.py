@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-14 17:40:53 +0100 (Wed, September 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 10:48:16 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,8 @@ __date__ = "$Date: 2022-09-08 17:27:34 +0100 (Thu, September 08, 2022) $"
 import numpy as np
 import pandas as pd
 from PyQt5 import QtCore, QtGui
+from operator import or_
+from functools import reduce
 
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
@@ -44,6 +46,27 @@ ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
                 QtCore.Qt.Vertical  : QtCore.Qt.Vertical,
                 }
 
+# standard definitions for roles applicable to QTableModel
+USER_ROLE = QtCore.Qt.UserRole
+EDIT_ROLE = QtCore.Qt.EditRole
+DISPLAY_ROLE = QtCore.Qt.DisplayRole
+TOOLTIP_ROLE = QtCore.Qt.ToolTipRole
+STATUS_ROLE = QtCore.Qt.StatusTipRole
+BACKGROUND_ROLE = QtCore.Qt.BackgroundRole
+FOREGROUND_ROLE = QtCore.Qt.ForegroundRole
+CHECK_ROLE = QtCore.Qt.CheckStateRole
+ICON_ROLE = QtCore.Qt.DecorationRole
+SIZE_ROLE = QtCore.Qt.SizeHintRole
+ALIGNMENT_ROLE = QtCore.Qt.TextAlignmentRole
+NO_PROPS = QtCore.Qt.NoItemFlags
+CHECKABLE = QtCore.Qt.ItemIsUserCheckable
+ENABLED = QtCore.Qt.ItemIsEnabled
+SELECTABLE = QtCore.Qt.ItemIsSelectable
+EDITABLE = QtCore.Qt.ItemIsEditable
+CHECKED = QtCore.Qt.Checked
+UNCHECKED = QtCore.Qt.Unchecked
+PARTIALLYECHECKED = QtCore.Qt.PartiallyChecked
+
 # define roles to return cell-values
 DTYPE_ROLE = QtCore.Qt.UserRole + 1000
 VALUE_ROLE = QtCore.Qt.UserRole + 1001
@@ -51,7 +74,6 @@ VALUE_ROLE = QtCore.Qt.UserRole + 1001
 # a role to map the table-index to the cell in the df
 INDEX_ROLE = QtCore.Qt.UserRole + 1002
 
-EDIT_ROLE = QtCore.Qt.EditRole
 _EDITOR_SETTER = ('setColor', 'selectValue', 'setData', 'set', 'setValue', 'setText', 'setFile')
 _EDITOR_GETTER = ('get', 'value', 'text', 'getFile')
 
@@ -72,8 +94,13 @@ class _TableModel(QtCore.QAbstractTableModel):
     _chrHeight = 12
 
     showEditIcon = False
-    defaultFlags = QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
-    defaultEditable = True
+    defaultFlags = ENABLED | SELECTABLE  # add CHECKABLE to enable check-boxes
+    _defaultEditable = True
+
+    _defaultDf = None
+    _dfIndex = None
+    _colour = None
+    _defaultColour = None
 
     def __init__(self, data, view=None):
         """Initialise the pandas model.
@@ -96,8 +123,10 @@ class _TableModel(QtCore.QAbstractTableModel):
             self._chrWidth = 1 + bbox('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789').width() / 36
             self._chrHeight = bbox('A').height() + 8
 
+        # initialise sorting
         self._sortColumn = 0
         self._sortOrder = QtCore.Qt.AscendingOrder
+        # NOTE:ED - could I use another self._filterIndex here? so _df doesn't need to be changed
 
         # create a pixmap for the editable icon (currently a pencil)
         self._editableIcon = Icon('icons/editable').pixmap(int(self._chrHeight), int(self._chrHeight))
@@ -117,19 +146,64 @@ class _TableModel(QtCore.QAbstractTableModel):
         """
         self.beginResetModel()
 
-        self._df = value
+        self._colour = None
+        if self._defaultDf is not None:
+            # must have unique indices - otherwise ge arrays for multiple rows in here
+            idx = self._defaultDf.index
+            lastIdx = list(value.index)
+            if (mapping := [idx.get_loc(cc) for cc in lastIdx if cc in idx]):
+                newMapping = np.zeros(len(lastIdx), dtype=np.int32)
+
+                # remove any duplicated rows - there SHOULDN'T be any, but could be a generic df
+                for ind, rr in enumerate(mapping):
+                    if isinstance(rr, int):
+                        newMapping[ind] = rr
+                    elif isinstance(rr, np.ndarray):
+                        # get the index of the first duplicate - may not be the correct order with other matching index :|
+                        indT = list(rr).index(True)
+                        newMapping[ind] = indT
+                        for mm in mapping[ind + 1:]:
+                            if isinstance(mm, np.ndarray):
+                                mm[indT] = False
+                    else:
+                        # anything else is a missing row
+                        raise RuntimeError(f'{self.__class__.__name__}.df: new df is not a sub-set of the original')
+
+                if self._defaultColour is not None:
+                    # can be used for other table-information
+                    self._colour = self._defaultColour[newMapping, :]
+
+        if self._colour is None:
+            # create numpy arrays to match the data that will hold background colour
+            self._colour = np.empty(value.shape, dtype=np.object)
 
         # set the initial sort-order
         self._oldSortIndex = [row for row in range(value.shape[0])]
         self._sortIndex = [row for row in range(value.shape[0])]
 
-        # create numpy arrays to match the data that will hold background colour
-        self._colour = np.empty(value.shape, dtype=np.object)
+        # # create numpy arrays to match the data that will hold background colour
+        # self._colour = np.empty(value.shape, dtype=np.object)
         self._headerToolTips = {orient: np.empty(value.shape[ii], dtype=np.object)
                                 for ii, orient in enumerate([QtCore.Qt.Vertical, QtCore.Qt.Horizontal])}
 
+        self._df = value
+        self._dfIndex = list(value.index)
+
         # notify that the data has changed
         self.endResetModel()
+
+    def setDefaultDf(self, value):
+        """Set the default unfiltered table
+        """
+        if value is not None:
+            self._defaultDf = value
+            if self._colour is not None:
+                self._defaultColour = self._colour.copy()
+
+        else:
+            # reset the values to star again
+            self._defaultDf = None
+            self._defaultColour = None
 
     def setToolTips(self, orientation, values):
         """Set the tooltips for the horizontal/vertical headers.
@@ -164,20 +238,30 @@ class _TableModel(QtCore.QAbstractTableModel):
 
             self._df.loc[row] = newRow  # dependent on the index
             iLoc = self._df.index.get_loc(row)
+
+            # sLoc = self._sortIndex[iLoc]  # signals?
+            # self.beginInsertRows(QtCore.QModelIndex(), sLoc, sLoc)
             self._colour = np.insert(self._colour, iLoc, np.empty((self.columnCount()), dtype=np.object), axis=0)
             self._setSortOrder(self._sortColumn, self._sortOrder)
+            # self.endInsertRows()
+
+            # NOTE:ED insert into the unfiltered df?
+            # connect to signals in the view?
 
             # emit a signal to spawn an update of the table and notify headers to update
             self.layoutChanged.emit()
 
         else:
-            # NOTE:ED - not checked
+            # NOTE:ED - not checked, keep for reference
             pass
             # self._df.loc[row] = newRow
             # iLoc = self._df.index.get_loc(row)
             # self.beginInsertRows(QtCore.QModelIndex(), iLoc, iLoc)
             # self._colour = np.insert(self._colour, iLoc, np.empty((self.columnCount()), dtype=np.object), axis=0)
             # self.endInsertRows()
+            # indexA = model.index(0, 0)
+            # indexB = model.index(n - 1, c - 1)
+            # model.dataChanged.emit(indexA, indexB)  # all visible cells
 
     def _updateRow(self, row, newRow):
         """Update a row in the table.
@@ -274,14 +358,15 @@ class _TableModel(QtCore.QAbstractTableModel):
         """
         return self._df.shape[1]
 
-    def data(self, index, role=QtCore.Qt.DisplayRole):
+    def data(self, index, role=DISPLAY_ROLE):
         """Process the data callback for the model
         """
         if index.isValid():
             # get the source cell
             row, col = self._sortIndex[index.row()], index.column()
 
-            if role == QtCore.Qt.DisplayRole:
+            if role == DISPLAY_ROLE:
+                # need to discard columns that include check-boxes
                 data = self._df.iat[row, col]
 
                 # float/np.float - round to 3 decimal places
@@ -298,12 +383,12 @@ class _TableModel(QtCore.QAbstractTableModel):
                 except:
                     return val
 
-            elif role == QtCore.Qt.BackgroundRole:
+            elif role == BACKGROUND_ROLE:
                 if (colourDict := self._colour[row, col]):
                     # get the colour from the dict
                     return colourDict.get(role)
 
-            elif role == QtCore.Qt.ForegroundRole:
+            elif role == FOREGROUND_ROLE:
                 if (colourDict := self._colour[row, col]):
                     # get the colour from the dict
                     return colourDict.get(role)
@@ -311,7 +396,7 @@ class _TableModel(QtCore.QAbstractTableModel):
                 # return the default foreground colour
                 return self._defaultForegroundColour
 
-            elif role == QtCore.Qt.ToolTipRole:
+            elif role == TOOLTIP_ROLE:
                 data = self._df.iat[row, col]
 
                 return str(data)
@@ -330,15 +415,23 @@ class _TableModel(QtCore.QAbstractTableModel):
                 return data
 
             elif role == INDEX_ROLE:
+                # return a dict of item-data?
                 return (row, col)
 
-            # elif role == QtCore.Qt.DecorationRole:
+            # if role == CHECK_ROLE and col == 0:
+            #     # need flags to include CHECKABLE and return QtCore.Qt.checked/unchecked/PartiallyChecked here
+            #     return CHECKED
+
+            # elif role == ICON_ROLE:
             #     # return the pixmap - this works, transfer to _MultiHeader
             #     return self._editableIcon
 
+            # elif role == ALIGNMENT_ROLE:
+            #     pass
+
         return None
 
-    def setData(self, index, value, role=QtCore.Qt.EditRole) -> bool:
+    def setData(self, index, value, role=EDIT_ROLE) -> bool:
         """Set data in the DataFrame. Required if table is editable.
         """
         if not index.isValid():
@@ -351,7 +444,7 @@ class _TableModel(QtCore.QAbstractTableModel):
                     self._df.iat[row, col] = value
 
                     # need to store in the parent (unfiltered table)
-                    self._setParentDf(row, col, value)
+                    self._setDataParentDf(row, col, value)
 
                     self.dataChanged.emit(index, index)
 
@@ -360,16 +453,21 @@ class _TableModel(QtCore.QAbstractTableModel):
             except Exception as es:
                 getLogger().debug2(f'error accessing cell {index}  ({row}, {col})   {es}')
 
+        # elif role == CHECK_ROLE:
+        #     # set state in cell/object
+        #     return True
+
         return False
 
-    def _setParentDf(self, row, col, value):
+    def _setDataParentDf(self, row, col, value):
         try:
             # can't think of a better way of doing this yet :|
 
             # set in the top-level as well - map the index to the _defaultDf - background/foreground colours?
             idx = self._df.index[row]
-            row = self._view._defaultDf.index.get_loc(idx)
-            self._view._defaultDf.iat[row, col] = value
+            if self._defaultDf is not None and not self._defaultDf.empty:
+                row = self._defaultDf.index.get_loc(idx)
+                self._defaultDf.iat[row, col] = value
 
         except Exception as es:
             getLogger().debug2(f'error accessing parent cell ({row}, {col})   {es}')
@@ -377,24 +475,24 @@ class _TableModel(QtCore.QAbstractTableModel):
     def headerData(self, col, orientation, role=None):
         """Return the column headers
         """
-        if role == QtCore.Qt.DisplayRole and orientation == QtCore.Qt.Horizontal:
+        if role == DISPLAY_ROLE and orientation == QtCore.Qt.Horizontal:
             try:
                 # quickest way to get the column
                 return self._df.columns[col]
             except:
                 return None
 
-        elif role == QtCore.Qt.ToolTipRole and orientation == QtCore.Qt.Horizontal:
+        elif role == TOOLTIP_ROLE and orientation == QtCore.Qt.Horizontal:
             try:
                 # quickest way to get the column
                 return self._headerToolTips[orientation][col]
             except:
                 return None
 
-        # if orientation == QtCore.Qt.Vertical and role == QtCore.Qt.DisplayRole:
+        # if orientation == QtCore.Qt.Vertical and role == DISPLAY_ROLE:
         #     return self._df.index[col] if not self._df.empty else None
 
-        elif role == QtCore.Qt.SizeHintRole:
+        elif role == SIZE_ROLE:
             # process the heights/widths of the headers
             if orientation == QtCore.Qt.Horizontal:
                 try:
@@ -420,7 +518,7 @@ class _TableModel(QtCore.QAbstractTableModel):
                     # return the default QSize
                     return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))
 
-        elif role == QtCore.Qt.DecorationRole and self._isColumnEditable(col) and self.showEditIcon:
+        elif role == ICON_ROLE and self._isColumnEditable(col) and self.showEditIcon:
             # return the pixmap
             return self._editableIcon
 
@@ -475,9 +573,9 @@ class _TableModel(QtCore.QAbstractTableModel):
         if not (colourDict := self._colour[row, column]):
             colourDict = self._colour[row, column] = {}
         if colour:
-            colourDict[QtCore.Qt.ForegroundRole] = QtGui.QColor(colour)
+            colourDict[FOREGROUND_ROLE] = QtGui.QColor(colour)
         else:
-            colourDict.pop(QtCore.Qt.ForegroundRole, None)
+            colourDict.pop(FOREGROUND_ROLE, None)
 
     def setBackground(self, row, column, colour):
         """Set the background colour for dataFrame cell at position (row, column).
@@ -493,9 +591,9 @@ class _TableModel(QtCore.QAbstractTableModel):
         if not (colourDict := self._colour[row, column]):
             colourDict = self._colour[row, column] = {}
         if colour:
-            colourDict[QtCore.Qt.BackgroundRole] = QtGui.QColor(colour)
+            colourDict[BACKGROUND_ROLE] = QtGui.QColor(colour)
         else:
-            colourDict.pop(QtCore.Qt.BackgroundRole, None)
+            colourDict.pop(BACKGROUND_ROLE, None)
 
     @staticmethod
     def _universalSort(values):
@@ -539,7 +637,7 @@ class _TableModel(QtCore.QAbstractTableModel):
     def flags(self, index):
         # Set the table to be editable - need the editable columns here
         if self._isColumnEditable(index.column()):
-            return QtCore.Qt.ItemIsEditable | self.defaultFlags
+            return EDITABLE | self.defaultFlags
         else:
             return self.defaultFlags
 
@@ -548,6 +646,86 @@ class _TableModel(QtCore.QAbstractTableModel):
         """
         try:
             # return True if the column contains an edit function
+            # NOTE:ED - need to remove _dataFrameObject, move options to TableABC? BUT Column class is still good
             return self._view._dataFrameObject.setEditValues[col] is not None
         except:
-            return self.defaultEditable
+            return self._defaultEditable
+
+
+#=========================================================================================
+# _TableObjectModel
+#=========================================================================================
+
+def _getDisplayRole(colDef, obj):
+    if isinstance((value := colDef.getFormatValue(obj)), bool):
+        return None
+    else:
+        return value
+
+
+def _getCheckRole(colDef, obj):
+    if isinstance((value := colDef.getValue(obj)), bool):
+        return CHECKED if value else UNCHECKED
+
+    return None
+
+
+class _TableObjectModel(_TableModel):
+    """Table-model that supports defining a list of objects for the table.
+
+    Objects are defined as a list, and table is populated with information from the Column classes.
+    """
+
+    defaultFlags = ENABLED | SELECTABLE | CHECKABLE
+
+    getAttribRole = {DISPLAY_ROLE   : _getDisplayRole,
+                     CHECK_ROLE     : _getCheckRole,
+                     ICON_ROLE      : lambda colDef, obj: colDef.getIcon(obj),
+                     EDIT_ROLE      : lambda colDef, obj: colDef.getEditValue(obj),
+                     TOOLTIP_ROLE   : lambda colDef, obj: colDef.tipText,
+                     BACKGROUND_ROLE: lambda colDef, obj: colDef.getColor(obj),
+                     ALIGNMENT_ROLE : lambda colDef, obj: colDef.alignment
+                     }
+
+    setAttribRole = {EDIT_ROLE : lambda colDef, obj, value: colDef.setEditValue(obj, value),
+                     CHECK_ROLE: lambda colDef, obj, value: colDef.setEditValue(obj, True if (value == CHECKED) else False)
+                     }
+
+    # # NOTE:ED - not tested
+    # def _setSortOrder(self, column: int, order: QtCore.Qt.SortOrder = ...):
+    #     """Sort the object-list
+    #     """
+    #     colDef = self._view._columnDefs._columns
+    #     getValue = colDef[column].getValue
+    #     self._view._objects.sort(key=getValue, reverse=False if order == QtCore.Qt.AscendingOrder else True)
+
+    def data(self, index, role=DISPLAY_ROLE):
+        result = None  # super(AdminModel, self).data(index, role)  # super not required?
+
+        # special control over the object properties
+        if index.isValid():
+            # get the source cell
+            row, col = self._sortIndex[index.row()], index.column()
+            obj = self._view._objects[row]
+            colDef = self._view._columnDefs._columns[col]
+
+            if (func := self.getAttribRole.get(role)):
+                return func(colDef, obj)
+
+        return result
+
+    def setData(self, index, value, role=EDIT_ROLE) -> bool:
+        # super(AdminModel, self).setData(index, role, value)  # super not required?
+
+        if index.isValid():
+            row, col = self._sortIndex[index.row()], index.column()
+            obj = self._view._objects[row]
+            colDef = self._view._columnDefs._columns[col]
+
+            if (func := self.setAttribRole.get(role)):
+                func(colDef, obj, value)
+
+                self._view.viewport().update()  # repaint the view
+                return True
+
+        return False

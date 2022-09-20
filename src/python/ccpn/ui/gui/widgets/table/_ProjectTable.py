@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-15 16:07:23 +0100 (Thu, September 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 10:48:16 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,6 +42,7 @@ from ccpn.ui.gui.widgets.table._TableDelegate import _TableDelegate
 from ccpn.ui._implementation.QueueHandler import QueueHandler
 from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
+from ccpn.util.Common import NOTHING
 
 
 #=========================================================================================
@@ -54,6 +55,19 @@ blankId = SimpleNamespace(className='notDefined', serial=0)
 OBJECT_CLASS = 0
 OBJECT_PARENT = 1
 MODULEIDS = {}
+
+_TABLE_KWDS = ('parent', 'df',
+               'multiSelect', 'selectRows',
+               'showHorizontalHeader', 'showVerticalHeader',
+               'borderWidth', 'cellPadding', 'focusBorderWidth',
+               '_resize', 'setWidthToColumns', 'setHeightToRows',
+               'setOnHeaderOnly', 'showGrid',
+               'selectionCallback', 'selectionCallbackEnabled',
+               'actionCallback', 'actionCallbackEnabled',
+               'enableExport', 'enableDelete', 'enableSearch',
+               'ignoreStyleSheet',
+               'mainWindow', 'moduleParent'
+               )
 
 
 class _ProjectTableABC(TableABC, Base):
@@ -91,33 +105,61 @@ class _ProjectTableABC(TableABC, Base):
     _maximumQueueLength = 0
     _logQueue = False
 
-    def __init__(self, parent=None, df=None,
+    def __init__(self, parent, df=None,
                  multiSelect=True, selectRows=True,
                  showHorizontalHeader=True, showVerticalHeader=True,
                  borderWidth=2, cellPadding=2, focusBorderWidth=0,
                  _resize=False, setWidthToColumns=False, setHeightToRows=False,
-                 setOnHeaderOnly=False,
+                 setOnHeaderOnly=False, showGrid=False,
+                 selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
+                 actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
+                 enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
+                 # local parameters
+                 ignoreStyleSheet=True,
                  mainWindow=None, moduleParent=None,
-                 enableExport=True, enableDelete=True, enableSearch=True,
-                 enableDoubleClick=True,
-                 showGrid=False, ignoreStyleSheet=True,
                  **kwds):
         """Initialise the widgets for the module.
-        """
-        # required before initialising
-        self._enableExport = enableExport
-        self._enableDelete = enableDelete
-        self._enableSearch = enableSearch
 
-        super().__init__(parent, df,
+        :param parent:
+        :param df:
+        :param multiSelect:
+        :param selectRows:
+        :param showHorizontalHeader:
+        :param showVerticalHeader:
+        :param borderWidth:
+        :param cellPadding:
+        :param focusBorderWidth:
+        :param _resize:
+        :param setWidthToColumns:
+        :param setHeightToRows:
+        :param setOnHeaderOnly:
+        :param showGrid:
+        :param selectionCallback:
+        :param selectionCallbackEnabled:
+        :param actionCallback:
+        :param actionCallbackEnabled:
+        :param enableExport:
+        :param enableDelete:
+        :param enableSearch:
+        :param enableCopyCell:
+        :param ignoreStyleSheet:
+        :param mainWindow:
+        :param moduleParent:
+        :param kwds:
+        """
+        super().__init__(parent, df=df,
                          multiSelect=multiSelect, selectRows=selectRows,
                          showHorizontalHeader=showHorizontalHeader, showVerticalHeader=showVerticalHeader,
                          borderWidth=borderWidth, cellPadding=cellPadding, focusBorderWidth=focusBorderWidth,
                          _resize=_resize, setWidthToColumns=setWidthToColumns, setHeightToRows=setHeightToRows,
-                         showGrid=showGrid, setOnHeaderOnly=setOnHeaderOnly
+                         setOnHeaderOnly=setOnHeaderOnly, showGrid=showGrid,
+                         selectionCallback=selectionCallback, selectionCallbackEnabled=selectionCallbackEnabled,
+                         actionCallback=actionCallback, actionCallbackEnabled=actionCallbackEnabled,
+                         enableExport=enableExport, enableDelete=enableDelete, enableSearch=enableSearch, enableCopyCell=enableCopyCell,
                          )
         # Base messes up styleSheets defined in superclass
-        Base._init(self, ignoreStyleSheet=ignoreStyleSheet, **kwds)
+        baseKwds = {k: v for k, v in kwds.items() if k not in _TABLE_KWDS}
+        Base._init(self, ignoreStyleSheet=ignoreStyleSheet, **baseKwds)
 
         # Derive application, project, and current from mainWindow
         if mainWindow:
@@ -147,10 +189,6 @@ class _ProjectTableABC(TableABC, Base):
         self._scrollOverride = False
 
         self._rightClickedTableIndex = None  # last selected item in a table before raising the context menu. Enabled with mousePress event filter
-
-        self._enableDoubleClick = enableDoubleClick
-        if enableDoubleClick:
-            self._enableActionCallback = True
 
         # notifier queue handling
         self._queueHandler = QueueHandler(self,
@@ -552,12 +590,12 @@ class _ProjectTableABC(TableABC, Base):
         # MUST BE SUBCLASSED
         raise NotImplementedError(f'Code error: {self.__class__.__name__}.actionCallback not implemented')
 
-    def setActionCallback(self, actionCallback=None):
-        # enable callbacks
-        if not (actionCallback is None or callable(actionCallback)):
-            raise ValueError(f'{self.__class__.__name__}.setActionCallback: actionCallback is not None|callable')
-
-        self.actionCallback = actionCallback
+    # def setActionCallback(self, actionCallback=None):
+    #     # enable callbacks
+    #     if not (actionCallback is None or callable(actionCallback)):
+    #         raise ValueError(f'{self.__class__.__name__}.setActionCallback: actionCallback is not None|callable')
+    #
+    #     self.actionCallback = actionCallback
 
     def setCheckBoxCallback(self, checkBoxCallback):
         # enable callback on the checkboxes

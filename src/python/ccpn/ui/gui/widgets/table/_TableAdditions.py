@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-14 16:07:05 +0100 (Wed, September 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 10:48:16 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,7 @@ __date__ = "$Date: 2022-09-09 18:02:40 +0100 (Fri, September 09, 2022) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from collections import OrderedDict
 from functools import partial
 
@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets.SearchWidget import attachSimpleSearchWidget
 from ccpn.ui.gui.widgets.FileDialog import TablesFileDialog
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
-from ccpn.util.Common import copyToClipboard
+from ccpn.util.Common import copyToClipboard, NOTHING
 
 
 #=========================================================================================
@@ -128,6 +128,12 @@ class _TableCopyCell(_TableMenuABC):
     """Class to handle copy-cell option on a menu
     """
     _enableCopyCell = True
+
+    def _init(self, enableCopyCell=NOTHING):
+        """Initialise the Copy-cell state
+        """
+        if enableCopyCell is not NOTHING:
+            self.setCopyCellEnabled(enableCopyCell)
 
     def addTableMenuOptions(self, menu):
         """Add copy-cell option to the right-mouse menu
@@ -321,6 +327,12 @@ class _TableExport(_TableMenuABC):
     """
     _enableExport = True
 
+    def _init(self, enableExport=NOTHING):
+        """Initialise the export-state
+        """
+        if enableExport is not NOTHING:
+            self.setExportEnabled(enableExport)
+
     def addTableMenuOptions(self, menu):
         """Add export options to the right-mouse menu
         """
@@ -470,6 +482,12 @@ class _TableDelete(_TableMenuABC):
     """
     _enableDelete = True
 
+    def _init(self, enableDelete=NOTHING):
+        """Initialise the delete-state
+        """
+        if enableDelete is not NOTHING:
+            self.setDeleteEnabled(enableDelete)
+
     def addTableMenuOptions(self, menu):
         """Add delete options to the right-mouse menu
         """
@@ -534,11 +552,17 @@ _SEARCH_OPTION = 'Filter...'
 class _TableSearch(_TableMenuABC):
     """Class to handle search options from a right-mouse menu.
     """
+    tableAboutToBeSearched = QtCore.pyqtSignal(list)
+    tableSearched = QtCore.pyqtSignal(list)
+
     _enableSearch = True
     _searchWidget = None
 
-    # initialise the internal data storage
-    _defaultDf = None
+    def _init(self, enableSearch=NOTHING):
+        """Initialise the search-state
+        """
+        if enableSearch is not NOTHING:
+            self.setSearchEnabled(enableSearch)
 
     def addTableMenuOptions(self, menu):
         """Add search options to the right-mouse menu
@@ -613,16 +637,17 @@ class _TableSearch(_TableMenuABC):
             if not attachSimpleSearchWidget(self._parent, self):
                 getLogger().warning('Filter option not available')
 
-            else:
-                self._defaultDf = self._df
+            elif (model := self.model()):
+                model.setDefaultDf(self._df)
 
     def refreshTable(self):
         """Refresh the table from the search-widget
         """
-        if self._defaultDf is not None:
-            self.updateDf(self._defaultDf)
+
+        if (model := self.model()) and model._defaultDf is not None:
+            self.updateDf(model._defaultDf)
         else:
-            getLogger().warning(f'{self.__class__.__name__}.refreshTable: defaultDf is not defined')
+            getLogger().debug(f'{self.__class__.__name__}.refreshTable: defaultDf is not defined')
 
     def setDataFromSearchWidget(self, df):
         """Set the data from the search-widget

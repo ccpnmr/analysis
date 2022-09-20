@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-09 21:15:59 +0100 (Fri, September 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 10:48:16 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -83,11 +83,11 @@ class _TableDelegate(QtWidgets.QStyledItemDelegate):
     """handle the setting of data when editing the table
     """
 
-    def __init__(self, parent, objectColumn=None):
+    def __init__(self, parent=None, objectColumn=None):
         """Initialise the delegate
         :param parent - link to the handling table
         """
-        QtWidgets.QStyledItemDelegate.__init__(self, parent)
+        super().__init__(parent)
         self.customWidget = None
         self._parent = parent
         self._objectColumn = objectColumn
@@ -197,3 +197,32 @@ class _TableDelegate(QtWidgets.QStyledItemDelegate):
         if isinstance(widget, QtWidgets.QLineEdit):
             self._editorValue = widget.text()
             self._returnPressed = True
+
+
+#=========================================================================================
+# Table delegate to handle cell-painting
+#=========================================================================================
+
+class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
+    """handle the setting of data when editing the table
+    """
+
+    def paint(self, painter, option, index):
+        """Paint the contents of the cell.
+        """
+        # Remove dotted border on cell focus.  https://stackoverflow.com/a/55252650/3620725
+        #   or put 'outline: 0px;' into the QTableView stylesheet
+        # if option.state & QtWidgets.QStyle.State_HasFocus:
+        #     option.state = option.state ^ QtWidgets.QStyle.State_HasFocus
+
+        super().paint(painter, option, index)
+
+        if (brush := index.data(QtCore.Qt.BackgroundRole)) and (option.state & QtWidgets.QStyle.State_Selected):
+            painter.save()
+            # fade the background and paint over the top of selected cell
+            # - ensures that different coloured backgrounds are still visible
+            # - does, however, modify the foreground colour :|
+            brush.setAlphaF(0.20)
+            painter.setCompositionMode(painter.CompositionMode_SourceOver)
+            painter.fillRect(option.rect, brush)
+            painter.restore()

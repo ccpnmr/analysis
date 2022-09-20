@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-14 16:07:04 +0100 (Wed, September 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 10:48:16 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ import numpy as np
 from PyQt5 import QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.table.TableABC import TableABC
+from ccpn.util.Common import NOTHING
 
 
 ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
@@ -49,6 +50,18 @@ EDIT_ROLE = QtCore.Qt.EditRole
 _EDITOR_SETTER = ('setColor', 'selectValue', 'setData', 'set', 'setValue', 'setText', 'setFile')
 _EDITOR_GETTER = ('get', 'value', 'text', 'getFile')
 
+_TABLE_KWDS = ('parent', 'df',
+               'multiSelect', 'selectRows',
+               'showHorizontalHeader', 'showVerticalHeader',
+               'borderWidth', 'cellPadding', 'focusBorderWidth',
+               '_resize', 'setWidthToColumns', 'setHeightToRows',
+               'setOnHeaderOnly', 'showGrid',
+               'selectionCallback', 'selectionCallbackEnabled',
+               'actionCallback', 'actionCallbackEnabled',
+               'enableExport', 'enableDelete', 'enableSearch', 'enableCopyCell'
+               'ignoreStyleSheet',
+               )
+
 
 #=========================================================================================
 # TableABC
@@ -62,22 +75,57 @@ class Table(TableABC, Base):
     _enableSelectionCallback = True
     _enableActionCallback = True
 
-    def __init__(self, parent=None, df=None,
+    def __init__(self, parent, df=None,
                  multiSelect=True, selectRows=True,
                  showHorizontalHeader=True, showVerticalHeader=True,
                  borderWidth=2, cellPadding=2, focusBorderWidth=0,
                  _resize=False, setWidthToColumns=False, setHeightToRows=False,
-                 showGrid=False, ignoreStyleSheet=True,
+                 setOnHeaderOnly=False, showGrid=False,
+                 selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
+                 actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
+                 enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
+                 # local parameters
+                 ignoreStyleSheet=True,
                  **kwds):
-        """Initialise the table
+        """Initialise the table.
+
+        :param parent:
+        :param df:
+        :param multiSelect:
+        :param selectRows:
+        :param showHorizontalHeader:
+        :param showVerticalHeader:
+        :param borderWidth:
+        :param cellPadding:
+        :param focusBorderWidth:
+        :param _resize:
+        :param setWidthToColumns:
+        :param setHeightToRows:
+        :param setOnHeaderOnly:
+        :param showGrid:
+        :param selectionCallback:
+        :param selectionCallbackEnabled:
+        :param actionCallback:
+        :param actionCallbackEnabled:
+        :param enableExport:
+        :param enableDelete:
+        :param enableSearch:
+        :param enableCopyCell:
+        :param ignoreStyleSheet:
+        :param kwds:
         """
-        super().__init__(parent, df,
+        super().__init__(parent, df=df,
                          multiSelect=multiSelect, selectRows=selectRows,
                          showHorizontalHeader=showHorizontalHeader, showVerticalHeader=showVerticalHeader,
                          borderWidth=borderWidth, cellPadding=cellPadding, focusBorderWidth=focusBorderWidth,
                          _resize=_resize, setWidthToColumns=setWidthToColumns, setHeightToRows=setHeightToRows,
-                         showGrid=showGrid)
-        Base._init(self, ignoreStyleSheet=ignoreStyleSheet, **kwds)
+                         setOnHeaderOnly=setOnHeaderOnly, showGrid=showGrid,
+                         selectionCallback=selectionCallback, selectionCallbackEnabled=selectionCallbackEnabled,
+                         actionCallback=actionCallback, actionCallbackEnabled=actionCallbackEnabled,
+                         enableExport=enableExport, enableDelete=enableDelete, enableSearch=enableSearch, enableCopyCell=enableCopyCell,
+                         )
+        baseKwds = {k: v for k, v in kwds.items() if k not in _TABLE_KWDS}
+        Base._init(self, ignoreStyleSheet=ignoreStyleSheet, **baseKwds)
 
 
 #=========================================================================================

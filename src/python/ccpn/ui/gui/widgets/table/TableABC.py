@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-20 10:48:16 +0100 (Tue, September 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 18:54:08 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -89,6 +89,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     # NOTE:ED overrides QtCore.Qt.ForegroundRole
     # QTableView::item - color: %(GUITABLE_ITEM_FOREGROUND)s;
     # QTableView::item:selected - color: %(GUITABLE_SELECTED_FOREGROUND)s;
+    # cell uses alternate-background-role for unselected-focused cell
 
     _columnDefs = None
     _enableSelectionCallback = False
@@ -194,7 +195,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         self._tableBlockingLevel = 0
 
         # initialise the table
-        self.updateDf(df, _resize, setHeightToRows, setWidthToColumns, setOnHeaderOnly=setOnHeaderOnly, resetDefault=True)
+        self.updateDf(df, _resize, setHeightToRows, setWidthToColumns, setOnHeaderOnly=setOnHeaderOnly)
 
         # set selection/action callbacks
         self.doubleClicked.connect(self._actionConnect)
@@ -210,7 +211,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
 
         self.setItemDelegate(_TableDelegateABC())
 
-    def updateDf(self, df, resize=True, setHeightToRows=False, setWidthToColumns=False, setOnHeaderOnly=False, resetDefault=False, newModel=False):
+    def updateDf(self, df, resize=True, setHeightToRows=False, setWidthToColumns=False, setOnHeaderOnly=False, newModel=False):
         """Initialise the dataFrame
         """
         if not isinstance(df, (type(None), pd.DataFrame)):
@@ -244,9 +245,6 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
                 self.setModel(model)
             else:
                 model.df = df
-
-        if resetDefault:
-            model.setDefaultDf(df)  # model changes so need to keep it here
 
         return model
 
@@ -436,11 +434,12 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
             oldRows = OrderedSet([idx.data(INDEX_ROLE)[0] for sel in deselected for idx in sel.indexes()])
             sRows = OrderedSet([idx.data(INDEX_ROLE)[0] for idx in self.selectedIndexes()])
 
-            new = self._df.iloc[list(newRows)]
-            old = self._df.iloc[list(oldRows)]
-            sel = self._df.iloc[list(sRows)]
+            df = self._df
+            new = df.iloc[list(newRows)]
+            old = df.iloc[list(oldRows)]
+            sel = df.iloc[list(sRows)]
             try:
-                last = self._df.iloc[[self.currentIndex().data(INDEX_ROLE)[0]]]
+                last = df.iloc[[self.currentIndex().data(INDEX_ROLE)[0]]]
             except Exception:
                 last = []
 
@@ -495,9 +494,10 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
             # get the df-rows from the selection
             sRows = OrderedSet([idx.data(INDEX_ROLE)[0] for idx in self.selectedIndexes()])
 
-            sel = self._df.iloc[list(sRows)]
+            df = self._df
+            sel = df.iloc[list(sRows)]
             try:
-                last = self._df.iloc[[self.currentIndex().data(INDEX_ROLE)[0]] if sRows else []]
+                last = df.iloc[[self.currentIndex().data(INDEX_ROLE)[0]] if sRows else []]
             except Exception:
                 last = []
 
@@ -683,6 +683,16 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     #=========================================================================================
     # Other methods
     #=========================================================================================
+
+    def rowCount(self):
+        """Return the number of rows in the table
+        """
+        return (model := self.model()) and model.rowCount()
+
+    def columnCount(self):
+        """Return the number of columns in the table
+        """
+        return (model := self.model()) and model.columnCount()
 
     def setWidthToColumns(self):
         """Set the width of the table to the column widths
@@ -888,7 +898,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
 def main():
     """Show the test-table
     """
-    MAX_ROWS = 5
+    MAX_ROWS = 8
 
     from ccpn.ui.gui.widgets.Application import TestApplication
     import pandas as pd
@@ -914,7 +924,8 @@ def main():
                      450 + random.randint(-100, 400),
                      700 + random.randint(-MAX_ROWS, MAX_ROWS),
                      150.3 + random.random() * 1e2,
-                     'bravo' + chrs[3:]])
+                     ('bravo' + chrs[3:]) if ii % 2 else ('delta' + chrs[3:])
+                     ])
 
     df = pd.DataFrame(data, columns=cols, index=rowIndex)
 
@@ -929,28 +940,21 @@ def main():
 
     # set some background colours
     cells = ((0, 0, '#80C0FF'),
-             (1, 1, '#fe83cc'),
-             (1, 2, '#fe83cc'),
+             (1, 1, '#fe83cc'), (1, 2, '#fe83cc'),
              (2, 3, '#83fbcc'),
-             (3, 2, '#e0ff87'),
-             (3, 3, '#e0ff87'),
-             (3, 4, '#e0ff87'),
-             (3, 5, '#e0ff87'),
-             (4, 2, '#e0f08a'),
-             (4, 3, '#e0f08a'),
-             (4, 4, '#e0f08a'),
-             (4, 5, '#e0f08a'),
-             (6, 2, '#70a04f'),
-             (6, 6, '#70a04f'),
-             (7, 1, '#eebb43'),
-             (7, 2, '#eebb43'),
-             (8, 4, '#7090ef'),
-             (8, 5, '#7090ef'),
-             (9, 0, '#30f06f'),
-             (9, 1, '#30f06f'),
+             (3, 2, '#e0ff87'), (3, 3, '#e0ff87'), (3, 4, '#e0ff87'), (3, 5, '#e0ff87'),
+             (4, 2, '#e0f08a'), (4, 3, '#e0f08a'), (4, 4, '#e0f08a'), (4, 5, '#e0f08a'),
+             (6, 2, '#70a04f'), (6, 6, '#70a04f'),
+             (7, 1, '#eebb43'), (7, 2, '#eebb43'),
+             (8, 4, '#7090ef'), (8, 5, '#7090ef'),
+             (9, 0, '#30f06f'), (9, 1, '#30f06f'),
+             (10, 2, '#e0d0e6'), (10, 3, '#e0d0e6'), (10, 4, '#e0d0e6'),
+             (11, 2, '#e0d0e6'), (11, 3, '#e0d0e6'), (11, 4, '#e0d0e6'),
              )
+
     for row, col, colour in cells:
-        table.setBackground(row, col, colour)
+        if 0 <= row < table.rowCount() and 0 <= col < table.columnCount():
+            table.setBackground(row, col, colour)
 
     win.setCentralWidget(frame)
     frame.layout().addWidget(table, 0, 0)

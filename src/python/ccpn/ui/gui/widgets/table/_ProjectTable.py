@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-20 10:48:16 +0100 (Tue, September 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 18:54:08 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptio
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.table.TableABC import TableABC
+from ccpn.ui.gui.widgets.table.TableABC import TableABC, INDEX_ROLE
 from ccpn.ui.gui.widgets.table._TableDelegate import _TableDelegate
 from ccpn.ui._implementation.QueueHandler import QueueHandler
 from ccpn.util.Logging import getLogger
@@ -230,8 +230,8 @@ class _ProjectTableABC(TableABC, Base):
     def getRightMouseItem(self):
         if self._rightClickedTableIndex:
             try:
-                row = self._rightClickedTableIndex.row()
-                return self._df.iloc[self.model()._sortIndex[row]]
+                row, _col = self._rightClickedTableIndex.data(INDEX_ROLE)
+                return self._df.iloc[row]
             except:
                 return None
 
@@ -378,7 +378,7 @@ class _ProjectTableABC(TableABC, Base):
                 sortOrder = oldModel._sortOrder
 
             # update model to the new _df
-            model = self.updateDf(self._df, resetDefault=True)
+            model = self.updateDf(self._df)
 
             self.resizeColumnsToContents()
 
@@ -414,7 +414,7 @@ class _ProjectTableABC(TableABC, Base):
             # use the object as the index, object always exists even if isDeleted
             self._df.set_index(self._df[self.OBJECTCOLUMN], inplace=True, )
 
-        self.updateDf(self._df, resize=True, resetDefault=True)
+        self.updateDf(self._df, resize=True)
 
         self.showColumns(None)
 
@@ -619,9 +619,9 @@ class _ProjectTableABC(TableABC, Base):
             selectedObjects = []
             valuesDict = defaultdict(list)
             col = self._df.columns.get_loc(self.OBJECTCOLUMN)
-            _sortIndex = self.model()._sortIndex
             for idx in selection:
-                row = _sortIndex[idx.row()]  # map to sorted rows?
+
+                row, _col = idx.data(INDEX_ROLE)
 
                 # col = idx.column()
                 # if self._objects and len(self._objects) > 0:
@@ -683,7 +683,7 @@ class _ProjectTableABC(TableABC, Base):
                         return
                 uniqObjs = set(selection)
 
-                _sortIndex = self.model()._sortIndex
+                _sortIndex = model._sortIndex
                 dfTemp = self._df.reset_index(drop=True)
                 data = [dfTemp[dfTemp[self._OBJECT] == obj] for obj in uniqObjs]
                 rows = [_sortIndex.index(_dt.index[0]) for _dt in data if not _dt.empty]

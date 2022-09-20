@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-20 10:48:16 +0100 (Tue, September 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 18:54:08 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,7 @@ from ccpn.ui.gui.widgets.FileDialog import TablesFileDialog
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import copyToClipboard, NOTHING
+from ccpn.util.OrderedSet import OrderedSet
 
 
 #=========================================================================================
@@ -179,8 +180,8 @@ class _TableCopyCell(_TableMenuABC):
         """Copy the current cell-value to the clipboard
         """
         idx = self.currentIndex()
-        if idx is not None:
-            text = idx.data().strip()
+        if idx is not None and (data := idx.data()) is not None:
+            text = data.strip()
             copyToClipboard([text])
 
 
@@ -385,18 +386,23 @@ class _TableExport(_TableMenuABC):
                                     False, export only the visible table
         """
         model = self.model()
-        df = model.df
-        rows, cols = model.rowCount(), model.columnCount()
+        df = model._df
+        rows, cols = df.shape[0], df.shape[1]
 
         if df is None or df.empty:
             MessageDialog.showWarning('Export Table to File', 'Table does not contain a dataFrame')
 
         else:
-            rowList = [model._sortIndex[row] for row in range(rows)]
-            if exportAll:
-                colList = list(self.model().df.columns)  # assumes that the dataFrame column-headings match the table
+            if model._filterIndex is None:
+                rowList = [model._sortIndex[row] for row in range(rows)]
             else:
-                colList = [col for ii, col, in enumerate(list(self.model().df.columns)) if not self.horizontalHeader().isSectionHidden(ii)]
+                # need to map to the sorted indexes
+                rowList = list(OrderedSet(model._sortIndex[row] for row in range(rows)) & OrderedSet(model._sortIndex[ii] for ii in model._filterIndex))
+
+            if exportAll:
+                colList = list(df.columns)  # assumes that the dataFrame column-headings match the table
+            else:
+                colList = [col for ii, col, in enumerate(list(df.columns)) if not self.horizontalHeader().isSectionHidden(ii)]
 
             self._showExportTableDialog(df, rowList=rowList, colList=colList)
 
@@ -638,19 +644,62 @@ class _TableSearch(_TableMenuABC):
                 getLogger().warning('Filter option not available')
 
             elif (model := self.model()):
-                model.setDefaultDf(self._df)
+                model.resetFilter()
+
+        self.update()
 
     def refreshTable(self):
         """Refresh the table from the search-widget
         """
 
-        if (model := self.model()) and model._defaultDf is not None:
-            self.updateDf(model._defaultDf)
+        if (model := self.model()) and model._df is not None:
+            model.resetFilter()
+
         else:
             getLogger().debug(f'{self.__class__.__name__}.refreshTable: defaultDf is not defined')
 
-    def setDataFromSearchWidget(self, df):
+    def setDataFromSearchWidget(self, rows):
         """Set the data from the search-widget
         """
-        # this may be a subset of self._defaultDf
-        self.updateDf(df)
+        if (model := self.model()) and model._df is not None:
+
+            model.beginResetModel()
+            if model._filterIndex is not None:
+                model._filterIndex = sorted(set(model._filterIndex) & set(model._sortIndex.index(ii) for ii in rows))
+            else:
+                model._filterIndex = sorted(model._sortIndex.index(ii) for ii in rows)
+
+            model.endResetModel()
+
+        # import numpy as np
+        # NOTE:ED - keep for the minute
+        # # must have unique indices - otherwise ge arrays for multiple rows in here
+        # idx = self._df.index
+        # lastIdx = list(df.index)
+        #
+        # if (mapping := [idx.get_loc(cc) for cc in lastIdx if cc in idx]):
+        #     newMapping = np.zeros(len(lastIdx), dtype=np.int32)
+        #
+        #     # remove any duplicated rows - there SHOULDN'T be any, but could be a generic df
+        #     for ind, rr in enumerate(mapping):
+        #         if isinstance(rr, int):
+        #             newMapping[ind] = rr
+        #         elif isinstance(rr, np.ndarray):
+        #             # get the index of the first duplicate - may not be the correct order with other matching index :|
+        #             indT = list(rr).index(True)
+        #             newMapping[ind] = indT
+        #             for mm in mapping[ind + 1:]:
+        #                 if isinstance(mm, np.ndarray):
+        #                     mm[indT] = False
+        #         else:
+        #             # anything else is a missing row
+        #             raise RuntimeError(f'{self.__class__.__name__}.df: new df is not a sub-set of the original')
+        #
+        #     if (model := self.model()) and model._df is not None:
+        #         # self.updateDf(model._defaultDf)
+        #         if model._filterIndex is not None:
+        #             model._filterIndex = sorted(model._filterIndex[ft] for ft in newMapping)
+        #         else:
+        #             model._filterIndex = sorted(newMapping)
+        #
+        # self.update()

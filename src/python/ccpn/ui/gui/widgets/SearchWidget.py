@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-20 10:09:41 +0100 (Tue, September 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 18:54:08 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -458,28 +458,26 @@ class _TableFilterABC(ScrollArea):
 
         _compareErrorCount = 0
         _model = self.table.model()
-        # check using the actual table - not the underlying dataframe
+
         df = self.df
-        dfIndex = list(df.index)  # table must have unique row-indexes
         if condition != Exclude:
             rows = OrderedSet()
         else:
             # Exclude needs to remove values from the list
-            # Start with the sorted values already found - from _sortIndex
-            # if self._listRows is not None:
-            #     rows = OrderedSet(list(self._listRows)[row] for row in _model._sortIndex)
-            # else:
-            #     rows = OrderedSet(_model._sortIndex)
-            rows = set(dfIndex[row] for row in _model._sortIndex)
+            rows = OrderedSet(row for row in range(df.shape[0]))
 
-        for row in range(_model.rowCount()):
-            # the sorted row
-            _row = _model._sortIndex[row]
+        for row in range(df.shape[0]):
+            for column in range(df.shape[1]):
+                if df.columns[column] in visHeadings:
 
-            for column in range(_model.columnCount()):
-                if self.table._df.columns[column] in visHeadings:
-                    idx = _model.index(row, column)
-                    cellText = idx.data(QtCore.Qt.DisplayRole)
+                    # could replace this with a quicker column-based method
+                    cellText = df.iat[row, column]
+                    # float/np.float - round to 3 decimal places
+                    if isinstance(cellText, (float, np.floating)):
+                        cellText = f'{cellText:.3f}'
+                    else:
+                        cellText = str(cellText)
+
                     if condition in RangeConditions:
                         match = _compareKeysInRange(cellText, (condition1Value, condition2Value), condition)
                     else:
@@ -489,39 +487,23 @@ class _TableFilterABC(ScrollArea):
 
                     if match:
                         if condition != Exclude:
-                            # # add the found sorted row to the found list
-                            # if self._listRows is not None:
-                            #     rows.add(list(self._listRows)[_row])
-                            # else:
-                            #     rows.add(_row)
-                            rows.add(dfIndex[_row])
-                            # rows.add(row)  # store the found table row
+                            # add the found sorted row to the found list
+                            rows.add(row)
                         else:
-                            # # remove the found sorted values from the list
-                            # if self._listRows is not None:
-                            #     rows -= {list(self._listRows)[_row]}
-                            # else:
-                            #     rows -= {_row}
-                            rows -= {dfIndex[_row]}  # store the found table row
+                            # remove the found sorted values from the list
+                            rows -= {row}
 
         if _compareErrorCount > 0:
             getLogger().debug('Error in comparing values for GuiTable filters, use debug2 for details')
 
-        try:
-            self._searchedDataFrame = self.searchRows(df, rows)
-        except Exception as es:
-            getLogger().warning(f'Encountered a problem searching the table {es}')
+        self._listRows = rows
+        if len(rows):
+            self.table.setDataFromSearchWidget(rows)
+            self.searchButtons.getButton('Reset').setEnabled(True)
 
-        else:
-            self._listRows = rows
-
-            if not self._searchedDataFrame.empty:
-                self.table.setDataFromSearchWidget(self._searchedDataFrame)
-                self.searchButtons.getButton('Reset').setEnabled(True)
-
-            elif not ignoreNotFound:
-                MessageDialog.showWarning('Not found', 'Query value(s) not found in selected columns.'
-                                                       'Try by filtering in a specific column or double check your query.')
+        elif not ignoreNotFound:
+            MessageDialog.showWarning('Not found', 'Query value(s) not found in selected columns.'
+                                                   'Try by filtering in a specific column or double check your query.')
 
     def selectSearchOption(self, sourceTable, columnObject, value):
         try:

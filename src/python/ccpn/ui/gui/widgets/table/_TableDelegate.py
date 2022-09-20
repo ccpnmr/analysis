@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-20 10:48:16 +0100 (Tue, September 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 18:54:09 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,35 +26,9 @@ __date__ = "$Date: 2022-09-08 18:14:25 +0100 (Thu, September 08, 2022) $"
 # Start of code
 #=========================================================================================
 
-import numpy as np
-import pandas as pd
 from PyQt5 import QtWidgets, QtCore, QtGui
-from collections import defaultdict, OrderedDict
-from contextlib import contextmanager
-from dataclasses import dataclass
-from functools import partial
-from time import time_ns
-from types import SimpleNamespace
-import typing
-
-from ccpn.core.lib.CallBack import CallBack
-from ccpn.core.lib.CcpnSorting import universalSortKey
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptions
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
-from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
-from ccpn.ui.gui.widgets.Frame import ScrollableFrame
-from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
-from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.SearchWidget import attachDFSearchWidget
-from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.FileDialog import TablesFileDialog
-from ccpn.util.Path import aPath
+from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS
 from ccpn.util.Logging import getLogger
-from ccpn.util.Common import copyToClipboard
-from ccpn.util.OrderedSet import OrderedSet
 
 
 ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
@@ -73,6 +47,7 @@ INDEX_ROLE = QtCore.Qt.UserRole + 1002
 EDIT_ROLE = QtCore.Qt.EditRole
 _EDITOR_SETTER = ('setColor', 'selectValue', 'setData', 'set', 'setValue', 'setText', 'setFile')
 _EDITOR_GETTER = ('get', 'value', 'text', 'getFile')
+_replaceAlternativeColor = QtGui.QColor(getColours()[BORDERFOCUS])
 
 
 #=========================================================================================
@@ -212,8 +187,10 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
         """
         # Remove dotted border on cell focus.  https://stackoverflow.com/a/55252650/3620725
         #   or put 'outline: 0px;' into the QTableView stylesheet
-        # if option.state & QtWidgets.QStyle.State_HasFocus:
-        #     option.state = option.state ^ QtWidgets.QStyle.State_HasFocus
+        focus = False
+        if option.state & QtWidgets.QStyle.State_HasFocus:
+            option.state = option.state ^ QtWidgets.QStyle.State_HasFocus
+            focus = True
 
         super().paint(painter, option, index)
 
@@ -225,4 +202,15 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
             brush.setAlphaF(0.20)
             painter.setCompositionMode(painter.CompositionMode_SourceOver)
             painter.fillRect(option.rect, brush)
+            if focus:
+                # move the focus rectangle drawing to after, otherwise, alternative-background-color is used
+                painter.setPen(_replaceAlternativeColor)
+                painter.drawRect(option.rect.adjusted(0, 0, -1, -1))
+            painter.restore()
+
+        elif focus:
+            # move the focus rectangle drawing to after, otherwise, alternative-background-color is used
+            painter.save()
+            painter.setPen(_replaceAlternativeColor)
+            painter.drawRect(option.rect.adjusted(0, 0, -1, -1))
             painter.restore()

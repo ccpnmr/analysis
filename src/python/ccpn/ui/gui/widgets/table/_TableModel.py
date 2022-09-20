@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-20 10:48:16 +0100 (Tue, September 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 18:54:09 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -53,6 +53,7 @@ DISPLAY_ROLE = QtCore.Qt.DisplayRole
 TOOLTIP_ROLE = QtCore.Qt.ToolTipRole
 STATUS_ROLE = QtCore.Qt.StatusTipRole
 BACKGROUND_ROLE = QtCore.Qt.BackgroundRole
+BACKGROUNDCOLOR_ROLE = QtCore.Qt.BackgroundColorRole
 FOREGROUND_ROLE = QtCore.Qt.ForegroundRole
 CHECK_ROLE = QtCore.Qt.CheckStateRole
 ICON_ROLE = QtCore.Qt.DecorationRole
@@ -97,10 +98,7 @@ class _TableModel(QtCore.QAbstractTableModel):
     defaultFlags = ENABLED | SELECTABLE  # add CHECKABLE to enable check-boxes
     _defaultEditable = True
 
-    _defaultDf = None
-    _dfIndex = None
     _colour = None
-    _defaultColour = None
 
     def __init__(self, data, view=None):
         """Initialise the pandas model.
@@ -127,6 +125,7 @@ class _TableModel(QtCore.QAbstractTableModel):
         self._sortColumn = 0
         self._sortOrder = QtCore.Qt.AscendingOrder
         # NOTE:ED - could I use another self._filterIndex here? so _df doesn't need to be changed
+        self._filterIndex = None
 
         # create a pixmap for the editable icon (currently a pencil)
         self._editableIcon = Icon('icons/editable').pixmap(int(self._chrHeight), int(self._chrHeight))
@@ -146,64 +145,31 @@ class _TableModel(QtCore.QAbstractTableModel):
         """
         self.beginResetModel()
 
-        self._colour = None
-        if self._defaultDf is not None:
-            # must have unique indices - otherwise ge arrays for multiple rows in here
-            idx = self._defaultDf.index
-            lastIdx = list(value.index)
-            if (mapping := [idx.get_loc(cc) for cc in lastIdx if cc in idx]):
-                newMapping = np.zeros(len(lastIdx), dtype=np.int32)
-
-                # remove any duplicated rows - there SHOULDN'T be any, but could be a generic df
-                for ind, rr in enumerate(mapping):
-                    if isinstance(rr, int):
-                        newMapping[ind] = rr
-                    elif isinstance(rr, np.ndarray):
-                        # get the index of the first duplicate - may not be the correct order with other matching index :|
-                        indT = list(rr).index(True)
-                        newMapping[ind] = indT
-                        for mm in mapping[ind + 1:]:
-                            if isinstance(mm, np.ndarray):
-                                mm[indT] = False
-                    else:
-                        # anything else is a missing row
-                        raise RuntimeError(f'{self.__class__.__name__}.df: new df is not a sub-set of the original')
-
-                if self._defaultColour is not None:
-                    # can be used for other table-information
-                    self._colour = self._defaultColour[newMapping, :]
-
-        if self._colour is None:
-            # create numpy arrays to match the data that will hold background colour
-            self._colour = np.empty(value.shape, dtype=np.object)
-
         # set the initial sort-order
         self._oldSortIndex = [row for row in range(value.shape[0])]
         self._sortIndex = [row for row in range(value.shape[0])]
+        self._filterIndex = [row for row in range(value.shape[0])]
 
-        # # create numpy arrays to match the data that will hold background colour
-        # self._colour = np.empty(value.shape, dtype=np.object)
+        # create numpy arrays to match the data that will hold background colour
+        self._colour = np.empty(value.shape, dtype=np.object)
         self._headerToolTips = {orient: np.empty(value.shape[ii], dtype=np.object)
                                 for ii, orient in enumerate([QtCore.Qt.Vertical, QtCore.Qt.Horizontal])}
 
         self._df = value
-        self._dfIndex = list(value.index)
+        self._filterIndex = None
 
         # notify that the data has changed
         self.endResetModel()
 
-    def setDefaultDf(self, value):
-        """Set the default unfiltered table
+    @property
+    def filteredDf(self):
+        """Return the filtered dataFrame
         """
-        if value is not None:
-            self._defaultDf = value
-            if self._colour is not None:
-                self._defaultColour = self._colour.copy()
-
+        if self._filterIndex is not None:
+            # the filtered df
+            return self._df.iloc[self._filterIndex]
         else:
-            # reset the values to star again
-            self._defaultDf = None
-            self._defaultColour = None
+            return self._df
 
     def setToolTips(self, orientation, values):
         """Set the tooltips for the horizontal/vertical headers.
@@ -328,7 +294,7 @@ class _TableModel(QtCore.QAbstractTableModel):
 
         else:
             if self._view.isSortingEnabled():
-                # notify rows are going to be inserted
+                # notify rows are going to be inserted - remove from filtered?
                 sortedLoc = self._sortIndex.index(iLoc)
                 self.beginRemoveRows(QtCore.QModelIndex(), sortedLoc, sortedLoc)
 
@@ -351,7 +317,10 @@ class _TableModel(QtCore.QAbstractTableModel):
     def rowCount(self, parent=None):
         """Return the row count for the dataFrame
         """
-        return self._df.shape[0]
+        if self._filterIndex is not None:
+            return len(self._filterIndex)
+        else:
+            return self._df.shape[0]
 
     def columnCount(self, parent=None):
         """Return the column count for the dataFrame
@@ -363,7 +332,8 @@ class _TableModel(QtCore.QAbstractTableModel):
         """
         if index.isValid():
             # get the source cell
-            row, col = self._sortIndex[index.row()], index.column()
+            fRow = self._filterIndex[index.row()] if self._filterIndex is not None else index.row()
+            row, col = self._sortIndex[fRow], index.column()
 
             if role == DISPLAY_ROLE:
                 # need to discard columns that include check-boxes
@@ -438,14 +408,12 @@ class _TableModel(QtCore.QAbstractTableModel):
             return False
         if role == EDIT_ROLE:
             # get the source cell
-            row, col = self._sortIndex[index.row()], index.column()
+            fRow = self._filterIndex[index.row()] if self._filterIndex is not None else index.row()
+            row, col = self._sortIndex[fRow], index.column()
+
             try:
                 if self._df.iat[row, col] != value:
                     self._df.iat[row, col] = value
-
-                    # need to store in the parent (unfiltered table)
-                    self._setDataParentDf(row, col, value)
-
                     self.dataChanged.emit(index, index)
 
                     return True
@@ -458,19 +426,6 @@ class _TableModel(QtCore.QAbstractTableModel):
         #     return True
 
         return False
-
-    def _setDataParentDf(self, row, col, value):
-        try:
-            # can't think of a better way of doing this yet :|
-
-            # set in the top-level as well - map the index to the _defaultDf - background/foreground colours?
-            idx = self._df.index[row]
-            if self._defaultDf is not None and not self._defaultDf.empty:
-                row = self._defaultDf.index.get_loc(idx)
-                self._defaultDf.iat[row, col] = value
-
-        except Exception as es:
-            getLogger().debug2(f'error accessing parent cell ({row}, {col})   {es}')
 
     def headerData(self, col, orientation, role=None):
         """Return the column headers
@@ -611,6 +566,11 @@ class _TableModel(QtCore.QAbstractTableModel):
         newData = self._universalSort(self._df[col])
         self._sortIndex = list(newData.sort_values(ascending=True if order == QtCore.Qt.AscendingOrder else False).index)
 
+        # map the old sort-order to the new sort-order
+        if self._filterIndex is not None:
+            self._oldFilterIndex = self._filterIndex
+            self._filterIndex = sorted([self._sortIndex.index(self._oldSortIndex[fi]) for fi in self._filterIndex])
+
     def sort(self, column: int, order: QtCore.Qt.SortOrder = ...) -> None:
         """Sort the underlying pandas DataFrame
         Required as there is no proxy model to handle the sorting
@@ -651,6 +611,13 @@ class _TableModel(QtCore.QAbstractTableModel):
         except:
             return self._defaultEditable
 
+    def resetFilter(self):
+        """Reset the table to unsorted
+        """
+        self.beginResetModel()
+        self._filterIndex = None
+        self.endResetModel()
+
 
 #=========================================================================================
 # _TableObjectModel
@@ -675,6 +642,7 @@ class _TableObjectModel(_TableModel):
 
     Objects are defined as a list, and table is populated with information from the Column classes.
     """
+    # NOTE:ED - not tested
 
     defaultFlags = ENABLED | SELECTABLE | CHECKABLE
 
@@ -691,7 +659,6 @@ class _TableObjectModel(_TableModel):
                      CHECK_ROLE: lambda colDef, obj, value: colDef.setEditValue(obj, True if (value == CHECKED) else False)
                      }
 
-    # # NOTE:ED - not tested
     # def _setSortOrder(self, column: int, order: QtCore.Qt.SortOrder = ...):
     #     """Sort the object-list
     #     """
@@ -705,7 +672,9 @@ class _TableObjectModel(_TableModel):
         # special control over the object properties
         if index.isValid():
             # get the source cell
-            row, col = self._sortIndex[index.row()], index.column()
+            fRow = self._filterIndex[index.row()] if self._filterIndex is not None else index.row()
+            row, col = self._sortIndex[fRow], index.column()
+
             obj = self._view._objects[row]
             colDef = self._view._columnDefs._columns[col]
 
@@ -718,7 +687,9 @@ class _TableObjectModel(_TableModel):
         # super(AdminModel, self).setData(index, role, value)  # super not required?
 
         if index.isValid():
-            row, col = self._sortIndex[index.row()], index.column()
+            fRow = self._filterIndex[index.row()] if self._filterIndex is not None else index.row()
+            row, col = self._sortIndex[fRow], index.column()
+
             obj = self._view._objects[row]
             colDef = self._view._columnDefs._columns[col]
 

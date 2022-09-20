@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-01 17:25:27 +0100 (Thu, September 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 10:42:06 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -55,7 +55,7 @@ from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.VLine import VLine
 from ccpn.ui.gui.lib.Validators import LineEditValidator
-from ccpn.ui.gui.lib._SimplePandasTable import _newSimplePandasTable, _updateSimplePandasTable
+from ccpn.ui.gui.widgets.table.Table import Table
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS, TOOLTIP_BACKGROUND
 
 from ccpn.framework.lib.ccpnNef import CcpnNefIo
@@ -1111,6 +1111,7 @@ class NefDictFrame(Frame):
         values = [(itm, itm.data(1, 0)) for itm in newItms if itm.data(1, 0)]
 
         return values
+
     def _getAllChildren(self):
         # grab the tree state
         items = []
@@ -2421,7 +2422,12 @@ class NefDictFrame(Frame):
         """
         frame = MoreLessFrame(self, name=_name, showMore=showMore, grid=(0, 0))
 
-        table = _newSimplePandasTable(frame.contentsFrame, pd.DataFrame(_data))
+        # table = _newSimplePandasTable(frame.contentsFrame, pd.DataFrame(_data))
+        table = Table(frame.contentsFrame, pd.DataFrame(_data),
+                      selectionCallbackEnabled=False, actionCallbackEnabled=False,
+                      enableDelete=False)
+        table.setEditable(False)
+
         frame.contentsFrame.getLayout().addWidget(table, 0, 0)
         frame.contentsFrame.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         frame.contentsFrame.setMinimumSize(100, 100)
@@ -2445,7 +2451,8 @@ class NefDictFrame(Frame):
         if self._collectionsTable and self._collections:
             _df = pd.DataFrame({COLLECTION: self._collections.keys(),
                                 'Items'   : ['\n'.join(vv for vv in val) for val in self._collections.values()]})
-            _updateSimplePandasTable(self._collectionsTable, _df, _resize=True)
+            # _updateSimplePandasTable(self._collectionsTable, _df, _resize=True)
+            self._collectionsTable.updateDf(_df, resize=True)
 
             _model = self._collectionsTable.model()
             # colour the structureData if exist in the project
@@ -2454,7 +2461,8 @@ class NefDictFrame(Frame):
                     _model.setForeground(row, 0, INVALIDTEXTROWNOCHECKCOLOUR)
         else:
             _df = pd.DataFrame({COLLECTION: [], 'Items': []})
-            _updateSimplePandasTable(self._collectionsTable, _df)
+            # _updateSimplePandasTable(self._collectionsTable, _df)
+            self._collectionsTable.updateDf(_df)
 
         # rebuild the list of structureData
         _itms = self._getAllChildren()
@@ -2480,7 +2488,8 @@ class NefDictFrame(Frame):
         if self._structureDataTable and self._structureData:
             _df = pd.DataFrame({STRUCTUREDATA: self._structureData.keys(),
                                 'Items'      : ['\n'.join(vv for vv in val) for val in self._structureData.values()]})
-            _updateSimplePandasTable(self._structureDataTable, _df, _resize=True)
+            # _updateSimplePandasTable(self._structureDataTable, _df, _resize=True)
+            self._structureDataTable.updateDf(_df, resize=True)
 
             _model = self._structureDataTable.model()
             # colour the structureData if exist in the project
@@ -2489,7 +2498,8 @@ class NefDictFrame(Frame):
                     _model.setForeground(row, 0, INVALIDTEXTROWNOCHECKCOLOUR)
         else:
             _df = pd.DataFrame({STRUCTUREDATA: [], 'Items': []})
-            _updateSimplePandasTable(self._structureDataTable, _df)
+            # _updateSimplePandasTable(self._structureDataTable, _df)
+            self._structureDataTable.updateDf(_df)
 
     def _fillPopup(self, nefObject=None):
         """Initialise the project setting - only required for testing

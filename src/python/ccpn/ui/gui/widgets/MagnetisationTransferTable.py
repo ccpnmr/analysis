@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-14 16:11:39 +0100 (Wed, September 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 10:10:06 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -147,7 +147,7 @@ class MagnetisationTransferTable(TableABC):
         """
         self.setEnabled(value)
         # not sure whether to disable the table or just disable the editing and menu items
-        self.model().defaultEditable = value
+        self.setEditable(value)
         for action in self._actions:
             action.setEnabled(value)
 
@@ -319,7 +319,8 @@ class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
                 raise Exception(f'Widget {widget} does not expose a get method; required for table editing')
 
             try:
-                self._parent.model().setData(index, value)
+                model = index.model()
+                model.setData(index, value)
 
             except Exception as es:
                 getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}  {value}')

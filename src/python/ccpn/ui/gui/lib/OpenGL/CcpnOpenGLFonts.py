@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-10 17:16:59 +0100 (Sat, September 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 18:59:23 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import LEFTBORDER, RIGHTBORDER, TOPBO
 from ccpn.util.Colour import hexToRgbRatio
 from ccpn.util.AttrDict import AttrDict
 
-from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT
+from ccpn.ui.gui.lib.OpenGL import GL
 
 
 GlyphXpos = 'Xpos'

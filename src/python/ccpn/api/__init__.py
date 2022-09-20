@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 __modifiedBy__ = "$Author: Luca Mureddu $"
 __dateModified__ = "$Date: 2021-06-23 17:58:44 +0000 (Wed, June 23, 2021) $"
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-08-25 10:25:19 +0100 (Thu, August 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-20 14:53:03 +0100 (Tue, September 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,7 +50,6 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Integral import Integral
-from ccpn.core.PseudoDimension import PseudoDimension
 from ccpn.core.SpectrumHit import SpectrumHit
 from ccpn.core.Sample import Sample
 from ccpn.core.SampleComponent import SampleComponent
@@ -73,7 +72,6 @@ from ccpn.core.DataTable import DataTable
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.Model import Model
 from ccpn.core.Note import Note
-from ccpn.core.PeakCluster import PeakCluster
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Multiplet import Multiplet
 from ccpn.core.Collection import Collection
@@ -85,7 +83,6 @@ from ccpn.core.Collection import Collection
 from ccpn.ui._implementation.Window import Window
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpn.ui._implementation.Strip import Strip
-# from ccpn.ui._implementation.Axis import Axis
 from ccpn.ui._implementation.Mark import Mark
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.ui._implementation.MultipletListView import MultipletListView

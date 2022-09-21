@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2022-09-16 14:14:02 +0100 (Fri, September 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-21 10:43:43 +0100 (Wed, September 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,10 +30,10 @@ from ccpn.util import Path
 # CCPN Urls
 ccpnUrl                         = 'http://www.ccpn.ac.uk'
 ccpn2Url                        = 'http://www.ccpn.ac.uk'
-ccpnLicenceUrl                  = 'http://www.ccpn.ac.uk/v3-software/licences'
-ccpnTutorials                   = 'https://www.ccpn.ac.uk/v3-software/tutorials'
+ccpnLicenceUrl                  = 'http://www.ccpn.ac.uk/software/licensing'
+ccpnTutorials                   = 'https://www.ccpn.ac.uk/support/tutorials'
 ccpnForum                       = 'https://forum.ccpn.ac.uk'
-ccpnVideos                      = 'https://www.ccpn.ac.uk/v3-software/v3-video-tutorials'
+ccpnVideos                      = 'https://www.ccpn.ac.uk/manual/v3/'
 oldCcpnIssuesUrl                = 'https://sourceforge.net/p/ccpn/bugs/'
 ccpnIssuesUrl                   = 'https://bitbucket.org/ccpnmr/issue-tracker/issues?status=new&status=open'
 ccpnDocumentationUrl            = 'https://www.ccpn.ac.uk/api-documentation/v3/html'

@@ -44,7 +44,7 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
         super().__init__()
         self.fittingModels = self._registerModels([BlankFittingModel] + FittingModels)
         self.calculationModels = self._registerModels([BlankCalculationModel] + CalculationModels)
-        fittingModel = self._getFirstModel(self.fittingModels)
+        fittingModel = self.getFittingModelByName(sv.ExponentialDecay) or self._getFirstModel(self.fittingModels)
         calculationModel = self._getFirstModel(self.calculationModels)
         if fittingModel:
             self._currentFittingModel = fittingModel()

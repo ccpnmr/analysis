@@ -555,7 +555,8 @@ class GuiFittingPanel(GuiSettingPanel):
     def setWidgetDefinitions(self):
         """Common fitting Widgets"""
         models = list(self.guiModule.backendHandler.fittingModels.values())
-
+        currentFittingModel = self.guiModule.backendHandler.currentFittingModel
+        currentFittingModelName = currentFittingModel.ModelName if currentFittingModel is not None else None
         self.widgetDefinitions = od((
             (guiNameSpaces.WidgetVarName_OptimiserSeparator,
              {'label': guiNameSpaces.Label_OptimiserSeparator,
@@ -570,7 +571,7 @@ class GuiFittingPanel(GuiSettingPanel):
               'callBack': self._commonCallback,
               'tipText': '',
               'type': compoundWidget.PulldownListCompoundWidget,
-              'enabled': True,
+              'enabled': False,
               'kwds': {'labelText': guiNameSpaces.Label_OptimiserMethod,
                        'tipText': guiNameSpaces.TipText_OptimiserMethod,
                        'texts': ['leastsq', 'differential_evolution', 'ampgo', 'newton'],
@@ -580,10 +581,10 @@ class GuiFittingPanel(GuiSettingPanel):
               'callBack': self._commonCallback,
               'tipText': guiNameSpaces.TipText_ErrorMethod,
               'type': compoundWidget.PulldownListCompoundWidget,
-              'enabled': True,
+              'enabled': False,
               'kwds': {'labelText': guiNameSpaces.Label_ErrorMethod,
                        'tipText': guiNameSpaces.TipText_ErrorMethod,
-                       'texts': ['parametric bootstrapping', 'non-parametric bootstrapping', 'Monte-Carlo', ],
+                       'texts': ['Default','parametric bootstrapping', 'non-parametric bootstrapping', 'Monte-Carlo', ],
                        'fixedWidths': SettingsWidgetFixedWidths}}),
         ))
         ## Set the models definitions
@@ -609,9 +610,11 @@ class GuiFittingPanel(GuiSettingPanel):
               'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_FittingModel,
                        'fixedWidths': SettingsWidgetFixedWidths,
+                       'selectedText': currentFittingModelName,
                        'compoundKwds': {'texts': modelNames,
                                         'extraLabels': extraLabels_ddFittingModels,
                                         'tipTexts': tipTexts_ddFittingModels,
+
                                         'direction': 'v',
                                         'tipText': '',
                                         'hAlign': 'l',

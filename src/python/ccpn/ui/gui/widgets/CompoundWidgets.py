@@ -1582,7 +1582,9 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
     def __init__(self, parent=None, mainWindow=None,
                  showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
-                 labelText='', texts=[], tipTexts=[], icons=[], callback=None, selectedInd=0, direction='h',
+                 labelText='', texts=[], tipTexts=[], icons=[], callback=None,
+                 selectedText = None,
+                 selectedInd=0, direction='h',
                  editable=True, compoundKwds=None,
                  **kwds):
         """
@@ -1622,6 +1624,9 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
         if fixedWidths is not None:
             self.setFixedWidths(fixedWidths)
 
+        if selectedText is not None:
+            self.setByText(selectedText, silent=True)
+
     # def get(self):
     #     """Convenience: get the radioButtons text
     #     """
@@ -1642,10 +1647,10 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
         """
         return self.radioButtons.get()
 
-    def setByText(self, value, *args):
+    def setByText(self, value, silent=False, *args):
         """Convenience: set the radioButtons selected text
         """
-        self.radioButtons.set(value)
+        self.radioButtons.set(value, silent=silent)
 
     def _getSaveState(self):
         return self.getByText()

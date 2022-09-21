@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-16 12:24:33 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-21 15:03:26 +0100 (Wed, September 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,35 +31,37 @@ __date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 #=========================================================================================
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import \
-    DataLoaderABC, checkPathForDataLoader, getDataLoaders
+    DataLoaderABC, checkPathForDataLoader, getDataLoaders, NO_SUFFIX, ANY_SUFFIX
 from ccpn.util.traits.CcpNmrTraits import Bool, List, Int
 from ccpn.core.lib.ContextManagers import logCommandManager
 
 _DIRECTORY_DATA = 'directoryData'
 
 class DirectoryDataLoader(DataLoaderABC):
-    """A directory data loader
+    """A directory data loader: loads all recognised files contained in the directory.
+    Should be a directory.
     """
     dataFormat = _DIRECTORY_DATA
-    suffixes = []  # a list of suffixes that get matched to path
-    allowDirectory = True  # Can/Can't open a directory
+    suffixes = [NO_SUFFIX, ANY_SUFFIX]  # a list of suffixes that get matched to path
+    allowDirectory = True  # Have to allow a directory
+    requireDirectory = True  # Require a directory
 
     recursive = Bool(default_value=False).tag(info='Flag to define recursive behavior')
     dataLoaders = List(default_value=[]).tag(info='List with dataLoader instances for the files of the directory "path"')
     count = Int(default_value=0).tag(info='Count of number of dataLoaders including the recursive ones')
 
-    @classmethod
-    def checkForValidFormat(cls, path):
-        """check if valid format corresponding to dataFormat
-        :return: None or instance of the class
-        """
-        if (_path := cls.checkPath(path)) is None:
-            return None
-        if not _path.is_dir():
-            return None
-        # assume that all is good for now
-        instance = cls(path)
-        return instance
+    # @classmethod
+    # def checkForValidFormat(cls, path):
+    #     """check if valid format corresponding to dataFormat
+    #     :return: None or instance of the class
+    #     """
+    #     if (_path := cls.checkPath(path)) is None:
+    #         return None
+    #     if not _path.is_dir():
+    #         return None
+    #     # assume that all is good for now
+    #     instance = cls(path)
+    #     return instance
 
     def load(self):
         """The actual loading method;

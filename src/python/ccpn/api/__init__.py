@@ -23,10 +23,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$Author: Luca Mureddu $"
-__dateModified__ = "$Date: 2021-06-23 17:58:44 +0000 (Wed, June 23, 2021) $"
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-01 17:25:26 +0100 (Thu, September 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-21 15:03:25 +0100 (Wed, September 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -112,5 +110,7 @@ from ccpn.ui._implementation.IntegralListView import IntegralListView
 
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import Path, aPath
+from ccpn.util.isotopes import getIsotopeRecords
+
 from ccpn.framework.Application import getApplication
 from ccpn.framework.Preferences import getPreferences

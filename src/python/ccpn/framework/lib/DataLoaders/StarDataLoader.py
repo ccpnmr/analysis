@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-22 19:58:03 +0000 (Tue, February 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-21 15:03:27 +0100 (Wed, September 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ from ccpn.util.Logging import getLogger
 
 
 class StarDataLoader(DataLoaderABC):
-    """NMRStar data loader
+    """The NMRStar data-loader.
     """
     dataFormat = 'starFile'
     suffixes = ['.str']  # a list of suffixes that get matched to path
@@ -51,22 +51,35 @@ class StarDataLoader(DataLoaderABC):
     def __init__(self, path):
         super(StarDataLoader, self).__init__(path)
         self._starReader = CcpnNmrStarReader()
-        self._dataBlock = None
+
+    @property
+    def starReader(self):
+        """:return the starReader instance
+        """
+        return self._starReader
 
     @property
     def dataBlock(self):
-        """Get the NmrdataBlock from the file define by self.path
+        """:return the starReader's dataBlock or None if not yet read and parsed by getDataBlock
         """
-        if self._dataBlock is None:
-            self._dataBlock = self._starReader.parse(path=self.path)
-            getLogger().debug(f'StarDataLoader: Read "{self.path}" into dataBlock')
-        return self._dataBlock
+        return self._starReader.dataBlock
+
+    def getDataBlock(self):
+        """Get the NmrdataBlock from the file defined by self.path
+        :return dataBlock
+        """
+        self._starReader.parse(path=self.path)
+        getLogger().debug(f'StarDataLoader: Read "{self.path}" into dataBlock')
+        return self.dataBlock
 
     def load(self):
         """The actual NMRStar loading method; subclassed to account for special
         circumstances
         :return: a list of [project]
         """
+        if self.dataBlock is None:
+            # this will read and parse the file
+            self.getDataBlock()
         result = self.application._loadStarFile(dataLoader=self)
         return [result]
 

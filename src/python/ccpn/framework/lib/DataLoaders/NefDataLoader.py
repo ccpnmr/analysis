@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:47:14 +0000 (Tue, February 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-21 15:03:27 +0100 (Wed, September 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -45,7 +45,7 @@ from ccpn.framework.lib.ccpnNef.CcpnNefImporter import CcpnNefImporter, NEF_STAN
 
 
 class NefDataLoader(DataLoaderABC):
-    """NEF data loader
+    """The NEF data-loader.
     """
     dataFormat = 'nefFile'
     suffixes = ['.nef']  # a list of suffixes that get matched to path

@@ -5,7 +5,7 @@ This module defines the data loading mechanism for loading a pdb file
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:01 +0100 (Tue, July 20, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-09-21 15:03:27 +0100 (Wed, September 21, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,7 +34,7 @@ from ccpn.core.Project import Project
 
 
 class PdbDataLoader(DataLoaderABC):
-    """Pdb file data loader
+    """The Pdb file data-loader.
     """
     dataFormat = 'pdbFile'
     suffixes = ['.pdb']  # a list of suffixes that get matched to path

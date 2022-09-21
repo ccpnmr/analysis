@@ -13,12 +13,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-29 10:55:51 +0100 (Tue, March 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-21 15:03:26 +0100 (Wed, September 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -38,8 +38,7 @@ from ccpn.core.lib.SpectrumDataSources.lib.BinaryHeader import BinaryHeader
 
 
 class NmrViewSpectrumDataSource(SpectrumDataSourceABC):
-    """
-    NmrView spectral storage
+    """NmrView nD (n=1-4) binary spectral data reading.
     """
     dataFormat = 'NMRView'
     alternateDataFormatNames = ['NmrView']
@@ -49,6 +48,7 @@ class NmrViewSpectrumDataSource(SpectrumDataSourceABC):
     headerSize = 512
     blockHeaderSize = 0
     isFloatData = True
+    MAXDIM = 4          # Explicitly overide as NmrView can only handle upto 4 (?) dimensions
 
     suffixes = ['.nv']
     openMethod = open

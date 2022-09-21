@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-22 19:58:04 +0000 (Tue, February 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-21 15:03:28 +0100 (Wed, September 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -37,15 +37,24 @@ from ccpn.util.nef.GenericStarParser import PARSER_MODE_STANDARD, LoopRow
 def getSaveFrames() -> dict:
     """:return the dict with saveFrame class definitions
     """
-    # import here to register
+    # local import here to effectuate the registering
     from ccpn.framework.lib.ccpnNmrStarIo.ChemicalShiftSaveFrame import ChemicalShiftSaveFrame
+    from ccpn.framework.lib.ccpnNmrStarIo.EntitySaveFrame import EntitySaveFrame
+    from ccpn.framework.lib.ccpnNmrStarIo.EntryInformationSaveFrame import EntryInformationSaveFrame
     return SaveFrameABC._registeredSaveFrames
 
 
 class SaveFrameABC(NmrSaveFrame):
     """A class to manage; i.e. register the various saveFrames
     """
+    # To be subclassed
+
     _sf_category = None
+    _ENTRY_ID_TAG = 'entry_id'  # Different saveFrames hve different tag names for this (!!)
+
+    # end subclass
+
+    # dict for registering the classes
     _registeredSaveFrames = {}
 
     def __init__(self, parent, *args, **kwds):
@@ -58,11 +67,18 @@ class SaveFrameABC(NmrSaveFrame):
 
     @property
     def entry_id(self) -> str:
-        """:return the entry-Id as a str"""
-        _id = self.get('entry_id')
+        """:return the entry-Id as a str
+        """
+        _id = self.get(self._ENTRY_ID_TAG)
         if _id is None:
             return None
         return str(_id)
+
+    @property
+    def entryName(self) -> str:
+        """:return the entryName (derived from entry_id) as a str
+        """
+        return  f'bmrb{self.entry_id}'
 
     def importIntoProject(self, project) -> list:
         """Import the data of self into project.

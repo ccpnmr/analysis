@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-20 10:48:16 +0100 (Tue, September 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-21 15:09:53 +0100 (Wed, September 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -172,7 +172,7 @@ def main():
     layout = QtWidgets.QGridLayout()
     frame.setLayout(layout)
 
-    table = Table(df=df)
+    table = Table(None, df=df)
     win.setCentralWidget(frame)
     frame.layout().addWidget(table, 0, 0)
 

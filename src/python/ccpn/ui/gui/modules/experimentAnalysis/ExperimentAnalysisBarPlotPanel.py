@@ -23,20 +23,19 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 # Start of code
 #=========================================================================================
 
-import math
 import pyqtgraph as pg
-import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
-import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore
 from ccpn.util.Logging import getLogger
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
+from ccpn.util.Colour import colorSchemeTable, hexToRgb, rgbaRatioToHex, colourNameToHexDict
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import ExperimentAnalysisPlotToolBar
 from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
-from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, MEDIUM_BLUE, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_GRID, CCPNGLWIDGET_LABELLING
-from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
-from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours, getGradientBrushByArray, colourNameToHexDict
-from ccpn.ui.gui.widgets.Font import Font, getFont
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
-from ccpn.util.Colour import colorSchemeTable
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_LABELLING
+from ccpn.ui.gui.guiSettings import getColours, DIVIDER
+from ccpn.ui.gui.widgets.Font import getFont
+from ccpn.ui.gui.widgets.Label import Label
 
 class BarPlotPanel(GuiPanel):
 
@@ -88,12 +87,13 @@ class BarPlotPanel(GuiPanel):
                                              actionCallback=self._mouseDoubleClickEvent,
                                              selectionCallback=self._mouseSingleClickEvent,
                                              hoverCallback=self._mouseHoverCallbackEvent,
-                                             threshouldLine=0.1, grid=(1,0))
+                                             threshouldLine=0.1, grid=(1,0), gridSpan=(1, 2))
         self.barGraphWidget.showThresholdLine(True)
         self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._thresholdLineMoved)
         self._setBarGraphWidget()
         self.toolbar = ExperimentAnalysisPlotToolBar(parent=self, plotItem=self.barGraphWidget,
                                                      grid=(0, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
+        self.currentCollectionLabel = Label(self, text='', grid=(0, 1), hAlign='r',)
 
     def setXLabel(self, label=''):
         self.barGraphWidget.plotWidget.setLabel('bottom', label)
@@ -288,13 +288,15 @@ class BarPlotPanel(GuiPanel):
     def _mouseSingleClickEvent(self, x, y):
         self._setCurrentObjs(self._plottedDf, x)
 
-    def _mouseHoverCallbackEvent(self, x, y):
+    def _mouseHoverCallbackEvent(self, barIndex, x, y):
         if self._plottedDf is not None:
-            pid = self._plottedDf.loc[x, sv.COLLECTIONPID]
-            # collection = self.project.getByPid(pid)
-
-            self.barGraphWidget._hoverBox.setText(pid)
-
+            posTxt = f'Y:{y:.2f}'
+            if barIndex is not None:
+                pid = self._plottedDf.loc[barIndex, sv.COLLECTIONPID]
+                txt = f'{pid} -- {posTxt}'
+                self.currentCollectionLabel.setText(txt)
+            else:
+                self.currentCollectionLabel.clear()
 
     def _updateAxisLabels(self):
         self.setXLabel(label=self.xColumnName)

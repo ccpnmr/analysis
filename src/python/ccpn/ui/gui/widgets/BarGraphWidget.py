@@ -130,8 +130,9 @@ class BarGraphWidget(Widget):
         self.belowBrush = 'r'
         self.disappearedBrush = 'b'
         self.threshouldLine = threshouldLine
-        self._hoverBox = pg.TextItem(text='TEXT', anchor=(-0.1,0.1), angle=0, border='w', fill=(0, 0, 255, 100))
+        self._hoverBox = pg.TextItem(text='', anchor=(-0.1,0.1), angle=0, border='w', fill=(0, 0, 255, 100))
         self._hoverBox.hide()
+        self._hoverBoxEnabled = False
         self.setData(viewBox=self.customViewBox, xValues=xValues, yValues=yValues, objects=objects, colour=colour, replace=True)
         self.xLine = self.customViewBox.xLine
         self.customViewBox.addItem(self.xLine)
@@ -241,15 +242,15 @@ class BarGraphWidget(Widget):
         if self._selectionCallback:
             self._selectionCallback(x,y)
 
-    def _mouseHoverCallback(self, x, y):
+    def _mouseHoverCallback(self, barIndex, x, y):
         if self._hoverCallback:
-            if x is not None:
+            self._hoverCallback(barIndex, x, y)
+            if self._hoverBoxEnabled:
                 self._hoverBox.show()
                 self._hoverBox.setPos(x,y)
-                self._hoverCallback(x,y)
             else:
                 self._hoverBox.hide()
-        # self._hoverBox.hide()
+
 
     def setViewBoxLimits(self, xMin, xMax, yMin, yMax):
         self.customViewBox.setLimits(xMin=xMin, xMax=xMax, yMin=yMin, yMax=yMax)

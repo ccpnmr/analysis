@@ -188,13 +188,13 @@ class BarGraph(pg.BarGraphItem):
 
     def hoverEvent(self, event):
 
-        position = None
+
         try:
-            position = self._getBarNumberByEvent(event)
+            barIndex = self._getBarNumberByEvent(event)
+            if self._hoverCallback:
+                self._hoverCallback(barIndex=barIndex, x=event.pos().x(), y=event.pos().y())
         except:
             getLogger().debug("Error getting position of a bar from mouse event")
-        if self._hoverCallback:
-            self._hoverCallback(x=position, y=event.pos().y())
 
     def drawLabels(self, ratio=0.5):
         """

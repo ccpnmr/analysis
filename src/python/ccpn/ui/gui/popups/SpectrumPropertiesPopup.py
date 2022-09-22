@@ -280,7 +280,7 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
         QtCore.QTimer.singleShot(0, partial(dynamicSizeAdjust, self, sizeFunction=self._targetSize,
                                             adjustWidth=True, adjustHeight=False))
 
-    def _targetSize(self) -> typing.Optional[tuple[QtCore.QSize, QtCore.QSize]]:
+    def _targetSize(self) -> typing.Optional[tuple]:
         """Get the size of the widget to match the popup to.
 
         Returns the size of the clicked tab, or None if there is an error.

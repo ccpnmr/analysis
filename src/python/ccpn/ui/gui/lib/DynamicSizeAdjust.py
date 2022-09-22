@@ -124,7 +124,7 @@ def dynamicSizeAdjust(widget, sizeFunction: callable = None, step: int = _INITIA
 # Example sizeFunction - taken from SpectrumPropertiesPopup.py
 #=========================================================================================
 
-def _targetSize(self) -> Optional[tuple[QtCore.QSize, QtCore.QSize]]:
+def _targetSize(self) -> Optional[tuple]:
     """Get the size of the widget to match the popup to.
 
     Returns the size of the clicked tab, or None if there is an error.

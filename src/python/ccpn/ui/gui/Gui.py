@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-21 15:03:28 +0100 (Wed, September 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-22 17:43:36 +0100 (Thu, September 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from ccpn.core.Project import Project
 
 from ccpn.framework.Application import getApplication
 from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders, checkPathForDataLoader
+from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders, _checkPathForDataLoader
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib.ContextManagers import \
@@ -310,11 +310,33 @@ class Gui(Ui):
         if pathFilter is None:
             pathFilter =  tuple(getDataLoaders().keys())
 
-        if (dataLoader :=  checkPathForDataLoader(path, pathFilter=pathFilter)) is None:
-            dataFormats = [dl.dataFormat for dl in _getPotentialDataLoaders(path)]
-            txt = f'Loading "{path}" unsuccessful; tried all of {dataFormats}, but failed'
+        _loaders = _checkPathForDataLoader(path=path, pathFilter=pathFilter)
+        if len(_loaders) > 0 and _loaders[-1].isValid:
+            # found a valid one; use that
+            dataLoader = _loaders[-1]
+
+        # log errors
+        elif len(_loaders) == 0:
+            dataLoader = None
+            txt = f'No valid loader found for {path}'
+
+        elif len(_loaders) == 1 and not _loaders[0].isValid:
+            dataLoader = None
+            txt = f'No valid loader: {_loaders[0].errorString}'
+
+        else:
+            dataLoader = None
+            txt = f'No valid loader found for {path}; tried {[dl.dataFormat for dl in _loaders]}'
+
+        if dataLoader is None:
             getLogger().warning(txt)
             return (None, False, False)
+
+        # if (dataLoader :=  checkPathForDataLoader(path, pathFilter=pathFilter)) is None:
+        #     dataFormats = [dl.dataFormat for dl in _getPotentialDataLoaders(path)]
+        #     txt = f'Loading "{path}" unsuccessful; tried all of {dataFormats}, but failed'
+        #     getLogger().warning(txt)
+        #     return (None, False, False)
 
         createNewProject = dataLoader.createNewProject
         ignore = False

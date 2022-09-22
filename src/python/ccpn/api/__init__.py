@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-21 15:03:25 +0100 (Wed, September 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-22 17:43:35 +0100 (Thu, September 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -48,7 +48,6 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Integral import Integral
-from ccpn.core.PseudoDimension import PseudoDimension
 from ccpn.core.SpectrumHit import SpectrumHit
 from ccpn.core.Sample import Sample
 from ccpn.core.SampleComponent import SampleComponent
@@ -82,7 +81,6 @@ from ccpn.core.Collection import Collection
 from ccpn.ui._implementation.Window import Window
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpn.ui._implementation.Strip import Strip
-# from ccpn.ui._implementation.Axis import Axis
 from ccpn.ui._implementation.Mark import Mark
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.ui._implementation.MultipletListView import MultipletListView

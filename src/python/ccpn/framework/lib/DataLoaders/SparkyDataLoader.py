@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-21 15:03:27 +0100 (Wed, September 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-22 17:43:36 +0100 (Thu, September 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -41,25 +41,8 @@ class SparkyDataLoader(DataLoaderABC):
     canCreateNewProject = True
     alwaysCreateNewProject = False
 
-    # def __init__(self, path):
-    #     super(SparkyDataLoader, self).__init__(path)
-
-    # @classmethod
-    # def checkForValidFormat(cls, path):
-    #     """check if valid sparkyFormat
-    #     :return: None or instance of the class
-    #     """
-    #     if (_path := cls.checkPath(path)) is None:
-    #         return None
-    #
-    #     #TODO: implement additional checks?
-    #
-    #     instance = cls(path)
-    #     return instance
-    #     # return None
-
     def load(self):
-        """The actual Nef loading method; subclassed to account for special
+        """The actual sparky loading method; subclassed to account for special
         circumstances
         raises RunTimeError on error
         :return: a list of [project]

@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-21 15:03:26 +0100 (Wed, September 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-22 17:43:35 +0100 (Thu, September 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -67,34 +67,5 @@ class CcpNmrV2ProjectDataLoader(DataLoaderABC):
         self.isValid = True
         self.errorString =  ''
         return True
-
-    # @classmethod
-    # def checkForValidFormat(cls, path):
-    #     """check if valid format corresponding to dataFormat
-    #     :return: None or instance of the class
-    #     """
-    #     if (instance := super().checkForValidFormat(path)) is None:
-    #         return None
-    #     if not instance.checkValid():
-    #         # instance.isValid = False
-    #         # instance.errorString = f'Invalid path "{instance.path}"; required sub-directory "{CCPN_API_DIRECTORY}" not found'
-    #         return None
-    #
-    #     instance.isValid = True
-    #     instance.errorString = ''
-    #     return instance
-
-        # if (_path := cls.checkPath(path)) is None:
-        #     return None
-        # if not _path.is_dir():
-        #     return None
-        # # assume that all is good if we find the CCPN_API_DIRECTORY
-        # _apiPath = _path / MEMOPS / IMPLEMENTATION
-        # if _apiPath.exists():
-        #     # it is a directory that has memops/implementation subdirectory,
-        #     # so we must assume it to be a V2 project directory.
-        #     instance = cls(path)
-        #     return instance
-        # return None
 
 CcpNmrV2ProjectDataLoader._registerFormat()

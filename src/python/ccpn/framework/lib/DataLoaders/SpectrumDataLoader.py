@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-21 15:03:27 +0100 (Wed, September 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-22 17:43:36 +0100 (Thu, September 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -72,7 +72,7 @@ class SpectrumDataLoaderABC(DataLoaderABC):
     def checkValid(self) -> bool:
         """check if path defines one of the valid spectrum data formats
         :param path: path to (binary) spectrum file; may contain redirections (e.g $DATA)
-        Calls _checkPath and _checkSuffix
+        Calls super-class which does_checkPath and _checkSuffix
         sets self.isValid and self.errorString
         :returns True if ok or False otherwise
         """
@@ -80,31 +80,10 @@ class SpectrumDataLoaderABC(DataLoaderABC):
             return False
         if (dataSource := self.spectumDataSourceClass.checkForValidFormat(self.path)) is None:
             self.isValid = False
-            self.errorString = f'Failed to get a SpectrumDataSource for "{self.path}"'
+            self.errorString = f'Failed to initiate a {self.spectumDataSourceClass.__name__} instance for "{self.path}"'
             return False
         self.dataSource = dataSource
         return True
-
-    # @classmethod
-    # def checkForValidFormat(cls, path):
-    #     """check if path defines one of the valid spectrum data formats
-    #     :path: path to (binary) spectrum file; may contain redirections (e.g $DATA)
-    #     :return: None or instance of the class
-    #     """
-    #     dataStore = DataStore.newFromPath(path)
-    #     if not dataStore.exists():
-    #         return None
-    #
-    #     if not cls.checkSuffix(path):
-    #         return None
-    #
-    #     if (dataSource := cls.spectumDataSourceClass.checkForValidFormat(dataStore.aPath())) is None:
-    #         return None
-    #
-    #     instance = cls(dataStore.aPath())
-    #     instance.dataSource = dataSource
-    #     instance.dataStore = dataStore
-    #     return instance
 
     @classmethod
     def _documentClass(cls) -> str:

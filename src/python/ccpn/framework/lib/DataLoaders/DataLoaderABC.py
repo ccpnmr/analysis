@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-21 15:03:26 +0100 (Wed, September 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-22 17:43:35 +0100 (Thu, September 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -134,16 +134,35 @@ def _getPotentialDataLoaders(path) -> list:
         loaders = _suffixDict.get(path.suffix,
                                   _suffixDict.get(ANY_SUFFIX, []))
 
-    # # filter for loaders that do not allow a directory
-    # if path.is_dir():
-    #     # we have a directory
-    #     loaders = [dl for dl in loaders if (dl.allowDirectory or dl.requireDirectory)]
-    # else:
-    #     # we have a file; i.e. all the loaders that not requireDirectory
-    #     loaders = [dl for dl in loaders if (not dl.requireDirectory)]
-
     return loaders
 
+def _checkPathForDataLoader(path, pathFilter=None) -> list:
+    """Check path if it corresponds to any defined data format.
+    Optionally exclude any dataLoader with types not in pathFilter (default: all dataFormats)
+
+    :param pathFilter: a tuple/list of dataFormat strings; expands to all dataFormat's if None
+    :return a list of DataLoader instance(s) (either valid or invalid); last one is potential valid one
+
+    CCPNINTERNAL: used in Gui._getDataLoader
+    """
+    if not isinstance(path, (str, Path)):
+        raise ValueError('checkPathForDataLoader: invalid path %r' % path)
+
+    if pathFilter is None:
+        pathFilter = list(getDataLoaders().keys())
+
+    _loaders = _getPotentialDataLoaders(path)
+    result = []
+    for cls in _loaders:
+        instance = cls.newFromPath(path)
+        result.append(instance)
+        if instance.isValid:
+            if instance.dataFormat in pathFilter:
+                break
+            else:
+                instance.isValid = False
+                instance.errorString = f'DataFormat "{instance.dataFormat}" for valid path "{instance.path}" not in filter'
+    return result
 
 def checkPathForDataLoader(path, pathFilter=None):
     """Check path if it corresponds to any defined data format.
@@ -152,31 +171,45 @@ def checkPathForDataLoader(path, pathFilter=None):
     :param pathFilter: a tuple/list of dataFormat strings; expands to all dataFormat if None
     :return a DataLoader instance or None if there was no match
     """
-    if not isinstance(path, (str, Path)):
-        raise ValueError('checkPathForDataLoader: invalid path %r' % path)
+    _loaders = _checkPathForDataLoader(path=path, pathFilter=pathFilter)
+    if len(_loaders) > 0 and _loaders[-1].isValid:
+        # found a valid one; return that
+        return _loaders[-1]
 
-    _path = aPath(path)
-    if not _path.exists():
-        raise ValueError('checkPathForDataLoader: path %r does not exist' % path)
+    # log errors
+    if len(_loaders) == 0:
+        getLogger().debug2(f'No valid loader found for {path}')
 
-    if pathFilter is None:
-        pathFilter = list(getDataLoaders().keys())
+    elif len(_loaders) == 1 and not _loaders[0].isValid:
+        getLogger().debug2(f'{_loaders[0].errorString}')
 
-    _loaders = _getPotentialDataLoaders(path)
-    for cls in _loaders:
+    else:
+        txt = 'tried:\n' + '\n'.join(dl.errorString for dl in _loaders)
+        getLogger().debug2(txt)
 
-        # create an instance and check
-        instance = cls.newFromPath(path)
-        if instance.checkValid():
-            # we found a valid format for path
-            if cls.dataFormat in pathFilter:
-                getLogger().debug2('%-20s %-20s: %s' % (cls.dataFormat, '(Valid, in filter)', path))
-                return instance
-            else:
-                getLogger().debug2('%-20s %-20s: %s' % (cls.dataFormat, '(Valid, not in filter)', path))
-
-    getLogger().debug2(f'No valid loader found for {path}')
     return None
+
+    # if not isinstance(path, (str, Path)):
+    #     raise ValueError('checkPathForDataLoader: invalid path %r' % path)
+    #
+    # if pathFilter is None:
+    #     pathFilter = list(getDataLoaders().keys())
+    #
+    # _loaders = _getPotentialDataLoaders(path)
+    # for cls in _loaders:
+    #
+    #     # create an instance and check
+    #     instance = cls.newFromPath(path)
+    #     if instance.checkValid():
+    #         # we found a valid format for path
+    #         if instance.dataFormat in pathFilter:
+    #             getLogger().debug2('%-20s %-20s: %s' % (instance.dataFormat, '(Valid, in filter)', path))
+    #             return instance
+    #         else:
+    #             getLogger().debug2('%-20s %-20s: %s' % (instance.dataFormat, '(Valid, not in filter)', path))
+    #
+    # getLogger().debug2(f'No valid loader found for {path}')
+    # return None
 
 #--------------------------------------------------------------------------------------------
 # DataLoader class
@@ -239,8 +272,6 @@ class DataLoaderABC(TraitBase):
     def __init__(self, path):
         super().__init__()
         self.path = aPath(path)
-        # if not self.path.exists():
-        #     raise ValueError('Invalid path "%s"' % path)
 
         # get default setting for project creation
         self.createNewProject = self.alwaysCreateNewProject or self.canCreateNewProject
@@ -249,6 +280,8 @@ class DataLoaderABC(TraitBase):
         # local import to avoid cycles
         from ccpn.framework.Application import getApplication
         self.application = getApplication()
+
+        self.checkValid()
 
     @property
     def project(self):
@@ -269,29 +302,34 @@ class DataLoaderABC(TraitBase):
         """check if valid format corresponding to dataFormat
         :return: None or instance of the class
 
-        Can be subclassed
+        Can be subclassed;
+        GWV 20/09/2022: depricated; maintained for code backward compatibility
         """
         instance = cls(path)
-        if not instance.checkValid():
+        if not instance.isValid:
             # instance.isValid = False
             # instance.errorString = f'Invalid path "{instance.path}"; required sub-directory "{CCPN_API_DIRECTORY}" not found'
             return None
 
-        instance.isValid = True
-        instance.errorString = ''
         return instance
 
-        # instance = cls(path)
-        # if not instance._checkPath():
-        #     return None
-        # # assume that all is good
-        # return instance
-        #
-        # if (_path := cls.checkPath(path)) is None:
-        #     return None
-        # # assume that all is good
-        # instance = cls(path)
-        # return instance
+    def checkValid(self) -> bool:
+        """Check if self.path is valid.
+        Calls _checkPath and _checkSuffix
+        sets self.isValid and self.errorString
+        :returns True if ok or False otherwise
+
+        Can be subclassed
+        """
+        self.isValid = False
+        self.errorString = f'Validity of {self.path} has not been checked'
+
+        if not self._checkPath():
+            return False
+
+        self.isValid = True
+        self.errorString = ''
+        return True
 
     def load(self):
         """The actual file loading method;
@@ -310,59 +348,6 @@ class DataLoaderABC(TraitBase):
 
         return result
 
-    # @classmethod
-    # def checkSuffix(cls, path) -> bool:
-    #     """Check if suffix of path confirms to settings of class attribute suffixes.
-    #     :returns True or False
-    #     """
-    #     _path = aPath(path)
-    #     if len(_path.suffixes) == 0 and NO_SUFFIX in cls.suffixes:
-    #         return True
-    #     if len(_path.suffixes) > 0 and ANY_SUFFIX in cls.suffixes:
-    #         return True
-    #     if len(_path.suffixes) > 0 and _path.suffix in cls.suffixes:
-    #         return True
-    #     return False
-
-    # @classmethod
-    # def checkPath(cls, path):
-    #     """Check if path exists and confirms to settings of class attributes suffixes and allowDirectory
-    #     do not allow dot-file (e.g. .cshrc)
-    #     :returns Path instance of path, or None
-    #     """
-    #     _path = aPath(path)
-    #     if not _path.exists():
-    #         return None
-    #     if not cls.checkSuffix(path):
-    #         return None
-    #     if _path.basename == '':
-    #         return None
-    #     if _path.is_dir() and not cls.allowDirectory:
-    #         # path is a directory: cls does not allow
-    #         return None
-    #     if not _path.is_dir() and cls.requireDirectory:
-    #         # path is a file, but cls requires a directory
-    #         return None
-    #     return _path
-
-    def checkValid(self) -> bool:
-        """Check if self.path is valid.
-        Calls _checkPath and _checkSuffix
-        sets self.isValid and self.errorString
-        :returns True if ok or False otherwise
-        Can be subclassed
-        """
-        self.isValid = False
-        self.errorString = ''
-
-        if not self._checkSuffix():
-            return False
-        if not self._checkPath():
-            return False
-
-        self.isValid = True
-        return True
-
     def _checkSuffix(self) -> bool:
         """Check if suffix of self.path confirms to settings of class attribute suffixes.
         sets self.isValid and self.errorString
@@ -371,12 +356,15 @@ class DataLoaderABC(TraitBase):
         _path = self.path
         if len(_path.suffixes) == 0 and NO_SUFFIX in self.suffixes:
             self.isValid = True
+            self.errorString = ''
             return True
         if len(_path.suffixes) > 0 and ANY_SUFFIX in self.suffixes:
             self.isValid = True
+            self.errorString = ''
             return True
         if len(_path.suffixes) > 0 and _path.suffix in self.suffixes:
             self.isValid = True
+            self.errorString = ''
             return True
 
         self.isValid = False
@@ -390,23 +378,28 @@ class DataLoaderABC(TraitBase):
         """
         _path = self.path
         if not _path.exists():
-            self.errorString = f'Path "{_path}" does not exists'
             self.isValid = False
+            self.errorString = f'Path "{_path}" does not exists'
             return False
+
         if not self._checkSuffix():
             return False
+
         if _path.basename == '':
             self.errorString = f'Invalid path "{_path}"'
             self.isValid = False
             return False
+
         if _path.is_dir() and not self.allowDirectory:
             # path is a directory: cls does not allow
             self.errorString = f'Invalid path "{_path}"; directory not allowed'
             self.isValid = False
             return False
+
         if not _path.is_dir() and self.requireDirectory:
             # path is a file, but cls requires a directory
             self.errorString = f'Invalid path "{_path}"; directory required'
+            self.isValid = False
             return False
 
         self.errorString = ''

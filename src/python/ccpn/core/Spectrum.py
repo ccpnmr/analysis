@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-05 16:58:03 +0100 (Mon, September 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-22 17:43:35 +0100 (Thu, September 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -3572,17 +3572,18 @@ def _extractRegionToFile(spectrum, dimensions, position, dataStore, name=None) -
     for dim in dimensions[1:]:
         sliceTuples[dim - 1] = (1, spectrum.pointCounts[dim - 1])
 
-    with spectrum.dataSource.openExistingFile(spectrum.dataSource.path) as inputFile:
-        with dataSource.openNewFile(path=dataStore.aPath()) as output:
-            # loop over all requested slices
-            for position, aliased in inputFile._selectedPointsIterator(sliceTuples=sliceTuples,
-                                                                   excludeDimensions=[readSliceDim]):
-                data = inputFile.getSliceData(position=position, sliceDim=readSliceDim)
+    # with spectrum.dataSource.openExistingFile() as inputFile:
+    inputFile = spectrum.dataSource
+    with dataSource.openNewFile(path=dataStore.aPath()) as output:
+        # loop over all requested slices
+        for position, aliased in inputFile._selectedPointsIterator(sliceTuples=sliceTuples,
+                                                               excludeDimensions=[readSliceDim]):
+            data = inputFile.getSliceData(position=position, sliceDim=readSliceDim)
 
-                # map the input position to the output position and write the data
-                outPosition = [position[inverseIndexMap[p]] for p in output.dimensionIndices]
-                # print('>>>', position, outPosition)
-                output.setSliceData(data=data, position=outPosition, sliceDim=writeSliceDim)
+            # map the input position to the output position and write the data
+            outPosition = [position[inverseIndexMap[p]] for p in output.dimensionIndices]
+            # print('>>>', position, outPosition)
+            output.setSliceData(data=data, position=outPosition, sliceDim=writeSliceDim)
 
     # create the new Spectrum instance from the dataSource
     newSpectrum = _newSpectrumFromDataSource(project=spectrum.project,

@@ -222,9 +222,9 @@ class GuiBase(object):
                                                                                    # ('icon', 'icons/null')
                                                                                    ]),
             (),
-            # ("CSM (alpha)", self.showChemicalShiftMappingModule, [('shortcut', 'ma')]),
-            # ("RM (alpha)", self.showRelaxationModule, [('shortcut', 're')]),
-            # (),
+            ("Chemical Shift Mapping (alpha)", self.showChemicalShiftMappingModule, [('shortcut', 'ma')]),
+            ("Relaxation (alpha)", self.showRelaxationModule, [('shortcut', 're')]),
+            (),
             ("In Active Spectrum Display", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
                                             ("Show/Hide Spectrum Toolbar", self.toggleSpectrumToolbar, [('shortcut', 'sb')]),
                                             ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),

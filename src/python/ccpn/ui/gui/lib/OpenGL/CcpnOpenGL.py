@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-23 10:22:19 +0100 (Fri, September 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-23 10:45:22 +0100 (Fri, September 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -179,9 +179,6 @@ class CcpnGLWidget(QOpenGLWidget):
         self.glReady = False
 
         super().__init__(strip)
-        # trying to get VAOs to work on MacOS - might just give up :|
-        # GLUT.glutInitContextVersion(3, 0)
-        # GLUT.glutInitContextProfile(GLUT.GLUT_CORE_PROFILE)
 
         # GST add antiAliasing, no perceptible speed impact on my mac (intel iris graphics!)
         # samples = 4 is good enough but 8 also works well in terms of speed...

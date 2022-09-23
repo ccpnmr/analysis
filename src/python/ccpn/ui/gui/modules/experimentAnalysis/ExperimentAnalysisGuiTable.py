@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-25 16:21:44 +0100 (Thu, August 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-23 20:22:18 +0100 (Fri, September 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,42 +36,65 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Column import ColumnClass, Column
 import ccpn.ui.gui.widgets.GuiTable as gt
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
+from ccpn.ui.gui.widgets.table.Table import Table
 
 
-class _ExperimentalAnalysisTableABC(gt.GuiTable):
-    """
-    Table containing fitting results.
-    Wrapper GuiTable built from the backend outputDataTable.
-    See SeriesTablesBC for more information about the underlined dataframe.
+
+class _ExperimentalAnalysisTableABC(Table):
     """
 
-    className = guiNameSpaces.TablePanel
+    """
+    className = '_TableWidget'
     defaultHidden = []
     _internalColumns = []
     _hiddenColumns = []
+    _defaultEditable = False
+    _enableDelete = False
+    _OBJECT = sv.COLLECTIONPID
 
-    def __init__(self, parent, guiModule,  **kwds):
-        self.mainWindow = guiModule.mainWindow
-        self.dataFrameObject = None
-        super().__init__(parent=parent, mainWindow=self.mainWindow, dataFrameObject=None,  # class collating table and objects and headings,
-                        setLayout=True, autoResize=True, multiSelect=True,
-                        enableMouseMoveEvent=False,
-                        selectionCallback=self.selection,
-                        actionCallback=self.action,
-                        checkBoxCallback=self.actionCheckBox,  grid=(0, 0))
+    def __init__(self, parent, mainWindow=None, guiModule=None, **kwds):
+        """Initialise the widgets for the module.
+        """
+        # Derive application, project, and current from mainWindow
+        self.mainWindow = mainWindow
+
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+        else:
+            self.application = None
+            self.project = None
+            self.current = None
+
+        kwds['setLayout'] = True
+
+        # initialise the currently attached dataFrame
+
+        self._hiddenColumns = [sv._ROW_UID, sv.COLLECTIONID, sv.PEAKPID, sv.NMRCHAINNAME,
+                               sv.NMRRESIDUETYPE, sv.NMRATOMNAMES, sv.SERIESUNIT,
+                               sv.SERIESSTEP, sv.SERIESSTEPVALUE, sv.MINIMISER_METHOD, sv.MINIMISER_MODEL, sv.CHISQR,
+                               sv.REDCHI, sv.AIC, sv.BIC,
+                               sv.MODEL_NAME, sv.NMRRESIDUECODETYPE]
+        errCols = [tt for tt in self.columnTexts if sv._ERR in tt]
+        self._hiddenColumns += errCols
+
+        # initialise the table
+        super().__init__(parent=parent, **kwds)
+
         self.guiModule = guiModule
-        self.current = self.guiModule.current
-        self._columns = None
-        self._hiddenColumns = []
-        self._dataFrame = None
-        self._dataFrameObject = None
-        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
-        self._selectOverride = True # otherwise very odd behaviour
-        self.setMinimumWidth(200)
+        self.moduleParent = guiModule
+
+        # Initialise the notifier for processing dropped items
+        self._postInitTableCommonWidgets()
+
         self._navigateToPeakOnSelection = True
         self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
                                                  callback=self._currentCollectionCallback, onceOnly=True)
+
+    # =========================================================================================
+    # dataFrame
+    # =========================================================================================
 
     @property
     def dataFrame(self):
@@ -84,14 +107,51 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
 
     def build(self, dataFrame):
         if dataFrame is not None:
-            self.setData(dataFrame)
+            self.updateDf(df=dataFrame)
+
+            _hiddenColumns = [sv._ROW_UID, sv.COLLECTIONID, sv.PEAKPID, sv.NMRCHAINNAME,
+                                   sv.NMRRESIDUETYPE, sv.NMRATOMNAMES, sv.SERIESUNIT,
+                                   sv.SERIESSTEP, sv.SERIESSTEPVALUE, sv.MINIMISER_METHOD, sv.MINIMISER_MODEL,
+                                   sv.CHISQR,
+                                   sv.REDCHI, sv.AIC, sv.BIC,
+                                   sv.MODEL_NAME, sv.NMRRESIDUECODETYPE]
+            errCols = [tt for tt in self.columnTexts if sv._ERR in tt]
+            _hiddenColumns += errCols
+            self.setHiddenColumns(texts=_hiddenColumns)
+
+    #=========================================================================================
+    # Selection/action callbacks
+    #=========================================================================================
+
+    def selectionCallback(self, selected, deselected, selection, lastItem):
+        from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import _navigateToPeak, \
+            getPeaksFromCollection
+        collections = self.getSelectedCollections()
+        if len(collections) == 0:
+            return
+        peaks = getPeaksFromCollection(collections[-1])
+        self.current.collections = collections
+        self.current.peaks = peaks
+        if len(peaks) == 0:
+            return
+        if self._navigateToPeakOnSelection:
+            _navigateToPeak(self.guiModule, self.current.peaks[-1])
+
+    def actionCallback(self, selection, lastItem):
+        from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import _navigateToPeak
+        _navigateToPeak(self.guiModule, self.current.peaks[-1])
+
+    #=========================================================================================
+    # Handle drop events
+    #=========================================================================================
 
     def _processDroppedItems(self, data):
         """
         CallBack for Drop events
         """
         pids = data.get('pids', [])
-        print('Not implemented')
+        # self._handleDroppedItems(pids, KlassTable, self.moduleParent._modulePulldown)
+        print('Dropped pids', pids)
 
     def _close(self):
         """
@@ -99,96 +159,17 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
         """
         pass
 
-    def mousePressEvent(self, event):
-        self._currentIndex = self.indexAt(event.pos())
-        if  self._currentIndex is None:
-            self.clearSelection()
-            return
-        else:
-            super().mousePressEvent(event)
 
-    def clearSelection(self):
-        super().clearSelection()
-        self.current.collections = []
+    #=========================================================================================
+    # Table context menu
+    #=========================================================================================
 
-    def _currentCollectionCallback(self, *args):
-        # select collection on table.
-        getLogger().warn('Selection on Current Collection not implemented yet')
-        # self.clearSelection()
+    # add edit/add parameters to meta-data table
 
-    def getSelectedObjects(self, fromSelection=None):
-        """
-        :param fromSelection:
-        :return: get a list of table objects. If the table has a header called pid, the object is a ccpn Core obj like Peak,
-         otherwise is a Pandas series object corresponding to the selected row(s).
-        """
-        from collections import defaultdict
-        model = self.selectionModel()
-        # selects all the items in the row
-        selection = fromSelection if fromSelection else model.selectedIndexes()
-        if selection:
-            selectedObjects = []
-            valuesDict = defaultdict(list)
-            for iSelect in selection:
-                row = iSelect.row()
-                col = iSelect.column()
-                if self.dataFrame is not None and len(self.dataFrame.columns)>col: #just in case
-                    h = self.dataFrame.columns[col]
-                    v = self.dataFrame.iloc[row, col]
-                    valuesDict[h].append(v)
-            if valuesDict:
-                selectedObjects = [row for i, row in pd.DataFrame(valuesDict).iterrows()]
-            return selectedObjects
-        else:
-            return []
-
-    def getSelectedCollections(self):
-        selectedObjs = self.getSelectedObjects()
-
-        collections = set()
-        for selectedRow in selectedObjs:
-            coPid = selectedRow[sv.COLLECTIONPID]
-            co = self.project.getByPid(coPid)
-            collections.add(co)
-        return list(collections)
-
-
-    def selection(self, data, *args):
-        """
-        :param args:
-        :return:
-        """
-        from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import _navigateToPeak, \
-            getPeaksFromCollection
-        collections = self.getSelectedCollections()
-        if len(collections)== 0:
-            return
-        peaks = getPeaksFromCollection(collections[-1])
-        self.current.collections = collections
-        self.current.peaks = peaks
-        if len(peaks)== 0:
-            return
-        if self._navigateToPeakOnSelection:
-            _navigateToPeak(self.guiModule, self.current.peaks[-1])
-
-    def action(self, *args):
-        from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import _navigateToPeak
-        _navigateToPeak(self.guiModule, self.current.peaks[-1])
-
-    def actionCheckBox(self, data):
-        pass
-
-    def _setContextMenu(self):
-        """Subclass guiTable to add new items to context menu
-        """
-        super()._setContextMenu()
-
-        _actions = self.tableMenu.actions()
-        if _actions:
-            _topMenuItem = _actions[0]
-            self.tableMenu.insertSeparator(_topMenuItem)
-            editCollection = self.tableMenu.addAction('Edit Collection', self._editCollection)
-            self.tableMenu.moveActionAboveName(editCollection, 'Export Visible Table')
+    def addTableMenuOptions(self, menu):
+        super().addTableMenuOptions(menu)
+        editCollection = menu.addAction('Edit Collection', self._editCollection)
+        menu.moveActionAboveName(editCollection, 'Export Visible Table')
 
     def _editCollection(self):
         from ccpn.ui.gui.popups.CollectionPopup import CollectionPopup
@@ -199,6 +180,56 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
                 popup = CollectionPopup(self, mainWindow=self.mainWindow, obj=co, editMode=True)
                 popup.exec()
                 popup.raise_()
+
+
+    def getSelectedCollections(self):
+        selectedRowsDf = self.selectedRows()
+
+        collections = set()
+        for ix, selectedRow in selectedRowsDf.iterrows():
+            coPid = selectedRow[sv.COLLECTIONPID]
+            co = self.project.getByPid(coPid)
+            collections.add(co)
+        return list(collections)
+
+    def _currentCollectionCallback(self, *args):
+        # select collection on table.
+        collections = self.current.collections
+        pids = [co.pid for co in collections]
+        # select
+        self._highLightObjs(pids)
+
+    def _highLightObjs(self, selection, headerName=sv.COLLECTIONPID, scrollToSelection=True):
+        # skip if the table is empty
+        if self._df is None or self._df.empty:
+            return
+
+        with self._blockTableSignals('_highLightObjs'):
+            selectionModel = self.selectionModel()
+            model = self.model()
+            selectionModel.clearSelection()
+
+            if selection:
+                if len(selection) > 0:
+                    if isinstance(selection[0], pd.Series):
+                        # not sure how to handle this
+                        return
+                uniqObjs = set(selection)
+                columnTextIx = self.columnTexts.index(headerName)
+                for i in model._sortIndex:
+                    value = model.index(i, columnTextIx).data()
+                    for obj in uniqObjs:
+                        if value == obj:
+                            rowIndex = model.index(i, 0)
+                            selectionModel.select(rowIndex, selectionModel.Select | selectionModel.Rows)
+                            if scrollToSelection:
+                                self.scrollTo(rowIndex, self.EnsureVisible)
+
+    def clearSelection(self):
+        super().clearSelection()
+        self.current.collections = []
+
+
 
 
 class TablePanel(GuiPanel):
@@ -213,10 +244,11 @@ class TablePanel(GuiPanel):
 
     def initWidgets(self):
         row = 0
-        Label(self, 'TablePanel', grid=(row, 0))
+        # Label(self, 'TablePanel', grid=(row, 0))
         self.mainTable = self.TABLE(self,
-                                     mainWindow=self.mainWindow,
-                                     guiModule = self.guiModule, grid=(0, 0))
+                                    mainWindow=self.mainWindow,
+                                    guiModule = self.guiModule,
+                                    grid=(0, 0), gridSpan=(1, 2))
 
     
     def setInputData(self, dataFrame):

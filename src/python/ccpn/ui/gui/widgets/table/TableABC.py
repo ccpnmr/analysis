@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-20 18:54:08 +0100 (Tue, September 20, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-09-23 20:22:18 +0100 (Fri, September 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -525,6 +525,15 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         """
         # MUST BE SUBCLASSED
         raise NotImplementedError(f'Code error: {self.__class__.__name__}.actionCallback not implemented')
+
+    def selectedRows(self):
+        """
+        :return: a DataFrame with selected rows
+        """
+        sRows = OrderedSet([idx.data(INDEX_ROLE)[0] for idx in self.selectedIndexes()])
+        df = self._df
+        sel = df.iloc[list(sRows)]
+        return sel
 
     #=========================================================================================
     # keyboard and mouse handling - modified to allow double-click to keep current selection

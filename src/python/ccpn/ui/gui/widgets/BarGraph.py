@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-18 18:08:36 +0100 (Thu, August 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-23 16:12:48 +0100 (Fri, September 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -284,7 +284,7 @@ class BarGraph(pg.BarGraphItem):
             if brushes and not self.useGradient:
                 try:
                     p.setBrush(fn.mkBrush(brushes[i]))
-                    self.barColoursDict[x] = brushes[i]
+                    self.barColoursDict[x - width/2] = brushes[i]
                 except:
                     getLogger().warn(f'BarGraph error. Cannot find a brush for at position {i}')
 
@@ -292,7 +292,7 @@ class BarGraph(pg.BarGraphItem):
                 x = x0
             else:
                 x = x0[i]
-            self.barColoursDict[x] = brush
+            self.barColoursDict[x - width/2] = brush
             if np.isscalar(y0):
                 y = y0
             else:
@@ -309,7 +309,7 @@ class BarGraph(pg.BarGraphItem):
                     for heightGroup, brush in zip(heightGroups, brushes):
                         if h in heightGroup:
                             p.setBrush(fn.mkBrush(brush))
-                            self.barColoursDict[x]=brush
+                            self.barColoursDict[x - width/2]=brush
                             break
 
             rect = QtCore.QRectF(x, y, w, h)

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-23 10:22:19 +0100 (Fri, September 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,18 +26,15 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
-import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal
 from ccpn.util.Logging import getLogger
 import numpy as np
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_REBUILD, GLRENDERMODE_DRAW, GLVertexArray
 from ccpn.core.Integral import Integral
+from ccpn.ui.gui.lib.OpenGL import GL
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLREGIONTYPE, GLLINETYPE
-
-from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT
-
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_REBUILD, GLRENDERMODE_DRAW, GLVertexArray
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_REGIONSHADE, CCPNGLWIDGET_INTEGRALSHADE
 
 
@@ -56,6 +53,7 @@ REGION_COLOURS = {
 
 class GLRegion(QtWidgets.QWidget):
     valuesChanged = pyqtSignal(list)
+
     # editingFinished = pyqtSignal(list)
 
     def __init__(self, parent, glList, values=(0, 0), axisCode=None, orientation='h',
@@ -281,6 +279,7 @@ class GLRegion(QtWidgets.QWidget):
 
 class GLInfiniteLine(GLRegion):
     valuesChanged = pyqtSignal(float)
+
     # editingFinished = pyqtSignal(float)
 
     def __init__(self, parent, glList, values=(0, 0), axisCode=None, orientation='h',

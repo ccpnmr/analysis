@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-07 15:59:36 +0100 (Tue, June 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-23 10:22:19 +0100 (Fri, September 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,11 +26,8 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
-import sys
-from PyQt5 import QtWidgets
 import numpy as np
-
-from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT, VBO
+from ccpn.ui.gui.lib.OpenGL import GL
 
 
 GLRENDERMODE_IGNORE = 0

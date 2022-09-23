@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-20 18:59:23 +0100 (Tue, September 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-26 16:52:07 +0100 (Mon, September 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,18 +26,15 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
-import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal
 from ccpn.util.Logging import getLogger
 import numpy as np
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_REBUILD, GLRENDERMODE_DRAW, GLVertexArray
 from ccpn.core.Integral import Integral
+from ccpn.ui.gui.lib.OpenGL import GL
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLREGIONTYPE, GLLINETYPE
-
-from ccpn.ui.gui.lib.OpenGL import GL
-
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_REBUILD, GLRENDERMODE_DRAW, GLVertexArray
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_REGIONSHADE, CCPNGLWIDGET_INTEGRALSHADE
 
 

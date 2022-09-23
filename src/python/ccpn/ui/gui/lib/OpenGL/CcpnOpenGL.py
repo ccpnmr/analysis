@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-20 18:59:22 +0100 (Tue, September 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-26 16:52:06 +0100 (Mon, September 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -99,7 +99,8 @@ from ccpn.ui.gui.lib.mouseEvents import \
     middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK, \
     makeDragEvent
 
-from ccpn.ui.gui.lib.OpenGL import GL, VBO
+from ccpn.ui.gui.lib.OpenGL import GL
+import OpenGL.arrays.vbo as VBO
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString

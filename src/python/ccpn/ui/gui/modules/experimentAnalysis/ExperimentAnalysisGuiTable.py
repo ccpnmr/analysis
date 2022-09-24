@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-09-23 20:22:18 +0100 (Fri, September 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-24 20:20:31 +0100 (Sat, September 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -109,15 +109,7 @@ class _ExperimentalAnalysisTableABC(Table):
         if dataFrame is not None:
             self.updateDf(df=dataFrame)
 
-            _hiddenColumns = [sv._ROW_UID, sv.COLLECTIONID, sv.PEAKPID, sv.NMRCHAINNAME,
-                                   sv.NMRRESIDUETYPE, sv.NMRATOMNAMES, sv.SERIESUNIT,
-                                   sv.SERIESSTEP, sv.SERIESSTEPVALUE, sv.MINIMISER_METHOD, sv.MINIMISER_MODEL,
-                                   sv.CHISQR,
-                                   sv.REDCHI, sv.AIC, sv.BIC,
-                                   sv.MODEL_NAME, sv.NMRRESIDUECODETYPE]
-            errCols = [tt for tt in self.columnTexts if sv._ERR in tt]
-            _hiddenColumns += errCols
-            self.setHiddenColumns(texts=_hiddenColumns)
+            self.setHiddenColumns(texts=self._hiddenColumns)
 
     #=========================================================================================
     # Selection/action callbacks

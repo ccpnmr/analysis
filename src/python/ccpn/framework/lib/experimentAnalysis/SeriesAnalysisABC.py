@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-25 10:13:01 +0100 (Thu, August 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-24 20:20:31 +0100 (Sat, September 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,15 +30,10 @@ import numpy as np
 from scipy import stats
 import pandas as pd
 from abc import ABC
-from collections import defaultdict
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Logging import getLogger
-from ccpn.core.Peak import Peak
-from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
-from ccpn.core.NmrResidue import NmrResidue
-from ccpn.core.NmrAtom import NmrAtom
-from ccpn.core.Collection import Collection
+from ccpn.core.DataTable import DataTable
 from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.CcpNmrTraits import Any, List, Bool, Odict, CString, Set
 from ccpn.framework.Application import getApplication, getCurrent, getProject
@@ -130,18 +125,17 @@ class SeriesAnalysisABC(ABC):
         else:
             getLogger().warning(f'Impossible to set untraceableValue to {value}. Use type int or float.')
 
-    def fitInputData(self):
+    def fitInputData(self) -> DataTable:
         """
         Perform calculation using the currentFittingModel and currentCalculationModel to the inputDataTables
         and save outputs to a single newDataTable.
         Resulting dataTables are available in the outputDataTables.
-        :return: None. Creates a new output dataTable in outputDataTables
+        :return: output dataTable . Creates a new output dataTable in outputDataTables
         """
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
 
         if len(self.inputDataTables) == 0:
-            getLogger().warning('Cannot run any fitting models. Add a valid inputData first')
-            return
+            raise RuntimeError('Cannot run any fitting models. Add a valid inputData first')
         inputFrame = self.inputDataTables[-1].data
         fittingFrame = self.currentFittingModel.fitSeries(inputFrame)
         fittingFrame.joinNmrResidueCodeType()
@@ -152,6 +146,7 @@ class SeriesAnalysisABC(ABC):
         merged = pd.merge(fittingFrame, cdf, on=[sv.COLLECTIONPID], how='left')
         outputDataTable = self._fetchOutputDataTable(name=self._outputDataTableName)
         outputDataTable.data = merged
+        return outputDataTable
 
     @property
     def currentFittingModel(self):
@@ -302,7 +297,6 @@ class SeriesAnalysisABC(ABC):
         for dataTable in self._inputDataTables:
             if not isinstance(dataTable.data.__class__ , InputSeriesFrameBC):
                 dataTable.data.__class__ = InputSeriesFrameBC
-
 
     @classmethod
     def exportToFile(cls, path, fileType, *args, **kwargs):

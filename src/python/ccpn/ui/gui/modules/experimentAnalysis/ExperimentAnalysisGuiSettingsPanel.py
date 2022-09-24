@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-09-23 16:12:48 +0100 (Fri, September 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-24 20:20:31 +0100 (Sat, September 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -327,11 +327,11 @@ class GuiInputDataPanel(GuiSettingPanel):
                 obj = self.guiModule.project.getByPid(pid)
                 if obj:
                     backend.addInputDataTable(obj)
-        backend.fitInputData()
+        outputDataTable = backend.fitInputData()
         outputPulldown = self.getWidget(guiNameSpaces.WidgetVarName_OutputDataTablesSelection)
         if outputPulldown:
             outputPulldown.update() #there seems to be a bug on pulldown not updating straight-away
-            outputPulldown.select(name)
+            outputPulldown.select(outputDataTable.pid)
         self.guiModule.updateAll()
 
     def _filterOutputDataOnPulldown(self, pids, *args):

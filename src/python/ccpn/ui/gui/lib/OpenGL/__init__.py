@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-26 16:55:11 +0100 (Mon, September 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-26 16:56:17 +0100 (Mon, September 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,8 @@ import os
 import sys
 from PyQt5 import QtWidgets
 from ctypes import util
-from ccpn.util.Common import isLinux, isUbuntu
+from ccpn.util.Common import isLinux, isUbuntuVersion
+
 
 _OpenGLLibraryPathOSX11 = '/System/Library/Frameworks/%s.framework/%s'
 util_find_library_bk = util.find_library
@@ -44,7 +45,8 @@ def util_find_library_OSX11Patch(name):
 
 try:
     try:
-        if isLinux() and isUbuntu():
+        if isLinux() and isUbuntuVersion('22.04'):
+            # fix needed for openGL to work on 22.04
             os.environ['PYOPENGL_PLATFORM'] = 'x11'
         from OpenGL import GL
         import OpenGL.arrays.vbo as VBO
@@ -56,8 +58,10 @@ try:
         from OpenGL import GL
         import OpenGL.arrays.vbo as VBO
 
-        #  restore the util find_library
+
+        # restore the util find_library
         util.find_library = util_find_library_bk
+
 except ImportError:
     app = QtWidgets.QApplication(sys.argv)
     QtWidgets.QMessageBox.critical(None, "Error importing OpenGL.",

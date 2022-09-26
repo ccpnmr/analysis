@@ -39,6 +39,7 @@ import random
 import re
 import sys
 import string
+import platform
 from collections.abc import Iterable
 from string import whitespace
 
@@ -185,6 +186,14 @@ def isWindowsOS():
 
 def isMacOS():
     return sys.platform[:6].lower() == 'darwin'
+
+
+def isLinux():
+    return sys.platform[:5].lower() == 'linux'
+
+
+def isUbuntu():
+    return 'ubuntu' in platform.version().lower()
 
 
 def parseSequenceCode(value):

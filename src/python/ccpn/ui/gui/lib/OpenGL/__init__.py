@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-26 16:52:07 +0100 (Mon, September 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-26 16:55:11 +0100 (Mon, September 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,22 +26,26 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.util.Logging import getLogger
-from PyQt5 import QtWidgets
+import os
 import sys
+from PyQt5 import QtWidgets
 from ctypes import util
+from ccpn.util.Common import isLinux, isUbuntu
 
 _OpenGLLibraryPathOSX11 = '/System/Library/Frameworks/%s.framework/%s'
 util_find_library_bk = util.find_library
+
 
 def util_find_library_OSX11Patch(name):
     res = util_find_library_bk(name)
     if res: return res
     return _OpenGLLibraryPathOSX11 % (name, name)
 
+
 try:
-    import OpenGL as ogl
     try:
+        if isLinux() and isUbuntu():
+            os.environ['PYOPENGL_PLATFORM'] = 'x11'
         from OpenGL import GL
         import OpenGL.arrays.vbo as VBO
     except ImportError:
@@ -51,6 +55,7 @@ try:
         # now do the imports
         from OpenGL import GL
         import OpenGL.arrays.vbo as VBO
+
         #  restore the util find_library
         util.find_library = util_find_library_bk
 except ImportError:

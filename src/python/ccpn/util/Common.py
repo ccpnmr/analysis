@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-20 09:20:27 +0100 (Tue, September 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-26 16:55:11 +0100 (Mon, September 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ import random
 import re
 import sys
 import string
+import platform
 from collections.abc import Iterable
 from string import whitespace
 
@@ -187,6 +188,14 @@ def isWindowsOS():
 
 def isMacOS():
     return sys.platform[:6].lower() == 'darwin'
+
+
+def isLinux():
+    return sys.platform[:5].lower() == 'linux'
+
+
+def isUbuntu():
+    return 'ubuntu' in platform.version().lower()
 
 
 def parseSequenceCode(value):

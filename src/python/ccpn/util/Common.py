@@ -1,6 +1,5 @@
 """Miscellaneous common utilities
 """
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -10,7 +9,6 @@ from __future__ import unicode_literals
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
@@ -196,6 +194,22 @@ def isUbuntu():
     return 'ubuntu' in platform.version().lower()
 
 
+def isUbuntuVersion(value: str = ''):
+    from subprocess import Popen, PIPE
+
+    HOSTNAMECTL = 'hostnamectl'
+    OPERATING_SYSTEM = 'Operating System'
+
+    if isUbuntu() and (osQuery := Popen(HOSTNAMECTL, stdout=PIPE, stderr=PIPE)):
+        osStatus, _osError = osQuery.communicate()
+        if osQuery.poll() == 0:
+            for line in osStatus.decode("utf-8").split('\n'):
+                if OPERATING_SYSTEM in line and value in line:
+                    return True
+
+    return False
+
+
 def parseSequenceCode(value):
     """split sequence code into (seqCode,seqInsertCode, offset) tuple
     """
@@ -233,10 +247,12 @@ def splitIntFromChars(value):
 
     return number, chars
 
+
 def groupIntoChunks(aList, chunkSize, reverse=True):
     """Yield successive n-sized chunks from list."""
     for i in range(0, len(aList), chunkSize):
         yield sorted(aList[i:i + chunkSize], key=float, reverse=reverse)
+
 
 def dictionaryProduct(dict1, dict2):
     """multiply input {a:x}, {b:y} to result {(a,b):x*y} dictionary
@@ -346,11 +362,14 @@ def reorder(values, axisCodes, refAxisCodes):
     #
     return result
 
+
 def _getShortUniqueID():
     import uuid
+
     _id = uuid.uuid4()
     shortID = str(_id).split('-')[-1]
     return str(shortID)
+
 
 def stringifier(*fields, **options):
     """Get stringifier function, that will format an object x according to
@@ -398,6 +417,7 @@ def contains_whitespace(s):
 def contains_whitespace_nospace(s):
     return True in [c in s for c in string.whitespace if c != ' ']
 
+
 def sortByPriorityList(values, priority, initialSort=True, initialSortReverse=False):
     """
     Sorts an iterable according to a list of priority items.
@@ -408,9 +428,12 @@ def sortByPriorityList(values, priority, initialSort=True, initialSortReverse=Fa
     if initialSort:
         values.sort(reverse=initialSortReverse)
     priority_dict = {k: i for i, k in enumerate(priority)}
+
     def priority_getter(value):
         return priority_dict.get(value, len(values))
+
     return sorted(values, key=priority_getter)
+
 
 def makeIterableList(inList=None):
     """
@@ -489,7 +512,8 @@ def splitDataFrameWithinRange(dataframe, column1, column2, minX, maxX, minY, max
               outers (rest) not included in inners
     """
 
-    bools = dataframe[column1].between(minX, maxX, inclusive=True) & dataframe[column2].between(minY, maxY, inclusive=True)
+    bools = dataframe[column1].between(minX, maxX, inclusive=True) & dataframe[column2].between(minY, maxY,
+                                                                                                inclusive=True)
     inners = dataframe[bools]
     outers = dataframe[-bools]
     filteredInners = inners.filter(items=[column1, column2])
@@ -557,6 +581,7 @@ def _naturalKeyObjs(obj, theProperty='name'):
 def naturalSortList(ll, reverse=True):
     """
     :param ll: a list of strings
+    :param reverse: reverse the sort-order
     :return: a sorted list by natural sort
     """
     convert = lambda text: int(text) if text.isdigit() else text.lower()

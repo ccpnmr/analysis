@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-27 15:45:03 +0100 (Tue, September 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-27 16:27:48 +0100 (Tue, September 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1391,7 +1391,7 @@ class CcpnNefWriter:
         category = 'nef_nmr_spectrum'
         result = self._newNefSaveFrame(obj, category, name, includeLoops=False)  # NOTE:ED - was peakList
 
-        path = spectrum.filePath
+        path = spectrum.path   # .filePath gives the path containing $DATA, etc.
         if path:
             result['ccpn_spectrum_file_path'] = path
 

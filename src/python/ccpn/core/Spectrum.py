@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-22 17:43:35 +0100 (Thu, September 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-27 16:28:58 +0100 (Tue, September 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -3421,14 +3421,14 @@ def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], dimensionCo
     dataSource = EmptySpectrumDataSource()
     if dataSource is None:
         raise RuntimeError('Error creating empty DataSource')
-    # Fill in some of the parameters
+    # Fill in required parameters
     if dimensionCount is None:
         dimensionCount = len(isotopeCodes)
     dataSource.dimensionCount = dimensionCount
     dataSource.isotopeCodes = isotopeCodes
     dataSource._setSpectralParametersFromIsotopeCodes()
     dataSource._assureProperDimensionality()
-    dataSource.noiseLevel = 0.0
+    dataSource.noiseLevel = None
 
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
 

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-25 13:13:37 +0100 (Mon, July 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-28 15:37:44 +0100 (Wed, September 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,13 +29,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtWidgets, QtCore
-from functools import partial
+from functools import partial, reduce
 from types import SimpleNamespace
+from operator import or_
 import pandas as pd
 
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_PID, \
     CS_STATIC, CS_STATE, CS_ORPHAN, CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT, CS_ATOMNAME, \
     CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, \
@@ -784,28 +785,38 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         """
         selection = self.getSelectedObjects()
         data = self.getRightMouseItem()
+        _peaks = None
+
         if (data is not None and not data.empty) and selection:
-            if (matching := [ch for ch in selection if ch and ch.nmrAtom]):
+            if (matching := [cs for cs in selection if cs and cs.nmrAtom]):
 
                 # if there is a selection and the selection contains shift with nmrAtoms
                 with undoBlockWithoutSideBar():
-                    _peaks = list(pp for pp in self.project.peaks if pp.chemicalShiftList == self._table)
+                    with notificationEchoBlocking():
 
-                    for cs in matching:
-                        nmrAtom = cs.nmrAtom
-
+                        # get the set of peaks that need updating, and corresponding set of nmrAtoms
+                        _peaks = reduce(or_, [set(cs.assignedPeaks) for cs in matching])
+                        nmrAtoms = set(cs.nmrAtom for cs in matching)
                         for peak in _peaks:
                             peakDimNmrAtoms = list(list(pp) for pp in peak.dimensionNmrAtoms)
-                            for peakDim in peakDimNmrAtoms:
-                                if nmrAtom in peakDim:
-                                    peakDim.remove(nmrAtom)
 
-                            # update the peak assignments
-                            peak.dimensionNmrAtoms = peakDimNmrAtoms
+                            # remove the required nmrAtoms from each assignment dimension
+                            found = False
+                            for peakDim in peakDimNmrAtoms:
+                                pDims = set(peakDim)
+                                diff = pDims - nmrAtoms
+                                if diff != pDims:
+                                    peakDim[:] = list(diff)
+                                    found = True
+
+                            if found:
+                                # update the peak assignments
+                                peak.dimensionNmrAtoms = peakDimNmrAtoms
 
                         if delete:
                             # delete the chemicalShift
-                            cs.delete()
+                            for cs in matching:
+                                cs.delete()
 
 
 #=========================================================================================

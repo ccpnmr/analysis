@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-28 18:45:17 +0100 (Wed, September 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -339,7 +339,7 @@ class V3CoreObjectABC(NotifierBase):
             del dd[oldId]
         dd[self.id] = self
 
-    def _finaliseAction(self, action: str):
+    def _finaliseAction(self, action: str, **actionKwds):
         """Do v3 core object level finalisation, and execute all notifiers
         action is one of: 'create', 'delete', 'change', 'rename'
         """
@@ -368,7 +368,6 @@ class V3CoreObjectABC(NotifierBase):
         # NB 'AbstractWrapperObject' not currently in use (Sep 2016), but kept for future needs
         iterator = (project._context2Notifiers.setdefault((name, action), OrderedDict())
                     for name in (className, 'AbstractWrapperObject'))
-        # pendingNotifications = project._pendingNotifications
 
         if action == 'rename':
             try:
@@ -380,32 +379,19 @@ class V3CoreObjectABC(NotifierBase):
                 self._resetIds(oldPid.id)
                 self._project._collectionList._resetItemPids(oldPid, self.pid)
 
-            # # Call notifiers with special signature
-            # if project._notificationSuspension:
-            #     for dd in iterator:
-            #         for notifier, onceOnly in dd.items():
-            #             pendingNotifications.append((notifier, onceOnly, self, oldPid))
-            # else:
-
             for dd in iterator:
                 for notifier in tuple(dd):
-                    notifier(self, oldPid)
+                    notifier(self, oldPid, **actionKwds)
 
+            # for reference - as per AbstractWrapperObject
             # for obj in self._getDirectChildren():  # no children defined for anything yet - consider later
             #     obj._finaliseAction('rename')
 
         else:
-            # # Normal case - just call notifiers - as per AbstractWrapperObject
-            # if project._notificationSuspension and action != 'delete':
-            #     # NB Deletion notifiers must currently be executed immediately
-            #     for dd in iterator:
-            #         for notifier, onceOnly in dd.items():
-            #             pendingNotifications.append((notifier, onceOnly, self))
-            # else:
-
+            # Normal case - just call notifiers - as per AbstractWrapperObject
             for dd in iterator:
                 for notifier in tuple(dd):
-                    notifier(self)
+                    notifier(self, **actionKwds)
 
         # propagate the action to explicitly associated (generally child) instances
         for obj, action in self._finaliseChildren:

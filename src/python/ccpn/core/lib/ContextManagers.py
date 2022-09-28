@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-01 17:25:26 +0100 (Thu, September 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-28 18:45:17 +0100 (Wed, September 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1152,17 +1152,23 @@ class BlankedPartial(object):
         # kwds = self._kwds.update(kwds)
         if self._preExecution:
             # call the notification
-            self._obj._finaliseAction(self._trigger)
+            if isinstance(self._trigger, (list, tuple)):
+                self._obj._finaliseAction(self._trigger[0], **self._trigger[1])
+            else:
+                self._obj._finaliseAction(self._trigger)
 
         with notificationBlanking():
             self._func(*self._args, **self._kwds)
 
         if self._postExecution:
             # call the notification
-            self._obj._finaliseAction(self._trigger)
+            if isinstance(self._trigger, (list, tuple)):
+                self._obj._finaliseAction(self._trigger[0], **self._trigger[1])
+            else:
+                self._obj._finaliseAction(self._trigger)
 
 
-def ccpNmrV3CoreSetter(doNotify=True):
+def ccpNmrV3CoreSetter(doNotify=True, **actionKwds):
     """A decorator wrap the property setters method in an undo block and triggering the
     'change' notification if doNotify=True
     """
@@ -1172,7 +1178,7 @@ def ccpNmrV3CoreSetter(doNotify=True):
         func = args[0]
         args = args[1:]  # Optional 'self' is now args[0]
         self = args[0]  # this is the object
-        value = args[1]
+        # value = args[1]
 
         application = getApplication()  # pass it in to reduce overhead
 
@@ -1184,15 +1190,15 @@ def ccpNmrV3CoreSetter(doNotify=True):
                 try:
                     # call the wrapped function
                     result = func(*args, **kwds)
-                except Exception as es:
+                except Exception:
                     raise
 
                 finally:
-                    addUndoItem(undo=BlankedPartial(func, self, 'change', False, self, oldValue),
-                                redo=BlankedPartial(func, self, 'change', False, self, args[1]))
+                    addUndoItem(undo=BlankedPartial(func, self, ('change', actionKwds), False, self, oldValue),
+                                redo=BlankedPartial(func, self, ('change', actionKwds), False, self, args[1]))
 
         if doNotify:
-            self._finaliseAction('change')
+            self._finaliseAction('change', **actionKwds)
 
         return result
 

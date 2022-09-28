@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-01 18:15:12 +0100 (Thu, September 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-28 18:26:48 +0100 (Wed, September 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -157,6 +157,9 @@ def copyStripAxisPositionsAndWidths(fromStrip, toStrip):
 
 def matchAxesAndNmrAtoms(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom]):
     shiftDict = {}
+    if not strip.spectra:
+        return
+
     shiftList = strip.spectra[0].chemicalShiftList
     for axis in strip.orderedAxes:
 

@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-16 15:02:25 +0100 (Fri, September 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-29 21:46:26 +0100 (Thu, September 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ import numpy
 from ccpn.util.Path import aPath, Path
 from ccpn.util.Logging import getLogger
 
-from ccpn.util.traits.CcpNmrTraits import CInt, CString
+from ccpn.util.traits.CcpNmrTraits import CList, CInt, Int, CString, Bool
 
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 from ccpn.core.lib.SpectrumDataSources.lib.NmrPipeHeader import NmrPipeHeader
@@ -53,9 +53,11 @@ DATA_TYPE_COMPLEX = 1  # size/2 real and size/2 imag points
 DATA_TYPE_PN      = 2  # size/2 P and size/2 N points
 dataTypeMap = {DATA_TYPE_REAL:"real", DATA_TYPE_COMPLEX:"complex", DATA_TYPE_PN:"PN"}
 
+from ccpn.core.lib.SpectrumLib import DIMENSION_FREQUENCY, DIMENSION_TIME
 DOMAIN_TIME       = 0
 DOMAIN_FREQUENCY  = 1
-domainMap = {DOMAIN_TIME:"time", DOMAIN_FREQUENCY:"frequency"}
+# map NmrPipe defs on V3 defs
+domainMap = {DOMAIN_TIME:DIMENSION_TIME, DOMAIN_FREQUENCY:DIMENSION_FREQUENCY}
 
 # ordering definitions for the NUS types, to be stored in FDUSER6
 NUS_TYPE_NONUS    = 0
@@ -113,6 +115,14 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
     #=========================================================================================
 
+    template = CString(allow_none=True, default_value=None).tag(
+                                        info='The template to generate the path of the individual files comprising the nD',
+                                        isDimensional=False,
+                                        doCopy=True,
+                                        spectrumAttribute=None,
+                                        hasSetterInSpectrumClass=False
+                                       )
+
     nFiles = CInt(default_value=0).tag(
                                         info='The number of files comprising the nD',
                                         isDimensional=False,
@@ -128,15 +138,17 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                                         spectrumAttribute=None,
                                         hasSetterInSpectrumClass=False
                                        )
-
-    template = CString(allow_none=True, default_value=None).tag(
-                                        info='The template to generate the path of the individual files comprising the nD',
-                                        isDimensional=False,
-                                        doCopy=True,
-                                        spectrumAttribute=None,
-                                        hasSetterInSpectrumClass=False
-                                       )
-
+    isTransposed = Bool(default_value=False).tag(isDimensional=False,
+                                                 doCopy=False,
+                                                 spectrumAttribute=None,
+                                                 hasSetterInSpectrumClass=False
+                                                 )
+    dataTypes = CList(trait=Int(), default_value=[DATA_TYPE_REAL] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute=None,
+            hasSetterInSpectrumClass=False
+            )
 
     def __init__(self, path=None, spectrum=None, temporaryBuffer=True, bufferPath=None):
         """Initialise; optionally set path or extract from spectrum
@@ -155,12 +167,6 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         # NmrPipe files are always buffered
         self.setBuffering(True, temporaryBuffer, bufferPath)
 
-    def _readHeader(self):
-        "Create NmrPipeHeader instance and read the data"
-        if not self.hasOpenFile():
-            self.openFile(mode=self.defaultOpenReadMode)
-        self.header = NmrPipeHeader(self.headerSize, self.wordSize).read(self.fp, doSeek=True)
-
     def readParameters(self):
         """Read the parameters from the NmrPipe file header
         Returns self
@@ -170,35 +176,66 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         self.setDefaultParameters()
 
         try:
-            self._readHeader()
+            # Create NmrPipeHeader instance and read the data"
+            if not self.hasOpenFile():
+                self.openFile(mode=self.defaultOpenReadMode)
+            self.header = NmrPipeHeader(self.headerSize, self.wordSize).read(self.fp, doSeek=True)
+            self.isBigEndian = self.header.isBigEndian
 
-            # check the 'magic' bytes
-            magicBytes = tuple(self.header.bytes[8:12])
-            if magicBytes not in self.header._byteOrderFlags:
-                raise RuntimeError('NmrPipe file "%s" appears to be corrupted: does not contain the expected magic 4 bytes' %
-                                  self.path)
-            byteorder = self.header._byteOrderFlags[magicBytes]
-            if  byteorder != sys.byteorder:
-                self.header.swapBytes()
-                self.isBigEndian = (byteorder == 'big')
+            # First map the easy parameters from the NmrPipeHeader definitions to the DataSource definitions
+            for parName, pipeName in [
+                ('isTransposed', 'transposed'),
+                ('nFiles', 'nFiles'),
+                ('dimensionCount', 'dimensionCount'),
+                ('dimensionOrder', 'dimensionOrder'),
+                ('axisLabels', 'axisLabels'),
+                ('spectrometerFrequencies', 'spectrometerFrequencies'),
+                ('spectralWidthsHz', 'spectralWidthsHz'),
+                ('referencePoints', 'referencePoints'),
+                ('referenceValues', 'referenceValues'),
+                ('phases0', 'phases0'),
+                ('phases1', 'phases1'),
+            ]:
+                value = self.header.getParameterValue(pipeName)
+                setattr(self, parName, value)
 
-            for parName in self.header.parameterNames:
-                result = self.header.getParameterValue(parName)
-                setattr(self, parName, result)
+            # Now do the more complicated ones
 
-                # Fixes!
-                if parName == 'temperature' and self.temperature == 0.0:
-                    self.temperature = None
+            # map the domain types
+            _domain = self.header.getParameterValue('domain')
+            self.dimensionTypes = [domainMap.get(k, DIMENSION_FREQUENCY) for k in _domain ]
 
-                # Pipe and NUS dimensions??
-                map1 = {1:specLib.X_DIM, 2:specLib.Y_DIM, 3:specLib.Z_DIM, 4:specLib.A_DIM, 0:None}
-                if parName == "pipeDimension":
-                    self.pipeDimension = map1[self.pipeDimension]
-                if parName == "nusDimension":
-                    self.nusDimension = map1[self.nusDimension]
+            # map the quad types
+            _quadTypes = self.header.getParameterValue('quadType')
+            map2 = {0: DATA_TYPE_COMPLEX, 1:DATA_TYPE_REAL, 3:DATA_TYPE_PN}
+            self.dataTypes = [map2.get(v, DATA_TYPE_REAL) for v in _quadTypes]
+            self.isComplex = [v != DATA_TYPE_REAL for v in self.dataTypes]
+
+            _pointCounts = self.header.getParameterValue('pointCounts')
+            # correction for complex types required here
+            if (self.dataTypes[specLib.X_AXIS] != DATA_TYPE_REAL):
+                _pointCounts[specLib.X_AXIS] *= 2
+
+            if (self.dataTypes[specLib.X_AXIS] == DATA_TYPE_REAL and \
+                self.dimensionTypes[specLib.X_AXIS] == DIMENSION_FREQUENCY and \
+                self.dataTypes[specLib.Y_AXIS] != DATA_TYPE_REAL):
+                    _pointCounts[specLib.Y_AXIS] *= 2
+
+            self.pointCounts = _pointCounts
+
+            # temperature
+            if (_temp := self.header.getParameterValue('temperature')) == 0.0:
+                self.temperature = None
+            else:
+                self.temperature = _temp
+
+            # Pipe and NUS dimensions
+            map1 = {1:specLib.X_DIM, 2:specLib.Y_DIM, 3:specLib.Z_DIM, 4:specLib.A_DIM, 0:None}
+            self.pipeDimension = map1[self.header.getParameterValue('pipeDimension')]
+            self.nusDimension = map1[self.header.getParameterValue('nusDimension')]
 
             # Fix isAcquisition for transposed data
-            if self.dimensionCount >= 2 and self.header.isTransposed:
+            if self.dimensionCount >= 2 and self.isTransposed:
                 _isAcquisition = [False] * self.MAXDIM
                 _isAcquisition[1] = True
                 self.isAcquisition = _isAcquisition
@@ -218,7 +255,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         super().readParameters()
 
         # fix possible acquisition axis code
-        if self.transposed:
+        if self.isTransposed:
             self.acquisitionAxisCode = self.axisCodes[specLib.Y_DIM_INDEX]
 
         return self
@@ -388,7 +425,21 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                     fp.seek(offset, 0)
                     data = numpy.fromfile(file=fp, dtype=self.dtype, count=planeSize)
                     data.resize( (self.pointCounts[yAxis], self.pointCounts[xAxis]))
-                self.hdf5buffer.setPlaneData(data, position=position, xDim=xDim, yDim=yDim)
+
+                if self.isComplex[specLib.Y_AXIS]:
+                    # sort the n-RI data point into nRnI data points
+                    totalSize = self.pointCounts[specLib.Y_AXIS]
+                    realSize = int(totalSize / 2)
+                    data2 = numpy.empty(shape=data.shape)
+                    _realData = data[0::2,:]  # The real points
+                    _imagData = data[1::2,:]  # The imag points
+                    data2[0:realSize, :] = _realData
+                    data2[realSize:totalSize, :] = _imagData
+
+                    self.hdf5buffer.setPlaneData(data2, position=position, xDim=xDim, yDim=yDim)
+
+                else:
+                    self.hdf5buffer.setPlaneData(data, position=position, xDim=xDim, yDim=yDim)
         self._bufferFilled = True
 
 # Register this format

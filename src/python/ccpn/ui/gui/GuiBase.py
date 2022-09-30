@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-11 16:03:57 +0100 (Thu, August 11, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-09-30 15:27:26 +0100 (Fri, September 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -308,6 +308,15 @@ class GuiBase(object):
             ]
                    ))
 
+        if self._isInDebugMode:
+            ms.append(('Development', [
+                ("Set debug off", partial(self.setDebug, 0)),
+                ("Set debug level 1", partial(self.setDebug, 1)),
+                ("Set debug level 2", partial(self.setDebug, 2)),
+                ("Set debug level 3", partial(self.setDebug, 3)),
+                ]
+                       ))
+
         ms.append(('Help', [
             (TUTORIALSMENU, ([
                 ("None", None, [('checkable', True),
@@ -331,6 +340,7 @@ class GuiBase(object):
             ("About CcpNmr V3...", self._showAboutPopup),
             ]
                    ))
+
 
     def _setColourSchemeAndStyleSheet(self):
         """Set the colourScheme and stylesheet as determined by arguments --dark, --light or preferences

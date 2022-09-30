@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-19 20:46:18 +0100 (Mon, September 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-30 15:27:26 +0100 (Fri, September 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -179,14 +179,18 @@ class Framework(NotifierBase, GuiBase):
         # self.revision = Version.revision
 
         self.useFileLogger = not self.args.nologging
-        if self.args.debug3:
-            self._debugLevel = Logging.DEBUG3
-        elif self.args.debug2:
-            self._debugLevel = Logging.DEBUG2
-        elif self.args.debug:
-            self._debugLevel = Logging.DEBUG
-        else:
-            self._debugLevel = Logging.INFO
+
+        # map to 0-3, with 0 no debug
+        _level = ([self.args.debug, self.args.debug2, self.args.debug3, True].index(True) + 1) % 4
+        self.setDebug(_level)
+        # if self.args.debug3:
+        #     self._debugLevel = Logging.DEBUG3
+        # elif self.args.debug2:
+        #     self._debugLevel = Logging.DEBUG2
+        # elif self.args.debug:
+        #     self._debugLevel = Logging.DEBUG
+        # else:
+        #     self._debugLevel = Logging.INFO
 
         self.preferences = Preferences(application=self)
         if not self.args.skipUserPreferences:
@@ -265,17 +269,6 @@ class Framework(NotifierBase, GuiBase):
     def hasGui(self) -> bool:
         """:return True if application has a gui"""
         return isinstance(self.ui, Gui)
-
-    @property
-    def _isInDebugMode(self) -> bool:
-        """:return True if either of the debug flags has been set
-        CCPNINTERNAL: used throughout to check
-        """
-        if self._debugLevel == Logging.DEBUG1 or \
-                self._debugLevel == Logging.DEBUG2 or \
-                self._debugLevel == Logging.DEBUG3:
-            return True
-        return False
 
     #-----------------------------------------------------------------------------------------
     # Useful (?) directories as Path instances
@@ -543,16 +536,40 @@ class Framework(NotifierBase, GuiBase):
             self.ui.initialize(None)
 
     #-----------------------------------------------------------------------------------------
+    # Utilities
+    #-----------------------------------------------------------------------------------------
+
+    def setDebug(self, level:int):
+        """Set the debugging level
+        :param level: 0: off, 1-3: debug level 1-3
+        """
+        if level == 3:
+            self._debugLevel = Logging.DEBUG3
+        elif level == 2:
+            self._debugLevel = Logging.DEBUG2
+        elif level == 1:
+            self._debugLevel = Logging.DEBUG
+        elif level == 0:
+            self._debugLevel = Logging.INFO
+        else:
+            raise ValueError(f'Invalid debug level ({level}); should be 0-3')
+
+    @property
+    def _isInDebugMode(self) -> bool:
+        """:return True if either of the debug flags has been set
+        CCPNINTERNAL: used throughout to check
+        """
+        if self._debugLevel == Logging.DEBUG1 or \
+           self._debugLevel == Logging.DEBUG2 or \
+           self._debugLevel == Logging.DEBUG3:
+            return True
+        return False
 
     def _savePreferences(self):
         """Save the user preferences to file
         CCPNINTERNAL: used in PreferencesPopup and GuiMainWindow._close()
         """
         self.preferences._saveUserPreferences()
-
-    #-----------------------------------------------------------------------------------------
-
-    #-----------------------------------------------------------------------------------------
 
     def _setLanguage(self):
         # Language, check for command line override, or use preferences

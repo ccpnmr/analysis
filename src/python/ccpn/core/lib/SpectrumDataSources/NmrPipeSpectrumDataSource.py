@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-29 21:53:10 +0100 (Thu, September 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-30 14:40:52 +0100 (Fri, September 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -109,7 +109,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
     isFloatData = True
     MAXDIM = 4          # Explicitly overide as NmrPipe can only handle upto 4 dimensions
 
-    suffixes = ['.dat', '.fid', '.ft', '.ft1', '.ft2', '.ft3', '.ft4', '.pipe']
+    suffixes = ['.pipe', '.fid', '.ft', '.ft1', '.ft2', '.ft3', '.ft4', '.dat']
     openMethod = open
     defaultOpenReadMode = 'rb'
 
@@ -216,9 +216,9 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
             if (self.dataTypes[specLib.X_AXIS] != DATA_TYPE_REAL):
                 _pointCounts[specLib.X_AXIS] *= 2
 
-            if (self.dataTypes[specLib.X_AXIS] == DATA_TYPE_REAL and \
-                self.dimensionTypes[specLib.X_AXIS] == DIMENSION_FREQUENCY and \
-                self.dataTypes[specLib.Y_AXIS] != DATA_TYPE_REAL):
+            if not self.isComplex[specLib.X_AXIS] and \
+                   self.dimensionTypes[specLib.X_AXIS] == DIMENSION_FREQUENCY and \
+               self.isComplex[specLib.Y_AXIS]:
                     _pointCounts[specLib.Y_AXIS] *= 2
 
             self.pointCounts = _pointCounts
@@ -426,7 +426,8 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                     data = numpy.fromfile(file=fp, dtype=self.dtype, count=planeSize)
                     data.resize( (self.pointCounts[yAxis], self.pointCounts[xAxis]))
 
-                if self.isComplex[specLib.Y_AXIS]:
+                if self.isComplex[specLib.Y_AXIS] and \
+                   self.dimensionTypes[specLib.Y_AXIS] == DIMENSION_TIME:
                     # sort the n-RI data point into nRnI data points
                     totalSize = self.pointCounts[specLib.Y_AXIS]
                     realSize = int(totalSize / 2)

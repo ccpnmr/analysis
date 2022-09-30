@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-30 09:25:28 +0100 (Fri, September 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-30 14:39:51 +0100 (Fri, September 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -564,6 +564,8 @@ class Gui(Ui):
                 return False
 
         newPath = aPath(newPath).assureSuffix(CCPN_EXTENSION)
+        title = 'Project SaveAs'
+
         if (  not overwrite and
               newPath.exists() and
              (newPath.is_file() or (newPath.is_dir() and len(newPath.listdir()) > 0))
@@ -571,10 +573,15 @@ class Gui(Ui):
             # should not really need to check the second and third condition above, only
             # the Qt dialog stupidly insists a directory exists before you can select it
             # so if it exists but is empty then don't bother asking the question
-            title = 'Project SaveAs'
             msg = 'Path "%s" already exists; overwrite?' % newPath
             if not MessageDialog.showYesNo(title, msg):
                 return False
+
+        # check the project name derived from path
+        newName = newPath.basename
+        if (_name := self.project._checkName(newName, correctName=True)) != newName:
+            newPath = newPath.parent / _name + CCPN_EXTENSION
+            MessageDialog.showInfo(title, f'Project name changed to "{_name}"', parent=self)
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
             with logCommandManager('application.', 'saveProjectAs', newPath, overwrite=overwrite):

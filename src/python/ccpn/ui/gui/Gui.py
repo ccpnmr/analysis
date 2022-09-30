@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-30 09:22:43 +0100 (Fri, September 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-30 09:25:28 +0100 (Fri, September 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -598,6 +598,8 @@ class Gui(Ui):
 
             return True
 
+        # PyCharm thinks the next statement is unreachable; not true as the with catchExceptions does yield
+        # and finish
         return False
 
     @logCommand('application.')

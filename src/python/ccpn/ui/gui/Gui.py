@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-20 09:30:43 +0100 (Tue, September 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-09-30 09:22:43 +0100 (Fri, September 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -576,8 +576,8 @@ class Gui(Ui):
             if not MessageDialog.showYesNo(title, msg):
                 return False
 
-        with logCommandManager('application.', 'saveProjectAs', newPath, overwrite=overwrite):
-            with catchExceptions(errorStringTemplate='Error saving project: %s'):
+        with catchExceptions(errorStringTemplate='Error saving project: %s'):
+            with logCommandManager('application.', 'saveProjectAs', newPath, overwrite=overwrite):
                 with MessageDialog.progressManager(self.mainWindow, f'Saving project {newPath} ... '):
                     if not self.application._saveProject(newPath=newPath,
                                                          createFallback=False,
@@ -587,16 +587,18 @@ class Gui(Ui):
                         MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
                         return False
 
-        self.mainWindow._updateWindowTitle()
-        self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
-        self.mainWindow._fillRecentProjectsMenu() # Update the menu
+            self.mainWindow._updateWindowTitle()
+            self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
+            self.mainWindow._fillRecentProjectsMenu() # Update the menu
 
-        successMessage = 'Project successfully saved to "%s"' % self.project.path
-        MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
-        self.mainWindow.statusBar().showMessage(successMessage)
-        getLogger().info(successMessage)
+            successMessage = 'Project successfully saved to "%s"' % self.project.path
+            MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
+            self.mainWindow.statusBar().showMessage(successMessage)
+            getLogger().info(successMessage)
 
-        return True
+            return True
+
+        return False
 
     @logCommand('application.')
     def saveProject(self) -> bool:

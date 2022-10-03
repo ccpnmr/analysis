@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-30 14:39:51 +0100 (Fri, September 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-03 08:50:45 +0100 (Mon, October 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -454,9 +454,12 @@ class Gui(Ui):
             if not _ok:
                 return
 
+        if (_name := Project._checkName(name, correctName=True)) != name:
+            MessageDialog.showInfo('New Project', f'Project name changed from "{name}" to "{_name}"\nSee console/log for details', parent=self)
+
         with catchExceptions(errorStringTemplate='Error creating new project: %s'):
             self.mainWindow.moduleArea._closeAll()
-            newProject = self.application._newProject(name=name)
+            newProject = self.application._newProject(name=_name)
             if newProject is None:
                 raise RuntimeError('Unable to create new project')
             newProject._mainWindow.show()
@@ -551,6 +554,20 @@ class Gui(Ui):
 
         return None
 
+    def _closeProject(self):
+        """Do all gui-related stuff when closing a project
+        CCPNINTERNAL: called from Framework._closeProject()
+        """
+        if self.mainWindow:
+            # ui/gui cleanup
+            self.mainWindow.deleteAllNotifiers()
+            self.mainWindow._closeMainWindowModules()
+            self.mainWindow._closeExtraWindowModules()
+            self.mainWindow.sideBar.clearSideBar()
+            self.mainWindow.sideBar.deleteLater()
+            self.mainWindow.deleteLater()
+            self.mainWindow = None
+
     def saveProjectAs(self, newPath=None, overwrite:bool=False) -> bool:
         """Opens save Project to newPath.
         Optionally open file dialog.
@@ -581,7 +598,7 @@ class Gui(Ui):
         newName = newPath.basename
         if (_name := self.project._checkName(newName, correctName=True)) != newName:
             newPath = newPath.parent / _name + CCPN_EXTENSION
-            MessageDialog.showInfo(title, f'Project name changed to "{_name}"', parent=self)
+            MessageDialog.showInfo(title, f'Project name changed from "{newName}" to "{_name}"\nSee console/log for details', parent=self)
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
             with logCommandManager('application.', 'saveProjectAs', newPath, overwrite=overwrite):

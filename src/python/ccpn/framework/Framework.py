@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-30 15:27:26 +0100 (Fri, September 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-03 08:50:45 +0100 (Mon, October 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -877,14 +877,12 @@ class Framework(NotifierBase, GuiBase):
         # local import to avoid cycles
         from ccpn.core.Project import _newProject
 
-        newName = re.sub('[^0-9a-zA-Z]+', '', name)
+        if Project._checkName(name, correctName=False) is None:
+            raise ValueError(f'Invalid project name "{name}"; check log/console for details')
         # NB _closeProject includes a gui cleanup call
         self._closeProject()
-        newProject = _newProject(self, name=newName)
+        newProject = _newProject(self, name=name)
         self._initialiseProject(newProject)  # This also set the linkages
-        # defer the logging output until the project is fully initialised
-        if newName != name:
-            getLogger().info('Removed whitespace from name: %s' % name)
         return newProject
 
     # @logCommand('application.')  # decorated in ui class
@@ -943,20 +941,14 @@ class Framework(NotifierBase, GuiBase):
         return self.ui.saveProject()
 
     def _closeProject(self):
-        """Close project and clean up - when opening another or quitting application
+        """Close project and clean up - when opening another or quitting application.
+        Leaves the state of the whole programme as "transient", as there is no active project.
+        Hence, need to be followed by initialising a new project or termination of the programme.
         """
         # NB: this function must clean up both wrapper and ui/gui
 
         self.deleteAllNotifiers()
-        if self.ui.mainWindow:
-            # ui/gui cleanup
-            self.ui.mainWindow.deleteAllNotifiers()
-            self.ui.mainWindow._closeMainWindowModules()
-            self.ui.mainWindow._closeExtraWindowModules()
-            self.ui.mainWindow.sideBar.clearSideBar()
-            self.ui.mainWindow.sideBar.deleteLater()
-            self.ui.mainWindow.deleteLater()
-            self.ui.mainWindow = None
+        self.ui._closeProject()
 
         if self.current:
             self.current._unregisterNotifiers()

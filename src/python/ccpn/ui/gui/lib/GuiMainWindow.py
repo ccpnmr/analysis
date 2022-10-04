@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-21 15:03:28 +0100 (Wed, September 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-04 17:37:46 +0100 (Tue, October 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -825,6 +825,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         # add link to website videos
         modulesMenu.addAction(Action(modulesMenu, text='Video Tutorials && Manual', callback=self._showCCPNTutorials))
+        modulesMenu.addAction(Action(modulesMenu, text='Tutorial Data', callback=self._showTutorialData))
         modulesMenu.addSeparator()
 
         # add the main tutorials
@@ -867,6 +868,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         except Exception as es:
             getLogger().warning('Error opening tutorial: %s' % str(filename))
+
+    def _showTutorialData(self):
+        from ccpn.framework.PathsAndUrls import ccpnTutorials
+
+        self.application._showHtmlFile("Tutorial Data", ccpnTutorials)
 
     def _showSideBarModule(self, module, modulesMenu, visible):
         try:

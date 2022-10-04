@@ -11,12 +11,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-16 10:48:21 +0100 (Mon, May 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-04 17:38:24 +0100 (Tue, October 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -165,6 +165,7 @@ CCPNGLWIDGET_HEXBACKGROUND = 'CCPNGLWIDGET_HEXBACKGROUND'
 CCPNGLWIDGET_HEXHIGHLIGHT = 'CCPNGLWIDGET_HEXHIGHLIGHT'
 CCPNGLWIDGET_FOREGROUND = 'CCPNGLWIDGET_FOREGROUND'
 CCPNGLWIDGET_BACKGROUND = 'CCPNGLWIDGET_BACKGROUND'
+CCPNGLWIDGET_BUTTON_FOREGROUND = 'CCPNGLWIDGET_BUTTON_FOREGROUND'
 
 CCPNGLWIDGET_PICKCOLOUR = 'CCPNGLWIDGET_PICKCOLOUR'
 CCPNGLWIDGET_GRID = 'CCPNGLWIDGET_GRID'
@@ -266,6 +267,7 @@ colourSchemes = {
 
         CCPNGLWIDGET_FOREGROUND          : (0.05, 0.05, 0.05, 1.0),  #'#080000'
         CCPNGLWIDGET_BACKGROUND          : (1.0, 1.0, 1.0, 1.0),
+        CCPNGLWIDGET_BUTTON_FOREGROUND   : (0.2, 0.21, 0.2, 1.0),  #'#080000'
 
         CCPNGLWIDGET_PICKCOLOUR          : (0.2, 0.5, 0.9, 1.0),
         CCPNGLWIDGET_GRID                : (0.5, 0.0, 0.0, 1.0),  #'#080000'
@@ -351,6 +353,7 @@ colourSchemes = {
 
         CCPNGLWIDGET_FOREGROUND   : (0.9, 1.0, 1.0, 1.0),  #'#f0ffff'
         CCPNGLWIDGET_BACKGROUND   : (0.1, 0.1, 0.1, 1.0),
+        CCPNGLWIDGET_BUTTON_FOREGROUND: (0.75, 0.79, 0.77, 1.0),  #'#080000'
 
         CCPNGLWIDGET_PICKCOLOUR   : (0.2, 0.5, 0.9, 1.0),
         CCPNGLWIDGET_GRID         : (0.9, 1.0, 1.0, 1.0),  #'#f7ffff'

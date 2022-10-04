@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-26 16:53:37 +0100 (Mon, September 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-04 17:38:24 +0100 (Tue, October 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -92,7 +92,7 @@ from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGR
     CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, getColours, \
     CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_ZOOMAREA, CCPNGLWIDGET_PICKAREA, \
     CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_ZOOMLINE, CCPNGLWIDGET_MOUSEMOVELINE, \
-    CCPNGLWIDGET_HARDSHADE, CCPNGLWIDGET_BADAREA
+    CCPNGLWIDGET_HARDSHADE, CCPNGLWIDGET_BADAREA, CCPNGLWIDGET_BUTTON_FOREGROUND
 import ccpn.util.Phasing as Phasing
 from ccpn.ui.gui.lib.mouseEvents import \
     leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, controlShiftRightMouse, \
@@ -1952,13 +1952,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
         dy = STRINGOFFSET * self.deltaY
         self._lockedStringFalse = GLString(text=GLDefs.LOCKEDSTRING, font=smallFont, x=0, y=dy,
-                                           colour=(0.5, 0.5, 0.5, 1.0), GLContext=self)
+                                           colour=self.buttonForeground, GLContext=self)
         self._lockedStringTrue = GLString(text=GLDefs.LOCKEDSTRING, font=smallFont, x=0, y=dy,
                                           colour=self.highlightColour, GLContext=self)
 
         dx = self._lockedStringTrue.width * self.deltaX
         self._fixedStringFalse = GLString(text=GLDefs.FIXEDSTRING, font=smallFont, x=dx, y=dy,
-                                          colour=(0.5, 0.5, 0.5, 1.0), GLContext=self)
+                                          colour=self.buttonForeground, GLContext=self)
         self._fixedStringTrue = GLString(text=GLDefs.FIXEDSTRING, font=smallFont, x=dx, y=dy,
                                          colour=self.highlightColour, GLContext=self)
         cornerButtons = ((self._lockedStringTrue, self._toggleAxisLocked),
@@ -1995,6 +1995,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.hexBackground = self.colours[CCPNGLWIDGET_HEXBACKGROUND]
         self.background = self.colours[CCPNGLWIDGET_BACKGROUND]
         self.foreground = self.colours[CCPNGLWIDGET_FOREGROUND]
+        self.buttonForeground = self.colours[CCPNGLWIDGET_BUTTON_FOREGROUND]
         self.mousePickColour = self.colours[CCPNGLWIDGET_PICKCOLOUR]
         self.gridColour = self.colours[CCPNGLWIDGET_GRID]
         self.highlightColour = self.colours[CCPNGLWIDGET_HIGHLIGHT]
@@ -2036,16 +2037,17 @@ class CcpnGLWidget(QOpenGLWidget):
             self.globalGL.glSmallFontSize = _size
             self.refreshDevicePixelRatio()
 
-        # get the updated font
-        smallFont = self.getSmallFont()
-
-        # change the colour of the selected 'Lock' string
-        self._lockedStringTrue = GLString(text=GLDefs.LOCKEDSTRING, font=smallFont, x=0, y=0,
-                                          colour=self.highlightColour, GLContext=self)
-
-        # change the colour of the selected 'Fixed' string
-        self._fixedStringTrue = GLString(text=GLDefs.FIXEDSTRING, font=smallFont, x=0, y=0,
-                                         colour=self.highlightColour, GLContext=self)
+        self.buildOverlayStrings()
+        # # get the updated font
+        # smallFont = self.getSmallFont()
+        #
+        # # change the colour of the selected 'Lock' string
+        # self._lockedStringTrue = GLString(text=GLDefs.LOCKEDSTRING, font=smallFont, x=0, y=0,
+        #                                   colour=self.highlightColour, GLContext=self)
+        #
+        # # change the colour of the selected 'Fixed' string
+        # self._fixedStringTrue = GLString(text=GLDefs.FIXEDSTRING, font=smallFont, x=0, y=0,
+        #                                  colour=self.highlightColour, GLContext=self)
 
     def setBackgroundColour(self, col, silent=False):
         """
@@ -4128,7 +4130,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if self.highlighted:
                 colour = self.highlightColour
             else:
-                colour = self.foreground
+                colour = self.buttonForeground
 
             smallFont = self.getSmallFont()
             self.stripIDString = GLString(text=self.stripIDLabel,

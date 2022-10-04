@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-18 18:59:32 +0100 (Mon, July 18, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-04 18:24:50 +0100 (Tue, October 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -67,6 +67,7 @@ from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
 ALL = '<Use all>'
 UseCurrent = '<Use current>'
+IncludeCurrent = '<Current Strip>'
 UseLastOpened = '<Use last opened>'  # used for last opened display
 
 StandardSelections = [ALL, UseCurrent, UseLastOpened]
@@ -294,8 +295,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         if self._spectrumDisplay.MAXPEAKLABELTYPES:
             row += 1
-            _texts = ['Short', 'Full', 'NmrAtom Pid', 'Minimal', 'Peak Pid', 'ClusterId','Annotation']
-            _names = ['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal', 'annSDS_Id','annSDS_ClusterId', 'annSDS_Annotation']
+            _texts = ['Short', 'Full', 'NmrAtom Pid', 'Minimal', 'Peak Pid', 'ClusterId', 'Annotation']
+            _names = ['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal', 'annSDS_Id', 'annSDS_ClusterId', 'annSDS_Annotation']
             _texts = _texts[:self._spectrumDisplay.MAXPEAKLABELTYPES]
             _names = _names[:self._spectrumDisplay.MAXPEAKLABELTYPES]
 
@@ -1351,9 +1352,9 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
                     kws.update({'mainWindow': self.mainWindow})
                     if 'kwds' in data:
                         kws.update(data['kwds'])
-                        newItem = widgetType(self, grid=(row, 0),  **kws,)
+                        newItem = widgetType(self, grid=(row, 0), **kws, )
                     else:
-                        newItem = widgetType(self,  self.mainWindow, grid=(row, 0), **kws)
+                        newItem = widgetType(self, self.mainWindow, grid=(row, 0), **kws)
 
                 else:
                     newItem = CheckBoxCompoundWidget(
@@ -1567,12 +1568,12 @@ class ObjectSelectionWidget(ListCompoundWidget):
         """Fill the pulldownList with the currently available objects
         """
         ll = [SelectToAdd] + self.standardListItems
-        pulldownObjs = [None]*len(ll)
+        pulldownObjs = [None] * len(ll)
         if self.project:
             objects = [obj for obj in getattr(self.project, self.KLASS._pluralLinkName, [])]
             ll += [obj.pid for obj in objects]
             pulldownObjs += objects
-        self.pulldownList.setData(texts=ll,)# objects=pulldownObjs)
+        self.pulldownList.setData(texts=ll, )  # objects=pulldownObjs)
 
     def _getObjects(self):
         """Return list of objects in the listWidget selection
@@ -1599,11 +1600,14 @@ class ObjectSelectionWidget(ListCompoundWidget):
 class ChainSelectionWidget(ObjectSelectionWidget):
     KLASS = Chain
 
+
 class SpectrumGroupSelectionWidget(ObjectSelectionWidget):
     KLASS = SpectrumGroup
 
+
 class NmrChainSelectionWidget(ObjectSelectionWidget):
     KLASS = NmrChain
+
 
 class UniqueNmrAtomNamesSelectionWidget(ObjectSelectionWidget):
     KLASS = NmrAtom
@@ -1612,6 +1616,7 @@ class UniqueNmrAtomNamesSelectionWidget(ObjectSelectionWidget):
         """Fill the pulldownList with the currently available objects
         """
         from ccpn.util.Common import sortByPriorityList
+
         priorityAtomNames = ['H', 'Hn' 'HA', 'HB', 'C', 'CA', 'CB', 'N', 'Nh', 'NE', 'ND']
         ll = [SelectToAdd] + self.standardListItems
         uniqueNames = set()
@@ -1622,6 +1627,7 @@ class UniqueNmrAtomNamesSelectionWidget(ObjectSelectionWidget):
         complete = ll + uniqueNames
         self.pulldownList.setData(texts=complete)
 
+
 class UniqueNmrResidueTypeSelectionWidget(ObjectSelectionWidget):
     KLASS = NmrResidue
 
@@ -1629,6 +1635,7 @@ class UniqueNmrResidueTypeSelectionWidget(ObjectSelectionWidget):
         """Fill the pulldownList with the currently available objects
         """
         from ccpn.util.Common import sortByPriorityList
+
         ## could add some priority list to show on top.
         ll = [SelectToAdd] + self.standardListItems
         uniqueNames = set()
@@ -1639,6 +1646,7 @@ class UniqueNmrResidueTypeSelectionWidget(ObjectSelectionWidget):
         uniqueNames.sort(reverse=False)
         complete = ll + list(uniqueNames)
         self.pulldownList.setData(texts=complete)
+
 
 class RestraintTableSelectionWidget(ObjectSelectionWidget):
     KLASS = RestraintTable
@@ -1668,6 +1676,7 @@ class _SeriesInputDataTableSelectionWidget(ObjectSelectionWidget):
                     allowedDTs.append(obj.pid)
         complete = ll + list(allowedDTs)
         pulldown.setData(texts=complete)
+
 
 class ViolationTableSelectionWidget(ObjectSelectionWidget):
     KLASS = ViolationTable
@@ -1700,6 +1709,10 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
             return [spectrumDisplay]
         else:
             displays = self._getObjects()
+            if IncludeCurrent in gids:
+                if (strip := self.application.current.strip):
+                    displays += [strip]  # fix for the minute - must check return type
+
         return displays
 
     def _objRenamedCallback(self, data):

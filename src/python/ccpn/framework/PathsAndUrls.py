@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2022-09-21 10:43:43 +0100 (Wed, September 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-04 17:38:06 +0100 (Tue, October 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,9 +28,9 @@ __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 from ccpn.util import Path
 
 # CCPN Urls
-ccpnUrl                         = 'http://www.ccpn.ac.uk'
-ccpn2Url                        = 'http://www.ccpn.ac.uk'
-ccpnLicenceUrl                  = 'http://www.ccpn.ac.uk/software/licensing'
+ccpnUrl                         = 'https://www.ccpn.ac.uk'
+ccpn2Url                        = 'https://www.ccpn.ac.uk'
+ccpnLicenceUrl                  = 'https://www.ccpn.ac.uk/software/licensing'
 ccpnTutorials                   = 'https://www.ccpn.ac.uk/support/tutorials'
 ccpnForum                       = 'https://forum.ccpn.ac.uk'
 ccpnVideos                      = 'https://www.ccpn.ac.uk/manual/v3/'
@@ -77,10 +77,10 @@ backboneAssignmentTutorialPath  = ccpnCodePath / 'tutorials' / 'BackboneAssignme
 screenTutorialPath              = ccpnCodePath / 'tutorials' / 'CcpNmr_AnalysisScreen_Tutorial_Beta2Release.pdf'
 cspTutorialPath                 = ccpnCodePath / 'tutorials' / 'CSPTutorial.pdf'
 solidStatePeptideTutorialPath   = ccpnCodePath / 'tutorials' / 'SolidStatePeptideAssignmentTutorial.pdf'
-solidStateHETsTutorialPath       = ccpnCodePath / 'tutorials' / 'SolidStateHETsAssignmentTutorial.pdf'
+solidStateHETsTutorialPath      = ccpnCodePath / 'tutorials' / 'SolidStateHETsAssignmentTutorial.pdf'
 solidStateSH3TutorialPath       = ccpnCodePath / 'tutorials' / 'SolidStateSH3AssignmentTutorial.pdf'
-macroWritingTutorialPath       = ccpnCodePath / 'tutorials' / 'MacroWritingTutorial.pdf'
-screeningTutorialPath      = ccpnCodePath / 'tutorials' / 'ScreeningTutorial.pdf'
+macroWritingTutorialPath        = ccpnCodePath / 'tutorials' / 'MacroWritingTutorial.pdf'
+screeningTutorialPath           = ccpnCodePath / 'tutorials' / 'ScreeningTutorial.pdf'
 howTosPath                      = tutorialsPath / 'How-Tos'
 
 documentationPath               = ccpnCodePath / 'doc' / 'build' / 'html' / 'index.html'

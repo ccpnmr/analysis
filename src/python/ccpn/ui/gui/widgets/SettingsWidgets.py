@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-04 18:24:50 +0100 (Tue, October 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-04 18:25:41 +0100 (Tue, October 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1719,7 +1719,7 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
         self._spectrumDisplayRenamed(data)
 
     def _spectrumDisplayRenamed(self, dataDict, **kwargs):
-        # This method has been implemeted only because
+        # This method has been implemented only because
         # oldPid argument in data is not yet available for SpectrumDisplay
         obj = dataDict.get(Notifier.OBJECT)
         currentTexts = self.getTexts()

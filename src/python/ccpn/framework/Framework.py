@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-21 15:03:26 +0100 (Wed, September 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-05 13:15:14 +0100 (Wed, October 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -510,9 +510,10 @@ class Framework(NotifierBase, GuiBase):
             getLogger().debug(f'initialising v2 noise and contour levels')
             for spectrum in newProject.spectra:
                 # calculate the new noise level
-                setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
-                                          setPositiveContours=True, setNegativeContours=True,
-                                          useSameMultiplier=True)
+                spectrum.noiseLevel = spectrum.estimateNoise()
+
+                # Check  contourLevels, contourColours
+                spectrum._setDefaultContourValues()
 
                 # set the initial contour colours
                 (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)

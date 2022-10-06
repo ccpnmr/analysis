@@ -33,7 +33,7 @@ from dataclasses import dataclass
 from contextlib import contextmanager, suppress
 import typing
 
-from ccpn.ui.gui.guiSettings import getColours
+from ccpn.ui.gui.guiSettings import getColours, GUITABLE_GRIDLINES
 from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.widgets.Menu import Menu
@@ -63,27 +63,44 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
                         alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
                         border: %(_BORDER_WIDTH)spx solid %(BORDER_NOFOCUS)s;
                         border-radius: 2px;
-                    }
-                    QTableView::focus {
-                        background-color: %(GUITABLE_BACKGROUND)s;
-                        alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
-                        border: %(_BORDER_WIDTH)spx solid %(BORDER_FOCUS)s;
-                        border-radius: 2px;
+                        gridline-color: %(_GRID_COLOR)s;
+                        selection-background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
+                        selection-color: %(GUITABLE_SELECTED_FOREGROUND)s;
                     }
                     QTableView::item {
-                        margin: 0px;
-                        padding: %(_CELL_PADDING)spx;
-                    }
-                    QTableView::item:focus {
-                        margin: 0px;
-                        border: %(_FOCUS_BORDER_WIDTH)spx solid %(BORDER_FOCUS)s;
-                        padding: %(_CELL_PADDING_OFFSET)spx;
-                    }
-                    QTableView::item:selected {
-                        background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
-                        color: %(GUITABLE_SELECTED_FOREGROUND)s;
+                        padding-top: %(_CELL_PADDING)spx;
+                        padding-bottom: %(_CELL_PADDING)spx;
                     }
                     """
+
+    # styleSheet = """QTableView {
+    #                     background-color: %(GUITABLE_BACKGROUND)s;
+    #                     alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
+    #                     border: %(_BORDER_WIDTH)spx solid %(BORDER_NOFOCUS)s;
+    #                     border-radius: 2px;
+    #                     gridline-color: %(_GRID_COLOR)s;
+    #                 }
+    #                 QTableView::focus {
+    #                     background-color: %(GUITABLE_BACKGROUND)s;
+    #                     alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
+    #                     border: %(_BORDER_WIDTH)spx solid %(BORDER_FOCUS)s;
+    #                     border-radius: 2px;
+    #                 }
+    #                 QTableView::item {
+    #                     padding: %(_CELL_PADDING)spx;
+    #                     border: %(_FOCUS_BORDER_WIDTH)spx;
+    #                     margin: 0px;
+    #                 }
+    #                 QTableView::item:focus {
+    #                     padding: %(_CELL_PADDING_OFFSET)spx;
+    #                     border: %(_FOCUS_BORDER_WIDTH)spx solid %(BORDER_FOCUS)s;
+    #                     margin: 0px;
+    #                 }
+    #                 QTableView::item:selected {
+    #                     background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
+    #                     color: %(GUITABLE_SELECTED_FOREGROUND)s;
+    #                 }
+    #                 """
 
     # NOTE:ED overrides QtCore.Qt.ForegroundRole
     # QTableView::item - color: %(GUITABLE_ITEM_FOREGROUND)s;
@@ -107,7 +124,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     def __init__(self, parent, df=None,
                  multiSelect=True, selectRows=True,
                  showHorizontalHeader=True, showVerticalHeader=True,
-                 borderWidth=2, cellPadding=2, focusBorderWidth=0,
+                 borderWidth=2, cellPadding=2, focusBorderWidth=0, gridColour=None,
                  _resize=False, setWidthToColumns=False, setHeightToRows=False,
                  setOnHeaderOnly=False, showGrid=False, wordWrap=False,
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
@@ -127,6 +144,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         :param borderWidth:
         :param cellPadding:
         :param focusBorderWidth:
+        :param gridColour:
         :param _resize:
         :param setWidthToColumns:
         :param setHeightToRows:
@@ -162,6 +180,11 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         self._cellPadding = colours['_CELL_PADDING'] = cellPadding  # the extra padding for the selected cell-item
         self._focusBorderWidth = colours['_FOCUS_BORDER_WIDTH'] = focusBorderWidth
         self._cellPaddingOffset = colours['_CELL_PADDING_OFFSET'] = cellPadding - focusBorderWidth
+        try:
+            col = QtGui.QColor(gridColour).name() if gridColour else colours[GUITABLE_GRIDLINES]
+        except:
+            col = colours[GUITABLE_GRIDLINES]
+        self.gridcolour = colours['_GRID_COLOR'] = col
         self._defaultStyleSheet = self.styleSheet % colours
         self.setStyleSheet(self._defaultStyleSheet)
         self.setAlternatingRowColors(True)
@@ -214,7 +237,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         if actionCallbackEnabled is not NOTHING:
             self.setActionCallbackEnabled(actionCallbackEnabled)
 
-        self.setItemDelegate(_TableDelegateABC())
+        self.setItemDelegate(_TableDelegateABC(focusBorderWidth=focusBorderWidth))
 
     def updateDf(self, df, resize=True, setHeightToRows=False, setWidthToColumns=False, setOnHeaderOnly=False, newModel=False):
         """Initialise the dataFrame
@@ -1044,7 +1067,9 @@ def main():
     layout = QtWidgets.QGridLayout()
     frame.setLayout(layout)
 
-    table = TableABC(None, df=df, focusBorderWidth=1)
+    table = TableABC(None, df=df, focusBorderWidth=2, cellPadding=11,
+                     showGrid=True, gridColour='white',
+                     setWidthToColumns=False, setHeightToRows=False, _resize=True)
 
     # set some background colours
     cells = ((0, 0, '#80C0FF'),

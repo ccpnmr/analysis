@@ -27,7 +27,7 @@ __date__ = "$Date: 2022-09-08 18:14:25 +0100 (Thu, September 08, 2022) $"
 #=========================================================================================
 
 from PyQt5 import QtWidgets, QtCore, QtGui
-from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS
+from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 from ccpn.util.Logging import getLogger
 
 
@@ -43,6 +43,7 @@ ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
 DTYPE_ROLE = QtCore.Qt.UserRole + 1000
 VALUE_ROLE = QtCore.Qt.UserRole + 1001
 INDEX_ROLE = QtCore.Qt.UserRole + 1002
+BORDER_ROLE = QtCore.Qt.UserRole + 1003
 
 EDIT_ROLE = QtCore.Qt.EditRole
 _EDITOR_SETTER = ('setColor', 'selectValue', 'setData', 'set', 'setValue', 'setText', 'setFile')
@@ -175,44 +176,82 @@ class _TableDelegate(QtWidgets.QStyledItemDelegate):
 class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
     """Handle the setting of data when editing the table
     """
+    # NOTE:ED - this is required as setting the borders in the styleSheet disables the use of BackgroundRole in the table-model
+    #   so need this alternative to add padding to the left of the cell :|
+    _leftPadding = '  '  # 2 spaces should be enough
+    _focusBorderWidth = 1
+    _focusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERFOCUS]))
+    _noFocusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERNOFOCUS]))
 
-    def __init__(self, *args, **kwds):
-        """Initialise the class
-        """
-        super().__init__(*args, **kwds)
+    def __init__(self, focusBorderWidth=1, *args, **kwds):
+        super(_TableDelegateABC, self).__init__(*args, *kwds)
+
+        # double the line-widths and account for the device-pixel-ratio
+        self._focusBorderWidth = focusBorderWidth
+        self._focusPen.setWidthF(focusBorderWidth * 2.0)
+        self._focusPen.setJoinStyle(QtCore.Qt.MiterJoin)  # square ends
+        self._noFocusPen.setWidthF(2.0)
 
         # set the required alternative colour
         self._replaceAlternativeColor = QtGui.QColor(getColours()[BORDERFOCUS])
+
+    def displayText(self, value, locale: QtCore.QLocale) -> str:
+        """Add padding for editable cells.
+        """
+        value = super().displayText(value, locale)
+
+        return (self._leftPadding + value)
 
     def paint(self, painter, option, index):
         """Paint the contents of the cell.
         """
         # Remove dotted border on cell focus.  https://stackoverflow.com/a/55252650/3620725
         #   or put 'outline: 0px;' into the QTableView stylesheet
-        focus = False
-        if option.state & QtWidgets.QStyle.State_HasFocus:
-            option.state = option.state ^ QtWidgets.QStyle.State_HasFocus
-            focus = True
-
+        focus = (option.state & QtWidgets.QStyle.State_HasFocus)
         super().paint(painter, option, index)
 
+        # alternative method to add selection border to the focussed cell
         if (brush := index.data(QtCore.Qt.BackgroundRole)) and (option.state & QtWidgets.QStyle.State_Selected):
-            painter.save()
             # fade the background and paint over the top of selected cell
             # - ensures that different coloured backgrounds are still visible
             # - does, however, modify the foreground colour :|
+            painter.save()
+            painter.setClipRect(option.rect)
             brush.setAlphaF(0.20)
             painter.setCompositionMode(painter.CompositionMode_SourceOver)
             painter.fillRect(option.rect, brush)
+
             if focus:
+                painter.setPen(self._focusPen)
+                painter.drawRect(option.rect)
+
+            elif not focus and index.data(BORDER_ROLE):
                 # move the focus rectangle drawing to after, otherwise, alternative-background-color is used
-                painter.setPen(self._replaceAlternativeColor)
-                painter.drawRect(option.rect.adjusted(0, 0, -1, -1))
+                painter.setPen(self._noFocusPen)
+                painter.setRenderHint(QtGui.QPainter.Antialiasing)
+                painter.drawRoundedRect(option.rect, 2, 2)
             painter.restore()
 
-        elif focus:
-            # move the focus rectangle drawing to after, otherwise, alternative-background-color is used
-            painter.save()
-            painter.setPen(self._replaceAlternativeColor)
-            painter.drawRect(option.rect.adjusted(0, 0, -1, -1))
-            painter.restore()
+        else:
+            if focus:
+                painter.save()
+                painter.setClipRect(option.rect)
+                painter.setPen(self._focusPen)
+                painter.drawRect(option.rect)
+                painter.restore()
+
+            elif not focus and index.data(BORDER_ROLE):
+                # move the focus rectangle drawing to after, otherwise, alternative-background-color is used
+                painter.save()
+                painter.setClipRect(option.rect)
+                painter.setPen(self._noFocusPen)
+                painter.setRenderHint(QtGui.QPainter.Antialiasing)
+                painter.drawRoundedRect(option.rect, 2, 2)
+                painter.restore()
+
+    def updateEditorGeometry(self, widget, itemStyle, index):
+        """Fit editor geometry to the index
+        """
+        cellRect = itemStyle.rect
+        widget.move(cellRect.topLeft())
+        widget.setGeometry(cellRect)

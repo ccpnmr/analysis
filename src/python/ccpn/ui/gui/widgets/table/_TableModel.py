@@ -74,6 +74,7 @@ VALUE_ROLE = QtCore.Qt.UserRole + 1001
 
 # a role to map the table-index to the cell in the df
 INDEX_ROLE = QtCore.Qt.UserRole + 1002
+BORDER_ROLE = QtCore.Qt.UserRole + 1003
 
 _EDITOR_SETTER = ('setColor', 'selectValue', 'setData', 'set', 'setValue', 'setText', 'setFile')
 _EDITOR_GETTER = ('get', 'value', 'text', 'getFile')
@@ -412,6 +413,11 @@ class _TableModel(QtCore.QAbstractTableModel):
 
                 # return the default foreground colour
                 return self._defaultForegroundColour
+
+            elif role == BORDER_ROLE:
+                if (colourDict := self._colour[row, col]):
+                    # get the colour from the dict
+                    return True if colourDict.get(BACKGROUND_ROLE) else False
 
             elif role == TOOLTIP_ROLE:
                 data = self._df.iat[row, col]

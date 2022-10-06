@@ -53,7 +53,7 @@ _EDITOR_GETTER = ('get', 'value', 'text', 'getFile')
 _TABLE_KWDS = ('parent', 'df',
                'multiSelect', 'selectRows',
                'showHorizontalHeader', 'showVerticalHeader',
-               'borderWidth', 'cellPadding', 'focusBorderWidth',
+               'borderWidth', 'cellPadding', 'focusBorderWidth', 'gridColour',
                '_resize', 'setWidthToColumns', 'setHeightToRows',
                'setOnHeaderOnly', 'showGrid', 'wordWrap',
                'selectionCallback', 'selectionCallbackEnabled',
@@ -79,7 +79,7 @@ class Table(TableABC, Base):
     def __init__(self, parent, df=None,
                  multiSelect=True, selectRows=True,
                  showHorizontalHeader=True, showVerticalHeader=True,
-                 borderWidth=2, cellPadding=2, focusBorderWidth=0,
+                 borderWidth=2, cellPadding=2, focusBorderWidth=0, gridColour=None,
                  _resize=False, setWidthToColumns=False, setHeightToRows=False,
                  setOnHeaderOnly=False, showGrid=False, wordWrap=False,
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
@@ -100,6 +100,7 @@ class Table(TableABC, Base):
         :param borderWidth:
         :param cellPadding:
         :param focusBorderWidth:
+        :param gridColour:
         :param _resize:
         :param setWidthToColumns:
         :param setHeightToRows:
@@ -120,7 +121,7 @@ class Table(TableABC, Base):
         super().__init__(parent, df=df,
                          multiSelect=multiSelect, selectRows=selectRows,
                          showHorizontalHeader=showHorizontalHeader, showVerticalHeader=showVerticalHeader,
-                         borderWidth=borderWidth, cellPadding=cellPadding, focusBorderWidth=focusBorderWidth,
+                         borderWidth=borderWidth, cellPadding=cellPadding, focusBorderWidth=focusBorderWidth, gridColour=gridColour,
                          _resize=_resize, setWidthToColumns=setWidthToColumns, setHeightToRows=setHeightToRows,
                          setOnHeaderOnly=setOnHeaderOnly, showGrid=showGrid, wordWrap=wordWrap,
                          selectionCallback=selectionCallback, selectionCallbackEnabled=selectionCallbackEnabled,

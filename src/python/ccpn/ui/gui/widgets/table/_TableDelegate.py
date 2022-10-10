@@ -229,7 +229,7 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
                 # move the focus rectangle drawing to after, otherwise, alternative-background-color is used
                 painter.setPen(self._noFocusPen)
                 painter.setRenderHint(QtGui.QPainter.Antialiasing)
-                painter.drawRoundedRect(option.rect, 2, 2)
+                painter.drawRoundedRect(option.rect, 4, 4)
             painter.restore()
 
         else:
@@ -246,7 +246,7 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
                 painter.setClipRect(option.rect)
                 painter.setPen(self._noFocusPen)
                 painter.setRenderHint(QtGui.QPainter.Antialiasing)
-                painter.drawRoundedRect(option.rect, 2, 2)
+                painter.drawRoundedRect(option.rect, 4, 4)
                 painter.restore()
 
     def updateEditorGeometry(self, widget, itemStyle, index):

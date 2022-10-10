@@ -1071,6 +1071,10 @@ def main():
                      showGrid=True, gridColour='white',
                      setWidthToColumns=False, setHeightToRows=False, _resize=True)
 
+    for row in range(table.rowCount()):
+        for col in range(table.columnCount()):
+            table.setBackground(row, col, QtGui.QColor(random.randint(0, 256 ** 3) | 0x808080))
+
     # set some background colours
     cells = ((0, 0, '#80C0FF'),
              (1, 1, '#fe83cc'), (1, 2, '#fe83cc'),

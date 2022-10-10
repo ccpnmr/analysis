@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-09-23 16:12:48 +0100 (Fri, September 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-10 17:49:59 +0100 (Mon, October 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -180,18 +180,33 @@ class BarGraphWidget(Widget):
 
     def fitXZoom(self):
         xs, ys = self._getPlotData()
+        xRange, yRange = self.customViewBox.viewRange()
+        xm, xM = xRange
         if len(xs) > 0:
-            _max = np.max([np.max(a) for a in xs])
-            _min = np.min([np.min(a) for a in xs])
+            xAll = [a for j in xs for a in j]
+            xAll = np.array(xAll)
+            xAll.sort()
+            masked = np.ma.masked_inside(xAll, xm, xM)
+            filtered = xAll[masked.mask]
+            # filter for only the visible range.
+            _max = np.max(filtered)
+            _min = np.min(filtered)
             self.plotWidget.setXRange(_min, _max)
 
     def fitYZoom(self):
         """ToDo get this from the current view, rather then the whole data """
         xs, ys = self._getPlotData()
+        xRange, yRange = self.customViewBox.viewRange()
+        xm, xM = xRange
         if len(ys) > 0:
-            _max = np.max([np.max(a) for a in ys])
-            _min = np.min([np.min(a) for a in ys])
-            self.plotWidget.setYRange(_min, _max)
+            yAll = [a for j in ys for a in j]
+            yAll = np.array(yAll)
+            xAll = [a for j in xs for a in j]
+            xAll = np.array(xAll)
+            # filter for only the visible range.
+            masked = np.ma.masked_inside(xAll, xm, xM)
+            filtered = yAll[masked.mask]
+            self.plotWidget.setYRange(np.min(filtered),  np.max(filtered))
 
     def _setViewBox(self):
         self.customViewBox = CustomViewBox(application=self.application)

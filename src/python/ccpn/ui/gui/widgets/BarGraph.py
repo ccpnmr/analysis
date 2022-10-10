@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-09-23 16:12:48 +0100 (Fri, September 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-10 17:49:59 +0100 (Mon, October 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -372,6 +372,7 @@ class CustomViewBox(pg.ViewBox):
 
     def __init__(self, application=None, *args, **kwds):
         pg.ViewBox.__init__(self, *args, **kwds)
+        self._zoomOnMouse = False
         self.exportDialog = None
         self.addSelectionBox()
         self.application = application
@@ -400,11 +401,24 @@ class CustomViewBox(pg.ViewBox):
         self.selectionBox.hide()
 
     def wheelEvent(self, ev, axis=None):
-        if (self.viewRange()[0][1] - self.viewRange()[0][0]) >= 10.001:
-            self.lastRange = self.viewRange()
-            super(CustomViewBox, self).wheelEvent(ev, axis)
-        if (self.viewRange()[0][1] - self.viewRange()[0][0]) < 10:
-            self.setRange(xRange=self.lastRange[0])
+        if axis in (0, 1):
+            mask = [False, False]
+            mask[axis] = self.state['mouseEnabled'][axis]
+        else:
+            mask = self.state['mouseEnabled'][:]
+        s = 1.02 ** (ev.delta() * self.state['wheelScaleFactor'])  # actual scaling factor
+        s = [(None if m is False else s) for m in mask]
+        if self._zoomOnMouse:
+            center = pg.Point(fn.invertQTransform(self.childGroup.transform()).map(ev.pos()))
+        else:
+            center = (0,0) #zoom on centre of the plot
+
+        self._resetTarget()
+        self.scaleBy(s, center)
+        ev.accept()
+        self.sigRangeChangedManually.emit(mask)
+        return
+
 
     def _getLimits(self, p1: float, p2: float):
         r = QtCore.QRectF(p1, p2)
@@ -540,20 +554,20 @@ class CustomViewBox(pg.ViewBox):
         self._checkThresholdAction()
         self.contextMenu.addAction(self.thresholdLineAction)
 
-        ## Labels: Show All
-        self.labelsAction = QtGui.QAction("Show Labels", self, triggered=self._toggleLabels, checkable=True, )
-        self.labelsAction.setChecked(self.allLabelsShown)
-        self.contextMenu.addAction(self.labelsAction)
-
-        ## Labels: Show Above Threshold
-        self.showAboveThresholdAction = QtGui.QAction("Show Labels Above Threshold", self,
-                                                      triggered=self.showAboveThreshold)
-        self.contextMenu.addAction(self.showAboveThresholdAction)
-
-        ## Selection: Select Above Threshold
-        self.selectAboveThresholdAction = QtGui.QAction("Select Items Above Threshold", self,
-                                                        triggered=self.selectAboveThreshold)
-        self.contextMenu.addAction(self.selectAboveThresholdAction)
+        # ## Labels: Show All
+        # self.labelsAction = QtGui.QAction("Show Labels", self, triggered=self._toggleLabels, checkable=True, )
+        # self.labelsAction.setChecked(self.allLabelsShown)
+        # self.contextMenu.addAction(self.labelsAction)
+        #
+        # ## Labels: Show Above Threshold
+        # self.showAboveThresholdAction = QtGui.QAction("Show Labels Above Threshold", self,
+        #                                               triggered=self.showAboveThreshold)
+        # self.contextMenu.addAction(self.showAboveThresholdAction)
+        #
+        # ## Selection: Select Above Threshold
+        # self.selectAboveThresholdAction = QtGui.QAction("Select Items Above Threshold", self,
+        #                                                 triggered=self.selectAboveThreshold)
+        # self.contextMenu.addAction(self.selectAboveThresholdAction)
 
         self.contextMenu.addSeparator()
         self.contextMenu.addAction('Export', self.showExportDialog)

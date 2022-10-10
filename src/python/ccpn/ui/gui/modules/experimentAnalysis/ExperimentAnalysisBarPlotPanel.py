@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-09-23 16:12:48 +0100 (Fri, September 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-10 17:49:59 +0100 (Mon, October 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -291,11 +291,14 @@ class BarPlotPanel(GuiPanel):
 
     def _mouseHoverCallbackEvent(self, barIndex, x, y):
         if self._plottedDf is not None:
-            posTxt = f'Y:{y:.2f}'
+            posTxt = f'{y:.3f}'
             if barIndex is not None:
                 pid = self._plottedDf.loc[barIndex, sv.COLLECTIONPID]
-                txt = f'{pid} -- {posTxt}'
-                self.currentCollectionLabel.setText(txt)
+                barValue = self._plottedDf.loc[barIndex, self.yColumnName]
+                if barValue:
+                    barValue = f'{barValue:.3f}'
+                    txt = f'{pid} -- {self.yColumnName}:{barValue} -- (Y:{posTxt})'
+                    self.currentCollectionLabel.setText(txt)
             else:
                 self.currentCollectionLabel.clear()
 

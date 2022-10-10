@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-09-24 20:20:31 +0100 (Sat, September 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-10 11:40:03 +0100 (Mon, October 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -189,39 +189,12 @@ class _ExperimentalAnalysisTableABC(Table):
         collections = self.current.collections
         pids = [co.pid for co in collections]
         # select
-        self._highLightObjs(pids)
+        self.selectRowsByValues(pids, headerName=sv.COLLECTIONPID)
 
-    def _highLightObjs(self, selection, headerName=sv.COLLECTIONPID, scrollToSelection=True):
-        # skip if the table is empty
-        if self._df is None or self._df.empty:
-            return
-
-        with self._blockTableSignals('_highLightObjs'):
-            selectionModel = self.selectionModel()
-            model = self.model()
-            selectionModel.clearSelection()
-
-            if selection:
-                if len(selection) > 0:
-                    if isinstance(selection[0], pd.Series):
-                        # not sure how to handle this
-                        return
-                uniqObjs = set(selection)
-                columnTextIx = self.columnTexts.index(headerName)
-                for i in model._sortIndex:
-                    value = model.index(i, columnTextIx).data()
-                    for obj in uniqObjs:
-                        if value == obj:
-                            rowIndex = model.index(i, 0)
-                            selectionModel.select(rowIndex, selectionModel.Select | selectionModel.Rows)
-                            if scrollToSelection:
-                                self.scrollTo(rowIndex, self.EnsureVisible)
 
     def clearSelection(self):
         super().clearSelection()
         self.current.collections = []
-
-
 
 
 class TablePanel(GuiPanel):

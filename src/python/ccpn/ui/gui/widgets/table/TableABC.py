@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-09-23 20:22:18 +0100 (Fri, September 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-10 11:40:03 +0100 (Mon, October 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -534,6 +534,39 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         df = self._df
         sel = df.iloc[list(sRows)]
         return sel
+
+    def selectRowsByValues(self, values, headerName, scrollToSelection=True):
+        """
+        Select rows if the given values are present in the table.
+        :param values: list of value to select
+        :param headerName: the column name for the column where to search the values
+        :param scrollToSelection: navigate to the table to show the result
+        :return: None
+        For obj table use the "highlightObjects" method.
+        """
+        if self._df is None or self._df.empty:
+            return
+        if headerName not in self._df.columns:
+            return
+
+        with self._blockTableSignals('selectRowsByValues'):
+            selectionModel = self.selectionModel()
+            model = self.model()
+            selectionModel.clearSelection()
+            columnTextIx = self.columnTexts.index(headerName)
+            for i in model._sortIndex:
+                cell = model.index(i, columnTextIx)
+                if cell is None:
+                    continue
+                tableValue = cell.data()
+                for valueToSelect in values:
+                    if tableValue == valueToSelect:
+                        rowIndex = model.index(i, 0)
+                        if rowIndex is None:
+                            continue
+                        selectionModel.select(rowIndex, selectionModel.Select | selectionModel.Rows)
+                        if scrollToSelection:
+                            self.scrollTo(rowIndex, self.EnsureVisible)
 
     #=========================================================================================
     # keyboard and mouse handling - modified to allow double-click to keep current selection

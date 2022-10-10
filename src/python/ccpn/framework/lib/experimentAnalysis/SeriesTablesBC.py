@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-25 16:21:44 +0100 (Thu, August 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-10 15:28:07 +0100 (Mon, October 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -191,11 +191,12 @@ class InputSeriesFrameBC(SeriesFrameBC):
                         collectionDict[item].append(col)
         return collectionDict
 
-    def buildFromSpectrumGroup(self, spectrumGroup, peakListIndices=None):
+    def buildFromSpectrumGroup(self, spectrumGroup, peakListIndices=None, filteredPeaks=None):
         """
         :param spectrumGroup: A core object containg the spectra ans series information
         :param peakListIndices: list of int, same length of spectra. Define which peakList index to use.
                                If None, use -1 (last created) as default for all spectra
+        :param filteredPeaks: Use only this subset of peaks. Used when a peak has changed, to avoid rebuild all.
         :return: None
         """
         # build the frame
@@ -208,7 +209,11 @@ class InputSeriesFrameBC(SeriesFrameBC):
         i = 1
         while True: ## This because we don't know how many rows we need
             for spectrum, peakListIndex in zip(spectra, peakListIndices):
-                for pk in spectrum.peakLists[peakListIndex].peaks:
+                if filteredPeaks is not None:
+                    peaks = [pk for pk in spectrum.peakLists[peakListIndex].peaks if pk in filteredPeaks]
+                else:
+                    peaks = spectrum.peakLists[peakListIndex].peaks
+                for pk in peaks:
                     for dimension in spectrum.dimensions:
                         try:
                             ## set the unique UID

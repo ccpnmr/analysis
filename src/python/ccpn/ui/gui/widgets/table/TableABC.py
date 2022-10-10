@@ -489,9 +489,9 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         """
         if self._enableSelectionCallback and self._selectionCallback is not None:
             # get the unique df-rows from the selections
-            newRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for sel in selected for idx in sel.indexes())
-            oldRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for sel in deselected for idx in sel.indexes())
-            sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes())
+            newRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for sel in selected for idx in sel.indexes()) - {False}
+            oldRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for sel in deselected for idx in sel.indexes()) - {False}
+            sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes()) - {False}
 
             df = self._df
             new = df.iloc[list(newRows)]
@@ -551,7 +551,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
 
         if self._enableActionCallback and self._actionCallback is not None:
             # get the df-rows from the selection
-            sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes())
+            sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes()) - {False}
 
             df = self._df
             sel = df.iloc[list(sRows)]
@@ -589,7 +589,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         """
         :return: a DataFrame with selected rows
         """
-        sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes())
+        sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes()) - {False}
         df = self._df
         return df.iloc[list(sRows)]
 

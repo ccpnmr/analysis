@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-10 11:40:03 +0100 (Mon, October 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-10 16:26:28 +0100 (Mon, October 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -535,7 +535,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         sel = df.iloc[list(sRows)]
         return sel
 
-    def selectRowsByValues(self, values, headerName, scrollToSelection=True):
+    def selectRowsByValues(self, values, headerName, scrollToSelection=True, doCallback=True):
         """
         Select rows if the given values are present in the table.
         :param values: list of value to select
@@ -548,8 +548,14 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
             return
         if headerName not in self._df.columns:
             return
+        from ccpn.core.lib.ContextManagers import nullContext
 
-        with self._blockTableSignals('selectRowsByValues'):
+        if doCallback:
+            context = nullContext
+        else:
+            context = self._blockTableSignals
+
+        with context('selectRowsByValues'):
             selectionModel = self.selectionModel()
             model = self.model()
             selectionModel.clearSelection()

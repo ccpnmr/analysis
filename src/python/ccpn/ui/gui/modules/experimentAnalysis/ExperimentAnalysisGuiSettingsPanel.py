@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-10 15:35:14 +0100 (Mon, October 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-10 16:26:28 +0100 (Mon, October 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -681,6 +681,23 @@ class AppearancePanel(GuiSettingPanel):
                        'objectName': guiNameSpaces.WidgetVarName_SpectrumDisplSelection,
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'tipText': guiNameSpaces.TipText_SpectrumDisplSelection}}),
+
+            (guiNameSpaces.WidgetVarName_NavigateToOpt,
+             {'label': guiNameSpaces.Label_NavigateToOpt,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': None,
+              'callBack': self._changeNavigateToDisplayTrigger,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_NavigateToOpt,
+                       'hAlign': 'l',
+                       'tipText': '',
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds': {'texts': [guiNameSpaces.SingleClick, guiNameSpaces.DoubleClick, guiNameSpaces.Disabled ],
+                                        'tipTexts': ["","", "Don't navigate to SpectrumDisplay(s)"],
+                                        'direction': 'v',
+                                        'selectedInd': 0,
+                                        }}}),
+
             (guiNameSpaces.WidgetVarName_BarGraphSeparator,
              {'label': guiNameSpaces.Label_BarGraphAppearance,
               'type': LabeledHLine,
@@ -906,18 +923,26 @@ class AppearancePanel(GuiSettingPanel):
             displays = displayWidget.getDisplays()
         return displays
 
+    def _getMainTable(self):
+
+        tablePanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.TablePanel)
+        if tablePanel is not None:
+            table = tablePanel.mainTable
+            return table
+
     def _mainTableColumnViewCallback(self, *args):
 
         widget = self.getWidget(guiNameSpaces.WidgetVarName_TableView)
         if not widget:
             return
         checked = widget.get() #get the checked values
-        tablePanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.TablePanel)
-        if tablePanel is not None:
-            table = tablePanel.mainTable
-            print(f'NYI: TODO: Need to tick {checked} in {table}')
-            # TODO change the column view on table!
+        table = self._getMainTable()
 
+    def _changeNavigateToDisplayTrigger(self, *args):
+        table = self._getMainTable()
+        widget = self.getWidget(guiNameSpaces.WidgetVarName_NavigateToOpt)
+        if table and widget:
+            table.setNavigateToPeakTrigger(widget.getByText())
 
 TABPOS += 1
 

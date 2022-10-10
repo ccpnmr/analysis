@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-09-23 16:12:48 +0100 (Fri, September 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-10 16:26:28 +0100 (Mon, October 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,11 +50,14 @@ BAR_thresholdLine       = 'blue'
 
 ##### SETTINGS  ######
 
-SETTINGS = 'settings'
+SETTINGS                = 'settings'
 WidgetVarName_          = 'VarName'
 Label_                  = 'Label'
 tipText_                = 'tipText'
 
+SingleClick             = 'Single Click'
+DoubleClick             = 'Double Click'
+Disabled                = 'Disabled'
 
 ####################################################
 ##########  TAB: GuiInputDataPanel
@@ -232,6 +235,10 @@ TipText_SpectrumDisplSeparator          = 'General Appearance settings for Spect
 WidgetVarName_SpectrumDisplSelection    = 'SpectrumDisplaySelection'
 Label_SpectrumDisplSelection            = 'Navigate to SpectrumDisplay'
 TipText_SpectrumDisplSelection          = 'Navigate to Peaks/NmrResidues in the selected SpectrumDisplay(s)'
+
+WidgetVarName_NavigateToOpt             = 'NavigateToOnClick'
+Label_NavigateToOpt                     = 'Navigate trigger'
+TipText_NavigateToOpt                   = 'Navigate to Peaks/NmrResidues in the selected SpectrumDisplay(s) using Single or Double click on the main table'
 
 WidgetVarName_BarGraphSeparator         = 'GeneralAppearanceSeparator'
 Label_BarGraphAppearance                = 'BarGraph'

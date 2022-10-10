@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-10 11:40:03 +0100 (Mon, October 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-10 16:26:28 +0100 (Mon, October 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -87,8 +87,9 @@ class _ExperimentalAnalysisTableABC(Table):
 
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
-
-        self._navigateToPeakOnSelection = True
+        self._navigateToPeakOnSelection = True # Default Behaviour
+        navigateTrigger = self.guiModule.getSettings(grouped=False).get(guiNameSpaces.WidgetVarName_NavigateToOpt)
+        self.setNavigateToPeakTrigger(navigateTrigger)
         self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
                                                  callback=self._currentCollectionCallback, onceOnly=True)
 
@@ -108,7 +109,6 @@ class _ExperimentalAnalysisTableABC(Table):
     def build(self, dataFrame):
         if dataFrame is not None:
             self.updateDf(df=dataFrame)
-
             self.setHiddenColumns(texts=self._hiddenColumns)
 
     #=========================================================================================
@@ -130,8 +130,30 @@ class _ExperimentalAnalysisTableABC(Table):
             _navigateToPeak(self.guiModule, self.current.peaks[-1])
 
     def actionCallback(self, selection, lastItem):
-        from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import _navigateToPeak
-        _navigateToPeak(self.guiModule, self.current.peaks[-1])
+        """ Perform a NavigateTo if required"""
+        if self._navigateToPeakOnSelection is None:
+            return # navigate is disabled
+        elif self._navigateToPeakOnSelection:
+            return # navigate is on a single click
+        else:
+            from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import _navigateToPeak
+            _navigateToPeak(self.guiModule, self.current.peaks[-1])
+
+    def setNavigateToPeakTrigger(self, trigger):
+        """
+        :param trigger: one of guiNameSpaces.SingleClick, doubleClick or Disabled
+        :return: None
+        """
+        if trigger is None:
+            self._navigateToPeakOnSelection = None
+            return
+        if trigger == guiNameSpaces.SingleClick:
+            self._navigateToPeakOnSelection = True
+            return
+        if trigger == guiNameSpaces.DoubleClick:
+            self._navigateToPeakOnSelection = False
+            return
+
 
     #=========================================================================================
     # Handle drop events

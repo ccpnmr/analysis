@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-21 15:03:25 +0100 (Wed, September 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-10 17:26:26 +0100 (Mon, October 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import functools
 # import os
+import re
 import typing
 import operator
 from typing import Sequence, Union, Optional, List
@@ -34,6 +35,7 @@ from collections import OrderedDict
 # from time import time
 from datetime import datetime
 from collections.abc import Iterable
+
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.Updater import UPDATE_POST_PROJECT_INITIALISATION
 from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
@@ -638,11 +640,9 @@ class Project(AbstractWrapperObject):
              createFallback: bool = False, overwriteExisting: bool = False,
              checkValid: bool = False, changeDataLocations: bool = False) -> bool:
         """Save project with all data, optionally to new location or with new name.
-        Unlike lower-level functions, this function ensures that data in high level caches are saved.
-        Return True if save succeeded otherwise return False (or throw error)
-        """
-        # self._flushCachedData()
 
+        ;return True if save succeeded otherwise return False (or throw error)
+        """
         # Update the spectrum internal settings
         for spectrum in self.spectra:
             spectrum._saveObject()
@@ -654,6 +654,12 @@ class Project(AbstractWrapperObject):
             newPath.assureSuffix(CCPN_EXTENSION)
             if newPath.exists() and not overwriteExisting:
                 raise ValueError('Cannot overwrite existing file "%s"' % newPath)
+
+            # check the project name derived from path
+            newName = newPath.basename
+            if (_name := self._checkName(newName, correctName=False)) is None:
+                raise ValueError(f'Project name "{newName}" (derived from path) is invalid; see console/log for details')
+
             path = str(newPath)
             if len(path) > 1024:
                 raise ValueError('There is a limit (1024) to the length of the path (%s)' % path)
@@ -705,6 +711,16 @@ class Project(AbstractWrapperObject):
     def name(self) -> str:
         """name of Project"""
         return self._wrappedData.root.name
+
+    @classmethod
+    def _checkName(cls, name, correctName=True):
+        """Checks name
+
+        :param name: name to be checked
+        :param correctName: flag to correct
+        :return: name (optionally corrected) or None
+        """
+        return apiIo._checkProjectName(name=name, correctName=correctName)
 
     @property
     def path(self) -> str:

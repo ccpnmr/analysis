@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-05 13:15:14 +0100 (Wed, October 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-10 17:26:27 +0100 (Mon, October 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -172,14 +172,10 @@ class Framework(NotifierBase, GuiBase):
         # self.revision = Version.revision
 
         self.useFileLogger = not self.args.nologging
-        if self.args.debug3:
-            self._debugLevel = Logging.DEBUG3
-        elif self.args.debug2:
-            self._debugLevel = Logging.DEBUG2
-        elif self.args.debug:
-            self._debugLevel = Logging.DEBUG
-        else:
-            self._debugLevel = Logging.INFO
+
+        # map to 0-3, with 0 no debug
+        _level = ([self.args.debug, self.args.debug2, self.args.debug3, True].index(True) + 1) % 4
+        self.setDebug(_level)
 
         self.preferences = Preferences(application=self)
         if not self.args.skipUserPreferences:
@@ -258,17 +254,6 @@ class Framework(NotifierBase, GuiBase):
     def hasGui(self) -> bool:
         """:return True if application has a gui"""
         return isinstance(self.ui, Gui)
-
-    @property
-    def _isInDebugMode(self) -> bool:
-        """:return True if either of the debug flags has been set
-        CCPNINTERNAL: used throughout to check
-        """
-        if self._debugLevel == Logging.DEBUG1 or \
-                self._debugLevel == Logging.DEBUG2 or \
-                self._debugLevel == Logging.DEBUG3:
-            return True
-        return False
 
     #-----------------------------------------------------------------------------------------
     # Useful (?) directories as Path instances
@@ -537,16 +522,40 @@ class Framework(NotifierBase, GuiBase):
             self.ui.initialize(None)
 
     #-----------------------------------------------------------------------------------------
+    # Utilities
+    #-----------------------------------------------------------------------------------------
+
+    def setDebug(self, level:int):
+        """Set the debugging level
+        :param level: 0: off, 1-3: debug level 1-3
+        """
+        if level == 3:
+            self._debugLevel = Logging.DEBUG3
+        elif level == 2:
+            self._debugLevel = Logging.DEBUG2
+        elif level == 1:
+            self._debugLevel = Logging.DEBUG
+        elif level == 0:
+            self._debugLevel = Logging.INFO
+        else:
+            raise ValueError(f'Invalid debug level ({level}); should be 0-3')
+
+    @property
+    def _isInDebugMode(self) -> bool:
+        """:return True if either of the debug flags has been set
+        CCPNINTERNAL: used throughout to check
+        """
+        if self._debugLevel == Logging.DEBUG1 or \
+           self._debugLevel == Logging.DEBUG2 or \
+           self._debugLevel == Logging.DEBUG3:
+            return True
+        return False
 
     def _savePreferences(self):
         """Save the user preferences to file
         CCPNINTERNAL: used in PreferencesPopup and GuiMainWindow._close()
         """
         self.preferences._saveUserPreferences()
-
-    #-----------------------------------------------------------------------------------------
-
-    #-----------------------------------------------------------------------------------------
 
     def _setLanguage(self):
         # Language, check for command line override, or use preferences
@@ -854,14 +863,12 @@ class Framework(NotifierBase, GuiBase):
         # local import to avoid cycles
         from ccpn.core.Project import _newProject
 
-        newName = re.sub('[^0-9a-zA-Z]+', '', name)
+        if Project._checkName(name, correctName=False) is None:
+            raise ValueError(f'Invalid project name "{name}"; check log/console for details')
         # NB _closeProject includes a gui cleanup call
         self._closeProject()
-        newProject = _newProject(self, name=newName)
+        newProject = _newProject(self, name=name)
         self._initialiseProject(newProject)  # This also set the linkages
-        # defer the logging output until the project is fully initialised
-        if newName != name:
-            getLogger().info('Removed whitespace from name: %s' % name)
         return newProject
 
     # @logCommand('application.')  # decorated in ui class
@@ -920,20 +927,14 @@ class Framework(NotifierBase, GuiBase):
         return self.ui.saveProject()
 
     def _closeProject(self):
-        """Close project and clean up - when opening another or quitting application
+        """Close project and clean up - when opening another or quitting application.
+        Leaves the state of the whole programme as "transient", as there is no active project.
+        Hence, need to be followed by initialising a new project or termination of the programme.
         """
         # NB: this function must clean up both wrapper and ui/gui
 
         self.deleteAllNotifiers()
-        if self.ui.mainWindow:
-            # ui/gui cleanup
-            self.ui.mainWindow.deleteAllNotifiers()
-            self.ui.mainWindow._closeMainWindowModules()
-            self.ui.mainWindow._closeExtraWindowModules()
-            self.ui.mainWindow.sideBar.clearSideBar()
-            self.ui.mainWindow.sideBar.deleteLater()
-            self.ui.mainWindow.deleteLater()
-            self.ui.mainWindow = None
+        self.ui._closeProject()
 
         if self.current:
             self.current._unregisterNotifiers()

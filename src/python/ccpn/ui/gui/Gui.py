@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-22 17:43:36 +0100 (Thu, September 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-10 17:26:27 +0100 (Mon, October 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -454,9 +454,12 @@ class Gui(Ui):
             if not _ok:
                 return
 
+        if (_name := Project._checkName(name, correctName=True)) != name:
+            MessageDialog.showInfo('New Project', f'Project name changed from "{name}" to "{_name}"\nSee console/log for details', parent=self)
+
         with catchExceptions(errorStringTemplate='Error creating new project: %s'):
             self.mainWindow.moduleArea._closeAll()
-            newProject = self.application._newProject(name=name)
+            newProject = self.application._newProject(name=_name)
             if newProject is None:
                 raise RuntimeError('Unable to create new project')
             newProject._mainWindow.show()
@@ -551,6 +554,20 @@ class Gui(Ui):
 
         return None
 
+    def _closeProject(self):
+        """Do all gui-related stuff when closing a project
+        CCPNINTERNAL: called from Framework._closeProject()
+        """
+        if self.mainWindow:
+            # ui/gui cleanup
+            self.mainWindow.deleteAllNotifiers()
+            self.mainWindow._closeMainWindowModules()
+            self.mainWindow._closeExtraWindowModules()
+            self.mainWindow.sideBar.clearSideBar()
+            self.mainWindow.sideBar.deleteLater()
+            self.mainWindow.deleteLater()
+            self.mainWindow = None
+
     def saveProjectAs(self, newPath=None, overwrite:bool=False) -> bool:
         """Opens save Project to newPath.
         Optionally open file dialog.
@@ -564,6 +581,8 @@ class Gui(Ui):
                 return False
 
         newPath = aPath(newPath).assureSuffix(CCPN_EXTENSION)
+        title = 'Project SaveAs'
+
         if (  not overwrite and
               newPath.exists() and
              (newPath.is_file() or (newPath.is_dir() and len(newPath.listdir()) > 0))
@@ -571,13 +590,18 @@ class Gui(Ui):
             # should not really need to check the second and third condition above, only
             # the Qt dialog stupidly insists a directory exists before you can select it
             # so if it exists but is empty then don't bother asking the question
-            title = 'Project SaveAs'
             msg = 'Path "%s" already exists; overwrite?' % newPath
             if not MessageDialog.showYesNo(title, msg):
                 return False
 
-        with logCommandManager('application.', 'saveProjectAs', newPath, overwrite=overwrite):
-            with catchExceptions(errorStringTemplate='Error saving project: %s'):
+        # check the project name derived from path
+        newName = newPath.basename
+        if (_name := self.project._checkName(newName, correctName=True)) != newName:
+            newPath = newPath.parent / _name + CCPN_EXTENSION
+            MessageDialog.showInfo(title, f'Project name changed from "{newName}" to "{_name}"\nSee console/log for details', parent=self)
+
+        with catchExceptions(errorStringTemplate='Error saving project: %s'):
+            with logCommandManager('application.', 'saveProjectAs', newPath, overwrite=overwrite):
                 with MessageDialog.progressManager(self.mainWindow, f'Saving project {newPath} ... '):
                     if not self.application._saveProject(newPath=newPath,
                                                          createFallback=False,
@@ -587,16 +611,20 @@ class Gui(Ui):
                         MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
                         return False
 
-        self.mainWindow._updateWindowTitle()
-        self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
-        self.mainWindow._fillRecentProjectsMenu() # Update the menu
+            self.mainWindow._updateWindowTitle()
+            self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
+            self.mainWindow._fillRecentProjectsMenu() # Update the menu
 
-        successMessage = 'Project successfully saved to "%s"' % self.project.path
-        MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
-        self.mainWindow.statusBar().showMessage(successMessage)
-        getLogger().info(successMessage)
+            successMessage = 'Project successfully saved to "%s"' % self.project.path
+            MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
+            self.mainWindow.statusBar().showMessage(successMessage)
+            getLogger().info(successMessage)
 
-        return True
+            return True
+
+        # PyCharm thinks the next statement is unreachable; not true as the with catchExceptions does yield
+        # and finish
+        return False
 
     @logCommand('application.')
     def saveProject(self) -> bool:

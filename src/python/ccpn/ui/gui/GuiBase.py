@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-01 19:18:26 +0100 (Thu, September 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-10 17:26:27 +0100 (Mon, October 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -310,6 +310,15 @@ class GuiBase(object):
             (PLUGINSMENU, ()),
             ]
                    ))
+
+        if self._isInDebugMode:
+            ms.append(('Development', [
+                ("Set debug off", partial(self.setDebug, 0)),
+                ("Set debug level 1", partial(self.setDebug, 1)),
+                ("Set debug level 2", partial(self.setDebug, 2)),
+                ("Set debug level 3", partial(self.setDebug, 3)),
+                ]
+                       ))
 
         ms.append(('Help', [
             (TUTORIALSMENU, ([

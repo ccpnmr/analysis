@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-30 14:40:52 +0100 (Fri, September 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-11 13:00:51 +0100 (Tue, October 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -48,16 +48,21 @@ import ccpn.core.lib.SpectrumLib as specLib
 
 #============================================================================================================
 
-DATA_TYPE_REAL    = 0  # real data points
-DATA_TYPE_COMPLEX = 1  # size/2 real and size/2 imag points
-DATA_TYPE_PN      = 2  # size/2 P and size/2 N points
-dataTypeMap = {DATA_TYPE_REAL:"real", DATA_TYPE_COMPLEX:"complex", DATA_TYPE_PN:"PN"}
+#define FD_QUAD       0
+#define FD_COMPLEX    0
+#define FD_SINGLATURE 1
+#define FD_REAL       1
+#define FD_PSEUDOQUAD 2
+#define FD_SE         3
+#define FD_GRAD       4
+from ccpn.core.lib.SpectrumLib import DATA_TYPE_REAL, DATA_TYPE_PN, DATA_TYPE_COMPLEX
+dataTypeMap = {0:DATA_TYPE_COMPLEX, 1:DATA_TYPE_REAL, 2:DATA_TYPE_REAL, 3:DATA_TYPE_PN, 4:DATA_TYPE_REAL}
 
 from ccpn.core.lib.SpectrumLib import DIMENSION_FREQUENCY, DIMENSION_TIME
-DOMAIN_TIME       = 0
-DOMAIN_FREQUENCY  = 1
+PIPE_TIME_DOMAIN  = 0
+PIPE_FREQUENCY_DOMAIN  = 1
 # map NmrPipe defs on V3 defs
-domainMap = {DOMAIN_TIME:DIMENSION_TIME, DOMAIN_FREQUENCY:DIMENSION_FREQUENCY}
+domainMap = {PIPE_TIME_DOMAIN:DIMENSION_TIME, PIPE_FREQUENCY_DOMAIN:DIMENSION_FREQUENCY}
 
 # ordering definitions for the NUS types, to be stored in FDUSER6
 NUS_TYPE_NONUS    = 0
@@ -87,7 +92,6 @@ nusMap = {NUS_TYPE_NONUS:"regular", NUS_TYPE_NUS:"nus", NUS_TYPE_ISTNUS:"ist-nus
 #  (F) Complex  (F) Real     ->   nAq/2     n1
 #  (F) Real     (F) Complex  ->   nAq       n1/2
 #  (F) Real     (F) Real     ->   nAq       n1
-#
 #
 #============================================================================================================
 
@@ -143,12 +147,6 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                                                  spectrumAttribute=None,
                                                  hasSetterInSpectrumClass=False
                                                  )
-    dataTypes = CList(trait=Int(), default_value=[DATA_TYPE_REAL] * MAXDIM, maxlen=MAXDIM).tag(
-            isDimensional=True,
-            doCopy=True,
-            spectrumAttribute=None,
-            hasSetterInSpectrumClass=False
-            )
 
     def __init__(self, path=None, spectrum=None, temporaryBuffer=True, bufferPath=None):
         """Initialise; optionally set path or extract from spectrum
@@ -207,8 +205,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
             # map the quad types
             _quadTypes = self.header.getParameterValue('quadType')
-            map2 = {0: DATA_TYPE_COMPLEX, 1:DATA_TYPE_REAL, 3:DATA_TYPE_PN}
-            self.dataTypes = [map2.get(v, DATA_TYPE_REAL) for v in _quadTypes]
+            self.dataTypes = [dataTypeMap.get(v, DATA_TYPE_REAL) for v in _quadTypes]
             self.isComplex = [v != DATA_TYPE_REAL for v in self.dataTypes]
 
             _pointCounts = self.header.getParameterValue('pointCounts')
@@ -217,7 +214,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                 _pointCounts[specLib.X_AXIS] *= 2
 
             if not self.isComplex[specLib.X_AXIS] and \
-                   self.dimensionTypes[specLib.X_AXIS] == DIMENSION_FREQUENCY and \
+               self.dimensionTypes[specLib.X_AXIS] == DIMENSION_FREQUENCY and \
                self.isComplex[specLib.Y_AXIS]:
                     _pointCounts[specLib.Y_AXIS] *= 2
 
@@ -378,8 +375,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         """define valid path to a (binary) data file, if needed appends or substitutes
         the suffix (if defined).
 
-
-        return self or None on error
+        :return self or None on error
         """
         if path is None:
             self.dataFile = None  # A reset essentially
@@ -401,6 +397,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
         getLogger().debug('fillHdf5Buffer: filling buffer %s' % self.hdf5buffer)
 
+        # just some definitions
         xAxis = specLib.X_DIM_INDEX
         xDim = specLib.X_DIM
         yAxis = specLib.Y_DIM_INDEX
@@ -419,6 +416,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
             # nD's: fill the buffer, reading x,y planes from the nmrPipe files into the hdf5 buffer
             planeSize = self.pointCounts[xAxis] * self.pointCounts[yAxis]
             sliceTuples = [(1, p) for p in self.pointCounts]
+            # loop over all the xy-planes
             for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=(xDim, yDim)):
                 path, offset = self._getPathAndOffset(position)
                 with open(path, 'r') as fp:
@@ -426,21 +424,55 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                     data = numpy.fromfile(file=fp, dtype=self.dtype, count=planeSize)
                     data.resize( (self.pointCounts[yAxis], self.pointCounts[xAxis]))
 
+                writePosition = [p for p in position]
+                writeData = data
+
+                # For the Z,A dimensions:
+                # - the complex time Z,A-axes have n alternating real, imag points (nRI)
+                if self.dimensionCount >= 3 and self.isComplex[specLib.Z_AXIS] and \
+                   self.dimensionTypes[specLib.Z_AXIS] == DIMENSION_TIME:
+                    # adjust the Z-position to nRnI ordering
+                    zP = writePosition[specLib.Z_AXIS] - 1  # convert to zero-based
+                    totalSize = self.pointCounts[specLib.Z_AXIS]
+                    realSize = totalSize // 2
+                    if zP % 2:
+                        # imaginary point
+                        zP = zP // 2 + realSize
+                    else:
+                        # real point
+                        zP = zP // 2
+                    writePosition[specLib.Z_AXIS] = zP + 1 # convert to one-based
+
+                if self.dimensionCount >= 4 and self.isComplex[specLib.A_AXIS] and \
+                   self.dimensionTypes[specLib.A_AXIS] == DIMENSION_TIME:
+                    # adjust the A-position to nRnI ordering
+                    aP = writePosition[specLib.A_AXIS] - 1  # convert to zero-based
+                    totalSize = self.pointCounts[specLib.A_AXIS]
+                    realSize = totalSize // 2
+                    if aP % 2:
+                        # imaginary point
+                        aP = aP // 2 + realSize
+                    else:
+                        # real point
+                        aP = aP // 2
+                    writePosition[specLib.A_AXIS] = aP + 1 # convert to one-based
+
+                # In a NmrPipe 2D xy plane:
+                # - A complex X-axis has n real points followed by n imaginary points (nRnI)
+                # - A complex Y-axis has n alternating real, imag points (nRI)
                 if self.isComplex[specLib.Y_AXIS] and \
                    self.dimensionTypes[specLib.Y_AXIS] == DIMENSION_TIME:
                     # sort the n-RI data point into nRnI data points
                     totalSize = self.pointCounts[specLib.Y_AXIS]
-                    realSize = int(totalSize / 2)
-                    data2 = numpy.empty(shape=data.shape)
+                    realSize = totalSize // 2
+                    writeData = numpy.empty(shape=data.shape)
                     _realData = data[0::2,:]  # The real points
                     _imagData = data[1::2,:]  # The imag points
-                    data2[0:realSize, :] = _realData
-                    data2[realSize:totalSize, :] = _imagData
+                    writeData[0:realSize, :] = _realData
+                    writeData[realSize:totalSize, :] = _imagData
 
-                    self.hdf5buffer.setPlaneData(data2, position=position, xDim=xDim, yDim=yDim)
+                self.hdf5buffer.setPlaneData(writeData, position=writePosition, xDim=xDim, yDim=yDim)
 
-                else:
-                    self.hdf5buffer.setPlaneData(data, position=position, xDim=xDim, yDim=yDim)
         self._bufferFilled = True
 
 # Register this format

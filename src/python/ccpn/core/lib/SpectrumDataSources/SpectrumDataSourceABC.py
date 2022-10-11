@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-10-11 13:00:51 +0100 (Tue, October 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-11 16:17:13 +0100 (Tue, October 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -319,14 +319,14 @@ class SpectrumDataSourceABC(CcpNmrJson):
             hasSetterInSpectrumClass=False
             )
     pointCounts = CList(trait=CInt(allow_none=False), default_value=[0] * MAXDIM, maxlen=MAXDIM).tag(
-            info='Total number of points along each dimension',
+            info='Total number of data points along each dimension',
             isDimensional=True,
             doCopy=True,
             spectrumAttribute='pointCounts',
             hasSetterInSpectrumClass=True
             )
     blockSizes = CList(trait=CInt(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
-            info='Sub-matrix sizes along each dimension',
+            info='Sub-matrix number of points along each dimension',
             isDimensional=True,
             doCopy=False,
             spectrumAttribute=None,
@@ -536,6 +536,16 @@ class SpectrumDataSourceABC(CcpNmrJson):
         else:
             result = (self.headerSize + self.totalNumberOfPoints) * self.wordSize
 
+        return result
+
+    @property
+    def realPointCounts(self) -> list:
+        """Conveniance to yield the number of real points along each dimension
+        """
+        result = []
+        for isComplex, p in zip(self.isComplex, self.pointCounts):
+            _p = p // 2 if isComplex else p
+            result.append(_p)
         return result
 
     #=========================================================================================

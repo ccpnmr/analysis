@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-10-11 13:00:51 +0100 (Tue, October 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-11 16:17:12 +0100 (Tue, October 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -416,6 +416,8 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
             # nD's: fill the buffer, reading x,y planes from the nmrPipe files into the hdf5 buffer
             planeSize = self.pointCounts[xAxis] * self.pointCounts[yAxis]
             sliceTuples = [(1, p) for p in self.pointCounts]
+            realPointCounts = self.realPointCounts
+
             # loop over all the xy-planes
             for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=(xDim, yDim)):
                 path, offset = self._getPathAndOffset(position)
@@ -433,11 +435,9 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                    self.dimensionTypes[specLib.Z_AXIS] == DIMENSION_TIME:
                     # adjust the Z-position to nRnI ordering
                     zP = writePosition[specLib.Z_AXIS] - 1  # convert to zero-based
-                    totalSize = self.pointCounts[specLib.Z_AXIS]
-                    realSize = totalSize // 2
                     if zP % 2:
                         # imaginary point
-                        zP = zP // 2 + realSize
+                        zP = zP // 2 + realPointCounts[specLib.Z_AXIS]
                     else:
                         # real point
                         zP = zP // 2
@@ -447,11 +447,9 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                    self.dimensionTypes[specLib.A_AXIS] == DIMENSION_TIME:
                     # adjust the A-position to nRnI ordering
                     aP = writePosition[specLib.A_AXIS] - 1  # convert to zero-based
-                    totalSize = self.pointCounts[specLib.A_AXIS]
-                    realSize = totalSize // 2
                     if aP % 2:
                         # imaginary point
-                        aP = aP // 2 + realSize
+                        aP = aP // 2 + realPointCounts[specLib.A_AXIS]
                     else:
                         # real point
                         aP = aP // 2
@@ -464,7 +462,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                    self.dimensionTypes[specLib.Y_AXIS] == DIMENSION_TIME:
                     # sort the n-RI data point into nRnI data points
                     totalSize = self.pointCounts[specLib.Y_AXIS]
-                    realSize = totalSize // 2
+                    realSize = realPointCounts[specLib.Y_AXIS]
                     writeData = numpy.empty(shape=data.shape)
                     _realData = data[0::2,:]  # The real points
                     _imagData = data[1::2,:]  # The imag points

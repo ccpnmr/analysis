@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-12 10:21:58 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:02:46 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -327,6 +327,19 @@ class SeriesAnalysisABC(ABC):
         for dataTable in self._inputDataTables:
             if not isinstance(dataTable.data.__class__ , InputSeriesFrameBC):
                 dataTable.data.__class__ = InputSeriesFrameBC
+
+    def _isPeakInParentCollection(self, peak):
+        """Check if a peak is in the parentCollection subCollection """
+
+        if not self.inputCollection:
+            return False
+        return any([co for co in peak.collections if co in self.inputCollection.items])
+
+    def _isCollectionInParentCollection(self, collection):
+        """Check if a collection is in the parentCollection items """
+        if not self.inputCollection:
+            return False
+        return collection in self.inputCollection.items
 
     @classmethod
     def exportToFile(cls, path, fileType, *args, **kwargs):

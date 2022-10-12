@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-10 17:49:59 +0100 (Mon, October 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:02:46 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -189,12 +189,15 @@ class BarGraphWidget(Widget):
             masked = np.ma.masked_inside(xAll, xm, xM)
             filtered = xAll[masked.mask]
             # filter for only the visible range.
-            _max = np.max(filtered)
-            _min = np.min(filtered)
-            self.plotWidget.setXRange(_min, _max)
+            if len(filtered)>0:
+                _max = np.max(filtered)
+                _min = np.min(filtered)
+                self.plotWidget.setXRange(_min, _max)
+            else:
+                self.zoomFull()
 
     def fitYZoom(self):
-        """ToDo get this from the current view, rather then the whole data """
+        """"""
         xs, ys = self._getPlotData()
         xRange, yRange = self.customViewBox.viewRange()
         xm, xM = xRange
@@ -206,7 +209,10 @@ class BarGraphWidget(Widget):
             # filter for only the visible range.
             masked = np.ma.masked_inside(xAll, xm, xM)
             filtered = yAll[masked.mask]
-            self.plotWidget.setYRange(np.min(filtered),  np.max(filtered))
+            if len(filtered) > 0:
+                self.plotWidget.setYRange(np.min(filtered),  np.max(filtered))
+            else:
+                self.zoomFull()
 
     def _setViewBox(self):
         self.customViewBox = CustomViewBox(application=self.application)

@@ -32,7 +32,7 @@ assignIsotope = '13C'       # Isotope of dimension to be assigned
 rootIsotope = '1H'         # Isotope of one of the root dimensions which has already been assigned
 casPosCbsNeg = True # True if Ca peaks are positive and Cb peaks are negative in HNCACB,
                     # False if Cas are negative and Cb peaks are positive
-glyHasCaSign = True  # True if Glycine Ca peaks in the HNCACB spectrum have the same sign as the other Ca peaks,
+glyHasCaSign = False  # True if Glycine Ca peaks in the HNCACB spectrum have the same sign as the other Ca peaks,
                     # False if Glycine Ca peaks in the HNCACB spectrum have the same sign as the other Cb peaks
 
 iSpectra = ['H[N[CA]]', 'H[N[ca[CO]]]', 'H[N[{CA|ca[Cali]}]]']

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-10 16:26:28 +0100 (Mon, October 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 10:21:58 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -62,6 +62,14 @@ Disabled                = 'Disabled'
 ####################################################
 ##########  TAB: GuiInputDataPanel
 ####################################################
+
+WidgetVarName_InputCollectionSeparator  = 'InputCollectionSeparator'
+Label_InputCollection                   = 'Input Collection'
+TipText_InputCollection                 = 'Select the top parent Collection containing all subset of peakCollections'
+
+WidgetVarName_InputCollectionSelection  = 'InputCollectionSelection'
+Label_InputCollectionSelection          = Label_InputCollection
+TipText_InputCollectionSelection        = TipText_InputCollection
 
 Label_InputData                         = 'Input data'
 TipText_GuiInputDataPanel               = 'This tab will allow user to create and set the input DataTable(s)'

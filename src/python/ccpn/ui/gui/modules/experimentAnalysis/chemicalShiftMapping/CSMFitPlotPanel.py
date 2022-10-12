@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-10 15:28:07 +0100 (Mon, October 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 10:21:58 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -88,7 +88,8 @@ class CSMFitPlotPanel(FitPlotPanel):
                 dd = {'pos': [0, 0], 'data': 'obj', 'brush': pg.mkBrush(255, 0, 0), 'symbol': 'o', 'size': 10, 'pen': None}  # red default
                 dd['pos'] = [x,y]
                 dd['data'] = obj
-
+                if obj is None:
+                    continue
                 if hasattr(obj.spectrum, 'positiveContourColour'):  # colour from the spectrum. The only CCPN obj implemeted so far
                     brush = pg.functions.mkBrush(hexToRgb(obj.spectrum.positiveContourColour))
                     dd['brush'] = brush

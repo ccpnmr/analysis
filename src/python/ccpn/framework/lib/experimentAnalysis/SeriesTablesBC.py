@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-10 15:28:07 +0100 (Mon, October 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 10:21:58 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -179,19 +179,31 @@ class InputSeriesFrameBC(SeriesFrameBC):
         self.loc[-1, columns] = None # None value, because you must give a value when creating columns after init.
         self.dropna(inplace=True)    # remove  None values that were created as a temporary spaceHolder
 
-    def _getCollectionDict4SpectrumGroup(self, spectrumGroup):
-        """ _Internal. build the collection dict, so we know if a peak is in a collection.
-        Note, this routine exists because peak.collection is extremely slow and here we also filter-out peaks
-        which are not  in the spectrumGroup of interest."""
+    def _getCollectionDict4SpectrumGroup(self, spectrumGroup, parentCollection=None):
+        """
+        Internal.
+        Build a collection dict applying several filter of interest.
+            - Filter collections which are subset of the parentCollection if parentCollection is given,
+              else use all available from project.
+            - Filter peaks in the collection Items if their spectra are in the given spectrumGroup argument
+            - Note, you cannot simply use peak.collections (which is also extremely slow)
+        :param spectrumGroup:
+        :param parentCollection: Collection or None, the inputCollection in the backendHandler. Top collection containing subsets of peakCollections
+        :return: dict {peak:[collection,...]}
+        """
         collectionDict = defaultdict(list)
-        for col in spectrumGroup.project.collections:
-            for item in col.items:
+        if parentCollection is not None:
+            parentCollectionItems = parentCollection.items
+        else:
+            parentCollectionItems = spectrumGroup.project.collections
+        for collection in parentCollectionItems:
+            for item in collection.items:
                 if isinstance(item, Peak):
                     if item.spectrum in spectrumGroup.spectra:
-                        collectionDict[item].append(col)
+                        collectionDict[item].append(collection)
         return collectionDict
 
-    def buildFromSpectrumGroup(self, spectrumGroup, peakListIndices=None, filteredPeaks=None):
+    def buildFromSpectrumGroup(self, spectrumGroup, parentCollection=None, peakListIndices=None, filteredPeaks=None):
         """
         :param spectrumGroup: A core object containg the spectra ans series information
         :param peakListIndices: list of int, same length of spectra. Define which peakList index to use.
@@ -205,7 +217,7 @@ class InputSeriesFrameBC(SeriesFrameBC):
         spectra = spectrumGroup.spectra
         if peakListIndices is None or len(peakListIndices) != len(spectra):
             peakListIndices = [-1] * len(spectra)
-        collectionDict = self._getCollectionDict4SpectrumGroup(spectrumGroup)
+        collectionDict = self._getCollectionDict4SpectrumGroup(spectrumGroup, parentCollection=parentCollection)
         i = 1
         while True: ## This because we don't know how many rows we need
             for spectrum, peakListIndex in zip(spectra, peakListIndices):

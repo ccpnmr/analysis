@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-10 16:26:28 +0100 (Mon, October 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 10:21:58 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -190,6 +190,28 @@ class GuiInputDataPanel(GuiSettingPanel):
         """ Define the widgets in a dict."""
         backend = self.guiModule.backendHandler
         self.widgetDefinitions = od((
+
+            (guiNameSpaces.WidgetVarName_InputCollectionSeparator,
+             {'label': guiNameSpaces.Label_InputCollection,
+              'type': LabeledHLine,
+              'kwds': {'text': guiNameSpaces.Label_InputCollection,
+                       # 'height': 30,
+                       'gridSpan': (1, 2),
+                       'colour': DividerColour,
+                       'tipText': guiNameSpaces.TipText_InputCollection}}),
+
+            (guiNameSpaces.WidgetVarName_InputCollectionSelection,
+             {'label': guiNameSpaces.Label_InputCollectionSelection,
+              'tipText': guiNameSpaces.TipText_InputCollectionSelection,
+              'type': objectPulldowns.CollectionPulldown,
+              'kwds': {'labelText': guiNameSpaces.Label_InputCollectionSelection,
+                       'tipText': guiNameSpaces.TipText_InputCollectionSelection,
+                       'filterFunction': self._filterInputCollections,
+                       'callback':self._addInputCollectionCallback,
+                       'showSelectName': True,
+                       'objectName': guiNameSpaces.WidgetVarName_InputCollectionSelection,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+
             (guiNameSpaces.WidgetVarName_SpectrumGroupsSeparator,
              {'label': guiNameSpaces.Label_SpectrumGroups,
                                  'type': LabeledHLine,
@@ -203,9 +225,12 @@ class GuiInputDataPanel(GuiSettingPanel):
                                 'tipText': guiNameSpaces.TipText_SpectrumGroupSelectionWidget,
                                 'callBack': None,
                                 'type': settingWidgets.SpectrumGroupSelectionWidget,
+                                'postInit': self._setFixedHeightPostInit,
                                 'kwds': {
                                         'labelText': guiNameSpaces.Label_SelectSpectrumGroups,
                                         'tipText': guiNameSpaces.TipText_SpectrumGroupSelectionWidget,
+                                        'pulldownCallback': self._addSpectrumGroupToBackend,
+                                        'objectWidgetChangedCallback': self._addSpectrumGroupToBackend,
                                         'displayText': [],
                                         'defaults': [],
                                         'standardListItems':[],
@@ -245,6 +270,7 @@ class GuiInputDataPanel(GuiSettingPanel):
              {'label': guiNameSpaces.Label_SelectDataTable,
               'tipText': guiNameSpaces.TipText_DataTableSelection,
               'type': settingWidgets._SeriesInputDataTableSelectionWidget,
+              'postInit': self._setFixedHeightPostInit,
               'kwds': {
                   'objectWidgetChangedCallback':self._addInputDataCallback,
                   'labelText': guiNameSpaces.Label_SelectDataTable,
@@ -300,6 +326,11 @@ class GuiInputDataPanel(GuiSettingPanel):
             ))
         return self.widgetDefinitions
 
+    def _setFixedHeightPostInit(self, widget, *args):
+        widget.listWidget.setFixedHeight(50)
+        widget.setMaximumWidths(SettingsWidgetFixedWidths)
+        widget.getLayout().setAlignment(QtCore.Qt.AlignTop)
+
     def _addInputDataCallback(self, *args):
 
         backend = self.guiModule.backendHandler
@@ -313,6 +344,28 @@ class GuiInputDataPanel(GuiSettingPanel):
             if obj:
                 backend.addInputDataTable(obj)
                 getLogger().info(f'{self.guiModule.className}:{self.tabName}. {obj} added to inputDataTables')
+
+    def _addInputCollectionCallback(self, *args):
+        """Add Input Collection to backened  """
+        backend = self.guiModule.backendHandler
+        pid = self.getSettingsAsDict().get(guiNameSpaces.WidgetVarName_InputCollectionSelection)
+        obj = self.guiModule.project.getByPid(pid)
+        if obj:
+            backend.inputCollection = obj
+
+    def _addSpectrumGroupToBackend(self, *args):
+
+        backend = self.guiModule.backendHandler
+        sgPids = self.getSettingsAsDict().get(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection, [])
+        if not sgPids:
+            self.guiModule.backendHandler.clearInputDataTables()
+            getLogger().info(f'{self.guiModule.className}:{self.tabName}. Cleaned inputSpectrumGroups')
+            return
+        for pid in sgPids:
+            obj = self.guiModule.project.getByPid(pid)
+            if obj:
+                backend.addInputSpectrumGroup(obj)
+                getLogger().info(f'{self.guiModule.className}:{self.tabName}. {obj} added to InputSpectrumGroups')
 
     def _fitAndFecthOutputData(self, *args):
         getLogger().info('Starting fit')
@@ -344,6 +397,15 @@ class GuiInputDataPanel(GuiSettingPanel):
         pids = self.guiModule.project.getPidsByObjects(filteredDataTables)
         return pids
 
+    def _filterInputCollections(self, pids, *args):
+        """ Add collections only if contain a subset of other collections. Avoid massive lists! """
+        collections = self.guiModule.project.getByPids(pids)
+        filteredCollectionPids = []
+        for collection in collections:
+            types = [type(item) for item in collection.items]
+            if type(collection) in types:
+                filteredCollectionPids.append(collection.pid)
+        return filteredCollectionPids
 
     def _limitSelectionOnInputData(self):
         "Allow only one selection on SpectrumGroups and DataTable. "
@@ -356,7 +418,7 @@ class GuiInputDataPanel(GuiSettingPanel):
             dtSelectionWidget.setMaximumItemSelectionCount(1)
 
     def _createInputDataTableCallback(self, *args):
-        """ """
+        """ Create InputDataTable from widget Callback. """
         settingsPanelHandler = self.guiModule.settingsPanelHandler
         inputSettings = settingsPanelHandler.getInputDataSettings()
         sgPids = inputSettings.get(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection, [None])

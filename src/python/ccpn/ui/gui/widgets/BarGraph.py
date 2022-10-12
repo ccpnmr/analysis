@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-10 17:49:59 +0100 (Mon, October 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 10:21:58 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -40,9 +40,9 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Logging import getLogger
-from ccpn.util.Common import percentage,groupIntoChunks
-from PyQt5.QtCore import pyqtSignal
-
+from ccpn.util.Colour import hexToRgb, rgbaRatioToHex
+from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND, \
+    GUISTRIP_PIVOT, DIVIDER, CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_HIGHLIGHT
 current = []
 
 class BarGraph(pg.BarGraphItem):
@@ -216,7 +216,7 @@ class BarGraph(pg.BarGraphItem):
         self.picture = QtGui.QPicture()
         self._shape = QtGui.QPainterPath()
         p = QtGui.QPainter(self.picture)
-
+        selectedBarPen = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=2)
         pen = self.opts['pen']
         pens = self.opts['pens']
 
@@ -562,6 +562,7 @@ class CustomViewBox(pg.ViewBox):
         # ## Labels: Show Above Threshold
         # self.showAboveThresholdAction = QtGui.QAction("Show Labels Above Threshold", self,
         #                                               triggered=self.showAboveThreshold)
+        # self.contextMenu.addAction(self.showAboveThresholdAction)
         # self.contextMenu.addAction(self.showAboveThresholdAction)
         #
         # ## Selection: Select Above Threshold

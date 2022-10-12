@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-10 15:28:07 +0100 (Mon, October 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 10:21:58 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,6 @@ from functools import partial
 from ccpn.util.Logging import getLogger
 from ccpn.core.Peak import Peak
 from ccpn.core.Substance import Substance
-from ccpn.core.Spectrum import Spectrum
 from ccpn.core.DataTable import DataTable
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
@@ -115,44 +114,45 @@ class CoreNotifiersHandler(ExperimentAnalysisHandlerABC):
     @staticmethod
     def _onCurrentPeak(guiModule, data):
         peak = data[Notifier.OBJECT]
-
         pass
 
     @staticmethod
-    def _peakChanged(guiModule, data):
-        peak = data[Notifier.OBJECT]
+    def _isPeakInSpectrumGroup(peak, spectrumGroup):
+        return peak.spectrum in spectrumGroup.spectra
+
+    @staticmethod
+    def _setRebuildInputDataOnPeakNotifier(guiModule, peaks=None):
+        """ INTERNAL.  Rebuild the inputData after a new or deleted peak or update only a subset if peaks are only changed"""
         backendHandler = guiModule.backendHandler
-        settingsPanelHandler = guiModule.settingsPanelHandler
-        inputSettings = settingsPanelHandler.getInputDataSettings()
-        sgPids = inputSettings.get(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection, [None])
-        if not sgPids:
-            return
-        spGroup = guiModule.project.getByPid(sgPids[-1])
-        for inputData in backendHandler.inputDataTables:
-            inputData.data.buildFromSpectrumGroup(spGroup, filteredPeaks=[peak])
         backendHandler._needsRefitting = True
+        backendHandler._needsRebuildingInputDataTables = True
         toolbar = guiModule.panelHandler.getToolBarPanel()
         if toolbar:
             toolbar.setUpdateState(PanelUpdateState.DETECTED)
 
     @staticmethod
-    def _applyChangesToQueue(guiModule):
-        pass
+    def _peakChanged(guiModule, data):
+        peak = data[Notifier.OBJECT]
+        CoreNotifiersHandler._setRebuildInputDataOnPeakNotifier(guiModule)
 
     @staticmethod
     def _peakDeleted(guiModule, data):
         """
+        Rebuild the inputData without the deleted peak
         """
         peak = data[Notifier.OBJECT]
-        getLogger().warn('_peakDeleted notifier not implemented. Please rebuild the inputData manually', peak)
-        pass
+        CoreNotifiersHandler._setRebuildInputDataOnPeakNotifier(guiModule)
 
     @staticmethod
     def _peakCreated(guiModule, data):
         """
-        To be defined. Maybe automatically add a row in the main dataTable?
+        Rebuild inputData on peak creation
         """
-        getLogger().warn('_peakCreated notifier not implemented')
+        peak = data[Notifier.OBJECT]
+        CoreNotifiersHandler._setRebuildInputDataOnPeakNotifier(guiModule)
+
+    @staticmethod
+    def _applyChangesToQueue(guiModule):
         pass
 
     #### DataTables ####

@@ -7,12 +7,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 20:15:37 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 10:21:58 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,14 +50,13 @@ class ExperimentAnalysisHandlerABC(object):
 
     example:
         experimentAnalysis = ExperimentAnalysis()
-        # use the backend manager to start the backend server
+        # use the backendHandler to interact to the backend built-in methods
         experimentAnalysis.backend.start(...)
-        experimentAnalysis.backend.calculate(...)
-        # use the panels controller to install a panel
+        experimentAnalysis.backend.fitInputData(...)
+        # use the panelsHandler to install a panel
         experimentAnalysis.panels.install(MyPanel(name))
         panel = experimentAnalysis.panels.get(name)
         # etc
-
     """
 
     @property
@@ -255,6 +254,15 @@ class SettingsPanelHandler(ExperimentAnalysisHandlerABC):
 
     def getInputDataSettings(self) -> dict:
         return self.getAllSettings().get(guiNameSpaces.Label_InputData, {})
+
+    def _getSelectedSpectrumGroup(self):
+        """ Get the SpectrumGroup Obj from the Widgets. """
+        inputSettings = self.getInputDataSettings()
+        sgPids = inputSettings.get(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection, [None])
+        if not sgPids:
+            return
+        spGroup = self.guiModule.project.getByPid(sgPids[-1])
+        return spGroup
 
     def close(self):
         pass

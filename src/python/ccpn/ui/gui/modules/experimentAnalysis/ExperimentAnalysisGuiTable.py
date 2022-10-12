@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-10 16:26:28 +0100 (Mon, October 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 10:21:58 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -23,26 +23,29 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 # Start of code
 #=========================================================================================
 
-
-import pandas as pd
+from ccpn.util.DataEnum import DataEnum
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.Notifiers import Notifier
 ######## gui/ui imports ########
-from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
-from PyQt5 import QtCore, QtGui, QtWidgets
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.Column import ColumnClass, Column
-import ccpn.ui.gui.widgets.GuiTable as gt
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 from ccpn.ui.gui.widgets.table.Table import Table
 
 
+class _NavigateTrigger(DataEnum):
+    """
+    _NavigateTrigger = 0 # status: No callback, don't navigate to SpectrumDisplay.
+    _NavigateTrigger = 1 # status: Callback on single click, navigate to SpectrumDisplay at each table selection.
+    _NavigateTrigger = 2 # status: Callback on double click, navigate only with a doubleClick on a table row.
+    """
+    DISABLED        = 0, guiNameSpaces.Disabled
+    SINGLECLICK     = 1, guiNameSpaces.SingleClick
+    DOUBLECLICK     = 2, guiNameSpaces.DoubleClick
 
 class _ExperimentalAnalysisTableABC(Table):
     """
-
+    A table to display results from the series Analysis DataTables and interact to source spectra on SpectrumDisplays.
     """
     className = '_TableWidget'
     defaultHidden = []
@@ -87,9 +90,9 @@ class _ExperimentalAnalysisTableABC(Table):
 
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
-        self._navigateToPeakOnSelection = True # Default Behaviour
-        navigateTrigger = self.guiModule.getSettings(grouped=False).get(guiNameSpaces.WidgetVarName_NavigateToOpt)
-        self.setNavigateToPeakTrigger(navigateTrigger)
+        self._navigateTrigger = _NavigateTrigger.SINGLECLICK # Default Behaviour
+        navigateTriggerName = self.guiModule.getSettings(grouped=False).get(guiNameSpaces.WidgetVarName_NavigateToOpt)
+        self.setNavigateToPeakTrigger(navigateTriggerName)
         self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
                                                  callback=self._currentCollectionCallback, onceOnly=True)
 
@@ -116,6 +119,7 @@ class _ExperimentalAnalysisTableABC(Table):
     #=========================================================================================
 
     def selectionCallback(self, selected, deselected, selection, lastItem):
+        """Set the current collection and navigate to SpectrumDisplay if the trigger is enabled as singleClick. """
         from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import _navigateToPeak, \
             getPeaksFromCollection
         collections = self.getSelectedCollections()
@@ -126,34 +130,25 @@ class _ExperimentalAnalysisTableABC(Table):
         self.current.peaks = peaks
         if len(peaks) == 0:
             return
-        if self._navigateToPeakOnSelection:
+        if self._navigateTrigger == _NavigateTrigger.SINGLECLICK:
             _navigateToPeak(self.guiModule, self.current.peaks[-1])
 
     def actionCallback(self, selection, lastItem):
-        """ Perform a NavigateTo if required"""
-        if self._navigateToPeakOnSelection is None:
-            return # navigate is disabled
-        elif self._navigateToPeakOnSelection:
-            return # navigate is on a single click
-        else:
+        """Perform a navigate to SpectrumDisplay if the trigger is enabled as doubleClick"""
+        if self._navigateTrigger == _NavigateTrigger.DOUBLECLICK:
             from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import _navigateToPeak
             _navigateToPeak(self.guiModule, self.current.peaks[-1])
 
     def setNavigateToPeakTrigger(self, trigger):
         """
-        :param trigger: one of guiNameSpaces.SingleClick, doubleClick or Disabled
+        Set the navigation Trigger to single/Double click or Disabled when selecting a row on the table.
+        :param trigger: int or str, one of _NavigateTrigger value or name. See _NavigateTrigger for details.
         :return: None
         """
-        if trigger is None:
-            self._navigateToPeakOnSelection = None
-            return
-        if trigger == guiNameSpaces.SingleClick:
-            self._navigateToPeakOnSelection = True
-            return
-        if trigger == guiNameSpaces.DoubleClick:
-            self._navigateToPeakOnSelection = False
-            return
-
+        for enumTrigger in _NavigateTrigger:
+            if enumTrigger == trigger or enumTrigger.description == trigger:
+                self._navigateTrigger = enumTrigger
+                return
 
     #=========================================================================================
     # Handle drop events
@@ -165,7 +160,7 @@ class _ExperimentalAnalysisTableABC(Table):
         """
         pids = data.get('pids', [])
         # self._handleDroppedItems(pids, KlassTable, self.moduleParent._modulePulldown)
-        print('Dropped pids', pids)
+        getLogger().warning('Drop not yet implemented for this module.')
 
     def _close(self):
         """
@@ -195,10 +190,8 @@ class _ExperimentalAnalysisTableABC(Table):
                 popup.exec()
                 popup.raise_()
 
-
     def getSelectedCollections(self):
         selectedRowsDf = self.selectedRows()
-
         collections = set()
         for ix, selectedRow in selectedRowsDf.iterrows():
             coPid = selectedRow[sv.COLLECTIONPID]
@@ -210,14 +203,11 @@ class _ExperimentalAnalysisTableABC(Table):
         # select collection on table.
         collections = self.current.collections
         pids = [co.pid for co in collections]
-        # select
         self.selectRowsByValues(pids, headerName=sv.COLLECTIONPID)
-
 
     def clearSelection(self):
         super().clearSelection()
         self.current.collections = []
-
 
 class TablePanel(GuiPanel):
 
@@ -228,7 +218,6 @@ class TablePanel(GuiPanel):
     def __init__(self, guiModule, *args, **Framekwargs):
         GuiPanel.__init__(self, guiModule, *args , **Framekwargs)
 
-
     def initWidgets(self):
         row = 0
         # Label(self, 'TablePanel', grid=(row, 0))
@@ -236,7 +225,6 @@ class TablePanel(GuiPanel):
                                     mainWindow=self.mainWindow,
                                     guiModule = self.guiModule,
                                     grid=(0, 0), gridSpan=(1, 2))
-
     
     def setInputData(self, dataFrame):
         """Provide the DataFrame to populate the table."""

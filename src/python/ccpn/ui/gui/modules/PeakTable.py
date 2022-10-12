@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-03 14:19:53 +0100 (Wed, August 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:10 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,6 @@ from collections import OrderedDict
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
 from ccpn.core.NmrAtom import NmrAtom
-from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -43,6 +42,7 @@ from ccpn.ui.gui.lib.GuiStripContextMenus import _selectedPeaksMenuItem, _addMen
     _getNdPeakMenuItems, _setEnabledAllItems
 from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget
 from ccpn.ui.gui.lib._CoreTableFrame import _CoreTableWidgetABC, _CoreTableFrameABC
+from ccpn.ui.gui.widgets.table._TableAdditions import _TableMenuABC
 from ccpn.util.Common import makeIterableList
 from ccpn.util.Logging import getLogger
 
@@ -152,10 +152,61 @@ class PeakTableModule(CcpnModule):
 
 
 #=========================================================================================
+# Peak table menu
+#=========================================================================================
+
+
+class _PeakTableOptions(_TableMenuABC):
+    """Class to handle peak-table options from a right-mouse menu.
+    """
+
+    def addTableMenuOptions(self, menu):
+        """Add options to the right-mouse menu
+        """
+        super().addTableMenuOptions(menu)
+
+        menu.addSeparator()
+        _peakItem = _selectedPeaksMenuItem(None)
+        _addMenuItems(self, menu, [_peakItem])
+
+        # _selectedPeaksMenu submenu - add to Strip._selectedPeaksMenu
+        items = _getNdPeakMenuItems(menuId='Main')
+        # attach to the _selectedPeaksMenu submenu
+        _addMenuItems(self, self._selectedPeaksMenu, items)
+
+    def setTableMenuOptions(self, menu):
+        """Update options in the right-mouse menu
+        """
+        super().setTableMenuOptions(menu)
+
+        # Enable/disable menu items as required
+        self._navigateToPeakMenuMain.setEnabled(False)
+        _setEnabledAllItems(self._selectedPeaksMenu, True if self.current.peaks else False)
+
+    #=========================================================================================
+    # Properties
+    #=========================================================================================
+
+    pass
+
+    #=========================================================================================
+    # Class methods
+    #=========================================================================================
+
+    pass
+
+    #=========================================================================================
+    # Implementation
+    #=========================================================================================
+
+    pass
+
+
+#=========================================================================================
 # _NewPeakTableWidget
 #=========================================================================================
 
-class _NewPeakTableWidget(_CoreTableWidgetABC):
+class _NewPeakTableWidget(_PeakTableOptions, _CoreTableWidgetABC):
     """Class to present a peakList Table
     """
     className = 'PeakTable'
@@ -293,15 +344,18 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
     # Widget callbacks
     #=========================================================================================
 
-    def actionCallback(self, data):
+    def actionCallback(self, selection, lastItem):
         """If current strip contains the double-clicked peak will navigateToPositionInStrip
         """
         from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
 
-        # multi-selection table will return a list of objects
-        objs = data[CallBack.OBJECT]
-        if not objs:
+        try:
+            if not (objs := list(lastItem[self._OBJECT])):
+                return
+        except Exception as es:
+            getLogger().debug2(f'{self.__class__.__name__}.actionCallback: No selection\n{es}')
             return
+
         if isinstance(objs, (tuple, list)):
             peak = objs[0]
         else:
@@ -341,40 +395,7 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
     # Table context menu
     #=========================================================================================
 
-    def _setContextMenu(self, enableExport=True, enableDelete=True):
-        """Subclass guiTable to add new items to context menu
-        """
-        super()._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
-
-        # add extra items to the menu
-        _actions = self.tableMenu.actions()
-        if _actions:
-            # _topMenuItem = _actions[0]
-            # _topSeparator = self.tableMenu.insertSeparator(_topMenuItem)
-            # self._copyPeakMenuAction = self.tableMenu.addAction('Copy Peaks...', self._copyPeaks)
-            # # move new actions to the top of the list
-            # self.tableMenu.insertAction(_topSeparator, self._copyPeakMenuAction)
-
-            # add the selected peaks menu to the bottom
-            self.tableMenu.addSeparator()
-            _peakItem = _selectedPeaksMenuItem(None)
-
-            _addMenuItems(self, self.tableMenu, [_peakItem])
-
-            # _selectedPeaksMenu submenu - add to Strip._selectedPeaksMenu
-            items = _getNdPeakMenuItems(menuId='Main')
-            # attach to the _selectedPeaksMenu submenu
-            _addMenuItems(self, self._selectedPeaksMenu, items)
-
-    def _raiseTableContextMenu(self, pos):
-        """Raise the right-mouse menu
-        """
-        # Enable/disable menu items as required
-        self._navigateToPeakMenuMain.setEnabled(False)
-        _setEnabledAllItems(self._selectedPeaksMenu, True if self.current.peaks else False)
-
-        # raise the menu
-        super()._raiseTableContextMenu(pos)
+    # currently in _PeakTableOptions
 
     #=========================================================================================
     # Table functions

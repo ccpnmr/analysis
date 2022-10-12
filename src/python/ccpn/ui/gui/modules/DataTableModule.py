@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-27 14:36:45 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:10 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget
-from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableView, _updateSimplePandasTable, _SearchTableView
+from ccpn.ui.gui.widgets.table.Table import Table
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Logging import getLogger
@@ -161,9 +161,10 @@ class DataTableModule(CcpnModule):
 
         row += 1
         Label(_topWidget, text='\nmetadata', grid=(row, 0), hAlign='r', vAlign='t')
-        self._metadata = _SimplePandasTableView(_topWidget, showVerticalHeader=False)
-        _topWidget.getLayout().addWidget(self._metadata, row, 1, 1, 3)
+        self._metadata = Table(_topWidget, showVerticalHeader=False, grid=(row, 1), gridSpan=(1, 3))
         self._metadata.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self._metadata._enableSelectionCallback = False
+        self._metadata._enableActionCallback = False
 
         row += 1
         Spacer(_topWidget, 5, 5,
@@ -236,25 +237,25 @@ class DataTableModule(CcpnModule):
 
         df = self._table.data
         if df is not None and len(df) > 0:
-            _updateSimplePandasTable(self._tableWidget, df, _resize=False)
+            self._tableWidget.updateDf(df)
         else:
-            _updateSimplePandasTable(self._tableWidget, pd.DataFrame({}))
+            self._tableWidget.updateDf(pd.DataFrame({}))
 
         self.lineEditComment.setText(self._table.comment if self._table.comment else '')
 
         _df = pd.DataFrame({'name'     : self._table.metadata.keys(),
                             'parameter': self._table.metadata.values()})
-        _updateSimplePandasTable(self._metadata, _df, _resize=True)
+        self._metadata.updateDf(_df, resize=True, setOnHeaderOnly=True)
 
     def _updateEmptyTable(self):
         """Update with an empty table
         """
-        _updateSimplePandasTable(self._tableWidget, pd.DataFrame({}))
+        self._tableWidget.updateDf(pd.DataFrame({}))
         self.lineEditComment.setText('')
 
         _df = pd.DataFrame({'name'     : [],
                             'parameter': []})
-        _updateSimplePandasTable(self._metadata, _df, _resize=True)
+        self._metadata.updateDf(_df, resize=True, setOnHeaderOnly=True)
 
     def _applyComment(self):
         """Set the values in the dataTable
@@ -301,7 +302,7 @@ class DataTableModule(CcpnModule):
 # _TableWidget
 #=========================================================================================
 
-class _TableWidget(_SimplePandasTableView, _SearchTableView):
+class _TableWidget(Table):
     """
     Class to present a DataTable
     """
@@ -311,6 +312,8 @@ class _TableWidget(_SimplePandasTableView, _SearchTableView):
     defaultHidden = []
     _internalColumns = []
     _hiddenColumns = []
+
+    _enableDelete = False
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, **kwds):
         """Initialise the widgets for the module.
@@ -337,10 +340,9 @@ class _TableWidget(_SimplePandasTableView, _SearchTableView):
 
         # initialise the table
         super().__init__(parent=parent,
-                         showHorizontalHeader=True,
-                         showVerticalHeader=False,
-                         multiSelect=True,
-                         grid=(3, 0), gridSpan=(1, 6))
+                         grid=(3, 0), gridSpan=(1, 6)
+                         )
+
         self.moduleParent = moduleParent
 
         # Initialise the notifier for processing dropped items
@@ -349,17 +351,19 @@ class _TableWidget(_SimplePandasTableView, _SearchTableView):
         # may refactor the remaining modules so this isn't needed
         self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
 
-        self._initSearchTableView()
+    #=========================================================================================
+    # Selection/action callbacks
+    #=========================================================================================
 
-    @property
-    def _df(self):
-        """Return the Pandas-dataFrame holding the data
-        """
-        return self.model()._df
-
-    @_df.setter
-    def _df(self, value):
+    def selectionCallback(self, selected, deselected, selection, lastItem):
         pass
+
+    def actionCallback(self, selection, lastItem):
+        pass
+
+    #=========================================================================================
+    # Handle drop events
+    #=========================================================================================
 
     def _processDroppedItems(self, data):
         """
@@ -404,6 +408,12 @@ class _TableWidget(_SimplePandasTableView, _SearchTableView):
                 openNew = showYesNo(title, msg)
                 if openNew:
                     _openItemObject(self.mainWindow, others)
+
+    #=========================================================================================
+    # Table context menu
+    #=========================================================================================
+
+    # add edit/add parameters to meta-data table
 
 
 #=========================================================================================

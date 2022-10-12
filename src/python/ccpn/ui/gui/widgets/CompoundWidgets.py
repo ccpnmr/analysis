@@ -7,12 +7,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-08 19:58:03 +0100 (Mon, August 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:13 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.CheckBoxes import CheckBoxes
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.Entry import Entry
 from ccpn.ui.gui.widgets.Label import Label
@@ -855,6 +856,93 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
         return self.set(value)
 
 
+class CheckBoxesCompoundWidget(CompoundBaseWidget):
+    """
+    Compound class comprising a Label and a CheckBoxes group, combined in a CompoundBaseWidget (i.e. a Frame)
+
+      orientation       widget layout
+      ------------      ------------------------
+      left:             Label       CheckBoxes
+
+      right:            CheckBoxes    Label
+
+      top:              Label
+                        CheckBoxes
+
+      bottom:           CheckBoxes
+                        Label
+
+    """
+    layoutDict = dict(
+            # grid positions for label and checkBoxes for the different orientations
+            left=[(0, 0), (0, 1)],
+            right=[(0, 1), (0, 0)],
+            top=[(0, 0), (1, 0)],
+            bottom=[(1, 0), (0, 0)],
+            )
+
+    def __init__(self, parent=None, mainWindow=None,
+                 showBorder=False, orientation='left',
+                 minimumWidths=None, maximumWidths=None, fixedWidths=None,
+                 labelText='', texts=[], callback=None, compoundKwds=None,
+                 **kwds):
+        """
+        :param parent: parent widget
+        :param showBorder: flag to display the border of Frame (True, False)
+        :param orientation: flag to determine the orientation of the labelText relative to the CheckBox widget.
+                            Allowed values: 'left', 'right', 'top', 'bottom'
+        :param minimumWidths: tuple of two values specifying the minimum width of the Label and CheckBox widget, respectively
+        :param maximumWidths: tuple of two values specifying the maximum width of the Label and CheckBox widget, respectively
+        :param labelText: Text for the Label
+        :param texts: (optional) texts for the Checkboxes
+        :param callback: (optional) callback for the CheckBox
+        :param kwds: (optional) keyword, value pairs for the gridding of Frame
+        """
+
+        CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
+                                    showBorder=showBorder, **kwds)
+
+        self.label = Label(parent=self, text=labelText, vAlign='center')
+        self._addWidget(self.label)
+
+        checkboxKwds = {
+                        'texts'     : texts,
+                        'callback'  : callback,
+                        }
+        checkboxKwds.update(compoundKwds or {})
+        self.checkBoxes = CheckBoxes(parent=self, **checkboxKwds)
+        self.checkBoxes.setObjectName(labelText)
+        self.setObjectName(labelText)
+        self._addWidget(self.checkBoxes)
+
+        if minimumWidths is not None:
+            self.setMinimumWidths(minimumWidths)
+
+        if maximumWidths is not None:
+            self.setMaximumWidths(maximumWidths)
+
+        if fixedWidths is not None:
+            self.setFixedWidths(fixedWidths)
+
+    def get(self):
+        return self.checkBoxes.getSelectedText()
+
+    def set(self, texts):
+        """Set Checked the given texts, and untick the rest."""
+        self.checkBoxes.setSelectedByText(texts, checkFlag=True)
+
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.get()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.set(value)
+
 class ButtonCompoundWidget(CompoundBaseWidget):
     """
     Compound class comprising a Label and a Button, combined in a CompoundBaseWidget (i.e. a Frame)
@@ -998,6 +1086,12 @@ class LabelCompoundWidget(CompoundBaseWidget):
 
         if fixedWidths is not None:
             self.setFixedWidths(fixedWidths)
+
+    def _getSaveState(self):
+        return self.label2.get()
+
+    def _setSavedState(self, value):
+        self.label2.setText(value)
     
 class SpinBoxCompoundWidget(CompoundBaseWidget):
     """
@@ -1089,6 +1183,12 @@ class SpinBoxCompoundWidget(CompoundBaseWidget):
         """Set the callback for the spinBox
         """
         self.spinBox.setCallback(callback)
+
+    def _getSaveState(self):
+        return self.getValue()
+
+    def _setSavedState(self, value):
+        self.setValue(value)
 
 
 class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
@@ -1292,6 +1392,12 @@ class ScientificSpinBoxCompoundWidget(CompoundBaseWidget):
         """
         self.scientificSpinBox.setCallback(callback)
 
+    def _getSaveState(self):
+        return self.getValue()
+
+    def _setSavedState(self, value):
+        self.setValue(value)
+
 
 class SelectorWidget(Widget):
 
@@ -1476,7 +1582,9 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
     def __init__(self, parent=None, mainWindow=None,
                  showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
-                 labelText='', texts=[], tipTexts=[], icons=[], callback=None, selectedInd=0, direction='h',
+                 labelText='', texts=[], tipTexts=[], icons=[], callback=None,
+                 selectedText = None,
+                 selectedInd=0, direction='h',
                  editable=True, compoundKwds=None,
                  **kwds):
         """
@@ -1516,6 +1624,9 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
         if fixedWidths is not None:
             self.setFixedWidths(fixedWidths)
 
+        if selectedText is not None:
+            self.setByText(selectedText, silent=True)
+
     # def get(self):
     #     """Convenience: get the radioButtons text
     #     """
@@ -1536,10 +1647,16 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
         """
         return self.radioButtons.get()
 
-    def setByText(self, value, *args):
+    def setByText(self, value, silent=False, *args):
         """Convenience: set the radioButtons selected text
         """
-        self.radioButtons.set(value)
+        self.radioButtons.set(value, silent=silent)
+
+    def _getSaveState(self):
+        return self.getByText()
+
+    def _setSavedState(self, value):
+        self.setByText(value)
 
 class ColourSelectionCompoundWidget(PulldownListCompoundWidget):
 

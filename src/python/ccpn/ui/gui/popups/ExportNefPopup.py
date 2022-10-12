@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-17 17:50:18 +0100 (Tue, May 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:12 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,7 @@ __date__ = "$Date: 2017-07-06 15:51:11 +0000 (Thu, July 06, 2017) $"
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ProjectTreeCheckBoxes
+from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ExportTreeCheckBoxes
 from ccpn.ui.gui.popups.ExportDialog import ExportDialogABC
 from ccpn.ui.gui.widgets.FileDialog import NefFileDialog
 from ccpn.ui.gui.widgets.MessageDialog import showError
@@ -86,7 +86,7 @@ class ExportNefPopup(ExportDialogABC):
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(row, 0), gridSpan=(1, 1))
         row += 1
-        self.treeView = ProjectTreeCheckBoxes(userFrame, project=None, grid=(row, 0), includeProject=True)
+        self.treeView = ExportTreeCheckBoxes(userFrame, project=None, grid=(row, 0), includeProject=True)
 
     def populate(self, userframe):
         """Populate the widgets with project

@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:11 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -89,6 +89,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
     WINDOWPREFIX = 'New '
 
     ENABLEREVERT = True
+    _code = None
 
     def __init__(self, parent=None, mainWindow=None, project=None, **kwds):
         """
@@ -99,65 +100,11 @@ class CreateChainPopup(AttributeEditorPopupABC):
 
         super().__init__(parent, mainWindow=mainWindow, size=(500, 300), **kwds)
 
-        row = 2
-        label2a = Label(self.mainWidget, text="Name", grid=(row, 0))
-        self.moleculeEdit = LineEdit(self.mainWidget, text="", grid=(row, 1), gridSpan=(1, 1), textAlignment='l', backgroundText='> Enter name <')
-        label2b = Label(self.mainWidget, text="Molecule Type", grid=(row, 2))
-        self.molTypePulldown = PulldownList(self.mainWidget, grid=(row, 3))
-        row += 1
-
-        comment = Label(self.mainWidget, text="Comment", grid=(row, 0))
-        self.commentName = LineEdit(self.mainWidget, text="", grid=(row, 1), gridSpan=(1, 1), textAlignment='l', backgroundText='> Optional <')
-        row += 1
-
-        self.molTypes = ['protein', 'DNA', 'RNA', 'other']
-        self.molTypePulldown.setData(self.molTypes)
-        label3a = Label(self.mainWidget, text="Sequence", grid=(row, 0))
-        tipText = "Sequence may be entered a set of one letter codes without\n" \
-                  "spaces or a set of three letter codes with spaces inbetween"
-        self.sequenceEditor = TextEditor(self.mainWidget, grid=(row, 1), gridSpan=(1, 3), tipText=tipText)
-        row += 1
-
-        label4a = Label(self.mainWidget, 'Sequence Start', grid=(row, 0))
-        self.lineEdit1a = Spinbox(self.mainWidget, grid=(row, 1), value=1, min=-1000000, max=1000000)
-        label5a = Label(self.mainWidget, 'Chain code', grid=(row, 2))
-        code = _nextChainCode(self.project)
-        self.lineEdit2a = LineEdit(self.mainWidget, grid=(row, 3), text=code)
-        row += 1
-        tipText6a = "E.g., for a VAL residue, the set of HG11, HG12, HG13 (NMR equivalent) atoms will create a new atom HG1%;\n" \
-                    "        also the set HG1%, HG2% will create a new atom HG%"
-        label6a = Label(self.mainWidget, 'Expand Atoms From AtomSets', tipText=tipText6a, grid=(row, 0))
-        self.expandAtomsFromAtomSetW = CheckBox(self.mainWidget, checked=DefaultAddAtomGroups,
-                                                tipText=tipText6a, grid=(row, 1))
-        row += 1
-        tipText7a = "Add new atoms for Non-stereo Specific Atoms (if any).\n" \
-                    "E.g., for a VAL residue, HGx%, HGy% will be added if atoms HG1% and HG2% are present.\n" \
-                    "This option is available only if 'Expand Atoms From AtomSets' is selected."
-        label7a = Label(self.mainWidget, 'Add Non-Stereo Specific Atoms', tipText=tipText7a, grid=(row, 0))
-        self.addNonstereoAtomsW = CheckBox(self.mainWidget, checked=DefaultAddNonstereoAtoms,
-                                           tipText=tipText7a, grid=(row, 1),)
-        row += 1
-        tipText8a = "E.g., for a VAL residue, the set of HG11, HG12, HG13 (NMR equivalent) atoms\n" \
-                    "        will create a new atom HG1% and an extra pseudo-atom MG1;\n" \
-                    "        also the set HG1%, HG2% will create a new atom HG% and an extra pseudo-atom QG.\n" \
-                    "This option is available only if 'Expand Atoms From AtomSets' is selected and proton groups."
-        label8a = Label(self.mainWidget, 'Add extra Pseudo-Atoms', tipText=tipText8a, grid=(row, 0))
-        self.addPseudoAtomsW = CheckBox(self.mainWidget, checked=DefaultAddPseudoAtoms,
-                                        tipText=tipText8a, grid=(row, 1),)
-        self._togglePseudoAtomOptions(self.expandAtomsFromAtomSetW.get())
-
+        # set up the widgets
+        self._setWidgets()
 
         # define the blank object to hold the new attributes
-        self.obj = AttrDict()
-        self.obj.startNumber = 1
-        self.obj.shortName = code
-        self.obj.sequence = None
-        self.obj.compoundName = None
-        self.obj.comment = None
-        self.obj.molType = self.molTypes[0]
-        self.obj.expandFromAtomSets = DefaultAddAtomGroups
-        self.obj.addPseudoAtoms = DefaultAddPseudoAtoms
-        self.obj.addNonstereoAtoms = DefaultAddNonstereoAtoms
+        self._defineObject()
 
         # attach the callbacks for the widgets
         self.moleculeEdit.textChanged.connect(self._queueSetMoleculeName)
@@ -172,6 +119,68 @@ class CreateChainPopup(AttributeEditorPopupABC):
 
         self._popupReady = True
         self._populate()
+
+    def _setWidgets(self):
+        """Set up the widgets
+        """
+        row = 2
+        label2a = Label(self.mainWidget, text="Name", grid=(row, 0))
+        self.moleculeEdit = LineEdit(self.mainWidget, text="", grid=(row, 1), gridSpan=(1, 1), textAlignment='l', backgroundText='> Enter name <')
+        label2b = Label(self.mainWidget, text="Molecule Type", grid=(row, 2))
+        self.molTypePulldown = PulldownList(self.mainWidget, grid=(row, 3))
+        row += 1
+        comment = Label(self.mainWidget, text="Comment", grid=(row, 0))
+        self.commentName = LineEdit(self.mainWidget, text="", grid=(row, 1), gridSpan=(1, 1), textAlignment='l', backgroundText='> Optional <')
+        row += 1
+        self.molTypes = ['protein', 'DNA', 'RNA', 'other']
+        self.molTypePulldown.setData(self.molTypes)
+        label3a = Label(self.mainWidget, text="Sequence", grid=(row, 0))
+        tipText = "Sequence may be entered a set of one letter codes without\n" \
+                  "spaces or a set of three letter codes with spaces inbetween"
+        self.sequenceEditor = TextEditor(self.mainWidget, grid=(row, 1), gridSpan=(1, 3), tipText=tipText)
+        row += 1
+        label4a = Label(self.mainWidget, 'Sequence Start', grid=(row, 0))
+        self.lineEdit1a = Spinbox(self.mainWidget, grid=(row, 1), value=1, min=-1000000, max=1000000)
+        label5a = Label(self.mainWidget, 'Chain code', grid=(row, 2))
+        self._code = _nextChainCode(self.project)
+        self.lineEdit2a = LineEdit(self.mainWidget, grid=(row, 3), text=self._code)
+        row += 1
+        tipText6a = "E.g., for a VAL residue, the set of HG11, HG12, HG13 (NMR equivalent) atoms will create a new atom HG1%;\n" \
+                    "        also the set HG1%, HG2% will create a new atom HG%"
+        label6a = Label(self.mainWidget, 'Expand Atoms From AtomSets', tipText=tipText6a, grid=(row, 0))
+        self.expandAtomsFromAtomSetW = CheckBox(self.mainWidget, checked=DefaultAddAtomGroups,
+                                                tipText=tipText6a, grid=(row, 1))
+        row += 1
+        tipText7a = "Add new atoms for Non-stereo Specific Atoms (if any).\n" \
+                    "E.g., for a VAL residue, HGx%, HGy% will be added if atoms HG1% and HG2% are present.\n" \
+                    "This option is available only if 'Expand Atoms From AtomSets' is selected."
+        label7a = Label(self.mainWidget, 'Add Non-Stereo Specific Atoms', tipText=tipText7a, grid=(row, 0))
+        self.addNonstereoAtomsW = CheckBox(self.mainWidget, checked=DefaultAddNonstereoAtoms,
+                                           tipText=tipText7a, grid=(row, 1), )
+        row += 1
+        tipText8a = "E.g., for a VAL residue, the set of HG11, HG12, HG13 (NMR equivalent) atoms\n" \
+                    "        will create a new atom HG1% and an extra pseudo-atom MG1;\n" \
+                    "        also the set HG1%, HG2% will create a new atom HG% and an extra pseudo-atom QG.\n" \
+                    "This option is available only if 'Expand Atoms From AtomSets' is selected and proton groups."
+        label8a = Label(self.mainWidget, 'Add extra Pseudo-Atoms', tipText=tipText8a, grid=(row, 0))
+        self.addPseudoAtomsW = CheckBox(self.mainWidget, checked=DefaultAddPseudoAtoms,
+                                        tipText=tipText8a, grid=(row, 1), )
+        self._togglePseudoAtomOptions(self.expandAtomsFromAtomSetW.get())
+
+    def _defineObject(self):
+        """Initialise the new object
+        """
+        # define the blank object to hold the new attributes
+        self.obj = AttrDict()
+        self.obj.compoundName = None
+        self.obj.startNumber = 1
+        self.obj.shortName = self._code
+        self.obj.sequence = None
+        self.obj.comment = None
+        self.obj.molType = self.molTypes[0]
+        self.obj.expandFromAtomSets = DefaultAddAtomGroups
+        self.obj.addPseudoAtoms = DefaultAddPseudoAtoms
+        self.obj.addNonstereoAtoms = DefaultAddNonstereoAtoms
 
     def _applyAllChanges(self, changes):
         """Apply all changes and create sequence from self.obj

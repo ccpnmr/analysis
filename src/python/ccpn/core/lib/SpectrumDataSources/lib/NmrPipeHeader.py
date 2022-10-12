@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-06-07 17:29:57 +0100 (Tue, June 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:06 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,7 @@ __date__ = "$Date: 2020-11-20 10:28:48 +0000 (Fri, November 20, 2020) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
+import sys
 from array import array
 
 from ccpn.core.lib.SpectrumDataSources.lib.BinaryHeader import BinaryHeader
@@ -88,8 +88,8 @@ class NmrPipeHeader(BinaryHeader):
     # These parameters will be set in the NmrPipeSpectrumDataSource object
     defs = [
     #     parameter           pipe2header header2pipe  dimensionMapped transpose default FDdefs
-        ("dimensionCount",          (getInt,  setInt, False, False, 0,          "FDDIMCOUNT")),
-        ("transposed",              (getBool, setInt, False, False, False,     "FDTRANSPOSED")),
+        ("dimensionCount",          (getInt,  setInt, False, False, 0,        "FDDIMCOUNT")),
+        ("transposed",              (getBool, setInt, False, False, False,    "FDTRANSPOSED")),
         ("nFiles",                  (getInt,  setInt, False, False, 0,        "FDFILECOUNT")),
         ("pipeDimension",           (getInt,  setInt, False, False, 0,        "FDPIPEFLAG")),
         ("sliceCount",              (getInt,  setInt, False, False, 0,        "FDSLICECOUNT")),
@@ -98,11 +98,12 @@ class NmrPipeHeader(BinaryHeader):
 
         ("dimensionOrder",          (getInt,  setInt, False, True, 0,         ["FDDIMORDER1", "FDDIMORDER2", "FDDIMORDER3", "FDDIMORDER4"])),
 
-        ("axisLabels",              (toChar8, fromChar8, True,  True,  '',      ["FDF2LABEL", "FDF1LABEL", "FDF3LABEL", "FDF4LABEL"])),
+        ("axisLabels",              (toChar8, fromChar8, True,  True,  '',    ["FDF2LABEL", "FDF1LABEL", "FDF3LABEL", "FDF4LABEL"])),
         ("dataTypes",               (getInt,  setInt, True, True, 0,          ["FDF2QUADFLAG", "FDF1QUADFLAG", "FDF3QUADFLAG", "FDF4QUADFLAG"])),
         ("domain",                  (getInt,  setInt, True, True, 0,          ["FDF2FTFLAG", "FDF1FTFLAG", "FDF3FTFLAG", "FDF4FTFLAG"])),
         ("pointCounts",             (getInt,  setInt, False, True, 0,         ["FDSIZE", "FDSPECNUM", "FDF3SIZE", "FDF4SIZE"])),
         ("tdSizes",                 (getInt,  setInt, True, True, 0,          ["FDF2TDSIZE", "FDF1TDSIZE", "FDF3TDSIZE", "FDF4TDSIZE"])),
+        ("quadType",                (getInt,  setInt, True, True, 1,          ["FDF2QUADFLAG", "FDF1QUADFLAG", "FDF3QUADFLAG", "FDF4QUADFLAG"])),
 
         ("spectralWidthsHz",        (getFloat, setFloat, True, True, 0.0,      ["FDF2SW", "FDF1SW", "FDF3SW", "FDF4SW"])),
         ("spectrometerFrequencies", (getFloat, setFloat, True, True, 0.0,      ["FDF2OBS", "FDF1OBS", "FDF3OBS", "FDF4OBS"])),
@@ -141,10 +142,33 @@ class NmrPipeHeader(BinaryHeader):
         super().__init__(headerSize=headerSize, wordSize=wordSize)
 
         # Always initialise the bytes, intValues and floatValues arrays, but these will be
-        # re-intialised upon reading the header
+        # re-initialised upon reading the header
         self.fromBytes(bytearray(headerSize*wordSize))
+        self.isBigEndian = True
         self.setDefaultValues()
-        
+
+    def read(self, fp, doSeek=True):
+        """Read and initialise the header from binary file pointed to by fp
+        :param doSeek: seek to start of file if True
+        :return self
+        """
+        super().read(fp=fp, doSeek=doSeek)
+        # check the 'magic' bytes
+        if self.magicBytes not in self._byteOrderFlags:
+            raise RuntimeError(f'NmrPipe file "{fp.name}" appears to be corrupted: does not contain the expected magic 4 bytes')
+        byteorder = self._byteOrderFlags[self.magicBytes]
+        if byteorder != sys.byteorder:
+           self.swapBytes()
+        self.isBigEndian = (byteorder == 'big')
+
+        return self
+
+    @property
+    def magicBytes(self) -> tuple:
+        """Return magic bytes as a tuple
+        """
+        return tuple(self.bytes[8:12])
+
     def setDefaultValues(self):
         """Setting the magic numbers and default values
         """
@@ -231,8 +255,3 @@ class NmrPipeHeader(BinaryHeader):
 
         return
 
-    @property
-    def isTransposed(self):
-        """:return True if data are transposed
-        """
-        return self.getParameterValue('transposed')

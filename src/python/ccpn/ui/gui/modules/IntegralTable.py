@@ -9,12 +9,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:10 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -206,13 +206,16 @@ class _NewIntegralTableWidget(_CoreTableWidgetABC):
     # Widget callbacks
     #=========================================================================================
 
-    def actionCallback(self, data):
+    def actionCallback(self, selection, lastItem):
         """Notifier DoubleClick action on item in table
         """
-        # NOTE:ED - need to clean this up
-        objs = data[CallBack.OBJECT]
-        if not objs:
+        try:
+            if not (objs := list(lastItem[self._OBJECT])):
+                return
+        except Exception as es:
+            getLogger().debug2(f'{self.__class__.__name__}.actionCallback: No selection\n{es}')
             return
+
         if isinstance(objs, (tuple, list)):
             integral = objs[0]
         else:

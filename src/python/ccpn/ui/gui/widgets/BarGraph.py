@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-21 12:09:15 +0100 (Thu, July 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:12 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import pyqtgraph as pg
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph import getConfigOption
 from pyqtgraph import functions as fn
@@ -40,25 +41,20 @@ from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import percentage,groupIntoChunks
-
-
+from PyQt5.QtCore import pyqtSignal
 
 current = []
 
 class BarGraph(pg.BarGraphItem):
+
     def __init__(self, application=None, viewBox=None, xValues=None ,x0Values=None,x1Values=None, yValues=None,
+                 actionCallback=None, selectionCallback=None, hoverCallback = None,
                  objects=None, brush=None, brushes = None, useGradient=False, drawLabels=True, labelDistanceRatio=0.1, **kwds):
         super().__init__(**kwds)
-        """
-        This class allows top draw bars with or without objects.It Needs only xValues and yValues.
-        The bar width is by default set to 1.
-        The objects are linked to the bars through the label annotations (with setData).
-        """
-        # TODO:
-        # setObjects in a more general way. Initially implemented only for NmrResidues objects.
-
         self.viewBox = viewBox
-        self.callback = None
+        self._selectionCallback = selectionCallback
+        self._actionCallback =  actionCallback
+        self._hoverCallback = hoverCallback
         self.trigger = QtCore.pyqtSignal()
         self.useGradient = useGradient
         self.xValues = xValues if xValues is not None else []
@@ -71,6 +67,8 @@ class BarGraph(pg.BarGraphItem):
         self.objects = objects or []
         self.application = application
         self.barColoursDict = {}
+        self.itemXRanges = [] #list of tuples, X start stop for the bar each bar in the plot
+        self.itemYRanges = [] # list of tuples, Y start stop for the bar each bar in the plot
 
         self.opts = dict(  # setting for BarGraphItem
                 x=self.xValues,
@@ -153,33 +151,53 @@ class BarGraph(pg.BarGraphItem):
         for x, y in zip(self.xValues, self.yValues):
             self.allValues.update({x: y})
 
-    def mouseClickEvent(self, event):
-
+    def _getBarNumberByEvent(self, event):
+        # Bar are drawn starting half width before the actual x value. Therefore the position has to be back calculated.
         position = event.pos().x()
+        height = event.pos().y()
+        for _xRange, _yRange in zip(self.itemXRanges, self.itemYRanges):
+            startX, stopX = _xRange
+            startY, stopY = _yRange
+            if startX <= position < stopX and startY <= height <= stopY:
+                position = np.mean([startX, stopX])
+                return position
+        return
+
+    def mouseClickEvent(self, event):
+        position = self._getBarNumberByEvent(event)
+        if not position:
+            return
+        if self._selectionCallback:
+            self._selectionCallback(x=position, y=event.pos().y())
 
         self.clicked = int(position)
         if event.button() == QtCore.Qt.LeftButton:
             for label in self.labels:
                 if label.text() == str(self.clicked):
                     label.setSelected(True)
-
             event.accept()
 
     def mouseDoubleClickEvent(self, event):
-
-        position = event.pos().x()
-
+        position = self._getBarNumberByEvent(event)
+        if not position:
+            return
+        if self._actionCallback:
+            self._actionCallback(x=position, y=event.pos().y())
         self.doubleclicked = int(position)
-        if event.button() == QtCore.Qt.LeftButton:
-            for label in self.labels:
-                if label.text() == str(self.doubleclicked):
-                    print(label.text(), label.data(self.doubleclicked))
-
         event.accept()
+
+    def hoverEvent(self, event):
+
+
+        try:
+            barIndex = self._getBarNumberByEvent(event)
+            if self._hoverCallback:
+                self._hoverCallback(barIndex=barIndex, x=event.pos().x(), y=event.pos().y())
+        except:
+            getLogger().debug("Error getting position of a bar from mouse event")
 
     def drawLabels(self, ratio=0.5):
         """
-
         The label Text is the str of the x values and is used to find and set an object to it.
         NB, changing the text to any other str may not set the objects correctly!
 
@@ -193,6 +211,8 @@ class BarGraph(pg.BarGraphItem):
             label.setBrush(QtGui.QColor(self.brush))
 
     def drawPicture(self):
+        self.itemXRanges = []
+        self.itemYRanges = []
         self.picture = QtGui.QPicture()
         self._shape = QtGui.QPainterPath()
         p = QtGui.QPainter(self.picture)
@@ -264,7 +284,7 @@ class BarGraph(pg.BarGraphItem):
             if brushes and not self.useGradient:
                 try:
                     p.setBrush(fn.mkBrush(brushes[i]))
-                    self.barColoursDict[x] = brushes[i]
+                    self.barColoursDict[x - width/2] = brushes[i]
                 except:
                     getLogger().warn(f'BarGraph error. Cannot find a brush for at position {i}')
 
@@ -272,7 +292,7 @@ class BarGraph(pg.BarGraphItem):
                 x = x0
             else:
                 x = x0[i]
-            self.barColoursDict[x] = brush
+            self.barColoursDict[x - width/2] = brush
             if np.isscalar(y0):
                 y = y0
             else:
@@ -289,10 +309,14 @@ class BarGraph(pg.BarGraphItem):
                     for heightGroup, brush in zip(heightGroups, brushes):
                         if h in heightGroup:
                             p.setBrush(fn.mkBrush(brush))
-                            self.barColoursDict[x]=brush
+                            self.barColoursDict[x - width/2]=brush
                             break
 
             rect = QtCore.QRectF(x, y, w, h)
+            _xRange = (x, x+w)
+            _yRange = (y, h)
+            self.itemXRanges.append(_xRange)
+            self.itemYRanges.append(_yRange)
             p.drawRect(rect)
             self._shape.addRect(rect)
 

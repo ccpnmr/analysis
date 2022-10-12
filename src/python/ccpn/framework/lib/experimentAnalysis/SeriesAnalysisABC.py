@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-18 18:59:32 +0100 (Mon, July 18, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,35 +26,47 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
+import numpy as np
+from scipy import stats
+import pandas as pd
 from abc import ABC
 from collections import defaultdict
 from ccpn.util.OrderedSet import OrderedSet
+from ccpn.util.Logging import getLogger
+from ccpn.core.Peak import Peak
+from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
-from ccpn.util.Common import flattenLists
-import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.Collection import Collection
+from ccpn.util.traits.TraitBase import TraitBase
+from ccpn.util.traits.CcpNmrTraits import Any, List, Bool, Odict, CString, Set
 from ccpn.framework.Application import getApplication, getCurrent, getProject
-from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC, InputSeriesFrameBC, ALL_SERIES_DATA_TYPES
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC, InputSeriesFrameBC
+import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+
 
 class SeriesAnalysisABC(ABC):
     """
     The top level class for SeriesAnalysis modules.
     """
     seriesAnalysisName = ''
-    fittingModels = OrderedSet()
+    _allowedPeakProperties = [sv._HEIGHT, sv._VOLUME, sv._PPMPOSITION, sv._LINEWIDTH]
 
     @property
-    def inputDataTables(self, ) -> list:
+    def inputDataTables(self) -> list:
         """
         Get the attached input DataTables
         Lists of DataTables.
-        Add decorator to ensure the input dataFrame is of the write type as in the subclass.
-        (especially when restoring a project)
         """
+        self._ensureDataType()
         return list(self._inputDataTables)
 
     @inputDataTables.setter
     def inputDataTables(self, values):
         self._inputDataTables = OrderedSet(values)
+        self._ensureDataType()
 
     def addInputDataTable(self, dataTable):
         """
@@ -68,82 +80,124 @@ class SeriesAnalysisABC(ABC):
         """
         self._inputDataTables = OrderedSet()
 
-    def getOutputDataTables(self, seriesFrameType:str=None):
-        """
-        Get the attached Lists of DataTables using SeriesFrame with Output format.
-        """
-        dataTablesByDataType = defaultdict(list)
-        for dataTable in self._outputDataTables:
-            seriesFrame = dataTable.data
-            if dataTable.data is not None:
-                if hasattr(seriesFrame, sv.SERIESFRAMETYPE):
-                    dataTablesByDataType[seriesFrame.SERIESFRAMETYPE].append(dataTable)
-        if seriesFrameType:
-            return flattenLists(dataTablesByDataType.get(seriesFrameType))
-        else:
-            return flattenLists(list(dataTablesByDataType.values()))
+    @property
+    def outputDataTableName(self):
+        """The name for the outputDataTable created after a fitData routine """
+        return self._outputDataTableName
 
-    def _fetchOutputDataTable(self, name=None, overrideExisting=True):
+    @outputDataTableName.setter
+    def outputDataTableName(self, name):
+        self._outputDataTableName = name
+
+    def _fetchOutputDataTable(self, name=None):
         """
         Interanl. Called after 'fit()' to get a valid Datatable to attach the fitting output SeriesFrame
         :param seriesFrameType: str,  A filtering serieFrameType.
-        :param overrideExistingOutput: True, to get last available dataTable. False, to create always a new one
         :return: DataTable
         """
-        dataTable = None
-        if overrideExisting:
-            dataTable = self.project.getDataTable(name)
+        dataTable = self.project.getDataTable(name)
+        if dataTable:
+            # restore the type in case is from a reopened project.
+            dataTable.data.__class__ = SeriesFrameBC
+
         if not dataTable:
             dataTable = self.project.newDataTable(name)
+        ## update the exclusionHandler
+        if not self._exclusionHandler._dataTable:
+            self._exclusionHandler._dataTable = dataTable
+        self._exclusionHandler.save()
+        ## update the DATATABLETYPE
+        dataTable.setMetadata(sv.DATATABLETYPE, sv.SERIESANALYSISOUTPUTDATA)
         return dataTable
 
-    def addOutputData(self, dataTable):
-        self._outputDataTables.add(dataTable)
+    @property
+    def exclusionHandler(self):
+        """Get an object containing all excluded pids"""
+        exclusionHandler = self._exclusionHandler
+        dataTable = self.project.getDataTable(self.outputDataTableName)
+        if dataTable is not None:
+            exclusionHandler._dataTable = dataTable
+        return exclusionHandler
 
-    def removeOutputData(self, dataTable):
-        self._outputDataTables.discard(dataTable)
+    @property
+    def untraceableValue(self) -> float:
+        return self._untraceableValue
 
-    def _setDataType(self, dataTables, theType):
-        """set the dataTable.data (dataFrame) to the given type.
-         Used when restored project lost the dataTable.data Type """
-        for dataTable in dataTables:
-            if not isinstance(dataTable.data, theType):
-                dataTable.data.__class__ = theType
+    @untraceableValue.setter
+    def untraceableValue(self, value):
+        if isinstance(value, (float, int)):
+            self._untraceableValue = value
+        else:
+            getLogger().warning(f'Impossible to set untraceableValue to {value}. Use type int or float.')
 
-
-    @classmethod
-    def fitInputData(self, *args, **kwargs):
+    def fitInputData(self):
         """
-        override on custom implementation
-        :param args:
-        :param kwargs:
-        :return: None
-            kwargs
-            =======================
-            :key: outputName: outputDataTable name
-            :key: fittingModels:  list of fittingModel classes (not initialised).
-                            So to use only the specif given, rather that all available.
-            :key: overrideOutputDataTables: bool, True to rewrite the output result in the last available dataTable.
-                                    When multiple fittingModels are available, each will output in a different dataTable
-                                    according to its definitions.
-
+        Perform calculation using the currentFittingModel and currentCalculationModel to the inputDataTables
+        and save outputs to a single newDataTable.
+        Resulting dataTables are available in the outputDataTables.
+        :return: None. Creates a new output dataTable in outputDataTables
         """
-        pass
+        getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
 
-    @classmethod
-    def registerFittingModel(cls, fittingModel):
+        if len(self.inputDataTables) == 0:
+            getLogger().warning('Cannot run any fitting models. Add a valid inputData first')
+            return
+        inputFrame = self.inputDataTables[-1].data
+        fittingFrame = self.currentFittingModel.fitSeries(inputFrame)
+        fittingFrame.joinNmrResidueCodeType()
+        calculationFrame = self.currentCalculationModel.calculateValues(inputFrame)
+        # merge the frames on CollectionPid/id, Assignment, model-results/statistics and calculation
+        # keep only minimal info and not duplicates to the fitting frame (except the collectionPid)
+        cdf = calculationFrame[[ sv.COLLECTIONPID] + self.currentCalculationModel.modelArgumentNames]
+        merged = pd.merge(fittingFrame, cdf, on=[sv.COLLECTIONPID], how='left')
+        outputDataTable = self._fetchOutputDataTable(name=self._outputDataTableName)
+        outputDataTable.data = merged
+
+    @property
+    def currentFittingModel(self):
+        """ The working fittingModel in the module.
+         E.g.: the initiated ExponentialDecayModel. See models for docs. """
+        if self._currentFittingModel is None:
+            getLogger().warn('Fitting Model not set.')
+            return
+        return self._currentFittingModel
+
+    @currentFittingModel.setter
+    def currentFittingModel(self, model):
+        self._currentFittingModel = model
+
+    @property
+    def currentCalculationModel(self):
+        """ The working CalculationModel in the module.
+        E.g.: the initiated EuclidianModel for ChemicalshiftMapping. See models for docs. """
+        if self._currentCalculationModel is None:
+            getLogger().warn('CalculationModel not set.')
+            return
+        return self._currentCalculationModel
+
+    @currentCalculationModel.setter
+    def currentCalculationModel(self, model):
+        self._currentCalculationModel = model
+
+    def registerModel(self, model):
         """
-        A method to register a FittingModel object.
+        A method to register a Model object, either FittingModel or CalculationModel.
         See the FittingModelABC for more information
         """
-        cls.fittingModels.add(fittingModel)
+        from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, CalculationModel
+        if issubclass(model, CalculationModel):
+            self.calculationModels.update({model.ModelName: model})
+            return
+        if issubclass(model, FittingModelABC):
+            self.fittingModels.update({model.ModelName: model})
+        return
 
-    @classmethod
-    def deRegisterFittingModel(cls, fittingModel):
+    def deRegisterModel(self, model):
         """
-        A method to de-register a fitting Model
+        A method to de-register a  Model
         """
-        cls.fittingModels.discard(fittingModel)
+        self.calculationModels.pop(model.ModelName, None)
+        self.fittingModels.pop(model.ModelName, None)
 
     def getFittingModelByName(self, modelName):
         """
@@ -151,8 +205,25 @@ class SeriesAnalysisABC(ABC):
         :param modelName: str
         :return:
         """
-        dd = {model.ModelName:model for model in self.fittingModels}
-        return dd.get(modelName, None)
+        return self.fittingModels.get(modelName, None)
+
+    def getCalculationModelByName(self, modelName):
+        """
+        Convenient method to get a registered Calculation Object  by its name
+        :param modelName: str
+        :return:
+        """
+        return self.calculationModels.get(modelName, None)
+
+    def _getFirstModel(self, models):
+        """
+        Get the first Model in the dict
+        :param models: dict of FittingModels or CalculationModels
+        :return:
+        """
+        first = next(iter(models), iter({}))
+        model = models.get(first)
+        return model
 
     def newInputDataTableFromSpectrumGroup(self, spectrumGroup:SpectrumGroup, peakListIndices=None, dataTableName:str=None):
         """
@@ -168,6 +239,7 @@ class SeriesAnalysisABC(ABC):
         seriesFrame = InputSeriesFrameBC()
         seriesFrame.buildFromSpectrumGroup(spectrumGroup, peakListIndices=peakListIndices)
         dataTable = project.newDataTable(name=dataTableName, data=seriesFrame)
+        dataTable.setMetadata(sv.DATATABLETYPE, sv.SERIESANALYSISINPUTDATA)
         self._setRestoringMetadata(dataTable, seriesFrame, spectrumGroup)
         return dataTable
 
@@ -185,25 +257,52 @@ class SeriesAnalysisABC(ABC):
         collections = createCollectionsFromSpectrumGroup(spectrumGroup, peakListIndices)
         return collections
 
+    def getThresholdValueForData(self, data, columnName, calculationMode=sv.MAD, factor=1.):
+        """ Get the Threshold value for the ColumnName values.
+        :param data: pd.dataFrame
+        :param columnName: str. a column name presents in the data(frame)
+        :param calculationMode: str, one of ['MAD', 'AAD', 'Mean', 'Median', 'STD']
+        :param factor: float. Multiplication factor.
+        :return float.
+
+        MAD: Median absolute deviation, (https://en.wikipedia.org/wiki/Median_absolute_deviation)
+        AAD: Average absolute deviation, (https://en.wikipedia.org/wiki/Average_absolute_deviation).
+        Note, MAD and AAD are often abbreviated the same way, in fact, in scipy MAD is Median absolute deviation,
+        whereas in Pandas MAD is Mean absolute deviation!
+        """
+        factor = factor if factor and factor >0 else 1
+        thresholdValue = None
+        if data is not None:
+            if len(data[columnName])>0:
+                values = data[columnName].values
+                values = values[~np.isnan(values)]  # skip nans
+                if calculationMode == sv.MAD:
+                    thresholdValue = stats.median_absolute_deviation(values) # in scipy MAD is Median absolute deviation
+                if calculationMode == sv.AAD:
+                    thresholdValue = data[columnName].mad() # in pandas MAD is Mean absolute deviation !
+                else:
+                    func = lf.CommonStatFuncs.get(calculationMode, None)
+                    if func:
+                        thresholdValue = func(values)
+        if thresholdValue:
+            thresholdValue *= factor
+        return thresholdValue
+
     @staticmethod
     def _setRestoringMetadata(dataTable, seriesFrame, spectrumGroup):
         """ set the metadata needed for restoring the object"""
         dataTable.setMetadata(spectrumGroup.className, spectrumGroup.pid)
         dataTable.setMetadata(sv.SERIESFRAMETYPE, seriesFrame.SERIESFRAMETYPE)
 
-    def _restoreInputDataTableData(self, dataTable):
+    def _ensureDataType(self):
         """
         Reset variables and Obj type after restoring a project from its metadata.
         :return: dataTable
         """
-        spectrumGroupPid = dataTable.metadata.get(SpectrumGroup.className, None)
-        spectrumGroup = self.project.getByPid(spectrumGroupPid)
-        dataTypeStr = dataTable.metadata.get(sv.SERIESFRAMETYPE, None)
-        dataType = ALL_SERIES_DATA_TYPES.get(dataTypeStr, InputSeriesFrameBC)
-        data = dataTable.data
-        if spectrumGroup and data is not None:
-            data.__class__ = dataType
-        return dataTable
+        for dataTable in self._inputDataTables:
+            if not isinstance(dataTable.data.__class__ , InputSeriesFrameBC):
+                dataTable.data.__class__ = InputSeriesFrameBC
+
 
     @classmethod
     def exportToFile(cls, path, fileType, *args, **kwargs):
@@ -212,24 +311,99 @@ class SeriesAnalysisABC(ABC):
         """
         pass
 
+    def _registerModels(self, models):
+        """Register multiple models in the main class """
+        dd = {}
+        for model in models:
+            self.registerModel(model)
+            dd[model.ModelName] = model
+        return dd
+
     def plotResults(self, *args, **kwargs):
         pass
 
-
     def __init__(self):
-
         self.project = getProject()
         self.application = getApplication()
         self.current = getCurrent()
         self._inputDataTables = OrderedSet()
-        self._outputDataTables = OrderedSet()
+        self._outputDataTableName = sv.SERIESANALYSISOUTPUTDATA
+        self._untraceableValue = 1.0   # default value for replacing NaN values in untraceableValues.
+        self.fittingModels = dict()
+        self.calculationModels = dict()
+        self._currentFittingModel = None     ## e.g.: ExponentialDecay for relaxation
+        self._currentCalculationModel = None ## e.g.: HetNoe for Relaxation
         self._needsRefitting = False
+        self._exclusionHandler = ExclusionHandler()
+
+    def close(self):
+        self.exclusionHandler.save()
+        self.clearInputDataTables()
+        self._currentCalculationModel = None
+        self._currentFittingModel = None
 
     def __str__(self):
         return f'<{self.__class__.__name__}: {self.seriesAnalysisName}>'
 
     __repr__ = __str__
 
+
+class ExclusionHandler(TraitBase):
+    """ A class that holds pids of objects to be excluded from calculations. E.g.: peaks from fitting etc.
+    Available Objects: (traitName are taken from the object's _pluralLinkName property):
+        - peaks
+        - collections
+        - nmrResidues
+        - nmrAtoms
+        - spectra
+    Use save/restore to save/restore traits as metadata into/from a datatable
+    """
+
+    _traitNames = [f'{tag}s' for tag in sv.EXCLUDED_OBJECTS]
+
+    def __init__(self, dataTable=None, *args, **kwargs):
+        super().__init__()
+        self._dataTable = dataTable # used to store/restore exclusions as metadata
+        for name in self._traitNames:
+            self.add_traits(**{name:List()})
+            self.update({name:[]}) ## ensures all starts correctly and a list works as a list!
+
+    def clear(self):
+        """Reset all to empty """
+        for name in self._traitNames:
+            self.update({name:[]})
+
+    def updataDataTable(self):
+        """ Update the datatable data flags
+         to do, update the dataFrame with True/False if the pid is in Data
+            syntax DataFrame.loc[condition, (column_1, column_2)] = new_value
+        """
+        df = self._dataTable.data
+        ## eg: for peaks to be like:
+        # for pid in self.excluded_peakPids:
+        #     df.loc[df[sv.PEAKPID] == pid, 'excluded_peakPids'] = True
+        # self._dataTable.data = df
+        pass
+
+    def save(self):
+        """Save metadata do the dataTable """
+        if not self._dataTable:
+            getLogger().warn('Impossible to save to DataTable. No DataTable available.')
+            return
+        self._dataTable.updateMetadata(self.asDict())
+
+    def restore(self):
+        """Restore metadata from the dataTable """
+        if not self._dataTable:
+            getLogger().warn('Impossible restore from DataTable. No DataTable available.')
+            return
+        for name, value in self._dataTable.metadata.items():
+            if name in self._traitNames:
+                self.update({name: value})
+
+
+####
+## Below objects are not implemeted yet and will be done with NTDB definitions
 
 class GroupingNmrAtomABC(ABC):
     """

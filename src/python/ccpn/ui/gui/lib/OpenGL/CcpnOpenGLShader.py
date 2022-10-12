@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-17 13:40:47 +0100 (Fri, June 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:10 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,10 @@ import numpy as np
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.lib.OpenGL import GL
 
+
+#=========================================================================================
+# ShaderProgramABC - Class defining a GL shader program
+#=========================================================================================
 
 class ShaderProgramABC(object):
     """
@@ -69,14 +73,14 @@ class ShaderProgramABC(object):
     2.1 	1.20.8 	    120 <- should be the lowest needed
     3.0 	1.30.10 	130
     3.1 	1.40.08 	140
-    3.2 	1.50.11 	150
+    3.2 	1.50.11 	150 <- can now get it to work from here :)
     3.3 	3.30.6  	330
     4.0 	4.00.9 	    400
     4.1 	4.10.6 	    410
     4.2 	4.20.6  	420
     4.3 	4.30.6  	430
 
-    (On MacOS, anything above 2.1 causes problems)
+    (On MacOS, anything above 2.1 causes problems - I think solved now)
     """
 
     vertexShader = None
@@ -123,7 +127,8 @@ class ShaderProgramABC(object):
             self.uniformLocations[att] = shader.uniformLocation(att)
             self.uniformLocations['_' + att] = np.zeros((self.attributes[att][0],), dtype=self.attributes[att][1])
 
-    def _addGLShader(self, source, shader_type):
+    @staticmethod
+    def _addGLShader(source, shader_type):
         """Function for compiling a GLSL shader
 
         :param source: String containing shader source code
@@ -170,7 +175,8 @@ class ShaderProgramABC(object):
         """
         self._shader.release()
 
-    def setProjectionAxes(self, attMatrix, left, right, bottom, top, near, far):
+    @staticmethod
+    def setProjectionAxes(attMatrix, left, right, bottom, top, near, far):
         """Set the contents of the projection matrix
         """
         oa = 2.0 / (right - left) if abs(right-left) > 1.0e-7 else 1.0
@@ -185,12 +191,13 @@ class ShaderProgramABC(object):
                            0.0, 0.0, oc, 0.0,
                            og, oe, od, 1.0]
 
-    def setViewportMatrix(self, viewMatrix, left, right, bottom, top, near, far):
+    @staticmethod
+    def setViewportMatrix(viewMatrix, left, right, bottom, top, near, far):
         """Set the contents of the viewport matrix
         """
         # return the viewport transformation matrix - mapping screen to NDC
         #   normalised device coordinates
-        #   viewport * NDC_cooord = world_coord
+        #   viewport * NDC_co-ord = world_co-ord
         oa = (right - left) / 2.0  #if abs(right-left) > 1.0e-7 else 1.0
         ob = (top - bottom) / 2.0  #if abs(top-bottom) > 1.0e-7 else 1.0
         oc = (far - near) / 2.0  #if abs(far-near) > 1.0e-7 else 1.0
@@ -203,7 +210,9 @@ class ShaderProgramABC(object):
                             0.0, 0.0, oc, od,
                             0.0, 0.0, 0.0, 1.0]
 
-    # Common attributes sizes
+    #=========================================================================================
+    # Methods available - Common attributes sizes
+    #=========================================================================================
 
     def setGLUniformMatrix4fv(self, uniformLocation=None, count=1, transpose=GL.GL_FALSE, value=None):
         """Set a 4x4 float32 matrix in the shader

@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-21 11:40:03 +0100 (Thu, July 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -80,8 +80,8 @@ class SeriesFrameBC(TableFrame):
 
     def joinNmrResidueCodeType(self):
         """ Merge the nmrResidue SequenceCode and ResidueType columns in a new colum (NMRRESIDUECODETYPE)"""
-        ## convert the sequenceCode to str. This because pandas Automatically tries to make floats.
-        self[sv.NMRRESIDUECODE] = self[sv.NMRRESIDUECODE].astype(int).astype(str)
+        ## convert the sequenceCode to str. This because pandas Automatically tries to make floats.!!
+        self[sv.NMRRESIDUECODE] = self[sv.NMRRESIDUECODE].astype(str).apply(lambda x: x.replace('.0', ''))
         self._joinTwoColumnsAsStr(sv.NMRRESIDUECODE, sv.NMRRESIDUETYPE, newColumName=sv.NMRRESIDUECODETYPE, separator='-')
 
 class InputSeriesFrameBC(SeriesFrameBC):
@@ -237,6 +237,8 @@ class InputSeriesFrameBC(SeriesFrameBC):
                                 self.loc[i, sv.NMRRESIDUETYPE] = nmrAtom.nmrResidue.residueType
                                 self.loc[i, sv.NMRATOMNAME] = nmrAtom.name
                                 self.loc[i, sv.NMRATOMPID] = nmrAtom.pid
+                            for excludedFlag in sv.EXCLUDED_OBJECTS:
+                                self.loc[i, excludedFlag] = False
                             i += 1
                         except Exception as e:
                             getLogger().warn(f'Cannot add row {i} for peak {pk.pid}. Skipping with error: {e}')
@@ -250,6 +252,28 @@ class InputSeriesFrameBC(SeriesFrameBC):
 
 class RelaxationOutputFrame(SeriesFrameBC):
     SERIESFRAMETYPE = sv.RELAXATION_OUTPUT_FRAME
+
+
+class HetNoeOutputFrame(SeriesFrameBC):
+
+    """
+    A TableData used for the HetNoe Series Analysis,
+    Mandatory Column names are:
+        ## --------- Columns definitions --------- ##
+        # Group with various identifiers as the main RelaxationOutputFrame
+
+        # Group with calculation/calculated values
+        - seriesUnit        : str,
+        - seriesStep        : float,
+        - seriesStepValue   : float,
+        - value             : float,
+        - value_err         : float,
+
+    """
+
+    SERIESFRAMENAME = sv.HetNoe_OUTPUT_FRAME
+    SERIESFRAMETYPE = sv.HetNoe_OUTPUT_FRAME
+
 
 ########################################################################################################################
 ################################   Chemical Shift Mapping  I/O Series Output Table      ################################
@@ -274,11 +298,12 @@ class CSMOutputFrame(SeriesFrameBC):
         - seriesUnit        : str,
         - seriesStep        : float,
         - seriesStepValue   : float,
-        - deltaDeltaMean    : float,
+        - deltaDelta        : float,
+        - deltaDelta_err    : float,
         - kd                : float,
-        - kd_error          : float,
+        - kd_err            : float,
         - bMax              : float,
-        - bMax_error        : float,
+        - bMax_err          : float,
         # Group with statistical fitting results
         - R2               : float,
         - Chi-square       : float,
@@ -309,7 +334,7 @@ class CSMOutputFrame(SeriesFrameBC):
                     sv.SERIESUNIT,
                     sv.SERIESSTEP,
                     sv.SERIESSTEPVALUE,
-                    sv.DELTADELTAMEAN,
+                    sv.DELTA_DELTA,
                     sv.KD,
                     sv.KD_ERR,
                     sv.BMAX,
@@ -344,44 +369,18 @@ def _mergeRowsByHeaders(inputData, grouppingHeaders, dropColumnNames=[sv.NMRATOM
         inputData[sv._ROW_UID] = newIDs
     return inputData
 
-def _getOutputFrameFromInputFrame(inputFrame, outputFrameType=RelaxationOutputFrame):
-    """
-    :param inputFrame: a populated input Frame with columns definition and all other class properties
-    :return: outputFrame
-    """
-    outputFrame = outputFrameType()
-    ## clone the existing values from columns
-    for column in inputFrame:
-        outputFrame[column] = inputFrame[column].values
-    ## the parameters fitting Columns are added on the fly as may differ by Model (e.g.: amplitude, decay etc)
-    ## add the statistical fitting output Columns
-    fittingColumns = sv.CONSTANT_STATS_OUTPUT_TABLE_COLUMNS
-    for fittingColumn in fittingColumns:
-        outputFrame[fittingColumn] = [None] * len(inputFrame)
-    # #clone the other properties
-    outputFrame.setSeriesUnits(inputFrame.SERIESUNITS)
-    outputFrame.setSeriesSteps(inputFrame.SERIESSTEPS)
-    outputFrame._assignmentHeaders = inputFrame.assignmentHeaders
-    outputFrame._valuesHeaders = inputFrame.valuesHeaders
-    return outputFrame
-
 
 INPUT_SERIESFRAME_DICT = {
                     InputSeriesFrameBC.SERIESFRAMETYPE: InputSeriesFrameBC
                     }
 
-OUTPUT_CSM_SERIESFRAMES_DICT = {
+OUTPUT_SERIESFRAMES_DICT = {
                               sv.CSM_OUTPUT_FRAME: CSMOutputFrame,
-                              }
-
-OUTPUT_RELAXATION_SERIESFRAMES_DICT = {
-                              sv.RELAXATION_OUTPUT_FRAME: RelaxationOutputFrame
-                              }
+                            }
 
 
 
 ALL_SERIES_DATA_TYPES = {
                         **INPUT_SERIESFRAME_DICT,
-                        **OUTPUT_CSM_SERIESFRAMES_DICT,
-                        **OUTPUT_RELAXATION_SERIESFRAMES_DICT
+                        **OUTPUT_SERIESFRAMES_DICT
                          }

@@ -9,12 +9,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-08 15:41:02 +0100 (Mon, August 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:04 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import functools
 # import os
+import re
 import typing
 import operator
 from typing import Sequence, Union, Optional, List
@@ -34,6 +35,7 @@ from collections import OrderedDict
 # from time import time
 from datetime import datetime
 from collections.abc import Iterable
+
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.Updater import UPDATE_POST_PROJECT_INITIALISATION
 from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
@@ -91,7 +93,7 @@ STRUCTUREDATA = 'structureData'
 COMPLEXES = 'complexes'
 SPECTRUMGROUPS = 'spectrumGroups'
 NOTES = 'notes'
-PEAKCLUSTERS = 'peakClusters'
+# _PEAKCLUSTERS = '_peakClusters'
 COLLECTIONS = 'collections'
 
 
@@ -240,7 +242,7 @@ class Project(AbstractWrapperObject):
         return None
 
     @property
-    def peakClusters(self):
+    def _peakClusters(self):
         """STUB: hot-fixed later"""
         return None
 
@@ -638,11 +640,9 @@ class Project(AbstractWrapperObject):
              createFallback: bool = False, overwriteExisting: bool = False,
              checkValid: bool = False, changeDataLocations: bool = False) -> bool:
         """Save project with all data, optionally to new location or with new name.
-        Unlike lower-level functions, this function ensures that data in high level caches are saved.
-        Return True if save succeeded otherwise return False (or throw error)
-        """
-        # self._flushCachedData()
 
+        ;return True if save succeeded otherwise return False (or throw error)
+        """
         # Update the spectrum internal settings
         for spectrum in self.spectra:
             spectrum._saveObject()
@@ -654,6 +654,12 @@ class Project(AbstractWrapperObject):
             newPath.assureSuffix(CCPN_EXTENSION)
             if newPath.exists() and not overwriteExisting:
                 raise ValueError('Cannot overwrite existing file "%s"' % newPath)
+
+            # check the project name derived from path
+            newName = newPath.basename
+            if (_name := self._checkName(newName, correctName=False)) is None:
+                raise ValueError(f'Project name "{newName}" (derived from path) is invalid; see console/log for details')
+
             path = str(newPath)
             if len(path) > 1024:
                 raise ValueError('There is a limit (1024) to the length of the path (%s)' % path)
@@ -705,6 +711,16 @@ class Project(AbstractWrapperObject):
     def name(self) -> str:
         """name of Project"""
         return self._wrappedData.root.name
+
+    @classmethod
+    def _checkName(cls, name, correctName=True):
+        """Checks name
+
+        :param name: name to be checked
+        :param correctName: flag to correct
+        :return: name (optionally corrected) or None
+        """
+        return apiIo._checkProjectName(name=name, correctName=correctName)
 
     @property
     def path(self) -> str:
@@ -1531,13 +1547,17 @@ class Project(AbstractWrapperObject):
         else:
             return list(filter(None, map(lambda x: self.getByPid(x) if isinstance(x, str) else x, pids)))
 
-    def getByPids(self, pids: list):
+    def getByPids(self, pids: Iterable):
         """Optimise method to get all found objects from a list of pids. Remove any None.
         """
+        if not isinstance(pids, Iterable):
+            raise ValueError(f'{self.__class__.__name__}.getByPids: pids must be an iterable')
+
         objs = [self.getByPid(pid) if isinstance(pid, str) else pid for pid in pids]
         return list(filter(lambda obj: self.isCoreObject(obj), objs))
 
-    def getPidsByObjects(self, objs: list):
+    @staticmethod
+    def getPidsByObjects(objs: list):
         """Optimise method to get all found pids from a list of objects. Remove any None.
          Warning: do not use with zip"""
         return list(filter(None, map(lambda x: x.pid if isinstance(x, AbstractWrapperObject) else None, objs)))
@@ -1782,17 +1802,19 @@ class Project(AbstractWrapperObject):
         return _fetchDataTable(self, name=name)
 
     @logCommand('project.')
-    def newPeakCluster(self, peaks: Sequence[Union['Peak', str]] = None, **kwds) -> Optional['PeakCluster']:
+    def _newPeakCluster(self, peaks: Sequence[Union['Peak', str]] = None, **kwds) -> Optional['_PeakCluster']:
         """Create new PeakCluster.
 
         See the PeakCluster class for details.
 
         Optional keyword arguments can be passed in; see PeakCluster._newPeakCluster for details.
 
+        CCPN Internal - this object is deprecated.
+
         :param peaks: optional list of peaks as objects or pids.
         :return: a new PeakCluster instance.
         """
-        from ccpn.core.PeakCluster import _newPeakCluster
+        from ccpn.core._implementation._PeakCluster import _newPeakCluster
 
         return _newPeakCluster(self, peaks=peaks, **kwds)
 
@@ -1931,6 +1953,9 @@ class Project(AbstractWrapperObject):
                             shortName=shortName, role=role, comment=comment,
                             expandFromAtomSets=expandFromAtomSets, addPseudoAtoms=addPseudoAtoms,
                             addNonstereoAtoms=addNonstereoAtoms, **kwds)
+
+    # GWV: why not newChain to be consistent???
+    newChain = createChain
 
     @logCommand('project.')
     def newSubstance(self, name: str = None, labelling: str = None, substanceType: str = 'Molecule',

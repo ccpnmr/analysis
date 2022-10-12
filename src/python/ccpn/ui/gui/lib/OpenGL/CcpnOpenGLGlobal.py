@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-27 15:24:37 +0000 (Thu, January 27, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:10 +0100 (Wed, October 12, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -53,10 +53,14 @@ GLPIXELSHADER = 'GLPixelShader'
 GLTEXTSHADER = 'GLTextShader'
 
 
+#=========================================================================================
+# Global data accessible by all shaders and GL-widgets
+#=========================================================================================
+
 @singleton
 class GLGlobalData(QtWidgets.QWidget):
     """
-    Class to handle the common information between all the GL widgets
+    Class to handle the common information between all the GL-widgets
     """
 
     def __init__(self, parent=None, mainWindow=None):
@@ -94,7 +98,7 @@ class GLGlobalData(QtWidgets.QWidget):
 
         _foundFonts = self.fonts[GLFONT_DEFAULT].fontGlyph
 
-        # find all the fonts ion the list that have a matching 2* size, for double resolution retina displays
+        # find all the fonts in the list that have a matching 2* size, for double resolution retina displays
         self.GLFONT_SIZES = [_size for _size in _foundFonts.keys() if _size * 2 in _foundFonts.keys()]
 
         # set the current size from the preferences
@@ -127,6 +131,10 @@ class GLGlobalData(QtWidgets.QWidget):
         self._shaderProgramAlias = self.shaders['aliasedPixelShader']
         self._shaderProgramTexAlias = self.shaders['aliasedTextShader']
 
+
+#=========================================================================================
+# Pixel shader for contour plotting
+#=========================================================================================
 
 class PixelShader(ShaderProgramABC):
     """
@@ -173,8 +181,9 @@ class PixelShader(ShaderProgramABC):
                   'mvMatrix': (16, np.float32),
                   }
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # methods available for shader
+    #=========================================================================================
+    # methods available
+    #=========================================================================================
 
     def setPMatrix(self, matrix):
         """Set the contents of projection pMatrix
@@ -188,6 +197,10 @@ class PixelShader(ShaderProgramABC):
         """
         self.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, matrix)
 
+
+#=========================================================================================
+# Pixel shader for aliased peak plotting
+#=========================================================================================
 
 class AliasedPixelShader(PixelShader):
     """
@@ -257,8 +270,9 @@ class AliasedPixelShader(PixelShader):
         'aliasEnabled' : (1, np.uint32),
         }
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # methods available for shader
+    #=========================================================================================
+    # methods available
+    #=========================================================================================
 
     def __init__(self):
         self.attributes.update(self._attributes)
@@ -309,6 +323,10 @@ class AliasedPixelShader(PixelShader):
         self.setGLUniform1i('aliasEnabled', value)
 
 
+#=========================================================================================
+# Functions
+#=========================================================================================
+
 def getAliasSetting(aliasX, aliasY):
     """Return the alias setting for alias value (aliasX, aliasY) for insertion into shader
     """
@@ -320,6 +338,10 @@ def getAliasSetting(aliasX, aliasY):
     # arbitrary value to pack into a single float
     return (256 * aliasX) + aliasY
 
+
+#=========================================================================================
+# Main Text shader
+#=========================================================================================
 
 class TextShader(ShaderProgramABC):
     """
@@ -369,9 +391,9 @@ class TextShader(ShaderProgramABC):
 
         void main()
         {
-            _texFilter = texture2D(texture, _texCoord);
+            _texFilter = texture2D(texture, _texCoord);  // returns float due to glTexImage2D creation as GL_ALPHA
             // colour for blending enabled
-            _opacity = _texFilter.w * alpha;
+            _opacity = _texFilter.a * alpha;  // only has .alpha component
 
             if (blendEnabled != 0)
                 // multiply the character fade by the color fade to give the actual transparency
@@ -393,8 +415,9 @@ class TextShader(ShaderProgramABC):
                   'alpha'       : (1, np.float32),
                   }
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # methods available for shader
+    #=========================================================================================
+    # methods available
+    #=========================================================================================
 
     def setPTexMatrix(self, matrix):
         """Set the contents of projection pTexMatrix
@@ -464,6 +487,10 @@ class TextShader(ShaderProgramABC):
         self.setGLUniform1f('alpha', value)
 
 
+#=========================================================================================
+# Text shader for displaying text in aliased regions
+#=========================================================================================
+
 class AliasedTextShader(TextShader):
     """
     Text shader for displaying text in aliased regions
@@ -520,9 +547,9 @@ class AliasedTextShader(TextShader):
         
         void main()
         {
-            _texFilter = texture2D(texture, _texCoord);
+            _texFilter = texture2D(texture, _texCoord);  // returns float due to glTexImage2D creation as GL_ALPHA
             // colour for blending enabled
-            _opacity = _texFilter.w * alpha;
+            _opacity = _texFilter.a * alpha;  // only has .alpha component
                         
             // set the pixel colour
             if (abs(_aliased) < 0.5)
@@ -562,8 +589,9 @@ class AliasedTextShader(TextShader):
         'aliasEnabled' : (1, np.uint32),
         }
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # methods available for shader
+    #=========================================================================================
+    # methods available
+    #=========================================================================================
 
     def __init__(self):
         self.attributes.update(self._attributes)

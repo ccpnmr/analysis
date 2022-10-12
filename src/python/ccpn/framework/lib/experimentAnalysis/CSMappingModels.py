@@ -1,0 +1,302 @@
+"""
+This module defines base classes for Series Analysis
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
+#=========================================================================================
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: Luca Mureddu $"
+__date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
+import numpy as np
+import warnings
+from ccpn.util.Logging import getLogger
+from ccpn.core.DataTable import TableFrame
+from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult, CalculationModel
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMOutputFrame
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
+
+########################################################################################################################
+####################################       Minimisers     ##############################################################
+########################################################################################################################
+
+class FractionBindingMinimiser(MinimiserModel):
+    """A model based on the fraction bound Fitting equation.
+      Eq. 6 from  M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
+    """
+
+    FITTING_FUNC = lf.fractionBound_func
+    KDstr = sv.KD # They must be exactly as they are defined in the FITTING_FUNC arguments! This was too hard to change!
+    BMAXstr = sv.BMAX
+
+    defaultParams = {KDstr:1,
+                     BMAXstr:0.5}
+
+    def __init__(self, **kwargs):
+        super().__init__(Binding1SiteMinimiser.FITTING_FUNC, **kwargs)
+        self.name = self.MODELNAME
+        self.params = self.make_params(**self.defaultParams)
+
+    def guess(self, data, x, **kws):
+        """
+        :param data: y values 1D array
+        :param x: the x axis values. 1D array
+        :param kws:
+        :return: dict of params needed for the fitting
+        """
+        params = self.params
+        minKD = np.min(x)
+        maxKD = np.max(x) + (np.max(x) * 0.5)
+        if minKD == maxKD == 0:
+            getLogger().warning(f'Fitting model min==max {minKD}, {maxKD}')
+            minKD = -1
+
+        params.get(self.KDstr).value = np.mean(x)
+        params.get(self.KDstr).min = minKD
+        params.get(self.KDstr).max = maxKD
+        params.get(self.BMAXstr).value = np.mean(data)
+        params.get(self.BMAXstr).min = 0.001
+        params.get(self.BMAXstr).max = np.max(data) + (np.max(data) * 0.5)
+        return params
+
+
+class Binding1SiteMinimiser(MinimiserModel):
+    """A model based on the oneSiteBindingCurve Fitting equation.
+    """
+
+    FITTING_FUNC = lf.oneSiteBinding_func
+    MODELNAME = '1_Site_Binding_Model'
+
+    KDstr = sv.KD # They must be exactly as they are defined in the FITTING_FUNC arguments! This was too hard to change!
+    BMAXstr = sv.BMAX
+
+    defaultParams = {KDstr:1,
+                     BMAXstr:0.5}
+
+    def __init__(self, independent_vars=['x'], prefix='', nan_policy=sv.OMIT_MODE, **kwargs):
+        kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
+        super().__init__(Binding1SiteMinimiser.FITTING_FUNC, **kwargs)
+        self.name = self.MODELNAME
+        self.params = self.make_params(**self.defaultParams)
+
+    def guess(self, data, x, **kws):
+        """
+        :param data: y values 1D array
+        :param x: the x axis values. 1D array
+        :param kws:
+        :return: dict of params needed for the fitting
+        """
+        params = self.params
+        minKD = np.min(x)
+        maxKD = np.max(x)+(np.max(x)*0.5)
+        if minKD == maxKD == 0:
+            getLogger().warning(f'Fitting model min==max {minKD}, {maxKD}')
+            minKD = -1
+
+        params.get(self.KDstr).value = np.mean(x)
+        params.get(self.KDstr).min = minKD
+        params.get(self.KDstr).max = maxKD
+        params.get(self.BMAXstr).value = np.mean(data)
+        params.get(self.BMAXstr).min = 0.001
+        params.get(self.BMAXstr).max = np.max(data)+(np.max(data)*0.5)
+        return params
+
+
+########################################################################################################################
+####################################    DataSeries Models    ###########################################################
+########################################################################################################################
+
+class EuclideanCalculationModel(CalculationModel):
+    """
+    ChemicalShift Analysis DeltaDeltas shift distance calculation
+    """
+    ModelName = sv.EUCLIDEAN_DISTANCE
+    Info        = 'Calculate The DeltaDelta shifts for a series using the average Euclidean Distance.'
+    MaTex       = r'$\sqrt{\frac{1}{N}\sum_{i=0}^N (\alpha_i*\delta_i)^2}$'
+    Description = f'{sv.uALPHA}: the factor for each atom of interest;\ni: atom;\nN atom count;\n{sv.uDelta}: delta shift per atom in the series'
+    References  = '''
+                    1) Eq. (9) M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
+                    2) Mureddu, L. & Vuister, G. W. Simple high-resolution NMR spectroscopy as a tool in molecular biology.
+                       FEBS J. 286, 2035–2042 (2019).
+                  '''
+    FullDescription = f'{Info} \n {Description}\nSee References: {References}'
+
+    def __init__(self):
+        super().__init__()
+        self._alphaFactors = {}
+        self._euclideanCalculationMethod = 'mean'
+
+    @property
+    def modelArgumentNames(self):
+        """ The list of parameters as str used in the calculation model.
+          These names will appear as column headers in the output result frames. """
+        return [sv.DELTA_DELTA, sv.DELTA_DELTA_ERR]
+
+    def setAlphaFactors(self, values):
+        self._alphaFactors = values
+
+    def calculateValues(self, inputData:TableFrame) -> TableFrame:
+        """
+        Calculate the DeltaDeltas for an input SeriesTable.
+        :param inputData: CSMInputFrame
+        :return: outputFrame
+        """
+        outputFrame = CSMOutputFrame()
+        outputFrame._buildColumnHeaders()
+        grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
+        rowIndex = 1
+        with warnings.catch_warnings():
+            warnings.filterwarnings(action='ignore', category=RuntimeWarning)
+            while True:
+                for collectionId, groupDf in grouppedByCollectionsId:
+                    groupDf.sort_values([sv.SERIESSTEP], inplace=True)
+                    dimensions = groupDf[sv.DIMENSION].unique()
+                    dataPerDimensionDict = {}
+                    for dim in dimensions:
+                        dimRow = groupDf[groupDf[sv.DIMENSION] == dim]
+                        dataPerDimensionDict[dim] = dimRow[sv._PPMPOSITION].values
+                    alphaFactors = []
+                    for i in dataPerDimensionDict:  # get the correct alpha factors per IsotopeCode/dimension and not derive it by atomName.
+                        ic = groupDf[groupDf[sv.DIMENSION] == i][sv.ISOTOPECODE].unique()[-1]
+                        alphaFactors.append(self._alphaFactors.get(ic, 1))
+                    values = np.array(list(dataPerDimensionDict.values()))
+                    seriesValues4residue = values.T  ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
+                    deltaDeltas = EuclideanCalculationModel._calculateDeltaDeltas(seriesValues4residue, alphaFactors)
+                    csmValue = np.mean(deltaDeltas[1:])  ## first item is excluded from as it is always 0 by definition.
+                    csmValueError = None
+                    nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf)
+                    seriesSteps = groupDf[sv.SERIESSTEP].unique()
+                    seriesUnits = groupDf[sv.SERIESUNIT].unique()
+                    peakPids = groupDf[sv.PEAKPID].unique()
+                    for delta, seriesStep, peakPid in zip(deltaDeltas, seriesSteps, peakPids):
+                        # build the outputFrame
+                        outputFrame.loc[rowIndex, sv.COLLECTIONID] = collectionId
+                        outputFrame.loc[rowIndex, sv.PEAKPID] = peakPid
+                        outputFrame.loc[rowIndex, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
+                        outputFrame.loc[rowIndex, sv.SERIESSTEPVALUE] = delta
+                        outputFrame.loc[rowIndex, sv.SERIESSTEP] = seriesStep
+                        outputFrame.loc[rowIndex, sv.SERIESUNIT] = seriesUnits[-1]
+                        outputFrame.loc[rowIndex, sv.GROUPBYAssignmentHeaders] = \
+                        groupDf[sv.GROUPBYAssignmentHeaders].values[0]
+                        outputFrame.loc[rowIndex, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames) > 0 else ''
+                        if len(self.modelArgumentNames) == 2:
+                            for header, value in zip(self.modelArgumentNames, [csmValue, csmValueError]):
+                                outputFrame.loc[rowIndex, header] = value
+                        rowIndex += 1
+                break
+        return outputFrame
+
+    @staticmethod
+    def _calculateDeltaDeltas(data, alphaFactors):
+        """
+        :param data: 2D array containing A and B coordinates to measure.
+        e.g.: for two HN peaks data will be a 2D array, e.g.: [[  8.15842 123.49895][  8.17385 123.98413]]
+        :return: float
+        """
+        deltaDeltas = []
+        origin = data[0] # first set of positions (any dimensionality)
+        for coord in data:# the other set of positions (same dim as origin)
+            dd = lf.euclideanDistance_func(origin, coord, alphaFactors)
+            deltaDeltas.append(dd)
+        return deltaDeltas
+
+
+
+class OneSiteBindingModel(FittingModelABC):
+    """
+    ChemicalShift Analysis: One Site-Binding Curve calculation model
+    """
+    ModelName = sv.ONE_BINDING_SITE_MODEL
+    Info = 'Fit data to using the One-Binding-Site model.'
+    Description = ' ... '
+    References = '''
+                    1) Eq. (x) M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
+                  '''
+    MaTex = r'$\frac{B_{Max} * [L]}{[L] + K_d}$'
+    Minimiser = Binding1SiteMinimiser
+
+
+
+    def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
+        """
+        :param inputData:
+        :param rescale:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
+        #TODO Missing rescale option
+        grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
+        for collectionId, groupDf in grouppedByCollectionsId:
+            groupDf.sort_values([sv.SERIESSTEP], inplace=True)
+            seriesSteps = groupDf[sv.SERIESSTEP]
+            seriesValues = groupDf[sv.SERIESSTEPVALUE]
+            xArray = seriesSteps.values # e.g. ligand concentration
+            yArray = seriesValues.values # DeltaDeltas
+            minimiser = self.Minimiser()
+            try:
+                params = minimiser.guess(yArray, xArray)
+                result = minimiser.fit(yArray, params, x=xArray)
+            except:
+                getLogger().warning(f'Fitting Failed for collectionId: {collectionId} data.')
+                params = minimiser.params
+                result = MinimiserResult(minimiser, params)
+            inputData.loc[collectionId, sv.MODEL_NAME] = self.ModelName
+            inputData.loc[collectionId, sv.MINIMISER_METHOD] = minimiser.method
+            for ix, row in groupDf.iterrows():
+                for resultName, resulValue in result.getAllResultsAsDict().items():
+                    inputData.loc[ix, resultName] = resulValue
+        return inputData
+
+
+class FractionBindingModel(FittingModelABC):
+    """
+    ChemicalShift Analysis: FractionBinding fitting Curve calculation model
+    """
+    ModelName = sv.FRACTION_BINDING_MODEL
+    Info = 'Fit data to using the Fraction Binding model.'
+    Description = ' ... '
+    References = '''
+                '''
+    MaTex = ''
+    Minimiser = FractionBindingMinimiser
+
+    def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
+        getLogger().critical(sv.NIY_WARNING)
+        return inputData
+
+########################################################################################################################
+########################################################################################################################
+
+
+
+## Add a new Model to the list to be available throughout the program
+FittingModels = [
+        OneSiteBindingModel,
+        FractionBindingModel
+        ]
+
+CalculationModels = [
+                    EuclideanCalculationModel,
+                    ]
+

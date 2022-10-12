@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-05 11:05:50 +0100 (Fri, August 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:07 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -120,7 +120,7 @@ saveFrameReadingOrder = [
     'ccpn_complex',
     'ccpn_spectrum_group',
     'ccpn_restraint_list',
-    'ccpn_peak_cluster_list',
+    # 'ccpn_peak_cluster_list',
     'ccpn_notes',
     'ccpn_distance_restraint_violation_list',
     'ccpn_dihedral_restraint_violation_list',
@@ -208,6 +208,10 @@ nef2CcpnMap = {
         ('script', 'script'),
         ('ccpn_input_uuid', 'inputDataUuid'),
         ('ccpn_output_uuid', 'outputDataUuid'),
+        # ('ccpn_date', 'date'),
+        # ('ccpn_stream_id', 'date'),
+        # ('ccpn_saveframe', 'saveframe'),
+        # ('ccpn_comment', 'comment'),
         )),
 
     # new saveframes to handle ccpn specific logging
@@ -416,8 +420,9 @@ nef2CcpnMap = {
     'nef_nmr_spectrum'                      : OrderedDict((
         ('num_dimensions', 'dimensionCount'),
         ('chemical_shift_list', None),
-        ('experiment_classification', None),
-        ('experiment_type', None),
+        ('experiment_classification', 'experimentType'),
+        ('experiment_type', 'experimentName'),
+        ('ccpn_reference_experiment_dimensions', 'referenceExperimentDimensions'),
         ('ccpn_positive_contour_count', 'positiveContourCount'),
         ('ccpn_positive_contour_base', 'positiveContourBase'),
         ('ccpn_positive_contour_factor', 'positiveContourFactor'),
@@ -753,23 +758,23 @@ nef2CcpnMap = {
         # ('peak_pid', 'pid'),
         )),
 
-    'ccpn_peak_cluster_list'                : OrderedDict((
-        ('ccpn_peak_cluster', _isALoop),
-        ('ccpn_peak_cluster_peaks', _isALoop),
-        )),
-
-    'ccpn_peak_cluster'                     : OrderedDict((
-        ('serial', 'serial'),
-        ('annotation', 'annotation'),
-        )),
-
-    'ccpn_peak_cluster_peaks'               : OrderedDict((
-        ('peak_cluster_serial', None),
-        ('peak_spectrum', 'peakList.spectrum.name'),
-        ('peak_list_serial', 'peakList.serial'),
-        ('peak_serial', 'serial'),
-        # ('peak_pid', 'pid'),
-        )),
+    # 'ccpn_peak_cluster_list'                : OrderedDict((
+    #     ('ccpn_peak_cluster', _isALoop),
+    #     ('ccpn_peak_cluster_peaks', _isALoop),
+    #     )),
+    #
+    # 'ccpn_peak_cluster'                     : OrderedDict((
+    #     ('serial', 'serial'),
+    #     ('annotation', 'annotation'),
+    #     )),
+    #
+    # 'ccpn_peak_cluster_peaks'               : OrderedDict((
+    #     ('peak_cluster_serial', None),
+    #     ('peak_spectrum', 'peakList.spectrum.name'),
+    #     ('peak_list_serial', 'peakList.serial'),
+    #     ('peak_serial', 'serial'),
+    #     # ('peak_pid', 'pid'),
+    #     )),
 
     # NB Sample crosslink to spectrum is handled on the spectrum side
     'ccpn_sample'                           : OrderedDict((
@@ -1201,7 +1206,7 @@ nef2CcpnClassNames = {
     'ccpn_complex'                          : 'MX',
     'ccpn_spectrum_group'                   : 'SG',
     'ccpn_restraint_list'                   : 'RT',
-    'ccpn_peak_cluster_list'                : 'PC',
+    # 'ccpn_peak_cluster_list'                : '_PC',
     'ccpn_notes'                            : 'NO',
     'ccpn_note'                             : 'NO',
     'ccpn_distance_restraint_violation_list': 'VT',

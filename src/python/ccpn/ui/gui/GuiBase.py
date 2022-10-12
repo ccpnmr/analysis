@@ -11,12 +11,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-02 17:48:49 +0100 (Tue, August 02, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:09 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -222,6 +222,9 @@ class GuiBase(object):
                                                                                    # ('icon', 'icons/null')
                                                                                    ]),
             (),
+            ("Chemical Shift Mapping (alpha)", self.showChemicalShiftMappingModule, [('shortcut', 'ma')]),
+            ("Relaxation (alpha)", self.showRelaxationModule, [('shortcut', 're')]),
+            (),
             ("In Active Spectrum Display", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
                                             ("Show/Hide Spectrum Toolbar", self.toggleSpectrumToolbar, [('shortcut', 'sb')]),
                                             ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
@@ -235,6 +238,7 @@ class GuiBase(object):
                                             (" .. with Y-Z Axes Flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
                                             (" .. with Axes Flipped...", self.showFlipArbitraryAxisPopup, [('shortcut', 'fa')]),
                                             )),
+            ("Show/Hide Crosshairs", self.toggleCrosshairAll, [('shortcut', 'ch')]),
             (),
             (SHOWMODULESMENU, ([
                 ("None", None, [('checkable', True),
@@ -287,10 +291,10 @@ class GuiBase(object):
         ms.append(('Macro', [
             ("New Macro Editor", self._showMacroEditorCallback, [('shortcut', 'nm')]),
             (),
-            ("Open User Macro...", self._openMacroCallback),
+            ("Open User Macro...", self._openMacroCallback, [('shortcut', 'om')]),
             ("Open CCPN Macro...", partial(self._openMacroCallback, directory=macroPath)),
             (),
-            ("Run...", self.runMacro),
+            ("Run...", self.runMacro, [('shortcut', 'rm')]),
             ("Run Recent", ()),
             (CCPNMACROSMENU, ([
                 ("None", None, [('checkable', True),
@@ -306,6 +310,15 @@ class GuiBase(object):
             (PLUGINSMENU, ()),
             ]
                    ))
+
+        if self._isInDebugMode:
+            ms.append(('Development', [
+                ("Set debug off", partial(self.setDebug, 0)),
+                ("Set debug level 1", partial(self.setDebug, 1)),
+                ("Set debug level 2", partial(self.setDebug, 2)),
+                ("Set debug level 3", partial(self.setDebug, 3)),
+                ]
+                       ))
 
         ms.append(('Help', [
             (TUTORIALSMENU, ([

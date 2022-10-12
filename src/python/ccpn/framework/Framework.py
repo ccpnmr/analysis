@@ -7,12 +7,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-27 10:25:00 +0100 (Wed, July 27, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:07 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -84,18 +84,11 @@ from ccpn.framework import Version
 from ccpn.framework.AutoBackup import AutoBackup
 from ccpn.framework.credits import printCreditsText
 from ccpn.framework.Current import Current
-from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
 from ccpn.framework.Translation import defaultLanguage
 from ccpn.framework.Translation import translator
 from ccpn.framework.Preferences import Preferences
 from ccpn.framework.PathsAndUrls import \
     userCcpnMacroPath, \
-    CCPN_ARCHIVES_DIRECTORY, \
-    CCPN_STATE_DIRECTORY, \
-    CCPN_DATA_DIRECTORY, \
-    CCPN_SPECTRA_DIRECTORY, \
-    CCPN_PLUGINS_DIRECTORY, \
-    CCPN_SCRIPTS_DIRECTORY, \
     tipOfTheDayConfig, \
     ccpnCodePath
 
@@ -179,14 +172,10 @@ class Framework(NotifierBase, GuiBase):
         # self.revision = Version.revision
 
         self.useFileLogger = not self.args.nologging
-        if self.args.debug3:
-            self._debugLevel = Logging.DEBUG3
-        elif self.args.debug2:
-            self._debugLevel = Logging.DEBUG2
-        elif self.args.debug:
-            self._debugLevel = Logging.DEBUG
-        else:
-            self._debugLevel = Logging.INFO
+
+        # map to 0-3, with 0 no debug
+        _level = ([self.args.debug, self.args.debug2, self.args.debug3, True].index(True) + 1) % 4
+        self.setDebug(_level)
 
         self.preferences = Preferences(application=self)
         if not self.args.skipUserPreferences:
@@ -226,12 +215,10 @@ class Framework(NotifierBase, GuiBase):
 
         # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
-
         self._dataLoaders = getDataLoaders()
 
         # register SpectrumDataSource formats for the first and only time
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
-
         self._spectrumDataSourceFormats = getDataFormats()
 
         # get a user interface; nb. ui.start() is called by the application
@@ -267,17 +254,6 @@ class Framework(NotifierBase, GuiBase):
     def hasGui(self) -> bool:
         """:return True if application has a gui"""
         return isinstance(self.ui, Gui)
-
-    @property
-    def _isInDebugMode(self) -> bool:
-        """:return True if either of the debug flags has been set
-        CCPNINTERNAL: used throughout to check
-        """
-        if self._debugLevel == Logging.DEBUG1 or \
-                self._debugLevel == Logging.DEBUG2 or \
-                self._debugLevel == Logging.DEBUG3:
-            return True
-        return False
 
     #-----------------------------------------------------------------------------------------
     # Useful (?) directories as Path instances
@@ -519,9 +495,10 @@ class Framework(NotifierBase, GuiBase):
             getLogger().debug(f'initialising v2 noise and contour levels')
             for spectrum in newProject.spectra:
                 # calculate the new noise level
-                setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
-                                          setPositiveContours=True, setNegativeContours=True,
-                                          useSameMultiplier=True)
+                spectrum.noiseLevel = spectrum.estimateNoise()
+
+                # Check  contourLevels, contourColours
+                spectrum._setDefaultContourValues()
 
                 # set the initial contour colours
                 (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
@@ -545,16 +522,40 @@ class Framework(NotifierBase, GuiBase):
             self.ui.initialize(None)
 
     #-----------------------------------------------------------------------------------------
+    # Utilities
+    #-----------------------------------------------------------------------------------------
+
+    def setDebug(self, level:int):
+        """Set the debugging level
+        :param level: 0: off, 1-3: debug level 1-3
+        """
+        if level == 3:
+            self._debugLevel = Logging.DEBUG3
+        elif level == 2:
+            self._debugLevel = Logging.DEBUG2
+        elif level == 1:
+            self._debugLevel = Logging.DEBUG
+        elif level == 0:
+            self._debugLevel = Logging.INFO
+        else:
+            raise ValueError(f'Invalid debug level ({level}); should be 0-3')
+
+    @property
+    def _isInDebugMode(self) -> bool:
+        """:return True if either of the debug flags has been set
+        CCPNINTERNAL: used throughout to check
+        """
+        if self._debugLevel == Logging.DEBUG1 or \
+           self._debugLevel == Logging.DEBUG2 or \
+           self._debugLevel == Logging.DEBUG3:
+            return True
+        return False
 
     def _savePreferences(self):
         """Save the user preferences to file
         CCPNINTERNAL: used in PreferencesPopup and GuiMainWindow._close()
         """
         self.preferences._saveUserPreferences()
-
-    #-----------------------------------------------------------------------------------------
-
-    #-----------------------------------------------------------------------------------------
 
     def _setLanguage(self):
         # Language, check for command line override, or use preferences
@@ -862,14 +863,12 @@ class Framework(NotifierBase, GuiBase):
         # local import to avoid cycles
         from ccpn.core.Project import _newProject
 
-        newName = re.sub('[^0-9a-zA-Z]+', '', name)
+        if Project._checkName(name, correctName=False) is None:
+            raise ValueError(f'Invalid project name "{name}"; check log/console for details')
         # NB _closeProject includes a gui cleanup call
         self._closeProject()
-        newProject = _newProject(self, name=newName)
+        newProject = _newProject(self, name=name)
         self._initialiseProject(newProject)  # This also set the linkages
-        # defer the logging output until the project is fully initialised
-        if newName != name:
-            getLogger().info('Removed whitespace from name: %s' % name)
         return newProject
 
     # @logCommand('application.')  # decorated in ui class
@@ -928,20 +927,14 @@ class Framework(NotifierBase, GuiBase):
         return self.ui.saveProject()
 
     def _closeProject(self):
-        """Close project and clean up - when opening another or quitting application
+        """Close project and clean up - when opening another or quitting application.
+        Leaves the state of the whole programme as "transient", as there is no active project.
+        Hence, need to be followed by initialising a new project or termination of the programme.
         """
         # NB: this function must clean up both wrapper and ui/gui
 
         self.deleteAllNotifiers()
-        if self.ui.mainWindow:
-            # ui/gui cleanup
-            self.ui.mainWindow.deleteAllNotifiers()
-            self.ui.mainWindow._closeMainWindowModules()
-            self.ui.mainWindow._closeExtraWindowModules()
-            self.ui.mainWindow.sideBar.clearSideBar()
-            self.ui.mainWindow.sideBar.deleteLater()
-            self.ui.mainWindow.deleteLater()
-            self.ui.mainWindow = None
+        self.ui._closeProject()
 
         if self.current:
             self.current._unregisterNotifiers()
@@ -1098,11 +1091,11 @@ class Framework(NotifierBase, GuiBase):
 
         CCPNINTERNAL: called from StarDataLoader
         """
-        dataBlock = dataLoader.dataBlock  # this will (if required) also read and parse the file
+        entryName = dataLoader.starReader.entryName
 
         if dataLoader.createNewProject:
             self._closeProject()
-            project = self._newProject(dataBlock.name)
+            project = self._newProject(entryName)
         else:
             project = self.project
 
@@ -1854,7 +1847,8 @@ class Framework(NotifierBase, GuiBase):
                              collection=None, selectFirstItem=False):
         """Displays Collection Module
         """
-        pass
+        MessageDialog.showNYI(parent=self.mainWindow)
+        # pass
 
     @logCommand('application.')
     def showNotesEditor(self, position: str = 'bottom', relativeTo: CcpnModule = None,
@@ -2007,14 +2001,29 @@ class Framework(NotifierBase, GuiBase):
         mainWindow.moduleArea.addModule(cs, position=position, relativeTo=relativeTo)
         return cs
 
-    def showChemicalShiftMappingAlpha(self, position: str = 'top', relativeTo: CcpnModule = None):
-        from ccpn.ui.gui.modules.experimentAnalysis.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
+    def showChemicalShiftMappingModule(self, position: str = 'top', relativeTo: CcpnModule = None):
+        from ccpn.ui.gui.modules.experimentAnalysis.chemicalShiftMapping.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
         cs = ChemicalShiftMappingGuiModule(mainWindow=mainWindow)
         mainWindow.moduleArea.addModule(cs, position=position, relativeTo=relativeTo)
         return cs
+
+    def showRelaxationModule(self, position: str = 'top', relativeTo: CcpnModule = None):
+        from ccpn.ui.gui.modules.experimentAnalysis.relaxation.RelaxationGuiModule import RelaxationGuiModule
+        mainWindow = self.ui.mainWindow
+        if not relativeTo:
+            relativeTo = mainWindow.moduleArea
+        relGuiModule = RelaxationGuiModule(mainWindow=mainWindow)
+        mainWindow.moduleArea.addModule(relGuiModule, position=position, relativeTo=relativeTo)
+        return relGuiModule
+
+    def toggleCrosshairAll(self):
+        """Toggles whether crosshairs are displayed in all windows.
+        """
+        for window in self.project.windows:
+            window.toggleCrosshair()
 
     #################################################################################################
     ## MENU callbacks:  Macro

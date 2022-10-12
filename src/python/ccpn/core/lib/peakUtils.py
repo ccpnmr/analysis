@@ -7,12 +7,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-01 14:43:48 +0100 (Mon, August 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:06 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1153,17 +1153,22 @@ def _getPeakSNRatio(peak, factor=2.5):
     from ccpn.core.lib.SpectrumLib import estimateSNR
 
     noiseLevel, negativeNoiseLevel = spectrum.noiseLevel, spectrum.negativeNoiseLevel
-    if not negativeNoiseLevel and noiseLevel:
+    # if not negativeNoiseLevel and noiseLevel:
+    if negativeNoiseLevel is None and noiseLevel is not None:
         negativeNoiseLevel = - noiseLevel if noiseLevel > 0 else noiseLevel * 2
         spectrum.negativeNoiseLevel = negativeNoiseLevel
         getLogger().warning('Spectrum Negative noise not defined for %s. Estimated default' % spectrum.pid)
-    if not noiseLevel:  # estimate it
+
+    # if not noiseLevel:  # estimate it
+    if noiseLevel is None:  # estimate it
         noiseLevel = spectrum.estimateNoise()
         negativeNoiseLevel = -noiseLevel
         spectrum.noiseLevel, spectrum.negativeNoiseLevel = noiseLevel, negativeNoiseLevel
         getLogger().warning('Spectrum noise level(s) not defined for %s. Estimated default' % spectrum.pid)
+
     if peak.height is None:
         updateHeight(peak)
         _getPeakSNRatio(peak)
+
     snr = estimateSNR(noiseLevels=[noiseLevel, negativeNoiseLevel], signalPoints=[peak.height], factor=factor)
-    return snr[0]  ## estimateSNR return a list with a lenght always > 0
+    return snr[0]  ## estimateSNR return a list with a length always > 0

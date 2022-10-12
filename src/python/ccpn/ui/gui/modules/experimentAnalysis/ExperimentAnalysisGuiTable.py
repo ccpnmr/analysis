@@ -7,12 +7,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-26 12:38:12 +0100 (Thu, May 26, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:11 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -25,59 +25,76 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 
 
 import pandas as pd
-
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.util.Logging import getLogger
+from ccpn.core.lib.Notifiers import Notifier
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.GuiTable import GuiTable, _getValueByHeader, _selectRowsOnTable, _makeTipText, _getHiddenColumns
-import ccpn.ui.gui.widgets.GuiTable as gt
 from ccpn.ui.gui.widgets.Column import ColumnClass, Column
+import ccpn.ui.gui.widgets.GuiTable as gt
+import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
+from ccpn.ui.gui.widgets.table.Table import Table
 
 
-class _ExperimentalAnalysisTableABC(gt.GuiTable):
+
+class _ExperimentalAnalysisTableABC(Table):
     """
-    Table containing reference information. Scores and values are calculated on the fly from the main dataframe
-    stored in datasets.
+
     """
-    className = 'ExperimentalAnalysisTable'
-    OBJECT = 'object'
-    TABLE = 'table'
+    className = '_TableWidget'
+    defaultHidden = []
+    _internalColumns = []
+    _hiddenColumns = []
+    _defaultEditable = False
+    _enableDelete = False
+    _OBJECT = sv.COLLECTIONPID
 
-    _columnsDefs = {
-        '#':      {gt.NAME: '#',
-                  gt.GETTER: lambda row: _getValueByHeader(row, '#'),
-                  gt.TIPTEXT: _makeTipText('#', "Enumerated entry value."),
-                  gt.WIDTH: 40,
-                  gt.HIDDEN: False
-                  },
-        }
+    def __init__(self, parent, mainWindow=None, guiModule=None, **kwds):
+        """Initialise the widgets for the module.
+        """
+        # Derive application, project, and current from mainWindow
+        self.mainWindow = mainWindow
 
-    def __init__(self, parent, guiModule, dataFrame, **kwds):
-        self.mainWindow = guiModule.mainWindow
-        self.dataFrameObject = None
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+        else:
+            self.application = None
+            self.project = None
+            self.current = None
 
-        super().__init__(parent=parent, mainWindow=self.mainWindow, dataFrameObject=None,  # class collating table and objects and headings,
-                        setLayout=True, autoResize=True, multiSelect=True,
-                        enableMouseMoveEvent=False,
-                        selectionCallback=self.selection,
-                        actionCallback=self.selection,
-                        checkBoxCallback=self.actionCheckBox,  grid=(0, 0))
+        kwds['setLayout'] = True
+
+        # initialise the currently attached dataFrame
+
+        self._hiddenColumns = [sv._ROW_UID, sv.COLLECTIONID, sv.PEAKPID, sv.NMRCHAINNAME,
+                               sv.NMRRESIDUETYPE, sv.NMRATOMNAMES, sv.SERIESUNIT,
+                               sv.SERIESSTEP, sv.SERIESSTEPVALUE, sv.MINIMISER_METHOD, sv.MINIMISER_MODEL, sv.CHISQR,
+                               sv.REDCHI, sv.AIC, sv.BIC,
+                               sv.MODEL_NAME, sv.NMRRESIDUECODETYPE]
+        errCols = [tt for tt in self.columnTexts if sv._ERR in tt]
+        self._hiddenColumns += errCols
+
+        # initialise the table
+        super().__init__(parent=parent, **kwds)
+
         self.guiModule = guiModule
-        self.current = self.guiModule.current
-        self._columns = ColumnClass([])
-        for colName, defs in self._columnsDefs.items():
-            columnObject = Column(colName,defs.get(gt.GETTER), tipText= defs.get(gt.TIPTEXT),
-                                  setEditValue= defs.get(gt.SETTER), format=defs.get(gt.FORMAT))
-            self._columns.columns.append(columnObject)
-        self._hiddenColumns = _getHiddenColumns(self)
-        self._dataFrame = dataFrame
-        self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
-        self.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
-        self.setMinimumHeight(100)
-        self._selectOverride = True # otherwise very odd behaviour
-        gt._resizeColumnWidths(self)
+        self.moduleParent = guiModule
+
+        # Initialise the notifier for processing dropped items
+        self._postInitTableCommonWidgets()
+
+        self._navigateToPeakOnSelection = True
+        self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
+                                                 callback=self._currentCollectionCallback, onceOnly=True)
+
+    # =========================================================================================
+    # dataFrame
+    # =========================================================================================
 
     @property
     def dataFrame(self):
@@ -89,66 +106,160 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
         self.build(dataFrame)
 
     def build(self, dataFrame):
-        self.clear()
-        self.dfo = self.getDataFromFrame(table=self, df=dataFrame, colDefs=self._columns)
-        self.setTableFromDataFrameObject(dataFrameObject=self.dfo, columnDefs=self._columns)
-        self.setHiddenColumns(_getHiddenColumns(self))
+        if dataFrame is not None:
+            self.updateDf(df=dataFrame)
 
-    def mousePressEvent(self, event):
-        if self.itemAt(event.pos()) is None:
-            self.clearSelection()
+            _hiddenColumns = [sv._ROW_UID, sv.COLLECTIONID, sv.PEAKPID, sv.NMRCHAINNAME,
+                                   sv.NMRRESIDUETYPE, sv.NMRATOMNAMES, sv.SERIESUNIT,
+                                   sv.SERIESSTEP, sv.SERIESSTEPVALUE, sv.MINIMISER_METHOD, sv.MINIMISER_MODEL,
+                                   sv.CHISQR,
+                                   sv.REDCHI, sv.AIC, sv.BIC,
+                                   sv.MODEL_NAME, sv.NMRRESIDUECODETYPE]
+            errCols = [tt for tt in self.columnTexts if sv._ERR in tt]
+            _hiddenColumns += errCols
+            self.setHiddenColumns(texts=_hiddenColumns)
+
+    #=========================================================================================
+    # Selection/action callbacks
+    #=========================================================================================
+
+    def selectionCallback(self, selected, deselected, selection, lastItem):
+        from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import _navigateToPeak, \
+            getPeaksFromCollection
+        collections = self.getSelectedCollections()
+        if len(collections) == 0:
             return
-        else:
-            GuiTable.mousePressEvent(self, event)
+        peaks = getPeaksFromCollection(collections[-1])
+        self.current.collections = collections
+        self.current.peaks = peaks
+        if len(peaks) == 0:
+            return
+        if self._navigateToPeakOnSelection:
+            _navigateToPeak(self.guiModule, self.current.peaks[-1])
+
+    def actionCallback(self, selection, lastItem):
+        from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import _navigateToPeak
+        _navigateToPeak(self.guiModule, self.current.peaks[-1])
+
+    #=========================================================================================
+    # Handle drop events
+    #=========================================================================================
+
+    def _processDroppedItems(self, data):
+        """
+        CallBack for Drop events
+        """
+        pids = data.get('pids', [])
+        # self._handleDroppedItems(pids, KlassTable, self.moduleParent._modulePulldown)
+        print('Dropped pids', pids)
+
+    def _close(self):
+        """
+        Cleanup the notifiers when the window is closed
+        """
+        pass
+
+
+    #=========================================================================================
+    # Table context menu
+    #=========================================================================================
+
+    # add edit/add parameters to meta-data table
+
+    def addTableMenuOptions(self, menu):
+        super().addTableMenuOptions(menu)
+        editCollection = menu.addAction('Edit Collection', self._editCollection)
+        menu.moveActionAboveName(editCollection, 'Export Visible Table')
+
+    def _editCollection(self):
+        from ccpn.ui.gui.popups.CollectionPopup import CollectionPopup
+        collections = self.getSelectedCollections()
+        if len(collections)>0:
+            co = collections[-1]
+            if co is not None:
+                popup = CollectionPopup(self, mainWindow=self.mainWindow, obj=co, editMode=True)
+                popup.exec()
+                popup.raise_()
+
+
+    def getSelectedCollections(self):
+        selectedRowsDf = self.selectedRows()
+
+        collections = set()
+        for ix, selectedRow in selectedRowsDf.iterrows():
+            coPid = selectedRow[sv.COLLECTIONPID]
+            co = self.project.getByPid(coPid)
+            collections.add(co)
+        return list(collections)
+
+    def _currentCollectionCallback(self, *args):
+        # select collection on table.
+        collections = self.current.collections
+        pids = [co.pid for co in collections]
+        # select
+        self._highLightObjs(pids)
+
+    def _highLightObjs(self, selection, headerName=sv.COLLECTIONPID, scrollToSelection=True):
+        # skip if the table is empty
+        if self._df is None or self._df.empty:
+            return
+
+        with self._blockTableSignals('_highLightObjs'):
+            selectionModel = self.selectionModel()
+            model = self.model()
+            selectionModel.clearSelection()
+
+            if selection:
+                if len(selection) > 0:
+                    if isinstance(selection[0], pd.Series):
+                        # not sure how to handle this
+                        return
+                uniqObjs = set(selection)
+                columnTextIx = self.columnTexts.index(headerName)
+                for i in model._sortIndex:
+                    value = model.index(i, columnTextIx).data()
+                    for obj in uniqObjs:
+                        if value == obj:
+                            rowIndex = model.index(i, 0)
+                            selectionModel.select(rowIndex, selectionModel.Select | selectionModel.Rows)
+                            if scrollToSelection:
+                                self.scrollTo(rowIndex, self.EnsureVisible)
 
     def clearSelection(self):
-        self.moduleParent.matchingTable.clean()
-        if self.current:
-            self.current.peaks = []
-        self.selectionModel().clearSelection()
-        self.moduleParent.hitScatterPlot.selectByPids([])
-
-    def selection(self, *args):
-        pass
-
-    def action(self, *args):
-        pass
-
-    def actionCheckBox(self, data):
-        pass
+        super().clearSelection()
+        self.current.collections = []
 
 
-    def _rebuild(self):
-        self.build(self._dataFrame)
-
-    def _setContextMenu(self, enableExport=True, enableDelete=True):
-        """Subclass guiTable to add new items to context menu
-        """
-        super()._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
-        _actions = self.tableMenu.actions()
-        if _actions:
-            _topMenuItem = _actions[0]
-            _topSeparator = self.tableMenu.insertSeparator(_topMenuItem)
-            pass
-
-    def _exportRawData(self):
-        if self.moduleParent:
-            self.moduleParent._exportRawData()
 
 
 class TablePanel(GuiPanel):
 
     position = 1
     panelName = 'TablePanel'
+    TABLE = _ExperimentalAnalysisTableABC
 
     def __init__(self, guiModule, *args, **Framekwargs):
         GuiPanel.__init__(self, guiModule, *args , **Framekwargs)
-        self.setMaximumHeight(100)
+
 
     def initWidgets(self):
         row = 0
-        Label(self, 'Test TablePanel', grid=(row, 0))
-        self.mainTable = _ExperimentalAnalysisTableABC(self,
-                                                     dataFrame=pd.DataFrame(),
-                                                     guiModule = self.guiModule, grid=(0, 0))
-        self.mainTable.dataFrame = pd.DataFrame([1, 2, 3, 4], columns=['#'])
+        # Label(self, 'TablePanel', grid=(row, 0))
+        self.mainTable = self.TABLE(self,
+                                    mainWindow=self.mainWindow,
+                                    guiModule = self.guiModule,
+                                    grid=(0, 0), gridSpan=(1, 2))
+
+    
+    def setInputData(self, dataFrame):
+        """Provide the DataFrame to populate the table."""
+        self.mainTable.dataFrame = dataFrame
+
+    def updatePanel(self, *args, **kwargs):
+        getLogger().info('Updating Relaxation table panel')
+        dataFrame = self.guiModule.getGuiOutputDataFrame()
+        self.setInputData(dataFrame)
+
+    def clearData(self):
+        self.mainTable.dataFrame = None
+        self.mainTable.clearTable()

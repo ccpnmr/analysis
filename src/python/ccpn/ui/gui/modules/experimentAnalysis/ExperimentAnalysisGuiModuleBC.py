@@ -7,12 +7,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-25 12:41:02 +0100 (Mon, July 25, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:11 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -24,16 +24,19 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 #=========================================================================================
 
 ######## core imports ########
+from PyQt5.QtCore import pyqtSignal
 from ccpn.framework.Application import getApplication, getCurrent, getProject
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisNotifierHandler import CoreNotifiersHandler
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 from ccpn.util.Logging import getLogger
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+import numpy as np
 
 ######## gui/ui imports ########
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import PanelHandler,\
-    SettingsPanelHandler, IOHandler
+    SettingsPanelHandler, IOHandler, ExtensionsHandler
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiSettingsPanel as settingsPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import ToolBarPanel, PanelUpdateState
@@ -51,8 +54,10 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     maxSettingsState = 2
     settingsPosition = 'left'
     className = 'ExperimentAnalysis'
+    _includeInLastSeen = False
+    settingsChanged = pyqtSignal(dict)
 
-    def __init__(self, mainWindow, name='Experiment Analysis', **kwds):
+    def __init__(self, mainWindow, name='Experiment Analysis', backendHandler=None, **kwds):
         super(ExperimentAnalysisGuiModuleBC, self)
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
@@ -60,8 +65,8 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         self.application = getApplication()
         self.current = getCurrent()
 
-        ## link to the Non-Gui backend and its Settings
-        self.backendHandler = SeriesAnalysisABC()
+        ## link to the Non-Gui backend
+        self.backendHandler = backendHandler or SeriesAnalysisABC()
 
         ## link to Gui Setting-Panels. Needs to be before the GuiPanels
         self.settingsPanelHandler = SettingsPanelHandler(self)
@@ -74,28 +79,62 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         ## link to Core Notifiers (Project/Current)
         self.coreNotifiersHandler = CoreNotifiersHandler(guiModule=self)
 
-        ## link to Core Notifiers (Project/Current)
+        ## link to Input/output. (NYI)
         self.ioHandler = IOHandler(guiModule=self)
 
-        ## the working dataTable which drives all Gui
-        self._selectedDataTables = () # add comment on what will be, e.g.: Pids
-
-        ## Startup with the first Data available
-        if self.project:
-            pass
+        ## link to user extestions - external programs. (NYI)
+        self.extensionsHandler = ExtensionsHandler(guiModule=self)
 
     #################################################################
     #####################      Data       ###########################
     #################################################################
 
-    ### Get the input/output dataTables via the backend.
+    ### Get the input/output dataTables via the backendHandler.
     @property
     def inputDataTables(self) -> list:
         return self.backendHandler.inputDataTables
 
-    @property
-    def outputDataTables(self) -> list:
-        return self.backendHandler.getOutputDataTables()
+    def getSelectedOutputDataTable(self):
+        """ Get the datatable from the selected Setting.
+        Impl. Note: Do not use/set current.dataTable so to allow multiple GuiModules to display different tables."""
+        settings = self.getSettings(grouped=False)
+        outputDataPid = settings.get(guiNameSpaces.WidgetVarName_OutputDataTablesSelection)
+        dataTable = self.project.getByPid(outputDataPid)
+        return dataTable
+
+    def getGuiOutputDataFrame(self):
+        """Get the SelectedOutputDataTable and transform the raw data to a displayable table for the main widgets.
+        """
+        dataTable = self.getSelectedOutputDataTable()
+        if dataTable is None:
+            return
+        dataFrame = dataTable.data
+        if len(dataFrame)==0:
+            return
+        if not sv.COLLECTIONPID in dataFrame:
+            return dataFrame
+        ## group by id and keep only first row as all duplicated except the series steps, which are not needed here.
+        ## reset index otherwise you lose the column collectionId
+        outDataFrame = dataFrame.groupby(sv.COLLECTIONPID).first().reset_index()
+        outDataFrame.set_index(sv.COLLECTIONPID, drop=False, inplace=True)
+        outDataFrame[sv.COLLECTIONID] = outDataFrame[sv.COLLECTIONID].astype(int)
+        ## sort by NmrResidueCode if available otherwise by COLLECTIONID
+        if outDataFrame[sv.NMRRESIDUECODE].str.isnumeric().all():
+            outDataFrame.sort_values(by=sv.NMRRESIDUECODE, key=lambda x: x.astype(int), inplace =True)
+        else:
+            outDataFrame.sort_values(by=sv.COLLECTIONID, inplace=True)
+        ## apply an ascending UID. This is needed for tables and BarPlotting
+        outDataFrame[sv.ASHTAG] = np.arange(1, len(outDataFrame)+1)
+        return outDataFrame
+
+    def getSettings(self, grouped=True) -> dict:
+        """
+        Get all settings set in the Settings panel
+        :param grouped: Bool. True to get a dict of dict, key: tabName; value: dict of settings per tab.
+                              False to get a flat dict with all settings in it.
+        :return:  dict of dict as default, dict if grouped = False.
+        """
+        return self.settingsPanelHandler.getAllSettings(grouped)
 
     #################################################################
     #####################      Widgets    ###########################
@@ -126,19 +165,19 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         Add the Common Settings Panels to the settingsPanelsManager.
         """
         self.settingsPanelHandler.append(settingsPanel.GuiInputDataPanel(self))
-        self.settingsPanelHandler.append(settingsPanel.CSMAppearancePanel(self))
+        self.settingsPanelHandler.append(settingsPanel.AppearancePanel(self))
 
     #####################################################################
     #####################  Widgets callbacks  ###########################
     #####################################################################
 
-    def updateAll(self):
+    def updateAll(self, refit=False):
         """ Update all Gui panels"""
         getLogger().info(f'Updating All ...')
         backend = self.backendHandler
-        if backend._needsRefitting:
-            if self.inputDataTables:
-                backend.fitInputData()
+        if refit or backend._needsRefitting:
+            getLogger().info(f'{self.className}: Refitting  Input DataTable(s)...')
+            backend.fitInputData()
         getLogger().info(f'{self.className}: Updating all Gui Panels...')
         settingsDict = self.settingsPanelHandler.getAllSettings()
         for panelName, panel in self.panelHandler.panels.items():
@@ -155,26 +194,34 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         ## restore and apply filters correctly
 
     def _closeModule(self):
-        ## de-register/close all notifiers
+        ## de-register/close all notifiers. Handler
+        self.backendHandler.close()
         self.coreNotifiersHandler.close()
         self.panelHandler.close()
-        self.ioHandler.close()
+        self.extensionsHandler.close()
         self.settingsPanelHandler.close()
         super()._closeModule()
 
+def _navigateToPeak(guiModule, peak):
+    from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
+    if peak is None:
+        return
+    # get the display from settings
+    appearanceTab = guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
+    displayWidget = appearanceTab.getWidget(guiNameSpaces.WidgetVarName_SpectrumDisplSelection)
+    if displayWidget is None:
+        getLogger().debug(f'Not found widget in Appearance tab {guiNameSpaces.WidgetVarName_SpectrumDisplSelection}')
+        return
+    displays = displayWidget.getDisplays()
+    for display in displays:
+        for strip in display.strips:
+            widths = _getCurrentZoomRatio(strip.viewRange())
+            navigateToPositionInStrip(strip=strip, positions=peak.position, widths=widths)
 
-#################################
-######    Testing GUI   #########
-#################################
-if __name__ == '__main__':
-    from ccpn.ui.gui.widgets.Application import TestApplication
-    from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-    app = TestApplication()
-    win = QtWidgets.QMainWindow()
-    moduleArea = CcpnModuleArea(mainWindow=None, )
-    m = ExperimentAnalysisGuiModuleBC(mainWindow=None)
-    moduleArea.addModule(m)
-    win.setCentralWidget(moduleArea)
-    win.resize(1000, 500)
-    win.show()
-    app.start()
+def getPeaksFromCollection(collection):
+    from ccpn.core.Peak import Peak
+    peaks = set()
+    for item in collection.items:
+        if isinstance(item, Peak):
+            peaks.add(item)
+    return list(peaks)

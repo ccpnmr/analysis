@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-01 16:01:03 +0100 (Mon, August 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:13 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -230,8 +230,8 @@ class GuiTableFilter(ScrollArea):
 
     def hideSearch(self):
         self.restoreTable(self.table)
-        if self.table.searchWidget is not None:
-            self.table.searchWidget.hide()
+        # if self.table.searchWidget is not None:
+        self.table.hideSearchWidget()
 
     def restoreTable(self, table):
         self.table.refreshTable()
@@ -427,8 +427,8 @@ class _TableFilterABC(ScrollArea):
 
     def hideSearch(self):
         self.restoreTable(self.table)
-        if self.table.searchWidget is not None:
-            self.table.searchWidget.hide()
+        # if self.table.searchWidget is not None:
+        self.table.hideSearchWidget()
 
     def restoreTable(self, table):
         self.table.refreshTable()
@@ -458,26 +458,26 @@ class _TableFilterABC(ScrollArea):
 
         _compareErrorCount = 0
         _model = self.table.model()
-        # check using the actual table - not the underlying dataframe
+
         df = self.df
         if condition != Exclude:
             rows = OrderedSet()
         else:
             # Exclude needs to remove values from the list
-            # Start with the sorted values already found - from _sortIndex
-            if self._listRows is not None:
-                rows = OrderedSet(list(self._listRows)[row] for row in _model._sortIndex)
-            else:
-                rows = OrderedSet(_model._sortIndex)
+            rows = OrderedSet(row for row in range(df.shape[0]))
 
-        for row in range(_model.rowCount()):
-            # the sorted row
-            _row = _model._sortIndex[row]
+        for row in range(df.shape[0]):
+            for column in range(df.shape[1]):
+                if df.columns[column] in visHeadings:
 
-            for column in range(_model.columnCount()):
-                if self.table._df.columns[column] in visHeadings:
-                    idx = _model.index(row, column)
-                    cellText = idx.data(QtCore.Qt.DisplayRole)
+                    # could replace this with a quicker column-based method
+                    cellText = df.iat[row, column]
+                    # float/np.float - round to 3 decimal places
+                    if isinstance(cellText, (float, np.floating)):
+                        cellText = f'{cellText:.3f}'
+                    else:
+                        cellText = str(cellText)
+
                     if condition in RangeConditions:
                         match = _compareKeysInRange(cellText, (condition1Value, condition2Value), condition)
                     else:
@@ -488,42 +488,22 @@ class _TableFilterABC(ScrollArea):
                     if match:
                         if condition != Exclude:
                             # add the found sorted row to the found list
-                            if self._listRows is not None:
-                                rows.add(list(self._listRows)[_row])
-                            else:
-                                rows.add(_row)
+                            rows.add(row)
                         else:
                             # remove the found sorted values from the list
-                            if self._listRows is not None:
-                                rows -= {list(self._listRows)[_row]}
-                            else:
-                                rows -= {_row}
+                            rows -= {row}
 
         if _compareErrorCount > 0:
             getLogger().debug('Error in comparing values for GuiTable filters, use debug2 for details')
 
-        try:
-            # self._searchedDataFrame = df.iloc[list(rows)].copy()  # changed from iloc
-            self._searchedDataFrame = self.searchRows(df, rows)
-        except Exception as es:
-            getLogger().warning(f'Encountered a problem searching the table {es}')
+        self._listRows = rows
+        if len(rows):
+            self.table.setDataFromSearchWidget(rows)
+            self.searchButtons.getButton('Reset').setEnabled(True)
 
-        else:
-            self._listRows = rows
-
-            if not self._searchedDataFrame.empty:
-
-                # with self.table._guiTableUpdate(self.table._dataFrameObject):
-                self.table.setDataFromSearchWidget(self._searchedDataFrame)
-                # self.table._setDefaultRowHeight()
-
-                self.searchButtons.getButton('Reset').setEnabled(True)
-            else:
-                self.searchButtons.getButton('Reset').setEnabled(False)
-                self.restoreTable(table)
-                if not ignoreNotFound:
-                    MessageDialog.showWarning('Not found', 'Query value(s) not found in selected columns.'
-                                                           'Try by filtering in a specific column or double check your query.')
+        elif not ignoreNotFound:
+            MessageDialog.showWarning('Not found', 'Query value(s) not found in selected columns.'
+                                                   'Try by filtering in a specific column or double check your query.')
 
     def selectSearchOption(self, sourceTable, columnObject, value):
         try:
@@ -572,7 +552,7 @@ class _SimplerDFTableFilter(_TableFilterABC):
     def searchRows(self, df, rows):
         """Return the subset of the df based on rows
         """
-        return df.loc[list(rows)].copy()
+        return df.loc[list(rows)]
 
     @property
     def columns(self):
@@ -628,7 +608,7 @@ def attachDFSearchWidget(parent, tableView):
     """
     returnVal = False
     try:
-        parentLayout = tableView.parent().getLayout()
+        parentLayout = tableView.parent().layout()
 
         if isinstance(parentLayout, QtWidgets.QGridLayout):
             idx = parentLayout.indexOf(tableView)
@@ -648,13 +628,13 @@ def attachDFSearchWidget(parent, tableView):
         return returnVal
 
 
-def attachSimpleSearchWidget(parent, tableView):
+def attachSimpleSearchWidget(parent, tableView, searchWidget=None):
     """Attach the search widget to the bottom of the table widget
     Search widget is applied to QTableView object
     """
     returnVal = False
     try:
-        parentLayout = tableView.parent().getLayout()
+        parentLayout = tableView.parent().layout()
 
         if isinstance(parentLayout, QtWidgets.QGridLayout):
             idx = parentLayout.indexOf(tableView)
@@ -662,8 +642,10 @@ def attachSimpleSearchWidget(parent, tableView):
             if location is not None:
                 if len(location) > 0:
                     row, column, rowSpan, columnSpan = location
-                    tableView.searchWidget = _SimplerDFTableFilter(parent=parent, table=tableView, vAlign='b')
-                    parentLayout.addWidget(tableView.searchWidget, row + 1, column, 1, columnSpan)
+                    widget = _SimplerDFTableFilter(parent=parent, table=tableView, vAlign='b')
+                    setattr(tableView, searchWidget or 'searchWidget', widget)  # not nice
+
+                    parentLayout.addWidget(widget, row + 1, column, 1, columnSpan)
                     tableView.searchWidget.hide()
 
                 returnVal = True

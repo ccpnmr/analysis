@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:42 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:14 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,13 +42,12 @@ class UpdateScheduler:
     """Class for deferred processing of events when the Qt GUI thread is idle
     """
 
-    def __init__(self, project, updaterCallback, name='unknown', startOnAdd=False, log=False, completeCallback=None):
+    def __init__(self, project, updaterCallback, name='unknown', log=False, completeCallback=None):
         """Initialise a new scheduler
 
         :param project: project container - used to reference top-level scheduler suspension
         :param updaterCallback: callback to execute
         :param name: optional str name for the scheduler
-        :param startOnAdd: True|False - if True, timer starts on creation, defaults to False
         :param log: True|False - log timer events, defaults to False
         :param completeCallback: callback to execute at end of timer event
         """
@@ -59,14 +58,11 @@ class UpdateScheduler:
             raise ValueError(f'completeCallback {completeCallback} must be callable or None')
         if not isinstance(name, str):
             raise ValueError(f'name {name} must be of type str')
-        if not isinstance(startOnAdd, bool):
-            raise ValueError(f'startOnAdd {startOnAdd} must be True|False')
         if not isinstance(log, bool):
             raise ValueError(f'log {log} must be True|False')
 
         self._project = project
         self._name = name
-        self._startOnAdd = startOnAdd
         self._log = log
 
         self._updaterCallback = updaterCallback
@@ -87,10 +83,6 @@ class UpdateScheduler:
 
         # initialise the timer
         self._initialiseTimer()
-
-        if startOnAdd:
-            # start if required
-            self.start()
 
     @property
     def isActive(self):
@@ -237,12 +229,11 @@ class _State(Enum):
 #     """Class for deferred processing of events when the Qt GUI thread is idle
 #     """
 #
-#     def __init__(self, updaterCallback, name='unknown', startOnAdd=False, log=False, completeCallback=None):
+#     def __init__(self, updaterCallback, name='unknown', log=False, completeCallback=None):
 #         """Initialise a new scheduler
 #
 #         :param updaterCallback: callback to execute
 #         :param name: optional str name for the scheduler
-#         :param startOnAdd: True|False - if True, timer starts on creation, defaults to False
 #         :param log: True|False - log timer events, defaults to False
 #         :param completeCallback: callback to execute at end of timer event
 #         """
@@ -253,13 +244,10 @@ class _State(Enum):
 #             raise ValueError(f'completeCallback {completeCallback} must be callable or None')
 #         if not isinstance(name, str):
 #             raise ValueError(f'name {name} must be of type str')
-#         if not isinstance(startOnAdd, bool):
-#             raise ValueError(f'startOnAdd {startOnAdd} must be True|False')
 #         if not isinstance(log, bool):
 #             raise ValueError(f'log {log} must be True|False')
 #
 #         self._name = name
-#         self._startOnAdd = startOnAdd
 #         self._log = log
 #
 #         self._updaterCallback = updaterCallback
@@ -273,10 +261,6 @@ class _State(Enum):
 #
 #         # initialise the timer
 #         self._initialiseTimer()
-#
-#         if startOnAdd:
-#             # start if required
-#             self.start()
 #
 #     @property
 #     def isActive(self):

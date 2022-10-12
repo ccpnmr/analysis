@@ -11,12 +11,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-25 13:50:14 +0100 (Mon, July 25, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -45,7 +45,7 @@ NMRATOMNAMES     = f'{NMRATOMNAME}s'        # -> str   | nmrAtom names comma sep
 NMRRESIDUECODETYPE = f'{NMRRESIDUECODE}-{NMRRESIDUETYPE}'  # -> str   | nmrResidue Sequence Code + Type (e.g.: '1-ALA')
 
 
-_ROW_UID         = '_ROW_UID'            # -> str   | Internal. Unique Identifier (e.g.: randomly generated 6 letters UUID)
+_ROW_UID         = 'ROW_UID'             # -> str   | Internal. Unique Identifier (e.g.: randomly generated 6 letters UUID)
 ASHTAG           = '#'                   # -> int   | incremental serial
 VALUE            = 'Value'               # -> str   | The column header  prefix in a SeriesTable. Used to store data after the CONSTANT_TABLE_COLUMNS
 TIME             = 'Time'                # -> str   | A general prefix in a SeriesTable.
@@ -53,6 +53,16 @@ TIME             = 'Time'                # -> str   | A general prefix in a Seri
 SEP              =  '_'                  # the prefix-name-suffix global separator. E.g., used in Value columns: Value_height_at_0
 VALUE_           = f'{VALUE}{SEP}'
 TIME_            = f'{TIME}{SEP}'
+EXCLUDED         = 'excluded'
+EXCLUDED_        = f'{EXCLUDED}{SEP}'
+_ERR             = '_err'
+ERROR            = 'Error'
+VALUE_ERR        = f'{VALUE}{_ERR}'
+## CSM Fitting Variables
+KD               = 'Kd'
+BMAX             = 'BMax'
+KD_ERR           = f'{KD}{_ERR}'
+BMAX_ERR         = f'{BMAX}{_ERR}'
 
 DIMENSION        = 'dimension'
 ISOTOPECODE      = 'isotopeCode'
@@ -68,13 +78,18 @@ COLLECTIONPID    = 'collectionPid'
 PID              = 'pid'
 ASSIGNEDNMRATOMS = 'assignedNmrAtoms'
 
+EXCLUDED_PEAKPID        = f'{EXCLUDED_}peakPid'
+EXCLUDED_SPECTRUMPID    = f'{EXCLUDED_}spectrumPid'
+EXCLUDED_NMRATOMPID     = f'{EXCLUDED_}nmrAtomPid'
+EXCLUDED_COLLECTIONPID  = f'{EXCLUDED_}collectionPid'
+
 # fitting output Stat variables
 MINIMISER        = 'minimiser'
-R2               = 'R2'
-CHISQUARE        = 'Chi-square'
-REDUCEDCHISQUARE = f'Red-{CHISQUARE}'
-AKAIKE           = 'Akaike'
-BAYESIAN         = 'Bayesian'
+R2               = 'r2'
+CHISQR           = 'chisqr'
+REDCHI           = 'redchi'  # DO NOT CHANGE! Hardcoded in dependencies Model
+AIC              = 'aic' # DO NOT CHANGE! Hardcoded in dependencies Model
+BIC              = 'bic' # DO NOT CHANGE! Hardcoded in dependencies Model
 MINIMISER_METHOD = 'Method'
 MINIMISER_MODEL  = 'Model'
 
@@ -101,33 +116,42 @@ _15N = '15N'
 _13C = '13C'
 
 
-CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, MINIMISER_MODEL, R2, CHISQUARE, REDUCEDCHISQUARE, AKAIKE, BAYESIAN]
-SpectrumPropertiesHeaders = [DIMENSION, ISOTOPECODE, SERIESSTEP, SERIESUNIT]
-PeakPropertiesHeaders = [COLLECTIONID, _PPMPOSITION, _HEIGHT, _LINEWIDTH, _VOLUME]
-AssignmentPropertiesHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE, NMRATOMNAME]
-GROUPBYAssignmentHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE]
-PidHeaders = [COLLECTIONPID, SPECTRUMPID, PEAKPID, NMRATOMPID]
 
-KD = 'Kd'
-BMAX = 'BMax'
-_ERR = '_err'
-KD_ERR = f'{KD}{_ERR}'
-BMAX_ERR = f'{BMAX}{_ERR}'
-ERROR = 'Error'
+## Relaxation  Fitting Variables
+AMPLITUDE = 'amplitude'
+DECAY = 'decay'
+AMPLITUDE_ERR = f'{AMPLITUDE}{_ERR}'
+DECAY_ERR = f'{DECAY}{_ERR}'
+
+HETNOE = 'HetNoe'
 
 FLAG = 'Flag'
 SERIAL = 'Serial'
+
+CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, MINIMISER_MODEL, R2, CHISQR, REDCHI, AIC, BIC]
+SpectrumPropertiesHeaders = [DIMENSION, ISOTOPECODE, SERIESSTEP, SERIESUNIT]
+PeakPropertiesHeaders = [_PPMPOSITION, _HEIGHT, _LINEWIDTH, _VOLUME]
+AssignmentPropertiesHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE, NMRATOMNAME]
+GROUPBYAssignmentHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE]
+PidHeaders = [COLLECTIONID, COLLECTIONPID, SPECTRUMPID, PEAKPID, NMRATOMPID]
+
+MERGINGHEADERS = [COLLECTIONID, COLLECTIONPID, NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE]
+EXCLUDED_OBJECTS = [EXCLUDED_COLLECTIONPID, EXCLUDED_COLLECTIONPID, EXCLUDED_NMRATOMPID, EXCLUDED_SPECTRUMPID]
+
 ############################################################################################
 ### Used in SeriesFrame tables ABCs
 ############################################################################################
-SERIESANALYSISINPUTDATA = 'SeriesAnalysisInputData'
-RELAXATION_OUTPUT_FRAME = 'RelaxationOutputFrame'
-CSM_OUTPUT_FRAME        = 'CSMOutputFrame'
-
-SERIESFRAMETYPE         = 'SERIESFRAMETYPE'
-_assignmentHeaders      = '_assignmentHeaders'
-_valuesHeaders          = '_valuesHeaders'
-_peakPidHeaders         = '_peakPidHeaders'
+DATATABLETYPE               = 'DATATABLETYPE'
+SERIESANALYSISDATATABLE     = 'SERIESANALYSISDATATABLE'
+SERIESANALYSISOUTPUTDATA    = 'SeriesAnalysisOutputData'
+SERIESANALYSISINPUTDATA     = 'SeriesAnalysisInputData'
+RELAXATION_OUTPUT_FRAME     = 'RelaxationOutputFrame'
+HetNoe_OUTPUT_FRAME         = 'HetNoeOutputFrame'
+CSM_OUTPUT_FRAME            = 'CSMOutputFrame'
+SERIESFRAMETYPE             = 'SERIESFRAMETYPE'
+_assignmentHeaders          = '_assignmentHeaders'
+_valuesHeaders              = '_valuesHeaders'
+_peakPidHeaders             = '_peakPidHeaders'
 
 _SpectrumPropertiesHeaders = 'spectrumPropertiesHeaders'
 
@@ -158,13 +182,14 @@ VARIANCE = 'Variance'
 MAD = 'MAD (Median Absolute Deviation)'
 AAD = 'AAD (Average Absolute Deviation)'
 
+### CSM Calculation Models
 ## Alpha Factors Definitions used in ChemicalShiftAnalysis DeltaDeltas
 uALPHA = '\u03B1'
 uDELTA = '\u0394'
 uDelta = '\u03B4'
 DELTA = 'Delta'
 DELTA_DELTA = f'{DELTA*2}'
-DELTADELTAMEAN = f'{DELTA*2}Mean'
+DELTA_DELTA_ERR = f'{DELTA_DELTA}{_ERR}'
 EUCLIDEAN_DISTANCE = 'Euclidean Distance'
 DEFAULT_H_ALPHAFACTOR = 1
 DEFAULT_N_ALPHAFACTOR = 0.142
@@ -182,14 +207,17 @@ DEFAULT_EXCLUDED_RESIDUES = ['PRO']
 FILTERINGATOMS  = 'FilteringAtoms'
 ALPHAFACTORS    = 'AlphaFactors'
 
-## Fitting models
+### Relaxation Calculation Models
+HETNOE_VALUE = f'{HETNOE}'
+HETNOE_VALUE_ERR = f'{HETNOE_VALUE}{_ERR}'
 
+## Fitting models
 FITTING_MODEL = 'fittingModel'
 MODEL_NAME = 'modelName'
 FITTING_MODELS = f'{FITTING_MODEL}s'
 OVERRIDE_OUTPUT_DATATABLE = 'overrideOutputDataTables'
 OUTPUT_DATATABLE_NAME = 'outputDataTableName'
-
+BLANKMODELNAME = 'Blank'
 
 ## OneSiteBindingModel
 ONE_BINDING_SITE_MODEL = 'One Site Binding'
@@ -201,6 +229,8 @@ EXCLUDEDRESIDUETYPES = 'ExcludedResidueTypes'
 
 LEASTSQ = 'leastsq'
 
+InversionRecovery = 'InversionRecovery'
+ExponentialDecay = 'ExponentialDecay'
 T1 = 'T1'
 T2 = 'T2'
 
@@ -211,8 +241,4 @@ NIY_WARNING = f'''This functionality has not been implemented yet.'''
 OMIT_MODE = 'omit'
 RAISE_MODE = 'raise'
 
-
-# FLAG
-FLAG_EXCLUDED = 'Excluded'
-FLAG_INCLUDED = 'Included'
 

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-03 19:49:59 +0100 (Wed, August 03, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ from ccpn.framework.lib.NTdb.NTdbDefs import getNTdbDefs
 
 class ChemicalShiftSaveFrame(SaveFrameABC):
     """A class to manage chemicalShift saveFrame
+    Creates a new (static) ChemicalShift Table and NmrChain/Residues/Atoms
     """
     _sf_category = 'assigned_chemical_shifts'
 
@@ -134,12 +135,13 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
         dd = self._seqResDict.setdefault((csRow.residueType, csRow.sequenceCode), [])
         dd.append(csRow)
 
-    def _newChemicalShift(self, csRow:LoopRow, chemShiftList):
+    def _newChemicalShift(self, csRow:LoopRow, nmrChain, chemShiftList):
         """Use chemShift to make a new (v3) chemicalShift in chemShiftList
         If need be: look back or look ahead into other rows
         :param csRow: the row to process
+        :param nmrChain: a NmrChain instance for the generated NmrAtoms
         :param chemShiftList: ChemicalShifList instance to generate new ChemicalShift
-        :return a ChemicalShift instance or None
+        :return a ChemicalShift instance
         """
         _row = csRow
 
@@ -147,7 +149,8 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
             return None
 
         project = chemShiftList.project
-        chainCode = chemShiftList.name
+        # chainCode = self.parent.chainCode if self.parent.chainCode else \
+        #             chemShiftList.name
         atomName = _row.atomName
 
         if _row.ntDef is not None:
@@ -215,7 +218,7 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
                 getLogger().warning(f'No provisions for ({_row.residueType},{_row.atomName}) with ambiguity code {_row.ambiguityCode}')
 
         # get the NmrAtom object
-        nmrChain = project.fetchNmrChain(chainCode)
+        # nmrChain = project.fetchNmrChain(chainCode)
         nmrResidue = nmrChain.fetchNmrResidue(residueType=_row.residueType, sequenceCode=_row.sequenceCode)
         try:
             nmrAtom = nmrResidue.newNmrAtom(name=atomName, isotopeCode=_row.isotopeCode)
@@ -298,13 +301,19 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
     def importIntoProject(self, project) -> list:
         """Import the data of self into project.
         :param project: a Project instance.
-        :return: list of imported V3 objects.
+        :return: list with the created ChemicalShiftList and NmrChain V3 objects.
         """
-        name = f'entry{self.entry_id}'
-        chemShiftList = project.newChemicalShiftList(name = name,
+        # Create a new ChemicalShiftList and a new NmrChain
+        comment = f'created from {self.entryName}'
+        chemShiftList = project.newChemicalShiftList(name = self.entryName,
                                                      autoUpdate = False,
-                                                     comment = f'from BMRB entry {self.entry_id}; {self.name}'
+                                                     comment = comment
                                                      )
+        chainCode = self.parent.chainCode if self.parent.chainCode else \
+                    self.entryName
+        #TODO isConnected should be True; after ficing the model issues
+        nmrChain = project.newNmrChain(shortName=chainCode, isConnected=False, comment=comment)
+
         # A two-stage conversion, as sometimes we need to look back or forward
         # 'parse'/convert the rows, assigning the attributes; create a lookupDict
         self._lookupDict = {}
@@ -318,9 +327,14 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
 
         # Loop again to create the V3 chemicalShift objects
         for _row in self.chemicalShifts:
-            self._newChemicalShift(_row, chemShiftList)
+            self._newChemicalShift(_row, nmrChain=nmrChain, chemShiftList=chemShiftList)
 
-        return [chemShiftList]
+        text = f'\n==> saveFrame "{self.name}"\n'
+        text += f'Imported as {chemShiftList}  ({len(chemShiftList.chemicalShifts)} shifts)\n'
+        text += f'Created {nmrChain}  ({len(nmrChain.nmrResidues)} NmrResidues, {len(nmrChain.nmrAtoms)} NmrAtoms)\n'
+        self.parent.note.appendText(text)
+
+        return [chemShiftList, nmrChain]
 
 ChemicalShiftSaveFrame._registerSaveFrame()
 

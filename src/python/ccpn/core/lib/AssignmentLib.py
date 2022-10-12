@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2022-08-09 12:15:40 +0100 (Tue, August 09, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:05 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -114,8 +114,11 @@ PROTEIN_NEF_ATOM_NAMES = {
             'HGx%', 'HGy%', 'HG1%', 'HG2%', 'HG%']
     }
 
-from ccpn.util import Common as commonUtil, Constants
+from itertools import combinations
+import typing
+import numpy
 from typing import Sequence
+from collections import defaultdict
 from ccpn.core.NmrAtom import NmrAtom, UnknownIsotopeCode
 from ccpn.core.Chain import Chain
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
@@ -123,14 +126,10 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList, GAUSSIANMETHOD
 from ccpn.core.Project import Project
-from collections import defaultdict
-from itertools import combinations
 import ccpn.core.lib.AxisCodeLib as AxisCodeLib
-from ccpn.util.Common import makeIterableList
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms, getCcpCodes, \
     getSpinSystemScore
-import typing
-import numpy
+from ccpn.util import Common as commonUtil
 from ccpn.util.Logging import getLogger
 
 
@@ -436,8 +435,8 @@ def getAllSpinSystems(project: Project, nmrResidues: typing.List[NmrResidue],
         probs = {}
         for ii, (apiChain, setChainCode, priorCode) in enumerate(zip(apiChains, setChainCodes, priorCodes)):
 
-            hash = ii
-            probHash = probs[hash] = {}
+            hsh = ii
+            probHash = probs[hsh] = {}
 
             for jj, _spinSystems in enumerate(shifts):
 
@@ -496,9 +495,9 @@ def getAllSpinSystems(project: Project, nmrResidues: typing.List[NmrResidue],
 
         matchesDict = {}
 
-        for ii, (apiChain, probsLists) in enumerate(zip(apiChains, probs.values())):
+        for ii, (chain, apiChain, probsLists) in enumerate(zip(chains, apiChains, probs.values())):
 
-            matchesChain = matchesDict[ii] = []
+            matchesChain = matchesDict.setdefault(chain, [])
 
             for jj, probsList in enumerate(probsLists.values()):
                 window = len(nmrResidues)
@@ -1210,11 +1209,13 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
     if peakList.peaks:
         peak = peakList.peaks[0]
         axisIso = list(zip(peak.axisCodes, peak.spectrum.isotopeCodes))
+        numDims = len(peak.axisCodes)
 
         count = len(peakList.peaks)
         pDiv = (count // 100) + 1  #10 if count > 100 else 1
         totalCopies = int(count / pDiv)
 
+        foundMts = {}
         with progressHandler(text='Set up NmrResidues...', maximum=totalCopies, autoClose=False) as progress:
 
             with undoBlock():
@@ -1233,11 +1234,34 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
                         dimensionNmrAtoms = peak.dimensionNmrAtoms  # for speed reasons !?
                         if not keepAssignments or all(not dimAtoms for dimAtoms in dimensionNmrAtoms):
 
-                            # make a new nmrResidue with new nmrAtoms and assign to the peak
-                            nmrResidue = nmrChain.newNmrResidue()
-                            for i, (axis, isotope) in enumerate(axisIso):
-                                nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)
-                                peak.assignDimension(axisCode=axis, value=[nmrAtom])
+                            if peak.multiplets:
+                                existingDims = [[] for _nd in range(numDims)]
+                                for mt in peak.multiplets:
+                                    if mt in foundMts:
+                                        for i, (exst, dimNmr) in enumerate(zip(existingDims, foundMts[mt])):
+                                            existingDims[i].append(dimNmr)
+
+                                    else:
+                                        # need to create a new residue and nmrAtoms
+                                        thisDims = [[] for _nd in range(numDims)]
+                                        nmrResidue = nmrChain.newNmrResidue()
+                                        for i, (axis, isotope) in enumerate(axisIso):
+                                            nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)
+                                            existingDims[i].append(nmrAtom)
+                                            thisDims[i] = nmrAtom
+
+                                        foundMts[mt] = thisDims
+
+                                # assign all the dimensions
+                                for i, ((axis, isotope), dims) in enumerate(zip(axisIso, existingDims)):
+                                    peak.assignDimension(axisCode=axis, value=dims)
+
+                            else:
+                                # make a new nmrResidue with new nmrAtoms and assign to the peak
+                                nmrResidue = nmrChain.newNmrResidue()
+                                for i, (axis, isotope) in enumerate(axisIso):
+                                    nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)
+                                    peak.assignDimension(axisCode=axis, value=[nmrAtom])
 
                 except Exception as es:
                     if 'Cancel' not in str(es):

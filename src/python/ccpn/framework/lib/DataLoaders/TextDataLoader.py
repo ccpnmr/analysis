@@ -6,7 +6,7 @@ defined as extensions .txt, .com, .csh, .sh
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:07 +0100 (Wed, October 12, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,10 +35,10 @@ from ccpn.core.Project import Project
 
 
 class TextDataLoader(DataLoaderABC):
-    """Text file data loader
+    """The text file data-loader.
     """
     dataFormat = 'textFile'
-    suffixes = '.txt .com .csh .sh'.split()  # a list of suffixes that get matched to path
+    suffixes = ['.txt', '.com', '.csh', '.sh']  # a list of suffixes that get matched to path
     loadFunction = (Project._loadTextFile, 'project')
 
 TextDataLoader._registerFormat()

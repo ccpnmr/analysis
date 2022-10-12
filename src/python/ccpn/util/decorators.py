@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:14 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,7 @@ from functools import partial
 from ccpn.util.SafeFilename import getSafeFilename
 from ccpn.util.Path import aPath, Path
 import ccpn.util.Logging as Logging
-
+import pandas as pd
 
 def trace(f):
     def globaltrace(frame, why, arg):
@@ -441,14 +441,18 @@ def logCommand(prefix='', get=None, isProperty=False):
         if blocking == 0 and application.ui is not None:
             _pref = prefix
             if get == 'self':
-                _pref += "get('%s')." % args[0].pid
+                _pref += f"get('{args[0].pid}')."
 
             if isProperty:
-                try:
-                    # if arg is a core object then use get(pid)
-                    logS = _pref + "%s = get('%s')" % (func.__name__, args[1].pid)
-                except:
-                    logS = _pref + '%s = %r' % (func.__name__, args[1])
+                from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+                from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
+                ##could replace these imports with hasattr(args[1], 'pid')
+                if isinstance(args[1], (AbstractWrapperObject, V3CoreObjectABC)):
+                    logS = f"{_pref}{func.__name__} = get({args[1].pid})"
+                elif isinstance(args[1], pd.DataFrame):
+                    logS = f"{_pref}{func.__name__} = $TableFrame"
+                else:
+                    logS = f"{_pref}{func.__name__} = {repr(args[1])}"
             else:
                 logS = _makeLogString(_pref, False, func, *args, **kwds)
 

@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2022-05-18 14:45:10 +0100 (Wed, May 18, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:12 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,51 +26,59 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.MessageDialog import showInfo
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 
 
 COLWIDTH = 140
 
 
-class PeakFindPopup(CcpnDialog):
+class PeakFindPopup(CcpnDialogMainWidget):
     """
     PeakFind for nD spectra
     This popup works only for nDs. (Should be renamed?)
     """
+    FIXEDWIDTH = True
+    FIXEDHEIGHT = True
 
     def __init__(self, parent=None, mainWindow=None, **kwds):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Pick ND peaks', **kwds)
+        super().__init__(parent, setLayout=True, windowTitle='Pick ND peaks', **kwds)
 
-        self.mainWindow = mainWindow
-        self.project = self.mainWindow.project
-        self.application = self.mainWindow.application
-        self.current = self.application.current
+        if mainWindow:
+            self.mainWindow = mainWindow
+            self.project = self.mainWindow.project
+            self.application = self.mainWindow.application
+            self.current = self.application.current
+        else:
+            self.mainWindow = self.project = self.application = self.current = None
 
-        # if self.current.strip and not self.current.strip.isDeleted:
-        # if not self.current.strip.spectra[-1].peakLists:
-        #
-        #     # if there is no peaklist then create a new one
-        #     self.current.strip.spectra[0].newPeakList()
-        #     showInfo(str(self.windowTitle()), "Current selected spectrum '%s' has no peakList:"
-        #                                       "New peakList '%s' inserted"
-        #              % (str(self.current.strip.spectra[0].pid),
-        #                 str(self.current.strip.spectra[0].peakLists[0].pid)))
+        # set up the popup
+        self._setWidgets()
+        self._populate()
 
-        self.peakListLabel = Label(self, text="PeakList ", grid=(0, 0))
-        self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 2), hAlign='l', callback=self._selectPeakList)
+        # enable the buttons
+        self.setOkButton(text='Find Peaks', callback=self._pickPeaks, tipText='Find Peaks')
+        self.setCancelButton(callback=self.reject)
+        self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
+        self.__postInit__()
 
-        self.checkBoxWidget = Frame(self, setLayout=True, grid=(1,0), gridSpan=(1,6))
+    def _setWidgets(self):
+        """Set up the widgets for the popup.
+        """
+        widget = self.mainWidget
+
+        self.peakListLabel = Label(widget, text="PeakList ", grid=(0, 0))
+        self.peakListPulldown = PulldownList(widget, grid=(0, 1), gridSpan=(1, 2), hAlign='l', callback=self._selectPeakList)
+
+        self.checkBoxWidget = Frame(widget, setLayout=True, grid=(1, 0), gridSpan=(1, 6))
 
         Label(self.checkBoxWidget, 'Pick', grid=(0, 0))
         self.spectrumContourSelect = RadioButtons(self.checkBoxWidget, grid=(0, 1), texts=['Positive only', 'Negative only', 'Both'],
@@ -80,32 +88,30 @@ class PeakFindPopup(CcpnDialog):
                                                   )
         self.checkBox1, self.checkBox2, self.checkBox3 = self.spectrumContourSelect.radioButtons
 
-        self.limitsFrame = Frame(parent=self, setLayout=True, spacing=(5, 0),
-                                   showBorder=False, fShape='noFrame',
-                                   grid=(2, 0), gridSpan=(1,6))
+        self.limitsFrame = Frame(parent=widget, setLayout=True, spacing=(5, 0),
+                                 showBorder=False, fShape='noFrame',
+                                 grid=(2, 0), gridSpan=(1, 6))
 
-        self.estimateFrame = Frame(parent=self, setLayout=True, spacing=(5, 0),
+        self.estimateFrame = Frame(parent=widget, setLayout=True, spacing=(5, 0),
                                    showBorder=False, fShape='noFrame',
-                                   grid=(3, 0), gridSpan=(1,6))
+                                   grid=(3, 0), gridSpan=(1, 6))
 
         self.estimateLineWidths = CheckBoxCompoundWidget(self.estimateFrame,
                                                          grid=(0, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                                                          # fixedWidths=(COLWIDTH, 30),
                                                          orientation='right',
-                                                         labelText='Estimate Line Widths',
-                                                         checked=False
+                                                         labelText='Fit Peaks',
+                                                         checked=True
                                                          )
+        self.estimateLineWidths.setVisible(False)
+
         self.estimateVolumes = CheckBoxCompoundWidget(self.estimateFrame,
-                                                      grid=(0, 1), vAlign='top', stretch=(0, 0), hAlign='left',
+                                                      grid=(1, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                                                       # fixedWidths=(COLWIDTH, 30),
                                                       orientation='right',
                                                       labelText='Estimate Peak Volumes',
                                                       checked=False
                                                       )
-
-        self.addSpacer(5, 5, expandX=True, expandY=True, grid=(4,5))
-        self.buttonBox = ButtonList(self, grid=(5, 3), gridSpan=(1, 3), texts=['Cancel', 'Find Peaks'],
-                                    callbacks=[self.reject, self._pickPeaks])
 
         self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists
                                        if peakList.spectrum.dimensionCount != 1])
@@ -113,12 +119,11 @@ class PeakFindPopup(CcpnDialog):
             self.peakListPulldown.select(self.current.strip.spectra[-1].peakLists[-1].pid)
         self.peakList = self.project.getByPid(self.peakListPulldown.currentText())
 
+    def _populate(self):
+        """Populate the widgets
+        """
         # populate the estimateFrame
         self._updateContents()
-
-        self.setFixedSize(self.sizeHint())
-        # else:
-        #     self.close()
 
     def _selectPeakList(self, item):
         self.peakList = self.project.getByPid(item)
@@ -128,18 +133,15 @@ class PeakFindPopup(CcpnDialog):
         peakList = self.peakList
         positions = [[x.value(), y.value()] for x, y in zip(self.minPositionBoxes, self.maxPositionBoxes)]
 
-        doPos = True
-        doNeg = True
-        if self.checkBox1.isChecked():
-            # Positive only
-            doNeg = False
-        elif self.checkBox2.isChecked():
-            # negative only
-            doPos = False
+        # Positive only
+        doNeg = False if self.checkBox1.isChecked() else True
+        # negative only
+        doPos = False if self.checkBox2.isChecked() else True
+
         doLineWidths = self.estimateLineWidths.isChecked()
         doVolumes = self.estimateVolumes.isChecked()
 
-        # Checking the third box turns the others off and sets both. Hence default
+        # Checking the third box turns the others off and sets both. Hence, default
         # peakList.pickPeaksNd(positions, doPos=doPos, doNeg=doNeg, fitMethod='gaussian')
 
         axisCodeDict = dict((code, positions[ii]) for ii, code in enumerate(self.peakList.spectrum.axisCodes))
@@ -149,21 +151,21 @@ class PeakFindPopup(CcpnDialog):
         _peakPicker = _spectrum.peakPicker
         if _peakPicker:
             _peakPicker.dropFactor = self.application.preferences.general.peakDropFactor
-            _peakPicker.setLineWidths = doLineWidths
-            _spectrum.pickPeaks(peakList,
-                                _spectrum.positiveContourBase if doPos else None,
-                                _spectrum.negativeContourBase if doNeg else None,
-                                **axisCodeDict)
+            _peakPicker.setLineWidths = doLineWidths  # currently set to True in the peak-picker :|
+            pks = _spectrum.pickPeaks(peakList,
+                                      _spectrum.positiveContourBase if doPos else None,
+                                      _spectrum.negativeContourBase if doNeg else None,
+                                      **axisCodeDict)
 
-        # estimate the peak volumes
-        if doVolumes and doLineWidths:
-            peakList.estimateVolumes(volumeIntegralLimit=self.application.preferences.general.volumeIntegralLimit)
+            # estimate the peak volumes for the selected peaks
+            if doVolumes and doLineWidths:
+                peakList.estimateVolumes(peaks=pks, volumeIntegralLimit=self.application.preferences.general.volumeIntegralLimit)
 
         self.accept()
 
     def _updateContents(self):
 
-        # updat the contents of the limits frame to the new spectrum
+        # update the contents of the limits frame to the new spectrum
         layout = self.limitsFrame.getLayout()
 
         rowCount = layout.rowCount()

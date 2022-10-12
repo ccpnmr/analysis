@@ -9,12 +9,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-01 14:43:48 +0100 (Mon, August 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:04 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,19 +26,17 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import numpy as np
-from typing import Sequence, Optional
-
-from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices, _axisCodeMapIndices
-
-from ccpn.util import Common as commonUtil
-from ccpn.core.Spectrum import Spectrum
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
-# from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
-from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar
-from ccpn.util.Logging import getLogger
-from ccpn.core._implementation.PMIListABC import PMIListABC
 import pandas as pd
+from typing import Sequence, Optional, Union
+
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
+from ccpn.core.Spectrum import Spectrum
+from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices, _axisCodeMapIndices
+from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar
+from ccpn.core._implementation.PMIListABC import PMIListABC
+from ccpn.util.decorators import logCommand
+from ccpn.util import Common as commonUtil
+from ccpn.util.Logging import getLogger
 
 GAUSSIANMETHOD = 'gaussian'
 LORENTZIANMETHOD = 'lorentzian'
@@ -140,14 +138,38 @@ class PeakList(PMIListABC):
                             minDropFactor=minDropFactor)
 
     @logCommand(get='self')
-    def estimateVolumes(self, volumeIntegralLimit=2.0, noWarning=False):
-        """Estimate the volumes for the peaks in this peakList
+    def estimateVolumes(self, peaks: Union[None, list, tuple] = None, volumeIntegralLimit=2.0, noWarning=False):
+        """Estimate the volumes for the peaks in this peakList.
+
+        If peaks is specified as None then volumes are estimated for all peaks in the peakList.
         The width of the volume integral in each dimension is the lineWidth * volumeIntegralLimit,
         the default is 2.0 * FWHM of the peak.
+        Set noWarning to True to ignore warnings from peaks without lineWidths, default is False.
+
+        :param peaks: list|tuple of peaks, or None
         :param volumeIntegralLimit: integral width as a multiple of lineWidth (FWHM)
+        :param noWarning: Ignore peak warnings
         """
+        # otherwise circular-import error
+        from ccpn.core.Peak import Peak
+
+        # verify the parameters
+        if not isinstance(peaks, (list, tuple, type(None))):
+            raise TypeError(f'{self.__class__.__name__}.estimateVolumes: peaks must be list|tuple|None')
+        if not peaks:
+            peaks = self.peaks  # get all the peaks in the peakList
+        else:
+            peaks = self.project.getByPids(peaks)
+            myPeaks = list(self.peaks)
+            if not all(isinstance(pk, Peak) and pk in myPeaks for pk in peaks):
+                raise TypeError(f'{self.__class__.__name__}.estimateVolumes: peaks contains non-Peak objects')
+        if not isinstance(volumeIntegralLimit, float):
+            raise TypeError(f'{self.__class__.__name__}.estimateVolumes: volumeIntegralLimit must be a float')
+        if not isinstance(noWarning, bool):
+            raise TypeError(f'{self.__class__.__name__}.estimateVolumes: noWarning must be True/False')
+
         with undoBlockWithoutSideBar():
-            for pp in self.peaks:
+            for pp in peaks:
                 # estimate the volume for each peak
                 height = pp.height
                 lineWidths = pp.lineWidths

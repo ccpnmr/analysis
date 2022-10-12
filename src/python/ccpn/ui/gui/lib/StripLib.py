@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-07 15:37:24 +0100 (Sun, August 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:10 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,9 +27,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import typing
-from typing import List, Tuple
-
-from ccpn.core._OldChemicalShift import _OldChemicalShift
+from typing import List
+from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.core.lib.ContextManagers import undoStackBlocking
@@ -61,7 +60,7 @@ def navigateToPositionInStrip(strip,
     if not axisCodes:
         axisCodes = strip.axisCodes
 
-    # below does not work for the Navigate To right mouse menu option because in the width
+    # below does not work for the Navigate-To right-mouse menu option because in the width
     # setting further down, stripAxisIndex is not necessarily the same as ii
     # so the width in the z axis can be set to some huge number by mistake
     # if widths is None:
@@ -158,6 +157,9 @@ def copyStripAxisPositionsAndWidths(fromStrip, toStrip):
 
 def matchAxesAndNmrAtoms(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom]):
     shiftDict = {}
+    if not strip.spectra:
+        return
+
     shiftList = strip.spectra[0].chemicalShiftList
     for axis in strip.orderedAxes:
 
@@ -176,7 +178,7 @@ def matchAxesAndNmrAtoms(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom]):
     return shiftDict
 
 
-def isPositionWithinfBounds(strip: GuiStrip, shift: _OldChemicalShift, axis: object):
+def isPositionWithinfBounds(strip: GuiStrip, shift: ChemicalShift, axis: object):
     """
     Determines whether a given shift is within the bounds of the specified axis of the specified
     strip.
@@ -187,6 +189,10 @@ def isPositionWithinfBounds(strip: GuiStrip, shift: _OldChemicalShift, axis: obj
     Modified to use aliasingLimits instead of spectrumLimits. Rasmus, 24/7/2016
 
     """
+    if shift is None or shift.value is None:
+        # quick check that shift exists and is not empty
+        return False
+
     minima = []
     maxima = []
 

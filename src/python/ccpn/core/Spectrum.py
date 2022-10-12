@@ -46,12 +46,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-22 17:31:10 +0100 (Thu, September 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:04 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -111,8 +111,11 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand, singleton
 from ccpn.util.Path import Path, aPath
 
+
 # defined here too as imported from Spectrum throughout the code base
 MAXALIASINGRANGE = specLib.MAXALIASINGRANGE
+_SCALECHANGED = 'scaleChanged'
+_UPDATECHEMICALSHIFTS = 'updateChemicalShifts'
 
 #=========================================================================================
 # Spectrum class
@@ -121,10 +124,11 @@ MAXALIASINGRANGE = specLib.MAXALIASINGRANGE
 from ccpn.core._implementation.updates.update_3_0_4 import _updateSpectrum_3_0_4_to_3_1_0
 from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_PROJECT_INITIALISATION
 
-@updateObject(fromVersion = '3.0.4',
-              toVersion = '3.1.0',
-              updateFunction =_updateSpectrum_3_0_4_to_3_1_0,
-              updateMethod = UPDATE_POST_PROJECT_INITIALISATION
+
+@updateObject(fromVersion='3.0.4',
+              toVersion='3.1.0',
+              updateFunction=_updateSpectrum_3_0_4_to_3_1_0,
+              updateMethod=UPDATE_POST_PROJECT_INITIALISATION
               )
 class Spectrum(AbstractWrapperObject):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
@@ -266,7 +270,6 @@ class Spectrum(AbstractWrapperObject):
         self._spectrumDimensions = None  # A tuple of SpectrumReferences instances; set once and retained for speed
 
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
-        self._scaleChanged = False
 
     #-----------------------------------------------------------------------------------------
     # end __init__
@@ -348,7 +351,7 @@ class Spectrum(AbstractWrapperObject):
         e.g. (1,2,3,..).
         Useful for mapping in axisCodes order: eg: self.getByAxisCodes('dimensions', ['N','C','H'])
         """
-        return tuple(range(1, self.dimensionCount+1))
+        return tuple(range(1, self.dimensionCount + 1))
 
     @property
     def dimensionIndices(self) -> tuple:
@@ -537,7 +540,7 @@ class Spectrum(AbstractWrapperObject):
 
     @scale.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSimple()
+    @ccpNmrV3CoreSetter(scaleChanged=True, dancing=True)
     def scale(self, value: Union[float, int, None]):
         if value is None:
             getLogger().warning('Scaling {} changed from None to 1.0'.format(self))
@@ -550,7 +553,6 @@ class Spectrum(AbstractWrapperObject):
             # Display a warning, but allow to be set
             getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
 
-        self._scaleChanged = True
         if value is None:
             self._wrappedData.scale = None
         else:
@@ -590,7 +592,7 @@ class Spectrum(AbstractWrapperObject):
         scale = self.scale if self.scale is not None else 1.0
         val = float(value) if value is not None else None
         if val is not None and scale != 0:
-            val = val/scale
+            val = val / scale
             self._wrappedData.noiseLevel = val
         else:
             self._wrappedData.noiseLevel = val
@@ -726,7 +728,7 @@ class Spectrum(AbstractWrapperObject):
     def dataFormat(self, value):
         self._openFile(path=self.filePath, dataFormat=value, checkParameters=True)
 
-    def _openFile(self, path:str, dataFormat, checkParameters=True):
+    def _openFile(self, path: str, dataFormat, checkParameters=True):
         """Open the spectrum as defined by path, creating a dataSource object
         :param path: a path to the spectrum; may contain redirections (e.g. $DATA)
         :param dataFormat: a dataFormat defined by one of the SpectrumDataSource types
@@ -750,7 +752,7 @@ class Spectrum(AbstractWrapperObject):
             self._saveSpectrumMetaData()
 
     @logCommand(get='self')
-    def reload(self, path:str = None):
+    def reload(self, path: str = None):
         """Reload the spectrum as defined by path;
         DataFormat and dimensionality need to match with the current Spectrum instance.
         All other parameters will be pulled from the (binary) spectrum data.
@@ -1223,7 +1225,7 @@ class Spectrum(AbstractWrapperObject):
 
     @referenceValues.setter
     @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(float, int))
-    @ccpNmrV3CoreSetter()
+    @ccpNmrV3CoreSetter(updateChemicalShifts=True)
     def referenceValues(self, value):
         self._setDimensionalAttributes('referenceValue', value)
 
@@ -1241,13 +1243,14 @@ class Spectrum(AbstractWrapperObject):
         """ Add substances to the spectrum.referenceSubstances list
         """
         from ccpn.core.Substance import Substance
-        currentPids = self._getInternalParameter(self._REFERENCESUBSTANCES) or [] #don't remove current pids
+
+        currentPids = self._getInternalParameter(self._REFERENCESUBSTANCES) or []  #don't remove current pids
         pids = [su.pid for su in substances if isinstance(su, Substance)]
-        self._setInternalParameter(self._REFERENCESUBSTANCES, pids+currentPids)
+        self._setInternalParameter(self._REFERENCESUBSTANCES, pids + currentPids)
         ## set to substance internal the cross-link to self
         for su in substances:
             currentSpPids = su._getInternalParameter(su._REFERENCESPECTRA) or []
-            su._setInternalParameter(su._REFERENCESPECTRA, list(set(currentSpPids+[self.pid])))
+            su._setInternalParameter(su._REFERENCESPECTRA, list(set(currentSpPids + [self.pid])))
 
     def clearReferenceSubstances(self):
         "remove the links to any ReferenceSubstances"
@@ -1288,14 +1291,14 @@ class Spectrum(AbstractWrapperObject):
         self._setDimensionalAttributes('aliasingLimits', value)
 
     @property
-    def aliasingPointLimits(self) -> Tuple[Tuple[int,int], ...]:
+    def aliasingPointLimits(self) -> Tuple[Tuple[int, int], ...]:
         """Return a tuple of sorted(minAliasingPointLimit, maxAliasingPointLimit) per dimension.
         i.e. The actual point limits of the full (including the aliased regions) limits.
         """
         return tuple(self._getDimensionalAttributes('aliasingPointLimits'))
 
     @property
-    def aliasingIndexes(self) -> Tuple[Tuple[int,int], ...]:
+    def aliasingIndexes(self) -> Tuple[Tuple[int, int], ...]:
         """Return a tuple of the number of times the spectralWidth are folded in each dimension.
         This is a derived property from the aliasingLimits; setting aliasingIndexes value will alter
         the aliasingLimits parameter accordingly.
@@ -1467,8 +1470,8 @@ class Spectrum(AbstractWrapperObject):
         return self._positions
 
     @positions.setter
+    @ccpNmrV3CoreSetter()  # scaleChanged=True)
     def positions(self, value):
-        # self._scaleChanged = True
         self._positions = value
 
         # NOTE:ED - temporary hack for showing straight the result of intensities change
@@ -1658,7 +1661,7 @@ class Spectrum(AbstractWrapperObject):
         """Set the preferred dimension ordering
         ;param dimensionOrder: tuple,list of dimensions (1-based; len dimensionCount)
         """
-        self._preferredAxisOrdering = [d-1 for d in dimensionOrder]
+        self._preferredAxisOrdering = [d - 1 for d in dimensionOrder]
 
     def _setDefaultAxisOrdering(self):
         """Set the default axis ordering based on some hierarchy rules (defined in the
@@ -1866,8 +1869,8 @@ class Spectrum(AbstractWrapperObject):
 
         return newValues
 
-    def setByAxisCodes(self, parameterName:str, values:Sequence, axisCodes:Sequence[str] = None,
-                       exactMatch:bool = False) -> list:
+    def setByAxisCodes(self, parameterName: str, values: Sequence, axisCodes: Sequence[str] = None,
+                       exactMatch: bool = False) -> list:
         """Set attributeName to values in order defined by axisCodes (default order if None)
         Perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
 
@@ -1904,11 +1907,12 @@ class Spectrum(AbstractWrapperObject):
         :return: a list with values defined by iterable in dimensions order
         """
         from ccpn.core.lib.SpectrumLib import _orderByDimensions
+
         if dimensions is None:
             dimensions = self.dimensions
         return _orderByDimensions(iterable, dimensions=dimensions, dimensionCount=self.dimensionCount)
 
-    def getByDimensions(self, parameterName:str, dimensions:Sequence[int] = None) -> list:
+    def getByDimensions(self, parameterName: str, dimensions: Sequence[int] = None) -> list:
         """Return a list of values of Spectrum dimensional attribute parameterName in order defined
         by dimensions (default order if None).
 
@@ -1932,7 +1936,7 @@ class Spectrum(AbstractWrapperObject):
 
         return newValues
 
-    def setByDimensions(self, parameterName: str, values:Sequence, dimensions:Sequence[int] = None) -> list:
+    def setByDimensions(self, parameterName: str, values: Sequence, dimensions: Sequence[int] = None) -> list:
         """Set Spectrum dimensional attribute parameterName to values in the order as defined by
         dimensions (1..dimensionCount)(default order if None)
 
@@ -2044,7 +2048,7 @@ class Spectrum(AbstractWrapperObject):
             return False
         return self.dataSource.isBuffered
 
-    def setBuffering(self, isBuffered:bool, path:str = None):
+    def setBuffering(self, isBuffered: bool, path: str = None):
         """Set Hdf5-buffering.
         Buffering status is retained (upon exit/save) if path is None; i.e. autobuffering, until
         buffering is disabled by isBuffered=False
@@ -2063,7 +2067,7 @@ class Spectrum(AbstractWrapperObject):
                                                      autoVersioning=True,
                                                      dataFormat=Hdf5SpectrumDataSource.dataFormat,
                                                      withSuffix=Hdf5SpectrumDataSource.suffixes[0]
-                                                   )
+                                                     )
                 path = _bufferStore.aPath()
                 self._dataStore.useBuffer = False  # Explicit path, no autobuffering
             else:
@@ -2145,7 +2149,7 @@ class Spectrum(AbstractWrapperObject):
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
             data = SliceData(shape=(self.pointCounts[sliceDim - 1],),
                              dimensions=(sliceDim,),
-                             position=[1]*self.dimensionCount
+                             position=[1] * self.dimensionCount
                              )
 
         else:
@@ -2247,8 +2251,8 @@ class Spectrum(AbstractWrapperObject):
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
             return PlaneData(shape=(self.pointCounts[yDim - 1], self.pointCounts[xDim - 1]),
                              dimensions=(xDim, yDim),
-                             position=[1]*self.dimensionCount
-                            )
+                             position=[1] * self.dimensionCount
+                             )
 
         try:
             position = self.dataSource.checkForValidPlane(position, xDim=xDim, yDim=yDim)
@@ -2438,7 +2442,7 @@ class Spectrum(AbstractWrapperObject):
 
         # Copy the peakList/peaks
         for idx, pl in enumerate(self.peakLists):
-            if idx+1 < len(newSpectrum.peakLists):
+            if idx + 1 < len(newSpectrum.peakLists):
                 newSpectrum.newPeakList()
             targetPl = newSpectrum.peakLists[idx]
             pl.copyTo(targetSpectrum=newSpectrum, targetPeakList=targetPl)
@@ -2540,6 +2544,7 @@ class Spectrum(AbstractWrapperObject):
         :return: new peak or None
         """
         from ccpn.core.lib.SpectrumLib import _createPeak
+
         return _createPeak(self, peakList, height=height, **ppmPositions)
 
     @logCommand(get='self')
@@ -2582,13 +2587,13 @@ class Spectrum(AbstractWrapperObject):
         # now get all other parameters in dimensions order
         axisCodes = self.getByDimensions('axisCodes', dimensions)
         ppmValues = [sorted(float(pos) for pos in region) for region in ppmRegions.values()]
-        ppmValues = self.orderByDimensions(ppmValues, dimensions) # now sorted in order of dimensions
+        ppmValues = self.orderByDimensions(ppmValues, dimensions)  # now sorted in order of dimensions
 
         axisDict = dict((axisCode, region) for axisCode, region in zip(axisCodes, ppmValues))
         sliceTuples = self._axisDictToSliceTuples(axisDict)
 
         return _pickPeaksByRegion(self,
-                                  sliceTuples= sliceTuples, peakList=peakList,
+                                  sliceTuples=sliceTuples, peakList=peakList,
                                   positiveThreshold=positiveThreshold, negativeThreshold=negativeThreshold)
 
     def _extractToFile(self, axisCodes, position, path, dataFormat, tag):
@@ -2596,6 +2601,9 @@ class Spectrum(AbstractWrapperObject):
         extractProjectionToFile.
         :return: new Spectrum instance
         """
+        from ccpn.framework.PathsAndUrls import CCPN_SPECTRA_DIRECTORY
+        from ccpn.util.SafeFilename import getSafeFilename
+
         dimensions = self.getByAxisCodes('dimensions', axisCodes)
 
         dataFormats = getDataFormats()
@@ -2611,8 +2619,37 @@ class Spectrum(AbstractWrapperObject):
         if path is None:
             appendToFilename = '_%s_%s' % (tagStr, '_'.join([str(p) for p in position]))
             path = self.dataSource.parentPath / self.name + appendToFilename
+            path = path.withSuffix(suffix)
 
-        dataStore = DataStore.newFromPath(path=path,
+            try:
+                # try saving to the same folder as the original spectrum
+                path = aPath(getSafeFilename(path))
+                with open(path, 'w'):
+                    pass
+                path.removeFile()
+
+            except Exception as es:
+                _oldPath = path
+                getLogger().debug(f'Cannot extract to path: {es}')
+
+                # error opening file in existing folder
+                try:
+                    # try saving to the default sub-folder in the project
+                    path = aPath(self.project.path).filepath / CCPN_SPECTRA_DIRECTORY / self.name + appendToFilename
+                    path = path.withSuffix(suffix)
+
+                    # try to open and remove the file
+                    path = aPath(getSafeFilename(path))
+                    with open(path, 'w'):
+                        pass
+                    path.removeFile()
+
+                    # It should now save the file to this folder as 'path'
+
+                except Exception as es2:
+                    raise RuntimeError(f'Cannot extract to path:\n\n{es}\n\n{es2}')
+
+        dataStore = DataStore.newFromPath(path=path.withoutSuffix(),
                                           autoVersioning=True, withSuffix=suffix,
                                           dataFormat=klass.dataFormat)
 
@@ -2670,7 +2707,7 @@ class Spectrum(AbstractWrapperObject):
     # Iterators
     #-----------------------------------------------------------------------------------------
 
-    def allPlanes(self, axisCodes: tuple, exactMatch:bool = True):
+    def allPlanes(self, axisCodes: tuple, exactMatch: bool = True):
         """An iterator over all planes defined by axisCodes, yielding (positions, data-array) tuples.
 
         :param axisCodes: a tuple/list of two axisCodes defining the plane
@@ -2688,7 +2725,7 @@ class Spectrum(AbstractWrapperObject):
             raise RuntimeError('Not valid path for %s ' % self)
         return self.dataSource.allPlanes(xDim=axisDims[0], yDim=axisDims[1])
 
-    def allSlices(self, axisCode:str, exactMatch:bool = True):
+    def allSlices(self, axisCode: str, exactMatch: bool = True):
         """An iterator over all slices defined by axisCode, yielding (positions, data-array) tuples.
 
         :param axisCode: an axisCodes defining the slice
@@ -2914,7 +2951,7 @@ class Spectrum(AbstractWrapperObject):
 
         # Only save (and possibly overwrite) if we have valid data
         if self._dataStore is not None and \
-            self.dataSource is not None:
+                self.dataSource is not None:
             self._spectrumTraits.save(_path)
 
     def _restoreFromSpectrumMetaData(self):
@@ -2932,11 +2969,15 @@ class Spectrum(AbstractWrapperObject):
         if _path.exists():
             _path.removeFile()
 
-    def _finaliseAction(self, action: str):
+    def _finaliseAction(self, action: str, **actionKwds):
         """Subclassed to handle associated spectrumViews instances
         """
-        if not super()._finaliseAction(action):
+        if not super()._finaliseAction(action, **actionKwds):
             return
+
+        # get the changed attribute states - defined in the ccpNmrV3CoreSetter arguments
+        scaleChanged = actionKwds.get(_SCALECHANGED, False)
+        updateShifts = actionKwds.get(_UPDATECHEMICALSHIFTS, False)
 
         if action == 'create':
             # No need; done by _newSpectrum
@@ -2955,17 +2996,16 @@ class Spectrum(AbstractWrapperObject):
             for integralList in self.integralLists:
                 integralList._finaliseAction(action)
 
-        # propagate the rename to associated spectrumViews
-        if action in ['change']:
+        # propagate the rename-action to associated spectrumViews
+        elif action in ['change']:
             for specView in self.spectrumViews:
                 if specView:
-                    if self._scaleChanged:
-                        # force a rebuild of the contours/etc.
-                        specView.buildContoursOnly = True
+                    # force a rebuild of the contours/etc.
+                    specView.buildContoursOnly = scaleChanged
+                    # other changes may need to be recognised here
                     specView._finaliseAction(action)
 
-            if self._scaleChanged:
-                self._scaleChanged = False
+            if scaleChanged:
 
                 # notify peaks/multiplets/integrals that the scale has changed
                 for peakList in self.peakLists:
@@ -2978,10 +3018,17 @@ class Spectrum(AbstractWrapperObject):
                     for integral in integralList.integrals:
                         integral._finaliseAction(action)
 
-            # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-            #
-            # GLSignals = GLNotifier(parent=self)
-            # GLSignals.emitPaintEvent()
+                # then notify the parent-lists
+                for peakList in self.peakLists:
+                    peakList._finaliseAction(action)
+                for multipletList in self.multipletLists:
+                    multipletList._finaliseAction(action)
+                for integralList in self.integralLists:
+                    integralList._finaliseAction(action)
+
+            if self.chemicalShiftList and updateShifts:
+                # notify the chemical-shifts to recalculate
+                self.chemicalShiftList.recalculatePeakShifts()
 
     def _clearCache(self):
         """Clear the cache
@@ -3004,11 +3051,12 @@ class Spectrum(AbstractWrapperObject):
         """Delete Spectrum"""
         with undoBlock():
 
-            # self._deleteSpectrumMetaData()
-
+            fp = self.filePath
             self._close()
 
-            # self.deleteAllNotifiers() TODO: no longer required?
+            with undoStackBlocking() as addUndoItem:
+                # recover the dataSource when undeleting
+                addUndoItem(undo=partial(setattr, self, 'filePath', fp))
 
             # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier?
             specDisplays = []
@@ -3033,13 +3081,6 @@ class Spectrum(AbstractWrapperObject):
 
             # delete the _wrappedData
             self._delete()
-
-            # with undoStackBlocking() as addUndoItem:
-            #     # notify spectrumViews of delete
-            #     addUndoItem(redo=self._finaliseSpectrumViews, '')
-
-            # for sd in specViews:
-            #     sd[0]._removeOrderedSpectrumViewIndex(sd[1])
 
     def _deleteChild(self, child):
         """Delete child object
@@ -3314,7 +3355,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
         'x'.join([str(p) for p in dataSource.pointCounts]),
         dataStore
         )
-    )
+                      )
 
     apiProject = project._wrappedData
     apiExperiment = apiProject.newExperiment(name=name, numDim=dataSource.dimensionCount)
@@ -3395,14 +3436,14 @@ def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], dimensionCo
     dataSource = EmptySpectrumDataSource()
     if dataSource is None:
         raise RuntimeError('Error creating empty DataSource')
-    # Fill in some of the parameters
+    # Fill in required parameters
     if dimensionCount is None:
         dimensionCount = len(isotopeCodes)
     dataSource.dimensionCount = dimensionCount
     dataSource.isotopeCodes = isotopeCodes
     dataSource._setSpectralParametersFromIsotopeCodes()
     dataSource._assureProperDimensionality()
-    dataSource.noiseLevel = 0.0
+    dataSource.noiseLevel = None
 
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
 
@@ -3418,6 +3459,7 @@ def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], dimensionCo
         dataSource.importFromSpectrum(spectrum, includePath=False)
 
     return spectrum
+
 
 def _newHdf5Spectrum(project: Project, isotopeCodes: Sequence[str], name: str = 'hdf5Spectrum', path=None, **parameters) -> Spectrum:
     """Creation of new hdf5 Spectrum (without data) at path (autogenerated temporary path when None);
@@ -3458,6 +3500,7 @@ def _newHdf5Spectrum(project: Project, isotopeCodes: Sequence[str], name: str = 
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
 
     return spectrum
+
 
 def _newSpectrum(project: Project, path: (str, Path), name: str = None) -> (Spectrum, None):
     """Creation of new Spectrum instance from path;

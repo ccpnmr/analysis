@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-07 15:17:12 +0100 (Sun, August 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:10 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -35,11 +35,12 @@ from dataclasses import dataclass
 from functools import partial
 from time import time_ns
 from types import SimpleNamespace
+import typing
 
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptions
-from ccpn.core.lib.Notifiers import Notifier, _removeDuplicatedNotifiers
+from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
 from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
@@ -50,13 +51,10 @@ from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.SearchWidget import attachDFSearchWidget
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.FileDialog import TablesFileDialog
-from ccpn.ui.gui.lib.MenuActions import _openItemObject
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import copyToClipboard
 from ccpn.util.OrderedSet import OrderedSet
-from ccpn.util.UpdateScheduler import UpdateScheduler
-from ccpn.util.UpdateQueue import UpdateQueue
 
 
 ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
@@ -67,6 +65,15 @@ ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
                 QtCore.Qt.Vertical  : QtCore.Qt.Vertical,
                 }
 
+# define a role to return a cell-value
+DTYPE_ROLE = QtCore.Qt.UserRole + 1000
+VALUE_ROLE = QtCore.Qt.UserRole + 1001
+INDEX_ROLE = QtCore.Qt.UserRole + 1002
+
+EDIT_ROLE = QtCore.Qt.EditRole
+_EDITOR_SETTER = ('setColor', 'selectValue', 'setData', 'set', 'setValue', 'setText', 'setFile')
+_EDITOR_GETTER = ('get', 'value', 'text', 'getFile')
+
 
 #=========================================================================================
 # _SimplePandasTableView
@@ -76,17 +83,17 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
     styleSheet = """QTableView {
                         background-color: %(GUITABLE_BACKGROUND)s;
                         alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
-                        border: 2px solid %(BORDER_NOFOCUS)s;
+                        border: %(_BORDER_WIDTH)spx solid %(BORDER_NOFOCUS)s;
                         border-radius: 2px;
                     }
                     QTableView::focus {
                         background-color: %(GUITABLE_BACKGROUND)s;
                         alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
-                        border: 2px solid %(BORDER_FOCUS)s;
+                        border: %(_BORDER_WIDTH)spx solid %(BORDER_FOCUS)s;
                         border-radius: 2px;
                     }
                     QTableView::item {
-                        padding: 2px;
+                        padding: %(_CELL_PADDING)spx;
                     }
                     QTableView::item::selected {
                         background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
@@ -94,15 +101,19 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
                     }
                     """
 
-    # overrides QtCore.Qt.ForegroundRole
+    # NOTE:ED overrides QtCore.Qt.ForegroundRole
     # QTableView::item - color: %(GUITABLE_ITEM_FOREGROUND)s;
     # QTableView::item:selected - color: %(GUITABLE_SELECTED_FOREGROUND)s;
 
     _columnDefs = None
+    _enableExport = True
+    _enableDelete = False
+    _enableSearch = False
 
     def __init__(self, parent=None,
                  multiSelect=False, selectRows=True,
                  showHorizontalHeader=True, showVerticalHeader=True,
+                 borderWidth=2, cellPadding=2,
                  **kwds):
         super().__init__(parent)
         Base._init(self, **kwds)
@@ -115,6 +126,9 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
 
         # set stylesheet
         colours = getColours()
+        # add border-width/cell-padding options
+        self._borderWidth = colours['_BORDER_WIDTH'] = borderWidth
+        self._cellPadding = colours['_CELL_PADDING'] = cellPadding  # the extra padding for the selected cell-item
         self._defaultStyleSheet = self.styleSheet % colours
         self.setStyleSheet(self._defaultStyleSheet)
         self.setAlternatingRowColors(True)
@@ -175,6 +189,8 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
         _header.setDefaultSectionSize(_height)
         _header.setMinimumSectionSize(_height)
         self.setMinimumSize(3 * _height, 3 * _height + self.horizontalScrollBar().height())
+
+        self._setContextMenu()
 
         # set a default empty model
         _clearSimplePandasTable(self)
@@ -320,6 +336,237 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
                     # self.PositionAtCenter)
                     break
 
+    #=========================================================================================
+    # Other methods
+    #=========================================================================================
+
+    def setExportEnabled(self, value):
+        """Enable/disable the export option from the right-mouse menu.
+        
+        :param bool value: enabled True/False
+        """
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}.setExportEnabled: value must be True/False')
+
+        self._enableExport = value
+
+    def setDeleteEnabled(self, value):
+        """Enable/disable the delete option from the right-mouse menu.
+
+        :param bool value: enabled True/False
+        """
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}.setDeleteEnabled: value must be True/False')
+
+        self._enableDelete = value
+
+    def setSearchEnabled(self, value):
+        """Enable/disable the search option from the right-mouse menu.
+
+        :param bool value: enabled True/False
+        """
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}.setSearchEnabled: value must be True/False')
+
+        self._enableSearch = value
+
+    def setWidthToColumns(self):
+        """Set the width of the table to the column widths
+        """
+        # need to get values from padding
+        header = self.horizontalHeader()
+        width = -2  # left/right borders
+        for nn in range(header.count()):
+            if not header.isSectionHidden(nn) and header.sectionViewportPosition(nn) >= 0:
+                width += (self.columnWidth(nn) + 1)  # cell border on right-hand-side
+
+        self.setFixedWidth(width)
+
+    def setHeightToRows(self):
+        """Set the height of the table to the row heights
+        """
+        height = 2 * self.horizontalHeader().height()
+
+        header = self.verticalHeader()
+        for nn in range(header.count()):
+            if not header.isSectionHidden(nn) and header.sectionViewportPosition(nn) >= 0:
+                height += (self.rowHeight(nn) + 1)
+
+        self.setFixedHeight(height)
+
+    def mapToSource(self, positions=None):
+        """Return a tuple of the locations of the specified visible-table positions in the dataFrame.
+
+        positions must be an iterable of table-positions, each a list|tuple of the form [row, col].
+
+        :param positions: iterable of list|tuples
+        :return: tuple to tuples
+        """
+        if not isinstance(positions, typing.Iterable):
+            raise TypeError(f'{self.__class__.__name__}.mapToSource: positions must be an iterable of list|tuples of the form [row, col]')
+        if not all(isinstance(pos, (list, tuple)) and
+                   len(pos) == 2 and isinstance(pos[0], int) and isinstance(pos[1], int) for pos in positions):
+            raise TypeError(f'{self.__class__.__name__}.mapToSource: positions must be an iterable of list|tuples of the form [row, col]')
+
+        sortIndex = self.model()._sortIndex
+        df = self.model().df
+        if not all((0 <= pos[0] < df.shape[0]) and (0 <= pos[1] < df.shape[1]) for pos in positions):
+            raise TypeError(f'{self.__class__.__name__}.mapToSource: positions contains invalid values')
+
+        return tuple((sortIndex[pos[0]], pos[1]) for pos in positions)
+
+    def mapRowsToSource(self, rows=None) -> tuple:
+        """Return a tuple of the source rows in the dataFrame.
+
+        rows must be an iterable of integers, or None.
+        None will return the source rows for the whole table.
+
+        :param rows: iterable of ints
+        :return: tuple of ints
+        """
+        sortIndex = self.model()._sortIndex
+        if rows is None:
+            return tuple(self.model()._sortIndex)
+
+        if not isinstance(rows, typing.Iterable):
+            raise TypeError(f'{self.__class__.__name__}.mapRowsToSource: rows must be an iterable of ints')
+        if not all(isinstance(row, int) for row in rows):
+            raise TypeError(f'{self.__class__.__name__}.mapRowsToSource: rows must be an iterable of ints')
+
+        df = self.model().df
+        if not all((0 <= row < df.shape[0]) for row in rows):
+            raise TypeError(f'{self.__class__.__name__}.mapToSource: rows contains invalid values')
+
+        return tuple(sortIndex[row] if 0 <= row < len(sortIndex) else None for row in rows)
+
+    #=========================================================================================
+    # Table context menu
+    #=========================================================================================
+
+    def _setContextMenu(self):
+        """Set up the context menu for the main table
+        """
+        self.tableMenu = Menu('', self, isFloatWidget=True)
+        setWidgetFont(self.tableMenu, )
+        self.tableMenu.addAction('Copy clicked cell value', self._copySelectedCell)
+        if self._enableExport:
+            self.tableMenu.addAction('Export Visible Table', partial(self.exportTableDialog, exportAll=False))
+            self.tableMenu.addAction('Export All Columns', partial(self.exportTableDialog, exportAll=True))
+
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self._raiseTableContextMenu)
+
+        return self.tableMenu
+
+    def _raiseTableContextMenu(self, pos):
+        """Create a new menu and popup at cursor position
+        """
+        pos = QtCore.QPoint(pos.x() + 10, pos.y() + 10)
+        self.tableMenu.exec_(self.mapToGlobal(pos))
+
+    #=========================================================================================
+    # Table functions
+    #=========================================================================================
+
+    def _copySelectedCell(self):
+        """Copy the current cell-value to the clipboard
+        """
+        idx = self.currentIndex()
+        if idx is not None:
+            text = idx.data().strip()
+            copyToClipboard([text])
+
+    def exportTableDialog(self, exportAll=True):
+        """export the contents of the table to a file
+        The actual data values are exported, not the visible items which may be rounded due to the table settings
+
+        :param exportAll: True/False - True implies export whole table - but in visible order
+                                    False, export only the visible table
+        """
+        model = self.model()
+        df = model.df
+        rows, cols = model.rowCount(), model.columnCount()
+
+        if df is None or df.empty:
+            MessageDialog.showWarning('Export Table to File', 'Table does not contain a dataFrame')
+
+        else:
+            rowList = [model._sortIndex[row] for row in range(rows)]
+            if exportAll:
+                colList = list(self.model().df.columns)
+            else:
+                colList = [col for ii, col, in enumerate(list(self.model().df.columns)) if not self.horizontalHeader().isSectionHidden(ii)]
+
+            self._exportTableDialog(df, rowList=rowList, colList=colList)
+
+    #=========================================================================================
+    # Exporters
+    #=========================================================================================
+
+    @staticmethod
+    def _dataFrameToExcel(dataFrame, path, sheet_name='Table', columns=None):
+        if dataFrame is not None:
+            path = aPath(path)
+            path = path.assureSuffix('xlsx')
+            if columns is not None and isinstance(columns, list):  #this is wrong. columns can be a 1d array
+                dataFrame.to_excel(path, sheet_name=sheet_name, columns=columns, index=False)
+            else:
+                dataFrame.to_excel(path, sheet_name=sheet_name, index=False)
+
+    @staticmethod
+    def _dataFrameToCsv(dataFrame, path, *args):
+        dataFrame.to_csv(path)
+
+    @staticmethod
+    def _dataFrameToTsv(dataFrame, path, *args):
+        dataFrame.to_csv(path, sep='\t')
+
+    @staticmethod
+    def _dataFrameToJson(dataFrame, path, *args):
+        dataFrame.to_json(path, orient='split', default_handler=str)
+
+    def findExportFormats(self, path, dataFrame, sheet_name='Table', filterType=None, columns=None):
+        formatTypes = OrderedDict([
+            ('.xlsx', self._dataFrameToExcel),
+            ('.csv', self._dataFrameToCsv),
+            ('.tsv', self._dataFrameToTsv),
+            ('.json', self._dataFrameToJson)
+            ])
+
+        # extension = os.path.splitext(path)[1]
+        extension = aPath(path).suffix
+        if not extension:
+            extension = '.xlsx'
+        if extension in formatTypes.keys():
+            formatTypes[extension](dataFrame, path, sheet_name, columns)
+            return
+        else:
+            try:
+                self._findExportFormats(str(path) + filterType, sheet_name)
+            except:
+                MessageDialog.showWarning('Could not export', 'Format file not supported or not provided.'
+                                                              '\nUse one of %s' % ', '.join(formatTypes))
+                getLogger().warning('Format file not supported')
+
+    def _exportTableDialog(self, dataFrame, rowList=None, colList=None):
+
+        self.saveDialog = TablesFileDialog(parent=None, acceptMode='save', selectFile='ccpnTable.xlsx',
+                                           fileFilter=".xlsx;; .csv;; .tsv;; .json ")
+        self.saveDialog._show()
+        path = self.saveDialog.selectedFile()
+        if path:
+            sheet_name = 'Table'
+            if dataFrame is not None and not dataFrame.empty:
+
+                if colList:
+                    dataFrame = dataFrame[colList]  # returns a new dataFrame
+                if rowList:
+                    dataFrame = dataFrame[:].iloc[rowList]
+
+                ft = self.saveDialog.selectedNameFilter()
+
+                self.findExportFormats(path, dataFrame, sheet_name=sheet_name, filterType=ft, columns=colList)
+
 
 #=========================================================================================
 # _SimplePandasTableModel
@@ -338,10 +585,12 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
     showEditIcon = False
     defaultFlags = QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
+    _defaultEditable = False
 
     def __init__(self, data, view=None):
-        """Initialise the pandas model
-        Allocates space for foreground/background colours
+        """Initialise the pandas model.
+        Allocates space for foreground/background colours.
+
         :param data: pandas DataFrame
         """
         if not isinstance(data, pd.DataFrame):
@@ -373,7 +622,10 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
     @df.setter
     def df(self, value):
-        """replace the dataFrame and update the model
+        """Replace the dataFrame and update the model.
+
+        :param value: pandas dataFrame
+        :return:
         """
         self.beginResetModel()
 
@@ -392,7 +644,13 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         self.endResetModel()
 
     def setToolTips(self, orientation, values):
-        """Set the tooltips for the horizontal/vertical headers
+        """Set the tooltips for the horizontal/vertical headers.
+
+        Orientation can be defined as: 'h', 'horizontal', 'v', 'vertical', QtCore.Qt.Horizontal, or QtCore.Qt.Vertical.
+
+        :param orientation: str or Qt constant
+        :param values: list of str containing new headers
+        :return:
         """
         orientation = ORIENTATIONS.get(orientation)
         if orientation is None:
@@ -406,7 +664,11 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             raise ValueError(f'{self.__class__.__name__}.setToolTips: Error setting values {orientation} -> {values}')
 
     def _insertRow(self, row, newRow):
-        """Insert a new row into the table
+        """Insert a new row into the table.
+
+        :param row: index of row to be inserted
+        :param newRow: new row as pandas-dataFrame or list of items
+        :return:
         """
         if self._view.isSortingEnabled():
             # notify that the table is about to be changed
@@ -430,7 +692,11 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             # self.endInsertRows()
 
     def _updateRow(self, row, newRow):
-        """Update a row in the table
+        """Update a row in the table.
+
+        :param row: index of row to be updated
+        :param newRow: new row as pandas-dataFrame or list of items
+        :return:
         """
         try:
             iLoc = self._df.index.get_loc(row)  # will give a keyError if the row is not found
@@ -477,7 +743,10 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
                 #     # self.dataChanged.emit(startIdx, endIdx)
 
     def _deleteRow(self, row):
-        """Delete a row from the table
+        """Delete a row from the table.
+
+        :param row: index of the row to be deleted
+        :return:
         """
         try:
             iLoc = self._df.index.get_loc(row)
@@ -522,8 +791,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         """
         if index.isValid():
             # get the source cell
-            row = self._sortIndex[index.row()]
-            col = index.column()
+            row, col = self._sortIndex[index.row()], index.column()
 
             if role == QtCore.Qt.DisplayRole:
                 data = self._df.iat[row, col]
@@ -533,6 +801,14 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
                     return f'{data:.3f}'
 
                 return str(data)
+
+            elif role == VALUE_ROLE:
+                val = self._df.iat[row, col]
+                try:
+                    # convert np.types to python types
+                    return val.item()  # type np.generic
+                except:
+                    return val
 
             elif role == QtCore.Qt.BackgroundRole:
                 if (colourDict := self._colour[row, col]):
@@ -552,7 +828,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
                 return str(data)
 
-            elif role == QtCore.Qt.EditRole:
+            elif role == EDIT_ROLE:
                 data = self._df.iat[row, col]
 
                 # float/np.float - return float
@@ -565,11 +841,35 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
                 return data
 
+            elif role == INDEX_ROLE:
+                return (row, col)
+
             # elif role == QtCore.Qt.DecorationRole:
             #     # return the pixmap - this works, transfer to _MultiHeader
             #     return self._editableIcon
 
         return None
+
+    def setData(self, index, value, role=QtCore.Qt.EditRole) -> bool:
+        """Set data in the DataFrame. Required if table is editable.
+        """
+        if not index.isValid():
+            return False
+
+        if role == EDIT_ROLE:
+            # get the source cell
+            row, col = self._sortIndex[index.row()], index.column()
+            try:
+                if self._df.iat[row, col] != value:
+                    self._df.iat[row, col] = value
+                    self.dataChanged.emit(index, index)
+
+                    return True
+
+            except Exception as es:
+                getLogger().debug2(f'error accessing cell {index}  ({row}, {col})   {es}')
+
+        return False
 
     def headerData(self, col, orientation, role=None):
         """Return the column headers
@@ -702,6 +1002,14 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         series = pd.Series(universalSortKey(val) for val in values)
         return series
 
+    def _setSortOrder(self, column: int, order: QtCore.Qt.SortOrder = ...):
+        """Get the new sort order based on the sort column and sort direction
+        """
+        self._oldSortIndex = self._sortIndex
+        col = self._df.columns[column]
+        newData = self._universalSort(self._df[col])
+        self._sortIndex = list(newData.sort_values(ascending=True if order == QtCore.Qt.AscendingOrder else False).index)
+
     def sort(self, column: int, order: QtCore.Qt.SortOrder = ...) -> None:
         """Sort the underlying pandas DataFrame
         Required as there is no proxy model to handle the sorting
@@ -717,14 +1025,6 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
         # emit a signal to spawn an update of the table and notify headers to update
         self.layoutChanged.emit()
-
-    def _setSortOrder(self, column: int, order: QtCore.Qt.SortOrder = ...):
-        """Get the new sort order based on the sort column and sort direction
-        """
-        self._oldSortIndex = self._sortIndex
-        col = self._df.columns[column]
-        newData = self._universalSort(self._df[col])
-        self._sortIndex = list(newData.sort_values(ascending=True if order == QtCore.Qt.AscendingOrder else False).index)
 
     def mapToSource(self, indexes):
         """Map the cell index to the co-ordinates in the pandas dataFrame
@@ -747,7 +1047,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             # return True if the column contains an edit function
             return self._view._dataFrameObject.setEditValues[col] is not None
         except:
-            return False
+            return self._defaultEditable
 
 
 #=========================================================================================
@@ -813,7 +1113,10 @@ class _SimplePandasTableHeaderModel(QtCore.QAbstractTableModel):
 # New/Update objects
 #=========================================================================================
 
-def _newSimplePandasTable(parent, data, _resize=False):
+def _newSimplePandasTable(parent, data,
+                          _resize=False,
+                          setWidthToColumns=False, setHeightToRows=False,
+                          **kwds):
     """Create a new _SimplePandasTable from a pd.DataFrame
     """
     if not parent:
@@ -822,22 +1125,22 @@ def _newSimplePandasTable(parent, data, _resize=False):
         raise ValueError(f'data is not of type pd.DataFrame - {type(data)}')
 
     # create a new table
-    table = _SimplePandasTableView(parent)
+    table = _SimplePandasTableView(parent, **kwds)
 
     # set the model
     data = pd.DataFrame(data)
     model = _SimplePandasTableModel(data, view=table)
     table.setModel(model)
 
-    # # put a proxy in between view and model - REALLY SLOW for big tables
-    # table._proxy = QtCore.QSortFilterProxyModel()
-    # table._proxy.setSourceModel(_model)
-    # table.setModel(table._proxy)
-
     table.resizeColumnsToContents()
     if _resize:
         # resize if required
         table.resizeRowsToContents()
+
+    if setWidthToColumns:
+        table.setWidthToColumns()
+    if setHeightToRows:
+        table.setHeightToRows()
 
     return table
 
@@ -894,6 +1197,9 @@ class _BlockingContent:
     rootBlocker = None
 
 
+from ccpn.ui._implementation.QueueHandler import QueueHandler
+
+
 class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     _tableSelectionChanged = QtCore.pyqtSignal(list)
 
@@ -942,6 +1248,11 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                  **kwds):
         """Initialise the widgets for the module.
         """
+        # required before initialising
+        self._enableExport = enableExport
+        self._enableDelete = enableDelete
+        self._enableSearch = enableSearch
+
         super().__init__(parent=parent,
                          multiSelect=multiSelect, selectRows=selectRows,
                          showHorizontalHeader=showHorizontalHeader, showVerticalHeader=showVerticalHeader,
@@ -977,11 +1288,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         # enable the right click menu
         self.searchWidget = None
         self._setHeaderContextMenu()
-        self._enableExport = enableExport
-        self._enableDelete = enableDelete
-        self._enableSearch = enableSearch
 
-        self._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
         self._rightClickedTableIndex = None  # last selected item in a table before raising the context menu. Enabled with mousePress event filter
 
         self._enableDoubleClick = enableDoubleClick
@@ -989,11 +1296,12 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             self.doubleClicked.connect(self._doubleClickCallback)
 
         # notifier queue handling
-        self._scheduler = UpdateScheduler(self.project, self._queueProcess, name=f'PandasTableNotifierHandler-{self}',
-                                          startOnAdd=False, log=False, completeCallback=self.update)
-        self._queuePending = UpdateQueue()
-        self._queueActive = None
-        self._lock = QtCore.QMutex()
+        self._queueHandler = QueueHandler(self,
+                                          completeCallback=self.update,
+                                          queueFullCallback=self.queueFull,
+                                          name=f'PandasTableNotifierHandler-{self}',
+                                          maximumQueueLength=self._maximumQueueLength,
+                                          log=self._logQueue)
 
         if self.enableEditDelegate:
             # set the delegate for editing
@@ -1005,7 +1313,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         """
         super().setModel(model)
 
-        # attach a handler for to respond to the selection changing
+        # attach a handler to respond to the selection changing
         self.selectionModel().selectionChanged.connect(self._selectionChangedCallback)
         model.showEditIcon = True
 
@@ -1172,19 +1480,20 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     # Table context menu
     #=========================================================================================
 
-    def _setContextMenu(self, enableExport=True, enableDelete=True):
+    def _setContextMenu(self):
         """Set up the context menu for the main table
         """
         self.tableMenu = Menu('', self, isFloatWidget=True)
         setWidgetFont(self.tableMenu, )
         self.tableMenu.addAction('Copy clicked cell value', self._copySelectedCell)
-        if enableExport:
+
+        if self._enableExport:
             self.tableMenu.addAction('Export Visible Table', partial(self.exportTableDialog, exportAll=False))
             self.tableMenu.addAction('Export All Columns', partial(self.exportTableDialog, exportAll=True))
 
         self.tableMenu.addSeparator()
 
-        if enableDelete:
+        if self._enableDelete:
             self.tableMenu.addAction('Delete Selection', self.deleteObjFromTable)
 
         self.tableMenu.addAction('Clear Selection', self._clearSelectionCallback)
@@ -1220,50 +1529,50 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     # Exporters
     #=========================================================================================
 
-    @staticmethod
-    def _dataFrameToExcel(dataFrame, path, sheet_name='Table', columns=None):
-        if dataFrame is not None:
-            path = aPath(path)
-            path = path.assureSuffix('xlsx')
-            if columns is not None and isinstance(columns, list):  #this is wrong. columns can be a 1d array
-                dataFrame.to_excel(path, sheet_name=sheet_name, columns=columns, index=False)
-            else:
-                dataFrame.to_excel(path, sheet_name=sheet_name, index=False)
-
-    @staticmethod
-    def _dataFrameToCsv(dataFrame, path, *args):
-        dataFrame.to_csv(path)
-
-    @staticmethod
-    def _dataFrameToTsv(dataFrame, path, *args):
-        dataFrame.to_csv(path, sep='\t')
-
-    @staticmethod
-    def _dataFrameToJson(dataFrame, path, *args):
-        dataFrame.to_json(path, orient='split', default_handler=str)
-
-    def findExportFormats(self, path, dataFrame, sheet_name='Table', filterType=None, columns=None):
-        formatTypes = OrderedDict([
-            ('.xlsx', self._dataFrameToExcel),
-            ('.csv', self._dataFrameToCsv),
-            ('.tsv', self._dataFrameToTsv),
-            ('.json', self._dataFrameToJson)
-            ])
-
-        # extension = os.path.splitext(path)[1]
-        extension = aPath(path).suffix
-        if not extension:
-            extension = '.xlsx'
-        if extension in formatTypes.keys():
-            formatTypes[extension](dataFrame, path, sheet_name, columns)
-            return
-        else:
-            try:
-                self._findExportFormats(str(path) + filterType, sheet_name)
-            except:
-                MessageDialog.showWarning('Could not export', 'Format file not supported or not provided.'
-                                                              '\nUse one of %s' % ', '.join(formatTypes))
-                getLogger().warning('Format file not supported')
+    # @staticmethod
+    # def _dataFrameToExcel(dataFrame, path, sheet_name='Table', columns=None):
+    #     if dataFrame is not None:
+    #         path = aPath(path)
+    #         path = path.assureSuffix('xlsx')
+    #         if columns is not None and isinstance(columns, list):  #this is wrong. columns can be a 1d array
+    #             dataFrame.to_excel(path, sheet_name=sheet_name, columns=columns, index=False)
+    #         else:
+    #             dataFrame.to_excel(path, sheet_name=sheet_name, index=False)
+    #
+    # @staticmethod
+    # def _dataFrameToCsv(dataFrame, path, *args):
+    #     dataFrame.to_csv(path)
+    #
+    # @staticmethod
+    # def _dataFrameToTsv(dataFrame, path, *args):
+    #     dataFrame.to_csv(path, sep='\t')
+    #
+    # @staticmethod
+    # def _dataFrameToJson(dataFrame, path, *args):
+    #     dataFrame.to_json(path, orient='split', default_handler=str)
+    #
+    # def findExportFormats(self, path, dataFrame, sheet_name='Table', filterType=None, columns=None):
+    #     formatTypes = OrderedDict([
+    #         ('.xlsx', self._dataFrameToExcel),
+    #         ('.csv', self._dataFrameToCsv),
+    #         ('.tsv', self._dataFrameToTsv),
+    #         ('.json', self._dataFrameToJson)
+    #         ])
+    #
+    #     # extension = os.path.splitext(path)[1]
+    #     extension = aPath(path).suffix
+    #     if not extension:
+    #         extension = '.xlsx'
+    #     if extension in formatTypes.keys():
+    #         formatTypes[extension](dataFrame, path, sheet_name, columns)
+    #         return
+    #     else:
+    #         try:
+    #             self._findExportFormats(str(path) + filterType, sheet_name)
+    #         except:
+    #             MessageDialog.showWarning('Could not export', 'Format file not supported or not provided.'
+    #                                                           '\nUse one of %s' % ', '.join(formatTypes))
+    #             getLogger().warning('Format file not supported')
 
     # def _rawDataToDF(self):
     #     try:
@@ -1296,24 +1605,24 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 
             self._exportTableDialog(df, rowList=rowList, colList=colList)
 
-    def _exportTableDialog(self, dataFrame, rowList=None, colList=None):
-
-        self.saveDialog = TablesFileDialog(parent=None, acceptMode='save', selectFile='ccpnTable.xlsx',
-                                           fileFilter=".xlsx;; .csv;; .tsv;; .json ")
-        self.saveDialog._show()
-        path = self.saveDialog.selectedFile()
-        if path:
-            sheet_name = 'Table'
-            if dataFrame is not None and not dataFrame.empty:
-
-                if colList:
-                    dataFrame = dataFrame[colList]  # returns a new dataFrame
-                if rowList:
-                    dataFrame = dataFrame[:].iloc[rowList]
-
-                ft = self.saveDialog.selectedNameFilter()
-
-                self.findExportFormats(path, dataFrame, sheet_name=sheet_name, filterType=ft, columns=colList)
+    # def _exportTableDialog(self, dataFrame, rowList=None, colList=None):
+    #
+    #     self.saveDialog = TablesFileDialog(parent=None, acceptMode='save', selectFile='ccpnTable.xlsx',
+    #                                        fileFilter=".xlsx;; .csv;; .tsv;; .json ")
+    #     self.saveDialog._show()
+    #     path = self.saveDialog.selectedFile()
+    #     if path:
+    #         sheet_name = 'Table'
+    #         if dataFrame is not None and not dataFrame.empty:
+    #
+    #             if colList:
+    #                 dataFrame = dataFrame[colList]  # returns a new dataFrame
+    #             if rowList:
+    #                 dataFrame = dataFrame[:].iloc[rowList]
+    #
+    #             ft = self.saveDialog.selectedNameFilter()
+    #
+    #             self.findExportFormats(path, dataFrame, sheet_name=sheet_name, filterType=ft, columns=colList)
 
     def deleteObjFromTable(self):
         """Delete all objects in the selection from the project
@@ -1440,6 +1749,9 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         :return: Actions: Select the dropped item on the table or/and open a new modules if multiple drops.
         If multiple different obj instances, then asks first.
         """
+        # import here to stop circular import
+        from ccpn.ui.gui.lib.MenuActions import _openItemObject
+
         objs = [self.project.getByPid(pid) for pid in pids]
 
         selectableObjects = [obj for obj in objs if isinstance(obj, objType)]
@@ -1678,7 +1990,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     def _queueGeneralNotifier(self, func, data):
         """Add the notifier to the queue handler
         """
-        self._queueAppend([func, data])
+        self._queueHandler.queueAppend([func, data])
 
     def _clearTableNotifiers(self):
         """Clean up the notifiers
@@ -1773,7 +2085,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         """Handle item selection has changed in table - call user callback
         """
         # MUST BE SUBCLASSED
-        raise NotImplementedError(f'Code error: {self.__class__.__name__}._selectionChangedCallback not implemented')
+        raise NotImplementedError(f'Code error: {self.__class__.__name__}.actionCallback not implemented')
 
     def _doubleClickCallback(self, itemSelection):
 
@@ -2043,53 +2355,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         Apply overall operation instead of all individual notifiers.
         """
         # MUST BE SUBCLASSED
-        raise NotImplementedError(f'Code error: {self.__class__.__name__}._updateTableCallback not implemented')
-
-    def _queueProcess(self):
-        """Process current items in the queue
-        """
-        with QtCore.QMutexLocker(self._lock):
-            # protect the queue switching
-            self._queueActive = self._queuePending
-            self._queuePending = UpdateQueue()
-
-        _startTime = time_ns()
-        _useQueueFull = (self._maximumQueueLength not in [0, None] and len(self._queueActive) > self._maximumQueueLength)
-        if self._logQueue:
-            # log the queue-time if required
-            getLogger().debug(f'_queueProcess  {self}  len: {len(self._queueActive)}  useQueueFull: {_useQueueFull}')
-
-        if _useQueueFull:
-            # rebuild from scratch if the queue is too big
-            try:
-                self._queueActive = None
-                self.queueFull()
-            except Exception as es:
-                getLogger().debug(f'Error in {self.__class__.__name__} update queueFull: {es}')
-
-        else:
-            executeQueue = _removeDuplicatedNotifiers(self._queueActive)
-            for itm in executeQueue:
-                # process item if different from previous
-                try:
-                    func, data = itm
-                    func(data)
-                except Exception as es:
-                    getLogger().debug(f'Error in {self.__class__.__name__} update - {es}')
-
-        if self._logQueue:
-            getLogger().debug(f'elapsed time {(time_ns() - _startTime) / 1e9}')
-
-    def _queueAppend(self, itm):
-        """Append a new item to the queue
-        """
-        self._queuePending.put(itm)
-        if not self._scheduler.isActive and not self._scheduler.isBusy:
-            self._scheduler.start()
-
-        elif self._scheduler.isBusy:
-            # caught during the queue processing event, need to restart
-            self._scheduler.signalRestart()
+        raise NotImplementedError(f'Code error: {self.__class__.__name__}.queueFull not implemented')
 
     #=========================================================================================
     # Common object properties
@@ -2140,9 +2406,6 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 # Table delegate to handle editing
 #=========================================================================================
 
-EDIT_ROLE = QtCore.Qt.EditRole
-
-
 class _SimpleTableDelegate(QtWidgets.QStyledItemDelegate):
     """handle the setting of data when editing the table
     """
@@ -2152,9 +2415,29 @@ class _SimpleTableDelegate(QtWidgets.QStyledItemDelegate):
         :param parent - link to the handling table
         """
         QtWidgets.QStyledItemDelegate.__init__(self, parent)
-        self.customWidget = False
+        self.customWidget = None
         self._parent = parent
         self._objectColumn = objectColumn
+
+    def createEditor(self, parentWidget, itemStyle, index):  # returns the edit widget
+        """Create the editor widget
+        """
+        col = index.column()
+        objCol = self._parent._columnDefs.columns[col]
+
+        if objCol.editClass:
+            widget = objCol.editClass(None, *objCol.editArgs, **objCol.editKw)
+            widget.setParent(parentWidget)
+            # widget.activated.connect(partial(self._pulldownActivated, widget))
+
+            self.customWidget = widget
+
+            return widget
+
+        else:
+            self.customWidget = None
+
+            return super().createEditor(parentWidget, itemStyle, index)
 
     def setEditorData(self, widget, index) -> None:
         """populate the editor widget when the cell is edited
@@ -2165,28 +2448,17 @@ class _SimpleTableDelegate(QtWidgets.QStyledItemDelegate):
         if not isinstance(value, (list, tuple)):
             value = (value,)
 
-        if hasattr(widget, 'setColor'):
-            widget.setColor(*value)
+        for attrib in _EDITOR_SETTER:
+            # get the method from the widget, and call with appropriate parameters
+            if (func := getattr(widget, attrib, None)):
+                if not callable(func):
+                    raise TypeError(f"widget.{attrib} is not callable")
 
-        elif hasattr(widget, 'setData'):
-            widget.setData(*value)
-
-        elif hasattr(widget, 'set'):
-            widget.set(*value)
-
-        elif hasattr(widget, 'setValue'):
-            widget.setValue(*value)
-
-        elif hasattr(widget, 'setText'):
-            widget.setText(*value)
-
-        elif hasattr(widget, 'setFile'):
-            widget.setFile(*value)
+                func(*value)
+                break
 
         else:
-            msg = 'Widget %s does not expose "setData", "set" or "setValue" method; ' % widget
-            msg += 'required for table proxy editing'
-            raise Exception(msg)
+            raise Exception(f'Widget {widget} does not expose a set method; required for table editing')
 
     def setModelData(self, widget, mode, index):
         """Set the object to the new value
@@ -2194,32 +2466,24 @@ class _SimpleTableDelegate(QtWidgets.QStyledItemDelegate):
         :param mode - editing mode:
         :param index - QModelIndex of the cell
         """
-        if hasattr(widget, 'get'):
-            value = widget.get()
+        for attrib in _EDITOR_GETTER:
+            if (func := getattr(widget, attrib, None)):
+                if not callable(func):
+                    raise TypeError(f"widget.{attrib} is not callable")
 
-        elif hasattr(widget, 'value'):
-            value = widget.value()
-
-        elif hasattr(widget, 'text'):
-            value = widget.text()
-
-        elif hasattr(widget, 'getFile'):
-            files = widget.selectedFiles()
-            if not files:
-                return
-            value = files[0]
+                value = func()
+                break
 
         else:
-            msg = f'Widget {widget} does not expose "get", "value" or "text" method; required for table editing'
-            raise Exception(msg)
+            raise Exception(f'Widget {widget} does not expose a get method; required for table editing')
 
-        row = index.row()
-        col = index.column()
+        row, col = index.row(), index.column()
         try:
             # get the sorted element from the dataFrame
             df = self._parent._df
             iRow = self._parent.model()._sortIndex[row]
             iCol = df.columns.get_loc(self._objectColumn)
+            # get the object
             obj = df.iat[iRow, iCol]
 
             # set the data which will fire notifiers to populate all tables (including this)
@@ -2230,40 +2494,23 @@ class _SimpleTableDelegate(QtWidgets.QStyledItemDelegate):
         except Exception as es:
             getLogger().debug('Error handling cell editing: %i %i - %s    %s    %s' % (row, col, str(es), self._parent.model()._sortIndex, value))
 
-    def createEditor(self, parentWidget, itemStyle, index):  # returns the edit widget
-
-        col = index.column()
-        objCol = self._parent._columnDefs.columns[col]
-
-        if objCol.editClass:
-            widget = objCol.editClass(None, *objCol.editArgs, **objCol.editKw)
-            widget.setParent(parentWidget)
-            self.customWidget = True
-            return widget
-
-        else:
-            return super().createEditor(parentWidget, itemStyle, index)
-
     def updateEditorGeometry(self, widget, itemStyle, index):  # ensures that the editor is displayed correctly
 
-        if True:  # self.customWidget:
+        if self.customWidget:
             cellRect = itemStyle.rect
-            x = cellRect.x()
-            y = cellRect.y()
+            pos = widget.mapToGlobal(cellRect.topLeft())
+            x, y = pos.x(), pos.y()
             hint = widget.sizeHint()
-
-            # if hint.height() > cellRect.height():
-            #     if isinstance(widget, QtWidgets.QComboBox):  # has a popup anyway
-            #         widget.move(cellRect.topLeft())
-            #
-            #     else:
-            #         pos = widget.mapToGlobal(cellRect.topLeft())
-            #         widget.setParent(self._parent, QtCore.Qt.Popup)  # popup so not confined
-            #         widget.move(pos)
-
             width = max(hint.width(), cellRect.width())
             height = max(hint.height(), cellRect.height())
+
+            # force the pulldownList to be a popup - will always close when clicking outside
+            widget.setParent(self._parent, QtCore.Qt.Popup)
             widget.setGeometry(x, y, width, height)
+
+            # # QT delay to popup ensures that focus is correct when opening
+            # # - requires subclass of pulldown to delay closing in double-click
+            # QtCore.QTimer.singleShot(0, widget.showPopup)
 
         else:
             return super().updateEditorGeometry(widget, itemStyle, index)

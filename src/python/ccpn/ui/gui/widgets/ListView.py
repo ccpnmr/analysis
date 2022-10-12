@@ -4,18 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-04 15:06:02 +0000 (Wed, November 04, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:13 +0100 (Wed, October 12, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -45,7 +46,7 @@ class ListView(QtWidgets.QListView, Base):
 
     ListView can be set to show a maximum number of rows.
     Can also be minimised to the contents - this requires the container to be set.
-        Also advisable to set the sizePolicy of the container:
+        It is also advisable to set the sizePolicy of the container:
         e.g. listViewContainer.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
     """
 
@@ -104,9 +105,9 @@ class ListView(QtWidgets.QListView, Base):
     def _minRows(self, rc):
         """Return the number of rows to show
         """
-        #GST actually it appears maximum rows is effectivey ignored as long as its large...
+        #GST actually it appears maximum rows is effectively ignored as long as it is large...
         result = min(rc, self._maximumRows)
-        if result > 0 and result <= self._minRowCount:
+        if 0 < result <= self._minRowCount:
             result = self._minRowCount
         return result
 
@@ -123,8 +124,8 @@ class ListView(QtWidgets.QListView, Base):
             maxListHeight = (self._minRows(rc) * rh) + fh
             maxContainerHeight = maxListHeight + self._headerHeight
             maxContainerHeight = max(maxContainerHeight, self._listViewContainer.minimumHeight())
-            # GST 4 rows is a good height as it gves a sensible scrollbar
-            # left in for future improvments: user adjustable results size
+            # GST 4 rows is a good height as it gives a sensible scrollbar
+            # left in for future improvements: user adjustable results size
             # minListHeight = (self._minRowCount * rh) + fh
             # minContainerHeight = minListHeight + self._headerHeight
 
@@ -146,12 +147,13 @@ class ListView(QtWidgets.QListView, Base):
             self._dragStartPosition = event.pos()
 
             pids = []
-            for item in sorted(self.selectionModel().selectedRows(0), key=lambda val: val.row()):
-                if item is not None:
-                    dataPid = item.data()  #item.data(0, QtCore.Qt.DisplayRole)
-                    # dataPid = item.indexes()[0].data()  #item.data(0, QtCore.Qt.DisplayRole)
-                    if self.project and self.project.getByPid(dataPid):
-                        pids.append(str(dataPid))
+            if self.selectionModel():
+                for item in sorted(self.selectionModel().selectedRows(0), key=lambda val: val.row()):
+                    if item is not None:
+                        dataPid = item.data()  #item.data(0, QtCore.Qt.DisplayRole)
+                        # dataPid = item.indexes()[0].data()  #item.data(0, QtCore.Qt.DisplayRole)
+                        if self.project and self.project.getByPid(dataPid):
+                            pids.append(str(dataPid))
 
             self._pids = list(pids) or None
         else:

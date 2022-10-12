@@ -11,12 +11,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-02 17:46:56 +0100 (Tue, August 02, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:12 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -115,7 +115,7 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         row += 1
         self._followFrame = Frame(self.mainWidget, setLayout=True, grid=(row, 0), gridSpan=(2, 2))
         self.followPeakOptionstLabel = Label(self._followFrame, text='Select Mode', grid=(subRow, 0))
-        self.followPeakOptionsRB = RadioButtons(self._followFrame, texts=[FINDPEAKS, USEEXISTINGPEAKS],
+        self.followPeakOptionsRB = RadioButtons(self._followFrame, texts=[USEEXISTINGPEAKS], # texts=[FINDPEAKS, USEEXISTINGPEAKS],
                                                 selectedInd=0, grid=(subRow, 1))
         subRow += 1
         engines = list(AVAILABLEFOLLOWPEAKS.keys())

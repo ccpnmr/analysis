@@ -19,14 +19,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$Author: Luca Mureddu $"
-__dateModified__ = "$Date: 2021-06-23 17:58:44 +0000 (Wed, June 23, 2021) $"
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-06-07 17:27:29 +0100 (Tue, June 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:03 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,7 +48,6 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Integral import Integral
-from ccpn.core.PseudoDimension import PseudoDimension
 from ccpn.core.SpectrumHit import SpectrumHit
 from ccpn.core.Sample import Sample
 from ccpn.core.SampleComponent import SampleComponent
@@ -73,7 +70,6 @@ from ccpn.core.DataTable import DataTable
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.Model import Model
 from ccpn.core.Note import Note
-from ccpn.core.PeakCluster import PeakCluster
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Multiplet import Multiplet
 from ccpn.core.Collection import Collection
@@ -85,7 +81,6 @@ from ccpn.core.Collection import Collection
 from ccpn.ui._implementation.Window import Window
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpn.ui._implementation.Strip import Strip
-# from ccpn.ui._implementation.Axis import Axis
 from ccpn.ui._implementation.Mark import Mark
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.ui._implementation.MultipletListView import MultipletListView
@@ -113,5 +108,7 @@ from ccpn.ui._implementation.IntegralListView import IntegralListView
 
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import Path, aPath
+from ccpn.util.isotopes import getIsotopeRecords
+
 from ccpn.framework.Application import getApplication
 from ccpn.framework.Preferences import getPreferences

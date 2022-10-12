@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-18 16:27:35 +0100 (Mon, July 18, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:09 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,6 @@ from ccpn.core.lib import AssignmentLib
 from ccpn.core.lib.peakUtils import estimateVolumes, updateHeight
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.ui.gui import guiSettings
-from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, progressManager
 from ccpn.ui.gui.popups.ShortcutsPopup import UserShortcuts
 from ccpn.ui.gui.lib.SpectrumDisplay import navigateToCurrentPeakPosition, navigateToCurrentNmrResiduePosition
@@ -41,6 +40,13 @@ from ccpn.ui.gui.lib.mouseEvents import MouseModes, setCurrentMouseMode, getCurr
 from ccpn.util.decorators import logCommand
 from ccpn.util.Colour import colorSchemeTable
 from ccpn.util.Logging import getLogger
+
+
+_PEAKS = 1
+_INTEGRALS = 2
+_MULTIPLETS = 4
+_INTEGRAL_PEAKS = 8
+_MULTIPLET_PEAKS = 16
 
 
 class GuiWindow():
@@ -59,7 +65,7 @@ class GuiWindow():
         # return
 
         context = QtCore.Qt.WidgetWithChildrenShortcut
-        addShortCut("c, h", self, self.toggleCrosshairAll, context=context)
+        # addShortCut("c, h", self, self.toggleCrosshairAll, context=context)
         addShortCut("e, n", self, self.estimateNoise, context=context)
         addShortCut("g, s", self, self.toggleGridAll, context=context)
         addShortCut("Del", self, partial(self.deleteSelectedItems), context=context)
@@ -199,14 +205,18 @@ class GuiWindow():
         # show simple delete items popup
         from ccpn.ui.gui.popups.DeleteItems import DeleteItemsPopup
 
+        foundSets = 0
         if self.current.peaks or self.current.multiplets or self.current.integrals:
             deleteItems = []
             if self.current.peaks:
-                deleteItems.append(('Peaks', self.current.peaks))
+                deleteItems.append(('Peaks', self.current.peaks, True))
+                foundSets += _PEAKS
             if self.current.integrals:
-                deleteItems.append(('Integrals', self.current.integrals))
+                deleteItems.append(('Integrals', self.current.integrals, True))
+                foundSets += _INTEGRALS
             if self.current.multiplets:
-                deleteItems.append(('Multiplets', self.current.multiplets))
+                deleteItems.append(('Multiplets', self.current.multiplets, True))
+                foundSets += _MULTIPLETS
 
             # add integrals attached peaks
             attachedIntegrals = set()
@@ -216,7 +226,8 @@ class GuiWindow():
             attachedIntegrals = list(attachedIntegrals - set(self.current.integrals))
 
             if attachedIntegrals:
-                deleteItems.append(('Additional Peak-Integrals', attachedIntegrals))
+                deleteItems.append(('Additional Peak-Integrals', attachedIntegrals, False))
+                foundSets += _INTEGRAL_PEAKS
 
             # add peaks attached multiplets
             attachedPeaks = set()
@@ -226,10 +237,17 @@ class GuiWindow():
             attachedPeaks = list(attachedPeaks - set(self.current.peaks))
 
             if attachedPeaks:
-                deleteItems.append(('Additional Multiplet-Peaks', attachedPeaks))
+                deleteItems.append(('Additional Multiplet-Peaks', attachedPeaks, False))
+                foundSets += _MULTIPLET_PEAKS
 
-            popup = DeleteItemsPopup(parent=self, mainWindow=self, items=deleteItems)
-            popup.exec_()
+            if foundSets & (_INTEGRAL_PEAKS | _MULTIPLET_PEAKS):
+                # if there are additional peaks that have been missed then show popup - add more conditions?
+                popup = DeleteItemsPopup(parent=self, mainWindow=self, items=deleteItems)
+                popup.exec()
+
+            else:
+                # don't show the popup
+                self.project.deleteObjects(*(obj for _name, itms, _check in deleteItems for obj in itms))
 
     # def deleteSelectedPeaks(self, parent=None):
     #
@@ -587,12 +605,12 @@ class GuiWindow():
         if strip:
             strip.spectrumDisplay.adjustContours()
 
-    def toggleCrosshairAll(self):
-        """
-        Toggles whether crosshairs are displayed in all windows.
-        """
-        for window in self.project.windows:
-            window.toggleCrosshair()
+    # def toggleCrosshairAll(self):
+    #     """
+    #     Toggles whether crosshairs are displayed in all windows.
+    #     """
+    #     for window in self.project.windows:
+    #         window.toggleCrosshair()
 
     def toggleCrosshair(self):
         """
@@ -801,19 +819,20 @@ class GuiWindow():
                     showWarning('Snap to Extremum', str(es))
 
             elif n > 1:
-                title = 'Snap Peak%s to extremum' % ('' if n == 1 else 's')
-                msg = 'Snap %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
-                if MessageDialog.showYesNo(title, msg, self):
-                    with progressManager(self, 'Snapping peaks to extrema'):
+                # title = 'Snap Peak%s to extremum' % ('' if n == 1 else 's')
+                # msg = 'Snap %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
+                # if MessageDialog.showYesNo(title, msg, self):
 
-                        try:
-                            peaks.sort(key=lambda x: x.position[0] if x.position and None not in x.position else 0, reverse=False)  # reorder peaks by position
-                            for peak in peaks:
-                                peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
-                                                    minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
+                with progressManager(self, 'Snapping peaks to extrema'):
 
-                        except Exception as es:
-                            showWarning('Snap to Extremum', str(es))
+                    try:
+                        peaks.sort(key=lambda x: x.position[0] if x.position and None not in x.position else 0, reverse=False)  # reorder peaks by position
+                        for peak in peaks:
+                            peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
+                                                minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
+
+                    except Exception as es:
+                        showWarning('Snap to Extremum', str(es))
 
             else:
                 getLogger().warning('No selected peak/s. Select a peak first.')

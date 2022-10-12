@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,9 +26,11 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
+
+import warnings
 import numpy as np
 import pandas as pd
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from pandas import Series, isnull
@@ -36,31 +38,56 @@ from lmfit import Model, Parameter
 from lmfit.model import ModelResult, _align
 from ccpn.core.DataTable import TableFrame
 from ccpn.util.Logging import getLogger
+from ccpn.util.OrderedSet import OrderedSet
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC
+from ccpn.framework.Application import getApplication, getProject
+from ccpn.core.lib.CcpnSorting import stringSortKey
 
-def _formatValue(value, maxInt=3, floatPrecision=3, expDigits=1):
-    try:
-        if isinstance(value, (float, int)):
-            if len(str(int(value))) > maxInt:
-                value = np.format_float_scientific(value, precision=floatPrecision, exp_digits=expDigits)
-            else:
-                value = round(value, 4)
-    except Exception as ex:
-        getLogger().debug2(f'Impossible to format {value}. Error:{ex}')
-    return value
+pd.set_option('display.max_columns', None)  # or 1\000
+pd.set_option('display.max_rows', 50)  # or 1000
 
 class FittingModelABC(ABC):
-    """
-    The top level class for the FittingModel Object.
-    """
-    ModelName   = 'ModelName'      # The Model name.
-    Info        = 'the info'            # A brief description of the fitting model.
-    Description = 'Description'  # A simplified representation of the used equation(s).
-    MaTex      = r''                 # MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
-    References  = 'References'    # A list of journal article references. E.g.: DOIs or title/authors/year/journal; web-pages.
-    Minimiser   = None
+
+    ModelName       = 'ModelName'       # The Model name.
+    Info            = 'the info'        # A brief description of the fitting model.
+    Description     = 'Description'     # A simplified representation of the used equation(s).
+    MaTex           = r''               # MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
+    References      = 'References'      # A list of journal article references. E.g.: DOIs or title/authors/year/journal; web-pages.
+    Minimiser       = None              # The fitting minimiser model object (initiated)
     FullDescription = f'{Info} \n {Description}\nSee References: {References}'
+    PeakProperty    = sv._HEIGHT        # The peak property to fit. One of ['height', 'lineWidth', 'volume', 'ppmPosition']
+
+    def __init__(self, *args, **kwargs):
+
+        self.application = getApplication()
+        self.project = getProject()
+        self._applyScaleMinMax = False
+        self._applyStandardScaler = False
+        self._modelArgumentNames = []
+        self._rawDataHeaders = [] #strings of columnHeaders
+
+    @property
+    def rawDataHeaders(self):
+        """ The list of rawData Column headers to appear in output frames and tables."""
+        return self._rawDataHeaders
+
+    @property
+    def modelArgumentNames(self):
+        """ The list of parameters as str used in the minimiser fitting function or calculation models.
+          These names will be used in the models and will appear as column headers in the output result frames. """
+        if self.Minimiser:
+            return self.Minimiser.getParamNames(self.Minimiser)
+        return []
+
+    @property
+    def modelStatsNames(self):
+        """ The list of statistical names used in the minimiser fitting function .
+          These names will be used in the models and will appear as column headers in the output result frames. """
+        if self.Minimiser:
+            return self.Minimiser.getStatParamNames(self.Minimiser)
+        return []
 
     @abstractmethod
     def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
@@ -70,21 +97,84 @@ class FittingModelABC(ABC):
         """
         pass
 
+    def getRawData(self, inputData:TableFrame, dimensionSeparator='F') -> TableFrame:
+        """
+
+        :param inputData: TableFrame.
+        :param dimensionSeparator: String to separate DimensionColumns for ppmPosition or linewidth.
+        :return: TableFrame
+        Transform an inputData frame to a minimal Frame containing only the rawData and common assignment columns.
+        Sorted by CollectionPid and series values.
+        Note: this resulting table is NOT used as input for calculation or fitting models.
+        """
+        outputFrame = SeriesFrameBC()
+        self._rawDataHeaders = OrderedSet()
+        if self.PeakProperty in [sv._HEIGHT, sv._VOLUME]:
+            inputData = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
+        commonHeaders = sv.MERGINGHEADERS
+        grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
+        for collectionId, groupDf in grouppedByCollectionsId:
+            groupDf.sort_values([sv.SERIESSTEP], inplace=True)
+            seriesSteps = groupDf[sv.SERIESSTEP]
+            ## Build columns
+            for ix, row in groupDf.iterrows():
+                pid = row[sv.COLLECTIONPID]
+                for commonHeader in commonHeaders:
+                    outputFrame.loc[pid, commonHeader] = row[commonHeader]
+                for xValue in seriesSteps.values:
+                    if xValue == row[sv.SERIESSTEP]:
+                        valueHeader = f'{dimensionSeparator}{int(row[sv.DIMENSION])}_{xValue}'
+                        if self.PeakProperty in [sv._HEIGHT, sv._VOLUME]:
+                            valueHeader = f'{self.PeakProperty}_{xValue}'
+                        outputFrame.loc[pid, valueHeader] = row[self.PeakProperty]
+                        self._rawDataHeaders.add(valueHeader)
+        self._rawDataHeaders = list(self._rawDataHeaders)
+        outputFrame.columns = commonHeaders + self._rawDataHeaders
+        outputFrame.set_index(sv.COLLECTIONPID, drop=False, inplace=True)
+
+        return outputFrame
+
+
+    @staticmethod
+    def getFittingFunc(cls):
+        """Get the Fitting Function used by the Minimiser """
+        if cls.Minimiser is not None:
+            return cls.Minimiser.FITTING_FUNC
+
+    def scaleMinMax(self, data):
+        return lf._scaleMinMaxData(data)
+
+
     def __str__(self):
         return f'<{self.__class__.__name__}: {self.ModelName}>'
 
     __repr__ = __str__
 
-def _registerModels(cls, fittingModels):
+
+class CalculationModel(FittingModelABC):
     """
-    INTERNAL
-    Register the FittingModel class (not-initialised) in the respective Experiment Analysis BaseClass
-    :param cls: Experiment Analysis BaseClass e.g.: ChemicalShiftMappingAnalysisBC
-    :param fittingModels: list of FittingModels to add to the cls
-    :return: None
+    Calculation model for Series Analysis
     """
-    for model in fittingModels:
-        cls.registerFittingModel(model)
+
+    ModelName   = 'Calculation'     ## The Model name.
+    Info        = 'the info'        ## A brief description of the fitting model.
+    Description = 'Description'     ## A simplified representation of the used equation(s).
+    MaTex       = r''               ## MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
+    References  = 'References'      ## A list of journal article references that help to identify the employed calculation equations. E.g.: DOIs or title/authors/year/journal; web-pages.
+
+    @abstractmethod
+    def calculateValues(self, inputData: TableFrame) -> TableFrame:
+        """
+        Calculate the required values for an input SeriesTable.
+        This method must be overridden in subclass'.
+        Return one row for each collection pid. Index by collection pid
+        :param inputData: InputFrame
+        :return: outputFrame
+        """
+        raise RuntimeError('This method must be overridden in subclass')
+
+    def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
+        raise RuntimeError('This method cannot be used in this class. Use calculateValues instead ')
 
 
 class MinimiserModel(Model):
@@ -114,13 +204,32 @@ class MinimiserModel(Model):
         - `'propagate'` : do nothing
         - `'omit'` : drop missing data
 
-    usage example:
+    ----- ccpn internal ----
+
+     _defaultParams must be set.
+        It is a dict containing as key the fitting func argument to be optimised (excluding x)
+        and an initial default value. (Arbitrary at this stage or None. Initial values are calculated separately in the "guess" method).
+
+        Also, these arguments as a string must be exactly as they are defined in the FITTING_FUNC arguments!
+        Example fitFunc with args decay and amplitude:
+
+            def expDecay(x, decay, amplitude):...
+            defaultParams = {
+                            'decay'    : 0.3,
+                            'amplitude': 1
+                            }
+            (note x is not necessary to be defined here, it is part of the "independent_vars" set automatically)
+        This because there is a clever signature inspection that sets on-the-fly args as class attributes,
+        and they are used throughout the code.  <is an odd behaviour but too hard/dangerous to change!>
+        defaultParams are also used to autogenerate Gui definitions in tables and widget entries.
 
     """
-    FITTING_FUNC= None
-    MODELNAME   = 'Minimiser'
-    method      = 'leastsq'
-    label       = ''
+    FITTING_FUNC  = None
+    MODELNAME     = 'Minimiser'
+    method        = 'leastsq'
+    label         = ''
+    defaultParams = {} # N.B Very important. see docs above.
+
 
     def fit(self, data, params=None, weights=None, method='leastsq',
             iter_cb=None, scale_covar=True, verbose=False, fit_kws=None,
@@ -185,105 +294,110 @@ class MinimiserModel(Model):
         Take ``t`` to be the independent variable and data to be the curve
         we will fit. Use keyword arguments to set initial guesses:
 
-        >>> result = my_model.fit(data, tau=5, N=3, t=t)
-
-        Or, for more control, pass a Parameters object.
-
-        >>> result = my_model.fit(data, params, t=t)
-
-        Keyword arguments override Parameters.
-
-        >>> result = my_model.fit(data, params, tau=5, t=t)
-
         """
+
         if params is None:
             params = self.make_params(verbose=verbose)
         else:
             params = deepcopy(params)
+        with warnings.catch_warnings():
+            warnings.filterwarnings(action='ignore', category=RuntimeWarning)
+            # If any kwargs match parameter names, override params.
+            param_kwargs = set(kwargs.keys()) & set(self.param_names)
+            for name in param_kwargs:
+                p = kwargs[name]
+                if isinstance(p, Parameter):
+                    p.name = name  # allows N=Parameter(value=5) with implicit name
+                    params[name] = deepcopy(p)
+                else:
+                    params[name].set(value=p)
+                del kwargs[name]
 
-        # If any kwargs match parameter names, override params.
-        param_kwargs = set(kwargs.keys()) & set(self.param_names)
-        for name in param_kwargs:
-            p = kwargs[name]
-            if isinstance(p, Parameter):
-                p.name = name  # allows N=Parameter(value=5) with implicit name
-                params[name] = deepcopy(p)
-            else:
-                params[name].set(value=p)
-            del kwargs[name]
+            # All remaining kwargs should correspond to independent variables.
+            for name in kwargs:
+                if name not in self.independent_vars:
+                    getLogger.warn(f"The keyword argument {name} does not " +
+                                  "match any arguments of the model function. " +
+                                  "It will be ignored.", UserWarning)
 
-        # All remaining kwargs should correspond to independent variables.
-        for name in kwargs:
-            if name not in self.independent_vars:
-                getLogger.warn(f"The keyword argument {name} does not " +
-                              "match any arguments of the model function. " +
-                              "It will be ignored.", UserWarning)
+            # If any parameter is not initialized raise a more helpful error.
+            missing_param = any(p not in params.keys() for p in self.param_names)
+            blank_param = any((p.value is None and p.expr is None)
+                              for p in params.values())
+            if missing_param or blank_param:
+                msg = ('Assign each parameter an initial value by passing '
+                       'Parameters or keyword arguments to fit.\n')
+                missing = [p for p in self.param_names if p not in params.keys()]
+                blank = [name for name, p in params.items()
+                         if p.value is None and p.expr is None]
+                msg += f'Missing parameters: {str(missing)}\n'
+                msg += f'Non initialized parameters: {str(blank)}'
+                raise ValueError(msg)
 
-        # If any parameter is not initialized raise a more helpful error.
-        missing_param = any(p not in params.keys() for p in self.param_names)
-        blank_param = any((p.value is None and p.expr is None)
-                          for p in params.values())
-        if missing_param or blank_param:
-            msg = ('Assign each parameter an initial value by passing '
-                   'Parameters or keyword arguments to fit.\n')
-            missing = [p for p in self.param_names if p not in params.keys()]
-            blank = [name for name, p in params.items()
-                     if p.value is None and p.expr is None]
-            msg += f'Missing parameters: {str(missing)}\n'
-            msg += f'Non initialized parameters: {str(blank)}'
-            raise ValueError(msg)
+            # Handle null/missing values.
+            if nan_policy is not None:
+                self.nan_policy = nan_policy
 
-        # Handle null/missing values.
-        if nan_policy is not None:
-            self.nan_policy = nan_policy
+            mask = None
+            if self.nan_policy == 'omit':
+                mask = ~isnull(data)
+                if mask is not None:
+                    data = data[mask]
+                if weights is not None:
+                    weights = _align(weights, mask, data)
 
-        mask = None
-        if self.nan_policy == 'omit':
-            mask = ~isnull(data)
-            if mask is not None:
-                data = data[mask]
-            if weights is not None:
-                weights = _align(weights, mask, data)
+            # If independent_vars and data are alignable (pandas), align them,
+            # and apply the mask from above if there is one.
+            for var in self.independent_vars:
+                if not np.isscalar(kwargs[var]):
+                    kwargs[var] = _align(kwargs[var], mask, data)
 
-        # If independent_vars and data are alignable (pandas), align them,
-        # and apply the mask from above if there is one.
-        for var in self.independent_vars:
-            if not np.isscalar(kwargs[var]):
-                kwargs[var] = _align(kwargs[var], mask, data)
+            # Make sure `dtype` for data is always `float64` or `complex128`
+            if np.isrealobj(data):
+                data = np.asfarray(data)
+            elif np.iscomplexobj(data):
+                data = np.asarray(data, dtype='complex128')
 
-        # Make sure `dtype` for data is always `float64` or `complex128`
-        if np.isrealobj(data):
-            data = np.asfarray(data)
-        elif np.iscomplexobj(data):
-            data = np.asarray(data, dtype='complex128')
+            # Coerce `dtype` for independent variable(s) to `float64` or
+            # `complex128` when the variable has one of the following types: list,
+            # tuple, numpy.ndarray, or pandas.Series
+            for var in self.independent_vars:
+                var_data = kwargs[var]
+                if isinstance(var_data, (list, tuple, np.ndarray, Series)):
+                    if np.isrealobj(var_data):
+                        kwargs[var] = np.asfarray(var_data)
+                    elif np.iscomplexobj(var_data):
+                        kwargs[var] = np.asarray(var_data, dtype='complex128')
 
-        # Coerce `dtype` for independent variable(s) to `float64` or
-        # `complex128` when the variable has one of the following types: list,
-        # tuple, numpy.ndarray, or pandas.Series
-        for var in self.independent_vars:
-            var_data = kwargs[var]
-            if isinstance(var_data, (list, tuple, np.ndarray, Series)):
-                if np.isrealobj(var_data):
-                    kwargs[var] = np.asfarray(var_data)
-                elif np.iscomplexobj(var_data):
-                    kwargs[var] = np.asarray(var_data, dtype='complex128')
+            if fit_kws is None:
+                fit_kws = {}
 
-        if fit_kws is None:
-            fit_kws = {}
-
-        result = MinimiserResult(self, params, method=method, iter_cb=iter_cb,
-                             scale_covar=scale_covar, fcn_kws=kwargs,
-                             nan_policy=self.nan_policy, calc_covar=calc_covar,
-                             max_nfev=max_nfev, **fit_kws)
-        result.fit(data=data, weights=weights)
-        result.components = self.components
-        self.method = method
-        if result.redchi is not None:
-            result.r2 = lf.r2_func(redchi=result.redchi, y=data)
+            result = MinimiserResult(self, params, method=method, iter_cb=iter_cb,
+                                 scale_covar=scale_covar, fcn_kws=kwargs,
+                                 nan_policy=self.nan_policy, calc_covar=calc_covar,
+                                 max_nfev=max_nfev, **fit_kws)
+            result.fit(data=data, weights=weights)
+            result.components = self.components
+            self.method = method
+            if result.redchi is not None:
+                result.r2 = lf.r2_func(redchi=result.redchi, y=data)
         return result
 
     def guess(self, data, x, **kws):
         pass
+
+    @staticmethod
+    def getParamNames(cls):
+        """ get the list of parameters as str used in the fitting function  """
+        return list(cls.defaultParams.keys())
+
+    def getStatParamNames(self):
+        """
+        Get the common statistical ParamNames .
+        :return: list
+        """
+        stats =  [sv.R2, sv.CHISQR, sv.REDCHI, sv.AIC, sv.BIC]
+        return stats
 
 
 class MinimiserResult(ModelResult):
@@ -295,7 +409,7 @@ class MinimiserResult(ModelResult):
 
        """
 
-    def __init__(self, model, params, data=None, weights=None,
+    def __init__(self, model, params, data=None, weights=None, scaleMinMax=False,
                  method=sv.LEASTSQ, fcn_args=None, fcn_kws=None,
                  iter_cb=None, scale_covar=True, nan_policy=sv.OMIT_MODE,
                  calc_covar=True, max_nfev=None, **fit_kws):
@@ -310,6 +424,8 @@ class MinimiserResult(ModelResult):
             Data to be modeled.
         weights : array_like, optional
             Weights to multiply ``(data-model)`` for fit residual.
+        scaleMinMax: bool, True to scale data 0-1
+
         method : str, optional
             Name of minimization method to use (default is `'leastsq'`).
         fcn_args : sequence, optional
@@ -334,6 +450,7 @@ class MinimiserResult(ModelResult):
 
         """
         self.r2 = None
+        self.scaleMinMax = scaleMinMax
 
         super().__init__( model, params, data=data, weights=weights,
                  method=method, fcn_args=fcn_args, fcn_kws=fcn_kws,
@@ -348,10 +465,10 @@ class MinimiserResult(ModelResult):
         dd = {}
         mappingNames = {sv.MINIMISER_METHOD :'method',
                        sv.R2                :'r2',
-                       sv.CHISQUARE         :'chisqr',
-                       sv.REDUCEDCHISQUARE  :'redchi',
-                       sv.AKAIKE            :'aic',
-                       sv.BAYESIAN          :'bic',
+                       sv.CHISQR         : 'chisqr',
+                       sv.REDCHI  : 'redchi',
+                       sv.AIC            : 'aic',
+                       sv.BIC          : 'bic',
                        }
         for nn, vv in mappingNames.items():
             dd[nn] = getattr(self, vv, None)
@@ -378,9 +495,9 @@ class MinimiserResult(ModelResult):
         """
         outputDict = {}
         for key, value in self.getParametersResult().items():
-            outputDict[key] = _formatValue(value)
+            outputDict[key] = value
         for key, value in self.getStatisticalResult().items():
-            outputDict[key] = _formatValue(value)
+            outputDict[key] = value
         return outputDict
 
     def getAllResultsAsDataFrame(self):
@@ -388,7 +505,7 @@ class MinimiserResult(ModelResult):
         :return: A dataFrame with all minimiser results
         """
         outputDict = self.getAllResultsAsDict()
-        df = pd.DataFrame(outputDict)
+        df = pd.DataFrame(outputDict, index=[0])
         return df
 
     def plot(self, datafmt='o', fitfmt='-', initfmt='--', showPlot=True, xlabel=None,
@@ -522,11 +639,8 @@ class MinimiserResult(ModelResult):
         ax_table.axis('tight')
 
         df = self.getAllResultsAsDataFrame()
-        columns = df.columns
-        columns = list(map(lambda x: x.replace(sv.CHISQUARE, sv.UNICODE_CHISQUARE), columns))
-        columns = list(map(lambda x: x.replace(sv.REDUCEDCHISQUARE, sv.UNICODE_RED_CHISQUARE), columns))
-        columns = list(map(lambda x: x.replace(sv.R2, sv.UNICODE_R2), columns))
-        table = ax_table.table(cellText=df.values, colLabels=columns,  loc='center')
+
+        table = ax_table.table(cellText=df.values, colLabels=df.columns,  loc='center')
         table.auto_set_font_size(False) #or plots very tiny
         table.set_fontsize(5)
         fig.tight_layout()

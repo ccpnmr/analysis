@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-03 19:09:32 +0000 (Thu, March 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:12 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -55,7 +55,7 @@ from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.VLine import VLine
 from ccpn.ui.gui.lib.Validators import LineEditValidator
-from ccpn.ui.gui.lib._SimplePandasTable import _newSimplePandasTable, _updateSimplePandasTable
+from ccpn.ui.gui.widgets.table.Table import Table
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS, TOOLTIP_BACKGROUND
 
 from ccpn.framework.lib.ccpnNef import CcpnNefIo
@@ -608,36 +608,36 @@ class NefDictFrame(Frame):
                     for rowIndex in chainErrors:
                         setRowBackgroundColour(rowIndex, _fillColour)
 
-    def table_peak_clusters(self, saveFrame, item, listName=None):
-        listItemName = 'ccpn_peak_cluster'
-        listName = 'ccpn_peak_cluster'
-        primaryCode = 'ccpn_peak_cluster'
-        itemName = item.data(0, 0)
-        _content = getattr(saveFrame, '_content', None)
-        _errors = getattr(saveFrame, '_rowErrors', {})
-
-        numPrimary = _content.get(primaryCode)
-        if numPrimary and len(numPrimary) <= 1:
-            return
-
-        if _errors:
-            _fillColour = INVALIDTABLEFILLCHECKCOLOUR if item.checkState(0) else INVALIDTABLEFILLNOCHECKCOLOUR
-
-            # colour rows by extra colour
-            chainErrors = _errors.get('_'.join([listItemName, itemName]))
-            if chainErrors:
-                table = self._nefTables.get(listItemName)
-
-                with self._tableColouring(table) as setRowBackgroundColour:
-                    for rowIndex in chainErrors:
-                        setRowBackgroundColour(rowIndex, _fillColour)
-            chainErrors = _errors.get('_'.join([listName, 'peaks', itemName]))
-            if chainErrors:
-                table = self._nefTables.get('_'.join([listName, 'peaks']))
-
-                with self._tableColouring(table) as setRowBackgroundColour:
-                    for rowIndex in chainErrors:
-                        setRowBackgroundColour(rowIndex, _fillColour)
+    # def table_peak_clusters(self, saveFrame, item, listName=None):
+    #     listItemName = 'ccpn_peak_cluster'
+    #     listName = 'ccpn_peak_cluster'
+    #     primaryCode = 'ccpn_peak_cluster'
+    #     itemName = item.data(0, 0)
+    #     _content = getattr(saveFrame, '_content', None)
+    #     _errors = getattr(saveFrame, '_rowErrors', {})
+    #
+    #     numPrimary = _content.get(primaryCode)
+    #     if numPrimary and len(numPrimary) <= 1:
+    #         return
+    #
+    #     if _errors:
+    #         _fillColour = INVALIDTABLEFILLCHECKCOLOUR if item.checkState(0) else INVALIDTABLEFILLNOCHECKCOLOUR
+    #
+    #         # colour rows by extra colour
+    #         chainErrors = _errors.get('_'.join([listItemName, itemName]))
+    #         if chainErrors:
+    #             table = self._nefTables.get(listItemName)
+    #
+    #             with self._tableColouring(table) as setRowBackgroundColour:
+    #                 for rowIndex in chainErrors:
+    #                     setRowBackgroundColour(rowIndex, _fillColour)
+    #         chainErrors = _errors.get('_'.join([listName, 'peaks', itemName]))
+    #         if chainErrors:
+    #             table = self._nefTables.get('_'.join([listName, 'peaks']))
+    #
+    #             with self._tableColouring(table) as setRowBackgroundColour:
+    #                 for rowIndex in chainErrors:
+    #                     setRowBackgroundColour(rowIndex, _fillColour)
 
     def table_ccpn_notes(self, saveFrame, item):
         itemName = item.data(0, 0)
@@ -972,6 +972,7 @@ class NefDictFrame(Frame):
                 palette = saveFrameData.palette()
                 palette.setColor(QtGui.QPalette.Base, _fillColour)
                 saveFrameData.setPalette(palette)
+                # saveFrameData.setToolTip('HELP!')  # can set a toolTip message here for bad names
             except Exception as es:
                 getLogger().debug(f'error setting colours {es}')
 
@@ -1110,6 +1111,7 @@ class NefDictFrame(Frame):
         values = [(itm, itm.data(1, 0)) for itm in newItms if itm.data(1, 0)]
 
         return values
+
     def _getAllChildren(self):
         # grab the tree state
         items = []
@@ -1732,7 +1734,7 @@ class NefDictFrame(Frame):
                           'complexes'            : partial(handleTreeViewParentGeneral, mappingCode='ccpn_complex'),
                           'spectrumGroups'       : partial(handleTreeViewParentGeneral, mappingCode='ccpn_spectrum_group'),
                           'notes'                : partial(handleTreeViewParentGeneral, mappingCode='ccpn_notes'),
-                          'peakClusters'         : partial(handleTreeViewParentGeneral, mappingCode='ccpn_peak_cluster_list'),
+                          # 'peakClusters'         : partial(handleTreeViewParentGeneral, mappingCode='ccpn_peak_cluster_list'),
                           'restraintLinks'       : None,
                           'violationTables'      : partial(handleTreeViewParentGeneralStructureData, mappingCode='ccpn_distance_restraint_violation_list'),
                           'dataTables'           : partial(handleTreeViewParentGeneral, mappingCode='ccpn_datatable'),
@@ -1825,11 +1827,11 @@ class NefDictFrame(Frame):
                                                       errorCode='ccpn_multiplet_list_serial',
                                                       tableColourFunc=partial(table_lists, listName='ccpn_multiplet'))
 
-    handleSaveFrames['ccpn_peak_cluster_list'] = partial(handleTreeViewSelectionGeneralNoCollection,
-                                                         prefix='ccpn_peak_cluster_',
-                                                         mappingCode='ccpn_peak_cluster',
-                                                         errorCode='ccpn_peak_cluster_serial',
-                                                         tableColourFunc=table_peak_clusters)
+    # handleSaveFrames['ccpn_peak_cluster_list'] = partial(handleTreeViewSelectionGeneralNoCollection,
+    #                                                      prefix='ccpn_peak_cluster_',
+    #                                                      mappingCode='ccpn_peak_cluster',
+    #                                                      errorCode='ccpn_peak_cluster_serial',
+    #                                                      tableColourFunc=table_peak_clusters)
 
     handleSaveFrames['nmr_chain'] = partial(handleTreeViewSelectionAssignment,
                                             prefix='nmr_chain_',
@@ -1984,11 +1986,11 @@ class NefDictFrame(Frame):
                                                        errorCode='ccpn_multiplet_list_serial',
                                                        tableColourFunc=partial(table_lists, listName='ccpn_multiplet'))
 
-    _setBadSaveFrames['ccpn_peak_cluster_list'] = partial(_set_bad_saveframe,
-                                                          prefix='ccpn_peak_cluster_',
-                                                          mappingCode='ccpn_peak_cluster',
-                                                          errorCode='ccpn_peak_cluster_serial',
-                                                          tableColourFunc=table_peak_clusters)
+    # _setBadSaveFrames['ccpn_peak_cluster_list'] = partial(_set_bad_saveframe,
+    #                                                       prefix='ccpn_peak_cluster_',
+    #                                                       mappingCode='ccpn_peak_cluster',
+    #                                                       errorCode='ccpn_peak_cluster_serial',
+    #                                                       tableColourFunc=table_peak_clusters)
 
     _setBadSaveFrames['nmr_chain'] = partial(_set_bad_saveframe,
                                              prefix='nmr_chain_',
@@ -2131,10 +2133,10 @@ class NefDictFrame(Frame):
                                                      checkID='_importMultiplets',
                                                      )
 
-    applyCheckBoxes['ccpn_peak_cluster_list'] = partial(apply_checkBox_item,
-                                                        prefix='ccpn_peak_cluster_',
-                                                        mappingCode='ccpn_peak_cluster',
-                                                        )
+    # applyCheckBoxes['ccpn_peak_cluster_list'] = partial(apply_checkBox_item,
+    #                                                     prefix='ccpn_peak_cluster_',
+    #                                                     mappingCode='ccpn_peak_cluster',
+    #                                                     )
 
     applyCheckBoxes['nmr_chain'] = partial(apply_checkBox_item,
                                            prefix='nmr_chain_',
@@ -2420,7 +2422,12 @@ class NefDictFrame(Frame):
         """
         frame = MoreLessFrame(self, name=_name, showMore=showMore, grid=(0, 0))
 
-        table = _newSimplePandasTable(frame.contentsFrame, pd.DataFrame(_data))
+        # table = _newSimplePandasTable(frame.contentsFrame, pd.DataFrame(_data))
+        table = Table(frame.contentsFrame, pd.DataFrame(_data),
+                      selectionCallbackEnabled=False, actionCallbackEnabled=False,
+                      enableDelete=False)
+        table.setEditable(False)
+
         frame.contentsFrame.getLayout().addWidget(table, 0, 0)
         frame.contentsFrame.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         frame.contentsFrame.setMinimumSize(100, 100)
@@ -2444,7 +2451,8 @@ class NefDictFrame(Frame):
         if self._collectionsTable and self._collections:
             _df = pd.DataFrame({COLLECTION: self._collections.keys(),
                                 'Items'   : ['\n'.join(vv for vv in val) for val in self._collections.values()]})
-            _updateSimplePandasTable(self._collectionsTable, _df, _resize=True)
+            # _updateSimplePandasTable(self._collectionsTable, _df, _resize=True)
+            self._collectionsTable.updateDf(_df, resize=True)
 
             _model = self._collectionsTable.model()
             # colour the structureData if exist in the project
@@ -2453,7 +2461,8 @@ class NefDictFrame(Frame):
                     _model.setForeground(row, 0, INVALIDTEXTROWNOCHECKCOLOUR)
         else:
             _df = pd.DataFrame({COLLECTION: [], 'Items': []})
-            _updateSimplePandasTable(self._collectionsTable, _df)
+            # _updateSimplePandasTable(self._collectionsTable, _df)
+            self._collectionsTable.updateDf(_df)
 
         # rebuild the list of structureData
         _itms = self._getAllChildren()
@@ -2479,7 +2488,8 @@ class NefDictFrame(Frame):
         if self._structureDataTable and self._structureData:
             _df = pd.DataFrame({STRUCTUREDATA: self._structureData.keys(),
                                 'Items'      : ['\n'.join(vv for vv in val) for val in self._structureData.values()]})
-            _updateSimplePandasTable(self._structureDataTable, _df, _resize=True)
+            # _updateSimplePandasTable(self._structureDataTable, _df, _resize=True)
+            self._structureDataTable.updateDf(_df, resize=True)
 
             _model = self._structureDataTable.model()
             # colour the structureData if exist in the project
@@ -2488,7 +2498,8 @@ class NefDictFrame(Frame):
                     _model.setForeground(row, 0, INVALIDTEXTROWNOCHECKCOLOUR)
         else:
             _df = pd.DataFrame({STRUCTUREDATA: [], 'Items': []})
-            _updateSimplePandasTable(self._structureDataTable, _df)
+            # _updateSimplePandasTable(self._structureDataTable, _df)
+            self._structureDataTable.updateDf(_df)
 
     def _fillPopup(self, nefObject=None):
         """Initialise the project setting - only required for testing
@@ -3325,7 +3336,7 @@ def main():
     # from ccpn.core.PeakList import PeakList
     # from ccpn.core.IntegralList import IntegralList
     # from ccpn.core.MultipletList import MultipletList
-    # from ccpn.core.PeakCluster import PeakCluster
+    # from ccpn.core._PeakCluster import _PeakCluster
     # from ccpn.core.Sample import Sample
     # from ccpn.core.Substance import Substance
     # from ccpn.core.NmrChain import NmrChain
@@ -3349,7 +3360,7 @@ def main():
     #     Complex._pluralLinkName,
     #     SpectrumGroup._pluralLinkName,
     #     Note._pluralLinkName,
-    #     PeakCluster._pluralLinkName,
+    #     _PeakCluster._pluralLinkName,
     #     ]
     # # build a complete list of items to grab from the project
     # pidList = []

@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-28 16:08:26 +0100 (Thu, July 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:09 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from ccpn.core.Project import Project
 
 from ccpn.framework.Application import getApplication
 from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders, checkPathForDataLoader
+from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders, _checkPathForDataLoader
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib.ContextManagers import \
@@ -303,19 +303,40 @@ class Gui(Ui):
         from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
         from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
-        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
+        from ccpn.framework.lib.DataLoaders.DataLoaderABC import _getPotentialDataLoaders
 
         if pathFilter is None:
             pathFilter =  tuple(getDataLoaders().keys())
-        dataLoader = checkPathForDataLoader(path, pathFilter=pathFilter)
+
+        _loaders = _checkPathForDataLoader(path=path, pathFilter=pathFilter)
+        if len(_loaders) > 0 and _loaders[-1].isValid:
+            # found a valid one; use that
+            dataLoader = _loaders[-1]
+
+        # log errors
+        elif len(_loaders) == 0:
+            dataLoader = None
+            txt = f'No valid loader found for {path}'
+
+        elif len(_loaders) == 1 and not _loaders[0].isValid:
+            dataLoader = None
+            txt = f'No valid loader: {_loaders[0].errorString}'
+
+        else:
+            dataLoader = None
+            txt = f'No valid loader found for {path}; tried {[dl.dataFormat for dl in _loaders]}'
 
         if dataLoader is None:
-            txt = '_getDataLoader: Loading "%s" unsuccessful; unrecognised type, should be one of %r' % \
-                  (path, pathFilter)
-            getLogger().debug(txt)
+            getLogger().warning(txt)
             return (None, False, False)
+
+        # if (dataLoader :=  checkPathForDataLoader(path, pathFilter=pathFilter)) is None:
+        #     dataFormats = [dl.dataFormat for dl in _getPotentialDataLoaders(path)]
+        #     txt = f'Loading "{path}" unsuccessful; tried all of {dataFormats}, but failed'
+        #     getLogger().warning(txt)
+        #     return (None, False, False)
 
         createNewProject = dataLoader.createNewProject
         ignore = False
@@ -379,7 +400,7 @@ class Gui(Ui):
         elif dataLoader.dataFormat == SparkyDataLoader.dataFormat:
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
 
-        elif dataLoader.dataFormat == SpectrumDataLoader.dataFormat and dataLoader.existsInProject():
+        elif dataLoader.isSpectrumLoader and dataLoader.existsInProject():
             ok = MessageDialog.showYesNoWarning('Loading Spectrum',
                                                 f'"{dataLoader.path}"\n' 
                                                 f'already exists in the project\n'
@@ -391,14 +412,17 @@ class Gui(Ui):
 
         elif dataLoader.dataFormat == StarDataLoader.dataFormat and dataLoader:
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
-            if dataLoader and not createNewProject and not ignore:
-                dataBlock = dataLoader.dataBlock  # this will also read and parse the file
-                popup = StarImporterPopup(project=self.project,
-                                          bmrbFilePath=dataLoader.path,
-                                          directory=dataLoader.path.parent,
-                                          dataBlock=dataBlock,
-                                          size=(700,1000))
+            if dataLoader and not ignore:
+                title = 'New project from NmrStar' if createNewProject else \
+                        'Import from NmrStar'
+                dataLoader.getDataBlock()  # this will read and parse the file
+                popup = StarImporterPopup(dataLoader=dataLoader,
+                                          parent=self.mainWindow,
+                                          size=(700,1000),
+                                          title=title
+                                          )
                 popup.exec_()
+                ignore = (popup.result == popup.CANCEL_PRESSED)
 
         elif dataLoader.dataFormat == DirectoryDataLoader.dataFormat and len(dataLoader) > MAXITEMLOGGING:
             ok = MessageDialog.showYesNoWarning('Directory "%s"\n' %dataLoader.path,
@@ -430,9 +454,12 @@ class Gui(Ui):
             if not _ok:
                 return
 
+        if (_name := Project._checkName(name, correctName=True)) != name:
+            MessageDialog.showInfo('New Project', f'Project name changed from "{name}" to "{_name}"\nSee console/log for details', parent=self)
+
         with catchExceptions(errorStringTemplate='Error creating new project: %s'):
             self.mainWindow.moduleArea._closeAll()
-            newProject = self.application._newProject(name=name)
+            newProject = self.application._newProject(name=_name)
             if newProject is None:
                 raise RuntimeError('Unable to create new project')
             newProject._mainWindow.show()
@@ -527,6 +554,20 @@ class Gui(Ui):
 
         return None
 
+    def _closeProject(self):
+        """Do all gui-related stuff when closing a project
+        CCPNINTERNAL: called from Framework._closeProject()
+        """
+        if self.mainWindow:
+            # ui/gui cleanup
+            self.mainWindow.deleteAllNotifiers()
+            self.mainWindow._closeMainWindowModules()
+            self.mainWindow._closeExtraWindowModules()
+            self.mainWindow.sideBar.clearSideBar()
+            self.mainWindow.sideBar.deleteLater()
+            self.mainWindow.deleteLater()
+            self.mainWindow = None
+
     def saveProjectAs(self, newPath=None, overwrite:bool=False) -> bool:
         """Opens save Project to newPath.
         Optionally open file dialog.
@@ -540,6 +581,8 @@ class Gui(Ui):
                 return False
 
         newPath = aPath(newPath).assureSuffix(CCPN_EXTENSION)
+        title = 'Project SaveAs'
+
         if (  not overwrite and
               newPath.exists() and
              (newPath.is_file() or (newPath.is_dir() and len(newPath.listdir()) > 0))
@@ -547,13 +590,18 @@ class Gui(Ui):
             # should not really need to check the second and third condition above, only
             # the Qt dialog stupidly insists a directory exists before you can select it
             # so if it exists but is empty then don't bother asking the question
-            title = 'Project SaveAs'
             msg = 'Path "%s" already exists; overwrite?' % newPath
             if not MessageDialog.showYesNo(title, msg):
                 return False
 
-        with logCommandManager('application.', 'saveProjectAs', newPath, overwrite=overwrite):
-            with catchExceptions(errorStringTemplate='Error saving project: %s'):
+        # check the project name derived from path
+        newName = newPath.basename
+        if (_name := self.project._checkName(newName, correctName=True)) != newName:
+            newPath = newPath.parent / _name + CCPN_EXTENSION
+            MessageDialog.showInfo(title, f'Project name changed from "{newName}" to "{_name}"\nSee console/log for details', parent=self)
+
+        with catchExceptions(errorStringTemplate='Error saving project: %s'):
+            with logCommandManager('application.', 'saveProjectAs', newPath, overwrite=overwrite):
                 with MessageDialog.progressManager(self.mainWindow, f'Saving project {newPath} ... '):
                     if not self.application._saveProject(newPath=newPath,
                                                          createFallback=False,
@@ -563,16 +611,20 @@ class Gui(Ui):
                         MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
                         return False
 
-        self.mainWindow._updateWindowTitle()
-        self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
-        self.mainWindow._fillRecentProjectsMenu() # Update the menu
+            self.mainWindow._updateWindowTitle()
+            self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
+            self.mainWindow._fillRecentProjectsMenu() # Update the menu
 
-        successMessage = 'Project successfully saved to "%s"' % self.project.path
-        MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
-        self.mainWindow.statusBar().showMessage(successMessage)
-        getLogger().info(successMessage)
+            successMessage = 'Project successfully saved to "%s"' % self.project.path
+            MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
+            self.mainWindow.statusBar().showMessage(successMessage)
+            getLogger().info(successMessage)
 
-        return True
+            return True
+
+        # PyCharm thinks the next statement is unreachable; not true as the with catchExceptions does yield
+        # and finish
+        return False
 
     @logCommand('application.')
     def saveProject(self) -> bool:
@@ -597,10 +649,18 @@ class Gui(Ui):
         and suspending sidebar.
         :return a list of loaded opjects
         """
+        from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
+        from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+
         result = []
         errorStringTemplate = 'Loading "%s" failed:' % dataLoader.path + '\n%s'
         with catchExceptions(errorStringTemplate=errorStringTemplate):
-            result = dataLoader.load()
+            # For data loads that are possibly time consuming, use progressManager
+            if isinstance(dataLoader, (StarDataLoader, NefDataLoader)):
+                with MessageDialog.progressManager(self.mainWindow, f'Importing data ... '):
+                    result = dataLoader.load()
+            else:
+                result = dataLoader.load()
         return result
 
     # @logCommand('application.') # eventually decorated by  _loadData()
@@ -620,17 +680,41 @@ class Gui(Ui):
 
         dataLoaders = []
         for path in paths:
+
+            _path = aPath(path)
+            if not _path.exists():
+                txt = f'"{path}" does not exist'
+                getLogger().warning(txt)
+                MessageDialog.showError('Load Data', txt, parent=self)
+                if len(paths) == 1:
+                    return []
+                else:
+                    continue
+
             dataLoader, createNewProject, ignore = self._getDataLoader(path, pathFilter=pathFilter)
-            if ignore or dataLoader is None:
+            if ignore:
                 continue
+
             if dataLoader is None:
-                getLogger().warning('Unable to load "%s"' % path)
-                continue
+                txt = f'Unable to load "{path}"'
+                getLogger().warning(txt)
+                MessageDialog.showError('Load Data', txt, parent=self)
+                if len(paths) == 1:
+                    return []
+                else:
+                    continue
+
             dataLoaders.append(dataLoader)
 
         # load the project using the dataLoaders;
         # We'll ask framework who will pass it back as ui._loadData calls
-        return self.application._loadData(dataLoaders)
+        objs = self.application._loadData(dataLoaders)
+        if len(objs) == 0:
+            txt = f'No objects were loaded from {paths}'
+            getLogger().warning(txt)
+            MessageDialog.showError('Load Data', txt, parent=self)
+
+        return objs
 
     def loadSpectra(self, *paths) -> list:
         """Load all the spectra found in paths.
@@ -639,7 +723,7 @@ class Gui(Ui):
         :param paths: list of paths
         :return a list of Spectra instances
         """
-        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
+        from ccpn.framework.lib.DataLoaders.DataLoaderABC import getSpectrumLoaders, checkPathForDataLoader
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
         if len(paths) == 0:
@@ -652,6 +736,8 @@ class Gui(Ui):
         if not paths:
             return []
 
+        pathFilter = list(getSpectrumLoaders().keys())
+
         spectrumLoaders = []
         count = 0
         # Recursively search all paths
@@ -659,11 +745,11 @@ class Gui(Ui):
             _path = aPath(path)
             if _path.is_dir():
                 dirLoader = DirectoryDataLoader(path, recursive=False,
-                                                pathFilter=(SpectrumDataLoader.dataFormat,))
+                                                pathFilter=pathFilter)
                 spectrumLoaders.append(dirLoader)
                 count += len(dirLoader)
 
-            elif (sLoader := SpectrumDataLoader.checkForValidFormat(path)) is not None:
+            elif (sLoader := checkPathForDataLoader(path, pathFilter=pathFilter)) is not None:
                 spectrumLoaders.append(sLoader)
                 count += 1
 

@@ -9,12 +9,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:10 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -282,15 +282,25 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
     # Widget callbacks
     #=========================================================================================
 
-    def actionCallback(self, data):
+    def actionCallback(self, selection, lastItem):
         """Notifier DoubleClick action on item in table
         If current strip contains the double-clicked multiplet will navigateToPositionInStrip
         """
         from ccpn.core.PeakList import PeakList
         from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
 
-        # TODO hack until we have multiplet views
-        multiplet = self.current.multiplet
+        try:
+            if not (objs := list(lastItem[self._OBJECT])):
+                return
+        except Exception as es:
+            getLogger().debug2(f'{self.__class__.__name__}.actionCallback: No selection\n{es}')
+            return
+
+        if isinstance(objs, (tuple, list)):
+            multiplet = objs[0]
+        else:
+            multiplet = objs
+
         if multiplet:
             if len(multiplet.peaks) > 0:
                 peak = multiplet.peaks[-1]
@@ -310,10 +320,10 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
         else:
             logger.warning('Impossible to navigate to peak position. Set a current strip first')
 
-    def selectionCallback(self, data):
+    def selectionCallback(self, selected, deselected, selection, lastItem):
         """set as current the selected peaks on the table
         """
-        super().selectionCallback(data)
+        super().selectionCallback(selected, deselected, selection, lastItem)
 
         # update the multiplet-peak table
         self._updateMultipletPeaksOnTable()
@@ -352,15 +362,15 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
     # Table context menu
     #=========================================================================================
 
-    def _setContextMenu(self, enableExport=True, enableDelete=True):
+    def _setContextMenu(self):
         """Subclass guiTable to add new items to context menu
         """
-        super()._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
+        super()._setContextMenu()
 
-        # add edit muliplet to the menu
-        self.tableMenu.insertSeparator(self.tableMenu.actions()[0])
-        a = self.tableMenu.addAction('Edit Multiplet...', self._editMultiplets)
-        self.tableMenu.insertAction(self.tableMenu.actions()[0], a)
+        # add edit multiplet to the menu
+        self._tableMenu.insertSeparator(self._tableMenu.actions()[0])
+        a = self._tableMenu.addAction('Edit Multiplet...', self._editMultiplets)
+        self._tableMenu.insertAction(self._tableMenu.actions()[0], a)
 
     def _editMultiplets(self):
         """Raise the edit multiplet popup

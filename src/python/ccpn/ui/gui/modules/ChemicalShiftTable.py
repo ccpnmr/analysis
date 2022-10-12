@@ -12,12 +12,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-28 15:37:44 +0100 (Wed, September 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:10 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -45,7 +45,6 @@ from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_PID, \
     CS_TABLECOLUMNS, ChemicalShiftState
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT
-from ccpn.core.lib.CallBack import CallBack
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
@@ -57,13 +56,24 @@ from ccpn.ui.gui.widgets.MessageDialog import showYesNo, showWarning
 from ccpn.ui.gui.widgets.SettingsWidgets import ALL
 from ccpn.ui.gui.widgets.Column import COLUMN_COLDEFS, COLUMN_SETEDITVALUE, COLUMN_FORMAT
 from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
-from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableViewProjectSpecific, _updateSimplePandasTable
+from ccpn.ui.gui.widgets.table._ProjectTable import _ProjectTableABC
 from ccpn.util.Logging import getLogger
 
 
 logger = getLogger()
 
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
+
+#=========================================================================================
+# Chemical Shift Table Options
+#=========================================================================================
+
+_NAVIGATE_CST = 'Navigate to:'
+_MERGE_CST = 'Merge NmrAtoms'
+_EDIT_CST = 'Edit NmrAtom'
+_REMOVE_CST = 'Remove assignments'
+_REMOVEDEL_CST = 'Remove assignments and Delete'
+_INTO_CSL = 'into'
 
 
 #=========================================================================================
@@ -205,7 +215,7 @@ OBJECT_PARENT = 1
 MODULEIDS = {}
 
 
-class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
+class _NewChemicalShiftTable(_ProjectTableABC):
     """New chemicalShiftTable based on faster QTableView
     Actually more like the original table but with pandas dataFrame
     """
@@ -278,7 +288,7 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
     def __init__(self, parent=None, mainWindow=None, moduleParent=None,
                  actionCallback=None, selectionCallback=None,
                  chemicalShiftList=None, hiddenColumns=None,
-                 enableExport=True, enableDelete=True, enableSearch=False,
+                 enableExport=True, enableDelete=True, enableSearch=False, enableCopyCell=False,
                  **kwds):
         """Initialise the widgets for the module.
         """
@@ -306,7 +316,8 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
     # Widget callbacks
     #=========================================================================================
 
-    def _getValidChemicalShift4Callback(self, objs):
+    @staticmethod
+    def _getValidChemicalShift4Callback(objs):
         if not objs or not all(objs):
             return
         if isinstance(objs, (tuple, list)):
@@ -319,22 +330,35 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
 
         return cShift
 
-    def actionCallback(self, data):
+    def actionCallback(self, selection, lastItem):
         """Notifier DoubleClick action on item in table. Mark a chemicalShift based on attached nmrAtom
         """
         from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import markNmrAtoms
 
-        cShift = self._getValidChemicalShift4Callback(data.get(CallBack.OBJECT, []))
+        try:
+            if not (objs := list(lastItem[self._OBJECT])):
+                return
+        except Exception as es:
+            getLogger().debug2(f'{self.__class__.__name__}.actionCallback: No selection\n{es}')
+            return
+
+        cShift = self._getValidChemicalShift4Callback(objs)
         if len(self.mainWindow.marks):
             if self.moduleParent.autoClearMarksWidget.checkBox.isChecked():
                 self.mainWindow.clearMarks()
         if cShift and cShift.nmrAtom:
             markNmrAtoms(self.mainWindow, [cShift.nmrAtom])
 
-    def selectionCallback(self, data):
+    def selectionCallback(self, selected, deselected, selection, lastItem):
         """Notifier Callback for selecting rows in the table
         """
-        objs = data[CallBack.OBJECT]
+        try:
+            if not (objs := list(selection[self._OBJECT])):
+                return
+        except Exception as es:
+            getLogger().debug2(f'{self.__class__.__name__}.selectionCallback: No selection\n{es}')
+            return
+
         self.current.chemicalShifts = objs or []
 
         if objs:
@@ -379,7 +403,8 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
 
         return list(newRow)
 
-    def _derivedFromObject(self, obj):
+    @staticmethod
+    def _derivedFromObject(obj):
         """Get a tuple of derived values from obj
         Not very generic yet - column class now seems redundant
         """
@@ -470,23 +495,6 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
                                     )
 
         return _dfObject
-
-    def refreshTable(self):
-        # subclass to refresh the groups
-        # _updateSimplePandasTable(self, self._df)
-        # # self.updateTableExpanders()
-
-        # easier to re-populate from scratch
-        self.populateTable(selectedObjects=self.current.chemicalShifts)
-
-    def setDataFromSearchWidget(self, dataFrame):
-        """Set the data for the table from the search widget.
-        """
-        # update to the new sub-table
-        _updateSimplePandasTable(self, dataFrame)
-        self._df = dataFrame
-        # self._updateGroups(dataFrame)
-        # self.updateTableExpanders()
 
     def _updateTableCallback(self, data):
         """Respond to table notifier.
@@ -602,12 +610,6 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         objs = data['value']
         self._selectOnTableCurrent(objs)
 
-    def _selectionChangedCallback(self, selected, deselected):
-        """Handle item selection as changed in table - call user callback
-        Includes checking for clicking below last row
-        """
-        self._changeTableSelection(None)
-
     def _selectOnTableCurrent(self, objs):
         """Highlight the list of objects on the table
         :param objs:
@@ -629,32 +631,35 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
     # Table context menu
     #=========================================================================================
 
-    def _setContextMenu(self, enableExport=True, enableDelete=True):
-        """Subclass guiTable to insert new merge items to top of context menu
+    def addTableMenuOptions(self, menu):
+        """Add options to the right-mouse menu
         """
-        super()._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
+        super().addTableMenuOptions(menu)
 
-        # add extra items to the menu
-        _actions = self.tableMenu.actions()
-        if _actions:
+        self._mergeMenuAction = menu.addAction(_MERGE_CST, self._mergeNmrAtoms)
+        self._editMenuAction = menu.addAction(_EDIT_CST, self._editNmrAtom)
+        self._removeAssignmentsMenuAction = menu.addAction(_REMOVE_CST, partial(self._removeAssignments, delete=False))
+        self._removeAssignmentsDeleteMenuAction = menu.addAction(_REMOVEDEL_CST, partial(self._removeAssignments, delete=True))
+
+        if (_actions := menu.actions()):
             _topMenuItem = _actions[0]
-            _topSeparator = self.tableMenu.insertSeparator(_topMenuItem)
-            self._navigateMenu = self.tableMenu.addMenu('Navigate to:')
-            self._mergeMenuAction = self.tableMenu.addAction('Merge NmrAtoms', self._mergeNmrAtoms)
-            self._editMenuAction = self.tableMenu.addAction('Edit NmrAtom', self._editNmrAtom)
-            self._removeAssignmentsMenuAction = self.tableMenu.addAction('Remove assignments', partial(self._removeAssignments, delete=False))
-            self._removeAssignmentsDeleteMenuAction = self.tableMenu.addAction('Remove assignments and Delete', partial(self._removeAssignments, delete=True))
+            _topSeparator = menu.insertSeparator(_topMenuItem)
 
             # move new actions to the top of the list
-            self.tableMenu.insertAction(_topSeparator, self._removeAssignmentsDeleteMenuAction)
-            self.tableMenu.insertAction(self._removeAssignmentsDeleteMenuAction, self._removeAssignmentsMenuAction)
-            self.tableMenu.insertAction(self._removeAssignmentsMenuAction, self._mergeMenuAction)
-            self.tableMenu.insertAction(self._mergeMenuAction, self._editMenuAction)
+            menu.insertAction(_topSeparator, self._removeAssignmentsDeleteMenuAction)
+            menu.insertAction(self._removeAssignmentsDeleteMenuAction, self._removeAssignmentsMenuAction)
+            menu.insertAction(self._removeAssignmentsMenuAction, self._mergeMenuAction)
+            menu.insertAction(self._mergeMenuAction, self._editMenuAction)
 
-    def _raiseTableContextMenu(self, pos):
-        """Create a new menu and popup at cursor position
-        Add merge item
+        # add navigate option to the bottom
+        menu.addSeparator()
+        self._navigateMenu = menu.addMenu(_NAVIGATE_CST)
+
+    def setTableMenuOptions(self, menu):
+        """Update options in the right-mouse menu
         """
+        super().setTableMenuOptions(menu)
+
         selection = self.getSelectedObjects()
         data = self.getRightMouseItem()
         if (data is not None and not data.empty):
@@ -663,12 +668,12 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
 
             selection = [ch.nmrAtom for ch in selection or [] if ch.nmrAtom]
             _check = (currentNmrAtom and 1 < len(selection) and currentNmrAtom in selection) or False
-            _option = 'into {}'.format(currentNmrAtom.id if currentNmrAtom else '') if _check else ''
-            self._mergeMenuAction.setText('Merge NmrAtoms {}'.format(_option))
+            _option = f'{_INTO_CSL} {currentNmrAtom.id if currentNmrAtom else ""}' if _check else ''
+            self._mergeMenuAction.setText(f'{_MERGE_CST} {_option}')
             self._mergeMenuAction.setEnabled(_check)
 
             current = True if (currentNmrAtom and selection) else False
-            self._editMenuAction.setText('Edit NmrAtom {}'.format(currentNmrAtom.id if current else ''))
+            self._editMenuAction.setText(f'{_EDIT_CST} {currentNmrAtom.id if current else ""}')
             self._editMenuAction.setEnabled(True if current else False)
             self._addNavigationStripsToContextMenu()
 
@@ -677,18 +682,27 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
 
         else:
             # disabled but visible lets user know that menu items exist
-            self._mergeMenuAction.setText('Merge NmrAtoms')
+            self._mergeMenuAction.setText(_MERGE_CST)
             self._mergeMenuAction.setEnabled(False)
-            self._editMenuAction.setText('Edit NmrAtom')
+            self._editMenuAction.setText(_EDIT_CST)
             self._editMenuAction.setEnabled(False)
             self._removeAssignmentsMenuAction.setEnabled(False)
             self._removeAssignmentsDeleteMenuAction.setEnabled(False)
 
-        # raise the menu
-        super()._raiseTableContextMenu(pos)
+    #=========================================================================================
+    # Properties
+    #=========================================================================================
+
+    pass
 
     #=========================================================================================
-    # Table functions
+    # Class methods
+    #=========================================================================================
+
+    pass
+
+    #=========================================================================================
+    # Table Implementation
     #=========================================================================================
 
     def _mergeNmrAtoms(self):
@@ -824,18 +838,20 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
 #=========================================================================================
 
 EDIT_ROLE = QtCore.Qt.EditRole
+_EDITOR_SETTER = ('setColor', 'selectValue', 'setData', 'set', 'setValue', 'setText', 'setFile')
+_EDITOR_GETTER = ('get', 'value', 'text', 'getFile')
 
 
 class _CSLTableDelegate(QtWidgets.QStyledItemDelegate):
     """handle the setting of data when editing the table
     """
+    _objectColumn = '_object'
 
     def __init__(self, parent):
         """Initialise the delegate
-        :param parent - link to the handling table:
+        :param parent: link to the handling table
         """
         QtWidgets.QStyledItemDelegate.__init__(self, parent)
-        self.customWidget = False
         self._parent = parent
 
     def setEditorData(self, widget, index) -> None:
@@ -847,62 +863,43 @@ class _CSLTableDelegate(QtWidgets.QStyledItemDelegate):
         if not isinstance(value, (list, tuple)):
             value = (value,)
 
-        if hasattr(widget, 'setColor'):
-            widget.setColor(*value)
+        for attrib in _EDITOR_SETTER:
+            # get the method from the widget, and call with appropriate parameters
+            if (func := getattr(widget, attrib, None)):
+                if not callable(func):
+                    raise TypeError(f"widget.{attrib} is not callable")
 
-        elif hasattr(widget, 'setData'):
-            widget.setData(*value)
-
-        elif hasattr(widget, 'set'):
-            widget.set(*value)
-
-        elif hasattr(widget, 'setValue'):
-            widget.setValue(*value)
-
-        elif hasattr(widget, 'setText'):
-            widget.setText(*value)
-
-        elif hasattr(widget, 'setFile'):
-            widget.setFile(*value)
+                func(*value)
+                break
 
         else:
-            msg = 'Widget %s does not expose "setData", "set" or "setValue" method; ' % widget
-            msg += 'required for table proxy editing'
-            raise Exception(msg)
+            raise Exception(f'Widget {widget} does not expose a set method; required for table editing')
 
     def setModelData(self, widget, mode, index):
         """Set the object to the new value
         :param widget - typically a lineedit handling the editing of the cell
-        :param mode - editing mode:
+        :param mode - editing mode
         :param index - QModelIndex of the cell
         """
-        if hasattr(widget, 'get'):
-            value = widget.get()
+        for attrib in _EDITOR_GETTER:
+            if (func := getattr(widget, attrib, None)):
+                if not callable(func):
+                    raise TypeError(f"widget.{attrib} is not callable")
 
-        elif hasattr(widget, 'value'):
-            value = widget.value()
-
-        elif hasattr(widget, 'text'):
-            value = widget.text()
-
-        elif hasattr(widget, 'getFile'):
-            files = widget.selectedFiles()
-            if not files:
-                return
-            value = files[0]
+                value = func()
+                break
 
         else:
-            msg = f'Widget {widget} does not expose "get", "value" or "text" method; required for table editing'
-            raise Exception(msg)
+            raise Exception(f'Widget {widget} does not expose a get method; required for table editing')
 
-        row = index.row()
-        col = index.column()
-
+        row, col = index.row(), index.column()
         try:
             # get the sorted element from the dataFrame
             df = self._parent._df
-            _iRow = self._parent.model()._sortOrder[row]
-            obj = df.iloc[_iRow]['_object']
+            iRow = self._parent.model()._sortOrder[row]
+            iCol = df.columns.get_loc(self._objectColumn)
+            # get the object
+            obj = df.iat[iRow, iCol]
 
             # set the data which will fire notifiers to populate all tables (including this)
             func = self._parent._dataFrameObject.setEditValues[col]

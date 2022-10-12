@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-27 14:36:45 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:05 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -186,7 +186,6 @@ class AbstractWrapperObject(NotifierBase):
         # Assign an unique id (per class) if it does not yet exists
         if not hasattr(self._wrappedData, '_uniqueId') or \
                 self._wrappedData._uniqueId is None:
-
             # NOTE:ED - HACK to stop rogue/unnecessary notifiers
             wrapperDict = self._wrappedData.__dict__
             wrapperDict['inConstructor'] = True
@@ -1385,7 +1384,7 @@ class AbstractWrapperObject(NotifierBase):
     #         for obj in target:
     #             obj._finaliseAction(action)
 
-    def _finaliseAction(self, action: str):
+    def _finaliseAction(self, action: str, **actionKwds):
         """Do wrapper level finalisation, and execute all notifiers
         action is one of: 'create', 'delete', 'change', 'rename'"""
 
@@ -1430,7 +1429,7 @@ class AbstractWrapperObject(NotifierBase):
 
             for dd in iterator:
                 for notifier in tuple(dd):
-                    notifier(self, oldPid)
+                    notifier(self, oldPid, **actionKwds)
 
             for obj in self._getDirectChildren():
                 obj._finaliseAction('rename')
@@ -1446,7 +1445,7 @@ class AbstractWrapperObject(NotifierBase):
 
             for dd in iterator:
                 for notifier in tuple(dd):
-                    notifier(self)
+                    notifier(self, **actionKwds)
 
         # print(f'  {self} ACTIONS   {self._finaliseChildren}')
         # propagate the action to explicitly associated (generally child) instances

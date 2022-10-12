@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:38 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:05 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -735,10 +735,13 @@ class _ObjectStore(object):
 
 def _storeNewObjectCurrent(result, thisAddUndoItem):
     if hasattr(result, CURRENT_ATTRIBUTE_NAME):
-        storeObj = _ObjectStore(result)
-        thisAddUndoItem(undo=storeObj._storeCurrentSelectedObject,
-                        redo=storeObj._restoreCurrentSelectedObject,
-                        )
+        try:
+            storeObj = _ObjectStore(result)
+            thisAddUndoItem(undo=storeObj._storeCurrentSelectedObject,
+                            redo=storeObj._restoreCurrentSelectedObject,
+                            )
+        except Exception:
+            getLogger().debug(f'Current does not have attribute {result.__class__.__name__}')
 
 
 def _storeDeleteObjectCurrent(self, thisAddUndoItem):
@@ -1149,17 +1152,23 @@ class BlankedPartial(object):
         # kwds = self._kwds.update(kwds)
         if self._preExecution:
             # call the notification
-            self._obj._finaliseAction(self._trigger)
+            if isinstance(self._trigger, (list, tuple)):
+                self._obj._finaliseAction(self._trigger[0], **self._trigger[1])
+            else:
+                self._obj._finaliseAction(self._trigger)
 
         with notificationBlanking():
             self._func(*self._args, **self._kwds)
 
         if self._postExecution:
             # call the notification
-            self._obj._finaliseAction(self._trigger)
+            if isinstance(self._trigger, (list, tuple)):
+                self._obj._finaliseAction(self._trigger[0], **self._trigger[1])
+            else:
+                self._obj._finaliseAction(self._trigger)
 
 
-def ccpNmrV3CoreSetter(doNotify=True):
+def ccpNmrV3CoreSetter(doNotify=True, **actionKwds):
     """A decorator wrap the property setters method in an undo block and triggering the
     'change' notification if doNotify=True
     """
@@ -1169,7 +1178,7 @@ def ccpNmrV3CoreSetter(doNotify=True):
         func = args[0]
         args = args[1:]  # Optional 'self' is now args[0]
         self = args[0]  # this is the object
-        value = args[1]
+        # value = args[1]
 
         application = getApplication()  # pass it in to reduce overhead
 
@@ -1181,15 +1190,15 @@ def ccpNmrV3CoreSetter(doNotify=True):
                 try:
                     # call the wrapped function
                     result = func(*args, **kwds)
-                except Exception as es:
+                except Exception:
                     raise
 
                 finally:
-                    addUndoItem(undo=BlankedPartial(func, self, 'change', False, self, oldValue),
-                                redo=BlankedPartial(func, self, 'change', False, self, args[1]))
+                    addUndoItem(undo=BlankedPartial(func, self, ('change', actionKwds), False, self, oldValue),
+                                redo=BlankedPartial(func, self, ('change', actionKwds), False, self, args[1]))
 
         if doNotify:
-            self._finaliseAction('change')
+            self._finaliseAction('change', **actionKwds)
 
         return result
 
@@ -1297,7 +1306,7 @@ def checkDeleted():
 DEFINEDPARAMETERS = ('option', 'attr', 'parameter', 'dim')
 
 
-def queueStateChange(verify):
+def queueStateChange(verify, last=True):
     """A decorator to wrap a state change event with a verify function
     """
 
@@ -1320,7 +1329,7 @@ def queueStateChange(verify):
         result = func(*args, **kwds)
 
         # call the verify function to update the _changes dict
-        verify(self, func.__name__, result, *pars)
+        verify(self, func.__name__, result, last, *pars)
 
         return result
 

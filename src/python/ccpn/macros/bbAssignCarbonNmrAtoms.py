@@ -104,9 +104,14 @@ def checkForGST(gstDict):
     peaks = gstDict['CA-1']['peaks'] + gstDict['CB-1']['peaks']
     if len(cas) == 0 and len(cbs) != 0:
         # this is a Glycine
-        if 48.5 > mean(cbs) > 40.0:
-            na = peaks[0].assignmentsByDimensions[assignDim][0]
-            na.rename(value='CA')
+        for pk in peaks:
+            nr = pk.assignmentsByDimensions[assignDim][0].nmrResidue
+            if 48.5 > pk.ppmPositions[assignDim] > 40.0:
+                na = nr.fetchNmrAtom(name='CA', isotopeCode=assignIsotope)
+                pk.assignDimension(axisCode=assignAxCde, value=na)
+            na = nr.fetchNmrAtom(name='CB', isotopeCode=assignIsotope)
+            if not na.assignedPeaks:
+                na.delete()
     elif len(cbs) == 0 and len(cas) >= 2:
         # this is a Serine or Threonine
         for pk in peaks:

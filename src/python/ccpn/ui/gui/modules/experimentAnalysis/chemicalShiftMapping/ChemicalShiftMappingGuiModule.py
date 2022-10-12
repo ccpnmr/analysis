@@ -1,0 +1,87 @@
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
+#=========================================================================================
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-12 15:27:11 +0100 (Wed, October 12, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: Luca Mureddu $"
+__date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
+######## core imports ########
+from ccpn.framework.lib.experimentAnalysis.ChemicalShiftMappingAnalysisBC import ChemicalShiftMappingAnalysisBC
+from ccpn.util.Logging import getLogger
+
+######## gui/ui imports ########
+from PyQt5 import QtWidgets
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
+import ccpn.ui.gui.modules.experimentAnalysis.chemicalShiftMapping.CSMSettingsPanel as settingsPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import CSMToolBarPanel
+from ccpn.ui.gui.modules.experimentAnalysis.chemicalShiftMapping.CSMBarPlotPanel import CSMBarPlotPanel
+from ccpn.ui.gui.modules.experimentAnalysis.chemicalShiftMapping.CSMFitPlotPanel import CSMFitPlotPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import ExperimentAnalysisGuiModuleBC
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel
+
+#####################################################################
+#######################  The main GUI Module ########################
+#####################################################################
+
+class ChemicalShiftMappingGuiModule(ExperimentAnalysisGuiModuleBC):
+
+    className = 'ChemicalShiftMapping'
+
+    def __init__(self, mainWindow, name='Chemical Shift Mapping (Alpha)', **kwds):
+        super(ExperimentAnalysisGuiModuleBC, self)
+
+        ## link to the Non-Gui backend and its Settings
+        backendHandler = ChemicalShiftMappingAnalysisBC()
+        ExperimentAnalysisGuiModuleBC.__init__(self, mainWindow=mainWindow, name=name, backendHandler=backendHandler)
+
+    #################################################################
+    #####################      Widgets    ###########################
+    #################################################################
+
+    def addPanels(self):
+        """ Add the Gui Panels to the panelHandler.
+        Each Panel is a stand-alone frame with information where about to be added on the general GUI.
+        Override in Subclasses"""
+        self.panelHandler.addToolBar(CSMToolBarPanel(self))
+        self.panelHandler.addPanel(TablePanel(self))
+        self.panelHandler.addPanel(CSMFitPlotPanel(self))
+        self.panelHandler.addPanel(CSMBarPlotPanel(self))
+
+    def addSettingsPanels(self):
+        """
+        Add the Settings Panels to the Gui. To retrieve a Panel use/see the settingsPanelsManager.
+        """
+        self.settingsPanelHandler.append(settingsPanel.CSMGuiInputDataPanel(self))
+        self.settingsPanelHandler.append(settingsPanel.CSMCalculationPanel(self))
+        self.settingsPanelHandler.append(settingsPanel.CSMGuiFittingPanel(self))
+        self.settingsPanelHandler.append(settingsPanel.CSMAppearancePanel(self))
+
+
+    #####################################################################
+    #####################  Widgets callbacks  ###########################
+    #####################################################################
+
+
+
+
+
+
+

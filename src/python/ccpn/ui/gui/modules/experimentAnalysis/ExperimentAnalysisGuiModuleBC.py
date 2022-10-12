@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-12 15:02:46 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 18:07:50 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -123,8 +123,10 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
             outDataFrame.sort_values(by=sv.NMRRESIDUECODE, key=lambda x: x.astype(int), inplace =True)
         else:
             outDataFrame.sort_values(by=sv.COLLECTIONID, inplace=True)
-        ## apply an ascending UID. This is needed for tables and BarPlotting
+        ## apply an ascending ASHTAG. This is needed for tables and BarPlotting
         outDataFrame[sv.ASHTAG] = np.arange(1, len(outDataFrame)+1)
+        ## put ASHTAG as first header
+        outDataFrame.insert(0, sv.ASHTAG, outDataFrame.pop(sv.ASHTAG))
         return outDataFrame
 
     def getSettings(self, grouped=True) -> dict:

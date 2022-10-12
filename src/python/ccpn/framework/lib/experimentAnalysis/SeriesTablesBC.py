@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-12 15:02:46 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 18:07:50 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -57,6 +57,17 @@ class SeriesFrameBC(TableFrame):
 
     def loadFromFile(self, filePath, *args, **kwargs):
         pass
+
+    def getByHeader(self, headerName:str, matchingValues:list):
+        """
+        Get a subset of this TableFrame if the given matchingValues are present in the given HeaderName column.
+        :param headerName: str
+        :param matchingValues: list of value to be present in the dataFrame in the given header.
+        :return: filtered dataFrame
+        """
+        if headerName not in self.columns:
+            return
+        return self[self[headerName].isin(matchingValues)]
 
     @staticmethod
     def _getAtomNamesFromGroupedByHeaders(groupedDf):
@@ -115,6 +126,7 @@ class InputSeriesFrameBC(SeriesFrameBC):
             - spectrumPid       : str,   value optional
             - peakPid           : str,   value optional
             - nmrAtomPid        : str,   value optional
+            - nmrResiduePid     : str,   value optional
             - peakCollectionPid : str,   value optional
 
     """
@@ -259,6 +271,7 @@ class InputSeriesFrameBC(SeriesFrameBC):
                                 self.loc[i, sv.NMRRESIDUETYPE] = nmrAtom.nmrResidue.residueType
                                 self.loc[i, sv.NMRATOMNAME] = nmrAtom.name
                                 self.loc[i, sv.NMRATOMPID] = nmrAtom.pid
+                                self.loc[i, sv.NMRRESIDUEPID] = nmrAtom.nmrResidue.pid
                             for excludedFlag in sv.EXCLUDED_OBJECTS:
                                 self.loc[i, excludedFlag] = False
                             i += 1
@@ -316,6 +329,7 @@ class CSMOutputFrame(SeriesFrameBC):
         - collectionId      : int,
         - collectionPid     : str,
         - peakPid           : str,
+        - nmrResiduePid     : str,
         # Group with calculation/calculated values
         - seriesUnit        : str,
         - seriesStep        : float,
@@ -348,6 +362,7 @@ class CSMOutputFrame(SeriesFrameBC):
                     sv._ROW_UID,
                     sv.COLLECTIONID,
                     sv.COLLECTIONPID,
+                    sv.NMRRESIDUEPID,
                     sv.PEAKPID,
                     sv.NMRCHAINNAME,
                     sv.NMRRESIDUECODE,

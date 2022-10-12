@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-09-23 16:12:48 +0100 (Fri, September 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 18:07:50 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -74,14 +74,15 @@ SERIESUNIT       = 'seriesUnit'
 PEAKPID          = 'peakPid'
 SPECTRUMPID      = 'spectrumPid'
 NMRATOMPID       = 'nmrAtomPid'
+NMRRESIDUEPID    = 'nmrResiduePid'
 COLLECTIONPID    = 'collectionPid'
 PID              = 'pid'
 ASSIGNEDNMRATOMS = 'assignedNmrAtoms'
 
-EXCLUDED_PEAKPID        = f'{EXCLUDED_}peakPid'
-EXCLUDED_SPECTRUMPID    = f'{EXCLUDED_}spectrumPid'
-EXCLUDED_NMRATOMPID     = f'{EXCLUDED_}nmrAtomPid'
-EXCLUDED_COLLECTIONPID  = f'{EXCLUDED_}collectionPid'
+EXCLUDED_PEAKPID        = f'{EXCLUDED_}{PEAKPID}'
+EXCLUDED_SPECTRUMPID    = f'{EXCLUDED_}{SPECTRUMPID}'
+EXCLUDED_NMRATOMPID     = f'{EXCLUDED_}{NMRATOMPID}'
+EXCLUDED_COLLECTIONPID  = f'{EXCLUDED_}{COLLECTIONPID}'
 
 # fitting output Stat variables
 MINIMISER        = 'minimiser'
@@ -133,7 +134,7 @@ SpectrumPropertiesHeaders = [DIMENSION, ISOTOPECODE, SERIESSTEP, SERIESUNIT]
 PeakPropertiesHeaders = [_PPMPOSITION, _HEIGHT, _LINEWIDTH, _VOLUME]
 AssignmentPropertiesHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE, NMRATOMNAME]
 GROUPBYAssignmentHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE]
-PidHeaders = [COLLECTIONID, COLLECTIONPID, SPECTRUMPID, PEAKPID, NMRATOMPID]
+PidHeaders = [COLLECTIONID, COLLECTIONPID, SPECTRUMPID, PEAKPID, NMRATOMPID, NMRRESIDUEPID]
 
 MERGINGHEADERS = [COLLECTIONID, COLLECTIONPID, NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE]
 EXCLUDED_OBJECTS = [EXCLUDED_COLLECTIONPID, EXCLUDED_COLLECTIONPID, EXCLUDED_NMRATOMPID, EXCLUDED_SPECTRUMPID]

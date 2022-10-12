@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-12 15:02:46 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-12 18:07:50 +0100 (Wed, October 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -74,7 +74,7 @@ class _ExperimentalAnalysisTableABC(Table):
 
         # initialise the currently attached dataFrame
 
-        self._hiddenColumns = [sv._ROW_UID, sv.COLLECTIONID, sv.PEAKPID, sv.NMRCHAINNAME,
+        self._hiddenColumns = [sv._ROW_UID, sv.COLLECTIONID, sv.PEAKPID, sv.NMRRESIDUEPID, sv.NMRCHAINNAME,
                                sv.NMRRESIDUETYPE, sv.NMRATOMNAMES, sv.SERIESUNIT,
                                sv.SERIESSTEP, sv.SERIESSTEPVALUE, sv.MINIMISER_METHOD, sv.MINIMISER_MODEL, sv.CHISQR,
                                sv.REDCHI, sv.AIC, sv.BIC,

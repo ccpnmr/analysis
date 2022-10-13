@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-13 17:18:34 +0100 (Thu, October 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -376,14 +376,18 @@ class GuiInputDataPanel(GuiSettingPanel):
         if len(backend.inputDataTables) == 0:
             dataTablePids = self.getSettingsAsDict().get(guiNameSpaces.WidgetVarName_DataTablesSelection, [])
             if len(dataTablePids) == 0:
-                getLogger().warning('Cannot create any output DataTable. Select an input DataTable first.')
+                msg = 'Cannot create any output DataTable. Select/add an input DataTable first.'
+                getLogger().warning(msg)
+                showWarning('Missing InputData', msg)
+                return
             for pid in dataTablePids:
                 obj = self.guiModule.project.getByPid(pid)
                 if obj:
                     backend.addInputDataTable(obj)
+
         outputDataTable = backend.fitInputData()
         outputPulldown = self.getWidget(guiNameSpaces.WidgetVarName_OutputDataTablesSelection)
-        if outputPulldown:
+        if outputPulldown and outputDataTable is not None:
             outputPulldown.update() #there seems to be a bug on pulldown not updating straight-away
             outputPulldown.select(outputDataTable.pid)
         self.guiModule.updateAll()

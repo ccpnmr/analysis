@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-13 17:18:34 +0100 (Thu, October 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -80,11 +80,11 @@ TipText_SpectrumGroupsSeparator         = 'SpectrumGroup Section. Create here a 
 
 WidgetVarName_SpectrumGroupsSelection   = 'SpectrumGroupsSelection'
 Label_SelectSpectrumGroups              = 'SpectrumGroup'
-TipText_SpectrumGroupSelectionWidget    = 'Select the SpectrumGroup containing the series of interest'
+TipText_SpectrumGroupSelectionWidget    = 'Select the SpectrumGroup containing the series of interest to create a new Input DataTable'
 
 WidgetVarName_DataTableName             = 'dataTableName'
 Label_InputDataTableName                = 'Input DataTable Name'
-TipText_dataTableNameSelectionWidget    = 'Select the name for the new DataTable input'
+TipText_dataTableNameSelectionWidget    = 'Select the name for the new DataTable input.'
 
 WidgetVarName_CreateDataTable           = 'CreateDataTableName'
 Label_CreateInput                       = 'Create Input DataTable'
@@ -92,7 +92,7 @@ TipText_createInputdataTableWidget      = 'Create the new input DataTable for th
 
 WidgetVarName_DataTableSeparator        = 'DataTableSeparator'
 Label_DataTables                        = 'Input DataTables'
-TipText_DataTableSeparator              = 'DataTable Section. Select input DataTable(s) to start the Experiment Analysis'
+TipText_DataTableSeparator              = 'DataTable Section. Select input DataTable(s) to start the Experiment Analysis. If None available, create one using a SpectrumGroup.'
 
 WidgetVarName_DataTablesSelection       = 'DataTablesSelection'
 Label_SelectDataTable                   = 'Input DataTable(s)'

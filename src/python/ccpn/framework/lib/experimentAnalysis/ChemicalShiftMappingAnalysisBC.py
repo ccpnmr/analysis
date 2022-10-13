@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-09-24 20:20:31 +0100 (Sat, September 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-13 17:18:34 +0100 (Thu, October 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -89,8 +89,7 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
             getLogger().warning("This fitting option has not been implemented yet. Only available with EuclideanCalculationModel ")
 
         if len(self.inputDataTables) == 0:
-            getLogger().warning('Cannot run any fitting models. Add a valid inputData first')
-            return
+            raise RuntimeError('Cannot run any fitting models. Add a valid inputData first')
 
         inputFrame = self.inputDataTables[-1].data
         calculationFrame = self.currentCalculationModel.calculateValues(inputFrame)

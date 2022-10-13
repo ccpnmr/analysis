@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-12 10:21:58 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -51,6 +51,7 @@ from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import Pan
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.ui.gui.widgets.SettingsWidgets import ALL, UseCurrent
+from ccpn.ui.gui.widgets.BarGraphWidget import TICKOPTIONS
 
 SettingsWidgeMinimumWidths =  (180, 180, 180)
 SettingsWidgetFixedWidths = (200, 350, 350)
@@ -872,6 +873,24 @@ class AppearancePanel(GuiSettingPanel):
                        'selectItem': guiNameSpaces.BAR_thresholdLine,
                        'compoundKwds': {'includeGradients': False,
                                         }}}),
+            (guiNameSpaces.WidgetVarName_BarXTickOpt,
+             {'label': guiNameSpaces.Label_BarXTickOpt,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': None,
+              'callBack': self._changeBarXTicks,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_BarXTickOpt,
+                       'hAlign': 'l',
+                       'tipText': guiNameSpaces.TipText_BarXTickOpt,
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds': {
+                           'texts': TICKOPTIONS,
+                           'tipTexts': ["Always show all ticks", "Show minimal ticks on zoom-in/out",],
+                           'direction': 'v',
+                           'selectedInd': 0,
+                           }}}),
+
+            ##Tables
             (guiNameSpaces.WidgetVarName_TableSeparator,
              {'label': guiNameSpaces.Label_TableSeparator,
               'type': LabeledHLine,
@@ -992,6 +1011,13 @@ class AppearancePanel(GuiSettingPanel):
             table = tablePanel.mainTable
             return table
 
+    def _getMainBarGraphWidget(self):
+
+        barGraphPanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.BarPlotPanel)
+        if barGraphPanel is not None:
+            barGraphWidget = barGraphPanel.barGraphWidget
+            return barGraphWidget
+
     def _mainTableColumnViewCallback(self, *args):
 
         widget = self.getWidget(guiNameSpaces.WidgetVarName_TableView)
@@ -1005,6 +1031,15 @@ class AppearancePanel(GuiSettingPanel):
         widget = self.getWidget(guiNameSpaces.WidgetVarName_NavigateToOpt)
         if table and widget:
             table.setNavigateToPeakTrigger(widget.getByText())
+
+    def _changeBarXTicks(self, *args):
+        widget = self.getWidget(guiNameSpaces.WidgetVarName_BarXTickOpt)
+        if widget:
+            value = widget.getByText()
+            barGraph = self._getMainBarGraphWidget()
+            barGraph.setTickOption(value)
+            self._commonCallback()
+
 
 TABPOS += 1
 

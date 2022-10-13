@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-12 18:07:50 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -328,29 +328,18 @@ class SeriesAnalysisABC(ABC):
             if not isinstance(dataTable.data.__class__ , InputSeriesFrameBC):
                 dataTable.data.__class__ = InputSeriesFrameBC
 
-    def _isPeakInParentCollection(self, peak):
-        """Check if a peak is in the parentCollection subCollection """
-
-        if not self.inputCollection:
-            return False
-        return any([co for co in peak.collections if co in self.inputCollection.items])
-
-    def _isCollectionInParentCollection(self, collection):
-        """Check if a collection is in the parentCollection items """
-        if not self.inputCollection:
-            return False
-        return collection in self.inputCollection.items
-
-    def _isNmrResiduePidInData(self, nmrResiduePid):
-        """Check if the NmrResidue (pid) is in the inputDataTables """
-        if len(self.inputDataTables)>0:
+    def _isPidInDataTables(self, header, pid):
+        """Check if a pid is in the inputDataTables.
+         :param header: str, dataTable header e.g.: sv.PeakPid
+         :param pid: str, the pid to search in the column
+         :return bool. True if pid in data"""
+        if len(self.inputDataTables) > 0:
             for inputDataTable in self.inputDataTables:
                 data = inputDataTable.data
-                filteredData = data.getByHeader(sv.NMRRESIDUEPID, [nmrResiduePid])
+                filteredData = data.getByHeader(header, [pid])
                 if not filteredData.empty:
                     return True
         return False
-
 
     @classmethod
     def exportToFile(cls, path, fileType, *args, **kwargs):

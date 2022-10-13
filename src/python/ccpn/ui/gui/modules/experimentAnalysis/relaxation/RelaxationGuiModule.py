@@ -7,12 +7,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-18 18:08:36 +0100 (Thu, August 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ from ccpn.util.Logging import getLogger
 from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import ToolBarPanel
-from ccpn.ui.gui.modules.experimentAnalysis.relaxation.RelaxationBarPlotPanel import RelaxationBarPlotPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.relaxation.RelaxationFitPlotPanel import RelaxationFitPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import ExperimentAnalysisGuiModuleBC
@@ -62,7 +62,7 @@ class RelaxationGuiModule(ExperimentAnalysisGuiModuleBC):
         self.panelHandler.addToolBar(ToolBarPanel(self))
         self.panelHandler.addPanel(TablePanel(self))
         self.panelHandler.addPanel(RelaxationFitPlotPanel(self))
-        self.panelHandler.addPanel(RelaxationBarPlotPanel(self))
+        self.panelHandler.addPanel(BarPlotPanel(self))
 
     def addSettingsPanels(self):
         """

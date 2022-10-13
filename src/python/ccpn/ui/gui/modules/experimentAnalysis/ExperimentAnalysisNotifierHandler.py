@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-12 18:07:50 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,10 +30,13 @@ from ccpn.core.Peak import Peak
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.DataTable import DataTable
 from ccpn.core.Collection import Collection
+from ccpn.core.Spectrum import Spectrum
+from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import ExperimentAnalysisHandlerABC
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 
 class CoreNotifiersHandler(ExperimentAnalysisHandlerABC):
     """
@@ -63,12 +66,21 @@ class CoreNotifiersHandler(ExperimentAnalysisHandlerABC):
 
         CoreNotifiersHandler._notifiers.update({
 
+            'onChangeSpectrum'      : Notifier(gm.project,
+                                               [Notifier.CHANGE],
+                                               targetName=Spectrum.className,
+                                               callback=partial(CoreNotifiersHandler._spectrumChanged, gm),
+                                               onceOnly=True),
+            'onChangeSpectrumGroup' : Notifier(gm.project,
+                                               [Notifier.CHANGE],
+                                               targetName=SpectrumGroup.className,
+                                               callback=partial(CoreNotifiersHandler._spectrumGroupChanged, gm),
+                                               onceOnly=True),
             'onDeletePeak'          : Notifier(gm.project,
                                                [Notifier.DELETE],
                                                targetName=Peak.className,
                                                callback=partial(CoreNotifiersHandler._peakDeleted, gm),
                                                onceOnly=True),
-
             'onChangePeak'          : Notifier(gm.project,
                                                [Notifier.CHANGE],
                                                targetName=Peak.className,
@@ -85,21 +97,21 @@ class CoreNotifiersHandler(ExperimentAnalysisHandlerABC):
                                                callback=partial(CoreNotifiersHandler._collectionChanged, gm),
                                                onceOnly=True),
             'onRenameCollection': Notifier(gm.project,
-                                           [Notifier.RENAME],
-                                           targetName=Collection.className,
-                                           callback=partial(CoreNotifiersHandler._collectionRenamed, gm),
-                                           onceOnly=True),
+                                                [Notifier.RENAME],
+                                                targetName=Collection.className,
+                                                callback=partial(CoreNotifiersHandler._collectionRenamed, gm),
+                                                onceOnly=True),
             'onDeleteNmrResidue': Notifier(gm.project,
-                                           [Notifier.DELETE],
-                                           targetName=NmrResidue.className,
-                                           callback=partial(CoreNotifiersHandler._nmrResidueDeleted, gm),
-                                           onceOnly=True),
+                                                [Notifier.DELETE],
+                                                targetName=NmrResidue.className,
+                                                callback=partial(CoreNotifiersHandler._nmrResidueDeleted, gm),
+                                                onceOnly=True),
 
             'onRenameNmrResidue': Notifier(gm.project,
-                                           [Notifier.RENAME],
-                                           targetName=NmrResidue.className,
-                                           callback=partial(CoreNotifiersHandler._nmrResidueRenamed, gm),
-                                           onceOnly=True),
+                                               [Notifier.RENAME],
+                                               targetName=NmrResidue.className,
+                                               callback=partial(CoreNotifiersHandler._nmrResidueRenamed, gm),
+                                               onceOnly=True),
             'onCreateDataTable'     : Notifier(gm.project,
                                                [Notifier.CREATE],
                                                targetName=DataTable.className,
@@ -130,54 +142,75 @@ class CoreNotifiersHandler(ExperimentAnalysisHandlerABC):
         return peak.spectrum in spectrumGroup.spectra
 
     @staticmethod
-    def _setRebuildInputDataOnPeakNotifier(guiModule, peaks=None):
+    def _setRebuildInputDataNotifier(guiModule, peaks=None):
         """ INTERNAL.  Rebuild the inputData after a new or deleted peak or update only a subset if peaks are only changed"""
         guiModule.setNeedRefitting()
         guiModule.setNeedRebuildingInputDataTables()
 
     @staticmethod
+    def _spectrumChanged(guiModule, data):
+        """Set Update Detected. E.g.: notify if the sliceColour has changed for the plotting colours"""
+        spectrum = data[Notifier.OBJECT]
+        if guiModule.backendHandler._isPidInDataTables(sv.SPECTRUMPID, spectrum.pid):
+            getLogger().debug(f'Firing _spectrumChanged notifier from {guiModule.className}')
+            guiModule._setUpdateDetected()
+
+    @staticmethod
+    def _spectrumGroupChanged(guiModule, data):
+        """Set Rebuild flags."""
+        spectrumGroup = data[Notifier.OBJECT]
+        if spectrumGroup in guiModule.backendHandler.inputSpectrumGroups:
+            getLogger().debug(f'Firing _spectrumGroupChanged notifier from {guiModule.className}')
+            CoreNotifiersHandler._setRebuildInputDataNotifier(guiModule)
+
+
+    @staticmethod
     def _peakChanged(guiModule, data):
         """Set Rebuild flags."""
         peak = data[Notifier.OBJECT]
-        if guiModule.backendHandler._isPeakInParentCollection(peak):
+        if guiModule.backendHandler._isPidInDataTables(sv.PEAKPID, peak.pid):
             getLogger().debug(f'Firing peakChanged notifier from {guiModule.className}')
-            CoreNotifiersHandler._setRebuildInputDataOnPeakNotifier(guiModule)
+            CoreNotifiersHandler._setRebuildInputDataNotifier(guiModule)
 
     @staticmethod
     def _peakDeleted(guiModule, data):
         """Set Rebuild flags."""
         peak = data[Notifier.OBJECT]
-        if guiModule.backendHandler._isPeakInParentCollection(peak):
+        if guiModule.backendHandler._isPidInDataTables(sv.PEAKPID, peak.pid):
             getLogger().debug(f'Firing peakDeleted notifier from {guiModule.className}')
-            CoreNotifiersHandler._setRebuildInputDataOnPeakNotifier(guiModule)
+            CoreNotifiersHandler._setRebuildInputDataNotifier(guiModule)
 
     @staticmethod
     def _collectionChanged(guiModule, data):
         """Set Rebuild flags."""
         collection = data[Notifier.OBJECT]
-        if guiModule.backendHandler._isCollectionInParentCollection(collection):
+        if guiModule.backendHandler._isPidInDataTables(sv.COLLECTIONPID, collection.pid):
             getLogger().debug(f'Firing collectionChanged notifier from {guiModule.className}')
-            CoreNotifiersHandler._setRebuildInputDataOnPeakNotifier(guiModule)
+            CoreNotifiersHandler._setRebuildInputDataNotifier(guiModule)
 
     @staticmethod
     def _collectionDeleted(guiModule, data):
         """Set Rebuild flags."""
         collection = data[Notifier.OBJECT]
-        if guiModule.backendHandler._isCollectionInParentCollection(collection):
-            getLogger().debug(f'Firing _collectionDeleted notifier from {guiModule.className}')
-            CoreNotifiersHandler._setRebuildInputDataOnPeakNotifier(guiModule)
+        if collection.isDeleted:
+            pid = collection.pid.strip('-Deleted') # check why data doesn't give the oldValue (pid without -Deleted).
+        else:
+            pid = collection.pid
+        if guiModule.backendHandler._isPidInDataTables(sv.COLLECTIONPID, collection.pid):
+            getLogger().info(f'Firing _collectionDeleted notifier from {guiModule.className}')
+            CoreNotifiersHandler._setRebuildInputDataNotifier(guiModule)
         if guiModule.backendHandler.inputCollection == collection:
             guiModule.backendHandler.inputCollection = None
-            CoreNotifiersHandler._setRebuildInputDataOnPeakNotifier(guiModule)
+            CoreNotifiersHandler._setRebuildInputDataNotifier(guiModule)
             showWarning('Input Collection Removed', 'Removing the Input Collection will affect the module functionalities')
 
     @staticmethod
     def _collectionRenamed(guiModule, data):
         """Set Rebuild flags."""
         collection = data[Notifier.OBJECT]
-        if guiModule.backendHandler._isCollectionInParentCollection(collection):
+        if guiModule.backendHandler._isPidInDataTables(sv.COLLECTIONPID, collection.pid):
             getLogger().debug(f'Firing _collectionRenamed notifier from {guiModule.className}')
-            CoreNotifiersHandler._setRebuildInputDataOnPeakNotifier(guiModule)
+            CoreNotifiersHandler._setRebuildInputDataNotifier(guiModule)
 
     @staticmethod
     def _applyChangesToQueue(guiModule):
@@ -217,14 +250,14 @@ class CoreNotifiersHandler(ExperimentAnalysisHandlerABC):
     def _nmrResidueDeleted(guiModule, data):
         """Set Rebuild flags."""
         nmrResidue = data[Notifier.OBJECT]
-        if guiModule.backendHandler._isNmrResidueInData(nmrResidue):
+        if guiModule.backendHandler._isPidInDataTables(sv.NMRRESIDUEPID, nmrResidue.pid):
             getLogger().info(f'Firing _nmrResidueDeleted notifier from {guiModule.className}')
-            CoreNotifiersHandler._setRebuildInputDataOnPeakNotifier(guiModule)
+            CoreNotifiersHandler._setRebuildInputDataNotifier(guiModule)
 
     @staticmethod
     def _nmrResidueRenamed(guiModule, data):
         """Set Rebuild flags."""
-        oldPid = data[Notifier.OLDPID]
-        if guiModule.backendHandler._isNmrResiduePidInData(oldPid):
+        pid = data[Notifier.OLDPID]
+        if guiModule.backendHandler._isPidInDataTables(sv.NMRRESIDUEPID, pid):
             getLogger().info(f'Firing _nmrResiduenRenamed notifier from {guiModule.className}')
-            CoreNotifiersHandler._setRebuildInputDataOnPeakNotifier(guiModule)
+            CoreNotifiersHandler._setRebuildInputDataNotifier(guiModule)

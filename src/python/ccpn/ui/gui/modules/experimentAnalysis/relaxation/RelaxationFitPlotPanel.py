@@ -7,12 +7,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-18 13:02:02 +0100 (Thu, August 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -119,44 +119,3 @@ class RelaxationFitPlotPanel(FitPlotPanel):
                 self.bindingPlot.fittingHandle.setPos(decay, amplitude)
             except Exception as error:
                 getLogger().warning(f'Error plotting: {error}')
-
-    def _replot(self, *args, **kwargs):
-        pos = kwargs.get('pos', [])
-        decay = None
-        amplitude = None
-        if pos and len(pos) > 0:
-            decay = pos[0]
-            amplitude = pos[1]
-        collections = self.current.collections
-        outputData = self.guiModule.getSelectedOutputDataTable()
-        if outputData is None:
-            return
-        dataFrame = outputData.data
-        if len(collections)== 0:
-            return
-        collection = collections[-1]
-        filteredDf = dataFrame[dataFrame[sv.COLLECTIONPID] == collection.pid]
-        seriesSteps = filteredDf[sv.SERIESSTEP].values
-        modelName = filteredDf[sv.MODEL_NAME].values[-1]
-        model = self.guiModule.backendHandler.getFittingModelByName(modelName)
-        if model is None:  ## get it from settings
-            model = self.guiModule.backendHandler.currentFittingModel
-        func = model.getFittingFunc(model)
-        try:  # todo need to change this to don't be hardcoded for sv.DECAY-AMPLITUDE but take it from the model.
-            if decay is None:
-                decay = filteredDf[sv.DECAY].values[0]
-            if amplitude is None:
-                amplitude = filteredDf[sv.AMPLITUDE].values[0]
-            extra = percentage(50, max(seriesSteps))
-            initialPoint = min(seriesSteps)
-            finalPoint = max(seriesSteps) + extra
-            xf = np.linspace(initialPoint, finalPoint, 3000)
-            yf = func(xf, decay, amplitude)
-            if self.fittedCurve is not None:
-                self.bindingPlot.removeItem(self.fittedCurve)
-            self.fittedCurve = self.bindingPlot.plot(xf, yf, pen=self.bindingPlot.gridPen)
-            # self.bindingPlot.zoomFull()
-            label = f'decay: {round(decay,2)} \namplitude: {round(amplitude,2)}'
-            self.bindingPlot.crossHair.hLine.label.setText(label)
-        except Exception as error:
-            getLogger().warning(f'Error plotting: {error}')

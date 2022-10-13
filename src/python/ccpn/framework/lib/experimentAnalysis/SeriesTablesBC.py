@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-13 10:49:59 +0100 (Thu, October 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -214,6 +214,7 @@ class InputSeriesFrameBC(SeriesFrameBC):
         :param filteredPeaks: Use only this subset of peaks. Used when a peak has changed, to avoid rebuild all.
         :return: None
         """
+        self.clear()
         # build the frame
         if self.columns.empty:
             self._buildColumnHeaders()

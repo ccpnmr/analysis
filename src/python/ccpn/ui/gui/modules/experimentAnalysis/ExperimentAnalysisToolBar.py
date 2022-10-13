@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-09-23 16:12:48 +0100 (Fri, September 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -118,46 +118,16 @@ class ToolBarPanel(GuiPanel):
         self.guiModule.updateAll()
 
     def _showStructureButtonCallback(self):
-        getLogger().warn('Not implemented. Clicked _showStructureButtonCallback')
-
-    def getUpdateState(self):
-        return self._updateState
-
-    def setUpdateState(self, value):
-
-        dataEnum = None
-        if isinstance(value, DataEnum):
-            dataEnum = value
-        else:
-            for i in PanelUpdateState:
-                if i.value == value:
-                    dataEnum = value
-
-        if dataEnum:
-            self._updateState = dataEnum.value
-            updateButton = self.getButton(guiNameSpaces.UpdateButton)
-            if updateButton:
-                iconValue = dataEnum.description
-                updateButton.setIcon(Icon(iconValue))
-
-
-
-class CSMToolBarPanel(ToolBarPanel):
-    """
-    A GuiPanel containing the ToolBar Widgets for the CSM Analysis Module
-    """
-
-    def _showStructureButtonCallback(self):
         from ccpn.ui.gui.modules.PyMolUtil import _CSMSelection2PyMolFileNew
-        import json
         import subprocess
         import os
         from ccpn.util.Path import aPath, fetchDir
         from ccpn.ui.gui.widgets.MessageDialog import showOkCancelWarning, showWarning
         scriptsPath = self.application.scriptsPath
         pymolScriptsPath = fetchDir(scriptsPath, guiNameSpaces.PYMOL)
-        settingsDict = self.guiModule.settingsPanelHandler.getAllSettings().get(guiNameSpaces.Label_GeneralAppearance,{})
-        barPanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.CSMBarPlotPanel)
+        settingsDict = self.guiModule.settingsPanelHandler.getAllSettings().get(guiNameSpaces.Label_GeneralAppearance,
+                                                                                {})
+        barPanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.BarPlotPanel)
         barGraph = barPanel.barGraphWidget
         moleculeFilePath = settingsDict.get(guiNameSpaces.WidgetVarName_MolStructureFile, '')
         moleculeFilePath = aPath(moleculeFilePath)
@@ -189,14 +159,34 @@ class CSMToolBarPanel(ToolBarPanel):
             code = row[sv.NMRRESIDUECODE]
             vv = coloursDict.get(num, '')
             sequenceCodeColoursDict[code] = vv
-        selection = "+".join([str(x.sequenceCode) for x in self.current.nmrResidues]) #FIXME this is broken
+        selection = "+".join([str(x.sequenceCode) for x in self.current.nmrResidues])  # FIXME this is broken
         scriptPath = _CSMSelection2PyMolFileNew(scriptFilePath, moleculeFilePath, sequenceCodeColoursDict, selection)
         try:
             self.pymolProcess = subprocess.Popen(str(pymolPath) + ' -r ' + str(scriptPath),
-                                                     shell=True,
-                                                     stdout=subprocess.PIPE,
-                                                     stderr=subprocess.PIPE)
+                                                 shell=True,
+                                                 stdout=subprocess.PIPE,
+                                                 stderr=subprocess.PIPE)
         except Exception as e:
             getLogger().warning('Pymol not started. Check executable.', e)
+
+    def getUpdateState(self):
+        return self._updateState
+
+    def setUpdateState(self, value):
+
+        dataEnum = None
+        if isinstance(value, DataEnum):
+            dataEnum = value
+        else:
+            for i in PanelUpdateState:
+                if i.value == value:
+                    dataEnum = value
+
+        if dataEnum:
+            self._updateState = dataEnum.value
+            updateButton = self.getButton(guiNameSpaces.UpdateButton)
+            if updateButton:
+                iconValue = dataEnum.description
+                updateButton.setIcon(Icon(iconValue))
 
 

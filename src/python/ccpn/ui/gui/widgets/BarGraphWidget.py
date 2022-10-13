@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-12 15:02:46 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -47,6 +47,9 @@ AboveBrushes = 'aboveBrushes'
 BelowBrush = 'belowBrush'
 DisappearedBrush = 'disappearedBrush'
 DrawLabels = 'drawLabels'
+AllTicks  = 'All Ticks'
+MinimalTicks = 'Minimal Ticks'
+TICKOPTIONS = [MinimalTicks, AllTicks]
 
 
 class XBarAxisItem(pg.AxisItem):
@@ -140,8 +143,7 @@ class BarGraphWidget(Widget):
         self._actionCallback = actionCallback
         self._selectionCallback = selectionCallback
         self._hoverCallback = hoverCallback
-
-
+        self._tickOption = MinimalTicks # one of AllTicks or MinimalTicks
         # plot.addItem(text)
 
         self._dataDict = {
@@ -213,6 +215,10 @@ class BarGraphWidget(Widget):
                 self.plotWidget.setYRange(np.min(filtered),  np.max(filtered))
             else:
                 self.zoomFull()
+
+    def setTickOption(self, value):
+        if value in TICKOPTIONS:
+            self._tickOption = value
 
     def _setViewBox(self):
         self.customViewBox = CustomViewBox(application=self.application)

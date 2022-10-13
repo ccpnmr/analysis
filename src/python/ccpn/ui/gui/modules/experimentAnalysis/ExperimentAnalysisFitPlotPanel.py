@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-12 15:02:46 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -170,22 +170,24 @@ class FittingPlot(pg.PlotItem):
         self.buttonsHidden = True
         self.autoBtn.hide()
         self.crossHair = CrossHair(plotWidget=self)
-        self.fittingHandle = FittingHandle(pen=self.gridPen)
-        self.fittingHandle.sigMoved.connect(self._handleMoved)
-        self.fittingHandle.sigHovered.connect(self._handleHovered)
-        self.fittingHandle.sigClicked.connect(self._handleClicked)
-        self.addItem(self.fittingHandle)
 
-    def _handleMoved(self, pos, *args):
-        self.parentWidget._replot(**{'pos':pos})
+        ## fittingHandle temporarly disabled. This feature (manual refitting) might be not necessary at all.
+        # self.fittingHandle = FittingHandle(pen=self.gridPen)
+        # self.fittingHandle.sigMoved.connect(self._handleMoved)
+        # self.fittingHandle.sigHovered.connect(self._handleHovered)
+        # self.fittingHandle.sigClicked.connect(self._handleClicked)
+        # self.addItem(self.fittingHandle)
 
-    def _handleHovered(self, *args):
-        # Action to be decided: maybe a tooltip of what it can do.
-        pass
-
-    def _handleClicked(self, *args):
-        # Action to be decided. maybe open a context menu gor right-click?
-        pass
+    # def _handleMoved(self, pos, *args):
+    #     pass
+    #
+    # def _handleHovered(self, *args):
+    #     # Action to be decided: maybe a tooltip of what it can do.
+    #     pass
+    #
+    # def _handleClicked(self, *args):
+    #     # Action to be decided. maybe open a context menu gor right-click?
+    #     pass
 
     def clear(self):
         """
@@ -330,9 +332,6 @@ class FitPlotPanel(GuiPanel):
         self.currentCollectionLabel = Label(self, text='', grid=(0, 2), hAlign='r',)
         self._bindingPlotView.addItem(self.bindingPlot)
         self.getLayout().addWidget(self._bindingPlotView, 1,0,1,3)
-
-    def _replot(self,  *args, **kwargs):
-        pass
 
     def _currentCollectionCallback(self, *args):
         backendHandler = self.guiModule.backendHandler

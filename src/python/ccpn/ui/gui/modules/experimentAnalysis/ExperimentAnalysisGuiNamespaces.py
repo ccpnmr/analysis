@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-12 10:21:58 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -253,12 +253,12 @@ Label_BarGraphAppearance                = 'BarGraph'
 TipText_BarGraphAppearance              = 'General Appearance settings for the BarGraph'
 
 WidgetVarName_BarGraphXcolumnName       = 'XcolumnName'
-Label_XcolumnName                       = 'X axis data'
-TipText_XcolumnName                     = 'Set the BarGraph X axis data'
+Label_XcolumnName                       = 'X Axis Data'
+TipText_XcolumnName                     = 'Set the BarGraph X Axis Data'
 
 WidgetVarName_BarGraphYcolumnName       = 'YcolumnName'
-Label_YcolumnName                       = 'Y axis data'
-TipText_YcolumnName                     = 'Set the BarGraph Y axis data'
+Label_YcolumnName                       = 'Y Axis Data'
+TipText_YcolumnName                     = 'Set the BarGraph Y Axis Data'
 
 WidgetVarName_ThreshValue               = 'ThreshValue'
 Label_ThreshValue                       = 'Threshold Value'
@@ -278,6 +278,10 @@ TipText_ThreshValueCalcOptions          = 'Select the calculation method for the
 WidgetVarName_ThreshValueFactor         = 'ThreshValueCalcFactor'
 Label_ThreshValueFactor                 = 'Threshold Factor'
 TipText_ThreshValueFactor               = 'Increase (multiply) the threshold value by a factor.'
+
+WidgetVarName_BarXTickOpt               = 'BarXTickOpt'
+Label_BarXTickOpt                       = 'X axis Ticks'
+TipText_BarXTickOpt                     = 'Display X axis ticks option. Display all ticks or show major/minor depending on zoom levels'
 
 ### Threshold Values for BarGraph options
 
@@ -353,13 +357,11 @@ Callback = 'Callback'
 RefitButton = 'refitButton'
 
 
-
-RelaxationBarPlotPanel = 'RelaxationBarPlotPanel'
+BarPlotPanel = 'BarPlotPanel'
 RelaxationFittingPlotPanel = 'RelaxationFittingPlotPanel'
 
 
 
-CSMBarPlotPanel = 'CSMBarPlotPanel'
 CSMFittingPlotPanel = 'CSMFittingPlotPanel'
 
 RelativeDisplacement = 'Relative Displacement'

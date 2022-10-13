@@ -170,7 +170,7 @@ class CSMGuiFittingPanel(GuiFittingPanel):
 
 class CSMAppearancePanel(AppearancePanel):
 
-    pass #TODO remove
+    pass
 
 
 #####################################################################

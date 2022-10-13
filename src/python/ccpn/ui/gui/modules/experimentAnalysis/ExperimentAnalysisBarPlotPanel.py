@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-10 17:49:59 +0100 (Mon, October 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as
 from ccpn.util.Colour import colorSchemeTable, hexToRgb, rgbaRatioToHex, colourNameToHexDict
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import ExperimentAnalysisPlotToolBar
-from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
+from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget, TICKOPTIONS, AllTicks, MinimalTicks
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_LABELLING
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.Font import getFont
@@ -40,7 +40,7 @@ from ccpn.ui.gui.widgets.Label import Label
 class BarPlotPanel(GuiPanel):
 
     position = 3
-    panelName = 'BarPlotPanel'
+    panelName = guiNameSpaces.BarPlotPanel
 
     def __init__(self, guiModule, *args, **Framekwargs):
         GuiPanel.__init__(self, guiModule,*args , **Framekwargs)
@@ -262,11 +262,16 @@ class BarPlotPanel(GuiPanel):
         ## set ticks for the xAxis. As they Xs are strs, Need to create a dict Index:Value
         ticks = dict(zip(dataFrame[xColumnName].index, dataFrame[xColumnName].values))
         xaxis = self._getAxis('bottom')
-        ##TODO set as an option to use major-minor or show all
-        # setTicks uses a list of 3 dicts. Major, minor, sub minors ticks. (used for when zooming in-out)
-        xaxis.setTicks([list(ticks.items())[9::10], # define steps of 10, show only 10 labels (max zoomed out)
-                        list(ticks.items())[4::5],  # steps of 5
-                        list(ticks.items())[::1]]) # steps of 1, show all labels
+        if self.barGraphWidget._tickOption == MinimalTicks:
+            # setTicks uses a list of 3 dicts. Major, minor, sub minors ticks. (used for when zooming in-out)
+            xaxis.setTicks([list(ticks.items())[9::10], # define steps of 10, show only 10 labels (max zoomed out)
+                            list(ticks.items())[4::5],  # steps of 5
+                            list(ticks.items())[::1]]) # steps of 1, show all labels
+        else:
+            # setTicks show all (equivalent to 1 for each Major, minor or sub minor
+            xaxis.setTicks([list(ticks.items())[::1],
+                            list(ticks.items())[::1],
+                            list(ticks.items())[::1]])
         ## update labels on axes
         self._updateAxisLabels()
         self._plottedDf = dataFrame

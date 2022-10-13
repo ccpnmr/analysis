@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-12 10:21:58 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -105,44 +105,4 @@ class CSMFitPlotPanel(FitPlotPanel):
             self.bindingPlot.zoomFull()
             self.currentCollectionLabel.setText(collection.pid)
             self.bindingPlot.fittingHandle.setPos(kd, bmax)
-
-    def _replot(self, *args, **kwargs):
-        collections = self.current.collections
-        outputData = self.guiModule.getSelectedOutputDataTable()
-        if outputData is None:
-            return
-        dataFrame = outputData.data
-
-        pos = kwargs.get('pos', [])
-        kd = None
-        bmax = None
-        if pos and len(pos) > 0:
-            kd = pos[0]
-            bmax = pos[1]
-        if len(collections)== 0:
-            return
-        collection = collections[-1]
-        filteredDf = dataFrame[dataFrame[sv.COLLECTIONPID] == collection.pid]
-        seriesSteps = filteredDf[sv.SERIESSTEP].values
-        modelName = filteredDf[sv.MODEL_NAME].values[-1]
-        model = self.guiModule.backendHandler.getFittingModelByName(modelName)
-        if model is None:  ## get it from settings
-            model = self.guiModule.backendHandler.currentFittingModel
-        func = model.getFittingFunc(model)
-        if kd is None:
-            kd = filteredDf[sv.KD].values[0]
-        if bmax is None:
-            bmax = filteredDf[sv.BMAX].values[0]
-        extra = percentage(50, max(seriesSteps))
-        initialPoint = min(seriesSteps)
-        finalPoint = max(seriesSteps) + extra
-        xf = np.linspace(initialPoint, finalPoint, 3000)
-        yf = func(xf, kd, bmax)
-        if self.fittedCurve is not None:
-            self.bindingPlot.removeItem(self.fittedCurve)
-        self.fittedCurve = self.bindingPlot.plot(xf, yf, pen=self.bindingPlot.gridPen)
-        # self.bindingPlot.zoomFull()
-        label = f'Kd: {round(kd,2)} \nbmax: {round(bmax,2)}'
-        self.bindingPlot.crossHair.hLine.label.setText(label)
-
 

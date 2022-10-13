@@ -221,9 +221,9 @@ class GuiBase(object):
             ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no'),
                                                                                    # ('icon', 'icons/null')
                                                                                    ]),
-            (),
-            ("Chemical Shift Mapping (alpha)", self.showChemicalShiftMappingModule, [('shortcut', 'ma')]),
-            ("Relaxation (alpha)", self.showRelaxationModule, [('shortcut', 're')]),
+            # (),
+            # ("Chemical Shift Mapping (alpha)", self.showChemicalShiftMappingModule, [('shortcut', 'ma')]),
+            # ("Relaxation (alpha)", self.showRelaxationModule, [('shortcut', 're')]),
             (),
             ("In Active Spectrum Display", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
                                             ("Show/Hide Spectrum Toolbar", self.toggleSpectrumToolbar, [('shortcut', 'sb')]),

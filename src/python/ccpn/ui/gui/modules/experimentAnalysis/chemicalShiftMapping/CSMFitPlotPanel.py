@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-13 15:21:35 +0100 (Thu, October 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -104,5 +104,5 @@ class CSMFitPlotPanel(FitPlotPanel):
             self.bindingPlot.scene().sigMouseMoved.connect(self.bindingPlot.mouseMoved)
             self.bindingPlot.zoomFull()
             self.currentCollectionLabel.setText(collection.pid)
-            self.bindingPlot.fittingHandle.setPos(kd, bmax)
+            # self.bindingPlot.fittingHandle.setPos(kd, bmax)
 

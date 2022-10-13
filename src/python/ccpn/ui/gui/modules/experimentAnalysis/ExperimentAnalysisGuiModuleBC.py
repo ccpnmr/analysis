@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-12 18:07:50 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-13 10:49:59 +0100 (Thu, October 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -179,8 +179,10 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
 
         if rebuildInputData or self.backendHandler._needsRebuildingInputDataTables:
             self.backendHandler._rebuildInputData()
+            self.backendHandler._needsRebuildingInputDataTables = False
         if refit or self.backendHandler._needsRefitting:
             self.backendHandler.fitInputData()
+            self.backendHandler._needsRefitting = False
         for panelName, panel in self.panelHandler.panels.items():
             panel.updatePanel(**{guiNameSpaces.SETTINGS: self.settingsPanelHandler.getAllSettings()})
 

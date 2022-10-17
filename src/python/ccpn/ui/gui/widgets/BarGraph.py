@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-12 10:21:58 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-17 10:46:29 +0100 (Mon, October 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -69,6 +69,7 @@ class BarGraph(pg.BarGraphItem):
         self.barColoursDict = {}
         self.itemXRanges = [] #list of tuples, X start stop for the bar each bar in the plot
         self.itemYRanges = [] # list of tuples, Y start stop for the bar each bar in the plot
+        self._shapes = {}
 
         self.opts = dict(  # setting for BarGraphItem
                 x=self.xValues,
@@ -196,7 +197,7 @@ class BarGraph(pg.BarGraphItem):
         except:
             getLogger().debug("Error getting position of a bar from mouse event")
 
-    def drawLabels(self, ratio=0.5):
+    def drawLabels(self, *args):
         """
         The label Text is the str of the x values and is used to find and set an object to it.
         NB, changing the text to any other str may not set the objects correctly!
@@ -204,13 +205,28 @@ class BarGraph(pg.BarGraphItem):
         """
         self.allLabelsShown = True
         for key, value in self.allValues.items():
-            label = CustomLabel(text=str(key))
+            pos = key + 0.5
+            label = CustomLabel(text=str(int(pos)))
             self.viewBox.addItem(label)
-            label.setPos(int(key), value + ratio)
+            label.setPos(key, value)
             self.labels.append(label)
             label.setBrush(QtGui.QColor(self.brush))
 
-    def drawPicture(self):
+    def drawSelectionBox(self, value):
+        region = self._shapes.get(value, [])
+        if len(region) == 4:
+            brush = self.barColoursDict.get(value)
+            x, y, w, h = region
+            p = QtGui.QPainter(self.picture)
+            self._shape = QtGui.QPainterPath()
+            selectedBarPen = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=2)
+            p.setPen(selectedBarPen)
+            p.setBrush(fn.mkBrush(brush))
+            rect = QtCore.QRectF(x, y, w, h)
+            p.drawRect(rect)
+            self._shape.addRect(rect)
+
+    def drawPicture(self, selected=[]):
         self.itemXRanges = []
         self.itemYRanges = []
         self.picture = QtGui.QPicture()
@@ -271,6 +287,7 @@ class BarGraph(pg.BarGraphItem):
                 raise Exception('must specify either y1 or height')
             height = y1 - y0
 
+
         p.setPen(fn.mkPen(pen))
         p.setBrush(fn.mkBrush(brush))
 
@@ -284,7 +301,7 @@ class BarGraph(pg.BarGraphItem):
             if brushes and not self.useGradient:
                 try:
                     p.setBrush(fn.mkBrush(brushes[i]))
-                    self.barColoursDict[x - width/2] = brushes[i]
+                    self.barColoursDict[x + width/2] = brushes[i]
                 except:
                     getLogger().warn(f'BarGraph error. Cannot find a brush for at position {i}')
 
@@ -292,7 +309,7 @@ class BarGraph(pg.BarGraphItem):
                 x = x0
             else:
                 x = x0[i]
-            self.barColoursDict[x - width/2] = brush
+            self.barColoursDict[x + width/2] = brush
             if np.isscalar(y0):
                 y = y0
             else:
@@ -309,8 +326,13 @@ class BarGraph(pg.BarGraphItem):
                     for heightGroup, brush in zip(heightGroups, brushes):
                         if h in heightGroup:
                             p.setBrush(fn.mkBrush(brush))
-                            self.barColoursDict[x - width/2]=brush
+                            self.barColoursDict[x + width/2]=brush
                             break
+
+            if x+width/2 in selected:
+                p.setPen(selectedBarPen)
+            else:
+                p.setPen(fn.mkPen(pen))
 
             rect = QtCore.QRectF(x, y, w, h)
             _xRange = (x, x+w)
@@ -318,6 +340,7 @@ class BarGraph(pg.BarGraphItem):
             self.itemXRanges.append(_xRange)
             self.itemYRanges.append(_yRange)
             p.drawRect(rect)
+            self._shapes[x + width/2] = (x, y, w, h)
             self._shape.addRect(rect)
 
         p.end()
@@ -333,18 +356,11 @@ class CustomLabel(QtWidgets.QGraphicsSimpleTextItem):
         QtWidgets.QGraphicsSimpleTextItem.__init__(self)
 
         self.setText(text)
-
-        font = self.font()
-        font.setPointSize(15)
-        self.setRotation(-75)
-        self.setFont(font)
+        self.setRotation(-90)
         self.setFlag(self.ItemIgnoresTransformations + self.ItemIsSelectable)
         self.setToolTip(text)
         self.isBelowThreshold = False
-
-
         self.customObject = self.data(int(self.text()))
-
         self.application = application
 
     def setCustomObject(self, obj):

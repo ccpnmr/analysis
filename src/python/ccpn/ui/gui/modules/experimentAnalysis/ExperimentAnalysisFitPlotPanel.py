@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-17 10:46:29 +0100 (Mon, October 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -24,6 +24,7 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 #=========================================================================================
 
 import pyqtgraph as pg
+from ccpn.util.Logging import getLogger
 from pyqtgraph.graphicsItems.ROI import Handle
 from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_LABELLING
@@ -210,14 +211,21 @@ class FittingPlot(pg.PlotItem):
         if len(xs)>0:
             x,y = xs[-1], ys[-1]
             xMin, xMax = min(x), max(x)
-            self.setXRange(xMin, xMax, padding=None, update=True)
+            try:
+                self.setXRange(xMin, xMax, padding=None, update=True)
+            except:
+                getLogger().debug2('Cannot fit XZoom')
 
     def fitYZoom(self):
         xs, ys = self._getPlotData()
         if len(xs) > 0:
             x, y = xs[-1], ys[-1]
             yMin, yMax = min(y), max(y)
-            self.setYRange(yMin, yMax, padding=None, update=True)
+            try:
+                self.setYRange(yMin, yMax, padding=None, update=True)
+            except:
+                getLogger().debug2('Cannot fit XZoom')
+
 
     def _getPlotData(self):
         xs = []

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-13 15:21:35 +0100 (Thu, October 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-17 10:46:29 +0100 (Mon, October 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -61,7 +61,11 @@ class CSMFitPlotPanel(FitPlotPanel):
             filteredDf = dataFrame[dataFrame[sv.COLLECTIONPID] == collection.pid]
             seriesSteps = filteredDf[sv.SERIESSTEP].values
             seriesStepsValues = filteredDf[sv.SERIESSTEPVALUE].values
-            seriesUnit = filteredDf[sv.SERIESUNIT].values[-1]
+            seriesUnits = filteredDf[sv.SERIESUNIT].values
+            if len(seriesUnits)>0:
+                seriesUnit = seriesUnits[0]
+            else:
+                seriesUnit = 'Series Unit Not Given'
             peakPids = filteredDf[sv.PEAKPID].values
             objs = [self.project.getByPid(pid) for pid in peakPids]
             modelName = filteredDf[sv.MODEL_NAME].values[-1]

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-17 10:46:29 +0100 (Mon, October 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -153,6 +153,9 @@ class ToolBarPanel(GuiPanel):
         import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
         # get the match  index-residueCode so that can be mapped to the PDB and pymol
         df = self.guiModule.getGuiOutputDataFrame()
+        if df is None or df.empty:
+            showWarning('No Data available', f'To start calculations, set the input Data from the Settings Panel')
+            return
         sequenceCodeColoursDict = {}
         for i, row in df.iterrows():
             num = row[sv.ASHTAG]

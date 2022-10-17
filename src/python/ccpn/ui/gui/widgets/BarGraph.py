@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-17 16:39:14 +0100 (Mon, October 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-17 17:30:58 +0100 (Mon, October 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -206,6 +206,8 @@ class BarGraph(pg.BarGraphItem):
     def drawPicture(self, selected=[]):
         self.itemXRanges = []
         self.itemYRanges = []
+        self.xValues = []
+        self.yValues = []
         self.picture = QtGui.QPicture()
         self._shape = QtGui.QPainterPath()
         p = QtGui.QPainter(self.picture)
@@ -316,6 +318,8 @@ class BarGraph(pg.BarGraphItem):
             _yRange = (y, h)
             self.itemXRanges.append(_xRange)
             self.itemYRanges.append(_yRange)
+            self.xValues.append(x + width/2)
+            self.yValues.append(h)
             p.drawRect(rect)
             self._shapes[x + width/2] = (x, y, w, h)
             self._shape.addRect(rect)
@@ -399,12 +403,14 @@ class CustomViewBox(pg.ViewBox):
             mask[axis] = self.state['mouseEnabled'][axis]
         else:
             mask = self.state['mouseEnabled'][:]
-        s = 1.02 ** (ev.delta() * self.state['wheelScaleFactor'])  # actual scaling factor
+        s = 1.015 ** (ev.delta() * self.state['wheelScaleFactor'])  # actual scaling factor
         s = [(None if m is False else s) for m in mask]
         if self._zoomOnMouse:
             center = pg.Point(fn.invertQTransform(self.childGroup.transform()).map(ev.pos()))
         else:
-            center = (0,0) #zoom on centre of the plot
+            xRange, yRange = self.viewRange()
+            cx, cy = np.mean(xRange),yRange[0]
+            center = (cx, cy) #zoom on centre of the plot
 
         self._resetTarget()
         self.scaleBy(s, center)

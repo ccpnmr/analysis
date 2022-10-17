@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-17 16:39:14 +0100 (Mon, October 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-17 17:30:58 +0100 (Mon, October 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -290,12 +290,22 @@ class BarGraphWidget(Widget):
         self.customViewBox.setLimits(xMin=xMin, xMax=xMax, yMin=yMin, yMax=yMax)
 
     def updateViewBoxLimits(self):
-        """Updates with default paarameters. Minimum values to show the data only
+        """Updates with default parameters. Minimum values to show the data only
         """
         if self.xValues and self.yValues:
             self.customViewBox.setLimits(xMin=min(self.xValues) / 2, xMax=max(self.xValues) + (max(self.xValues) * 0.5),
                                          yMin=min(self.yValues) / 2, yMax=max(self.yValues) + (max(self.yValues) * 0.5),
                                          )
+        else:
+            xValues = []
+            yValues = []
+            for bar in self.barGraphs:
+                xValues.extend(bar.xValues)
+                yValues.extend(bar.yValues)
+
+            if xValues and yValues:
+                self.customViewBox.setLimits(xMin=0, xMax=max(xValues)*2, yMin=min(yValues), yMax=max(yValues)*2)
+
 
     def setXRange(self, xMin, xMax, padding=None, update=True):
         self.customViewBox.setXRange(xMin, xMax, padding=padding, update=update)

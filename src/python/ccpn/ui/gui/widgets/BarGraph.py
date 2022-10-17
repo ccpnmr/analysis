@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-17 10:46:29 +0100 (Mon, October 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-17 16:39:14 +0100 (Mon, October 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -124,30 +124,6 @@ class BarGraph(pg.BarGraphItem):
                     else:
                         label.setText(getattr(obj, objAttr, ''))
 
-        # for label in self.labels:
-        #     for object in objects:
-        #         if isinstance(object, NmrResidue):
-        #             nmrResidue = object
-        #             if hasattr(nmrResidue, 'sequenceCode'):
-        #
-        #                 if nmrResidue.residue:
-        #                     if nmrResidue.sequenceCode is not None:
-        #                         if str(nmrResidue.sequenceCode) == label.text():
-        #                             label.setData(int(nmrResidue.sequenceCode), object)
-        #         if isinstance(object, Spectrum):
-        #             label.setData(str(object.name), object)
-        #
-        #
-        #                 # if nmrResidue.sequenceCode is not None:
-        #                 #   ind = nmrResidue.nmrChain.nmrResidues.index(nmrResidue)
-        #                 #   lbl = label.text()
-        #                 #   if str(ind) == lbl:
-        #                 #     label.setData(ind, object)
-        #
-        #         # else:
-        #         # pass
-        #         # print('Impossible to set this object to its label. Function implemented only for NmrResidue')
-
     def getValueDict(self):
         for x, y in zip(self.xValues, self.yValues):
             self.allValues.update({x: y})
@@ -178,6 +154,9 @@ class BarGraph(pg.BarGraphItem):
                     label.setSelected(True)
             event.accept()
 
+        #     select the bar (requires repaint)
+        self.drawPicture(selected=[position])
+
     def mouseDoubleClickEvent(self, event):
         position = self._getBarNumberByEvent(event)
         if not position:
@@ -188,8 +167,6 @@ class BarGraph(pg.BarGraphItem):
         event.accept()
 
     def hoverEvent(self, event):
-
-
         try:
             barIndex = self._getBarNumberByEvent(event)
             if self._hoverCallback:

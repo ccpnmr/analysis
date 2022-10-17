@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-17 16:39:14 +0100 (Mon, October 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -262,12 +262,19 @@ class BarGraphWidget(Widget):
         self.updateViewBoxLimits()
 
     def _mouseDoubleClickCallback(self, x, y):
+        self._selectBarNumbers(selected=[x])
         if self._actionCallback:
             self._actionCallback(x,y)
 
     def _mouseSingleClickCallback(self, x, y):
+        self._selectBarNumbers(selected=[x])
         if self._selectionCallback:
             self._selectionCallback(x,y)
+
+    def _selectBarNumbers(self, selected=[]):
+        """ Redraw with selected items """
+        for bar in self.barGraphs:
+            bar.drawPicture(selected)
 
     def _mouseHoverCallback(self, barIndex, x, y):
         if self._hoverCallback:

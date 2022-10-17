@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-17 16:39:14 +0100 (Mon, October 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,7 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 import pyqtgraph as pg
 from PyQt5 import QtCore
 from ccpn.util.Logging import getLogger
+from ccpn.core.lib.Notifiers import Notifier
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 from ccpn.util.Colour import colorSchemeTable, hexToRgb, rgbaRatioToHex, colourNameToHexDict
@@ -71,6 +72,10 @@ class BarPlotPanel(GuiPanel):
             self.barGraphWidget.xLine.setPos(_thresholdValueW.getValue())
             self.barGraphWidget.showThresholdLine(True)
             _thresholdValueW.doubleSpinBox.valueChanged.connect(self._updateThresholdValueFromSettings)
+
+        #     current
+        self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
+                                                 callback=self._currentCollectionCallback, onceOnly=True)
 
     def initWidgets(self):
         ## this colour def could go in an higher position as they are same for all possible plots
@@ -282,9 +287,10 @@ class BarPlotPanel(GuiPanel):
         if df is not None:
             pid = df.loc[ix, sv.COLLECTIONPID]
             collection = self.project.getByPid(pid)
-            peaks = getPeaksFromCollection(collection)
-            self.current.peaks = peaks
-            self.current.collection = collection
+            if self.current.collection != collection:
+                peaks = getPeaksFromCollection(collection)
+                self.current.peaks = peaks
+                self.current.collection = collection
 
     def _mouseDoubleClickEvent(self, x, y):
         from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import _navigateToPeak
@@ -343,3 +349,15 @@ class BarPlotPanel(GuiPanel):
                                        disappearedBrush=self._untraceableBrush,
                                        )
         self.barGraphWidget.xLine.setPen(self._tresholdLineBrush)
+
+    def _currentCollectionCallback(self, *args):
+        # select collection on table.
+        backendHandler = self.guiModule.backendHandler
+
+        df = self.guiModule.getGuiOutputDataFrame()
+        pids = [co.pid for co in self.current.collections]
+        filtered = df.getByHeader(sv.COLLECTIONPID, pids)
+        if filtered.empty:
+            return
+        barNumbers = filtered[sv.ASHTAG].values
+        self.barGraphWidget._selectBarNumbers(selected=barNumbers)

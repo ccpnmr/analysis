@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-17 17:30:58 +0100 (Mon, October 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-17 18:36:23 +0100 (Mon, October 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -114,13 +114,14 @@ class YBarAxisItem(pg.AxisItem):
 class BarGraphWidget(Widget):
 
     def __init__(self, parent, application=None, xValues=None, yValues=None, colour='r', actionCallback=None,
-                 selectionCallback=None, hoverCallback=None, objects=None, threshouldLine=0, backgroundColour='w', **kwds):
+                 selectionCallback=None, hoverCallback=None, objects=None, threshouldLine=0, backgroundColour='w',
+                 selectionBoxEnabled=True, **kwds):
         super().__init__(parent, **kwds)
 
         self.application = application
         self.backgroundColour = backgroundColour
         self.thresholdLineColour = 'b'
-
+        self._selectionBoxEnabled = selectionBoxEnabled
         self._setViewBox()
         self._setLayout()
         self.setContentsMargins(1, 1, 1, 1)
@@ -256,6 +257,7 @@ class BarGraphWidget(Widget):
         self.barGraphs.append(self.barGraph)
         self.customViewBox.addItem(self.barGraph)
         self.customViewBox.addItem(self._hoverBox)
+        self.customViewBox._selectionBoxEnabled = self._selectionBoxEnabled
         self.xValues = xValues
         self.yValues = yValues
         self.objects = objects
@@ -428,6 +430,7 @@ class BarGraphWidget(Widget):
         self.customViewBox.addItem(self.belowThreshold)
         self.customViewBox.addItem(self.disappearedPeaks)
         self.customViewBox.addItem(self._hoverBox)
+        self.customViewBox._selectionBoxEnabled = self._selectionBoxEnabled
         self.barGraphs.append(self.aboveThreshold)
         self.barGraphs.append(self.belowThreshold)
         self.barGraphs.append(self.disappearedPeaks)

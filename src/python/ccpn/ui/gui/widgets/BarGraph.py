@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-17 17:30:58 +0100 (Mon, October 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-17 18:36:23 +0100 (Mon, October 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -380,6 +380,7 @@ class CustomViewBox(pg.ViewBox):
         self.__xLine = pg.InfiniteLine(angle=0, movable=True, pen='b')
         self.addItem(self.xLine)
         self.contextMenu = None
+        self._selectionBoxEnabled = True
 
     @property
     def xLine(self):
@@ -435,15 +436,18 @@ class CustomViewBox(pg.ViewBox):
         """
         Updates drawing of selection box as mouse is moved.
         """
-        r = QtCore.QRectF(p1, p2)
-        # print('PPP',dir(self.mapToParent(ev.buttonDownPos())))
+        if self._selectionBoxEnabled:
+            r = QtCore.QRectF(p1, p2)
+            # print('PPP',dir(self.mapToParent(ev.buttonDownPos())))
 
-        r = self.mapRectFromParent(r)
-        self.selectionBox.setPos(self.mapToParent(ev.buttonDownPos()))
+            r = self.mapRectFromParent(r)
+            self.selectionBox.setPos(self.mapToParent(ev.buttonDownPos()))
 
-        self.selectionBox.resetTransform()
-        self.selectionBox.scale(r.width(), r.height())
-        self.selectionBox.show()
+            self.selectionBox.resetTransform()
+            self.selectionBox.scale(r.width(), r.height())
+            self.selectionBox.show()
+        else:
+            self.selectionBox.hide()
 
     def mouseClickEvent(self, event):
 

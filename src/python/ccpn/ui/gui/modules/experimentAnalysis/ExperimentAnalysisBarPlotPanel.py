@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-17 16:39:14 +0100 (Mon, October 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-17 18:36:23 +0100 (Mon, October 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -92,8 +92,10 @@ class BarPlotPanel(GuiPanel):
                                              actionCallback=self._mouseDoubleClickEvent,
                                              selectionCallback=self._mouseSingleClickEvent,
                                              hoverCallback=self._mouseHoverCallbackEvent,
+                                             selectionBoxEnabled = False,
                                              threshouldLine=0.1, grid=(1,0), gridSpan=(1, 2))
         self.barGraphWidget.showThresholdLine(True)
+
         self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._thresholdLineMoved)
         self._setBarGraphWidget()
         self.toolbar = ExperimentAnalysisPlotToolBar(parent=self, plotItem=self.barGraphWidget,

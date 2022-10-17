@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-17 18:56:01 +0100 (Mon, October 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -176,7 +176,7 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     def updateAll(self, refit=False, rebuildInputData=False):
         """ Update all Gui panels"""
         getLogger().info(f'Updating All ...')
-
+        currentCollections = self.current.collections
         if rebuildInputData or self.backendHandler._needsRebuildingInputDataTables:
             self.backendHandler._rebuildInputData()
             self.backendHandler._needsRebuildingInputDataTables = False
@@ -185,7 +185,9 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
             self.backendHandler._needsRefitting = False
         for panelName, panel in self.panelHandler.panels.items():
             panel.updatePanel(**{guiNameSpaces.SETTINGS: self.settingsPanelHandler.getAllSettings()})
-
+        ## make sure all is selected as before the update
+        self.current.collections = []
+        self.current.collections = currentCollections
         #set update done.
         toolbar = self.panelHandler.getToolBarPanel()
         if toolbar:

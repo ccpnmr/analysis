@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-04 11:38:40 +0000 (Tue, January 04, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-10-17 14:51:22 +0100 (Mon, October 17, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -316,13 +316,12 @@ class SpectrumView(AbstractWrapperObject):
         number = self.positiveContourCount
         if number < 1:
             return tuple()
-        else:
-            result = [self.positiveContourBase]
-            factor = self.positiveContourFactor
-            for ii in range(1, number):
-                result.append(factor * result[-1])
-            #
-            return tuple(result)
+
+        result = [self.positiveContourBase]
+        factor = self.positiveContourFactor
+        result.extend(factor * result[-1] for _ in range(1, number))
+        #
+        return tuple(result)
 
     @property
     def negativeLevels(self) -> Tuple[float, ...]:
@@ -330,13 +329,12 @@ class SpectrumView(AbstractWrapperObject):
         number = self.negativeContourCount
         if number < 1:
             return tuple()
-        else:
-            result = [self.negativeContourBase]
-            factor = self.negativeContourFactor
-            for ii in range(1, number):
-                result.append(factor * result[-1])
-            #
-            return tuple(result)
+
+        result = [self.negativeContourBase]
+        factor = self.negativeContourFactor
+        result.extend(factor * result[-1] for _ in range(1, number))
+        #
+        return tuple(result)
 
     @property
     def sliceColour(self) -> str:
@@ -395,7 +393,7 @@ class SpectrumView(AbstractWrapperObject):
     @property
     def dimensionIndices(self) -> tuple:
         """Spectrum dimension indices (0-based) in display order"""
-        return tuple([dim - 1 for dim in self.dimensions])
+        return tuple(dim - 1 for dim in self.dimensions)
 
     # deprecated
     # axisIndices = dimensionIndices
@@ -482,9 +480,8 @@ class SpectrumView(AbstractWrapperObject):
         :return Spectrum instance
         """
         position = self._getPointPosition(ppmPositions)
-        axisCodes = self.axisCodes[0:2]
-        plane = self.spectrum.extractPlaneToFile(axisCodes=axisCodes, position=position)
-        return plane
+        axisCodes = self.axisCodes[:2]
+        return self.spectrum.extractPlaneToFile(axisCodes=axisCodes, position=position)
 
     #=========================================================================================
     # Implementation functions

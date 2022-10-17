@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-18 13:02:01 +0100 (Thu, August 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-17 10:49:55 +0100 (Mon, October 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -102,6 +102,34 @@ class FollowNearestPeak(FollowPeakAbc):
         idx = np.array([np.linalg.norm(x + y) for (x, y) in targets - originPosition]).argmin()
         return idx
 
+
+class _FollowByMinimalShiftMapping(FollowPeakAbc):
+    """
+    INTERNAL. under development
+    """
+    name = 'MinimalShiftMapping'
+    info = 'Use the Minimal Shift Mapping to create clusters'
+
+
+    def findMatches(self, originPeaks, targetPeaks):
+        """
+        INTERNAL. under development """
+        getLogger().warn('Under development. Do not use yet.')
+        from scipy.spatial.distance import cdist
+        from scipy.optimize import linear_sum_assignment
+        originPeaks = np.array(originPeaks)
+        targetPeaks = np.array(targetPeaks)
+        originPeakPos = [pk.position for pk in originPeaks]
+        targetPeakPos = [pk.position for pk in targetPeaks]
+        originPeakPos = np.array(originPeakPos)
+        targetPeakPos = np.array(targetPeakPos)
+        Vs= {'1H':1, '13C':0.25, '15N':0.142} # alpha factors
+        ## Compute distance between each pair of the two PeakLists
+        distanceMatrix = cdist(originPeakPos, targetPeakPos, metric='seuclidean', V=[0.142,1])
+        originIndexes, targetIndexes = linear_sum_assignment(distanceMatrix)
+        originPeaks = originPeaks[originIndexes]
+        targetPeaks = targetPeaks[targetIndexes]
+        return list(zip(originPeaks, targetPeaks))
 
 class FollowSameAssignmentPeak(FollowPeakAbc):
 

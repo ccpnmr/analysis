@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-04 17:38:24 +0100 (Tue, October 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-17 14:50:57 +0100 (Mon, October 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -6022,32 +6022,38 @@ class CcpnGLWidget(QOpenGLWidget):
         """
         self._successiveClicks = None
 
-    def _selectPeak(self, xPosition, yPosition):
+    def _selectPeak(self, xPosition, yPosition, append=False):
         """(de-)Select first peak near cursor xPosition, yPosition
         if peak already was selected, de-select it
         """
-        peaks = set(self.current.peaks)
         newPeaks = self._mouseInPeak(xPosition, yPosition)
+        if append:
+            peaks = set(self.current.peaks)
+            self.current.peaks = list(peaks ^ set(newPeaks))  # symmetric difference
+        else:
+            self.current.peaks = newPeaks
 
-        self.current.peaks = list(peaks ^ set(newPeaks))  # symmetric difference
-
-    def _selectIntegral(self, xPosition, yPosition):
+    def _selectIntegral(self, xPosition, yPosition, append=False):
         """(de-)Select first integral near cursor xPosition, yPosition
         if integral already was selected, de-select it
         """
-        integrals = set(self.current.integrals)
         newIntegrals = self._mouseInIntegral(xPosition, yPosition)
+        if append:
+            integrals = set(self.current.integrals)
+            self.current.integrals = list(integrals ^ set(newIntegrals))  # symmetric difference
+        else:
+            self.current.integrals = newIntegrals
 
-        self.current.integrals = list(integrals ^ set(newIntegrals))  # symmetric difference
-
-    def _selectMultiplet(self, xPosition, yPosition):
+    def _selectMultiplet(self, xPosition, yPosition, append=False):
         """(de-)Select first multiplet near cursor xPosition, yPosition
         if multiplet already was selected, de-select it
         """
-        multiplets = set(self.current.multiplets)
         newMultiplets = self._mouseInMultiplet(xPosition, yPosition)
-
-        self.current.multiplets = list(multiplets ^ set(newMultiplets))  # symmetric difference
+        if append:
+            multiplets = set(self.current.multiplets)
+            self.current.multiplets = list(multiplets ^ set(newMultiplets))  # symmetric difference
+        else:
+            self.current.multiplets = newMultiplets
 
     def _pickAtMousePosition(self, event):
         """pick the peaks at the mouse position
@@ -6200,24 +6206,24 @@ class CcpnGLWidget(QOpenGLWidget):
             # Control-left-click; (de-)select peak and add/remove to selection
             event.accept()
             self._resetBoxes()
-            self._selectMultiplet(xPosition, yPosition)
-            self._selectPeak(xPosition, yPosition)
-            self._selectIntegral(xPosition, yPosition)
+            self._selectMultiplet(xPosition, yPosition, append=True)
+            self._selectPeak(xPosition, yPosition, append=True)
+            self._selectIntegral(xPosition, yPosition, append=True)
 
         elif leftMouse(event):
             # Left-click; select peak/integral/multiplet, deselecting others
             event.accept()
             self._resetBoxes()
-            self.current.clearPeaks()
-            self.current.clearIntegrals()
-            self.current.clearMultiplets()
+            # self.current.clearPeaks()
+            # self.current.clearIntegrals()
+            # self.current.clearMultiplets()
 
             self._selectMultiplet(xPosition, yPosition)
             self._selectPeak(xPosition, yPosition)
             self._selectIntegral(xPosition, yPosition)
 
         elif shiftRightMouse(event):
-            # Two successive shift-right-clicks: define zoombox
+            # Two successive shift-right-clicks: define zoom-box
             event.accept()
             if self._successiveClicks is None:
                 self._resetBoxes()

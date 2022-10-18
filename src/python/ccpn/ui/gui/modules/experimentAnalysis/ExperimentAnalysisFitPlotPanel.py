@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-17 18:56:01 +0100 (Mon, October 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-18 11:20:52 +0100 (Tue, October 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,7 @@ from ccpn.ui.gui.widgets.Action import Action
 from ccpn.core.Peak import Peak
 from ccpn.ui.gui.widgets.ViewBox import CrossHair
 from ccpn.core.lib.Notifiers import Notifier
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 
 class ExperimentAnalysisPlotToolBar(ToolBar):
 
@@ -342,13 +343,16 @@ class FitPlotPanel(GuiPanel):
         self.getLayout().addWidget(self._bindingPlotView, 1,0,1,3)
 
     def _currentCollectionCallback(self, *args):
-        backendHandler = self.guiModule.backendHandler
-        if not backendHandler.inputCollection:
-            return
-        if self.current.collection in self.guiModule.backendHandler.inputCollection.items:
-            self.plotCurrentData()
+
         if self.current.collection is None:
             self.clearData()
+            return
+        df = self.guiModule.getGuiOutputDataFrame()
+        pids = [co.pid for co in self.current.collections]
+        filtered = df.getByHeader(sv.COLLECTIONPID, pids)
+        if not filtered.empty:
+            self.plotCurrentData()
+
 
     def plotCurve(self, xs, ys):
         self.clearData()

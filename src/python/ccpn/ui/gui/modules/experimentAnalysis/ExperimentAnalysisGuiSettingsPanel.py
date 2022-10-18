@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-13 17:18:34 +0100 (Thu, October 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-18 15:56:16 +0100 (Tue, October 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -659,6 +659,7 @@ class GuiFittingPanel(GuiSettingPanel):
         tipTexts_ddFittingModels = [model.FullDescription for model in models]
         modelNames = [model.ModelName for model in models]
         extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddFittingModels]
+        enabledModels = [model.isEnabled for model in models]
         settingsDict = od((
             (guiNameSpaces.WidgetVarName_FittingSeparator,
              {'label': guiNameSpaces.Label_FittingSeparator,
@@ -681,7 +682,7 @@ class GuiFittingPanel(GuiSettingPanel):
                        'compoundKwds': {'texts': modelNames,
                                         'extraLabels': extraLabels_ddFittingModels,
                                         'tipTexts': tipTexts_ddFittingModels,
-
+                                        'enabledTexts': enabledModels,
                                         'direction': 'v',
                                         'tipText': '',
                                         'hAlign': 'l',

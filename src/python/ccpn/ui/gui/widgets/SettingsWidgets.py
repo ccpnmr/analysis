@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-04 18:25:41 +0100 (Tue, October 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-10-18 15:56:16 +0100 (Tue, October 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -66,7 +66,7 @@ from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
 
 ALL = '<Use all>'
-UseCurrent = '<Use current>'
+UseCurrent = '<Use active>'
 IncludeCurrent = '<Current Strip>'
 UseLastOpened = '<Use last opened>'  # used for last opened display
 

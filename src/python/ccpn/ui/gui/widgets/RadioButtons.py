@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-17 14:49:34 +0100 (Mon, October 17, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-10-18 15:56:16 +0100 (Tue, October 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,7 @@ class RadioButtons(QtWidgets.QWidget, Base):
     def __init__(self, parent, texts=None, selectedInd=None, exclusive=True,
 
                  callback=None, direction='h', tipTexts=None, objectNames=None, squared=False,
-                 extraLabels=None, extraLabelIcons=None,
+                 extraLabels=None, extraLabelIcons=None, enabledTexts=None,
                  icons=None, initButtons=True,
                  **kwds):
 
@@ -99,6 +99,10 @@ class RadioButtons(QtWidgets.QWidget, Base):
 
         buttonGroup.buttonClicked.connect(self._callback)
         self.setCallback(callback)
+
+        if enabledTexts is not None and len(enabledTexts)==len(texts):
+            for button, isEnabled in zip(self.radioButtons, enabledTexts):
+                button.setEnabled(isEnabled)
 
     def setButtons(self, texts=None, selectedInd=None, direction='h', tipTexts=None, objectNames=None, silent=False,
                    icons=None):

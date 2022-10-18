@@ -12,12 +12,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-25 16:21:44 +0100 (Thu, August 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-18 15:56:16 +0100 (Tue, October 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -82,6 +82,24 @@ def oneSiteBinding_func(x, Kd, BMax):
     """
     return (BMax * x) / (x + Kd)
 
+def cooperativity_func(x, Kd, BMax, Hs):
+    """
+    #FittingFunc. Called recursively with from the Minimiser
+    Args are used/inspected to set the attr to the Minimiser object and other functionality. Do not change signature characters
+    :param x: 1d array ( in CSM  ligand concentration)
+    :param kd: the initial kd value (in CSM the extrapolated ligand concentration to get a half-maximum binding at equilibrium)
+    :param bmax: in CSM is the CS deltas
+    :param Hs: hill slope
+    :return:
+    """
+    return (BMax * x **Hs) / (x**Hs + Kd**Hs)
+
+# import matplotlib.pyplot as plt
+# x = np.arange(1, 1000)
+# Kd, BMax, Hs = 250, 100, 3
+# y = cooperativity_func(x, Kd, BMax, Hs)
+# plt.plot(x,y)
+# plt.show()
 
 def blank_func(x, argA, argB):
     """

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-18 11:20:52 +0100 (Tue, October 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-18 15:56:16 +0100 (Tue, October 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,7 +50,7 @@ class CSMFitPlotPanel(FitPlotPanel):
         pass
 
     def plotCurrentData(self, kd=None, bmax=None, *args):
-
+        #TODO clean up!
         collections = self.current.collections
         if not collections:
             self.clearData()
@@ -88,16 +88,17 @@ class CSMFitPlotPanel(FitPlotPanel):
         model = self.guiModule.backendHandler.getFittingModelByName(modelName)
         if model is None: ## get it from settings
             model = self.guiModule.backendHandler.currentFittingModel
+        else:
+            model = model()
         func = model.getFittingFunc(model)
-        if kd is None:
-            kd = filteredDf[sv.KD].values[0]
-        if bmax is None:
-            bmax = filteredDf[sv.BMAX].values[0]
+        funcArgs = model.modelArgumentNames
+        argsFit = filteredDf.iloc[0][funcArgs]
+        fittingArgs = argsFit.astype(float).to_dict()
         extra = percentage(50, max(seriesSteps))
         initialPoint = min(seriesSteps)
         finalPoint = max(seriesSteps)+extra
         xf = np.linspace(initialPoint, finalPoint, 3000)
-        yf = func(xf, kd, bmax)
+        yf = func(xf, **fittingArgs)
         self.currentCollectionLabel.setText('')
         self.bindingPlot.clear()
         self.fittedCurve = self.bindingPlot.plot(xf, yf,  pen=self.bindingPlot.gridPen)

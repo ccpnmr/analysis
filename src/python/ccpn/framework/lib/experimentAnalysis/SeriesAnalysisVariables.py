@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-12 18:07:50 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-18 15:56:16 +0100 (Tue, October 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -63,7 +63,8 @@ KD               = 'Kd'
 BMAX             = 'BMax'
 KD_ERR           = f'{KD}{_ERR}'
 BMAX_ERR         = f'{BMAX}{_ERR}'
-
+HillSlope        = 'Hs'
+HillSlope_ERR    = f'{HillSlope}{_ERR}'
 DIMENSION        = 'dimension'
 ISOTOPECODE      = 'isotopeCode'
 CLUSTERID        = 'clusterId'
@@ -220,10 +221,13 @@ OVERRIDE_OUTPUT_DATATABLE = 'overrideOutputDataTables'
 OUTPUT_DATATABLE_NAME = 'outputDataTableName'
 BLANKMODELNAME = 'Blank'
 
-## OneSiteBindingModel
+## Receptor Binding Models
 ONE_BINDING_SITE_MODEL = 'One Site Binding'
+TWO_BINDING_SITE_MODEL = 'Two Site Binding'
+ONE_BINDING_ALLOSTERIC_SITE_MODEL = 'One Site with Allosteric Binding'
 FRACTION_BINDING_MODEL = 'Fraction Binding'
-
+COOPERATIVITY_BINDING_MODEL = 'Cooperativity Binding'
+FMNOYERROR = 'Fitting Model not implemented yet'
 #### residues names
 CCP_3LETTER_CODES = CCP_CODES_SORTED
 EXCLUDEDRESIDUETYPES = 'ExcludedResidueTypes'

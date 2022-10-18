@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-18 11:20:52 +0100 (Tue, October 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-18 15:56:16 +0100 (Tue, October 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -201,12 +201,12 @@ class _ExperimentalAnalysisTableABC(Table):
 
     def _currentCollectionCallback(self, *args):
         # select collection on table.
-
         if self.current.collection is None:
             self.clearSelection()
             return
-
         df = self.guiModule.getGuiOutputDataFrame()
+        if df is None:
+            return
         pids = [co.pid for co in self.current.collections]
         filtered = df.getByHeader(sv.COLLECTIONPID, pids)
         if filtered.empty:

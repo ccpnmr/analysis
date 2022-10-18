@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-13 15:58:43 +0100 (Thu, October 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-18 15:56:15 +0100 (Tue, October 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -52,9 +52,9 @@ class FractionBindingMinimiser(MinimiserModel):
                      BMAXstr:0.5}
 
     def __init__(self, **kwargs):
-        super().__init__(Binding1SiteMinimiser.FITTING_FUNC, **kwargs)
+        super().__init__(FractionBindingMinimiser.FITTING_FUNC, **kwargs)
         self.name = self.MODELNAME
-        self.params = self.make_params(**self.defaultParams)
+        self.params = self.make_params(**FractionBindingMinimiser.defaultParams)
 
     def guess(self, data, x, **kws):
         """
@@ -96,7 +96,7 @@ class Binding1SiteMinimiser(MinimiserModel):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
         super().__init__(Binding1SiteMinimiser.FITTING_FUNC, **kwargs)
         self.name = self.MODELNAME
-        self.params = self.make_params(**self.defaultParams)
+        self.params = self.make_params(**Binding1SiteMinimiser.defaultParams)
 
     def guess(self, data, x, **kws):
         """
@@ -119,6 +119,68 @@ class Binding1SiteMinimiser(MinimiserModel):
         params.get(self.BMAXstr).min = 0.001
         params.get(self.BMAXstr).max = np.max(data)+(np.max(data)*0.5)
         return params
+
+
+class BindingCooperativityMinimiser(MinimiserModel):
+    """A model based on the Binding with Cooperativity  Fitting equation.
+    """
+
+    FITTING_FUNC = lf.cooperativity_func
+    MODELNAME = 'Cooperativity_binding_Model'
+
+    KDstr = sv.KD # They must be exactly as they are defined in the FITTING_FUNC arguments! This was too hard to change!
+    BMAXstr = sv.BMAX
+    HillSlopestr = sv.HillSlope
+    defaultParams = {KDstr:1,
+                     BMAXstr:0.5,
+                     HillSlopestr:1}
+
+    def __init__(self, independent_vars=['x'], prefix='', nan_policy=sv.OMIT_MODE, **kwargs):
+        kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
+        super().__init__(BindingCooperativityMinimiser.FITTING_FUNC, **kwargs)
+        self.name = self.MODELNAME
+        self.params = self.make_params(**BindingCooperativityMinimiser.defaultParams)
+
+    def guess(self, data, x, **kws):
+        """
+        :param data: y values 1D array
+        :param x: the x axis values. 1D array
+        :param kws:
+        :return: dict of params needed for the fitting
+        """
+        print(self.params, 'BEFORE')
+        params = self.params
+        print(params, 'BEFORE params')
+        minKD = np.min(x)
+        maxKD = np.max(x)+(np.max(x)*0.5)
+        if minKD == maxKD == 0:
+            getLogger().warning(f'Fitting model min==max {minKD}, {maxKD}')
+            minKD = -1
+
+        params.get(self.HillSlopestr).value = 1
+        params.get(self.KDstr).value = np.mean(x)
+        params.get(self.KDstr).min = minKD
+        params.get(self.KDstr).max = maxKD
+        params.get(self.BMAXstr).value = np.mean(data)
+        params.get(self.BMAXstr).min = 0.001
+        params.get(self.BMAXstr).max = np.max(data)+(np.max(data)*0.5)
+        print(params, 'RETURN params')
+        return params
+
+class Binding2SiteMinimiser(MinimiserModel):
+    """A model based on the twoSiteBindingCurve Fitting equations.
+    To be implemented
+    """
+    FITTING_FUNC = None
+    MODELNAME = '2_Site_Binding_Model'
+
+class Binding1SiteAllostericMinimiser(MinimiserModel):
+    """A model based on the 1-Site-with-Allosteric Fitting equation.
+    To be implemented
+    """
+    FITTING_FUNC = None
+    MODELNAME = '1SiteAllosteric_Model'
+
 
 
 ########################################################################################################################
@@ -249,14 +311,19 @@ class OneSiteBindingModel(FittingModelABC):
     """
     ModelName = sv.ONE_BINDING_SITE_MODEL
     Info = 'Fit data to using the One-Binding-Site model.'
-    Description = ' ... '
+    Description = '''Fitting model for a saturation binding experiment analysis.\nCalculate Bmax and Kd using the fitting function Y = Bmax*X/(Kd + X).
+                    Bmax: is the maximum specific binding and in the CSM is given by the Relative displacement
+                    (Deltas among chemicalShifts).
+                    Kd: is the (equilibrium) dissociation constant in the same unit as the Series.
+                    The Kd represents the [ligand] required to get a half-maximum binding at equilibrium.
+                    X: is the Series steps. (Series unit/values are editable in the Spectrum Group) 
+                    '''
     References = '''
                     1) Eq. (x) M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
                   '''
     MaTex = r'$\frac{B_{Max} * [L]}{[L] + K_d}$'
     Minimiser = Binding1SiteMinimiser
-
-
+    FullDescription = f'{Info} \n {Description}\nSee References: {References}'
 
     def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
         """
@@ -267,7 +334,6 @@ class OneSiteBindingModel(FittingModelABC):
         :return:
         """
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
-        #TODO Missing rescale option
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
         for collectionId, groupDf in grouppedByCollectionsId:
             groupDf.sort_values([sv.SERIESSTEP], inplace=True)
@@ -291,17 +357,126 @@ class OneSiteBindingModel(FittingModelABC):
         return inputData
 
 
+
+class TwoSiteBindingModel(FittingModelABC):
+    """
+    ChemicalShift Analysis: Two Site-Binding Curve calculation model
+    """
+    ModelName = sv.TWO_BINDING_SITE_MODEL
+    Info = 'Fit data to using the Two-Binding-Site model.'
+    Description = sv.NIY_WARNING
+    References  = sv.NIY_WARNING
+    MaTex = r''
+    Minimiser = Binding2SiteMinimiser
+    FullDescription = f'{Info} \n {Description}\nSee References: {References}'
+    isEnabled = False
+
+    def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
+        """
+        :param inputData:
+        :param rescale:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        raise RuntimeError(sv.FMNOYERROR)
+
+
+class OneSiteWithAllostericBindingModel(FittingModelABC):
+    """
+    ChemicalShift Analysis: One Site-Binding Curve with allosteric modulator calculation model
+    """
+    ModelName = sv.ONE_BINDING_ALLOSTERIC_SITE_MODEL
+    Info = 'Fit data to using the One Site with allosteric modulator model.'
+    Description = sv.NIY_WARNING
+    References  = sv.NIY_WARNING
+    # References = '''
+    #                 1) A. Christopoulos and T. Kenakin, Pharmacol Rev, 54: 323-374, 2002.
+    #               '''
+    MaTex = r''
+    Minimiser = Binding1SiteAllostericMinimiser
+    FullDescription = f'{Info} \n {Description}\nSee References: {References}'
+    isEnabled = False
+
+    def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
+        """
+        :param inputData:
+        :param rescale:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        raise RuntimeError(sv.FMNOYERROR)
+
+
+class CooperativityBindingModel(FittingModelABC):
+    """
+    ChemicalShift Analysis: Cooperativity-Binding calculation model
+    """
+    ModelName = sv.COOPERATIVITY_BINDING_MODEL
+    Info = 'Fit data to using the  Cooperativity Binding  model.'
+    Description = '''Fitting model for a saturation binding experiment analysis.\nCalculate Bmax and Kd using the fitting function Y=Bmax*X^Hs/(Kd^Hs + X^Hs).
+                    Bmax: is the maximum specific binding and in the CSM is given by the Relative displacement
+                    (Deltas among chemicalShifts).
+                    Kd: is the (equilibrium) dissociation constant in the same unit as the Series.
+                    The Kd represents the [ligand] required to get a half-maximum binding at equilibrium.
+                    X: is the Series steps. (Series unit/values are editable in the Spectrum Group) 
+                    Hs: Hill slope coefficient.
+                    \nHs = 1: ligand/monomer binds to one site with no cooperativity.
+                    \nHs > 1: ligand/monomer binds to multiple sites with positive cooperativity.
+                    \nHs < 0: ligand/monomer binds to multiple sites with variable affinities or negative cooperativity.
+                    '''
+    References = '''
+                    1) https://en.wikipedia.org/wiki/Cooperative_binding. The Hill equation.
+                  '''
+    MaTex = r'$\frac{B_{Max} * [L]^Hs }{[L]^Hs + K_d^Hs}$'
+    Minimiser = BindingCooperativityMinimiser
+    FullDescription = f'{Info} \n {Description}\nSee References: {References}'
+
+    def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
+        """
+        :param inputData:
+        :param rescale:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
+        grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
+        for collectionId, groupDf in grouppedByCollectionsId:
+            groupDf.sort_values([sv.SERIESSTEP], inplace=True)
+            seriesSteps = groupDf[sv.SERIESSTEP]
+            seriesValues = groupDf[sv.SERIESSTEPVALUE]
+            xArray = seriesSteps.values # e.g. ligand concentration
+            yArray = seriesValues.values # DeltaDeltas
+            minimiser = self.Minimiser()
+            try:
+                params = minimiser.guess(yArray, xArray)
+                print(params, 'TTTGODFCSXZ')
+                result = minimiser.fit(yArray, params, x=xArray)
+            except:
+                getLogger().warning(f'Fitting Failed for collectionId: {collectionId} data.')
+                params = minimiser.params
+                result = MinimiserResult(minimiser, params)
+            inputData.loc[collectionId, sv.MODEL_NAME] = self.ModelName
+            inputData.loc[collectionId, sv.MINIMISER_METHOD] = minimiser.method
+            for ix, row in groupDf.iterrows():
+                for resultName, resulValue in result.getAllResultsAsDict().items():
+                    inputData.loc[ix, resultName] = resulValue
+        return inputData
+
+
 class FractionBindingModel(FittingModelABC):
     """
     ChemicalShift Analysis: FractionBinding fitting Curve calculation model
     """
     ModelName = sv.FRACTION_BINDING_MODEL
     Info = 'Fit data to using the Fraction Binding model.'
-    Description = ' ... '
-    References = '''
-                '''
+    Description = sv.NIY_WARNING
+    References  = sv.NIY_WARNING
     MaTex = ''
     Minimiser = FractionBindingMinimiser
+    isEnabled = False
 
     def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
         getLogger().critical(sv.NIY_WARNING)
@@ -312,11 +487,15 @@ class FractionBindingModel(FittingModelABC):
 
 
 
-## Add a new Model to the list to be available throughout the program
 FittingModels = [
         OneSiteBindingModel,
-        FractionBindingModel
+        CooperativityBindingModel,
+        TwoSiteBindingModel,
+        OneSiteWithAllostericBindingModel,
+        FractionBindingModel,
+
         ]
+## Add a new Model to the list to be available throughout the program
 
 CalculationModels = [
                     EuclideanCalculationModel,

@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-25 16:21:44 +0100 (Thu, August 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-18 15:56:16 +0100 (Tue, October 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -51,13 +51,14 @@ pd.set_option('display.max_rows', 50)  # or 1000
 class FittingModelABC(ABC):
 
     ModelName       = 'ModelName'       # The Model name.
-    Info            = 'the info'        # A brief description of the fitting model.
-    Description     = 'Description'     # A simplified representation of the used equation(s).
+    Info            = ''                # A brief description of the fitting model.
+    Description     = ''                # A simplified representation of the used equation(s).
     MaTex           = r''               # MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
-    References      = 'References'      # A list of journal article references. E.g.: DOIs or title/authors/year/journal; web-pages.
+    References      = ''                # A list of journal article references. E.g.: DOIs or title/authors/year/journal; web-pages.
     Minimiser       = None              # The fitting minimiser model object (initiated)
     FullDescription = f'{Info} \n {Description}\nSee References: {References}'
     PeakProperty    = sv._HEIGHT        # The peak property to fit. One of ['height', 'lineWidth', 'volume', 'ppmPosition']
+    isEnabled       = True              # True to enable on the GUI and be selected/used
 
     def __init__(self, *args, **kwargs):
 

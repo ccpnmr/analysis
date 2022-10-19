@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-01 14:10:06 +0100 (Thu, September 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-19 17:52:06 +0200 (Wed, October 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -189,7 +189,7 @@ class RaisePopupABC():
     """
 
     # These should be subclassed
-    popupClass = None  # a sub-class of CcpNmrDialog; used to generate a popup
+    popupClass = None  # a subclass of CcpNmrDialog; used to generate a popup
     objectArgumentName = 'obj'  # argument name set to obj passed to popupClass instantiation
     parentObjectArgumentName = None  # parent argument name set to obj passed to popupClass instantiation when useParent==True
 
@@ -207,7 +207,8 @@ class RaisePopupABC():
         """
         self.useParent = useParent  # Use parent of object
         if useParent and self.parentObjectArgumentName is None:
-            raise RuntimeError('useParent==True requires definition of parentObjectArgumentName (%s)' % self)
+            raise RuntimeError(f'useParent==True requires definition of parentObjectArgumentName ({self})')
+
         self.useNone = useNone
         self.kwds = kwds
         # these get set upon callback
@@ -225,8 +226,8 @@ class RaisePopupABC():
 
         popup = self.popupClass(parent=node.sidebar, mainWindow=mainWindow,
                                 **self.kwds)
-        popup.exec()
-        popup.raise_()
+        # popup.raise_()
+        popup.exec_()
 
 
 class _raiseNewChainPopup(RaisePopupABC):

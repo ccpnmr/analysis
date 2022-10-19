@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-21 15:03:26 +0100 (Wed, September 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-19 12:41:18 +0200 (Wed, October 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1403,7 +1403,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         position = list(position)
 
         if len(position) < self.dimensionCount:
-            position += [1] * self.dimensionCount - len(position)
+            position += [1] * (self.dimensionCount - len(position))
         position = position[0:self.dimensionCount]
 
         for idx, p in enumerate(position):

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-10 17:26:27 +0100 (Mon, October 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-19 17:52:38 +0200 (Wed, October 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1582,10 +1582,7 @@ class Framework(NotifierBase, GuiBase):
             MessageDialog.showWarning('Cannot make strip plot,', 'nothing to display')
             return
         else:
-            if len(self.project.spectrumDisplays) == 0:
-                MessageDialog.showWarning('', 'No SpectrumDisplay found')
-
-            elif self.current.strip and not self.current.strip.isDeleted:
+            if self.current.strip and not self.current.strip.isDeleted:
                 from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
 
                 popup = StripPlotPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
@@ -1593,6 +1590,9 @@ class Framework(NotifierBase, GuiBase):
                                        includePeakLists=includePeakLists, includeNmrChains=includeNmrChains,
                                        includeNmrChainPullSelection=includeNmrChainPullSelection, includeSpectrumTable=False)
                 popup.exec_()
+            else:
+                MessageDialog.showWarning('Make Strip Plot', 'No selected spectrumDisplay')
+
 
     ################################################################################################
     ## MENU callbacks:  Molecule

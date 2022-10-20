@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-20 17:18:10 +0100 (Thu, October 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-20 17:45:19 +0100 (Thu, October 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -107,20 +107,20 @@ Label_SelectDataTable                   = 'Input DataTable(s)'
 TipText_DataTableSelection              = 'Select input DataTable(s) to start the Experiment Analysis'
 
 WidgetVarName_OutPutDataTableName       = 'ResultDataTableName'
-Label_OutputDataTableName               = 'Result DataTable Name'
-TipText_OutputDataTableName             = 'Select the name for the Result DataTable. Create new if not existing, otherwise override exsiting.'
+Label_OutputDataTableName               = 'Results DataTable Name'
+TipText_OutputDataTableName             = 'Select the name for the Results DataTable. Create new if not existing, otherwise override exsiting.'
 
 WidgetVarName_OutputDataTableSeparator  = 'DataTableSeparator2'
-Label_OutputDataTable                   = 'Result DataTable'
-TipText_OutputDataTableSeparator        = 'Result DataTable Section. Select the result DataTable to display results'
+Label_OutputDataTable                   = 'Results DataTable'
+TipText_OutputDataTableSeparator        = 'Results DataTable Section. Select the results DataTable to display results'
 
 WidgetVarName_FitInputData              = 'FitInputData'
-Label_FitInput                          = 'Fit and Fetch Result Data'
-TipText_createOutputdataTableWidget     = 'Fit or refit input DataTable and store outputs in a result dataTable.'
+Label_FitInput                          = 'Fit and Fetch Results Data'
+TipText_createOutputdataTableWidget     = 'Fit or refit input DataTable and store outputs in a results dataTable.'
 
 WidgetVarName_OutputDataTablesSelection = 'ResultDataTablesSelection'
-Label_SelectOutputDataTable             = 'Result DataTable'
-TipText_OutputDataTableSelection        = 'Select Result DataTable(s) to display the Experiment Analysis results'
+Label_SelectOutputDataTable             = 'Results DataTable'
+TipText_OutputDataTableSelection        = 'Select Results DataTable(s) to display the Experiment Analysis results'
 
 #############################################################
 ##########  TAB: Calculation

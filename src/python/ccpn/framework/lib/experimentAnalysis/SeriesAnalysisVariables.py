@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-20 17:18:10 +0100 (Thu, October 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-20 17:45:19 +0100 (Thu, October 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -147,7 +147,7 @@ EXCLUDED_OBJECTS = [EXCLUDED_COLLECTIONPID, EXCLUDED_COLLECTIONPID, EXCLUDED_NMR
 ############################################################################################
 DATATABLETYPE               = 'DATATABLETYPE'
 SERIESANALYSISDATATABLE     = 'SERIESANALYSISDATATABLE'
-SERIESANALYSISOUTPUTDATA    = 'SeriesAnalysisResultData'
+SERIESANALYSISOUTPUTDATA    = 'SeriesAnalysisResultsData'
 SERIESANALYSISINPUTDATA     = 'SeriesAnalysisInputData'
 RELAXATION_OUTPUT_FRAME     = 'RelaxationOutputFrame'
 HetNoe_OUTPUT_FRAME         = 'HetNoeOutputFrame'

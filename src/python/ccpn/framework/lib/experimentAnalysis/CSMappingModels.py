@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-20 13:56:04 +0100 (Thu, October 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-20 15:36:35 +0100 (Thu, October 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -152,9 +152,13 @@ class EuclideanCalculationModel(CalculationModel):
         p1nl = peak1.spectrum.noiseLevel
         values = []
         for peak in peaks:
-            e = factor * np.sqrt((peak1.height / peak.height) ** 2 + (p1nl / peak.spectrum.noiseLevel) ** 2)
-            values.append(e)
-        error = np.mean(values)
+            try:
+                e = factor * np.sqrt((peak1.height / peak.height) ** 2 + (p1nl / peak.spectrum.noiseLevel) ** 2)
+                values.append(e)
+            except ZeroDivisionError:
+                e = None # don't add values
+        if all(values):
+            error = np.mean(values)
         return error
 
 ########################################################################################################################

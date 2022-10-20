@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-17 10:49:55 +0100 (Mon, October 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-20 15:36:35 +0100 (Thu, October 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -133,19 +133,37 @@ class _FollowByMinimalShiftMapping(FollowPeakAbc):
 
 class FollowSameAssignmentPeak(FollowPeakAbc):
 
-    name = 'Same assignment'
+    name = 'Same Assignment'
     info = 'Find peaks assigned to the same NmrAtoms'
 
     def getMatchedIndex(self, originPosition, targets) -> int:
-        raise RuntimeError('NYI')
+        raise RuntimeError('Not in use for this Subclass')
 
     def getMatchedPeak(self, originPeak, targetPeaks):
-        raise RuntimeError('NYI')
+        matched  = []
+        for peak in targetPeaks:
+            if peak.assignedNmrAtoms == originPeak.assignedNmrAtoms:
+                matched.append(peak)
+        return matched
 
     def getCollectionPeaks(self, originPeak, targetPeakLists:list):
-        raise RuntimeError('NYI')
+        '''
+        :param originPeak: iterable, (1D array, list, tuple) containing items to be matched to the targets
+        :param targetPeakLists:  list of PeakLists.
+        :return: a list of matchedPeaks
+        '''
+
+        matched = []
+        for peakList in targetPeakLists:
+            if isinstance(peakList, PeakList) and len(peakList.peaks)>0:
+                sameAssignmentPeaks = self.getMatchedPeak(originPeak, peakList.peaks)
+                if len(sameAssignmentPeaks)>0:
+                    matched.append(sameAssignmentPeaks[0])
+        return matched
+
+
 
 AVAILABLEFOLLOWPEAKS = {
                     FollowNearestPeak.name: FollowNearestPeak,
-                    # FollowSameAssignmentPeak.name: FollowSameAssignmentPeak
+                    FollowSameAssignmentPeak.name: FollowSameAssignmentPeak
                     }

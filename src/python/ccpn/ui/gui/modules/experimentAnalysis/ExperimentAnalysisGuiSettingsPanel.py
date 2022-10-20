@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-20 16:15:30 +0100 (Thu, October 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-20 17:18:10 +0100 (Thu, October 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -192,15 +192,42 @@ class GuiInputDataPanel(GuiSettingPanel):
         backend = self.guiModule.backendHandler
         self.widgetDefinitions = od((
 
-            (guiNameSpaces.WidgetVarName_InputCollectionSeparator,
-             {'label': guiNameSpaces.Label_InputCollection,
-              'type': LabeledHLine,
-              'kwds': {'text': guiNameSpaces.Label_InputCollection,
-                       # 'height': 30,
-                       'gridSpan': (1, 2),
-                       'colour': DividerColour,
-                       'tipText': guiNameSpaces.TipText_InputCollection}}),
+            (guiNameSpaces.WidgetVarName_GeneralSetupSeparator,
+             {'label': guiNameSpaces.Label_GeneralSetup,
+                                 'type': LabeledHLine,
+                                 'kwds': {'text': guiNameSpaces.Label_GeneralSetup,
+                                          'colour':DividerColour,
+                                          'gridSpan':(1,2),
+                                          'tipText': guiNameSpaces.TipText_GeneralSetup}}),
 
+
+            (guiNameSpaces.WidgetVarName_CreateSGroup,
+             {'label': guiNameSpaces.Label_CreateSGroup,
+                                 'tipText': guiNameSpaces.TipText_CreateSGroup,
+                                 'callBack': self._createSpectrumGroupCallback,
+                                 'type': compoundWidget.ButtonCompoundWidget,
+                                 '_init': None,
+                                 'kwds': {'labelText': guiNameSpaces.Label_CreateSGroup,
+                                           'text': 'Create ...',  # this is the Button name
+                                           'hAlign': 'left',
+                                           'tipText': guiNameSpaces.TipText_CreateSGroup,
+                                           'fixedWidths': SettingsWidgetFixedWidths}}),
+            (guiNameSpaces.WidgetVarName_SpectrumGroupsSelection,
+             {'label':  guiNameSpaces.Label_SelectSpectrumGroups,
+                                'tipText': guiNameSpaces.TipText_SpectrumGroupSelectionWidget,
+                                'callBack': None,
+                                'type': settingWidgets.SpectrumGroupSelectionWidget,
+                                'postInit': self._setFixedHeightPostInit,
+                                'kwds': {
+                                        'labelText': guiNameSpaces.Label_SelectSpectrumGroups,
+                                        'tipText': guiNameSpaces.TipText_SpectrumGroupSelectionWidget,
+                                        'pulldownCallback': self._addSpectrumGroupToBackend,
+                                        'objectWidgetChangedCallback': self._addSpectrumGroupToBackend,
+                                        'displayText': [],
+                                        'defaults': [],
+                                        'standardListItems':[],
+                                        'objectName': guiNameSpaces.WidgetVarName_SpectrumGroupsSelection,
+                                        'fixedWidths': SettingsWidgetFixedWidths}, }),
             (guiNameSpaces.WidgetVarName_SetupCollection,
              {'label': guiNameSpaces.Label_SetupCollection,
               'tipText': guiNameSpaces.TipText_SetupCollection,
@@ -220,35 +247,19 @@ class GuiInputDataPanel(GuiSettingPanel):
               'kwds': {'labelText': guiNameSpaces.Label_InputCollectionSelection,
                        'tipText': guiNameSpaces.TipText_InputCollectionSelection,
                        'filterFunction': self._filterInputCollections,
-                       'callback':self._addInputCollectionCallback,
+                       'callback': self._addInputCollectionCallback,
                        'showSelectName': True,
                        'objectName': guiNameSpaces.WidgetVarName_InputCollectionSelection,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
+            (guiNameSpaces.WidgetVarName_DataTableSeparator,
+             {'label': guiNameSpaces.Label_DataTables,
+              'type': LabeledHLine,
+              'kwds': {'text': guiNameSpaces.Label_DataTables,
+                       # 'height': 30,
+                       'gridSpan': (1, 2),
+                       'colour': DividerColour,
+                       'tipText': guiNameSpaces.TipText_DataTableSeparator}}),
 
-            (guiNameSpaces.WidgetVarName_SpectrumGroupsSeparator,
-             {'label': guiNameSpaces.Label_SpectrumGroups,
-                                 'type': LabeledHLine,
-                                 'kwds': {'text': guiNameSpaces.Label_SpectrumGroups,
-                                          # 'height': 30,
-                                          'colour':DividerColour,
-                                          'gridSpan':(1,2),
-                                          'tipText': guiNameSpaces.TipText_SpectrumGroupsSeparator}}),
-            (guiNameSpaces.WidgetVarName_SpectrumGroupsSelection,
-             {'label':  guiNameSpaces.Label_SelectSpectrumGroups,
-                                'tipText': guiNameSpaces.TipText_SpectrumGroupSelectionWidget,
-                                'callBack': None,
-                                'type': settingWidgets.SpectrumGroupSelectionWidget,
-                                'postInit': self._setFixedHeightPostInit,
-                                'kwds': {
-                                        'labelText': guiNameSpaces.Label_SelectSpectrumGroups,
-                                        'tipText': guiNameSpaces.TipText_SpectrumGroupSelectionWidget,
-                                        'pulldownCallback': self._addSpectrumGroupToBackend,
-                                        'objectWidgetChangedCallback': self._addSpectrumGroupToBackend,
-                                        'displayText': [],
-                                        'defaults': [],
-                                        'standardListItems':[],
-                                        'objectName': guiNameSpaces.WidgetVarName_SpectrumGroupsSelection,
-                                        'fixedWidths': SettingsWidgetFixedWidths}, }),
             (guiNameSpaces.WidgetVarName_DataTableName,
              {'label': guiNameSpaces.Label_InputDataTableName,
                                 'tipText': guiNameSpaces.TipText_dataTableNameSelectionWidget,
@@ -271,14 +282,7 @@ class GuiInputDataPanel(GuiSettingPanel):
                                          'hAlign': 'left',
                                          'tipText': guiNameSpaces.TipText_createInputdataTableWidget,
                                          'fixedWidths': SettingsWidgetFixedWidths}}),
-            (guiNameSpaces.WidgetVarName_DataTableSeparator,
-             {'label': guiNameSpaces.Label_DataTables,
-                                 'type': LabeledHLine,
-                                 'kwds': {'text':guiNameSpaces.Label_DataTables,
-                                          # 'height': 30,
-                                          'gridSpan':(1,2),
-                                          'colour': DividerColour,
-                                          'tipText': guiNameSpaces.TipText_DataTableSeparator}}),
+
             (guiNameSpaces.WidgetVarName_DataTablesSelection,
              {'label': guiNameSpaces.Label_SelectDataTable,
               'tipText': guiNameSpaces.TipText_DataTableSelection,
@@ -359,10 +363,31 @@ class GuiInputDataPanel(GuiSettingPanel):
                 getLogger().info(f'{self.guiModule.className}:{self.tabName}. {obj} added to inputDataTables')
 
     def _createInputCollectionCallback(self):
-        self.guiModule.application.showPeakCollectionsPopup()
+        """ Show the relevant Popup"""
+        popup = self.guiModule.application.showPeakCollectionsPopup()
+        if popup is not None:
+            topCollection = popup._topCollection
+            if topCollection is not None:
+                widget = self.getWidget(guiNameSpaces.WidgetVarName_InputCollectionSelection)
+                widget.update()
+                if widget is not None:
+                    widget.select(topCollection.pid)
+
+    def _createSpectrumGroupCallback(self):
+        """ Show the relevant Popup """
+        from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
+        sge = SpectrumGroupEditor(parent=self, mainWindow=self.guiModule.mainWindow, editMode=False)
+        sge.exec_()
+        sg = sge.obj
+        if sg is not None:
+            # add automatically to input
+            sgSelectionWidget = self.getWidget(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection)
+            sgSelectionWidget.updatePulldown()
+            if sgSelectionWidget is not None:
+                sgSelectionWidget.select(sg.pid)
 
     def _addInputCollectionCallback(self, *args):
-        """Add Input Collection to backened  """
+        """Add Input Collection to backend  """
         backend = self.guiModule.backendHandler
         pid = self.getSettingsAsDict().get(guiNameSpaces.WidgetVarName_InputCollectionSelection)
         obj = self.guiModule.project.getByPid(pid)
@@ -600,7 +625,6 @@ class GuiCalculationPanel(GuiSettingPanel):
         pass
 
     def _commonCallback(self, *args):
-        print('setting callback')
         calculationSettings = self.getSettingsAsDict()
         selectedCalcPeakProperty = calculationSettings.get(guiNameSpaces.WidgetVarName_CalcPeakProperty, None)
 

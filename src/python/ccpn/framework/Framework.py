@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-19 17:52:38 +0200 (Wed, October 19, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-10-20 17:18:10 +0100 (Thu, October 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1440,7 +1440,9 @@ class Framework(NotifierBase, GuiBase):
             MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
         else:
             from ccpn.ui.gui.popups.SeriesPeakCollectionPopup import SeriesPeakCollectionPopup
-            SeriesPeakCollectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow ).exec_()
+            popup = SeriesPeakCollectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup.exec_()
+            return popup
 
     def showProjectionPopup(self):
         if not self.project.spectra:

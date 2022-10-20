@@ -1,6 +1,10 @@
 """
 Module Documentation here
 """
+
+import contextlib
+
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -14,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-18 15:56:16 +0100 (Tue, October 18, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-20 11:07:01 +0200 (Thu, October 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1145,15 +1149,14 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
                 value = StripPlot._storedState.get(STOREACTIVE, LINKTOACTIVESTATE)
                 getattr(self, LINKTOPULLDOWNCLASS).set(value)
             value = StripPlot._storedState.get(STORELIST, 0)
-            try:
+
+            # with contextlib.suppress(Exception):
+            if value < len(self.listButtons):
                 self.listButtons.setIndex(value)
-            except:
-                # may be out of range
-                pass
+
             if self.includeNmrChainPullSelection:
                 value = StripPlot._storedState.get(STORENMRCHAIN, self.includeNmrChainPullSelection)
                 self.ncWidget.setIndex(value)
-            pass
 
     def setLabelText(self, label):
         """Set the text for the label attached to the list widget
@@ -1194,6 +1197,7 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         """
         if self._spectrumViewNotifier:
             self._spectrumViewNotifier.unRegister()
+        self.ncWidget.unRegister()
 
     def _spectrumViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
@@ -1234,10 +1238,6 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         if self.nmrChain is not None and self.NMRCHAINBUTTON is not None:
             # select the nmrChain here
             self.listButtons.setIndex(self.NMRCHAINBUTTON)
-
-        else:
-            # do nothing for the minute
-            pass
 
 
 class _SpectrumRow(Frame):

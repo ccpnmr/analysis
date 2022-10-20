@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-19 17:52:38 +0200 (Wed, October 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-20 11:07:01 +0200 (Thu, October 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -555,7 +555,6 @@ class GuiStrip(Frame):
         popup = EstimateNoisePopup(parent=self.mainWindow, mainWindow=self.mainWindow, strip=self,
                                    orderedSpectrumViews=self.getSpectrumViews())
         popup.exec_()
-        popup._cleanupWidget()
 
     def toggleNoiseThresholdLines(self):
         pass

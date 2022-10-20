@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-18 15:56:16 +0100 (Tue, October 18, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-20 11:07:01 +0200 (Thu, October 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -100,7 +100,7 @@ class RadioButtons(QtWidgets.QWidget, Base):
         buttonGroup.buttonClicked.connect(self._callback)
         self.setCallback(callback)
 
-        if enabledTexts is not None and len(enabledTexts)==len(texts):
+        if enabledTexts is not None and len(enabledTexts) == len(texts):
             for button, isEnabled in zip(self.radioButtons, enabledTexts):
                 button.setEnabled(isEnabled)
 
@@ -199,6 +199,11 @@ class RadioButtons(QtWidgets.QWidget, Base):
             return ixs[-1] if ixs else 0
         else:
             return ixs
+
+    def __len__(self):
+        """Return the number of buttons in the radio-group
+        """
+        return len(self.buttonGroup.buttons())
 
     @property
     def isChecked(self):
@@ -473,7 +478,7 @@ class EditableRadioButtons(Widget, Base):
                         if len(thisIcon) == 2:
                             iconSize = thisIcon[1]
                             if isinstance(iconSize, (list, tuple)) and len(iconSize) == 2 and \
-                                                    all(isinstance(iconVal, int) for iconVal in iconSize):
+                                    all(isinstance(iconVal, int) for iconVal in iconSize):
                                 button.setIconSize(QtCore.QSize(*iconSize))
 
         self.texts = texts

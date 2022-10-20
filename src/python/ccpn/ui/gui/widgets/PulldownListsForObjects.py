@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-17 14:50:07 +0100 (Mon, October 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-20 11:07:01 +0200 (Thu, October 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -216,8 +216,7 @@ class _PulldownABC(PulldownListCompoundWidget):
         """
         if obj is None:
             return str(None)
-        value = obj.id if self._useIds else obj.pid
-        return value
+        return obj.id if self._useIds else obj.pid
 
     def value2object(self, value):
         """Convert value to object, using pid or construct a pid from id
@@ -226,9 +225,8 @@ class _PulldownABC(PulldownListCompoundWidget):
         if value is None or len(value) == 0 or value == SELECT:
             return None
         if self._useIds:
-            value = self._shortClassName + ':' + value
-        obj = self.project.getByPid(value)
-        return obj
+            value = f'{self._shortClassName}:{value}'
+        return self.project.getByPid(value)
 
     def update(self):
         """Public function to update
@@ -245,7 +243,6 @@ class _PulldownABC(PulldownListCompoundWidget):
             with contextlib.suppress(Exception):
                 if ntf is not None:
                     ntf.unRegister()
-                    del (ntf)
 
     #==============================================================================================
     # Implementation

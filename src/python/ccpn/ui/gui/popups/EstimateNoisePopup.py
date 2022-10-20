@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:31 +0100 (Fri, June 04, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-10-20 11:07:01 +0200 (Thu, October 20, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,7 +30,7 @@ from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise, DEFAULTLEVELS, 
 from ccpn.core.lib.SpectrumLib import getNoiseEstimate, getNoiseEstimateFromRegion, getClippedRegion
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
+# from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
@@ -56,6 +56,7 @@ ESTIMATEDEFAULT = 'estimateDefault'
 ESTIMATEAUTO = 'estimateAuto'
 
 lineColour = getColours()[SOFTDIVIDER]
+
 
 class EstimateNoisePopup(CcpnDialogMainWidget):
     """
@@ -109,15 +110,8 @@ class EstimateNoisePopup(CcpnDialogMainWidget):
         """
         self.accept()
 
-    def _cleanupWidget(self):
-        """Cleanup the notifiers that are left behind after the widget is closed
-        """
-        self.close()
-
     def _setWidgets(self):
-        row = -1
-
-        row += 1
+        row = 0
         self.topFrame = Frame(self.mainWidget, setLayout=True, grid=(row, 0), gridSpan=(1, 1), hPolicy='minimal')
 
         row += 1
@@ -148,9 +142,8 @@ class EstimateNoisePopup(CcpnDialogMainWidget):
         if self.strip.spectrumDisplay.is1D:
             self.contourFrame.hide()
 
-
     def _setTopWidgets(self):
-        "Populate the top-frame"
+        """Populate the top-frame"""
         row = 0
 
         texts = ['Visible Area', 'Random Sampling']
@@ -176,9 +169,7 @@ class EstimateNoisePopup(CcpnDialogMainWidget):
                                                     checked=True)
 
     def _setContourWidgets(self):
-        row = -1
-
-        row += 1
+        row = 0
         Label(self.contourFrame, text='Contour Options:', grid=(row, 0), gridSpan=(1, 3), vAlign='t', hAlign='l')
 
         from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
@@ -262,8 +253,7 @@ class EstimateNoisePopup(CcpnDialogMainWidget):
             # may not be necessary
             tab._restoreWidgetState()
 
-        states = EstimateNoisePopup._storedState.get(ESTIMATECONTOURS)
-        if states:
+        if states := EstimateNoisePopup._storedState.get(ESTIMATECONTOURS):
             self.estimateOption.setIndex(states.get(ESTIMATEMETHOD))
             self.autoCalculate.set(states.get(ESTIMATEAUTO))
             if not self.strip.spectrumDisplay.is1D:
@@ -298,21 +288,19 @@ class NoiseTab(Widget):
 
     def _setWidgets(self):
         # set up the common widgets
-        row = -1
-
-        row += 1
+        row = 0
         LabeledHLine(self, text='Visible Area', style=HLine.DASH_LINE, colour=lineColour,
-                     grid=(row,0), gridSpan=(1,3), height=10)
+                     grid=(row, 0), gridSpan=(1, 3), height=10)
 
         self.axisCodeLabels = []
-        for ii, axis in enumerate(self.strip.axisCodes):
+        for axis in self.strip.axisCodes:
             row += 1
             Label(self, text=axis, grid=(row, 0), vAlign='t', hAlign='l')
             self.axisCodeLabels.append(Label(self, text=NONE_TEXT, grid=(row, 1), gridSpan=(1, 2), vAlign='t', hAlign='l'))
 
         row += 1
         LabeledHLine(self, text='Noise', style=HLine.DASH_LINE, colour=lineColour,
-                     grid=(row,0), gridSpan=(1,3), height=10)
+                     grid=(row, 0), gridSpan=(1, 3), height=10)
 
         for label, text in zip(['meanLabel', 'SDLabel', 'maxLabel', 'minLabel'], ['Mean', 'SD', 'Max', 'Min']):
             row += 1
@@ -332,17 +320,17 @@ class NoiseTab(Widget):
         self.recalculateLevelsButton = Button(self, grid=(row, 2), callback=self._estimateNoise, text='Re-estimate')
 
         row += 1
-        self.addSpacer(20, 20, expandX=True, expandY=True, grid=(row,0), gridSpan=(1,3))
+        self.addSpacer(20, 20, expandX=True, expandY=True, grid=(row, 0), gridSpan=(1, 3))
 
         options = {}
 
         row += 1
         self.noiseLevelButtons = Button(self, grid=(row, 0), callback=self._setNoiseLevel,
-                                            text='Set Noise Level', **options)
+                                        text='Set Noise Level', **options)
         self.noiseLevelToAllButtons = Button(self, grid=(row, 1), callback=self._setNoiseLevelToAll,
-                                            text='Set Noise Level To All', **options)
+                                             text='Set Noise Level To All', **options)
         self.contoursButton = Button(self, grid=(row, 2), callback=self._setContourLevels,
-                                       text='Generate Contours', **options)
+                                     text='Generate Contours', **options)
         self.contoursButton.hide()  # un-hidden for nD
 
         # remember the row for subclassed Nd below
@@ -356,11 +344,11 @@ class NoiseTab(Widget):
     def _setFromCurrentCursor(self):
         """Add the initial spinbox value from the current cursor position. Implemented only for 1D.
         """
-        if self.mainWindow.current is not None:
-            if self.spectrum.dimensionCount == 1:
-                if self.current.cursorPosition:
-                    self.noiseLevelSpinBox.set(float(self.current.cursorPosition[-1]))
-                    self._noiseFromCurrentCursorPosition = True
+        if self.mainWindow.current is not None and \
+                self.spectrum.dimensionCount == 1 and \
+                self.current.cursorPosition:
+            self.noiseLevelSpinBox.set(float(self.current.cursorPosition[-1]))
+            self._noiseFromCurrentCursorPosition = True
 
     def _estimateNoise(self):
         # get the current mode and call the relevant estimate routine
@@ -371,10 +359,7 @@ class NoiseTab(Widget):
             self._estimateFromRandomSamples()
 
     def _estimateFromRegion(self):
-        # get the noise estimate for the region displayed in the strip
-        noise = getNoiseEstimateFromRegion(self.spectrum, self.strip)
-
-        if noise:
+        if noise := getNoiseEstimateFromRegion(self.spectrum, self.strip):
             regions = getClippedRegion(self.spectrum, self.strip)
 
             # populate the widgets

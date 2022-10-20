@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-19 17:52:38 +0200 (Wed, October 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-20 11:07:01 +0200 (Thu, October 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -157,11 +157,11 @@ class StripPlotPopup(CcpnDialogMainWidget):
     def _buildStripsFromPeaks(self, peaks=None, spectrumDisplays=None):
         """Build the strips in the selected spectrumDisplays for the nmrAtoms attached to the current peaks
         """
-        if not spectrumDisplays:
+        if not (spectrumDisplays and peaks):
             return
 
         nmrResidues = set()
-        for peak in self.current.peaks:
+        for peak in peaks:
             atoms = makeIterableList(peak.assignedNmrAtoms)
             for atom in atoms:
                 nmrResidues.add(atom.nmrResidue)
@@ -172,7 +172,7 @@ class StripPlotPopup(CcpnDialogMainWidget):
     def _buildStrips(self, spectrumDisplays=None, peaks=None, nmrResidues=None):
         """Build the strips in the selected spectrumDisplays
         """
-        if not spectrumDisplays:
+        if not (spectrumDisplays and (peaks or nmrResidues)):
             return
 
         autoClearMarks = self._newStripPlotWidget.autoClearMarksWidget.isChecked()
@@ -198,7 +198,7 @@ class StripPlotPopup(CcpnDialogMainWidget):
 
             specDisplay.setColumnStretches(stretchValue=True, widths=True, minimumWidth=STRIPPLOTMINIMUMWIDTH)
 
-    def _cleanupWidget(self):
+    def _cleanupDialog(self):
         """Cleanup the notifiers that are left behind after the widget is closed
         """
         self._newStripPlotWidget._cleanupWidget()

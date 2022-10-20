@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-30 12:58:40 +0100 (Tue, August 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-20 11:07:01 +0200 (Thu, October 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -420,6 +420,14 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         """
         pass
 
+    def exec_(self) -> int:
+        result = super().exec_()
+
+        # clean-up the notifiers
+        self._cleanupDialog()
+
+        return result
+
     @contextmanager
     def handleUserClicked(self):
         """Context manager to handle user actions in dialogs.
@@ -522,6 +530,11 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         if self.storeStateOnReject:
             # store the state of any required widgets
             self.storeWidgetState()
+
+    def _cleanupDialog(self):
+        """Clean-up any extra widgets/data before closing
+        """
+        getLogger().debug2(f'Cleaning-up dialog {self} - subclass as required')
 
     def _refreshGLItems(self):
         """emit a signal to rebuild any required GL items

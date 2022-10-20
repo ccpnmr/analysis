@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-13 17:18:34 +0100 (Thu, October 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-20 16:15:30 +0100 (Thu, October 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -63,6 +63,10 @@ Disabled                = 'Disabled'
 ##########  TAB: GuiInputDataPanel
 ####################################################
 
+WidgetVarName_SetupCollection          = 'CreateCollectionButton'
+Label_SetupCollection                   = 'Setup the input Collection'
+TipText_SetupCollection                 = 'Setup the top Collection and its subset of peakCollections'
+
 WidgetVarName_InputCollectionSeparator  = 'InputCollectionSeparator'
 Label_InputCollection                   = 'Input Collection'
 TipText_InputCollection                 = 'Select the top parent Collection containing all subset of peakCollections'
@@ -98,21 +102,21 @@ WidgetVarName_DataTablesSelection       = 'DataTablesSelection'
 Label_SelectDataTable                   = 'Input DataTable(s)'
 TipText_DataTableSelection              = 'Select input DataTable(s) to start the Experiment Analysis'
 
-WidgetVarName_OutPutDataTableName       = 'OutputDataTableName'
-Label_OutputDataTableName               = 'Output DataTable Name'
-TipText_OutputDataTableName             = 'Select the name for the DataTable Output. Create new if not existing, otherwise override exsiting.'
+WidgetVarName_OutPutDataTableName       = 'ResultDataTableName'
+Label_OutputDataTableName               = 'Result DataTable Name'
+TipText_OutputDataTableName             = 'Select the name for the Result DataTable. Create new if not existing, otherwise override exsiting.'
 
 WidgetVarName_OutputDataTableSeparator  = 'DataTableSeparator2'
-Label_OutputDataTable                   = 'Output DataTable'
-TipText_OutputDataTableSeparator        = 'Output DataTable Section. Select the output DataTable to display results'
+Label_OutputDataTable                   = 'Result DataTable'
+TipText_OutputDataTableSeparator        = 'Result DataTable Section. Select the result DataTable to display results'
 
 WidgetVarName_FitInputData              = 'FitInputData'
-Label_FitInput                          = 'Fit and Fetch Output Data'
-TipText_createOutputdataTableWidget     = 'Fit or refit input DataTable and store result in an output dataTable.'
+Label_FitInput                          = 'Fit and Fetch Result Data'
+TipText_createOutputdataTableWidget     = 'Fit or refit input DataTable and store outputs in a result dataTable.'
 
-WidgetVarName_OutputDataTablesSelection = 'OutputDataTablesSelection'
-Label_SelectOutputDataTable             = 'Output DataTable'
-TipText_OutputDataTableSelection        = 'Select Output DataTable(s) to display the Experiment Analysis results'
+WidgetVarName_OutputDataTablesSelection = 'ResultDataTablesSelection'
+Label_SelectOutputDataTable             = 'Result DataTable'
+TipText_OutputDataTableSelection        = 'Select Result DataTable(s) to display the Experiment Analysis results'
 
 #############################################################
 ##########  TAB: Calculation

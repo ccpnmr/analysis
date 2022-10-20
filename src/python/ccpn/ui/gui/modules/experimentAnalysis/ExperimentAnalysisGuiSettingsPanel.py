@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-18 15:56:16 +0100 (Tue, October 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-20 16:15:30 +0100 (Thu, October 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -201,6 +201,18 @@ class GuiInputDataPanel(GuiSettingPanel):
                        'colour': DividerColour,
                        'tipText': guiNameSpaces.TipText_InputCollection}}),
 
+            (guiNameSpaces.WidgetVarName_SetupCollection,
+             {'label': guiNameSpaces.Label_SetupCollection,
+              'tipText': guiNameSpaces.TipText_SetupCollection,
+              'callBack': self._createInputCollectionCallback,
+              'type': compoundWidget.ButtonCompoundWidget,
+              '_init': None,
+              'kwds': {'labelText': guiNameSpaces.Label_SetupCollection,
+                       'text': 'Setup ...',  # this is the Button name
+                       'hAlign': 'left',
+                       'tipText': guiNameSpaces.TipText_SetupCollection,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+
             (guiNameSpaces.WidgetVarName_InputCollectionSelection,
              {'label': guiNameSpaces.Label_InputCollectionSelection,
               'tipText': guiNameSpaces.TipText_InputCollectionSelection,
@@ -345,6 +357,9 @@ class GuiInputDataPanel(GuiSettingPanel):
             if obj:
                 backend.addInputDataTable(obj)
                 getLogger().info(f'{self.guiModule.className}:{self.tabName}. {obj} added to inputDataTables')
+
+    def _createInputCollectionCallback(self):
+        self.guiModule.application.showPeakCollectionsPopup()
 
     def _addInputCollectionCallback(self, *args):
         """Add Input Collection to backened  """

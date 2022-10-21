@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-20 17:18:10 +0100 (Thu, October 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-21 15:51:19 +0100 (Fri, October 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -333,6 +333,7 @@ class GuiInputDataPanel(GuiSettingPanel):
             (guiNameSpaces.WidgetVarName_OutputDataTablesSelection,
              {'label': guiNameSpaces.Label_SelectOutputDataTable,
               'tipText': guiNameSpaces.TipText_OutputDataTableSelection,
+              'callBack': self._resultDataTablePulldownCallback,
               'type': objectPulldowns.DataTablePulldown,
               'kwds': {'labelText': guiNameSpaces.Label_SelectOutputDataTable,
                        'tipText': guiNameSpaces.TipText_OutputDataTableSelection,
@@ -441,6 +442,12 @@ class GuiInputDataPanel(GuiSettingPanel):
                 filteredDataTables.append(dataTable)
         pids = self.guiModule.project.getPidsByObjects(filteredDataTables)
         return pids
+
+    def _resultDataTablePulldownCallback(self, *args):
+        """Callback upon widget selection """
+        print('CALLDED')
+        self.guiModule.updateAll()
+
 
     def _filterInputCollections(self, pids, *args):
         """ Add collections only if contain a subset of other collections. Avoid massive lists! """

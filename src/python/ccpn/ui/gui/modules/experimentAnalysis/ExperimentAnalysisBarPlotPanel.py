@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-18 15:56:16 +0100 (Tue, October 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-21 15:51:19 +0100 (Fri, October 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -322,7 +322,6 @@ class BarPlotPanel(GuiPanel):
     def plotDataFrame(self, dataFrame):
         """ Plot the given columns of dataframe as bars
          """
-        getLogger().warning('Alpha version of plotting')
         self.barGraphWidget.clear()
         self._updateAxisLabels()
 

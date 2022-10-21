@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-18 15:56:16 +0100 (Tue, October 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-21 12:43:34 +0100 (Fri, October 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -211,21 +211,23 @@ class FittingPlot(pg.PlotItem):
         xs,ys = self._getPlotData()
         if len(xs)>0:
             x,y = xs[-1], ys[-1]
-            xMin, xMax = min(x), max(x)
-            try:
-                self.setXRange(xMin, xMax, padding=None, update=True)
-            except:
-                getLogger().debug2('Cannot fit XZoom')
+            if len(x) > 0:
+                xMin, xMax = min(x), max(x)
+                try:
+                    self.setXRange(xMin, xMax, padding=None, update=True)
+                except:
+                    getLogger().debug2('Cannot fit XZoom')
 
     def fitYZoom(self):
         xs, ys = self._getPlotData()
         if len(xs) > 0:
             x, y = xs[-1], ys[-1]
-            yMin, yMax = min(y), max(y)
-            try:
-                self.setYRange(yMin, yMax, padding=None, update=True)
-            except:
-                getLogger().debug2('Cannot fit XZoom')
+            if len(y) > 0:
+                yMin, yMax = min(y), max(y)
+                try:
+                    self.setYRange(yMin, yMax, padding=None, update=True)
+                except:
+                    getLogger().debug2('Cannot fit XZoom')
 
 
     def _getPlotData(self):

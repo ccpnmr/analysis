@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-21 14:00:36 +0100 (Fri, October 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -23,7 +23,7 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 # Start of code
 #=========================================================================================
 
-######## core imports ########
+
 from functools import partial
 from ccpn.util.Logging import getLogger
 from ccpn.core.Peak import Peak
@@ -37,6 +37,7 @@ from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import ExperimentAnalysisHandlerABC
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 
 class CoreNotifiersHandler(ExperimentAnalysisHandlerABC):
     """
@@ -187,6 +188,14 @@ class CoreNotifiersHandler(ExperimentAnalysisHandlerABC):
         if guiModule.backendHandler._isPidInDataTables(sv.COLLECTIONPID, collection.pid):
             getLogger().debug(f'Firing collectionChanged notifier from {guiModule.className}')
             CoreNotifiersHandler._setRebuildInputDataNotifier(guiModule)
+        else:
+            # check if is needed an update to inputCollection widget.
+            tab = guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_InputData)
+            if tab is not None:
+                widget = tab.getWidget(guiNameSpaces.WidgetVarName_InputCollectionSelection)
+                if widget:
+                    widget.update()
+
 
     @staticmethod
     def _collectionDeleted(guiModule, data):
@@ -236,13 +245,6 @@ class CoreNotifiersHandler(ExperimentAnalysisHandlerABC):
         deletedDataSet = data['object']
         getLogger().debug('_dataTableDeleted notifier not implemented')
         pass
-
-    #### SPECTRUM ####
-    @staticmethod
-    def _spectrumChanged(guiModule, data):
-        """
-        """
-        getLogger().debug('_spectrumChanged notifier not implemented')
 
     #### NmrResidue ####
 

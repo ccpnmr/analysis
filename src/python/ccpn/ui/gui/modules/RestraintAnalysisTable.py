@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 18:02:40 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -205,7 +205,8 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                         'type'    : DoubleSpinBoxCompoundWidget,
                                                         'kwds'    : {'labelText'    : 'Mean Value Lower Limit',
                                                                      'tipText'      : 'Lower threshold for mean value of restraints',
-                                                                     'range'        : (0.0, 1.0),
+                                                                     'minimum'      : 0.0,
+                                                                     'maximum'      : 1.0,
                                                                      'decimals'     : 2,
                                                                      'step'         : 0.05,
                                                                      'value'        : 0.3,

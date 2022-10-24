@@ -90,7 +90,8 @@ class CSMCalculationPanel(GuiCalculationPanel):
                                 'kwds': {'labelText': label,
                                          'tipText': tipText,
                                          'value': factorValue,
-                                         'range': (0.001, 1), 'step': 0.01, 'decimals': 4,
+                                         'minimum': 0.001, 'maximum': 1,
+                                         'step': 0.01, 'decimals': 4,
                                          'fixedWidths': SettingsWidgetFixedWidths}}
         untraceableWidgetDefinitions = od((
                             (guiNameSpaces.WidgetVarName_UntraceablePeak,

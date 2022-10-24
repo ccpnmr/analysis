@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-20 11:07:01 +0200 (Thu, October 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 18:51:31 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -245,7 +245,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                                                       )
 
         row += 1
-        Label(parent, text='Current values:', hAlign='r', grid=(row, 0))
+        Label(parent, text='Current values', hAlign='r', grid=(row, 0))
         Label(parent, text='Fixed', grid=(row, 1))
         Label(parent, text='Screen', grid=(row, 2))
 
@@ -839,7 +839,7 @@ class _commonSettings():
         self.atomCodeFrame = Frame(self._spectraWidget, setLayout=True, showBorder=False, fShape='noFrame',
                                    grid=(spectraRow, 0), gridSpan=(1, self.maxLen + 1),
                                    vAlign='top', hAlign='left')
-        self.axisCodeLabel = Label(self.atomCodeFrame, 'Restricted Axes:', grid=(0, 0))
+        self.axisCodeLabel = Label(self.atomCodeFrame, 'Restricted Axes', grid=(0, 0))
 
         # remember current selection so can be set after redefining checkboxes
         currentSelection = None
@@ -923,7 +923,7 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
                  defaultSpectrum=None,
                  activePulldownClass=None,
                  activePulldownInitialState=True,
-                 labelText='Display(s): ',
+                 labelText='Display(s) ',
                  **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
@@ -965,11 +965,11 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         else:
             self.displaysWidget = None
 
-        optionTexts = ['Show sequential strips:',
-                       'Mark positions:',
-                       'Auto clear marks:']
+        optionTexts = ['Show sequential strips',
+                       'Mark positions',
+                       'Auto clear marks']
         if self.activePulldownClass is not None:
-            optionTexts += ['Link to current {}:'.format(self.activePulldownClass.className)]
+            optionTexts += ['Link to current {}'.format(self.activePulldownClass.className)]
         _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
         colwidth = maxDim.width()
 
@@ -1100,7 +1100,7 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
                                                                    showSelectName=True,
                                                                    sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                                                    callback=self._spectrumDisplaySelectionPulldownCallback,
-                                                                   labelText='Pick Peaks in Display:'
+                                                                   labelText='Pick Peaks in Display'
                                                                    )
 
             # self._fillSpectrumFrame(self.displaysWidget._getDisplays())
@@ -1495,7 +1495,7 @@ class ObjectSelectionWidget(ListCompoundWidget):
         self.standardListItems = standardListItems
         labelName = self.KLASS._pluralLinkName[0].upper() + self.KLASS._pluralLinkName[1:]  #Keep CamelCase intact
         labelText = labelText or 'Select {}'.format(labelName)
-        tipText = tipText or 'Set active {} for module:'.format(labelName)
+        tipText = tipText or 'Set active {} for module'.format(labelName)
 
         super().__init__(parent=parent,
                          vAlign=vAlign, stretch=stretch, hAlign=hAlign, vPolicy=vPolicy,

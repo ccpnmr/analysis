@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-20 11:07:01 +0200 (Thu, October 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 18:51:31 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -113,7 +113,7 @@ class _PulldownABC(PulldownListCompoundWidget):
         self._userCallback = callback
 
         if labelText is None:
-            labelText = f'{self._className}:'
+            labelText = f'{self._className}'
 
         if setCurrent and self._currentAttributeName is None:
             raise ValueError('setCurrent option only valid if _currentAttributeName is defined for class')

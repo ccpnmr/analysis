@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 20:35:56 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -355,6 +355,11 @@ class SeriesAnalysisABC(ABC):
             self.registerModel(model)
             dd[model.ModelName] = model
         return dd
+
+    def _getSeriesStepValues(self):
+        """ Get the series values from the first input SpectrumGroups"""
+        for spectrumGroup in self.inputSpectrumGroups:
+            return spectrumGroup.series
 
     def plotResults(self, *args, **kwargs):
         pass

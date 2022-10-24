@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-24 15:07:24 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 20:35:56 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -371,15 +371,20 @@ RelaxationFittingPlotPanel = 'RelaxationFittingPlotPanel'
 
 
 CSMFittingPlotPanel = 'CSMFittingPlotPanel'
-
-
 ToolbarPanel = 'ToolbarPanel'
 TablePanel = 'TablePanel'
 PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
 PYMOL = 'pymol'
 
+# Table Groupping Headers
+_Assignments = 'Assignments'
+_SeriesSteps = 'SeriesSteps'
+_Calculation = 'Calculation'
+_Stats = 'Stats'
+_Errors = 'Errors'
+_Fitting = 'Fitting'
+TableGrouppingHeaders = [_Assignments, _SeriesSteps, _Calculation, _Fitting, _Stats, _Errors]
 
-    
 ### Appearance BarGraph X axis
 XBarGraphColumnNameOptions =  [
                                 seriesVariables.ASHTAG,

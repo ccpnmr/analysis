@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-21 15:51:19 +0100 (Fri, October 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 17:06:24 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -224,7 +224,7 @@ class BarPlotPanel(GuiPanel):
 
     def updatePanel(self, *args, **kwargs):
         getLogger().info('Updating  barPlot panel')
-        dataFrame = self.guiModule.getGuiOutputDataFrame()
+        dataFrame = self.guiModule.getGuiResultDataFrame()
         if dataFrame is not None:
             self.plotDataFrame(dataFrame)
         else:
@@ -355,7 +355,7 @@ class BarPlotPanel(GuiPanel):
         # select collection on table.
         backendHandler = self.guiModule.backendHandler
 
-        df = self.guiModule.getGuiOutputDataFrame()
+        df = self.guiModule.getGuiResultDataFrame()
         if df is None:
             return
         pids = [co.pid for co in self.current.collections]

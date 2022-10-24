@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-05 12:29:51 +0100 (Wed, October 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 18:04:56 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,12 +27,12 @@ __date__ = "$Date: 2021-09-17 15:02:29 +0100 (Fri, September 17, 2021) $"
 #=========================================================================================
 
 from ccpn.core.NmrAtom import NmrAtom
-from ccpn.core.Peak import Peak
-from ccpn.core.Project import Project
+# from ccpn.core.Peak import Peak
+# from ccpn.core.Project import Project
 from typing import List
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, navigateToNmrAtomsInStrip
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, undoStackBlocking
+from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.util.Logging import getLogger
 
 
@@ -98,17 +98,16 @@ def makeStripPlot(spectrumDisplay: GuiSpectrumDisplay, nmrAtomPairs: List[List[N
     if not nmrAtomPairs:
         return
 
-    # with undoBlockWithoutSideBar():
     with undoStackBlocking() as _:  # Do not add to undo/redo stack
         numberOfStrips = len(spectrumDisplay.strips)
 
         # Make sure there are enough strips to display nmrAtomPairs
         if numberOfStrips < len(nmrAtomPairs):
-            for ii in range(numberOfStrips, len(nmrAtomPairs)):
+            for _ii in range(numberOfStrips, len(nmrAtomPairs)):
                 # spectrumDisplay.strips[-1].clone()
                 spectrumDisplay.addStrip()
         else:  # numberOfStrips >= len(nmrAtomPairs):  # too many strips if >
-            for ii in range(len(nmrAtomPairs), numberOfStrips):
+            for _ii in range(len(nmrAtomPairs), numberOfStrips):
                 spectrumDisplay.deleteStrip(spectrumDisplay.strips[-1])
                 # spectrumDisplay.removeLastStrip()
 
@@ -118,7 +117,8 @@ def makeStripPlot(spectrumDisplay: GuiSpectrumDisplay, nmrAtomPairs: List[List[N
                 widths = ['default'] * len(strip.axisCodes)
             elif not widths:
                 widths = None
-            navigateToNmrAtomsInStrip(strip, nmrAtomPairs[ii], widths=widths)
+            if None not in nmrAtomPairs[ii]:
+                navigateToNmrAtomsInStrip(strip, nmrAtomPairs[ii], widths=widths)
 
 
 def makeStripPlotFromSingles(spectrumDisplay: GuiSpectrumDisplay, nmrAtoms: List[NmrAtom], autoWidth=True):
@@ -127,17 +127,14 @@ def makeStripPlotFromSingles(spectrumDisplay: GuiSpectrumDisplay, nmrAtoms: List
     with undoStackBlocking() as _:  # Do not add to undo/redo stack
         # Make sure there are enough strips to display nmrAtomPairs
         if numberOfStrips < len(nmrAtoms):
-            for ii in range(numberOfStrips, len(nmrAtoms)):
+            for _ii in range(numberOfStrips, len(nmrAtoms)):
                 # spectrumDisplay.strips[-1].clone()
                 spectrumDisplay.addStrip()
 
         # print(spectrumDisplay, nmrAtomPairs, len(nmrAtomPairs), len(spectrumDisplay.strips))
         # loop through strips and navigate to appropriate position in strip
         for ii, strip in enumerate(spectrumDisplay.strips):
-            if autoWidth:
-                widths = ['default'] * len(strip.axisCodes)
-            else:
-                widths = None
+            widths = ['default'] * len(strip.axisCodes) if autoWidth else None
             navigateToNmrAtomsInStrip(strip, [nmrAtoms[ii]], widths=widths)
 
 
@@ -149,7 +146,7 @@ def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widt
     newWidths = ['full'] * len(spCodes)
     index = 'YXT'.index(spectrumDisplay.stripArrangement)
 
-    if widths == None and index < 2:
+    if widths is None and index < 2:
         # set the width in case of nD (n>2)
         _widths = {'H': 0.3, 'C': 1.0, 'N': 1.0}
         # _ac = strip.axisCodes[0]

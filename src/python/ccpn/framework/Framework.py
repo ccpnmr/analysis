@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-20 17:18:10 +0100 (Thu, October 20, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-24 12:50:21 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -961,7 +961,7 @@ class Framework(NotifierBase, GuiBase):
         :return a list of loaded objects
         """
         objs = []
-        _echoBlocking = maxItemLogging > 0 and len(dataLoaders) > maxItemLogging
+        _echoBlocking = (0 < maxItemLogging < len(dataLoaders))
 
         if _echoBlocking:
             getLogger().info('Loading %d objects, while suppressing command-logging' %
@@ -984,7 +984,7 @@ class Framework(NotifierBase, GuiBase):
 
                     archiver = ProjectArchiver(projectPath=dataLoader.path)
                     archivePath = archiver.makeArchive()
-                    getLogger().info('==> Project archived to %s' % archivePath)
+                    getLogger().info(f'==> Project archived to {archivePath}')
                     if not archivePath:
                         MessageDialog.showWarning('Archive Project',
                                                   f'There was a problem creating an archive for {dataLoader.path}',
@@ -992,7 +992,7 @@ class Framework(NotifierBase, GuiBase):
                                                   )
 
                 result = self.ui._loadProject(dataLoader=dataLoader)
-                getLogger().info("==> Loaded project %s" % result)
+                getLogger().info(f"==> Loaded project {result}")
                 if not isIterable(result):
                     result = [result]
                 objs.extend(result)

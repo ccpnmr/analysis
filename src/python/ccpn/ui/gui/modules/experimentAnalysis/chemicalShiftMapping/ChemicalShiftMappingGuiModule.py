@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 15:07:25 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,10 +32,10 @@ from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 import ccpn.ui.gui.modules.experimentAnalysis.chemicalShiftMapping.CSMSettingsPanel as settingsPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import ToolBarPanel
-from ccpn.ui.gui.modules.experimentAnalysis.chemicalShiftMapping.CSMFitPlotPanel import CSMFitPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import ExperimentAnalysisGuiModuleBC
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
 
 #####################################################################
 #######################  The main GUI Module ########################
@@ -57,13 +57,8 @@ class ChemicalShiftMappingGuiModule(ExperimentAnalysisGuiModuleBC):
     #################################################################
 
     def addPanels(self):
-        """ Add the Gui Panels to the panelHandler.
-        Each Panel is a stand-alone frame with information where about to be added on the general GUI.
-        Override in Subclasses"""
-        self.panelHandler.addToolBar(ToolBarPanel(self))
-        self.panelHandler.addPanel(TablePanel(self))
-        self.panelHandler.addPanel(CSMFitPlotPanel(self))
-        self.panelHandler.addPanel(BarPlotPanel(self))
+        """ Add the Gui Panels to the panelHandler."""
+        super().addPanels()
 
     def addSettingsPanels(self):
         """

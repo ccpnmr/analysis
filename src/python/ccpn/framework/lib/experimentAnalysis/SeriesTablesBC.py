@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-13 15:18:47 +0100 (Thu, October 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 15:07:24 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -240,7 +240,7 @@ class InputSeriesFrameBC(SeriesFrameBC):
                             ## build the spectrum Property Columns
                             self.loc[i, sv.DIMENSION] = dimension
                             self.loc[i, sv.ISOTOPECODE] = spectrum.getByDimensions(sv.ISOTOPECODES, [dimension])[0]
-                            self.loc[i, sv.SERIESSTEP] = spectrum.getSeriesItem(spectrumGroup)
+                            self.loc[i, sv.SERIES_STEP_X] = spectrum.getSeriesItem(spectrumGroup)
                             self.loc[i, sv.SERIESUNIT] = spectrumGroup.seriesUnits
                             self.loc[i, sv.SPECTRUMPID] = spectrum.pid
                             ## build the peak Property Columns
@@ -359,8 +359,8 @@ class CSMOutputFrame(SeriesFrameBC):
                     sv.NMRRESIDUETYPE,
                     sv.NMRATOMNAMES,
                     sv.SERIESUNIT,
-                    sv.SERIESSTEP,
-                    sv.SERIESSTEPVALUE,
+                    sv.SERIES_STEP_X,
+                    sv.SERIES_STEP_Y,
                     sv.DELTA_DELTA,
                     sv.KD,
                     sv.KD_ERR,

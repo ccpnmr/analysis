@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-21 10:38:11 +0100 (Fri, October 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 15:07:24 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -83,7 +83,7 @@ class EuclideanCalculationModel(CalculationModel):
             warnings.filterwarnings(action='ignore', category=RuntimeWarning)
             while True:
                 for collectionId, groupDf in grouppedByCollectionsId:
-                    groupDf.sort_values([sv.SERIESSTEP], inplace=True)
+                    groupDf.sort_values([self.xSeriesStepHeader], inplace=True)
                     dimensions = groupDf[sv.DIMENSION].unique()
                     dataPerDimensionDict = {}
                     for dim in dimensions:
@@ -99,7 +99,7 @@ class EuclideanCalculationModel(CalculationModel):
                     csmValue = np.mean(deltaDeltas[1:])  ## first item is excluded from as it is always 0 by definition.
 
                     nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf)
-                    seriesSteps = groupDf[sv.SERIESSTEP].unique()
+                    seriesSteps = groupDf[self.xSeriesStepHeader].unique()
                     seriesUnits = groupDf[sv.SERIESUNIT].unique()
                     peakPids = groupDf[sv.PEAKPID].unique()
                     peaks = self.project.getByPids(peakPids)
@@ -110,8 +110,8 @@ class EuclideanCalculationModel(CalculationModel):
                         outputFrame.loc[rowIndex, sv.PEAKPID] = peakPid
                         outputFrame.loc[rowIndex, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
                         outputFrame.loc[rowIndex, sv.NMRRESIDUEPID] = groupDf[sv.NMRRESIDUEPID].values[-1]
-                        outputFrame.loc[rowIndex, sv.SERIESSTEPVALUE] = delta
-                        outputFrame.loc[rowIndex, sv.SERIESSTEP] = seriesStep
+                        outputFrame.loc[rowIndex, sv.SERIES_STEP_Y] = delta
+                        outputFrame.loc[rowIndex, self.xSeriesStepHeader] = seriesStep
                         outputFrame.loc[rowIndex, sv.SERIESUNIT] = seriesUnits[-1]
                         outputFrame.loc[rowIndex, sv.GROUPBYAssignmentHeaders] = \
                         groupDf[sv.GROUPBYAssignmentHeaders].values[0]
@@ -177,19 +177,23 @@ class CSMBindingModelBC(FittingModelABC):
     Created as all of the model share the same FitSeries routine
     """
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._ySeriesLabel = sv.RELDISPLACEMENT
+
     def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
         """
         :param inputData: Datatable derived from a CalculationModel, e.g. the EuclideanCalculationModel.
-                            This MUST contain the SERIESSTEP and  SERIESSTEPVALUE columns.
+                    This MUST contain the xColumnHeader ySeriesStepHeader columns.
 
         :return: output dataTable
         """
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
         for collectionId, groupDf in grouppedByCollectionsId:
-            groupDf.sort_values([sv.SERIESSTEP], inplace=True)
-            seriesSteps = groupDf[sv.SERIESSTEP]
-            seriesValues = groupDf[sv.SERIESSTEPVALUE]
+            groupDf.sort_values([self.xSeriesStepHeader], inplace=True)
+            seriesSteps = groupDf[self.xSeriesStepHeader]
+            seriesValues = groupDf[self.ySeriesStepHeader]
             xArray = seriesSteps.values # e.g. ligand concentration
             yArray = seriesValues.values # DeltaDeltas
             minimiser = self.Minimiser()

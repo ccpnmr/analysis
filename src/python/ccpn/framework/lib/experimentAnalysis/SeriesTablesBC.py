@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-24 15:07:24 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 16:36:43 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -46,6 +46,7 @@ class SeriesFrameBC(TableFrame):
     """
     SERIESFRAMENAME     = ''
     SERIESFRAMETYPE     = ''
+    _rawDataHeaders     = []
 
     def getRowByUID(self, uid):
         self.set_index(sv._ROW_UID, inplace=True, drop=False)
@@ -83,6 +84,14 @@ class SeriesFrameBC(TableFrame):
         ## convert the sequenceCode to str. This because pandas Automatically tries to make floats.!!
         self[sv.NMRRESIDUECODE] = self[sv.NMRRESIDUECODE].astype(str).apply(lambda x: x.replace('.0', ''))
         self._joinTwoColumnsAsStr(sv.NMRRESIDUECODE, sv.NMRRESIDUETYPE, newColumName=sv.NMRRESIDUECODETYPE, separator='-')
+
+
+    def _getRawDataHeaders(self):
+        """ Get the column Header names used in the fitting calculations if any"""
+        if sv.SERIES_STEP_X in self.columns:
+            return self[sv.SERIES_STEP_X].unique()
+        else:
+            return []
 
 class InputSeriesFrameBC(SeriesFrameBC):
     """

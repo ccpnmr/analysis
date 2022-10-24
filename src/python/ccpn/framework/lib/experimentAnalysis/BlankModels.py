@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-24 15:07:24 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 16:36:43 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -56,8 +56,9 @@ class BlankCalculationModel(CalculationModel):
             # build the outputFrame
             outputFrame.loc[collectionPid, sv.COLLECTIONPID] = collectionPid
             outputFrame.loc[collectionPid, sv.NMRRESIDUEPID] = groupDf[sv.NMRRESIDUEPID].values[-1]
-            outputFrame.loc[collectionPid, sv.VALUE] = None
-            outputFrame.loc[collectionPid, sv.VALUE_ERR] = None
+            for arg in self.modelArgumentNames:
+                outputFrame.loc[collectionPid, arg] = None
+
         return outputFrame
 
     @property

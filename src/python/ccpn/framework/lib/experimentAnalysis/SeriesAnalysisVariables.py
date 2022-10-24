@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-24 15:07:24 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 16:36:43 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -87,6 +87,7 @@ EXCLUDED_PEAKPID        = f'{EXCLUDED_}{PEAKPID}'
 EXCLUDED_SPECTRUMPID    = f'{EXCLUDED_}{SPECTRUMPID}'
 EXCLUDED_NMRATOMPID     = f'{EXCLUDED_}{NMRATOMPID}'
 EXCLUDED_COLLECTIONPID  = f'{EXCLUDED_}{COLLECTIONPID}'
+ALL_EXCLUDED            = [EXCLUDED_PEAKPID, EXCLUDED_SPECTRUMPID, EXCLUDED_NMRATOMPID, EXCLUDED_COLLECTIONPID]
 
 # fitting output Stat variables
 MINIMISER        = 'minimiser'

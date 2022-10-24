@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-18 11:20:52 +0100 (Tue, October 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 16:36:43 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -102,6 +102,11 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         dataTable = self.project.getByPid(outputDataPid)
         return dataTable
 
+    def getGuiRawData(self):
+        """ Get a dataFrame containing only the Collection Pid as index and Series Steps as headers columns"""
+        df = self.getGuiOutputDataFrame()
+        return df[df._getRawDataHeaders()]
+
     def getGuiOutputDataFrame(self):
         """Get the SelectedOutputDataTable and transform the raw data to a displayable table for the main widgets.
         """
@@ -117,6 +122,16 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         ## reset index otherwise you lose the column collectionId
         outDataFrame = dataFrame.groupby(sv.COLLECTIONPID).first().reset_index()
         outDataFrame.set_index(sv.COLLECTIONPID, drop=False, inplace=True)
+
+        # add the rawData as new columns (Transposed from column to row)
+        for ix, ys in dataFrame.groupby(sv.COLLECTIONPID)[[sv.SERIES_STEP_X, sv.SERIES_STEP_Y]]:
+            outDataFrame.loc[ix, ys[sv.SERIES_STEP_X].values] = ys[sv.SERIES_STEP_Y].values
+
+        # drop columns that should not be on the Gui. To remove: peak properties (dim, height, ppm etc)
+        toDrop = sv.PeakPropertiesHeaders + [sv.DIMENSION, sv.ISOTOPECODE, sv.NMRATOMNAME, sv.NMRATOMPID]
+        toDrop += sv.ALL_EXCLUDED
+        outDataFrame.drop(toDrop, axis=1, errors='ignore', inplace=True)
+
         outDataFrame[sv.COLLECTIONID] = outDataFrame[sv.COLLECTIONID].astype(int)
         ## sort by NmrResidueCode if available otherwise by COLLECTIONID
         if outDataFrame[sv.NMRRESIDUECODE].astype(str).str.isnumeric().all():

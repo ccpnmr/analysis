@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-24 17:06:24 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 20:35:56 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -951,12 +951,12 @@ class AppearancePanel(GuiSettingPanel):
             (guiNameSpaces.WidgetVarName_TableView,
              {'label': guiNameSpaces.Label_TableView,
               'tipText': guiNameSpaces.TipText_TableView,
-              'enabled': False,
+              'enabled': True,
               'type': compoundWidget.CheckBoxesCompoundWidget,
               'kwds': {
                   'labelText': guiNameSpaces.Label_TableView,
                   'tipText': guiNameSpaces.TipText_TableView,
-                  'texts': ['Assignments', 'Raw Data', 'Calculation', 'Fitting', 'Stats', 'Errors', ],
+                  'texts': guiNameSpaces.TableGrouppingHeaders,
                   'callback': self._mainTableColumnViewCallback,
                   'fixedWidths': SettingsWidgetFixedWidths,
                   'compoundKwds': {'direction': 'v',
@@ -1074,6 +1074,13 @@ class AppearancePanel(GuiSettingPanel):
             return
         checked = widget.get() #get the checked values
         table = self._getMainTable()
+        for value in widget.getTexts():
+            funcName = f'_toggle{value}Headers'
+            func = getattr(table, funcName)
+            try:
+                func(setVisible=value in checked)
+            except Exception as err:
+                getLogger().warning(f'Failed to call the function {funcName}. Error:{err}')
 
     def _changeNavigateToDisplayTrigger(self, *args):
         table = self._getMainTable()

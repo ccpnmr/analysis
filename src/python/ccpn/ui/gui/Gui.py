@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-10 17:26:27 +0100 (Mon, October 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 12:54:30 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -220,7 +220,7 @@ class Gui(Ui):
         project = self.application.project
         mainWindow.sideBar.buildTree(project, clear=True)
 
-        mainWindow.raise_()
+        # mainWindow.raise_()  # whaaaaaat? causes the menu-bar to be unresponsive
         mainWindow.namespace['current'] = self.application.current
         return mainWindow
 
@@ -447,25 +447,25 @@ class Gui(Ui):
         :return a Project instance or None
         """
         # if not self.project.isTemporary:
-        if self.project._undo is None or self.project._undo.isDirty():
-            message = 'Do you really want to create a new project (current project will be closed %s)?' % \
-                  (' and any changes will be lost' if self.project.isModified else '')
-            _ok = MessageDialog.showYesNo('New Project', message, parent=self.mainWindow)
-            if not _ok:
+        if self.project and (self.project._undo is None or self.project._undo.isDirty()):
+            message = f"Do you really want to create a new project (current project will be closed {' and any changes will be lost' if self.project.isModified else ''})?"
+
+            if not (_ok := MessageDialog.showYesNo('New Project', message, parent=self.mainWindow)):
                 return
 
         if (_name := Project._checkName(name, correctName=True)) != name:
             MessageDialog.showInfo('New Project', f'Project name changed from "{name}" to "{_name}"\nSee console/log for details', parent=self)
 
         with catchExceptions(errorStringTemplate='Error creating new project: %s'):
-            self.mainWindow.moduleArea._closeAll()
+            if self.mainWindow:
+                self.mainWindow.moduleArea._closeAll()
             newProject = self.application._newProject(name=_name)
             if newProject is None:
                 raise RuntimeError('Unable to create new project')
             newProject._mainWindow.show()
             QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
 
-        return newProject
+            return newProject
 
     def _loadProject(self, dataLoader) -> typing.Union[Project, None]:
         """Helper function, loading project from dataLoader instance
@@ -485,10 +485,10 @@ class Gui(Ui):
         if self.project:
             # if not self.project.isTemporary:
             if self.project._undo is None or self.project._undo.isDirty():
-                message = 'Do you really want to open a new project (current project will be closed %s)?' % \
-                          (' and any changes will be lost' if self.project.isModified else '')
-                _ok = MessageDialog.showYesNo('Load Project', message, parent=self.mainWindow)
-                if not _ok:
+                message = f"Do you really want to open a new project (current project will be closed" \
+                              f"{' and any changes will be lost' if self.project.isModified else ''})?"
+
+                if not (_ok := MessageDialog.showYesNo('Load Project', message, parent=self.mainWindow)):
                     return None
 
             # Some error recovery; store info to re-open the current project (or a new default)
@@ -496,18 +496,27 @@ class Gui(Ui):
             oldProjectIsTemporary = self.project.isTemporary
 
         try:
-            with MessageDialog.progressManager(self.mainWindow, 'Loading project %s ... ' % dataLoader.path):
+            if self.project:
+                # NOTE:ED - getting a strange QT bug disabling the menu-bar from here
+                #  I think because the main-window isn't visible on the first load :|
+                with MessageDialog.progressManager(self.mainWindow, f'Loading project {dataLoader.path} ... '):
+                    _loaded = dataLoader.load()
+                    if _loaded is None or len(_loaded) == 0:
+                        return None
+            else:
+                # progress not required on the first load
                 _loaded = dataLoader.load()
                 if _loaded is None or len(_loaded) == 0:
                     return None
 
-                newProject = _loaded[0]
-                # # Note that the newProject has its own MainWindow; i.e. it is not self
-                # newProject._mainWindow.sideBar.buildTree(newProject)
-                # The next two lines are essential to have the QT main event loop associated
-                # with the new window; without these, the programs just terminates
-                newProject._mainWindow.show()
-                QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
+            newProject = _loaded[0]
+
+            # # Note that the newProject has its own MainWindow; i.e. it is not self
+            # newProject._mainWindow.sideBar.buildTree(newProject)
+            # The next two lines are essential to have the QT main event loop associated
+            # with the new window; without these, the programs just terminates
+            newProject._mainWindow.show()
+            QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
 
             # if the new project contains invalid spectra then open the popup to see them
             self.mainWindow._checkForBadSpectra(newProject)

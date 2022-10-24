@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-28 18:26:48 +0100 (Wed, September 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 14:59:54 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -381,7 +381,7 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
                                           axisMask=axisMask)
 
                 # add connection tags to start/end sequential strips - may later allow insertion of nmrResidues
-                if allNmrResidues.index(nr) == 0:
+                if allNmrResidues.index(nr) == 0 and not nr.previousNmrResidue:
                     # enable dropping onto the left arrow
                     # strips[ii].header.setLabelText(position='l', text='<<<')
                     strips[ii].header.setLabelText(position='l', text='')
@@ -389,7 +389,7 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
 
                     strips[ii].header.setEnabledLeftDrop(showDropHeaders)
 
-                if allNmrResidues.index(nr) == len(allNmrResidues) - 1:
+                if allNmrResidues.index(nr) == (len(allNmrResidues) - 1) and not nr.nextNmrResidue:
                     # enable dropping onto the right label
                     # strips[ii].header.setLabelText(position='r', text='>>>')
                     strips[ii].header.setLabelText(position='r', text='')
@@ -419,7 +419,9 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
             # set the object for the centre label
             strips[0].header.setLabelObject(position='c', obj=nmrResidue)
 
-            strips[0].header.setEnabledLeftDrop(showDropHeaders)
-            strips[0].header.setEnabledRightDrop(showDropHeaders)
+            if not nmrResidue.previousNmrResidue:
+                strips[0].header.setEnabledLeftDrop(showDropHeaders)
+            if not nmrResidue.nextNmrResidue:
+                strips[0].header.setEnabledRightDrop(showDropHeaders)
 
     return strips

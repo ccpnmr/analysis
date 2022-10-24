@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-24 16:36:43 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 17:06:24 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -102,12 +102,7 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         dataTable = self.project.getByPid(outputDataPid)
         return dataTable
 
-    def getGuiRawData(self):
-        """ Get a dataFrame containing only the Collection Pid as index and Series Steps as headers columns"""
-        df = self.getGuiOutputDataFrame()
-        return df[df._getRawDataHeaders()]
-
-    def getGuiOutputDataFrame(self):
+    def getGuiResultDataFrame(self):
         """Get the SelectedOutputDataTable and transform the raw data to a displayable table for the main widgets.
         """
         dataTable = self.getSelectedOutputDataTable()
@@ -125,7 +120,7 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
 
         # add the rawData as new columns (Transposed from column to row)
         for ix, ys in dataFrame.groupby(sv.COLLECTIONPID)[[sv.SERIES_STEP_X, sv.SERIES_STEP_Y]]:
-            outDataFrame.loc[ix, ys[sv.SERIES_STEP_X].values] = ys[sv.SERIES_STEP_Y].values
+            outDataFrame.loc[ix, ys[sv.SERIES_STEP_X].astype(str).values] = ys[sv.SERIES_STEP_Y].values
 
         # drop columns that should not be on the Gui. To remove: peak properties (dim, height, ppm etc)
         toDrop = sv.PeakPropertiesHeaders + [sv.DIMENSION, sv.ISOTOPECODE, sv.NMRATOMNAME, sv.NMRATOMPID]

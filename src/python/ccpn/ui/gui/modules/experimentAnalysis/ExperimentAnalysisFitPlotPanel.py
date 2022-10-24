@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-24 15:07:24 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 17:06:24 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -457,7 +457,7 @@ class FitPlotPanel(GuiPanel):
         if self.current.collection is None:
             self.clearData()
             return
-        df = self.guiModule.getGuiOutputDataFrame()
+        df = self.guiModule.getGuiResultDataFrame()
         if df is None or df.empty:
             self.clearData()
             return

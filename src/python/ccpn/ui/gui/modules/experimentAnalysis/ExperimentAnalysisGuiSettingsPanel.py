@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-24 15:07:24 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 17:06:24 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1034,8 +1034,8 @@ class AppearancePanel(GuiSettingPanel):
 
         """ Get the threshold value based on selected Y axis. called from _setThresholdValueForData"""
         mo = self.guiModule
-        value = mo.backendHandler.getThresholdValueForData(data=mo.getGuiOutputDataFrame(), columnName=columnName,
-                                            calculationMode=calculationMode, factor=factor)
+        value = mo.backendHandler.getThresholdValueForData(data=mo.getGuiResultDataFrame(), columnName=columnName,
+                                                           calculationMode=calculationMode, factor=factor)
         return value
 
     def _settingsChangedCallback(self, settingsDict, *args):

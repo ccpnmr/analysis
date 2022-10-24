@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-12 18:07:49 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 15:07:24 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -122,7 +122,7 @@ class BlankFittingModel(FittingModelABC):
         inputData = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
         for collectionId, groupDf in grouppedByCollectionsId:
-            groupDf.sort_values([sv.SERIESSTEP], inplace=True)
+            groupDf.sort_values([self.xSeriesStepHeader], inplace=True)
             minimiser = self.Minimiser()
             params = minimiser.params
             result = MinimiserResult(minimiser, params) #Don't do the fitting. Just return a mock of results as np.nan

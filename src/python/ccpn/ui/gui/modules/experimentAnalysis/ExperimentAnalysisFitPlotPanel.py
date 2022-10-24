@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-21 12:43:34 +0100 (Fri, October 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 15:07:24 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -41,6 +41,8 @@ from ccpn.core.Peak import Peak
 from ccpn.ui.gui.widgets.ViewBox import CrossHair
 from ccpn.core.lib.Notifiers import Notifier
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.util.Common import percentage
+import numpy as np
 
 class ExperimentAnalysisPlotToolBar(ToolBar):
 
@@ -312,7 +314,7 @@ class FitPlotPanel(GuiPanel):
     def __init__(self, guiModule, *args, **Framekwargs):
         GuiPanel.__init__(self, guiModule, showBorder=True, *args , **Framekwargs)
         self.fittedCurve = None #not sure if this var should Exist
-
+        self.rawDataScatterPlot = None
 
     def initWidgets(self):
 
@@ -320,12 +322,119 @@ class FitPlotPanel(GuiPanel):
         self._setExtraWidgets()
         self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
                                                  callback=self._currentCollectionCallback, onceOnly=True)
+        self.setXLabel(label='X')
+        self.setYLabel(label='Y')
+        self.labels = []
 
     def updatePanel(self, *args, **kwargs):
         self.plotCurrentData()
 
-    def plotCurrentData(self, *args, **kwargs):
-        pass
+    def plotCurrentData(self, *args):
+        """ Plot a curve based on Current Collection.
+         Get Plotting data from the Output-GUI-dataTable (getSelectedOutputDataTable)"""
+
+        self.clearData()
+
+        ## Get the current Collections if any or return
+        collections = self.current.collections
+        if not collections:
+            return
+
+        ## Get the raw data from the output DataTable if any or return
+        outputData = self.guiModule.getSelectedOutputDataTable()
+        if outputData is None:
+            return
+
+        ## Check if the current Collection pids are in the Table. If Pids not on table, return.
+        dataFrame = outputData.data
+        pids = [co.pid for co in self.current.collections]
+        filtered = dataFrame.getByHeader(sv.COLLECTIONPID, pids)
+        if filtered.empty:
+            return
+
+        ## Consider only the last selected Collection.
+        lastCollectionPid = filtered[sv.COLLECTIONPID].values[-1]
+        filteredDf = dataFrame[dataFrame[sv.COLLECTIONPID] == lastCollectionPid]
+
+        ## Grab the Pids/Objs for each spot in the scatter plot. Peaks
+        peakPids = filteredDf[sv.PEAKPID].values
+        objs = [self.project.getByPid(pid) for pid in peakPids]
+
+        ## Grab the Fitting Model, to recreate the fitted Curve from the fitting results.
+        modelNames = filteredDf[sv.MODEL_NAME].values
+        if len(modelNames) > 0:
+            modelName = modelNames[0]
+        else:
+            modelName = None
+        model = self.guiModule.backendHandler.getFittingModelByName(modelName)
+        if model is None:  ## get it from settings
+            model = self.guiModule.backendHandler.currentFittingModel
+        else:
+            model = model()
+
+        ## Grab the columns to plot the raw data, the header name from the model
+        Xs = filteredDf[model.xSeriesStepHeader].values
+        Ys = filteredDf[model.ySeriesStepHeader].values
+
+        ## Grab the Fitting function from the model and its needed Args from the DataTable. (I.e. Kd, Decay etc)
+        func = model.getFittingFunc(model)
+        funcArgs = model.modelArgumentNames
+        argsFit = filteredDf.iloc[0][funcArgs]
+        fittingArgs = argsFit.astype(float).to_dict()
+
+        ## Add and extra of filling data at the end of the fitted curve to don't just sharp end on the last raw data Point
+        extra = percentage(50, max(Xs))
+        initialPoint = min(Xs)
+        finalPoint = max(Xs) + extra
+
+        ## Build the fitted curve arrays
+        xf = np.linspace(initialPoint, finalPoint, 3000)
+        yf = func(xf, **fittingArgs)
+
+        ## Grab the axes label
+        seriesUnits = filteredDf[sv.SERIESUNIT].values
+        if len(seriesUnits) > 0:
+            seriesUnit = seriesUnits[0]
+        else:
+            seriesUnit = 'X (Series Unit Not Given)'
+        xAxisLabel = seriesUnit
+        yAxisLabel = model._ySeriesLabel
+
+        ## Setup the various labels.
+        self.currentCollectionLabel.setText('')
+        self.setXLabel(label=xAxisLabel)
+        self.setYLabel(label=yAxisLabel)
+        labelText = f'{lastCollectionPid}'
+        if len(self.current.collections) > 1:
+            labelText += f' - (Last selected)'
+        self.currentCollectionLabel.setText(labelText)
+
+        ## Plot the fittedCurve
+        self.fittedCurve = self.bindingPlot.plot(xf, yf, pen=self.bindingPlot.gridPen)
+
+        ## Plot the Raw Data
+        spots = []
+        self.labels = []
+        for obj, x, y in zip(objs, Xs, Ys):
+            brush = pg.mkBrush(255, 0, 0)
+            dd = {'pos': [0, 0], 'data': 'obj', 'brush': brush, 'symbol': 'o', 'size': 10, 'pen': None}
+            dd['pos'] = [x, y]
+            dd['data'] = obj
+            if obj is None:
+                continue
+            if hasattr(obj.spectrum, 'positiveContourColour'):  # colour from the spectrum.
+                brush = pg.functions.mkBrush(hexToRgb(obj.spectrum.positiveContourColour))
+                dd['brush'] = brush
+            spots.append(dd)
+            label = _CustomLabel(obj=obj, textProperty='id')
+            self.bindingPlot.addItem(label)
+            label.setPos(x, y)
+            self.labels.append(label)
+
+        self.rawDataScatterPlot = pg.ScatterPlotItem(spots)
+        self.bindingPlot.addItem(self.rawDataScatterPlot)
+        self.bindingPlot.scene().sigMouseMoved.connect(self.bindingPlot.mouseMoved)
+        self.bindingPlot.zoomFull()
 
     def setXLabel(self, label=''):
         self.bindingPlot.setLabel('bottom', label)
@@ -345,7 +454,6 @@ class FitPlotPanel(GuiPanel):
         self.getLayout().addWidget(self._bindingPlotView, 1,0,1,3)
 
     def _currentCollectionCallback(self, *args):
-
         if self.current.collection is None:
             self.clearData()
             return
@@ -365,6 +473,20 @@ class FitPlotPanel(GuiPanel):
     def clearData(self):
         self.bindingPlot.clear()
         self.currentCollectionLabel.clear()
+
+    def toggleRawDataLabels(self, setVisible=True):
+        for la in self.labels:
+            la.setVisible(setVisible)
+
+    def toggleRawData(self, setVisible=True):
+        """Show/Hide the raw data from the plot Widget """
+        self.rawDataScatterPlot.setVisible(setVisible)
+        self.toggleRawDataLabels(setVisible)
+
+
+    def toggleFittedData(self, setVisible=True):
+        """Show/Hide the fitted data from the plot Widget """
+        self.fittedCurve.setVisible(setVisible)
 
     def close(self):
         self._selectCurrentCONotifier.unRegister()

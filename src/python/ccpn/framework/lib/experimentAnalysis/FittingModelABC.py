@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-18 15:56:16 +0100 (Tue, October 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 15:07:24 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -67,7 +67,10 @@ class FittingModelABC(ABC):
         self._applyScaleMinMax = False
         self._applyStandardScaler = False
         self._modelArgumentNames = []
-        self._rawDataHeaders = [] #strings of columnHeaders
+        self._rawDataHeaders = [] # strings of columnHeaders
+        self.xSeriesStepHeader = sv.SERIES_STEP_X
+        self.ySeriesStepHeader = sv.SERIES_STEP_Y
+        self._ySeriesLabel = self.PeakProperty # this is only used in the Plot Y Axis label.
 
     @property
     def rawDataHeaders(self):
@@ -115,15 +118,15 @@ class FittingModelABC(ABC):
         commonHeaders = sv.MERGINGHEADERS
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
         for collectionId, groupDf in grouppedByCollectionsId:
-            groupDf.sort_values([sv.SERIESSTEP], inplace=True)
-            seriesSteps = groupDf[sv.SERIESSTEP]
+            groupDf.sort_values([self.xSeriesStepHeader], inplace=True)
+            seriesSteps = groupDf[self.xSeriesStepHeader]
             ## Build columns
             for ix, row in groupDf.iterrows():
                 pid = row[sv.COLLECTIONPID]
                 for commonHeader in commonHeaders:
                     outputFrame.loc[pid, commonHeader] = row[commonHeader]
                 for xValue in seriesSteps.values:
-                    if xValue == row[sv.SERIESSTEP]:
+                    if xValue == row[self.xSeriesStepHeader]:
                         valueHeader = f'{dimensionSeparator}{int(row[sv.DIMENSION])}_{xValue}'
                         if self.PeakProperty in [sv._HEIGHT, sv._VOLUME]:
                             valueHeader = f'{self.PeakProperty}_{xValue}'

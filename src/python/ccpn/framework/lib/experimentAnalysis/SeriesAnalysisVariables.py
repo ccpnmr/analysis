@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-20 17:45:19 +0100 (Thu, October 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 15:07:24 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -71,8 +71,9 @@ DIMENSION        = 'dimension'
 ISOTOPECODE      = 'isotopeCode'
 CLUSTERID        = 'clusterId'
 COLLECTIONID     = 'collectionId'
-SERIESSTEP       = 'seriesStep'
-SERIESSTEPVALUE  = 'seriesStepValue'
+RELDISPLACEMENT  = 'Relative Displacement'
+SERIES_STEP_X    = 'series_Step_X'
+SERIES_STEP_Y    = 'series_Step_Y'
 SERIESUNIT       = 'seriesUnit'
 PEAKPID          = 'peakPid'
 SPECTRUMPID      = 'spectrumPid'
@@ -133,7 +134,7 @@ FLAG = 'Flag'
 SERIAL = 'Serial'
 
 CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, MINIMISER_MODEL, R2, CHISQR, REDCHI, AIC, BIC]
-SpectrumPropertiesHeaders = [DIMENSION, ISOTOPECODE, SERIESSTEP, SERIESUNIT]
+SpectrumPropertiesHeaders = [DIMENSION, ISOTOPECODE, SERIES_STEP_X, SERIESUNIT]
 PeakPropertiesHeaders = [_PPMPOSITION, _HEIGHT, _LINEWIDTH, _VOLUME]
 AssignmentPropertiesHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE, NMRATOMNAME]
 GROUPBYAssignmentHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE]

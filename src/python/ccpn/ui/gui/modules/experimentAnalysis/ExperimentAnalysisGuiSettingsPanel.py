@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-21 15:51:19 +0100 (Fri, October 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 15:07:24 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -445,9 +445,7 @@ class GuiInputDataPanel(GuiSettingPanel):
 
     def _resultDataTablePulldownCallback(self, *args):
         """Callback upon widget selection """
-        print('CALLDED')
         self.guiModule.updateAll()
-
 
     def _filterInputCollections(self, pids, *args):
         """ Add collections only if contain a subset of other collections. Avoid massive lists! """

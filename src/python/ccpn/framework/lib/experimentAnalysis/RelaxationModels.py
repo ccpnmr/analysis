@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-12 18:07:50 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-24 15:07:24 +0100 (Mon, October 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -109,18 +109,17 @@ class _RelaxationBaseFittingModel(FittingModelABC):
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
         ## Keep only one IsotopeCode as we are using only Height/Volume 15N?
         inputData = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
+        inputData[self.ySeriesStepHeader] = inputData[self.PeakProperty]
+        self._ySeriesLabel = self.PeakProperty
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
         for collectionId, groupDf in grouppedByCollectionsId:
-            groupDf.sort_values([sv.SERIESSTEP], inplace=True)
-            seriesSteps = groupDf[sv.SERIESSTEP]
-            seriesValues = groupDf[self.PeakProperty]
-            pid = groupDf[sv.COLLECTIONPID].values[-1]
-            xArray = seriesSteps.values
-            yArray = seriesValues.values
+            groupDf.sort_values([self.xSeriesStepHeader], inplace=True)
+            seriesSteps = Xs = groupDf[self.xSeriesStepHeader].values
+            seriesValues = Ys = groupDf[self.ySeriesStepHeader].values
             minimiser = self.Minimiser()
             try:
-                params = minimiser.guess(yArray, xArray)
-                result = minimiser.fit(yArray, params, x=xArray)
+                params = minimiser.guess(Ys, Xs)
+                result = minimiser.fit(Ys, params, x=Xs)
             except:
                 getLogger().warning(f'Fitting Failed for collectionId: {collectionId} data.')
                 params = minimiser.params
@@ -229,7 +228,7 @@ class HetNoeCalculation(CalculationModel):
         inputData = inputData[inputData[sv.ISOTOPECODE] == '15N']
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
         for collectionId, groupDf in grouppedByCollectionsId:
-            groupDf.sort_values([sv.SERIESSTEP], inplace=True)
+            groupDf.sort_values([self.xSeriesStepHeader], inplace=True)
             seriesValues = groupDf[self.PeakProperty]
             nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf) # join the atom names from different rows in a list
             seriesUnits = groupDf[sv.SERIESUNIT].unique()

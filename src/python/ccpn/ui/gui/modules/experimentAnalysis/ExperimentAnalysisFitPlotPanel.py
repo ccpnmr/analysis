@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-25 12:12:42 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 12:22:44 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -89,7 +89,7 @@ class LeftAxisItem(pg.AxisItem):
     def tickStrings(self, values, scale, spacing):
         """ Overridden method to show minimal decimals.
         """
-        return [f'{v:.4f}' for v in values]
+        return [f'{v:.2e}' for v in values]
 
 class FittingHandle(Handle):
     """Experimental.  A class to allow manual refitting of a curve based.  """

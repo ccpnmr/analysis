@@ -43,7 +43,7 @@ import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
 from ccpn.ui.gui.widgets.HLine import LabeledHLine
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import PanelUpdateState
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import PanelUpdateState
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiSettingsPanel import GuiSettingPanel, \
     GuiInputDataPanel, GuiCalculationPanel, GuiFittingPanel, AppearancePanel

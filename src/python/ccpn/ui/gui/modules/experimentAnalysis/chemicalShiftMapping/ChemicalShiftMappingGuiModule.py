@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-24 15:07:25 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 12:12:15 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ from ccpn.util.Logging import getLogger
 from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 import ccpn.ui.gui.modules.experimentAnalysis.chemicalShiftMapping.CSMSettingsPanel as settingsPanel
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import ToolBarPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import ToolBarPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import ExperimentAnalysisGuiModuleBC
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel

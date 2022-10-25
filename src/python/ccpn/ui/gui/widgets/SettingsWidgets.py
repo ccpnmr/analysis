@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-24 18:51:31 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 16:36:19 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1197,7 +1197,8 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         """
         if self._spectrumViewNotifier:
             self._spectrumViewNotifier.unRegister()
-        self.ncWidget.unRegister()
+        if self.includeNmrChainPullSelection:
+            self.ncWidget.unRegister()
 
     def _spectrumViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame

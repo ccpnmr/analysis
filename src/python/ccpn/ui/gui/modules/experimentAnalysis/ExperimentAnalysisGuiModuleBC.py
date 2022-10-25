@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-25 12:12:14 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 19:50:28 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -123,7 +123,7 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
             outDataFrame.loc[ix, ys[sv.SERIES_STEP_X].astype(str).values] = ys[sv.SERIES_STEP_Y].values
 
         # drop columns that should not be on the Gui. To remove: peak properties (dim, height, ppm etc)
-        toDrop = sv.PeakPropertiesHeaders + [sv.DIMENSION, sv.ISOTOPECODE, sv.NMRATOMNAME, sv.NMRATOMPID]
+        toDrop = sv.PeakPropertiesHeaders + [sv._SNR, sv.DIMENSION, sv.ISOTOPECODE, sv.NMRATOMNAME, sv.NMRATOMPID]
         toDrop += sv.ALL_EXCLUDED
         outDataFrame.drop(toDrop, axis=1, errors='ignore', inplace=True)
 

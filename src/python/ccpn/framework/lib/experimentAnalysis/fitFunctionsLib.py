@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-20 13:56:04 +0100 (Thu, October 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 19:50:28 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -250,6 +250,33 @@ def euclideanDistance_func(array1, array2, alphaFactors):
         delta **= 2
         deltas.append(delta)
     return np.sqrt(np.mean(np.array(deltas)))
+
+def _checkValidValues(values):
+    """
+    Check if values contain 0, None or np.nan
+    :param values: list
+    :return: bool
+    """
+    notAllowed = [0, None, np.nan]
+    for i in values:
+        if i in notAllowed:
+            return False
+    return True
+
+def peakErrorBySNR(snrPeak1, snrPeak2, factor=1):
+    """
+    Calculate the Error of NOE measurements (as in AnalysisV2)
+    :param factor: float, correction factor.
+    :param snrPeak1: float, signal to noise ratio for Peak 1
+    :param snrPeak2: float, signal to noise ratio for Peak 2
+    :return: float or None
+    Ref.: 1) eq. 4 from Kharchenko, V., et al. Dynamic 15N{1H} NOE measurements: a tool for studying protein dynamics.
+             J Biomol NMR 74, 707–716 (2020). https://doi.org/10.1007/s10858-020-00346-6
+    """
+    if not _checkValidValues([snrPeak1, snrPeak2, factor]):
+        return
+    error = abs(factor) * np.sqrt(snrPeak1**-2 + snrPeak2**-2)
+    return error
 
 def hetNoeError(sat, nonSat, noiseSat, noiseNonSat, factor=1):
     """

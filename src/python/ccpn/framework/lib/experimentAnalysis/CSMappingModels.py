@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-25 13:51:43 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 19:50:27 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -109,7 +109,7 @@ class EuclideanCalculationModel(CalculationModel):
                     seriesUnits = groupDf[sv.SERIESUNIT].unique()
                     peakPids = groupDf[sv.PEAKPID].unique()
                     peaks = self.project.getByPids(peakPids)
-                    csmValueError = self._calculateDeltaDeltasError(peaks)
+                    csmValueError = None
                     for delta, seriesStep, peakPid in zip(deltaDeltas, seriesSteps, peakPids):
                         # build the outputFrame
                         outputFrame.loc[rowIndex, sv.COLLECTIONID] = collectionId
@@ -150,6 +150,7 @@ class EuclideanCalculationModel(CalculationModel):
         :param peaks:
         :return: float
         """
+        # TODO Double check if is the right calculation error.
         error = None
         if len(peaks)<1:
             return None

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-25 14:12:25 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 19:50:28 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -185,10 +185,12 @@ class HetNoeCalculation(CalculationModel):
                   Sat = Peak Intensity for the Saturated Spectrum;
                   UnSat = Peak Intensity for the UnSaturated Spectrum, 
                   Value Error calculated as:
-                  error = factor * √(Noise_Sat / I_Sat) ** 2 + (Noise_UnSat / I_UnSat) ** 2
+                  error = factor * √SNR_Sat^-2 + SNR_UnSat^-2
                   factor = I_Sat/I_UnSat'''
     References  = '''
-                  '''
+                1) Kharchenko, V., et al. Dynamic 15N{1H} NOE measurements: a tool for studying protein dynamics. 
+                J Biomol NMR 74, 707–716 (2020). https://doi.org/10.1007/s10858-020-00346-6
+                '''
     # MaTex       = r'$I_{Sat} / I_{UnSat}$'
     FullDescription = f'{Info}\n{Description}'
     PeakProperty = sv._HEIGHT
@@ -234,11 +236,12 @@ class HetNoeCalculation(CalculationModel):
             seriesUnits = groupDf[sv.SERIESUNIT].unique()
             satPeakPid = groupDf[sv.PEAKPID].values[satIndex]
             unSatPeakPid = groupDf[sv.PEAKPID].values[unSatIndex]
+            satPeakSNR = groupDf[sv._SNR].values[satIndex]
+            unSatPeakSNR = groupDf[sv._SNR].values[unSatIndex]
             unSatValue = seriesValues.values[unSatIndex]
             satValue = seriesValues.values[satIndex]
             ratio = satValue/unSatValue
-            error = self._calculateHetNoeErrorFromPids(satPeakPid, unSatPeakPid, satValue=satValue, unSatValue=unSatValue)
-
+            error = lf.peakErrorBySNR(satPeakSNR, unSatPeakSNR, ratio)
             # build the outputFrame
             outputFrame.loc[collectionId, sv.COLLECTIONID] = collectionId
             outputFrame.loc[collectionId, sv.PEAKPID] = groupDf[sv.PEAKPID].values[0]

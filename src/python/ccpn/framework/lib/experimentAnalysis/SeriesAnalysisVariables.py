@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-24 16:36:43 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 19:50:28 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -107,6 +107,7 @@ _LINEWIDTH      = pu._LINEWIDTH
 _LINEWIDTHS     = pu.LINEWIDTHS
 _HEIGHT         = pu.HEIGHT
 _VOLUME         = pu.VOLUME
+_SNR            = 'signalToNoiseRatio'
 
 ## ATOM Names
 _H = pu.H

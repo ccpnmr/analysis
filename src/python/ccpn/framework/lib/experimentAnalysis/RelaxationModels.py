@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-25 13:51:43 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 14:12:25 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -140,36 +140,34 @@ class InversionRecoveryFittingModel(_RelaxationBaseFittingModel):
     InversionRecovery model class containing fitting equation and fitting information
     """
     ModelName   = sv.InversionRecovery
-    Info        = '''
-                  Inversion Recovery fitting model.
+    Info        = '''Inversion Recovery fitting model.
                   '''
-    Description = '''
+    Description = '''Model:
                   Y = amplitude * (1 - e^{-time/decay})
                   '''
     References  = '''
                   NIY
                   '''
-    Minimiser = InversionRecoveryMinimiser
-    MaTex =  r'$amplitude*(1 - e^{-time/decay})$'
+    # Minimiser = InversionRecoveryMinimiser
+    # MaTex =  r'$amplitude*(1 - e^{-time/decay})$'
+    FullDescription = f'{Info}\n{Description}'
 
 class ExponentialDecayFittingModel(_RelaxationBaseFittingModel):
     """
     ExponentialDecay FittingModel model class containing fitting equation and fitting information
     """
     ModelName   = sv.ExponentialDecay
-    Info        = '''
-                  Exponential Decay fitting model
+    Info        = '''Exponential Decay fitting model
                   '''
-    Description = '''
-                  Model:
+    Description = '''Model:
                   Y = amplitude * (e^{-time/decay})
                   '''
     References  = '''
                   NIY
                   '''
     Minimiser = ExponentialDecayMinimiser
-    MaTex = r'$amplitude *(e^{-time/decay})$'
-
+    # MaTex = r'$amplitude *(e^{-time/decay})$'
+    FullDescription = f'{Info}\n{Description}'
 
 #####################################################
 ##########  Calculation Models   ####################
@@ -181,19 +179,18 @@ class HetNoeCalculation(CalculationModel):
     """
     ModelName = sv.HETNOE
     Info        = 'Calculate HeteroNuclear NOE Values using peak Intensity (Height or Volume).'
-    MaTex       = r'$I_{Sat} / I_{UnSat}$'
-    Description = '''
-                    Model:
-                    HnN = I_Sat / I_UnSat
-                    Sat = Peak Intensity for the Saturated Spectrum;
-                    UnSat = Peak Intensity for the UnSaturated Spectrum, 
-                    Value Error calculated as:
-                    error = factor * √(Noise_Sat / I_Sat) ** 2 + (Noise_UnSat / I_UnSat) ** 2
-                    factor = I_Sat/I_UnSat'''
 
+    Description = '''Model:
+                  HnN = I_Sat / I_UnSat
+                  Sat = Peak Intensity for the Saturated Spectrum;
+                  UnSat = Peak Intensity for the UnSaturated Spectrum, 
+                  Value Error calculated as:
+                  error = factor * √(Noise_Sat / I_Sat) ** 2 + (Noise_UnSat / I_UnSat) ** 2
+                  factor = I_Sat/I_UnSat'''
     References  = '''
                   '''
-    FullDescription = f'{Info} \n {Description}\nSee References: {References}'
+    # MaTex       = r'$I_{Sat} / I_{UnSat}$'
+    FullDescription = f'{Info}\n{Description}'
     PeakProperty = sv._HEIGHT
     _allowedIntensityTypes = (sv._HEIGHT, sv._VOLUME)
 

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-24 17:06:24 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 12:12:15 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -22,8 +22,10 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
+from collections import OrderedDict as od
 from PyQt5 import QtCore, QtWidgets
+from ccpn.ui.gui.widgets.Action import Action
+from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
@@ -193,3 +195,48 @@ class ToolBarPanel(GuiPanel):
                 updateButton.setIcon(Icon(iconValue))
 
 
+class ExperimentAnalysisPlotToolBar(ToolBar):
+
+    def __init__(self, parent, plotItem, guiModule, **kwds):
+        super().__init__(parent=parent, **kwds)
+        self.plotItem = plotItem
+        self.plotItem.toolbar = self
+        self.guiModule = guiModule
+        self.setToolActions(self.getToolBarDefs())
+        self.setMaximumHeight(30)
+
+    def setToolActions(self, actionDefinitions):
+        for name, dd in actionDefinitions.items():
+            if isinstance(dd, od):
+                action = Action(self, **dd)
+                action.setObjectName(name)
+                self.addAction(action)
+            else:
+                self.addSeparator()
+
+    def getToolBarDefs(self):
+        toolBarDefs = od((
+            ('Zoom-All', od((
+                ('text', 'Zoom-All'),
+                ('toolTip', 'Zoom All Axes'),
+                ('icon', Icon('icons/zoom-full')),
+                ('callback', self.plotItem.zoomFull),
+                ('enabled', True)
+                ))),
+            ('Zoom-X', od((
+                ('text', 'Zoom-X-axis'),
+                ('toolTip', 'Reset X-axis to fit view'),
+                ('icon', Icon('icons/zoom-full-1d')),
+                ('callback', self.plotItem.fitXZoom),
+                ('enabled', True)
+            ))),
+            ('Zoom-Y', od((
+                ('text', 'Zoom-Y-axis'),
+                ('toolTip', 'Reset Y-axis to fit view'),
+                ('icon', Icon('icons/zoom-best-fit-1d')),
+                ('callback', self.plotItem.fitYZoom),
+                ('enabled', True)
+            ))),
+            ('Sep', ()),
+            ))
+        return toolBarDefs

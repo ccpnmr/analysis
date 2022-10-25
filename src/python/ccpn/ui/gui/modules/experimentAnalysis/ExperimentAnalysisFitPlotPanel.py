@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-24 20:35:56 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 12:12:14 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -24,6 +24,7 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 #=========================================================================================
 
 import pyqtgraph as pg
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import ExperimentAnalysisPlotToolBar
 from ccpn.util.Logging import getLogger
 from pyqtgraph.graphicsItems.ROI import Handle
 from PyQt5 import QtCore, QtWidgets
@@ -32,64 +33,54 @@ from ccpn.ui.gui.guiSettings import getColours
 from ccpn.util.Colour import hexToRgb, rgbaRatioToHex
 from ccpn.ui.gui.widgets.Font import getFont
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
-from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Label import Label
-from collections import OrderedDict as od
-from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.Action import Action
 from ccpn.core.Peak import Peak
 from ccpn.ui.gui.widgets.ViewBox import CrossHair
 from ccpn.core.lib.Notifiers import Notifier
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Common import percentage
 import numpy as np
+from collections import OrderedDict as od
+from ccpn.ui.gui.widgets.Icon import Icon
 
-class ExperimentAnalysisPlotToolBar(ToolBar):
+class FittingPlotToolBar(ExperimentAnalysisPlotToolBar):
 
-    def __init__(self, parent, plotItem, **kwds):
-        super().__init__(parent=parent, **kwds)
-        self.plotItem = plotItem
-        self.plotItem.toolbar = self
-        self.setToolActions(self._defaultToolBarDefs())
-        self.setMaximumHeight(30)
+    def __init__(self, parent, plotItem, guiModule, **kwds):
+        super().__init__(parent, plotItem=plotItem, guiModule=guiModule, **kwds)
 
-    def setToolActions(self, actionDefinitions):
-        for v in actionDefinitions:
-            if len(v) == 2:
-                if isinstance(v[1], od):
-                    action = Action(self, **v[1])
-                    action.setObjectName(v[0])
-                    self.addAction(action)
-            else:
-                self.addSeparator()
+        self.fittingPanel = parent
 
-    def _defaultToolBarDefs(self):
-        toolBarDefs = (
-            ('Zoom-All', od((
-                ('text', 'Zoom-All'),
-                ('toolTip', 'Zoom All Axes'),
-                ('icon', Icon('icons/zoom-full')),
-                ('callback', self.plotItem.zoomFull),
-                ('enabled', True)
+    def getToolBarDefs(self):
+        toolBarDefs = super().getToolBarDefs()
+        extraDefs = (
+            ('FittedCurve', od((
+                ('text', 'Toggle Fitted Curve'),
+                ('toolTip', 'Toggle the Fitted Curve'),
+                ('icon', Icon('icons/curveFit')),
+                ('callback', self._toggleFittedCurve),
+                ('enabled', True),
+                ('checkable', True)
                 ))),
-            ('Zoom-X', od((
-                ('text', 'Zoom-X-axis'),
-                ('toolTip', 'Reset X-axis to fit view'),
-                ('icon', Icon('icons/zoom-full-1d')),
-                ('callback', self.plotItem.fitXZoom),
-                ('enabled', True)
-            ))),
-            ('Zoom-Y', od((
-                ('text', 'Zoom-Y-axis'),
-                ('toolTip', 'Reset Y-axis to fit view'),
-                ('icon', Icon('icons/zoom-best-fit-1d')),
-                ('callback', self.plotItem.fitYZoom),
-                ('enabled', True)
-            ))),
-            (),
-            )
+            ('RawData', od((
+                ('text', 'ToggleRawDataScatter'),
+                ('toolTip', 'Toggle the RawData Scatter Plot'),
+                ('icon', Icon('icons/curveFitScatter')),
+                ('callback', self._toggleRawDataScatter),
+                ('enabled', True),
+                ('checkable', True)
+            ))))
+        toolBarDefs.update(extraDefs)
         return toolBarDefs
 
+    def _toggleFittedCurve(self):
+        action = self.sender()
+        print('_toggleFittedCurve', action)
+        self.fittingPanel.toggleFittedData(action.isChecked())
+
+    def _toggleRawDataScatter(self):
+        action = self.sender()
+        print('_toggleRawDataScatter', action)
+        self.fittingPanel.toggleRawData(action.isChecked())
 
 class LeftAxisItem(pg.AxisItem):
     """ Overridden class for the left axis to show minimal decimals and stop resizing to massive space.
@@ -449,8 +440,8 @@ class FitPlotPanel(GuiPanel):
         self._bindingPlotView = pg.GraphicsLayoutWidget()
         self._bindingPlotView.setBackground(self.backgroundColour)
         self.bindingPlot = FittingPlot(parentWidget=self)
-        self.toolbar = ExperimentAnalysisPlotToolBar(parent=self, plotItem=self.bindingPlot,
-                                                     grid=(0, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
+        self.toolbar = FittingPlotToolBar(parent=self, plotItem=self.bindingPlot, guiModule=self.guiModule,
+                                          grid=(0, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
         self.currentCollectionLabel = Label(self, text='', grid=(0, 2), hAlign='r',)
         self._bindingPlotView.addItem(self.bindingPlot)
         self.getLayout().addWidget(self._bindingPlotView, 1,0,1,3)

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-25 11:15:30 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 12:12:14 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -47,7 +47,7 @@ import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVa
 from ccpn.ui.gui.widgets.HLine import LabeledHLine, HLine
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import PanelUpdateState
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import PanelUpdateState
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.ui.gui.widgets.SettingsWidgets import ALL, UseCurrent

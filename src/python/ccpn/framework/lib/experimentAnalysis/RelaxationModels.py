@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-24 15:07:24 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 13:51:43 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -141,10 +141,10 @@ class InversionRecoveryFittingModel(_RelaxationBaseFittingModel):
     """
     ModelName   = sv.InversionRecovery
     Info        = '''
-                  NIY
+                  Inversion Recovery fitting model.
                   '''
     Description = '''
-                  NIY
+                  Y = amplitude * (1 - e^{-time/decay})
                   '''
     References  = '''
                   NIY
@@ -158,10 +158,11 @@ class ExponentialDecayFittingModel(_RelaxationBaseFittingModel):
     """
     ModelName   = sv.ExponentialDecay
     Info        = '''
-                  NIY
+                  Exponential Decay fitting model
                   '''
     Description = '''
-                  NIY
+                  Model:
+                  Y = amplitude * (e^{-time/decay})
                   '''
     References  = '''
                   NIY
@@ -179,14 +180,16 @@ class HetNoeCalculation(CalculationModel):
     Calculate HeteroNuclear NOE Values
     """
     ModelName = sv.HETNOE
-    Info        = 'Calculate HeteroNuclear NOE Values using peak Intensity (Height/Volume).'
+    Info        = 'Calculate HeteroNuclear NOE Values using peak Intensity (Height or Volume).'
     MaTex       = r'$I_{Sat} / I_{UnSat}$'
     Description = '''
+                    Model:
+                    HnN = I_Sat / I_UnSat
                     Sat = Peak Intensity for the Saturated Spectrum;
                     UnSat = Peak Intensity for the UnSaturated Spectrum, 
                     Value Error calculated as:
-                    error = factor * np.sqrt((noiseSat / sat) ** 2 + (noiseUnSat / UnSat) ** 2)
-                    factor = sat/unSat'''
+                    error = factor * √(Noise_Sat / I_Sat) ** 2 + (Noise_UnSat / I_UnSat) ** 2
+                    factor = I_Sat/I_UnSat'''
 
     References  = '''
                   '''

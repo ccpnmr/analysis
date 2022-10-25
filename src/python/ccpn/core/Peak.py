@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-28 18:27:01 +0100 (Wed, September 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 17:13:26 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -548,7 +548,8 @@ class Peak(AbstractWrapperObject):
 
         apiPeak.assignByDimensions(dimResonances)
 
-    def _recalculatePeakShifts(self, nmrResidues, shifts):
+    @staticmethod
+    def _recalculatePeakShifts(nmrResidues, shifts):
         # update the assigned nmrAtom chemical shift values - notify the nmrResidues and chemicalShifts
         for sh in shifts:
             sh._recalculateShiftValue()
@@ -563,13 +564,13 @@ class Peak(AbstractWrapperObject):
 
         _pre = set(makeIterableList(self.assignedNmrAtoms))
         _post = set(makeIterableList(value))
-        nmrResidues = set(nmr.nmrResidue for nmr in (_pre | _post))
-        shifts = list(set(cs for nmrAt in (_pre | _post) for cs in nmrAt.chemicalShifts))
+        nmrResidues = {nmr.nmrResidue for nmr in (_pre | _post)}
+        shifts = list({cs for nmrAt in (_pre | _post) for cs in nmrAt.chemicalShifts})
         newShifts = shifts.copy()
 
         _thisNmrPids = self.spectrum.chemicalShiftList._getNmrAtomPids()
-        _pre = set(atm.pid for atm in _pre)
-        _post = set(atm.pid for atm in _post)
+        _pre = {atm.pid for atm in _pre}
+        _post = {atm.pid for atm in _post}
 
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
@@ -579,8 +580,8 @@ class Peak(AbstractWrapperObject):
             self._dimensionNmrAtoms = value
 
             # add those that are not already in the list - otherwise recalculate
-            for nmrAtom in (_post - _pre - _thisNmrPids):
-                newShifts.append(self.spectrum.chemicalShiftList.newChemicalShift(nmrAtom=nmrAtom))
+            newShifts.extend(self.spectrum.chemicalShiftList.newChemicalShift(nmrAtom=nmrAtom)
+                             for nmrAtom in (_post - _pre - _thisNmrPids))
 
             # update the chemicalShift value/valueError
             self._recalculatePeakShifts(nmrResidues, newShifts)

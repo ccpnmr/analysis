@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-27 14:36:45 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 16:25:00 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget
-from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableView, _updateSimplePandasTable
+from ccpn.ui.gui.widgets.table.Table import Table
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Logging import getLogger
@@ -71,9 +71,8 @@ class ViolationTableModule(CcpnModule):
     _includeInLastSeen = False
 
     def __init__(self, mainWindow=None, name=f'{KlassTable.className} Module',
-                 table=None, selectFirstItem=True):
-        """
-        Initialise the Module widgets
+                 table=None, selectFirstItem=False):
+        """Initialise the Module widgets
         """
         super().__init__(mainWindow=mainWindow, name=name)
 
@@ -102,13 +101,12 @@ class ViolationTableModule(CcpnModule):
         self._settings = None
         if self.activePulldownClass:
             # add to settings widget - see sequenceGraph for more detailed example
-            settingsDict = OrderedDict(((LINKTOPULLDOWNCLASS, {'label'   : 'Link to current %s' % self.activePulldownClass.className,
-                                                               'tipText' : 'Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
+            settingsDict = OrderedDict(((LINKTOPULLDOWNCLASS, {'label'   : f'Link to current {self.activePulldownClass.className}',
+                                                               'tipText' : f'Set/update current {self.activePulldownClass.className} when selecting from pulldown',
                                                                'callBack': None,
                                                                'enabled' : True,
                                                                'checked' : False,
-                                                               '_init'   : None,
-                                                               }),
+                                                               '_init'   : None}),
                                         ))
             self._settings = ModuleSettingsWidget(parent=self.settingsWidget, mainWindow=self.mainWindow,
                                                   settingsDict=settingsDict,
@@ -133,14 +131,14 @@ class ViolationTableModule(CcpnModule):
                                          mainWindow=self.mainWindow,
                                          moduleParent=self,
                                          setLayout=True,
+                                         showVerticalHeader=False,
                                          grid=(0, 0))
 
-        # main widgets at the top
-        row = 0
         Spacer(_topWidget, 5, 5,
                QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                grid=(0, 0), gridSpan=(1, 1))
-        row += 1
+
+        row = 1
         self._modulePulldown = KlassPulldown(parent=_topWidget,
                                              mainWindow=self.mainWindow, default=None,
                                              grid=(row, 0), gridSpan=(1, 2), minimumWidths=(0, 100),
@@ -151,7 +149,6 @@ class ViolationTableModule(CcpnModule):
         # fixed height
         self._modulePulldown.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
 
-        # comment line on same row
         # row += 1
         self.labelComment = Label(_topWidget, text='comment', grid=(row, 2), hAlign='r')
         self.lineEditComment = LineEdit(_topWidget, grid=(row, 3), gridSpan=(1, 1),
@@ -174,8 +171,7 @@ class ViolationTableModule(CcpnModule):
 
         row += 1
         Label(_topWidget, text='\nmetadata', grid=(row, 0), hAlign='r', vAlign='t')
-        self._metadata = _SimplePandasTableView(_topWidget, showVerticalHeader=False)
-        _topWidget.getLayout().addWidget(self._metadata, row, 1, 1, 3)
+        self._metadata = Table(_topWidget, showVerticalHeader=False, grid=(row, 1), gridSpan=(1, 3))
         self._metadata.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         row += 1
@@ -200,9 +196,7 @@ class ViolationTableModule(CcpnModule):
         """
         Maximise the attached table
         """
-        if self._table:
-            pass
-        else:
+        if not self._table:
             self.clear()
 
     def _closeModule(self):
@@ -256,7 +250,7 @@ class ViolationTableModule(CcpnModule):
 
         _df = pd.DataFrame({'name'     : self._table.metadata.keys(),
                             'parameter': self._table.metadata.values()})
-        _updateSimplePandasTable(self._metadata, _df, _resize=True)
+        self._metadata.updateDf(_df, resize=True, setOnHeaderOnly=True)
 
     def _update(self):
         """Update the table
@@ -267,28 +261,28 @@ class ViolationTableModule(CcpnModule):
 
         df = self._table.data
         if df is not None and len(df) > 0:
-            _updateSimplePandasTable(self._tableWidget, df, _resize=False)
+            self._tableWidget.updateDf(df)
         else:
-            _updateSimplePandasTable(self._tableWidget, pd.DataFrame({}))
+            self._tableWidget.updateDf(pd.DataFrame({}))
 
         _rTablePid = self._table.getMetadata(_RESTRAINTTABLE)
         self.rtWidget.select(_rTablePid)
-        self.lineEditComment.setText(self._table.comment if self._table.comment else '')
+        self.lineEditComment.setText(self._table.comment or '')
 
         _df = pd.DataFrame({'name'     : self._table.metadata.keys(),
                             'parameter': self._table.metadata.values()})
-        _updateSimplePandasTable(self._metadata, _df, _resize=True)
+        self._metadata.updateDf(_df, resize=True, setOnHeaderOnly=True)
 
     def _updateEmptyTable(self):
         """Update with an empty table
         """
-        _updateSimplePandasTable(self._tableWidget, pd.DataFrame({}))
+        self._tableWidget.updateDf(pd.DataFrame({}))
         self.rtWidget.setIndex(0, blockSignals=True)
         self.lineEditComment.setText('')
 
         _df = pd.DataFrame({'name'     : [],
                             'parameter': []})
-        _updateSimplePandasTable(self._metadata, _df, _resize=True)
+        self._metadata.updateDf(_df, resize=True, setOnHeaderOnly=True)
 
     def _applyComment(self):
         """Set the values in the violationTable
@@ -335,16 +329,24 @@ class ViolationTableModule(CcpnModule):
 # _TableWidget
 #=========================================================================================
 
-class _TableWidget(_SimplePandasTableView):
+class _TableWidget(Table):
     """
     Class to present a ViolationTable
     """
     className = '_TableWidget'
     attributeName = KlassTable._pluralLinkName
 
-    def __init__(self, parent=None, mainWindow=None, moduleParent=None, **kwds):
-        """
-        Initialise the widgets for the module.
+    defaultHidden = []
+    _internalColumns = []
+    _hiddenColumns = []
+
+    _defaultEditable = False
+    _enableDelete = False
+
+    _rowHeightScale = 1.0
+
+    def __init__(self, parent=None, mainWindow=None, moduleParent=None, showVerticalHeader=True, **kwds):
+        """Initialise the widgets for the module.
         """
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
@@ -368,10 +370,9 @@ class _TableWidget(_SimplePandasTableView):
 
         # initialise the table
         super().__init__(parent=parent,
-                         showHorizontalHeader=True,
-                         showVerticalHeader=False,
-                         multiSelect=True,
-                         grid=(3, 0), gridSpan=(1, 6))
+                         grid=(3, 0), gridSpan=(1, 6), showVerticalHeader=showVerticalHeader,
+                         )
+
         self.moduleParent = moduleParent
 
         # Initialise the notifier for processing dropped items
@@ -379,6 +380,20 @@ class _TableWidget(_SimplePandasTableView):
 
         # may refactor the remaining modules so this isn't needed
         self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
+
+    #=========================================================================================
+    # Selection/action callbacks
+    #=========================================================================================
+
+    def selectionCallback(self, selected, deselected, selection, lastItem):
+        pass
+
+    def actionCallback(self, selection, lastItem):
+        pass
+
+    #=========================================================================================
+    # Handle drop events
+    #=========================================================================================
 
     def _processDroppedItems(self, data):
         """
@@ -407,22 +422,28 @@ class _TableWidget(_SimplePandasTableView):
 
         selectableObjects = [obj for obj in objs if isinstance(obj, objType)]
         others = [obj for obj in objs if not isinstance(obj, objType)]
-        if len(selectableObjects) > 0:
+
+        if selectableObjects:
             _openItemObject(self.mainWindow, selectableObjects[1:])
             pulldown.select(selectableObjects[0].pid)
 
         else:
             from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 
-            othersClassNames = list(set([obj.className for obj in others if hasattr(obj, 'className')]))
-            if len(othersClassNames) > 0:
+            if othersClassNames := list({obj.className for obj in others if hasattr(obj, 'className')}):
                 if len(othersClassNames) == 1:
-                    title, msg = 'Dropped wrong item.', 'Do you want to open the %s in a new module?' % ''.join(othersClassNames)
+                    title, msg = 'Dropped wrong item.', f"Do you want to open the {''.join(othersClassNames)} in a new module?"
                 else:
                     title, msg = 'Dropped wrong items.', 'Do you want to open items in new modules?'
-                openNew = showYesNo(title, msg)
-                if openNew:
+
+                if showYesNo(title, msg):
                     _openItemObject(self.mainWindow, others)
+
+    #=========================================================================================
+    # Table context menu
+    #=========================================================================================
+
+    # add edit/add parameters to meta-data table
 
 
 #=========================================================================================

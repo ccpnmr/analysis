@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-24 15:07:24 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 11:15:30 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -84,6 +84,11 @@ class FittingModelABC(ABC):
         if self.Minimiser:
             return self.Minimiser.getParamNames(self.Minimiser)
         return []
+
+    @property
+    def modelArgumentErrorNames(self):
+        """ The list of parameters errors """
+        return [f'{vv}{sv._ERR}' for vv in self.modelArgumentNames ]
 
     @property
     def modelStatsNames(self):

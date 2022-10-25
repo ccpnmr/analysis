@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-21 15:09:53 +0100 (Wed, September 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 15:59:09 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -55,10 +55,10 @@ _TABLE_KWDS = ('parent', 'df',
                'showHorizontalHeader', 'showVerticalHeader',
                'borderWidth', 'cellPadding', 'focusBorderWidth',
                '_resize', 'setWidthToColumns', 'setHeightToRows',
-               'setOnHeaderOnly', 'showGrid',
+               'setOnHeaderOnly', 'showGrid', 'wordWrap',
                'selectionCallback', 'selectionCallbackEnabled',
                'actionCallback', 'actionCallbackEnabled',
-               'enableExport', 'enableDelete', 'enableSearch', 'enableCopyCell'
+               'enableExport', 'enableDelete', 'enableSearch', 'enableCopyCell',
                'ignoreStyleSheet',
                )
 
@@ -80,7 +80,7 @@ class Table(TableABC, Base):
                  showHorizontalHeader=True, showVerticalHeader=True,
                  borderWidth=2, cellPadding=2, focusBorderWidth=0,
                  _resize=False, setWidthToColumns=False, setHeightToRows=False,
-                 setOnHeaderOnly=False, showGrid=False,
+                 setOnHeaderOnly=False, showGrid=False, wordWrap=False,
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
                  actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
                  enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
@@ -103,6 +103,7 @@ class Table(TableABC, Base):
         :param setHeightToRows:
         :param setOnHeaderOnly:
         :param showGrid:
+        :param wordWrap:
         :param selectionCallback:
         :param selectionCallbackEnabled:
         :param actionCallback:
@@ -119,7 +120,7 @@ class Table(TableABC, Base):
                          showHorizontalHeader=showHorizontalHeader, showVerticalHeader=showVerticalHeader,
                          borderWidth=borderWidth, cellPadding=cellPadding, focusBorderWidth=focusBorderWidth,
                          _resize=_resize, setWidthToColumns=setWidthToColumns, setHeightToRows=setHeightToRows,
-                         setOnHeaderOnly=setOnHeaderOnly, showGrid=showGrid,
+                         setOnHeaderOnly=setOnHeaderOnly, showGrid=showGrid, wordWrap=wordWrap,
                          selectionCallback=selectionCallback, selectionCallbackEnabled=selectionCallbackEnabled,
                          actionCallback=actionCallback, actionCallbackEnabled=actionCallbackEnabled,
                          enableExport=enableExport, enableDelete=enableDelete, enableSearch=enableSearch, enableCopyCell=enableCopyCell,

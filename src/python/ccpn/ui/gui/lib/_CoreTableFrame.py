@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-14 16:09:43 +0100 (Wed, September 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 15:59:09 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,12 +28,13 @@ __date__ = "$Date: 2022-04-29 16:52:01 +0100 (Fri, April 29, 2022) $"
 
 import pandas as pd
 from collections import OrderedDict
-from ccpn.core.lib.Notifiers import Notifier
 from PyQt5 import QtWidgets
 from ccpn.core.lib.DataFrameObject import DataFrameObject
+from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.table._ProjectTable import _ProjectTableABC
+from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.util.Logging import getLogger
 
 
@@ -138,10 +139,10 @@ class _CoreTableWidgetABC(_ProjectTableABC):
         :return pandas dataFrame
         """
         allItems = []
-        objects = []
-
         if self._table:
             self._columnDefs = self._getTableColumns(self._table)
+
+            objects = []
 
             for col, obj in enumerate(self._sourceObjects):
                 listItem = OrderedDict()
@@ -165,11 +166,9 @@ class _CoreTableWidgetABC(_ProjectTableABC):
         # use the object as the index, object always exists even if isDeleted
         df.set_index(df[self.OBJECTCOLUMN], inplace=True, )
 
-        _dfObject = DataFrameObject(dataFrame=df,
-                                    columnDefs=self._columnDefs or [],
-                                    table=self)
-
-        return _dfObject
+        return DataFrameObject(dataFrame=df,
+                               columnDefs=self._columnDefs or [],
+                               table=self)
 
     def getCellToRows(self, cellItem, attribute=None):
         """Get the list of objects which cellItem maps to for this table
@@ -220,14 +219,7 @@ class _CoreTableWidgetABC(_ProjectTableABC):
             try:
                 df = self._df
                 objSet = set(self._sourceObjects)  # objects in the list
-                if df is not None and not df.empty:
-                    tableSet = set(df[self.OBJECTCOLUMN])  # objects currently in the table
-                else:
-                    # # populate here or in CREATE?
-                    # self.populateTable()
-                    # return
-                    # current table is empty
-                    tableSet = set()
+                tableSet = set() if (df is None or df.empty) else set(df[self.OBJECTCOLUMN])
 
                 if trigger == Notifier.DELETE:
                     # uniqueIds in the visible table
@@ -399,58 +391,55 @@ class _CoreTableFrameABC(Frame):
         # self._table = None
         self.moduleParent = moduleParent
 
-        # add the widgets
-        self._setWidgets(mainWidget=self)
+        # add the widgets to frame
+        self._setWidgets(container=self)
 
         if obj is not None:
             self.selectTable(obj)
         elif selectFirstItem:
             self._modulePulldown.selectFirstItem()
 
-    def _setWidgets(self, mainWidget=None):
+    def _setWidgets(self, container=None):
         """Set up the widgets for the module
         """
-        # add to main widget area
-        _topWidget = mainWidget
+        # use the default font-size for the margins and padding
+        hh = getFontHeight() // 4
 
-        # main widgets at the top
+        # main widgets at the top - in a static frame, frame-in-a-frame to enforce ignored state
+        #  so that the table scrollbars appear for small modules
         row = 0
-        Spacer(_topWidget, 5, 5,
-               QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-               grid=(row, 0), gridSpan=(1, 1))
+        _outer = Frame(parent=container, grid=(row, 0), gridSpan=(1, 1), setLayout=True)
+        _outer.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
+        _outer.setContentsMargins(hh, hh, hh, hh)
+        _outer.getLayout().setColumnStretch(1, 2)
 
-        row += 1
+        # inner static-frame
+        self._moduleHeaderFrame = Frame(parent=_outer, grid=(0, 0), gridSpan=(1, 1), setLayout=True)
+        self._moduleHeaderFrame.setContentsMargins(0, 0, hh, 0)
+        self._moduleHeaderFrame.layout().setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+        self._moduleHeaderFrame.layout().setSpacing(hh)
+        Spacer(_outer, 5, 5,
+               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
+               grid=(0, 1))
+
+        # put pulldown-list and extra buttons in the static-frame
+        fRow = 0
         gridHPos = 0
-        self._modulePulldown = self._PulldownKlass(parent=_topWidget,
+        self._modulePulldown = self._PulldownKlass(parent=self._moduleHeaderFrame,
                                                    mainWindow=self.mainWindow,
-                                                   grid=(row, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
+                                                   grid=(fRow, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
                                                    showSelectName=True,
                                                    sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                                    callback=self._selectionPulldownCallback)
-        self._addWidgetRow = row
-        self._addWidgetCol = gridHPos + 2
+        self._addWidgetRow = fRow
+        self._addWidgetCol = gridHPos + 2  # new widgets are added from here by default
 
-        # fixed height for the pulldown
-        self._modulePulldown.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
-
+        # main window below the static-frame
         row += 1
-        self.spacer = Spacer(_topWidget, 5, 5,
-                             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
-                             grid=(row, 1), gridSpan=(1, 1))
-
-        # main window
-        # _hidden = ['Pid', 'Chain']
-
-        row += 1
-        self._tableWidget = self._TableKlass(parent=_topWidget,
+        self._tableWidget = self._TableKlass(parent=container,
                                              mainWindow=self.mainWindow,
-                                             grid=(row, 0), gridSpan=(1, 6),
-                                             # hiddenColumns=_hidden,
+                                             grid=(row, 0), gridSpan=(1, 2),
                                              )
-        _topWidget.getLayout().setColumnStretch(5, 2)
-
-        # set policy to fill the frame - still required?
-        self._tableWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
 
     def setActivePulldownClass(self, coreClass, checkBox):
         """Set up the callback properties for changing the current object from the pulldown
@@ -495,26 +484,25 @@ class _CoreTableFrameABC(Frame):
         """
         if table is None:
             self._modulePulldown.selectFirstItem()
+        elif isinstance(table, self._tableWidget.tableClass):
+            self._modulePulldown.select(table.pid)
         else:
-            if not isinstance(table, self._tableWidget.tableClass):
-                getLogger().warning(f'select: Object is not of type {self._tableWidget.tableName}')
-                raise TypeError(f'select: Object is not of type {self._tableWidget.tableName}')
-            else:
-                self._modulePulldown.select(table.pid)
+            getLogger().warning(f'select: Object is not of type {self._tableWidget.tableName}')
+            raise TypeError(f'select: Object is not of type {self._tableWidget.tableName}')
 
     def addWidgetToTop(self, widget, col=2, colSpan=1):
         """Convenience to add a widget to the top of the table; col >= 2
         """
         if col < self._addWidgetCol:
             raise RuntimeError(f'Col has to be >= {self._addWidgetCol}')
-        self.getLayout().addWidget(widget, self._addWidgetRow, col, 1, colSpan)
+        self._moduleHeaderFrame.getLayout().addWidget(widget, self._addWidgetRow, col, 1, colSpan)
 
     def addWidgetToPos(self, widget, row=0, col=2, rowSpan=1, colSpan=1, overrideMinimum=False, alignment=None):
         """Convenience to add a widget to the top of the table; col >= 2
         """
         if col < self._addWidgetCol and not overrideMinimum:
             raise RuntimeError(f'Col has to be >= {self._addWidgetCol}')
-        self.getLayout().addWidget(widget, row, col, rowSpan, colSpan)
+        self._moduleHeaderFrame.getLayout().addWidget(widget, row, col, rowSpan, colSpan)
 
     def _closeFrame(self):
         """CCPN-INTERNAL: used to close the module
@@ -542,27 +530,21 @@ class _CoreTableFrameABC(Frame):
         If multiple different obj instances, then asks first.
         """
         from ccpn.ui.gui.lib.MenuActions import _openItemObject
+        from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 
         objs = [self.project.getByPid(pid) for pid in pids]
 
         selectableObjects = [obj for obj in objs if isinstance(obj, objType)]
         others = [obj for obj in objs if not isinstance(obj, objType)]
-        if len(selectableObjects) > 0:
+        if selectableObjects:
             _openItemObject(self.mainWindow, selectableObjects[1:])
             pulldown.select(selectableObjects[0].pid)
 
-        else:
-            from ccpn.ui.gui.widgets.MessageDialog import showYesNo
+        elif othersClassNames := list({obj.className for obj in others if hasattr(obj, 'className')}):
+            title, msg = ('Dropped wrong item.', f"Do you want to open the {''.join(othersClassNames)} in a new module?") if len(othersClassNames) == 1 else ('Dropped wrong items.', 'Do you want to open items in new modules?')
 
-            othersClassNames = list(set([obj.className for obj in others if hasattr(obj, 'className')]))
-            if len(othersClassNames) > 0:
-                if len(othersClassNames) == 1:
-                    title, msg = 'Dropped wrong item.', 'Do you want to open the %s in a new module?' % ''.join(othersClassNames)
-                else:
-                    title, msg = 'Dropped wrong items.', 'Do you want to open items in new modules?'
-                openNew = showYesNo(title, msg)
-                if openNew:
-                    _openItemObject(self.mainWindow, others)
+            if showYesNo(title, msg):
+                _openItemObject(self.mainWindow, others)
 
     #=========================================================================================
     # Widget/Notifier Callbacks

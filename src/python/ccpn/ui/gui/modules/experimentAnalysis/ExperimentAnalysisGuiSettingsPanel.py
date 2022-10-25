@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-25 12:12:14 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-25 17:10:02 +0100 (Tue, October 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -107,6 +107,11 @@ class GuiSettingPanel(Frame):
         self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
         Spacer(self, 0, 2, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                grid=(1, 0), gridSpan=(1, 1))
+        self.postInitWidgets()
+
+    def postInitWidgets(self):
+        """ Override to apply preselection of widgets after creation"""
+        pass
 
     def getWidget(self, name):
         if self._moduleSettingsWidget is not None:
@@ -431,6 +436,11 @@ class GuiInputDataPanel(GuiSettingPanel):
         if outputPulldown and outputDataTable is not None:
             outputPulldown.update() #there seems to be a bug on pulldown not updating straight-away
             outputPulldown.select(outputDataTable.pid)
+
+        # preselect the NmrResidue code if available in the bar graph
+        appearancePanel = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
+        appearancePanel._preselectDefaultXaxisBarGraph()
+
         self.guiModule.updateAll()
 
     def _filterOutputDataOnPulldown(self, pids, *args):
@@ -537,7 +547,7 @@ class GuiCalculationPanel(GuiSettingPanel):
              {'label': guiNameSpaces.Label_CalculationOptions,
               'type': compoundWidget.RadioButtonsCompoundWidget,
               'postInit': None,
-              'callBack': self._commonCallback,
+              'callBack': self._calculationModeChanged,
               'kwds': {'labelText': guiNameSpaces.Label_CalculationOptions,
                        'hAlign': 'l',
                        'tipText': '',
@@ -629,6 +639,19 @@ class GuiCalculationPanel(GuiSettingPanel):
         getLogger().info('_setCalculationOptionsToBackend: NIY...')
         pass
 
+    def _calculationModeChanged(self, *args):
+        """Triggered after a change in the Calculation widget.
+         Auto-set the BarGraph to show the first Argument Result based on the model"""
+        self._commonCallback(*args)
+        appearancePanel = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
+        yAxisWidget = appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
+        backend = self.guiModule.backendHandler
+        currentCalculationModel = backend.currentCalculationModel
+        if currentCalculationModel is not None and currentCalculationModel.ModelName != sv.BLANKMODELNAME:
+            firstArg, *_ = currentCalculationModel.modelArgumentNames or [None]
+            if yAxisWidget:
+                yAxisWidget.select(firstArg)
+
     def _commonCallback(self, *args):
         calculationSettings = self.getSettingsAsDict()
         selectedCalcPeakProperty = calculationSettings.get(guiNameSpaces.WidgetVarName_CalcPeakProperty, None)
@@ -717,7 +740,7 @@ class GuiFittingPanel(GuiSettingPanel):
              {'label': guiNameSpaces.Label_FittingModel,
               'type': compoundWidget.RadioButtonsCompoundWidget,
               'postInit': None,
-              'callBack': self._commonCallback,
+              'callBack': self._fittingModeChanged,
               'tipText': guiNameSpaces.TipText_FittingModel,
               'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_FittingModel,
@@ -740,6 +763,11 @@ class GuiFittingPanel(GuiSettingPanel):
         """ Update FittingModel Settings at Backend"""
         self._setFittingSettingToBackend()
         super()._commonCallback(self, *args)
+
+    def _fittingModeChanged(self, *args):
+        """Triggered after a change in the fitting widget.
+         Auto-set the BarGraph Y widget to show the first Argument Result based on the model"""
+        self._commonCallback(*args)
 
     def _setFittingSettingToBackend(self):
         """ Update the backend """
@@ -988,6 +1016,28 @@ class AppearancePanel(GuiSettingPanel):
 
         ))
         return self.widgetDefinitions
+
+    def postInitWidgets(self):
+        self._preselectDefaultXaxisBarGraph()
+        self._preselectDefaultYaxisBarGraph()
+
+    def _preselectDefaultXaxisBarGraph(self):
+        """ Preselect the NmrResidue code if available """
+        xAxisWidget = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphXcolumnName)
+        valueToSelect = guiNameSpaces.ASHTAG
+        dataFrame = self.guiModule.getGuiResultDataFrame()
+        if dataFrame is None:
+            return
+        codes = dataFrame.get(sv.NMRRESIDUECODE)
+        if codes is None:
+            return
+        if codes.all():
+            valueToSelect = sv.NMRRESIDUECODE
+        if xAxisWidget:
+            xAxisWidget.select(valueToSelect)
+
+    def _preselectDefaultYaxisBarGraph(self):
+        pass
 
     @property
     def _axisYOptions(self):

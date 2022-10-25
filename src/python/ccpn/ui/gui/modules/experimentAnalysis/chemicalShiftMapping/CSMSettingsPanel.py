@@ -31,6 +31,8 @@ from collections import OrderedDict as od
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import ALL_GROUPINGNMRATOMS
 from ccpn.util.Logging import getLogger
 import numpy as np
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+
 from ccpn.util.isotopes import name2IsotopeCode
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -171,7 +173,14 @@ class CSMGuiFittingPanel(GuiFittingPanel):
 
 class CSMAppearancePanel(AppearancePanel):
 
-    pass
+    def _preselectDefaultYaxisBarGraph(self):
+        yAxisWidget = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
+        backend = self.guiModule.backendHandler
+        model = backend.currentCalculationModel
+        if model is not None and model.ModelName != sv.BLANKMODELNAME:
+            firstArg, *_ = model.modelArgumentNames or [None]
+            if yAxisWidget:
+                yAxisWidget.select(firstArg)
 
 
 #####################################################################

@@ -69,7 +69,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-14 16:33:29 +0100 (Wed, September 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:20:50 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1611,13 +1611,21 @@ class ChemicalShiftsMapping(CcpnModule):
         Re-implementation of closeModule function from CcpnModule to unregister notification on current
         """
         try:
-            self._selectCurrentNRNotifier.unRegister()
-            self._sgNotifier.unRegister()
-            self._sgDeleteNotifier.unRegister()
-            self._peakDeletedNotifier.unRegister()
-            self._nrChangedNotifier.unRegister()
-            self._nrDeletedNotifier.unRegister()
-            self.nmrResidueFrame._closeFrame()
+            if self._selectCurrentNRNotifier:
+                self._selectCurrentNRNotifier.unRegister()
+            if self._sgNotifier:
+                self._sgNotifier.unRegister()
+            if self._sgDeleteNotifier:
+                self._sgDeleteNotifier.unRegister()
+            if self._peakDeletedNotifier:
+                self._peakDeletedNotifier.unRegister()
+            if self._nrChangedNotifier:
+                self._nrChangedNotifier.unRegister()
+            if self._nrDeletedNotifier:
+                self._nrDeletedNotifier.unRegister()
+            if self.nmrResidueFrame:
+                self.nmrResidueFrame._cleanupWidget()
+
         except Exception as es:
             getLogger().warning(str(es))
         finally:

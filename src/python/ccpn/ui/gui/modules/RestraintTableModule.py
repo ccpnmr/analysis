@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-27 15:03:39 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:20:51 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -125,7 +125,10 @@ class RestraintTableModule(CcpnModule):
         """
         CCPN-INTERNAL: used to close the module
         """
-        self.restraintTable._close()
+        if self._RTwidget:
+            self._RTwidget._cleanupWidget()
+        if self.restraintTable:
+            self.restraintTable._close()
         super()._closeModule()
 
 
@@ -285,6 +288,13 @@ class GuiRestraintTable(GuiTable):
         """
         self.rtWidget.select(restraintTable.pid)
         self._update(restraintTable)
+
+    def _close(self):
+        """Clean-up notifiers on closing
+        """
+        if self.rtWidget:
+            self.rtWidget.unRegister()
+        super(GuiRestraintTable, self)._close()
 
     def _selectOnTableCurrentRestraintNotifierCallback(self, data):
         """

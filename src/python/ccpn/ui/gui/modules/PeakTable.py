@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-14 16:14:22 +0100 (Wed, September 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:20:50 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -92,14 +92,14 @@ class PeakTableModule(CcpnModule):
         self._settings = None
         if self.activePulldownClass:
             # add to settings widget - see sequenceGraph for more detailed example
-            settingsDict = OrderedDict(((LINKTOPULLDOWNCLASS, {'label'   : 'Link to current %s' % self.activePulldownClass.className,
-                                                               'tipText' : 'Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
+            settingsDict = OrderedDict(((LINKTOPULLDOWNCLASS, {'label': f'Link to current {self.activePulldownClass.className}',
+                                                               'tipText': f'Set/update current {self.activePulldownClass.className} when selecting from pulldown',
                                                                'callBack': None,
-                                                               'enabled' : True,
-                                                               'checked' : False,
-                                                               '_init'   : None,
-                                                               }),
+                                                               'enabled': True,
+                                                               'checked': False,
+                                                               '_init': None}),
                                         ))
+
             self._settings = ModuleSettingsWidget(parent=settingsWidget, mainWindow=self.mainWindow,
                                                   settingsDict=settingsDict,
                                                   grid=(0, 0))
@@ -147,7 +147,13 @@ class PeakTableModule(CcpnModule):
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
         """
-        self.tableFrame._closeFrame()
+        if self.activePulldownClass:
+            if self._setCurrentPulldown:
+                self._setCurrentPulldown.unRegister()
+            if self._settings:
+                self._settings._cleanupWidget()
+        if self.tableFrame:
+            self.tableFrame._cleanupWidget()
         super()._closeModule()
 
 

@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-20 10:41:25 +0100 (Tue, September 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:20:50 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -157,7 +157,7 @@ class NmrResidueTableModule(CcpnModule):
         self._mainFrame.selectTable(table)
 
     def _closeModule(self):
-        self.tableFrame._closeFrame()
+        self.tableFrame._cleanupWidget()
         super()._closeModule()
 
 

@@ -2,6 +2,7 @@
 This file contains CcpnModule base class
 modified by Geerten 1-12/12/2016
 """
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -16,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-04 17:36:00 +0100 (Tue, October 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:16:45 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,6 +29,7 @@ __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 #=========================================================================================
 
 import re
+import contextlib
 from ccpn.util import Logging
 from ccpn.util.Logging import getLogger
 import itertools
@@ -524,33 +526,29 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     def _closeModule(self):
         """Close the module
         """
-        try:
+        with contextlib.suppress(Exception):
             if self.closeFunc:
                 self.closeFunc()
-        except:
-            pass
-
         # delete any notifiers initiated with this Module
         self.deleteAllNotifiers()
 
-        getLogger().debug('Closing %s' % str(self.container()))
+        getLogger().debug(f'Closing {str(self.container())}')
 
         if self.maximised:
             self.toggleMaximised()
 
         if not self._container:
-            area = self.mainWindow.moduleArea
-            if area:
-                if area._container is None:
-                    for i in area.children():
-                        if isinstance(i, Container):
-                            self._container = i
+            if (area := self.mainWindow.moduleArea) and area._container is None:
+                for i in area.children():
+                    if isinstance(i, Container):
+                        self._container = i
+
         if self._includeInLastSeen:
             self.area._seenModuleStates[self.className] = {MODULENAME: self._defaultName, WIDGETSTATE: self.widgetsState}
 
         try:
             super().close()
-        except:
+        except Exception:
             """Remove this dock from the DockArea it lives inside."""
             self._container = None
             self.sigClosed.emit(self)

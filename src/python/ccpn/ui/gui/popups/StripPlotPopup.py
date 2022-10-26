@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-20 11:07:01 +0200 (Thu, October 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 17:32:53 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -60,7 +60,7 @@ class StripPlotPopup(CcpnDialogMainWidget):
             self.current = None
 
         self.spectrumDisplay = spectrumDisplay
-        self.spectrumDisplayLabel = Label(self.mainWidget, f"Current spectrumDisplay: {spectrumDisplay.id}", grid=(0, 0))
+        # self.spectrumDisplayLabel = Label(self.mainWidget, f"Current spectrumDisplay: {spectrumDisplay.id}", grid=(0, 0))
 
         # import the new strip plot widget - also used in backbone assignment and pick and assign module
         self._newStripPlotWidget = StripPlot(parent=self.mainWidget, mainWindow=self.mainWindow,

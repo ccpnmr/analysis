@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-26 11:25:47 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 14:29:56 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 from ccpn.util.Colour import colorSchemeTable, hexToRgb, rgbaRatioToHex, colourNameToHexDict
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import ExperimentAnalysisPlotToolBar
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import BarPlotToolBar
 from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget, TICKOPTIONS, AllTicks, MinimalTicks
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_LABELLING
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
@@ -99,7 +99,7 @@ class BarPlotPanel(GuiPanel):
 
         self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._thresholdLineMoved)
         self._setBarGraphWidget()
-        self.toolbar = ExperimentAnalysisPlotToolBar(parent=self, plotItem=self.barGraphWidget, guiModule=self.guiModule,
+        self.toolbar = BarPlotToolBar(parent=self, plotItem=self.barGraphWidget, guiModule=self.guiModule,
                                                      grid=(0, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
         self.currentCollectionLabel = Label(self, text='', grid=(0, 1), hAlign='r',)
 
@@ -361,6 +361,10 @@ class BarPlotPanel(GuiPanel):
                                        disappearedBrush=self._untraceableBrush,
                                        )
         self.barGraphWidget.xLine.setPen(self._tresholdLineBrush)
+
+    def toggleErrorBars(self, setVisible=True):
+        if self.barGraphWidget.errorBars:
+            self.barGraphWidget.errorBars.setVisible(setVisible)
 
     def _currentCollectionCallback(self, *args):
         # select collection on table.

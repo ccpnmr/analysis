@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-25 12:12:15 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 14:29:56 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -240,3 +240,34 @@ class ExperimentAnalysisPlotToolBar(ToolBar):
             ('Sep', ()),
             ))
         return toolBarDefs
+
+
+class BarPlotToolBar(ExperimentAnalysisPlotToolBar):
+
+    def __init__(self, parent, plotItem, guiModule, **kwds):
+        super().__init__(parent, plotItem=plotItem, guiModule=guiModule, **kwds)
+
+        self.parentPanel = parent
+
+
+    def getToolBarDefs(self):
+        toolBarDefs = super().getToolBarDefs()
+        extraDefs = (
+            ('ErrorBars', od((
+                ('text', 'Toggle ErrorBars'),
+                ('toolTip', 'Toggle the ErrorBars from the plot'),
+                ('icon', Icon('icons/errorBars')),
+                ('callback', self._toggleErrorBars),
+                ('enabled', True),
+                ('checkable', True)
+                ))
+             ),
+
+            )
+        toolBarDefs.update(extraDefs)
+        return toolBarDefs
+
+
+    def _toggleErrorBars(self):
+        action = self.sender()
+        self.parentPanel.toggleErrorBars(action.isChecked())

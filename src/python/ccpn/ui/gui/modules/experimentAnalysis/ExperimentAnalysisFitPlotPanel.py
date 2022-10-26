@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-25 12:22:44 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 14:29:56 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -200,7 +200,7 @@ class FittingPlot(pg.PlotItem):
 
     def fitXZoom(self):
         xs,ys = self._getPlotData()
-        if len(xs)>0:
+        if xs is not None and len(xs)>0:
             x,y = xs[-1], ys[-1]
             if len(x) > 0:
                 xMin, xMax = min(x), max(x)
@@ -211,7 +211,7 @@ class FittingPlot(pg.PlotItem):
 
     def fitYZoom(self):
         xs, ys = self._getPlotData()
-        if len(xs) > 0:
+        if xs is not None and len(xs) > 0:
             x, y = xs[-1], ys[-1]
             if len(y) > 0:
                 yMin, yMax = min(y), max(y)

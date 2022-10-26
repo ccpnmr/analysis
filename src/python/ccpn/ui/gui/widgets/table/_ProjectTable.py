@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-25 15:59:09 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:20:04 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -439,7 +439,6 @@ class _ProjectTableABC(TableABC, Base):
         self._rowNotifier = None
         self._cellNotifiers = []
         self._selectCurrentNotifier = None
-        self._droppedNotifier = None
         self._searchNotifier = None
 
     def _setTableNotifiers(self):
@@ -518,16 +517,13 @@ class _ProjectTableABC(TableABC, Base):
             self._selectCurrentNotifier.unRegister()
             self._selectCurrentNotifier = None
 
-        if self._droppedNotifier is not None:
-            self._droppedNotifier.unRegister()
-            self._droppedNotifier = None
-
         if self._searchNotifier is not None:
             self._searchNotifier.unRegister()
             self._searchNotifier = None
 
     def _close(self):
         self._clearTableNotifiers()
+        super(_ProjectTableABC, self)._close()
 
     def clearCurrentCallback(self):
         """Clear the callback function for current object/list change

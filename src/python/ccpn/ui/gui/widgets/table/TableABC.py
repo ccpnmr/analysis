@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-25 15:59:09 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:20:04 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -286,7 +286,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
             # set the dropEvent to the mainWidget of the module, otherwise the event gets stolen by Frames
             self.moduleParent.mainWidget._dropEventCallback = self._processDroppedItems
 
-        self.droppedNotifier = GuiNotifier(self,
+        self._droppedNotifier = GuiNotifier(self,
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                            self._processDroppedItems)
 
@@ -371,6 +371,13 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
                     # unblock to enable again
                     selModel.blockSignals(False)
                     self.blockSignals(False)
+
+    def _close(self):
+        """Clean up the notifiers
+        """
+        if self._droppedNotifier:
+            self._droppedNotifier.unRegister()
+            self._droppedNotifier = None
 
     #=========================================================================================
     # Properties

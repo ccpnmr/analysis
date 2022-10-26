@@ -9,12 +9,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-30 13:11:15 +0100 (Tue, August 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 10:45:10 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2490,16 +2490,15 @@ def _getParameterValues(obj, parameterName: str, dimensions: Sequence, dimension
 
     try:
         values = getattr(obj, parameterName)
-    except AttributeError:
-        raise ValueError('%s: unable to get parameter "%s"' % (obj, parameterName))
+    except AttributeError as es:
+        raise ValueError('%s: unable to get parameter "%s"' % (obj, parameterName)) from es
 
     newValues = []
     if all(isinstance(i, tuple) for i in values):
         # this could be the case as in peak.assignedNmrAtoms
         for ll in values:
-            _newValuesForDim = []
-            for dim in dimensions:
-                _newValuesForDim.append(ll[dim - 1])
+            # need to check against len(ll) in case of 2D overlaying nD
+            _newValuesForDim = [ll[dim - 1] for dim in dimensions if dim <= len(ll)]
             newValues.append(tuple(_newValuesForDim))
         return newValues
 

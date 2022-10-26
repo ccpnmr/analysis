@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-24 18:51:31 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:21:38 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,8 +30,6 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 #=========================================================================================
 
 import sys
-import contextlib
-
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 
@@ -154,8 +152,6 @@ class _PulldownABC(PulldownListCompoundWidget):
                                        [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
                                        self._className,
                                        self._updatePulldownList)
-            self._notifier1.setDebug(DEBUG)
-
             self._notifier2 = None
             if self._followCurrent:
                 self._notifier2 = Notifier(self.current,
@@ -163,7 +159,9 @@ class _PulldownABC(PulldownListCompoundWidget):
                                            targetName=self._currentAttributeName,
                                            callback=self._updateFromCurrent
                                            )
-                self._notifier2.setDebug(DEBUG)
+
+        else:
+            self._notifier1 = self._notifier2 = None
 
     @property
     def textList(self):
@@ -174,11 +172,8 @@ class _PulldownABC(PulldownListCompoundWidget):
     def getSelectedObject(self):
         """Return the selected object, or None if not selected or empty
         """
-        obj = None
         value = self.getText()
-        if value != SELECT and len(value) > 0:
-            obj = self.value2object(value)
-        return obj
+        return self.value2object(value) if value and value != SELECT else None
 
     def getObjects(self):
         """Return a list of objects from the pulldown list
@@ -191,19 +186,11 @@ class _PulldownABC(PulldownListCompoundWidget):
         if self._currentAttributeName is None:
             raise RuntimeError(f'{self.__class__.__name__}: _currentAttributeName needs to be defined for proper functioning')
 
-        obj = None
         _tmp = getattr(self.current, self._currentAttributeName)
-        if _tmp is not None and len(_tmp) > 0:
-            obj = _tmp[0]
-        #sys.stderr.write('>>> currentObject:\n', obj)
-        return obj
+        return _tmp[0] if _tmp else None
 
     def getFirstItemText(self):
-        result = None
-        texts = [txt for txt in self.pulldownList.texts if txt != SELECT]
-        if texts:
-            result = texts[0]
-        return result
+        return texts[0] if (texts := [txt for txt in self.pulldownList.texts if txt != SELECT]) else None
 
     def selectFirstItem(self):
         """Set the table to the first item.
@@ -240,9 +227,8 @@ class _PulldownABC(PulldownListCompoundWidget):
         """Unregister the notifiers; needs to be called when disgarding a instance
         """
         for ntf in (self._notifier1, self._notifier2):
-            with contextlib.suppress(Exception):
-                if ntf is not None:
-                    ntf.unRegister()
+            if ntf:
+                ntf.unRegister()
 
     #==============================================================================================
     # Implementation

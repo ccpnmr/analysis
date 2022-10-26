@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-24 18:51:31 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:21:38 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -297,7 +297,10 @@ class RestraintAnalysisTableModule(CcpnModule):
 
     def _closeModule(self):
         """Re-implementation of closeModule function from CcpnModule to unregister notification """
-        self.restraintAnalysisTable._close()
+        if self._RATwidget:
+            self._RATwidget.close()
+        if self.restraintAnalysisTable:
+            self.restraintAnalysisTable._close()
         super()._closeModule()
 
     def restoreWidgetsState(self, **widgetsState):
@@ -1030,6 +1033,13 @@ class RestraintAnalysisTableWidget(GuiTable):
         _dataFrame._objects = _objects
 
         return _dataFrame
+
+    def _close(self):
+        """Clean-up on closing
+        """
+        if self.pLwidget:
+            self.pLwidget.unRegister()
+        super(RestraintAnalysisTableWidget, self)._close()
 
     def refreshTable(self):
         # subclass to refresh the groups

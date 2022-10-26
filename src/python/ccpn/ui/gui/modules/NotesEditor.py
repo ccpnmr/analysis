@@ -1,19 +1,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 10:56:35 +0100 (Thu, October 07, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-10-26 15:21:38 +0100 (Wed, October 26, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -85,7 +85,7 @@ class NotesEditorModule(CcpnModule):
         self._setupWidgets()
 
         self._noteNotifier = None
-        self.droppedNotifier = None
+        self._droppedNotifier = None
         self._setNotifiers()
 
         if note is not None:
@@ -155,6 +155,13 @@ class NotesEditorModule(CcpnModule):
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                              grid=(row, 4), gridSpan=(1, 1))
 
+    def _closeModule(self):
+        """CCPN-INTERNAL: used to close the module
+        """
+        if self.noWidget:
+            self.noWidget.unRegister()
+        super(NotesEditorModule, self)._closeModule()
+
     def _processDroppedItems(self, data):
         """
         CallBack for Drop events
@@ -210,7 +217,7 @@ class NotesEditorModule(CcpnModule):
                                               [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
                                               Note.__name__,
                                               self._updateCallback)
-        self.droppedNotifier = self.setGuiNotifier(self.mainWidget,
+        self._droppedNotifier = self.setGuiNotifier(self.mainWidget,
                                                    [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                                    self._processDroppedItems)
 
@@ -220,27 +227,29 @@ class NotesEditorModule(CcpnModule):
         Temporarily disable notifiers, and define commandEchoBlock so all changes
         are treated as a single undo/redo event
         """
-        if self.note:  # calls _updateCallBack during _applyNote
-            self.setBlankingAllNotifiers(True)  # disable my own notifiers while updating object other
-            name = self.lineEdit1.text()
-            text = self.textBox.toPlainText()
-            comment = self.lineEditComment.text()
+        if not self.note:
+            return
 
-            try:
-                if name != self.note.name or text != self.note.text or comment != self.note.comment:
-                    with undoBlockWithoutSideBar():
-                        if name != self.note.name:
-                            self.note.rename(name)
-                        self.note.text = text
-                        self.note.comment = comment
+        self.setBlankingAllNotifiers(True)  # disable my own notifiers while updating object other
+        name = self.lineEdit1.text()
+        text = self.textBox.toPlainText()
+        comment = self.lineEditComment.text()
 
-            except Exception as es:
-                # need to immediately set back to stop error on loseFocus which also fires editingFinished
-                self.lineEdit1.setText(self.note.name)
-                showWarning('', str(es))
+        try:
+            if name != self.note.name or text != self.note.text or comment != self.note.comment:
+                with undoBlockWithoutSideBar():
+                    if name != self.note.name:
+                        self.note.rename(name)
+                    self.note.text = text
+                    self.note.comment = comment
 
-            self.noWidget.select(self.note.pid)
-            self.setBlankingAllNotifiers(False)
+        except Exception as es:
+            # need to immediately set back to stop error on loseFocus which also fires editingFinished
+            self.lineEdit1.setText(self.note.name)
+            showWarning('', str(es))
+
+        self.noWidget.select(self.note.pid)
+        self.setBlankingAllNotifiers(False)
 
     def _reject(self):
         """
@@ -275,7 +284,7 @@ class NotesEditorModule(CcpnModule):
         """
         self.textBox.setText(note.text)
         self.lineEdit1.setText(note.name)
-        self.lineEditComment.setText(note.comment if note.comment else '')
+        self.lineEditComment.setText(note.comment or '')
         self.noteWidget.show()
         self.show()
 

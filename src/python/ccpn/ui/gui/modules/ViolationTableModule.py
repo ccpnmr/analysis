@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-25 16:25:00 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:21:38 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -203,7 +203,15 @@ class ViolationTableModule(CcpnModule):
         """
         CCPN-INTERNAL: used to close the module
         """
-        self._tableWidget._close()
+        if self._modulePulldown:
+            self._modulePulldown.unRegister()
+        if self.rtWidget:
+            self.rtWidget.unRegister()
+        if self._tableWidget:
+            self._tableWidget._close()
+        if self._metadata:
+            self._metadata.close()
+            
         super()._closeModule()
 
     def _selectTable(self, table=None):

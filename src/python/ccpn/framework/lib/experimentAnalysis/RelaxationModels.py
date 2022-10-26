@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:26 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -109,18 +109,17 @@ class _RelaxationBaseFittingModel(FittingModelABC):
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
         ## Keep only one IsotopeCode as we are using only Height/Volume 15N?
         inputData = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
+        inputData[self.ySeriesStepHeader] = inputData[self.PeakProperty]
+        self._ySeriesLabel = self.PeakProperty
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
         for collectionId, groupDf in grouppedByCollectionsId:
-            groupDf.sort_values([sv.SERIESSTEP], inplace=True)
-            seriesSteps = groupDf[sv.SERIESSTEP]
-            seriesValues = groupDf[self.PeakProperty]
-            pid = groupDf[sv.COLLECTIONPID].values[-1]
-            xArray = seriesSteps.values
-            yArray = seriesValues.values
+            groupDf.sort_values([self.xSeriesStepHeader], inplace=True)
+            seriesSteps = Xs = groupDf[self.xSeriesStepHeader].values
+            seriesValues = Ys = groupDf[self.ySeriesStepHeader].values
             minimiser = self.Minimiser()
             try:
-                params = minimiser.guess(yArray, xArray)
-                result = minimiser.fit(yArray, params, x=xArray)
+                params = minimiser.guess(Ys, Xs)
+                result = minimiser.fit(Ys, params, x=Xs)
             except:
                 getLogger().warning(f'Fitting Failed for collectionId: {collectionId} data.')
                 params = minimiser.params
@@ -141,35 +140,34 @@ class InversionRecoveryFittingModel(_RelaxationBaseFittingModel):
     InversionRecovery model class containing fitting equation and fitting information
     """
     ModelName   = sv.InversionRecovery
-    Info        = '''
-                  NIY
+    Info        = '''Inversion Recovery fitting model.
                   '''
-    Description = '''
-                  NIY
+    Description = '''Model:
+                  Y = amplitude * (1 - e^{-time/decay})
                   '''
     References  = '''
                   NIY
                   '''
-    Minimiser = InversionRecoveryMinimiser
-    MaTex =  r'$amplitude*(1 - e^{-time/decay})$'
+    # Minimiser = InversionRecoveryMinimiser
+    # MaTex =  r'$amplitude*(1 - e^{-time/decay})$'
+    FullDescription = f'{Info}\n{Description}'
 
 class ExponentialDecayFittingModel(_RelaxationBaseFittingModel):
     """
     ExponentialDecay FittingModel model class containing fitting equation and fitting information
     """
     ModelName   = sv.ExponentialDecay
-    Info        = '''
-                  NIY
+    Info        = '''Exponential Decay fitting model
                   '''
-    Description = '''
-                  NIY
+    Description = '''Model:
+                  Y = amplitude * (e^{-time/decay})
                   '''
     References  = '''
                   NIY
                   '''
     Minimiser = ExponentialDecayMinimiser
-    MaTex = r'$amplitude *(e^{-time/decay})$'
-
+    # MaTex = r'$amplitude *(e^{-time/decay})$'
+    FullDescription = f'{Info}\n{Description}'
 
 #####################################################
 ##########  Calculation Models   ####################
@@ -180,18 +178,21 @@ class HetNoeCalculation(CalculationModel):
     Calculate HeteroNuclear NOE Values
     """
     ModelName = sv.HETNOE
-    Info        = 'Calculate HeteroNuclear NOE Values using peak Intensity (Height/Volume).'
-    MaTex       = r'$I_{Sat} / I_{UnSat}$'
-    Description = '''
-                    Sat = Peak Intensity for the Saturated Spectrum;
-                    UnSat = Peak Intensity for the UnSaturated Spectrum, 
-                    Value Error calculated as:
-                    error = factor * np.sqrt((noiseSat / sat) ** 2 + (noiseUnSat / UnSat) ** 2)
-                    factor = sat/unSat'''
+    Info        = 'Calculate HeteroNuclear NOE Values using peak Intensity (Height or Volume).'
 
+    Description = '''Model:
+                  HnN = I_Sat / I_UnSat
+                  Sat = Peak Intensity for the Saturated Spectrum;
+                  UnSat = Peak Intensity for the UnSaturated Spectrum, 
+                  Value Error calculated as:
+                  error = factor * √SNR_Sat^-2 + SNR_UnSat^-2
+                  factor = I_Sat/I_UnSat'''
     References  = '''
-                  '''
-    FullDescription = f'{Info} \n {Description}\nSee References: {References}'
+                1) Kharchenko, V., et al. Dynamic 15N{1H} NOE measurements: a tool for studying protein dynamics. 
+                J Biomol NMR 74, 707–716 (2020). https://doi.org/10.1007/s10858-020-00346-6
+                '''
+    # MaTex       = r'$I_{Sat} / I_{UnSat}$'
+    FullDescription = f'{Info}\n{Description}'
     PeakProperty = sv._HEIGHT
     _allowedIntensityTypes = (sv._HEIGHT, sv._VOLUME)
 
@@ -229,21 +230,21 @@ class HetNoeCalculation(CalculationModel):
         inputData = inputData[inputData[sv.ISOTOPECODE] == '15N']
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
         for collectionId, groupDf in grouppedByCollectionsId:
-            groupDf.sort_values([sv.SERIESSTEP], inplace=True)
+            groupDf.sort_values([self.xSeriesStepHeader], inplace=True)
             seriesValues = groupDf[self.PeakProperty]
             nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf) # join the atom names from different rows in a list
             seriesUnits = groupDf[sv.SERIESUNIT].unique()
-            satPeakPid = groupDf[sv.PEAKPID].values[satIndex]
-            unSatPeakPid = groupDf[sv.PEAKPID].values[unSatIndex]
+            satPeakSNR = groupDf[sv._SNR].values[satIndex]
+            unSatPeakSNR = groupDf[sv._SNR].values[unSatIndex]
             unSatValue = seriesValues.values[unSatIndex]
             satValue = seriesValues.values[satIndex]
             ratio = satValue/unSatValue
-            error = self._calculateHetNoeErrorFromPids(satPeakPid, unSatPeakPid, satValue=satValue, unSatValue=unSatValue)
-
+            error = lf.peakErrorBySNR(satPeakSNR, unSatPeakSNR, ratio)
             # build the outputFrame
             outputFrame.loc[collectionId, sv.COLLECTIONID] = collectionId
             outputFrame.loc[collectionId, sv.PEAKPID] = groupDf[sv.PEAKPID].values[0]
             outputFrame.loc[collectionId, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
+            outputFrame.loc[collectionId, sv.NMRRESIDUEPID] = groupDf[sv.NMRRESIDUEPID].values[-1]
             outputFrame.loc[collectionId, sv.SERIESUNIT] = seriesUnits[-1]
             outputFrame.loc[collectionId,self.modelArgumentNames[0]] = ratio
             outputFrame.loc[collectionId, self.modelArgumentNames[1]] = error

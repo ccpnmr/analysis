@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:14 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:30 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -61,10 +61,10 @@ _TABLE_KWDS = ('parent', 'df',
                'showHorizontalHeader', 'showVerticalHeader',
                'borderWidth', 'cellPadding', 'focusBorderWidth',
                '_resize', 'setWidthToColumns', 'setHeightToRows',
-               'setOnHeaderOnly', 'showGrid',
+               'setOnHeaderOnly', 'showGrid', 'wordWrap',
                'selectionCallback', 'selectionCallbackEnabled',
                'actionCallback', 'actionCallbackEnabled',
-               'enableExport', 'enableDelete', 'enableSearch',
+               'enableExport', 'enableDelete', 'enableSearch', 'enableCopyCell',
                'ignoreStyleSheet',
                'mainWindow', 'moduleParent'
                )
@@ -105,12 +105,14 @@ class _ProjectTableABC(TableABC, Base):
     _maximumQueueLength = 0
     _logQueue = False
 
+    _rowHeightScale = 1.0
+
     def __init__(self, parent, df=None,
                  multiSelect=True, selectRows=True,
                  showHorizontalHeader=True, showVerticalHeader=True,
                  borderWidth=2, cellPadding=2, focusBorderWidth=0,
                  _resize=False, setWidthToColumns=False, setHeightToRows=False,
-                 setOnHeaderOnly=False, showGrid=False,
+                 setOnHeaderOnly=False, showGrid=False, wordWrap=False,
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
                  actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
                  enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
@@ -134,6 +136,7 @@ class _ProjectTableABC(TableABC, Base):
         :param setHeightToRows:
         :param setOnHeaderOnly:
         :param showGrid:
+        :param wordWrap:
         :param selectionCallback:
         :param selectionCallbackEnabled:
         :param actionCallback:
@@ -152,7 +155,7 @@ class _ProjectTableABC(TableABC, Base):
                          showHorizontalHeader=showHorizontalHeader, showVerticalHeader=showVerticalHeader,
                          borderWidth=borderWidth, cellPadding=cellPadding, focusBorderWidth=focusBorderWidth,
                          _resize=_resize, setWidthToColumns=setWidthToColumns, setHeightToRows=setHeightToRows,
-                         setOnHeaderOnly=setOnHeaderOnly, showGrid=showGrid,
+                         setOnHeaderOnly=setOnHeaderOnly, showGrid=showGrid, wordWrap=wordWrap,
                          selectionCallback=selectionCallback, selectionCallbackEnabled=selectionCallbackEnabled,
                          actionCallback=actionCallback, actionCallbackEnabled=actionCallbackEnabled,
                          enableExport=enableExport, enableDelete=enableDelete, enableSearch=enableSearch, enableCopyCell=enableCopyCell,
@@ -232,7 +235,7 @@ class _ProjectTableABC(TableABC, Base):
             try:
                 row, _col = self._rightClickedTableIndex.data(INDEX_ROLE)
                 return self._df.iloc[row]
-            except:
+            except Exception:
                 return None
 
     def setCurrent(self):
@@ -327,20 +330,17 @@ class _ProjectTableABC(TableABC, Base):
 
         selectableObjects = [obj for obj in objs if isinstance(obj, objType)]
         others = [obj for obj in objs if not isinstance(obj, objType)]
-        if len(selectableObjects) > 0:
+
+        if selectableObjects:
             _openItemObject(self.mainWindow, selectableObjects[1:])
             pulldown.select(selectableObjects[0].pid)
 
-        else:
-            othersClassNames = list(set([obj.className for obj in others if hasattr(obj, 'className')]))
-            if len(othersClassNames) > 0:
-                if len(othersClassNames) == 1:
-                    title, msg = 'Dropped wrong item.', 'Do you want to open the %s in a new module?' % ''.join(othersClassNames)
-                else:
-                    title, msg = 'Dropped wrong items.', 'Do you want to open items in new modules?'
-                openNew = MessageDialog.showYesNo(title, msg)
-                if openNew:
-                    _openItemObject(self.mainWindow, others)
+        elif othersClassNames := list({obj.className for obj in others if hasattr(obj, 'className')}):
+            title, msg = ('Dropped wrong item.', f"Do you want to open the {''.join(othersClassNames)} in a new module?") \
+                if len(othersClassNames) == 1 else ('Dropped wrong items.', 'Do you want to open items in new modules?')
+
+            if MessageDialog.showYesNo(title, msg):
+                _openItemObject(self.mainWindow, others)
 
     #=========================================================================================
     # Table updates
@@ -439,7 +439,6 @@ class _ProjectTableABC(TableABC, Base):
         self._rowNotifier = None
         self._cellNotifiers = []
         self._selectCurrentNotifier = None
-        self._droppedNotifier = None
         self._searchNotifier = None
 
     def _setTableNotifiers(self):
@@ -518,16 +517,13 @@ class _ProjectTableABC(TableABC, Base):
             self._selectCurrentNotifier.unRegister()
             self._selectCurrentNotifier = None
 
-        if self._droppedNotifier is not None:
-            self._droppedNotifier.unRegister()
-            self._droppedNotifier = None
-
         if self._searchNotifier is not None:
             self._searchNotifier.unRegister()
             self._searchNotifier = None
 
     def _close(self):
         self._clearTableNotifiers()
+        super(_ProjectTableABC, self)._close()
 
     def clearCurrentCallback(self):
         """Clear the callback function for current object/list change

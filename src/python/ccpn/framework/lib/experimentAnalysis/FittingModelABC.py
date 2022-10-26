@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:25 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -51,13 +51,14 @@ pd.set_option('display.max_rows', 50)  # or 1000
 class FittingModelABC(ABC):
 
     ModelName       = 'ModelName'       # The Model name.
-    Info            = 'the info'        # A brief description of the fitting model.
-    Description     = 'Description'     # A simplified representation of the used equation(s).
+    Info            = ''                # A brief description of the fitting model.
+    Description     = ''                # A simplified representation of the used equation(s).
     MaTex           = r''               # MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
-    References      = 'References'      # A list of journal article references. E.g.: DOIs or title/authors/year/journal; web-pages.
+    References      = ''                # A list of journal article references. E.g.: DOIs or title/authors/year/journal; web-pages.
     Minimiser       = None              # The fitting minimiser model object (initiated)
     FullDescription = f'{Info} \n {Description}\nSee References: {References}'
     PeakProperty    = sv._HEIGHT        # The peak property to fit. One of ['height', 'lineWidth', 'volume', 'ppmPosition']
+    isEnabled       = True              # True to enable on the GUI and be selected/used
 
     def __init__(self, *args, **kwargs):
 
@@ -66,7 +67,10 @@ class FittingModelABC(ABC):
         self._applyScaleMinMax = False
         self._applyStandardScaler = False
         self._modelArgumentNames = []
-        self._rawDataHeaders = [] #strings of columnHeaders
+        self._rawDataHeaders = [] # strings of columnHeaders
+        self.xSeriesStepHeader = sv.SERIES_STEP_X
+        self.ySeriesStepHeader = sv.SERIES_STEP_Y
+        self._ySeriesLabel = self.PeakProperty # this is only used in the Plot Y Axis label.
 
     @property
     def rawDataHeaders(self):
@@ -80,6 +84,11 @@ class FittingModelABC(ABC):
         if self.Minimiser:
             return self.Minimiser.getParamNames(self.Minimiser)
         return []
+
+    @property
+    def modelArgumentErrorNames(self):
+        """ The list of parameters errors """
+        return [f'{vv}{sv._ERR}' for vv in self.modelArgumentNames ]
 
     @property
     def modelStatsNames(self):
@@ -114,15 +123,15 @@ class FittingModelABC(ABC):
         commonHeaders = sv.MERGINGHEADERS
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
         for collectionId, groupDf in grouppedByCollectionsId:
-            groupDf.sort_values([sv.SERIESSTEP], inplace=True)
-            seriesSteps = groupDf[sv.SERIESSTEP]
+            groupDf.sort_values([self.xSeriesStepHeader], inplace=True)
+            seriesSteps = groupDf[self.xSeriesStepHeader]
             ## Build columns
             for ix, row in groupDf.iterrows():
                 pid = row[sv.COLLECTIONPID]
                 for commonHeader in commonHeaders:
                     outputFrame.loc[pid, commonHeader] = row[commonHeader]
                 for xValue in seriesSteps.values:
-                    if xValue == row[sv.SERIESSTEP]:
+                    if xValue == row[self.xSeriesStepHeader]:
                         valueHeader = f'{dimensionSeparator}{int(row[sv.DIMENSION])}_{xValue}'
                         if self.PeakProperty in [sv._HEIGHT, sv._VOLUME]:
                             valueHeader = f'{self.PeakProperty}_{xValue}'

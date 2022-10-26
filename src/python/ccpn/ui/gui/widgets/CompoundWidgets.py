@@ -1,6 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+import contextlib
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
@@ -12,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:13 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:30 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -51,6 +52,7 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.util.Logging import getLogger
 
 
 class ListCompoundWidget(CompoundBaseWidget):
@@ -642,10 +644,9 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
             if default in texts:
                 index = texts.index(default)
             else:
-                try:
+                with contextlib.suppress(Exception):
                     index = int(default)
-                except:
-                    pass
+
         pulldownKwds = {'texts'   : texts,
                         'index'   : index,
                         'editable': editable,
@@ -924,12 +925,22 @@ class CheckBoxesCompoundWidget(CompoundBaseWidget):
         if fixedWidths is not None:
             self.setFixedWidths(fixedWidths)
 
+    def getTexts(self):
+        """Convenience: Return list of texts in checkboxes"""
+        return self.checkBoxes.texts
+
     def get(self):
         return self.checkBoxes.getSelectedText()
 
     def set(self, texts):
         """Set Checked the given texts, and untick the rest."""
         self.checkBoxes.setSelectedByText(texts, checkFlag=True)
+
+    def untickTexts(self, texts):
+        self.checkBoxes.setSelectedByText(texts, checkFlag=False)
+
+    def tickTexts(self, texts):
+        self.set(texts)
 
     def _getSaveState(self):
         """
@@ -998,7 +1009,7 @@ class ButtonCompoundWidget(CompoundBaseWidget):
         buttonKwds = { 'toggle'    : toggle,
                         'text'     : text,
                         'hAlign'   : hAlign,
-                        'icon'     : icon, 
+                        'icon'     : icon,
                         'callback' : callback,
                         }
         buttonKwds.update(compoundKwds or {})
@@ -1067,7 +1078,7 @@ class LabelCompoundWidget(CompoundBaseWidget):
         self.label = Label(parent=self, text=labelText, vAlign='center')
         self._addWidget(self.label)
 
-        hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
+        hAlign = orientation if orientation in ['left', 'right'] else 'center'
         label2Kwds = {
                         'text'     : label2Text,
                         'icon'     : icon,
@@ -1092,7 +1103,7 @@ class LabelCompoundWidget(CompoundBaseWidget):
 
     def _setSavedState(self, value):
         self.label2.setText(value)
-    
+
 class SpinBoxCompoundWidget(CompoundBaseWidget):
     """
     Compound class comprising a Label and an integer SpinBox, combined in a CompoundBaseWidget (i.e. a Frame)
@@ -1121,7 +1132,7 @@ class SpinBoxCompoundWidget(CompoundBaseWidget):
     def __init__(self, parent=None, mainWindow=None,
                  showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
-                 labelText='', value=None, range=(None, None), step=None, showButtons=True,
+                 labelText='', value=None, minimum=None, maximum=None, step=None, showButtons=True,
                  decimals=None, callback=None, editable=False, compoundKwds=None,
                  **kwds):
         """
@@ -1133,7 +1144,8 @@ class SpinBoxCompoundWidget(CompoundBaseWidget):
         :param maximumWidths: tuple of two values specifying the maximum width of the Label and SpinBox widget, respectively
         :param labelText: Text for the Label
         :param value: initial value for the SpinBox
-        :param range: (minimumValue, maximumValue) tuple for the SpinBox
+        :param minimum: minimum value
+        :param maximum: maximum value
         :param step: initial step for the increment of the SpinBox buttons
         :param showButtons: flag to display the SpinBox buttons (True, False)
         :param kwds: (optional) keyword, value pairs for the gridding of Frame
@@ -1145,12 +1157,10 @@ class SpinBoxCompoundWidget(CompoundBaseWidget):
         self.label = Label(parent=self, text=labelText, vAlign='center')
         self._addWidget(self.label)
 
-        hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
-        minimumValue = range[0] if range[0] is not None else None
-        maximumValue = range[1] if range[1] is not None else None
+        hAlign = orientation if orientation in ['left', 'right'] else 'center'
         spinboxKwds = {'value'      : value,
-                       'min'        : minimumValue,
-                       'max'        : maximumValue,
+                       'min'        : minimum,
+                       'max'        : maximum,
                        'step'       : step,
                        'showButtons': showButtons,
                        'hAlign'     : hAlign,
@@ -1219,7 +1229,7 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
     def __init__(self, parent=None, mainWindow=None,
                  showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
-                 labelText='', value=None, range=(None, None), step=None, showButtons=True,
+                 labelText='', value=None, minimum=None, maximum=None, step=None, showButtons=True,
                  decimals=None, callback=None, editable=False, compoundKwds=None,
                  **kwds):
         """
@@ -1231,7 +1241,8 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
         :param maximumWidths: tuple of two values specifying the maximum width of the Label and DoubleSpinBox widget, respectively
         :param labelText: Text for the Label
         :param value: initial value for the DoubleSpinBox
-        :param range: (minimumValue, maximumValue) tuple for the DoubleSpinBox
+        :param minimum: minimum value
+        :param maximum: maximum value
         :param step: initial step for the increment of the DoubleSpinBox buttons
         :param decimals: number of decimals the DoubleSpinBox to display
         :param showButtons: flag to display the DoubleSpinBox buttons (True, False)
@@ -1244,12 +1255,10 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
         self.label = Label(parent=self, text=labelText, vAlign='center')
         self._addWidget(self.label)
 
-        hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
-        minimumValue = range[0] if range[0] is not None else None
-        maximumValue = range[1] if range[1] is not None else None
+        hAlign = orientation if orientation in ['left', 'right'] else 'center'
         spinboxKwds = {'value'      : value,
-                       'min'        : minimumValue,
-                       'max'        : maximumValue,
+                       'min'        : minimum,
+                       'max'        : maximum,
                        'step'       : step,
                        'showButtons': showButtons,
                        'decimals'   : decimals,
@@ -1329,7 +1338,7 @@ class ScientificSpinBoxCompoundWidget(CompoundBaseWidget):
     def __init__(self, parent=None, mainWindow=None,
                  showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
-                 labelText='', value=None, range=(None, None), step=None, showButtons=True,
+                 labelText='', value=None, minimum=None, maximum=None, step=None, showButtons=True,
                  decimals=None, callback=None, editable=False, compoundKwds=None,
                  **kwds):
         """
@@ -1341,7 +1350,8 @@ class ScientificSpinBoxCompoundWidget(CompoundBaseWidget):
         :param maximumWidths: tuple of two values specifying the maximum width of the Label and scientificSpinBox widget, respectively
         :param labelText: Text for the Label
         :param value: initial value for the scientificSpinBox
-        :param range: (minimumValue, maximumValue) tuple for the scientificSpinBox
+        :param minimum: minimum value
+        :param maximum: maximum value
         :param step: initial step for the increment of the scientificSpinBox buttons
         :param decimals: number of decimals the scientificSpinBox to display
         :param showButtons: flag to display the scientificSpinBox buttons (True, False)
@@ -1354,12 +1364,10 @@ class ScientificSpinBoxCompoundWidget(CompoundBaseWidget):
         self.label = Label(parent=self, text=labelText, vAlign='center')
         self._addWidget(self.label)
 
-        hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
-        minimumValue = range[0] if range[0] is not None else None
-        maximumValue = range[1] if range[1] is not None else None
+        hAlign = orientation if orientation in ['left', 'right'] else 'center'
         scientificKwds = {'value'      : value,
-                          'min'        : minimumValue,
-                          'max'        : maximumValue,
+                          'min'        : minimum,
+                          'max'        : maximum,
                           'showButtons': showButtons,
                           'hAlign'     : hAlign,
                           'editable'   : editable,
@@ -1583,6 +1591,7 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
                  showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
                  labelText='', texts=[], tipTexts=[], icons=[], callback=None,
+                 enabledTexts=None,
                  selectedText = None,
                  selectedInd=0, direction='h',
                  editable=True, compoundKwds=None,

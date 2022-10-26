@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:13 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:30 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import textwrap
+from dataclasses import dataclass
 from PyQt5 import QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Font import setWidgetFont
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -547,25 +548,33 @@ class progressPopup(CcpnDialog):
             self.timer.stop()
 
 
+# small object to facilitate passing data to progressManager - could use 'send' but only needed once
+@dataclass
+class _progressStore:
+    newWindow = None
+
+
 @contextmanager
 def progressManager(parent, title=None, progressMax=100):
     thisProg = progressPopup(parent=parent, title=title, progressMax=progressMax)
 
+    _prog = _progressStore()
     try:
         thisProg.progress_simulation()
         thisProg.update()
         QtWidgets.QApplication.processEvents()  # still doesn't catch all the paint events
         sleep(0.1)
 
-        yield  # yield control to the main process
+        yield _prog  # yield control to the main process
 
     finally:
         thisProg.update()
         QtWidgets.QApplication.processEvents()  # hopefully it will redraw the popup
         thisProg.close()
 
-        # return correct focus control to the parent
-        QtWidgets.QApplication.setActiveWindow(parent)
+        if win := (_prog.newWindow or parent):
+            # return correct focus control to the parent
+            QtWidgets.QApplication.setActiveWindow(win)
 
 
 def _stoppableProgressBar(data, title='Calculating...', buttonText='Cancel'):
@@ -582,12 +591,10 @@ def _stoppableProgressBar(data, title='Calculating...', buttonText='Cancel'):
     widget = QtWidgets.QProgressDialog(title, buttonText, 0, len(data))  # starts = 0, ends = len(data)
     widget.setAutoClose(True)
     widget.raise_()
-    c = 0
-    for v in iter(data):
+    for c, v in enumerate(iter(data), start=1):
         QtCore.QCoreApplication.instance().processEvents()
         if widget.wasCanceled():
             raise RuntimeError('Stopped by user')
-        c += 1
         widget.setValue(c)
         yield (v)
 

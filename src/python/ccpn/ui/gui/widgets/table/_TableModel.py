@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:14 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:30 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -146,9 +146,9 @@ class _TableModel(QtCore.QAbstractTableModel):
         self.beginResetModel()
 
         # set the initial sort-order
-        self._oldSortIndex = [row for row in range(value.shape[0])]
-        self._sortIndex = [row for row in range(value.shape[0])]
-        self._filterIndex = [row for row in range(value.shape[0])]
+        self._oldSortIndex = list(range(value.shape[0]))
+        self._sortIndex = list(range(value.shape[0]))
+        self._filterIndex = list(range(value.shape[0]))
 
         # create numpy arrays to match the data that will hold background colour
         self._colour = np.empty(value.shape, dtype=np.object)
@@ -183,13 +183,13 @@ class _TableModel(QtCore.QAbstractTableModel):
         if not (orientation := ORIENTATIONS.get(orientation)):
             raise ValueError(f'orientation not in {list(ORIENTATIONS.keys())}')
         if not (isinstance(values, (list, tuple)) and all(isinstance(val, (type(None), str)) for val in values)):
-            raise ValueError(f'values must be a list|tuple of str|None')
+            raise ValueError('values must be a list|tuple of str|None')
 
         try:
             self._headerToolTips[orientation] = values
 
         except Exception as es:
-            raise ValueError(f'{self.__class__.__name__}.setToolTips: Error setting values {orientation} -> {values}\n{es}')
+            raise ValueError(f'{self.__class__.__name__}.setToolTips: Error setting values {orientation} -> {values}\n{es}') from es
 
     def _insertRow(self, row, newRow):
         """Insert a new row into the table.
@@ -300,9 +300,6 @@ class _TableModel(QtCore.QAbstractTableModel):
 
                 self._df.drop([row], inplace=True)
                 self._sortIndex[:] = [(val if val < iLoc else val - 1) for val in self._sortIndex if val != iLoc]
-                self._colour = np.delete(self._colour, iLoc, axis=0)
-
-                self.endRemoveRows()
 
             else:
                 # NOTE:ED - not checked
@@ -310,9 +307,9 @@ class _TableModel(QtCore.QAbstractTableModel):
                 self.beginRemoveRows(QtCore.QModelIndex(), iLoc, iLoc)
 
                 self._df.drop([row], inplace=True)
-                self._colour = np.delete(self._colour, iLoc, axis=0)
 
-                self.endRemoveRows()
+            self._colour = np.delete(self._colour, iLoc, axis=0)
+            self.endRemoveRows()
 
     def rowCount(self, parent=None):
         """Return the row count for the dataFrame
@@ -340,17 +337,14 @@ class _TableModel(QtCore.QAbstractTableModel):
                 data = self._df.iat[row, col]
 
                 # float/np.float - round to 3 decimal places
-                if isinstance(data, (float, np.floating)):
-                    return f'{data:.3f}'
-
-                return str(data)
+                return f'{data:.3f}' if isinstance(data, (float, np.floating)) else str(data)
 
             elif role == VALUE_ROLE:
                 val = self._df.iat[row, col]
                 try:
                     # convert np.types to python types
                     return val.item()  # type np.generic
-                except:
+                except Exception:
                     return val
 
             elif role == BACKGROUND_ROLE:
@@ -388,16 +382,16 @@ class _TableModel(QtCore.QAbstractTableModel):
                 # return a dict of item-data?
                 return (row, col)
 
-            # if role == CHECK_ROLE and col == 0:
-            #     # need flags to include CHECKABLE and return QtCore.Qt.checked/unchecked/PartiallyChecked here
-            #     return CHECKED
+                # if role == CHECK_ROLE and col == 0:
+                #     # need flags to include CHECKABLE and return QtCore.Qt.checked/unchecked/PartiallyChecked here
+                #     return CHECKED
 
-            # elif role == ICON_ROLE:
-            #     # return the pixmap - this works, transfer to _MultiHeader
-            #     return self._editableIcon
+                # elif role == ICON_ROLE:
+                #     # return the pixmap - this works, transfer to _MultiHeader
+                #     return self._editableIcon
 
-            # elif role == ALIGNMENT_ROLE:
-            #     pass
+                # elif role == ALIGNMENT_ROLE:
+                #     pass
 
         return None
 
@@ -434,18 +428,15 @@ class _TableModel(QtCore.QAbstractTableModel):
             try:
                 # quickest way to get the column
                 return self._df.columns[col]
-            except:
+            except Exception:
                 return None
 
         elif role == TOOLTIP_ROLE and orientation == QtCore.Qt.Horizontal:
             try:
                 # quickest way to get the column
                 return self._headerToolTips[orientation][col]
-            except:
+            except Exception:
                 return None
-
-        # if orientation == QtCore.Qt.Vertical and role == DISPLAY_ROLE:
-        #     return self._df.index[col] if not self._df.empty else None
 
         elif role == SIZE_ROLE:
             # process the heights/widths of the headers
@@ -455,21 +446,19 @@ class _TableModel(QtCore.QAbstractTableModel):
                     width = self._estimateColumnWidth(col)
 
                     header = self._view.horizontalHeader()
-                    visibleCols = [col for col in range(self.columnCount()) if not header.isSectionHidden(col)]
-                    if visibleCols:
+                    if visibleCols := [col for col in range(self.columnCount()) if not header.isSectionHidden(col)]:
                         # get the width of all the previous visible columns
                         lastCol = visibleCols[-1]
                         if col == lastCol and self._view is not None:
                             # stretch the last column to fit the table - sum the previous columns
-                            colWidths = sum([self._estimateColumnWidth(cc)
-                                             for cc in visibleCols[:-1]])
+                            colWidths = sum(self._estimateColumnWidth(cc) for cc in visibleCols[:-1])
                             viewWidth = self._view.viewport().size().width()
                             width = max(width, viewWidth - colWidths)
 
                     # return the size
                     return QtCore.QSize(width, int(self._chrHeight))
 
-                except:
+                except Exception:
                     # return the default QSize
                     return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))
 
@@ -486,7 +475,7 @@ class _TableModel(QtCore.QAbstractTableModel):
         try:
             # quickest way to get the column
             colName = self._df.columns[col]
-        except:
+        except Exception:
             colName = None
 
         maxLen = max(len(colName) if colName else 0, self._MINCHARS)  # never smaller than 4 characters
@@ -503,16 +492,14 @@ class _TableModel(QtCore.QAbstractTableModel):
                 if '\n' in data:
                     # get the longest row from the cell
                     dataRows = data.split('\n')
-                    newLen = max([len(_chrs) for _chrs in dataRows])
+                    newLen = max(len(_chrs) for _chrs in dataRows)
                 else:
                     newLen = len(data)
 
             # update the current maximum
             maxLen = max(newLen, maxLen)
 
-        # return the required minimum width
-        width = int(min(self._MAXCHARS, maxLen) * self._chrWidth)
-        return width
+        return int(min(self._MAXCHARS, maxLen) * self._chrWidth)
 
     def setForeground(self, row, column, colour):
         """Set the foreground colour for dataFrame cell at position (row, column).
@@ -555,8 +542,7 @@ class _TableModel(QtCore.QAbstractTableModel):
         """Method to apply sorting
         """
         # generate the universal sort key values for the column
-        series = pd.Series(universalSortKey(val) for val in values)
-        return series
+        return pd.Series(universalSortKey(val) for val in values)
 
     def _setSortOrder(self, column: int, order: QtCore.Qt.SortOrder = ...):
         """Get the new sort order based on the sort column and sort direction
@@ -564,7 +550,7 @@ class _TableModel(QtCore.QAbstractTableModel):
         self._oldSortIndex = self._sortIndex
         col = self._df.columns[column]
         newData = self._universalSort(self._df[col])
-        self._sortIndex = list(newData.sort_values(ascending=True if order == QtCore.Qt.AscendingOrder else False).index)
+        self._sortIndex = list(newData.sort_values(ascending=(order == QtCore.Qt.AscendingOrder)).index)
 
         # map the old sort-order to the new sort-order
         if self._filterIndex is not None:
@@ -591,8 +577,7 @@ class _TableModel(QtCore.QAbstractTableModel):
         """Map the cell index to the co-ordinates in the pandas dataFrame.
         Return list of tuples of dataFrame positions.
         """
-        idxs = [(self._sortIndex[idx.row()], idx.column()) if idx.isValid() else (None, None) for idx in indexes]
-        return idxs
+        return [(self._sortIndex[idx.row()], idx.column()) if idx.isValid() else (None, None) for idx in indexes]
 
     def flags(self, index):
         # Set the table to be editable - need the editable columns here
@@ -608,7 +593,7 @@ class _TableModel(QtCore.QAbstractTableModel):
             # return True if the column contains an edit function
             # NOTE:ED - need to remove _dataFrameObject, move options to TableABC? BUT Column class is still good
             return self._view._dataFrameObject.setEditValues[col] is not None
-        except:
+        except Exception:
             return self._defaultEditable
 
     def resetFilter(self):
@@ -624,10 +609,7 @@ class _TableModel(QtCore.QAbstractTableModel):
 #=========================================================================================
 
 def _getDisplayRole(colDef, obj):
-    if isinstance((value := colDef.getFormatValue(obj)), bool):
-        return None
-    else:
-        return value
+    return None if isinstance((value := colDef.getFormatValue(obj)), bool) else value
 
 
 def _getCheckRole(colDef, obj):

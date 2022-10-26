@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:26 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -44,6 +44,156 @@ students_t_func  = ls.students_t
 powerlaw_func    = ls.powerlaw
 
 
+
+
+########################################################################################################################
+########################            Ligand - Receptor Binding equations        #########################################
+########################################################################################################################
+
+"""
+    Below a set of library functions used in the Series Analysis, in particular the ChemicalShiftMapping module (CSM).
+    They are called recursively from each specific Fitting Model and its Minimiser object.
+    Function Arguments (*args) are used/inspected to set the attr to the Minimiser object and other functionality.
+    <-> WARNING <-> : Do not change the function signature without amending the Minimiser default parameters or 
+    will result in a broken Model. E.g.: oneSiteBinding_func(x, Kd, BMax) to oneSiteBinding_func(x, kd, bmax) will break
+    See MinimiserModel _defaultParams for more info. 
+
+"""
+
+def oneSiteBinding_func(x, Kd, BMax):
+    """
+    The one-site Specific Binding equation for a saturation binding experiment.
+
+    Y = Bmax*X/(Kd + X)
+
+    :param x:   1d array. The data to be fitted.
+                In the CSM it's the array of deltas (deltas among chemicalShifts, CS, usually in ppm positions)
+
+    :param Kd:  Defines the equilibrium dissociation constant. The value to get a half-maximum binding at equilibrium.
+                In the CSM the initial value is calculated from the ligand concentration.
+                The ligand concentration is inputted in the SpectrumGroup Series values.
+
+    :param BMax: Defines the max specific binding.
+                In the CSM the initial value is calculated from the CS deltas.
+                Note, The optimised BMax will be (probably always) larger than the measured CS.
+
+    :return:    Y array same shape of x. Represents the points for the fitted curve Y to be plotted.
+                When plotting BMax is the Y axis, Kd the X axis.
+    """
+    return (BMax * x) / (x + Kd)
+
+
+def oneSiteNonSpecBinding_func(x, NS, B=1):
+    """
+    The  one-site non specific Binding equation for a saturation binding experiment.
+
+    Y = NS*X + B
+
+    :param x:  1d array. The data to be fitted.
+               In the CSM it's the array of deltas (deltas among chemicalShifts, CS, usually in ppm positions)
+
+    :param NS: the slope of non-specific binding
+    :param B:  The non specific binding without ligand.
+
+    :return:   Y array same shape of x. Represents the points for the fitted curve Y to be plotted.
+               When plotting BMax is the Y axis, Kd the X axis.
+    """
+
+    YnonSpecific = NS * x + B
+
+    return YnonSpecific
+
+
+def fractionBound_func(x, Kd, BMax):
+    """
+    The one-site fractionBound equation for a saturation binding experiment.
+    V2 equation.
+    Y = BMax * (Kd + x - sqrt((Kd + x)^2 - 4x))
+
+    ref: 1) In-house calculations (V2 - wayne - Double check )
+
+    :param x:   1d array. The data to be fitted.
+                In the CSM it's the array of deltas (deltas among chemicalShifts, CS, usually in ppm positions)
+
+    :param Kd:  Defines the equilibrium dissociation constant. The value to get a half-maximum binding at equilibrium.
+                In the CSM the initial value is calculated from the ligand concentration.
+                The ligand concentration is inputted in the SpectrumGroup Series values.
+
+    :param BMax: Defines the max specific binding.
+                In the CSM the initial value is calculated from the CS deltas.
+                Note, The optimised BMax will be (probably always) larger than the measured CS.
+
+    :return:    Y array same shape of x. Represents the points for the fitted curve Y to be plotted.
+                When plotting BMax is the Y axis, Kd the X axis.
+    """
+
+    qd = np.sqrt((Kd+x)**2 - 4*x)
+    Y = BMax * (Kd + x - qd)
+
+    return Y
+
+def fractionBoundWithPro_func(x, Kd, BMax, T=1):
+    """
+    The one-site fractionBound equation for a saturation binding experiment.
+    V2 equation.
+    Y = BMax * ( (P + x + Kd) - sqrt(P + x + Kd)^2 - 4*P*x)) / 2 * P
+
+    ref: 1) M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
+
+
+    :param x:   1d array. The data to be fitted.
+                In the CSM it's the array of deltas (deltas among chemicalShifts, CS, usually in ppm positions)
+
+    :param Kd:  Defines the equilibrium dissociation constant. The value to get a half-maximum binding at equilibrium.
+                In the CSM the initial value is calculated from the ligand concentration.
+                The ligand concentration is inputted in the SpectrumGroup Series values.
+
+    :param BMax: Defines the max specific binding.
+                In the CSM the initial value is calculated from the CS deltas.
+                Note, The optimised BMax will be (probably always) larger than the measured CS.
+                
+    :param T: Target concentration.
+
+    :return:    Y array same shape of x. Represents the points for the fitted curve Y to be plotted.
+                When plotting BMax is the Y axis, Kd the X axis.
+    """
+
+    Y = BMax * ((T + x + Kd) - np.sqrt((T + x + Kd)**2 - 4 * T * x)) / 2 * T
+    return Y
+
+
+def cooperativity_func(x, Kd, BMax, Hs):
+    """
+    The cooperativity equation for a saturation binding experiment.
+
+    Y = Bmax*X^Hs/(Kd^Hs + X^Hs)
+
+    :param x:   1d array. The data to be fitted.
+                In the CSM it's the array of deltas (deltas among chemicalShifts, CS, usually in ppm positions)
+
+    :param Kd:  Defines the equilibrium dissociation constant. The value to get a half-maximum binding at equilibrium.
+                In the CSM the initial value is calculated from the ligand concentration.
+                The ligand concentration is inputted in the SpectrumGroup Series values.
+
+    :param BMax: Defines the max specific binding.
+                In the CSM the initial value is calculated from the CS deltas.
+                Note, The optimised BMax will be (probably always) larger than the measured CS.
+    :param Hs: hill slope. Default 1 to assume no cooperativity.
+                Hs = 1: ligand/monomer binds to one site with no cooperativity.
+                Hs > 1: ligand/monomer binds to multiple sites with positive cooperativity.
+                Hs < 0: ligand/monomer binds to multiple sites with variable affinities or negative cooperativity.
+    :return:    Y array same shape of x. Represents the points for the fitted curve Y to be plotted.
+                When plotting BMax is the Y axis, Kd the X axis.
+    """
+
+    Y =  (BMax * x **Hs) / (x**Hs + Kd**Hs)
+    return Y
+
+
+########################################################################################################################
+########################                     Various Fitting Functions                       ###########################
+########################################################################################################################
+
 def inversionRecovery_func(x, decay=1, amplitude=1):
     """ Function used to describe the T1 decay
     """
@@ -59,37 +209,13 @@ def exponentialDecay_func(x, decay=1, amplitude=1):
 def exponential_func(x, amplitude, decay):
     return amplitude * np.exp(decay * x)
 
-def fractionBound_func(x, kd, Bmax):
-    """
-    #FittingFunc. Called recursively with from the  Minimiser
-    Eq. 6 from  M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
-    :param x: ligand concentration
-    :param kd:
-    :param Bmax: DeltaDeltas cs values
-    :return: l, kd
-    """
-    qd = np.sqrt(((Bmax + x + kd) ** 2) - 4 * Bmax * x)
-    return ((Bmax + x + kd - qd) / 2)
-
-def oneSiteBinding_func(x, Kd, BMax):
-    """
-    #FittingFunc. Called recursively with from the Minimiser
-    Args are used/inspected to set the attr to the Minimiser object and other functionalities. Do not change signature characters
-    :param x: 1d array (e.g. ligand concentration)
-    :param kd: the initial kd value
-    :param bmax:
-    :return:
-    """
-    return (BMax * x) / (x + Kd)
-
-
 def blank_func(x, argA, argB):
     """
-    A mock fitting function
-    :param x:
-    :param argA:
-    :param argB:
-    :return:
+    A mock fitting function. Used for a Blank model.
+    :param x: example argument. Not in use.
+    :param argA: example argument. Not in use.
+    :param argB: example argument. Not in use.
+    :return: None
     """
     return
 
@@ -124,6 +250,33 @@ def euclideanDistance_func(array1, array2, alphaFactors):
         delta **= 2
         deltas.append(delta)
     return np.sqrt(np.mean(np.array(deltas)))
+
+def _checkValidValues(values):
+    """
+    Check if values contain 0, None or np.nan
+    :param values: list
+    :return: bool
+    """
+    notAllowed = [0, None, np.nan]
+    for i in values:
+        if i in notAllowed:
+            return False
+    return True
+
+def peakErrorBySNR(snrPeak1, snrPeak2, factor=1):
+    """
+    Calculate the Error of NOE measurements (as in AnalysisV2)
+    :param factor: float, correction factor.
+    :param snrPeak1: float, signal to noise ratio for Peak 1
+    :param snrPeak2: float, signal to noise ratio for Peak 2
+    :return: float or None
+    Ref.: 1) eq. 4 from Kharchenko, V., et al. Dynamic 15N{1H} NOE measurements: a tool for studying protein dynamics.
+             J Biomol NMR 74, 707–716 (2020). https://doi.org/10.1007/s10858-020-00346-6
+    """
+    if not _checkValidValues([snrPeak1, snrPeak2, factor]):
+        return
+    error = abs(factor) * np.sqrt(snrPeak1**-2 + snrPeak2**-2)
+    return error
 
 def hetNoeError(sat, nonSat, noiseSat, noiseNonSat, factor=1):
     """
@@ -183,3 +336,13 @@ CommonStatFuncs = {
                 sv.STD      : np.std,
                 sv.VARIANCE : np.var,
                 }
+
+
+# import matplotlib.pyplot as plt
+# x = np.arange(1, 1000)
+# Kd, BMax, P = 56, 0.18, 1
+# ys = oneSiteBinding_func(x, Kd, BMax )
+# yns = oneSiteNonSpecBinding_func(x, -0.01 )
+# plt.plot(ys)
+# plt.plot(yns)
+# plt.show()

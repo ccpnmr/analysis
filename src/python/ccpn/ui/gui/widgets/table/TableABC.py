@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:14 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:30 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -97,6 +97,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     _actionCallback = NOTHING
     _selectionCallback = NOTHING
     _defaultEditable = True
+    _rowHeightScale = None
 
     # define the default TableModel class
     defaultTableModel = _TableModel
@@ -106,7 +107,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
                  showHorizontalHeader=True, showVerticalHeader=True,
                  borderWidth=2, cellPadding=2, focusBorderWidth=0,
                  _resize=False, setWidthToColumns=False, setHeightToRows=False,
-                 setOnHeaderOnly=False, showGrid=False,
+                 setOnHeaderOnly=False, showGrid=False, wordWrap=False,
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
                  actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
                  enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
@@ -128,6 +129,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         :param setHeightToRows:
         :param setOnHeaderOnly:
         :param showGrid:
+        :param wordWrap:
         :param selectionCallback:
         :param selectionCallbackEnabled:
         :param actionCallback:
@@ -160,6 +162,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         self._defaultStyleSheet = self.styleSheet % colours
         self.setStyleSheet(self._defaultStyleSheet)
         self.setAlternatingRowColors(True)
+        self.setWordWrap(wordWrap)
 
         # set the preferred scrolling behaviour
         self.setHorizontalScrollMode(self.ScrollPerPixel)
@@ -186,7 +189,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
 
         height = getFontHeight(name=TABLEFONT, size='MEDIUM')
         self._setHeaderWidgets(height, showHorizontalHeader, showVerticalHeader)
-        self.setMinimumSize(3 * height, 3 * height + self.horizontalScrollBar().height())
+        self.setMinimumSize(2 * height, 2 * height + self.horizontalScrollBar().height())
 
         # set up the menus
         self.setTableMenu()
@@ -283,7 +286,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
             # set the dropEvent to the mainWidget of the module, otherwise the event gets stolen by Frames
             self.moduleParent.mainWidget._dropEventCallback = self._processDroppedItems
 
-        self.droppedNotifier = GuiNotifier(self,
+        self._droppedNotifier = GuiNotifier(self,
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                            self._processDroppedItems)
 
@@ -293,7 +296,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         try:
             # may refactor the remaining modules so this isn't needed
             self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
-        except:
+        except Exception:
             getLogger().debug2(f'{self.__class__.__name__} has no _widgetScrollArea')
 
     def _setHeaderWidgets(self, _height, showHorizontalHeader, showVerticalHeader):
@@ -312,10 +315,10 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         _header.setVisible(showHorizontalHeader)
         setWidgetFont(_header, name=TABLEFONT)
         setWidgetFont(self.verticalHeader(), name=TABLEFONT)
+
         # set the verticalHeader information
         _header = self.verticalHeader()
         # set Interactive and last column to expanding
-        _header.setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
         _header.setStretchLastSection(False)
         # only look at visible section
         _header.setResizeContentsPrecision(5)
@@ -323,7 +326,14 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         _header.setFixedWidth(10)  # gives enough of a handle to resize if required
         _header.setVisible(showVerticalHeader)
         _header.setHighlightSections(self.font().bold())
+
         setWidgetFont(_header, name=TABLEFONT)
+        if self._rowHeightScale:
+            _header.setSectionResizeMode(QtWidgets.QHeaderView.Fixed)
+            _height *= self._rowHeightScale
+        else:
+            _header.setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
+
         _header.setDefaultSectionSize(_height)
         _header.setMinimumSectionSize(_height)
 
@@ -341,8 +351,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
 
         if model._sortIndex and model._oldSortIndex:
             # get the pre-sorted mapping
-            if (rows := set(model._oldSortIndex[itm.row()] for itm in selection
-                            if itm.row() in model._oldSortIndex)):
+            if rows := {model._oldSortIndex[itm.row()] for itm in selection if itm.row() in model._oldSortIndex}:
                 # block so no signals emitted
                 self.blockSignals(True)
                 selModel.blockSignals(True)
@@ -362,6 +371,13 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
                     # unblock to enable again
                     selModel.blockSignals(False)
                     self.blockSignals(False)
+
+    def _close(self):
+        """Clean up the notifiers
+        """
+        if self._droppedNotifier:
+            self._droppedNotifier.unRegister()
+            self._droppedNotifier = None
 
     #=========================================================================================
     # Properties
@@ -429,10 +445,10 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         """Handle the callback for a selection
         """
         if self._enableSelectionCallback and self._selectionCallback is not None:
-            # get the df-rows from the selections
-            newRows = OrderedSet([idx.data(INDEX_ROLE)[0] for sel in selected for idx in sel.indexes()])
-            oldRows = OrderedSet([idx.data(INDEX_ROLE)[0] for sel in deselected for idx in sel.indexes()])
-            sRows = OrderedSet([idx.data(INDEX_ROLE)[0] for idx in self.selectedIndexes()])
+            # get the unique df-rows from the selections
+            newRows = OrderedSet([(dd := idx.data(INDEX_ROLE)) is not None and dd[0] for sel in selected for idx in sel.indexes()]) - {False}
+            oldRows = OrderedSet([(dd := idx.data(INDEX_ROLE)) is not None and dd[0] for sel in deselected for idx in sel.indexes()]) - {False}
+            sRows = OrderedSet([(dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes()]) - {False}
 
             df = self._df
             new = df.iloc[list(newRows)]
@@ -492,7 +508,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
 
         if self._enableActionCallback and self._actionCallback is not None:
             # get the df-rows from the selection
-            sRows = OrderedSet([idx.data(INDEX_ROLE)[0] for idx in self.selectedIndexes()])
+            sRows = OrderedSet([(dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes()]) - {False}
 
             df = self._df
             sel = df.iloc[list(sRows)]
@@ -530,10 +546,45 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         """
         :return: a DataFrame with selected rows
         """
-        sRows = OrderedSet([idx.data(INDEX_ROLE)[0] for idx in self.selectedIndexes()])
+        sRows = OrderedSet([(dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes()]) - {False}
         df = self._df
-        sel = df.iloc[list(sRows)]
-        return sel
+        return df.iloc[list(sRows)]
+
+    def selectRowsByValues(self, values, headerName, scrollToSelection=True, doCallback=True):
+        """
+        Select rows if the given values are present in the table.
+        :param values: list of value to select
+        :param headerName: the column name for the column where to search the values
+        :param scrollToSelection: navigate to the table to show the result
+        :return: None
+        For obj table use the "highlightObjects" method.
+        """
+        if self._df is None or self._df.empty:
+            return
+        if headerName not in self._df.columns:
+            return
+        from ccpn.core.lib.ContextManagers import nullContext
+
+        context = nullContext if doCallback else self._blockTableSignals
+
+        with context('selectRowsByValues'):
+            selectionModel = self.selectionModel()
+            model = self.model()
+            selectionModel.clearSelection()
+            columnTextIx = self.columnTexts.index(headerName)
+            for i in model._sortIndex:
+                cell = model.index(i, columnTextIx)
+                if cell is None:
+                    continue
+                tableValue = cell.data()
+                for valueToSelect in values:
+                    if tableValue == valueToSelect:
+                        rowIndex = model.index(i, 0)
+                        if rowIndex is None:
+                            continue
+                        selectionModel.select(rowIndex, selectionModel.Select | selectionModel.Rows)
+                        if scrollToSelection:
+                            self.scrollTo(rowIndex, self.EnsureVisible)
 
     #=========================================================================================
     # keyboard and mouse handling - modified to allow double-click to keep current selection
@@ -555,7 +606,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         self._currentIndex = self.indexAt(e.pos())
 
         # user can click in the blank space under the table
-        self._clickedInTable = True if self._currentIndex else False
+        self._clickedInTable = bool(self._currentIndex)
 
         super().mousePressEvent(e)
 
@@ -579,8 +630,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
             keyMod = QtWidgets.QApplication.keyboardModifiers()
 
             if keyMod in addSelectionMod:
-                idx = self.currentIndex()
-                if idx:
+                if idx := self.currentIndex():
                     # set the item, which toggles selection of the row
                     self.setCurrentIndex(idx)
 
@@ -637,8 +687,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
             # self.setUpdatesEnabled(False)
 
             if blanking and self.project:
-                if self.project:
-                    self.project.blankNotification()
+                self.project.blankNotification()
 
             # list to store any deferred functions until blocking has finished
             self._deferredFuncs = []
@@ -648,32 +697,30 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     def _unblockTableEvents(self, blanking=True, disableScroll=False, tableState=None):
         """Unblock all updates/signals/notifiers in the table.
         """
-        if self._tableBlockingLevel > 0:
-            self._tableBlockingLevel -= 1
-
-            # unblock all signals on last exit
-            if self._tableBlockingLevel == 0:
-                if blanking and self.project:
-                    if self.project:
-                        self.project.unblankNotification()
-
-                tableState.modelBlocker = None
-                tableState.rootBlocker = None
-                # self.setUpdatesEnabled(tableState.enabledState)
-                # tableState.enabledState = None
-
-                if disableScroll:
-                    self._scrollOverride = False
-
-                self.update()
-
-                for func in self._deferredFuncs:
-                    # process simple deferred functions - required so that qt signals are not blocked
-                    func()
-                self._deferredFuncs = []
-
-        else:
+        if self._tableBlockingLevel <= 0:
             raise RuntimeError('Error: tableBlockingLevel already at 0')
+
+        self._tableBlockingLevel -= 1
+
+        # unblock all signals on last exit
+        if self._tableBlockingLevel == 0:
+            if blanking and self.project:
+                self.project.unblankNotification()
+
+            tableState.modelBlocker = None
+            tableState.rootBlocker = None
+            # self.setUpdatesEnabled(tableState.enabledState)
+            # tableState.enabledState = None
+
+            if disableScroll:
+                self._scrollOverride = False
+
+            self.update()
+
+            for func in self._deferredFuncs:
+                # process simple deferred functions - required so that qt signals are not blocked
+                func()
+            self._deferredFuncs = []
 
     @contextmanager
     def _blockTableSignals(self, callerId='', blanking=True, disableScroll=False):

@@ -31,6 +31,8 @@ from collections import OrderedDict as od
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import ALL_GROUPINGNMRATOMS
 from ccpn.util.Logging import getLogger
 import numpy as np
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+
 from ccpn.util.isotopes import name2IsotopeCode
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -43,7 +45,7 @@ import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
 from ccpn.ui.gui.widgets.HLine import LabeledHLine
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import PanelUpdateState
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import PanelUpdateState
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiSettingsPanel import GuiSettingPanel, \
     GuiInputDataPanel, GuiCalculationPanel, GuiFittingPanel, AppearancePanel
@@ -90,7 +92,8 @@ class CSMCalculationPanel(GuiCalculationPanel):
                                 'kwds': {'labelText': label,
                                          'tipText': tipText,
                                          'value': factorValue,
-                                         'range': (0.001, 1), 'step': 0.01, 'decimals': 4,
+                                         'minimum': 0.001, 'maximum': 1,
+                                         'step': 0.01, 'decimals': 4,
                                          'fixedWidths': SettingsWidgetFixedWidths}}
         untraceableWidgetDefinitions = od((
                             (guiNameSpaces.WidgetVarName_UntraceablePeak,
@@ -170,7 +173,14 @@ class CSMGuiFittingPanel(GuiFittingPanel):
 
 class CSMAppearancePanel(AppearancePanel):
 
-    pass #TODO remove
+    def _preselectDefaultYaxisBarGraph(self):
+        yAxisWidget = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
+        backend = self.guiModule.backendHandler
+        model = backend.currentCalculationModel
+        if model is not None and model.ModelName != sv.BLANKMODELNAME:
+            firstArg, *_ = model.modelArgumentNames or [None]
+            if yAxisWidget:
+                yAxisWidget.select(firstArg)
 
 
 #####################################################################

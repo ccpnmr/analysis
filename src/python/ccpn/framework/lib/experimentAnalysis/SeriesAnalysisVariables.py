@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:26 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,7 +50,7 @@ ASHTAG           = '#'                   # -> int   | incremental serial
 VALUE            = 'Value'               # -> str   | The column header  prefix in a SeriesTable. Used to store data after the CONSTANT_TABLE_COLUMNS
 TIME             = 'Time'                # -> str   | A general prefix in a SeriesTable.
 
-SEP              =  '_'                  # the prefix-name-suffix global separator. E.g., used in Value columns: Value_height_at_0
+SEP              =  '_'   # the prefix-name-suffix global separator. E.g., used in Value columns: Value_height_at_0
 VALUE_           = f'{VALUE}{SEP}'
 TIME_            = f'{TIME}{SEP}'
 EXCLUDED         = 'excluded'
@@ -61,27 +61,33 @@ VALUE_ERR        = f'{VALUE}{_ERR}'
 ## CSM Fitting Variables
 KD               = 'Kd'
 BMAX             = 'BMax'
+T                = 'T'
+T_ERR            = f'{T}{_ERR}'
 KD_ERR           = f'{KD}{_ERR}'
 BMAX_ERR         = f'{BMAX}{_ERR}'
-
+HillSlope        = 'Hs'
+HillSlope_ERR    = f'{HillSlope}{_ERR}'
 DIMENSION        = 'dimension'
 ISOTOPECODE      = 'isotopeCode'
 CLUSTERID        = 'clusterId'
 COLLECTIONID     = 'collectionId'
-SERIESSTEP       = 'seriesStep'
-SERIESSTEPVALUE  = 'seriesStepValue'
+RELDISPLACEMENT  = 'Relative Displacement'
+SERIES_STEP_X    = 'series_Step_X'
+SERIES_STEP_Y    = 'series_Step_Y'
 SERIESUNIT       = 'seriesUnit'
 PEAKPID          = 'peakPid'
 SPECTRUMPID      = 'spectrumPid'
 NMRATOMPID       = 'nmrAtomPid'
+NMRRESIDUEPID    = 'nmrResiduePid'
 COLLECTIONPID    = 'collectionPid'
 PID              = 'pid'
 ASSIGNEDNMRATOMS = 'assignedNmrAtoms'
 
-EXCLUDED_PEAKPID        = f'{EXCLUDED_}peakPid'
-EXCLUDED_SPECTRUMPID    = f'{EXCLUDED_}spectrumPid'
-EXCLUDED_NMRATOMPID     = f'{EXCLUDED_}nmrAtomPid'
-EXCLUDED_COLLECTIONPID  = f'{EXCLUDED_}collectionPid'
+EXCLUDED_PEAKPID        = f'{EXCLUDED_}{PEAKPID}'
+EXCLUDED_SPECTRUMPID    = f'{EXCLUDED_}{SPECTRUMPID}'
+EXCLUDED_NMRATOMPID     = f'{EXCLUDED_}{NMRATOMPID}'
+EXCLUDED_COLLECTIONPID  = f'{EXCLUDED_}{COLLECTIONPID}'
+ALL_EXCLUDED            = [EXCLUDED_PEAKPID, EXCLUDED_SPECTRUMPID, EXCLUDED_NMRATOMPID, EXCLUDED_COLLECTIONPID]
 
 # fitting output Stat variables
 MINIMISER        = 'minimiser'
@@ -101,6 +107,7 @@ _LINEWIDTH      = pu._LINEWIDTH
 _LINEWIDTHS     = pu.LINEWIDTHS
 _HEIGHT         = pu.HEIGHT
 _VOLUME         = pu.VOLUME
+_SNR            = 'signalToNoiseRatio'
 
 ## ATOM Names
 _H = pu.H
@@ -129,11 +136,11 @@ FLAG = 'Flag'
 SERIAL = 'Serial'
 
 CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, MINIMISER_MODEL, R2, CHISQR, REDCHI, AIC, BIC]
-SpectrumPropertiesHeaders = [DIMENSION, ISOTOPECODE, SERIESSTEP, SERIESUNIT]
+SpectrumPropertiesHeaders = [DIMENSION, ISOTOPECODE, SERIES_STEP_X, SERIESUNIT]
 PeakPropertiesHeaders = [_PPMPOSITION, _HEIGHT, _LINEWIDTH, _VOLUME]
 AssignmentPropertiesHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE, NMRATOMNAME]
 GROUPBYAssignmentHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE]
-PidHeaders = [COLLECTIONID, COLLECTIONPID, SPECTRUMPID, PEAKPID, NMRATOMPID]
+PidHeaders = [COLLECTIONID, COLLECTIONPID, SPECTRUMPID, PEAKPID, NMRATOMPID, NMRRESIDUEPID]
 
 MERGINGHEADERS = [COLLECTIONID, COLLECTIONPID, NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE]
 EXCLUDED_OBJECTS = [EXCLUDED_COLLECTIONPID, EXCLUDED_COLLECTIONPID, EXCLUDED_NMRATOMPID, EXCLUDED_SPECTRUMPID]
@@ -143,7 +150,7 @@ EXCLUDED_OBJECTS = [EXCLUDED_COLLECTIONPID, EXCLUDED_COLLECTIONPID, EXCLUDED_NMR
 ############################################################################################
 DATATABLETYPE               = 'DATATABLETYPE'
 SERIESANALYSISDATATABLE     = 'SERIESANALYSISDATATABLE'
-SERIESANALYSISOUTPUTDATA    = 'SeriesAnalysisOutputData'
+SERIESANALYSISOUTPUTDATA    = 'SeriesAnalysisResultsData'
 SERIESANALYSISINPUTDATA     = 'SeriesAnalysisInputData'
 RELAXATION_OUTPUT_FRAME     = 'RelaxationOutputFrame'
 HetNoe_OUTPUT_FRAME         = 'HetNoeOutputFrame'
@@ -219,10 +226,15 @@ OVERRIDE_OUTPUT_DATATABLE = 'overrideOutputDataTables'
 OUTPUT_DATATABLE_NAME = 'outputDataTableName'
 BLANKMODELNAME = 'Blank'
 
-## OneSiteBindingModel
-ONE_BINDING_SITE_MODEL = 'One Site Binding'
+## Receptor Binding Models
+ONE_SITE_BINDING_MODEL = 'One-Site (Specific) Binding'
+ONE_SITE_TOTAL_BINDING_MODEL = 'One-Site (Total) Binding'
+TWO_BINDING_SITE_MODEL = 'Two Site Binding'
+ONE_SITE_BINDING_ALLOSTERIC_MODEL = 'One Site with Allosteric Binding'
 FRACTION_BINDING_MODEL = 'Fraction Binding'
-
+FRACTION_BINDING_WITHTARGETMODEL = 'Fraction Binding with [Target]'
+COOPERATIVITY_BINDING_MODEL = 'Cooperativity Binding'
+FMNOYERROR = 'Fitting Model not implemented yet'
 #### residues names
 CCP_3LETTER_CODES = CCP_CODES_SORTED
 EXCLUDEDRESIDUETYPES = 'ExcludedResidueTypes'

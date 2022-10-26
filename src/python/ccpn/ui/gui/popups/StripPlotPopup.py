@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-25 17:59:14 +0000 (Thu, November 25, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:29 +0100 (Wed, October 26, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,12 +26,11 @@ __date__ = "$Date: 2017-07-04 09:28:16 +0000 (Tue, July 04, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot, STRIPPLOT_PEAKS, STRIPPLOT_NMRRESIDUES, \
     STRIPPLOT_NMRCHAINS, NO_STRIP, STRIPPLOT_NMRATOMSFROMPEAKS
-from ccpn.ui.gui.widgets.MessageDialog import progressManager
+from ccpn.ui.gui.widgets.MessageDialog import progressManager, showWarning
 from ccpn.util.Common import makeIterableList
 
 
@@ -61,7 +60,7 @@ class StripPlotPopup(CcpnDialogMainWidget):
             self.current = None
 
         self.spectrumDisplay = spectrumDisplay
-        self.spectrumDisplayLabel = Label(self.mainWidget, "Current spectrumDisplay: %s" % spectrumDisplay.id, grid=(0, 0))
+        self.spectrumDisplayLabel = Label(self.mainWidget, f"Current spectrumDisplay: {spectrumDisplay.id}", grid=(0, 0))
 
         # import the new strip plot widget - also used in backbone assignment and pick and assign module
         self._newStripPlotWidget = StripPlot(parent=self.mainWidget, mainWindow=self.mainWindow,
@@ -71,9 +70,6 @@ class StripPlotPopup(CcpnDialogMainWidget):
                                              includeSpectrumTable=includeSpectrumTable,
                                              defaultSpectrum=NO_STRIP,
                                              grid=(1, 0), gridSpan=(1, 3))
-
-        # ButtonList(self, ['Cancel', 'OK'], [self.reject, self._accept], grid=(2, 1), gridSpan=(1, 2))
-        # self.setFixedSize(self.sizeHint())
 
         self.setOkButton(callback=self._accept, tipText='Create strip plot and close')
         self.setCloseButton(callback=self.reject, tipText='Close')
@@ -86,24 +82,67 @@ class StripPlotPopup(CcpnDialogMainWidget):
         listType = self._newStripPlotWidget.listButtons.getIndex()
         spectrumDisplays = self._newStripPlotWidget.displaysWidget.getDisplays()
 
+        msg = None
         if listType is not None and spectrumDisplays:
+            buttonType = self._newStripPlotWidget.listButtons.buttonTypes[listType]
+
+            if buttonType == STRIPPLOT_PEAKS:
+                msg = self._popupStripPeaks(spectrumDisplays)
+
+            elif buttonType == STRIPPLOT_NMRATOMSFROMPEAKS:
+                msg = self._popupStripPeakNmrResidues(spectrumDisplays)
+
+            elif buttonType == STRIPPLOT_NMRRESIDUES:
+                msg = self._popupNmrResidues(spectrumDisplays)
+
+            elif buttonType == STRIPPLOT_NMRCHAINS:
+                msg = self._popupNmrChain(spectrumDisplays)
+
+            if not msg:
+                self.accept()
+                return
+
+        msg = msg or 'No selected spectrumDisplay'
+        showWarning('Make Strip Plot', msg)
+
+    def _popupNmrChain(self, spectrumDisplays):
+        """Make strip from nmrResidues of selected nmrChain
+        """
+        if self._newStripPlotWidget.nmrChain:
+            if (nmrRes := self._newStripPlotWidget.nmrChain.nmrResidues):
+                with progressManager(self, 'Making Strip Plot...'):
+                    self._buildStrips(nmrResidues=nmrRes, spectrumDisplays=spectrumDisplays)
+            else:
+                return 'NmrChain is empty'
+        else:
+            return 'No selected nmrChain'
+
+    def _popupNmrResidues(self, spectrumDisplays):
+        """Make strip from selected nmrResidues
+        """
+        if (nmrRes := self.current.nmrResidues):
             with progressManager(self, 'Making Strip Plot...'):
-                buttonType = self._newStripPlotWidget.listButtons.buttonTypes[listType]
+                self._buildStrips(nmrResidues=nmrRes, spectrumDisplays=spectrumDisplays)
+        else:
+            return 'No selected nmrResidues'
 
-                if buttonType == STRIPPLOT_PEAKS:
-                    self._buildStrips(peaks=self.current.peaks, spectrumDisplays=spectrumDisplays)
+    def _popupStripPeakNmrResidues(self, spectrumDisplays):
+        """Make strip from assigned nmrResidues of selected peaks
+        """
+        if (pks := self.current.peaks):
+            with progressManager(self, 'Making Strip Plot...'):
+                self._buildStripsFromPeaks(peaks=pks, spectrumDisplays=spectrumDisplays)
+        else:
+            return 'No selected peaks'
 
-                elif buttonType == STRIPPLOT_NMRATOMSFROMPEAKS:
-                    self._buildStripsFromPeaks(peaks=self.current.peaks, spectrumDisplays=spectrumDisplays)
-
-                elif buttonType == STRIPPLOT_NMRRESIDUES:
-                    self._buildStrips(nmrResidues=self.current.nmrResidues, spectrumDisplays=spectrumDisplays)
-
-                elif buttonType == STRIPPLOT_NMRCHAINS:
-                    if self._newStripPlotWidget.nmrChain:
-                        self._buildStrips(nmrResidues=self._newStripPlotWidget.nmrChain.nmrResidues, spectrumDisplays=spectrumDisplays)
-
-        self.accept()
+    def _popupStripPeaks(self, spectrumDisplays):
+        """Make strip from selected peaks
+        """
+        if (pks := self.current.peaks):
+            with progressManager(self, 'Making Strip Plot...'):
+                self._buildStrips(peaks=pks, spectrumDisplays=spectrumDisplays)
+        else:
+            return 'No selected peaks'
 
     def storeWidgetState(self):
         """Store the state of the widgets between popups
@@ -118,11 +157,11 @@ class StripPlotPopup(CcpnDialogMainWidget):
     def _buildStripsFromPeaks(self, peaks=None, spectrumDisplays=None):
         """Build the strips in the selected spectrumDisplays for the nmrAtoms attached to the current peaks
         """
-        if not spectrumDisplays:
+        if not (spectrumDisplays and peaks):
             return
 
         nmrResidues = set()
-        for peak in self.current.peaks:
+        for peak in peaks:
             atoms = makeIterableList(peak.assignedNmrAtoms)
             for atom in atoms:
                 nmrResidues.add(atom.nmrResidue)
@@ -133,7 +172,7 @@ class StripPlotPopup(CcpnDialogMainWidget):
     def _buildStrips(self, spectrumDisplays=None, peaks=None, nmrResidues=None):
         """Build the strips in the selected spectrumDisplays
         """
-        if not spectrumDisplays:
+        if not (spectrumDisplays and (peaks or nmrResidues)):
             return
 
         autoClearMarks = self._newStripPlotWidget.autoClearMarksWidget.isChecked()
@@ -159,8 +198,7 @@ class StripPlotPopup(CcpnDialogMainWidget):
 
             specDisplay.setColumnStretches(stretchValue=True, widths=True, minimumWidth=STRIPPLOTMINIMUMWIDTH)
 
-    def _cleanupWidget(self):
+    def _cleanupDialog(self):
         """Cleanup the notifiers that are left behind after the widget is closed
         """
         self._newStripPlotWidget._cleanupWidget()
-        self.close()

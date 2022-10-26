@@ -7,12 +7,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:42 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:30 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,7 @@ class RadioButtons(QtWidgets.QWidget, Base):
     def __init__(self, parent, texts=None, selectedInd=None, exclusive=True,
 
                  callback=None, direction='h', tipTexts=None, objectNames=None, squared=False,
-                 extraLabels=None, extraLabelIcons=None,
+                 extraLabels=None, extraLabelIcons=None, enabledTexts=None,
                  icons=None, initButtons=True,
                  **kwds):
 
@@ -100,6 +100,10 @@ class RadioButtons(QtWidgets.QWidget, Base):
         buttonGroup.buttonClicked.connect(self._callback)
         self.setCallback(callback)
 
+        if enabledTexts is not None and len(enabledTexts) == len(texts):
+            for button, isEnabled in zip(self.radioButtons, enabledTexts):
+                button.setEnabled(isEnabled)
+
     def setButtons(self, texts=None, selectedInd=None, direction='h', tipTexts=None, objectNames=None, silent=False,
                    icons=None):
         """Change the buttons in the button group
@@ -114,16 +118,12 @@ class RadioButtons(QtWidgets.QWidget, Base):
 
         # rebuild the button list
         for i, text in enumerate(texts):
-            if 'h' in direction:
-                grid = (0, i)
+            grid = (0, i) if 'h' in direction else (i, 0)
 
-            else:
-                grid = (i, 0)
-
-            if self.extraLabels and len(self.extraLabels)==len(self.texts):
+            if self.extraLabels and len(self.extraLabels) == len(self.texts):
                 w = Widget(self, grid=grid, hAlign='l', setLayout=True)
-                button = RadioButton(w, text, squared=self.squared, tipText=tipTexts[i], grid=(0,0), hAlign='l')
-                label = Label(w, self.extraLabels[i], grid=(0,1), hAlign='l')
+                button = RadioButton(w, text, squared=self.squared, tipText=tipTexts[i], grid=(0, 0), hAlign='l')
+                label = Label(w, self.extraLabels[i], grid=(0, 1), hAlign='l')
                 if self.extraLabelIcons and len(self.extraLabelIcons) == len(self.texts):
                     label.setPixmap(self.extraLabelIcons[i])
             else:
@@ -163,11 +163,15 @@ class RadioButtons(QtWidgets.QWidget, Base):
         if selectedInd is not None:
             try:
                 self.radioButtons[selectedInd].setChecked(True)
-            except:
+                return
+
+            except Exception:
                 getLogger().debug(f'setButtons: could not set selectedInd {selectedInd}')
         elif selected:
             if selected in self.texts:
                 self.set(selected, silent=silent)
+                return
+
             else:
                 getLogger().debug(f'setButtons: could not set selected {selected}')
         elif self.radioButtons:
@@ -177,14 +181,11 @@ class RadioButtons(QtWidgets.QWidget, Base):
         for rb in self.radioButtons:
             if rb.text() == text:
                 return rb
-        else:
-            raise ValueError('radioButton %s not found in the list' % text)
+
+        raise ValueError(f'radioButton {text} not found in the list')
 
     def get(self):
-        texts = []
-        for i in self.radioButtons:
-            if i.isChecked():
-                texts.append(i.text())
+        texts = [i.text() for i in self.radioButtons if i.isChecked()]
         if self.isExclusive:
             # could still be undefined
             return texts[-1] if texts else None
@@ -192,15 +193,17 @@ class RadioButtons(QtWidgets.QWidget, Base):
             return texts
 
     def getIndex(self):
-        ixs = []
-        for i, rb in enumerate(self.radioButtons):
-            if rb.isChecked():
-                ixs.append(i)
+        ixs = [i for i, rb in enumerate(self.radioButtons) if rb.isChecked()]
         if self.isExclusive:
             # if exclusive then one-and-only-one MUST be set
             return ixs[-1] if ixs else 0
         else:
             return ixs
+
+    def __len__(self):
+        """Return the number of buttons in the radio-group
+        """
+        return len(self.buttonGroup.buttons())
 
     @property
     def isChecked(self):
@@ -230,7 +233,7 @@ class RadioButtons(QtWidgets.QWidget, Base):
                     self.deselectAll()
                 try:
                     self.radioButtons[i].setChecked(True)
-                except:
+                except Exception:
                     getLogger().debug(f'setIndex: could not set index {i}')
 
         else:
@@ -238,8 +241,28 @@ class RadioButtons(QtWidgets.QWidget, Base):
                 self.deselectAll()
             try:
                 self.radioButtons[i].setChecked(True)
-            except:
+            except Exception:
                 getLogger().debug(f'setIndex: could not set index {i}')
+
+    def selectButton(self, button, blockSignals=False):
+        if blockSignals:
+            with self.blockWidgetSignals():
+                if self.isExclusive:
+                    self.deselectAll()
+                try:
+                    i = self.radioButtons.index(button)
+                    self.radioButtons[i].setChecked(True)
+                except Exception:
+                    getLogger().debug(f'selectButton: could not select button {button}')
+
+        else:
+            if self.isExclusive:
+                self.deselectAll()
+            try:
+                i = self.radioButtons.index(button)
+                self.radioButtons[i].setChecked(True)
+            except Exception:
+                getLogger().debug(f'selectButton: could not select button {button}')
 
     def deselectAll(self):
         self.buttonGroup.setExclusive(False)
@@ -312,7 +335,7 @@ class RadioButtonsWithSubCheckBoxes(QtWidgets.QWidget, Base):
                  tipTexts=None,
                  objectNames=None,
                  ##checkBoxes
-                 checkBoxesDictionary = None, # see docs
+                 checkBoxesDictionary=None,  # see docs
                  **kwds):
         super().__init__(parent)
         Base._init(self, setLayout=True, **kwds)
@@ -325,23 +348,22 @@ class RadioButtonsWithSubCheckBoxes(QtWidgets.QWidget, Base):
         self.callback = callback
         self.radioButtons = []
         self.checkBoxesDictionary = checkBoxesDictionary or {}
-        self._setButtons(texts=texts,  selectedInd=selectedInd, tipTexts=tipTexts,
+        self._setButtons(texts=texts, selectedInd=selectedInd, tipTexts=tipTexts,
                          checkBoxesDictionary=self.checkBoxesDictionary)
 
-
-    def _setButtons(self, texts,  selectedInd, tipTexts, checkBoxesDictionary):
+    def _setButtons(self, texts, selectedInd, tipTexts, checkBoxesDictionary):
         self.radioButtons = []
         for i, radioButtonText in enumerate(texts):
             checkBoxesDict = checkBoxesDictionary.get(radioButtonText)
             _tiptext = tipTexts[i]
             _checked = i == selectedInd
             radioButtonWithSubSelection = RadioButtonWithSubSelection(self, text=radioButtonText,
-                                                      checked=_checked,
-                                                      tipText=_tiptext,
-                                                      checkBoxDictionary=checkBoxesDict,
-                                                      grid=(i+1,0))
+                                                                      checked=_checked,
+                                                                      tipText=_tiptext,
+                                                                      checkBoxDictionary=checkBoxesDict,
+                                                                      grid=(i + 1, 0))
             radioButtonWithSubSelection.radioButton.clicked.connect(
-                partial(self._buttonClicked, radioButtonWithSubSelection, i))
+                    partial(self._buttonClicked, radioButtonWithSubSelection, i))
 
             self.radioButtons.append(radioButtonWithSubSelection)
 
@@ -353,10 +375,10 @@ class RadioButtonsWithSubCheckBoxes(QtWidgets.QWidget, Base):
     def _buttonClicked(self, button, index):
         if not self.isExclusive:
             self.radioButtons[index].setChecked(button.isChecked())
-            self._callback(button)
         else:
             self.setIndex(index)
-            self._callback(button)
+
+        self._callback(button)
 
     def _callback(self, button):
         if self.callback and button:
@@ -378,17 +400,13 @@ class RadioButtonsWithSubCheckBoxes(QtWidgets.QWidget, Base):
         :return: A dictionary of selected radioButton text and a list of Selected CheckBoxes text
 
         """
-        dd = {}
-        for radioButton in self.radioButtons:
-            if radioButton.isChecked():
-                dd[radioButton.getText()] = radioButton.getSelectedCheckBoxes()
-        return dd
+        return {radioButton.getText(): radioButton.getSelectedCheckBoxes() for radioButton in self.radioButtons
+                if radioButton.isChecked()}
 
     def getRadioButtonByText(self, text):
         for rb in self.radioButtons:
             if rb.getText() == text:
                 return rb
-
 
 
 class EditableRadioButtons(Widget, Base):
@@ -435,10 +453,8 @@ class EditableRadioButtons(Widget, Base):
         self.radioButtons = []
         # rebuild the button list
         for i, text in enumerate(texts):
-            if 'h' in direction:
-                grid = (0, i)
-            else:
-                grid = (i, 0)
+            grid = (0, i) if 'h' in direction else (i, 0)
+
             button = EditableRadioButton(self, text=text, editable=editables[i], tipText=tipTexts[i],
                                          backgroundText=backgroundTexts[i],
                                          callbackOneditingFinished=False)  #callback=self.callback,
@@ -449,8 +465,8 @@ class EditableRadioButtons(Widget, Base):
             layout.addWidget(button, *grid)
             if objectNames and objectNames[i]:
                 button.radioButton.setObjectName(objectNames[i])
-                button.radioButton.setObjectName('radioButton_' + objectNames[i])
-                button.lineEdit.setObjectName('lineEdit_' + objectNames[i])
+                button.radioButton.setObjectName(f'radioButton_{objectNames[i]}')
+                button.lineEdit.setObjectName(f'lineEdit_{objectNames[i]}')
 
             if icons and icons[i]:
                 thisIcon = icons[i]
@@ -469,7 +485,7 @@ class EditableRadioButtons(Widget, Base):
         if selectedInd is not None:
             try:
                 self.radioButtons[selectedInd].setChecked(True)
-            except:
+            except Exception:
                 getLogger().debug(f'setButtons: could not set selectedInd {selectedInd}')
         elif selected:
             if selected in self.texts:
@@ -487,20 +503,14 @@ class EditableRadioButtons(Widget, Base):
             raise ValueError('radioButton %s not found in the list' % text)
 
     def get(self):
-        texts = []
-        for i in self.radioButtons:
-            if i.isChecked():
-                texts.append(i.text())
+        texts = [i.text() for i in self.radioButtons if i.isChecked()]
         if self.isExclusive:
             return texts[-1] if texts else None
         else:
             return texts
 
     def getIndex(self):
-        ixs = []
-        for i, rb in enumerate(self.radioButtons):
-            if rb.isChecked():
-                ixs.append(i)
+        ixs = [i for i, rb in enumerate(self.radioButtons) if rb.isChecked()]
         if self.isExclusive:
             # if exclusive then one-and-only-one MUST be set
             return ixs[-1] if ixs else 0
@@ -572,7 +582,6 @@ class EditableRadioButtons(Widget, Base):
         return self.setIndex(value)
 
 
-
 def main():
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
@@ -595,7 +604,7 @@ def main():
 
     checkBoxesDict = {
         '_txt1':
-         {'CheckBoxTexts': ['_cb1Txt1', '_cb1Txt2', '_cb1Txt3']},
+            {'CheckBoxTexts': ['_cb1Txt1', '_cb1Txt2', '_cb1Txt3']},
         '_txt2':
             {'CheckBoxTexts': ['_cb2Txt1', '_cb2Txt2', '_cb3Txt3']},
         }
@@ -610,6 +619,7 @@ def main():
     #                          callback=testCall)  # partial(self.assignSelect
     #     buttonGroup.addButton(button)
     from ccpn.ui.gui.widgets.Label import maTex2Pixmap
+
     mathExamples = [
         r'$\sqrt{\frac{1}{N}\sum_{i=0}^N (\alpha_i*\delta_i)^2}$',
         '$\\lambda_{soil}=k_{soil} / C_{soil}$']

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:25 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -55,8 +55,10 @@ class BlankCalculationModel(CalculationModel):
         for collectionPid, groupDf in grouppedByCollectionsPid:
             # build the outputFrame
             outputFrame.loc[collectionPid, sv.COLLECTIONPID] = collectionPid
-            outputFrame.loc[collectionPid, sv.VALUE] = None
-            outputFrame.loc[collectionPid, sv.VALUE_ERR] = None
+            outputFrame.loc[collectionPid, sv.NMRRESIDUEPID] = groupDf[sv.NMRRESIDUEPID].values[-1]
+            for arg in self.modelArgumentNames:
+                outputFrame.loc[collectionPid, arg] = None
+
         return outputFrame
 
     @property
@@ -119,9 +121,10 @@ class BlankFittingModel(FittingModelABC):
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
         ## Keep only one IsotopeCode
         inputData = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
+        inputData[self.ySeriesStepHeader] = inputData[self.PeakProperty]
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
         for collectionId, groupDf in grouppedByCollectionsId:
-            groupDf.sort_values([sv.SERIESSTEP], inplace=True)
+            groupDf.sort_values([self.xSeriesStepHeader], inplace=True)
             minimiser = self.Minimiser()
             params = minimiser.params
             result = MinimiserResult(minimiser, params) #Don't do the fitting. Just return a mock of results as np.nan

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:11 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:28 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import
     SettingsPanelHandler, IOHandler, ExtensionsHandler
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiSettingsPanel as settingsPanel
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import ToolBarPanel, PanelUpdateState
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import ToolBarPanel, PanelUpdateState
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
@@ -102,7 +102,7 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         dataTable = self.project.getByPid(outputDataPid)
         return dataTable
 
-    def getGuiOutputDataFrame(self):
+    def getGuiResultDataFrame(self):
         """Get the SelectedOutputDataTable and transform the raw data to a displayable table for the main widgets.
         """
         dataTable = self.getSelectedOutputDataTable()
@@ -117,14 +117,26 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         ## reset index otherwise you lose the column collectionId
         outDataFrame = dataFrame.groupby(sv.COLLECTIONPID).first().reset_index()
         outDataFrame.set_index(sv.COLLECTIONPID, drop=False, inplace=True)
+
+        # add the rawData as new columns (Transposed from column to row)
+        for ix, ys in dataFrame.groupby(sv.COLLECTIONPID)[[sv.SERIES_STEP_X, sv.SERIES_STEP_Y]]:
+            outDataFrame.loc[ix, ys[sv.SERIES_STEP_X].astype(str).values] = ys[sv.SERIES_STEP_Y].values
+
+        # drop columns that should not be on the Gui. To remove: peak properties (dim, height, ppm etc)
+        toDrop = sv.PeakPropertiesHeaders + [sv._SNR, sv.DIMENSION, sv.ISOTOPECODE, sv.NMRATOMNAME, sv.NMRATOMPID]
+        toDrop += sv.ALL_EXCLUDED
+        outDataFrame.drop(toDrop, axis=1, errors='ignore', inplace=True)
+
         outDataFrame[sv.COLLECTIONID] = outDataFrame[sv.COLLECTIONID].astype(int)
         ## sort by NmrResidueCode if available otherwise by COLLECTIONID
-        if outDataFrame[sv.NMRRESIDUECODE].str.isnumeric().all():
+        if outDataFrame[sv.NMRRESIDUECODE].astype(str).str.isnumeric().all():
             outDataFrame.sort_values(by=sv.NMRRESIDUECODE, key=lambda x: x.astype(int), inplace =True)
         else:
             outDataFrame.sort_values(by=sv.COLLECTIONID, inplace=True)
-        ## apply an ascending UID. This is needed for tables and BarPlotting
+        ## apply an ascending ASHTAG. This is needed for tables and BarPlotting
         outDataFrame[sv.ASHTAG] = np.arange(1, len(outDataFrame)+1)
+        ## put ASHTAG as first header
+        outDataFrame.insert(0, sv.ASHTAG, outDataFrame.pop(sv.ASHTAG))
         return outDataFrame
 
     def getSettings(self, grouped=True) -> dict:
@@ -171,22 +183,38 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     #####################  Widgets callbacks  ###########################
     #####################################################################
 
-    def updateAll(self, refit=False):
+    def updateAll(self, refit=False, rebuildInputData=False):
         """ Update all Gui panels"""
         getLogger().info(f'Updating All ...')
-        backend = self.backendHandler
-        if refit or backend._needsRefitting:
-            getLogger().info(f'{self.className}: Refitting  Input DataTable(s)...')
-            backend.fitInputData()
-        getLogger().info(f'{self.className}: Updating all Gui Panels...')
-        settingsDict = self.settingsPanelHandler.getAllSettings()
+        currentCollections = self.current.collections
+        if rebuildInputData or self.backendHandler._needsRebuildingInputDataTables:
+            self.backendHandler._rebuildInputData()
+            self.backendHandler._needsRebuildingInputDataTables = False
+        if refit or self.backendHandler._needsRefitting:
+            self.backendHandler.fitInputData()
+            self.backendHandler._needsRefitting = False
         for panelName, panel in self.panelHandler.panels.items():
-            panel.updatePanel(**{guiNameSpaces.SETTINGS: settingsDict})
-
+            panel.updatePanel(**{guiNameSpaces.SETTINGS: self.settingsPanelHandler.getAllSettings()})
+        ## make sure all is selected as before the update
+        self.current.collections = []
+        self.current.collections = currentCollections
         #set update done.
         toolbar = self.panelHandler.getToolBarPanel()
         if toolbar:
             toolbar.setUpdateState(PanelUpdateState.DONE)
+
+    def setNeedRefitting(self):
+        self.backendHandler._needsRefitting = True
+        self._setUpdateDetected()
+
+    def setNeedRebuildingInputDataTables(self):
+        self.backendHandler._needsRebuildingInputDataTables = True
+        self._setUpdateDetected()
+
+    def _setUpdateDetected(self):
+        toolbar = self.panelHandler.getToolBarPanel()
+        if toolbar:
+            toolbar.setUpdateState(PanelUpdateState.DETECTED)
 
     def restoreWidgetsState(self, **widgetsState):
         # with self.blockWidgetSignals():
@@ -220,6 +248,8 @@ def _navigateToPeak(guiModule, peak):
 
 def getPeaksFromCollection(collection):
     from ccpn.core.Peak import Peak
+    if collection is None:
+        return
     peaks = set()
     for item in collection.items:
         if isinstance(item, Peak):

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:11 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:28 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,12 +26,13 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 import pyqtgraph as pg
 from PyQt5 import QtCore
 from ccpn.util.Logging import getLogger
+from ccpn.core.lib.Notifiers import Notifier
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 from ccpn.util.Colour import colorSchemeTable, hexToRgb, rgbaRatioToHex, colourNameToHexDict
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import ExperimentAnalysisPlotToolBar
-from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import BarPlotToolBar
+from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget, TICKOPTIONS, AllTicks, MinimalTicks
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_LABELLING
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.Font import getFont
@@ -40,7 +41,7 @@ from ccpn.ui.gui.widgets.Label import Label
 class BarPlotPanel(GuiPanel):
 
     position = 3
-    panelName = 'BarPlotPanel'
+    panelName = guiNameSpaces.BarPlotPanel
 
     def __init__(self, guiModule, *args, **Framekwargs):
         GuiPanel.__init__(self, guiModule,*args , **Framekwargs)
@@ -50,6 +51,7 @@ class BarPlotPanel(GuiPanel):
         self._aboveX = []
         self._belowX = []
         self._untraceableX = []
+        self._errorHeights = {}
         ## Y
         self._aboveY = []
         self._belowY = []
@@ -72,6 +74,10 @@ class BarPlotPanel(GuiPanel):
             self.barGraphWidget.showThresholdLine(True)
             _thresholdValueW.doubleSpinBox.valueChanged.connect(self._updateThresholdValueFromSettings)
 
+        #     current
+        self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
+                                                 callback=self._currentCollectionCallback, onceOnly=True)
+
     def initWidgets(self):
         ## this colour def could go in an higher position as they are same for all possible plots
         colour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
@@ -87,11 +93,13 @@ class BarPlotPanel(GuiPanel):
                                              actionCallback=self._mouseDoubleClickEvent,
                                              selectionCallback=self._mouseSingleClickEvent,
                                              hoverCallback=self._mouseHoverCallbackEvent,
+                                             selectionBoxEnabled = False,
                                              threshouldLine=0.1, grid=(1,0), gridSpan=(1, 2))
         self.barGraphWidget.showThresholdLine(True)
+
         self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._thresholdLineMoved)
         self._setBarGraphWidget()
-        self.toolbar = ExperimentAnalysisPlotToolBar(parent=self, plotItem=self.barGraphWidget,
+        self.toolbar = BarPlotToolBar(parent=self, plotItem=self.barGraphWidget, guiModule=self.guiModule,
                                                      grid=(0, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
         self.currentCollectionLabel = Label(self, text='', grid=(0, 1), hAlign='r',)
 
@@ -217,7 +225,7 @@ class BarPlotPanel(GuiPanel):
 
     def updatePanel(self, *args, **kwargs):
         getLogger().info('Updating  barPlot panel')
-        dataFrame = self.guiModule.getGuiOutputDataFrame()
+        dataFrame = self.guiModule.getGuiResultDataFrame()
         if dataFrame is not None:
             self.plotDataFrame(dataFrame)
         else:
@@ -259,14 +267,27 @@ class BarPlotPanel(GuiPanel):
         self._untraceableBrush = colourNameToHexDict.get(self.untraceableBrushColour, guiNameSpaces.BAR_untracBrushHex)
         self._tresholdLineBrush = colourNameToHexDict.get(self.thresholdBrushColour, guiNameSpaces.BAR_thresholdLineHex)
         self._gradientbrushes = colorSchemeTable.get(self.aboveThresholdBrushColour, []) #in case there is one.
+        index = dataFrame[xColumnName].index
+        # get the errors
+        errorColumn = f'{yColumnName}{sv._ERR}'
+        if errorColumn in dataFrame.columns:
+            xError = index
+            yError = dataFrame[yColumnName].values
+            topError = dataFrame[errorColumn].values
+            self._errorHeights = {'xError': xError.values, 'yError': yError, 'topError': topError}
         ## set ticks for the xAxis. As they Xs are strs, Need to create a dict Index:Value
         ticks = dict(zip(dataFrame[xColumnName].index, dataFrame[xColumnName].values))
         xaxis = self._getAxis('bottom')
-        ##TODO set as an option to use major-minor or show all
-        # setTicks uses a list of 3 dicts. Major, minor, sub minors ticks. (used for when zooming in-out)
-        xaxis.setTicks([list(ticks.items())[9::10], # define steps of 10, show only 10 labels (max zoomed out)
-                        list(ticks.items())[4::5],  # steps of 5
-                        list(ticks.items())[::1]]) # steps of 1, show all labels
+        if self.barGraphWidget._tickOption == MinimalTicks:
+            # setTicks uses a list of 3 dicts. Major, minor, sub minors ticks. (used for when zooming in-out)
+            xaxis.setTicks([list(ticks.items())[9::10], # define steps of 10, show only 10 labels (max zoomed out)
+                            list(ticks.items())[4::5],  # steps of 5
+                            list(ticks.items())[::1]]) # steps of 1, show all labels
+        else:
+            # setTicks show all (equivalent to 1 for each Major, minor or sub minor
+            xaxis.setTicks([list(ticks.items())[::1],
+                            list(ticks.items())[::1],
+                            list(ticks.items())[::1]])
         ## update labels on axes
         self._updateAxisLabels()
         self._plottedDf = dataFrame
@@ -277,9 +298,10 @@ class BarPlotPanel(GuiPanel):
         if df is not None:
             pid = df.loc[ix, sv.COLLECTIONPID]
             collection = self.project.getByPid(pid)
-            peaks = getPeaksFromCollection(collection)
-            self.current.peaks = peaks
-            self.current.collection = collection
+            if self.current.collection != collection:
+                peaks = getPeaksFromCollection(collection)
+                self.current.peaks = peaks
+                self.current.collection = collection
 
     def _mouseDoubleClickEvent(self, x, y):
         from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import _navigateToPeak
@@ -291,11 +313,14 @@ class BarPlotPanel(GuiPanel):
 
     def _mouseHoverCallbackEvent(self, barIndex, x, y):
         if self._plottedDf is not None:
-            posTxt = f'Y:{y:.2f}'
+            posTxt = f'{y:.3f}'
             if barIndex is not None:
                 pid = self._plottedDf.loc[barIndex, sv.COLLECTIONPID]
-                txt = f'{pid} -- {posTxt}'
-                self.currentCollectionLabel.setText(txt)
+                barValue = self._plottedDf.loc[barIndex, self.yColumnName]
+                if barValue:
+                    barValue = f'{barValue:.3f}'
+                    txt = f'{pid} -- {self.yColumnName}:{barValue} -- (Y:{posTxt})'
+                    self.currentCollectionLabel.setText(txt)
             else:
                 self.currentCollectionLabel.clear()
 
@@ -306,7 +331,6 @@ class BarPlotPanel(GuiPanel):
     def plotDataFrame(self, dataFrame):
         """ Plot the given columns of dataframe as bars
          """
-        getLogger().warning('Alpha version of plotting')
         self.barGraphWidget.clear()
         self._updateAxisLabels()
 
@@ -324,6 +348,8 @@ class BarPlotPanel(GuiPanel):
                                        aboveY=self._aboveY,
                                        belowY=self._belowY,
                                        disappearedY=self._untraceableY,
+                                       ## errors
+                                       errorHeight = self._errorHeights,
                                        ## Objects
                                        aboveObjects=self._aboveObjects,
                                        belowObjects=self._belowObjects,
@@ -335,3 +361,21 @@ class BarPlotPanel(GuiPanel):
                                        disappearedBrush=self._untraceableBrush,
                                        )
         self.barGraphWidget.xLine.setPen(self._tresholdLineBrush)
+
+    def toggleErrorBars(self, setVisible=True):
+        if self.barGraphWidget.errorBars:
+            self.barGraphWidget.errorBars.setVisible(setVisible)
+
+    def _currentCollectionCallback(self, *args):
+        # select collection on table.
+        backendHandler = self.guiModule.backendHandler
+
+        df = self.guiModule.getGuiResultDataFrame()
+        if df is None:
+            return
+        pids = [co.pid for co in self.current.collections]
+        filtered = df.getByHeader(sv.COLLECTIONPID, pids)
+        if filtered.empty:
+            return
+        barNumbers = filtered[sv.ASHTAG].values
+        self.barGraphWidget._selectBarNumbers(selected=barNumbers)

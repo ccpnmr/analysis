@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:26 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -46,6 +46,7 @@ class SeriesFrameBC(TableFrame):
     """
     SERIESFRAMENAME     = ''
     SERIESFRAMETYPE     = ''
+    _rawDataHeaders     = []
 
     def getRowByUID(self, uid):
         self.set_index(sv._ROW_UID, inplace=True, drop=False)
@@ -84,6 +85,7 @@ class SeriesFrameBC(TableFrame):
         self[sv.NMRRESIDUECODE] = self[sv.NMRRESIDUECODE].astype(str).apply(lambda x: x.replace('.0', ''))
         self._joinTwoColumnsAsStr(sv.NMRRESIDUECODE, sv.NMRRESIDUETYPE, newColumName=sv.NMRRESIDUECODETYPE, separator='-')
 
+
 class InputSeriesFrameBC(SeriesFrameBC):
     """
     A TableData used for the Series ExperimentsAnalysis, such as ChemicalShiftMapping or Relaxation I/O.
@@ -115,6 +117,7 @@ class InputSeriesFrameBC(SeriesFrameBC):
             - spectrumPid       : str,   value optional
             - peakPid           : str,   value optional
             - nmrAtomPid        : str,   value optional
+            - nmrResiduePid     : str,   value optional
             - peakCollectionPid : str,   value optional
 
     """
@@ -179,36 +182,59 @@ class InputSeriesFrameBC(SeriesFrameBC):
         self.loc[-1, columns] = None # None value, because you must give a value when creating columns after init.
         self.dropna(inplace=True)    # remove  None values that were created as a temporary spaceHolder
 
-    def _getCollectionDict4SpectrumGroup(self, spectrumGroup):
-        """ _Internal. build the collection dict, so we know if a peak is in a collection.
-        Note, this routine exists because peak.collection is extremely slow and here we also filter-out peaks
-        which are not  in the spectrumGroup of interest."""
+    @staticmethod
+    def _getCollectionDict4SpectrumGroup(spectrumGroup, parentCollection=None):
+        """
+        Internal.
+        Build a collection dict applying several filter of interest.
+            - Filter collections which are subset of the parentCollection if parentCollection is given,
+              else skip.
+            - Filter peaks in the collection Items if their spectra are in the given spectrumGroup argument
+            - Note, you cannot simply use peak.collections (which is also extremely slow)
+        :param spectrumGroup:
+        :param parentCollection: Collection or None, the inputCollection in the backendHandler. Top collection containing subsets of peakCollections
+        :return: dict {peak:[collection,...]}
+        """
         collectionDict = defaultdict(list)
-        for col in spectrumGroup.project.collections:
-            for item in col.items:
+        if parentCollection is not None:
+            parentCollectionItems = parentCollection.items
+        else:
+            getLogger().warning('Parent Collection not found. Skipping... ')
+            parentCollectionItems = []
+        for subCollection in parentCollectionItems:
+            for item in subCollection.items:
                 if isinstance(item, Peak):
                     if item.spectrum in spectrumGroup.spectra:
-                        collectionDict[item].append(col)
+                        collectionDict[item].append(subCollection)
         return collectionDict
 
-    def buildFromSpectrumGroup(self, spectrumGroup, peakListIndices=None):
+    def buildFromSpectrumGroup(self, spectrumGroup, parentCollection=None, peakListIndices=None, filteredPeaks=None):
         """
         :param spectrumGroup: A core object containg the spectra ans series information
         :param peakListIndices: list of int, same length of spectra. Define which peakList index to use.
                                If None, use -1 (last created) as default for all spectra
+        :param filteredPeaks: Use only this subset of peaks. Used when a peak has changed, to avoid rebuild all.
         :return: None
         """
+        self.clear()
         # build the frame
         if self.columns.empty:
             self._buildColumnHeaders()
         spectra = spectrumGroup.spectra
         if peakListIndices is None or len(peakListIndices) != len(spectra):
             peakListIndices = [-1] * len(spectra)
-        collectionDict = self._getCollectionDict4SpectrumGroup(spectrumGroup)
+        collectionDict = InputSeriesFrameBC._getCollectionDict4SpectrumGroup(spectrumGroup,
+                                                                             parentCollection=parentCollection)
         i = 1
         while True: ## This because we don't know how many rows we need
             for spectrum, peakListIndex in zip(spectra, peakListIndices):
-                for pk in spectrum.peakLists[peakListIndex].peaks:
+                if filteredPeaks is not None:
+                    peaks = [pk for pk in spectrum.peakLists[peakListIndex].peaks if pk in filteredPeaks]
+                else:
+                    peaks = spectrum.peakLists[peakListIndex].peaks
+                for pk in peaks:
+                    if not pk in collectionDict:
+                        continue
                     for dimension in spectrum.dimensions:
                         try:
                             ## set the unique UID
@@ -216,7 +242,7 @@ class InputSeriesFrameBC(SeriesFrameBC):
                             ## build the spectrum Property Columns
                             self.loc[i, sv.DIMENSION] = dimension
                             self.loc[i, sv.ISOTOPECODE] = spectrum.getByDimensions(sv.ISOTOPECODES, [dimension])[0]
-                            self.loc[i, sv.SERIESSTEP] = spectrum.getSeriesItem(spectrumGroup)
+                            self.loc[i, sv.SERIES_STEP_X] = spectrum.getSeriesItem(spectrumGroup)
                             self.loc[i, sv.SERIESUNIT] = spectrumGroup.seriesUnits
                             self.loc[i, sv.SPECTRUMPID] = spectrum.pid
                             ## build the peak Property Columns
@@ -224,7 +250,7 @@ class InputSeriesFrameBC(SeriesFrameBC):
                             for collection in collections:
                                 self.loc[i, sv.COLLECTIONID] = collection.uniqueId
                                 self.loc[i, sv.COLLECTIONPID] = collection.pid
-                            for peakProperty in [sv._HEIGHT, sv._VOLUME]:
+                            for peakProperty in [sv._HEIGHT, sv._VOLUME, sv._SNR]:
                                 self.loc[i, peakProperty] = getattr(pk, peakProperty, None)
                             self.loc[i, sv._PPMPOSITION] = pk.getByDimensions(sv._PPMPOSITIONS, [dimension])[0]
                             self.loc[i, sv._LINEWIDTH] = pk.getByDimensions(sv._LINEWIDTHS, [dimension])[0]
@@ -237,6 +263,7 @@ class InputSeriesFrameBC(SeriesFrameBC):
                                 self.loc[i, sv.NMRRESIDUETYPE] = nmrAtom.nmrResidue.residueType
                                 self.loc[i, sv.NMRATOMNAME] = nmrAtom.name
                                 self.loc[i, sv.NMRATOMPID] = nmrAtom.pid
+                                self.loc[i, sv.NMRRESIDUEPID] = nmrAtom.nmrResidue.pid
                             for excludedFlag in sv.EXCLUDED_OBJECTS:
                                 self.loc[i, excludedFlag] = False
                             i += 1
@@ -294,6 +321,7 @@ class CSMOutputFrame(SeriesFrameBC):
         - collectionId      : int,
         - collectionPid     : str,
         - peakPid           : str,
+        - nmrResiduePid     : str,
         # Group with calculation/calculated values
         - seriesUnit        : str,
         - seriesStep        : float,
@@ -326,14 +354,15 @@ class CSMOutputFrame(SeriesFrameBC):
                     sv._ROW_UID,
                     sv.COLLECTIONID,
                     sv.COLLECTIONPID,
+                    sv.NMRRESIDUEPID,
                     sv.PEAKPID,
                     sv.NMRCHAINNAME,
                     sv.NMRRESIDUECODE,
                     sv.NMRRESIDUETYPE,
                     sv.NMRATOMNAMES,
                     sv.SERIESUNIT,
-                    sv.SERIESSTEP,
-                    sv.SERIESSTEPVALUE,
+                    sv.SERIES_STEP_X,
+                    sv.SERIES_STEP_Y,
                     sv.DELTA_DELTA,
                     sv.KD,
                     sv.KD_ERR,

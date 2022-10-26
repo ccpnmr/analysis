@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:26 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -103,21 +103,67 @@ class FollowNearestPeak(FollowPeakAbc):
         return idx
 
 
+class _FollowByMinimalShiftMapping(FollowPeakAbc):
+    """
+    INTERNAL. under development
+    """
+    name = 'MinimalShiftMapping'
+    info = 'Use the Minimal Shift Mapping to create clusters'
+
+
+    def findMatches(self, originPeaks, targetPeaks):
+        """
+        INTERNAL. under development """
+        getLogger().warn('Under development. Do not use yet.')
+        from scipy.spatial.distance import cdist
+        from scipy.optimize import linear_sum_assignment
+        originPeaks = np.array(originPeaks)
+        targetPeaks = np.array(targetPeaks)
+        originPeakPos = [pk.position for pk in originPeaks]
+        targetPeakPos = [pk.position for pk in targetPeaks]
+        originPeakPos = np.array(originPeakPos)
+        targetPeakPos = np.array(targetPeakPos)
+        Vs= {'1H':1, '13C':0.25, '15N':0.142} # alpha factors
+        ## Compute distance between each pair of the two PeakLists
+        distanceMatrix = cdist(originPeakPos, targetPeakPos, metric='seuclidean', V=[0.142,1])
+        originIndexes, targetIndexes = linear_sum_assignment(distanceMatrix)
+        originPeaks = originPeaks[originIndexes]
+        targetPeaks = targetPeaks[targetIndexes]
+        return list(zip(originPeaks, targetPeaks))
+
 class FollowSameAssignmentPeak(FollowPeakAbc):
 
-    name = 'Same assignment'
+    name = 'Same Assignment'
     info = 'Find peaks assigned to the same NmrAtoms'
 
     def getMatchedIndex(self, originPosition, targets) -> int:
-        raise RuntimeError('NYI')
+        raise RuntimeError('Not in use for this Subclass')
 
     def getMatchedPeak(self, originPeak, targetPeaks):
-        raise RuntimeError('NYI')
+        matched  = []
+        for peak in targetPeaks:
+            if peak.assignedNmrAtoms == originPeak.assignedNmrAtoms:
+                matched.append(peak)
+        return matched
 
     def getCollectionPeaks(self, originPeak, targetPeakLists:list):
-        raise RuntimeError('NYI')
+        '''
+        :param originPeak: iterable, (1D array, list, tuple) containing items to be matched to the targets
+        :param targetPeakLists:  list of PeakLists.
+        :return: a list of matchedPeaks
+        '''
+
+        matched = []
+        for peakList in targetPeakLists:
+            if isinstance(peakList, PeakList) and len(peakList.peaks)>0:
+                sameAssignmentPeaks = self.getMatchedPeak(originPeak, peakList.peaks)
+                if len(sameAssignmentPeaks)>0:
+                    matched.append(sameAssignmentPeaks[0])
+        return matched
+
+
 
 AVAILABLEFOLLOWPEAKS = {
                     FollowNearestPeak.name: FollowNearestPeak,
-                    # FollowSameAssignmentPeak.name: FollowSameAssignmentPeak
+                    FollowSameAssignmentPeak.name: FollowSameAssignmentPeak
                     }

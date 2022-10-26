@@ -3,6 +3,7 @@ Generate PulldownListCompoundWidget for project objects;
 set callback's on creation, deletion and rename
 
 """
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -17,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:13 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:30 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,7 +30,6 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 #=========================================================================================
 
 import sys
-
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 
@@ -92,7 +92,7 @@ class _PulldownABC(PulldownListCompoundWidget):
         # class needs some attributes to be checked and defined before super()
 
         if self._attributeName is None:
-            raise RuntimeError('%s: _attributeName needs to be defined for proper functioning' % self.__class__.__name__)
+            raise RuntimeError(f'{self.__class__.__name__}: _attributeName needs to be defined for proper functioning')
 
         self.mainWindow = mainWindow
         if self.mainWindow:
@@ -111,7 +111,7 @@ class _PulldownABC(PulldownListCompoundWidget):
         self._userCallback = callback
 
         if labelText is None:
-            labelText = self._className + ':'
+            labelText = f'{self._className}'
 
         if setCurrent and self._currentAttributeName is None:
             raise ValueError('setCurrent option only valid if _currentAttributeName is defined for class')
@@ -143,8 +143,8 @@ class _PulldownABC(PulldownListCompoundWidget):
                 raise ValueError('default parameter: expected int or "%s" object, got "%s"'
                                  % (self._klass.className, type(default)))
 
-            if default is not None:
-                self.select(default, blockSignals=True)
+        if default is not None:
+            self.select(default, blockSignals=True)
 
         # add a notifier to update the pulldown list
         if project:
@@ -152,8 +152,6 @@ class _PulldownABC(PulldownListCompoundWidget):
                                        [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
                                        self._className,
                                        self._updatePulldownList)
-            self._notifier1.setDebug(DEBUG)
-
             self._notifier2 = None
             if self._followCurrent:
                 self._notifier2 = Notifier(self.current,
@@ -161,7 +159,9 @@ class _PulldownABC(PulldownListCompoundWidget):
                                            targetName=self._currentAttributeName,
                                            callback=self._updateFromCurrent
                                            )
-                self._notifier2.setDebug(DEBUG)
+
+        else:
+            self._notifier1 = self._notifier2 = None
 
     @property
     def textList(self):
@@ -172,11 +172,8 @@ class _PulldownABC(PulldownListCompoundWidget):
     def getSelectedObject(self):
         """Return the selected object, or None if not selected or empty
         """
-        obj = None
         value = self.getText()
-        if value != SELECT and len(value) > 0:
-            obj = self.value2object(value)
-        return obj
+        return self.value2object(value) if value and value != SELECT else None
 
     def getObjects(self):
         """Return a list of objects from the pulldown list
@@ -187,26 +184,18 @@ class _PulldownABC(PulldownListCompoundWidget):
         """Return relevant attribute from current if _currentAttributeName is defined
         """
         if self._currentAttributeName is None:
-            raise RuntimeError('%s: _currentAttributeName needs to be defined for proper functioning' % self.__class__.__name__)
-        obj = None
+            raise RuntimeError(f'{self.__class__.__name__}: _currentAttributeName needs to be defined for proper functioning')
+
         _tmp = getattr(self.current, self._currentAttributeName)
-        if _tmp is not None and len(_tmp) > 0:
-            obj = _tmp[0]
-        #sys.stderr.write('>>> currentObject:\n', obj)
-        return obj
+        return _tmp[0] if _tmp else None
 
     def getFirstItemText(self):
-        result = None
-        texts = [txt for txt in self.pulldownList.texts if txt != SELECT]
-        if texts:
-            result = texts[0]
-        return result
+        return texts[0] if (texts := [txt for txt in self.pulldownList.texts if txt != SELECT]) else None
 
     def selectFirstItem(self):
         """Set the table to the first item.
         """
-        firstItemName = self.getFirstItemText()
-        if firstItemName:
+        if firstItemName := self.getFirstItemText():
             self.select(firstItemName)
 
     def object2value(self, obj):
@@ -214,8 +203,7 @@ class _PulldownABC(PulldownListCompoundWidget):
         """
         if obj is None:
             return str(None)
-        value = obj.id if self._useIds else obj.pid
-        return value
+        return obj.id if self._useIds else obj.pid
 
     def value2object(self, value):
         """Convert value to object, using pid or construct a pid from id
@@ -224,9 +212,8 @@ class _PulldownABC(PulldownListCompoundWidget):
         if value is None or len(value) == 0 or value == SELECT:
             return None
         if self._useIds:
-            value = self._shortClassName + ':' + value
-        obj = self.project.getByPid(value)
-        return obj
+            value = f'{self._shortClassName}:{value}'
+        return self.project.getByPid(value)
 
     def update(self):
         """Public function to update
@@ -239,15 +226,9 @@ class _PulldownABC(PulldownListCompoundWidget):
     def unRegister(self):
         """Unregister the notifiers; needs to be called when disgarding a instance
         """
-        try:
-            if self._notifier1 is not None:
-                self._notifier1.unRegister()
-                del (self._notifier1)
-            if self._notifier2 is not None:
-                self._notifier2.unRegister()
-                del (self._notifier2)
-        except:
-            pass
+        for ntf in (self._notifier1, self._notifier2):
+            if ntf:
+                ntf.unRegister()
 
     #==============================================================================================
     # Implementation
@@ -256,28 +237,27 @@ class _PulldownABC(PulldownListCompoundWidget):
     def _getPids(self) -> list:
         """Return a list of pids defined by 'self._attributeName' from project.
         """
-        if self.project:
-            pids = [self.object2value(obj) for obj in getattr(self.project, self._attributeName)]
-            if self._filterFunction:
-                pids = self._filterFunction(pids)
-            if self._followCurrent:
-                # add current if it is not part of the pids
-                current = self.getCurrentObject()
-                if current is not None:
-                    currentPid = self.object2value(current)
-                    if currentPid not in pids:
-                        pids = [currentPid] + pids
-                if current is None and not self._showSelectName:
-                    pids = [UNDEFINED] + pids
+        if not self.project:
+            return []
 
-            if self._showSelectName:
-                if self._selectNoneText:
-                    select = [self._selectNoneText]
-                else:
-                    select = [SELECT]
-                pids = select + pids
-            return pids
-        return []
+        pids = [self.object2value(obj) for obj in getattr(self.project, self._attributeName)]
+        if self._filterFunction:
+            pids = self._filterFunction(pids)
+        if self._followCurrent:
+            # add current if it is not part of the pids
+            current = self.getCurrentObject()
+            if current is not None:
+                currentPid = self.object2value(current)
+                if currentPid not in pids:
+                    pids = [currentPid] + pids
+            if current is None and not self._showSelectName:
+                pids = [UNDEFINED] + pids
+
+        if self._showSelectName:
+            select = [self._selectNoneText] if self._selectNoneText else [SELECT]
+            pids = select + pids
+
+        return pids
 
     def _updatePulldownList(self, callbackDict=None):
         """Callback to update the pulldown list; triggered by object creation, deletion or renaming
@@ -301,7 +281,7 @@ class _PulldownABC(PulldownListCompoundWidget):
 
         self.modifyTexts(pids)
 
-        # if the pulldownlist has updated then emit a changed notifier; assumes that the texts are unique
+        # if the pulldown-list has updated then emit a changed notifier; assumes that the texts are unique
         newPulldownItem = self.getText()
         if lastPulldownItem != newPulldownItem:
             if newName:
@@ -341,7 +321,7 @@ class _PulldownABC(PulldownListCompoundWidget):
         if DEBUG: sys.stderr.write('  < %s._callback() selecting pulldown\n' % self)
 
     def __str__(self):
-        return '<%s>' % self.__class__.__name__
+        return f'<{self.__class__.__name__}>'
 
     @staticmethod
     def onDestroyed(widget):

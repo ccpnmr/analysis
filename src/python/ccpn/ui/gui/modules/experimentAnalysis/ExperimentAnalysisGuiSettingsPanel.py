@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:11 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:28 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -47,10 +47,11 @@ import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVa
 from ccpn.ui.gui.widgets.HLine import LabeledHLine, HLine
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import PanelUpdateState
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import PanelUpdateState
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.ui.gui.widgets.SettingsWidgets import ALL, UseCurrent
+from ccpn.ui.gui.widgets.BarGraphWidget import TICKOPTIONS
 
 SettingsWidgeMinimumWidths =  (180, 180, 180)
 SettingsWidgetFixedWidths = (200, 350, 350)
@@ -106,6 +107,11 @@ class GuiSettingPanel(Frame):
         self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
         Spacer(self, 0, 2, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                grid=(1, 0), gridSpan=(1, 1))
+        self.postInitWidgets()
+
+    def postInitWidgets(self):
+        """ Override to apply preselection of widgets after creation"""
+        pass
 
     def getWidget(self, name):
         if self._moduleSettingsWidget is not None:
@@ -163,7 +169,7 @@ class GuiSettingPanel(Frame):
             'thresholdValue' : ''
             }
         return dd
-        
+
 
 TABPOS = 0
 ## Make a default tab ordering as they are added to this file.
@@ -190,27 +196,75 @@ class GuiInputDataPanel(GuiSettingPanel):
         """ Define the widgets in a dict."""
         backend = self.guiModule.backendHandler
         self.widgetDefinitions = od((
-            (guiNameSpaces.WidgetVarName_SpectrumGroupsSeparator,
-             {'label': guiNameSpaces.Label_SpectrumGroups,
+
+            (guiNameSpaces.WidgetVarName_GeneralSetupSeparator,
+             {'label': guiNameSpaces.Label_GeneralSetup,
                                  'type': LabeledHLine,
-                                 'kwds': {'text': guiNameSpaces.Label_SpectrumGroups,
-                                          # 'height': 30,
+                                 'kwds': {'text': guiNameSpaces.Label_GeneralSetup,
                                           'colour':DividerColour,
                                           'gridSpan':(1,2),
-                                          'tipText': guiNameSpaces.TipText_SpectrumGroupsSeparator}}),
+                                          'tipText': guiNameSpaces.TipText_GeneralSetup}}),
+
+
+            (guiNameSpaces.WidgetVarName_CreateSGroup,
+             {'label': guiNameSpaces.Label_CreateSGroup,
+                                 'tipText': guiNameSpaces.TipText_CreateSGroup,
+                                 'callBack': self._createSpectrumGroupCallback,
+                                 'type': compoundWidget.ButtonCompoundWidget,
+                                 '_init': None,
+                                 'kwds': {'labelText': guiNameSpaces.Label_CreateSGroup,
+                                           'text': 'Create ...',  # this is the Button name
+                                           'hAlign': 'left',
+                                           'tipText': guiNameSpaces.TipText_CreateSGroup,
+                                           'fixedWidths': SettingsWidgetFixedWidths}}),
             (guiNameSpaces.WidgetVarName_SpectrumGroupsSelection,
              {'label':  guiNameSpaces.Label_SelectSpectrumGroups,
                                 'tipText': guiNameSpaces.TipText_SpectrumGroupSelectionWidget,
                                 'callBack': None,
                                 'type': settingWidgets.SpectrumGroupSelectionWidget,
+                                'postInit': self._setFixedHeightPostInit,
                                 'kwds': {
                                         'labelText': guiNameSpaces.Label_SelectSpectrumGroups,
                                         'tipText': guiNameSpaces.TipText_SpectrumGroupSelectionWidget,
+                                        'pulldownCallback': self._addSpectrumGroupToBackend,
+                                        'objectWidgetChangedCallback': self._addSpectrumGroupToBackend,
                                         'displayText': [],
                                         'defaults': [],
                                         'standardListItems':[],
                                         'objectName': guiNameSpaces.WidgetVarName_SpectrumGroupsSelection,
                                         'fixedWidths': SettingsWidgetFixedWidths}, }),
+            (guiNameSpaces.WidgetVarName_SetupCollection,
+             {'label': guiNameSpaces.Label_SetupCollection,
+              'tipText': guiNameSpaces.TipText_SetupCollection,
+              'callBack': self._createInputCollectionCallback,
+              'type': compoundWidget.ButtonCompoundWidget,
+              '_init': None,
+              'kwds': {'labelText': guiNameSpaces.Label_SetupCollection,
+                       'text': 'Setup ...',  # this is the Button name
+                       'hAlign': 'left',
+                       'tipText': guiNameSpaces.TipText_SetupCollection,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+
+            (guiNameSpaces.WidgetVarName_InputCollectionSelection,
+             {'label': guiNameSpaces.Label_InputCollectionSelection,
+              'tipText': guiNameSpaces.TipText_InputCollectionSelection,
+              'type': objectPulldowns.CollectionPulldown,
+              'kwds': {'labelText': guiNameSpaces.Label_InputCollectionSelection,
+                       'tipText': guiNameSpaces.TipText_InputCollectionSelection,
+                       'filterFunction': self._filterInputCollections,
+                       'callback': self._addInputCollectionCallback,
+                       'showSelectName': True,
+                       'objectName': guiNameSpaces.WidgetVarName_InputCollectionSelection,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+            (guiNameSpaces.WidgetVarName_DataTableSeparator,
+             {'label': guiNameSpaces.Label_DataTables,
+              'type': LabeledHLine,
+              'kwds': {'text': guiNameSpaces.Label_DataTables,
+                       # 'height': 30,
+                       'gridSpan': (1, 2),
+                       'colour': DividerColour,
+                       'tipText': guiNameSpaces.TipText_DataTableSeparator}}),
+
             (guiNameSpaces.WidgetVarName_DataTableName,
              {'label': guiNameSpaces.Label_InputDataTableName,
                                 'tipText': guiNameSpaces.TipText_dataTableNameSelectionWidget,
@@ -233,18 +287,12 @@ class GuiInputDataPanel(GuiSettingPanel):
                                          'hAlign': 'left',
                                          'tipText': guiNameSpaces.TipText_createInputdataTableWidget,
                                          'fixedWidths': SettingsWidgetFixedWidths}}),
-            (guiNameSpaces.WidgetVarName_DataTableSeparator,
-             {'label': guiNameSpaces.Label_DataTables,
-                                 'type': LabeledHLine,
-                                 'kwds': {'text':guiNameSpaces.Label_DataTables,
-                                          # 'height': 30,
-                                          'gridSpan':(1,2),
-                                          'colour': DividerColour,
-                                          'tipText': guiNameSpaces.TipText_DataTableSeparator}}),
+
             (guiNameSpaces.WidgetVarName_DataTablesSelection,
              {'label': guiNameSpaces.Label_SelectDataTable,
               'tipText': guiNameSpaces.TipText_DataTableSelection,
               'type': settingWidgets._SeriesInputDataTableSelectionWidget,
+              'postInit': self._setFixedHeightPostInit,
               'kwds': {
                   'objectWidgetChangedCallback':self._addInputDataCallback,
                   'labelText': guiNameSpaces.Label_SelectDataTable,
@@ -290,6 +338,7 @@ class GuiInputDataPanel(GuiSettingPanel):
             (guiNameSpaces.WidgetVarName_OutputDataTablesSelection,
              {'label': guiNameSpaces.Label_SelectOutputDataTable,
               'tipText': guiNameSpaces.TipText_OutputDataTableSelection,
+              'callBack': self._resultDataTablePulldownCallback,
               'type': objectPulldowns.DataTablePulldown,
               'kwds': {'labelText': guiNameSpaces.Label_SelectOutputDataTable,
                        'tipText': guiNameSpaces.TipText_OutputDataTableSelection,
@@ -299,6 +348,11 @@ class GuiInputDataPanel(GuiSettingPanel):
                        'fixedWidths': SettingsWidgetFixedWidths}}),
             ))
         return self.widgetDefinitions
+
+    def _setFixedHeightPostInit(self, widget, *args):
+        widget.listWidget.setFixedHeight(50)
+        widget.setMaximumWidths(SettingsWidgetFixedWidths)
+        widget.getLayout().setAlignment(QtCore.Qt.AlignTop)
 
     def _addInputDataCallback(self, *args):
 
@@ -314,6 +368,52 @@ class GuiInputDataPanel(GuiSettingPanel):
                 backend.addInputDataTable(obj)
                 getLogger().info(f'{self.guiModule.className}:{self.tabName}. {obj} added to inputDataTables')
 
+    def _createInputCollectionCallback(self):
+        """ Show the relevant Popup"""
+        popup = self.guiModule.application.showPeakCollectionsPopup()
+        if popup is not None:
+            topCollection = popup._topCollection
+            if topCollection is not None:
+                widget = self.getWidget(guiNameSpaces.WidgetVarName_InputCollectionSelection)
+                widget.update()
+                if widget is not None:
+                    widget.select(topCollection.pid)
+
+    def _createSpectrumGroupCallback(self):
+        """ Show the relevant Popup """
+        from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
+        sge = SpectrumGroupEditor(parent=self, mainWindow=self.guiModule.mainWindow, editMode=False)
+        sge.exec_()
+        sg = sge.obj
+        if sg is not None:
+            # add automatically to input
+            sgSelectionWidget = self.getWidget(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection)
+            sgSelectionWidget.updatePulldown()
+            if sgSelectionWidget is not None:
+                sgSelectionWidget.select(sg.pid)
+
+    def _addInputCollectionCallback(self, *args):
+        """Add Input Collection to backend  """
+        backend = self.guiModule.backendHandler
+        pid = self.getSettingsAsDict().get(guiNameSpaces.WidgetVarName_InputCollectionSelection)
+        obj = self.guiModule.project.getByPid(pid)
+        if obj:
+            backend.inputCollection = obj
+
+    def _addSpectrumGroupToBackend(self, *args):
+
+        backend = self.guiModule.backendHandler
+        sgPids = self.getSettingsAsDict().get(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection, [])
+        if not sgPids:
+            self.guiModule.backendHandler.clearInputDataTables()
+            getLogger().info(f'{self.guiModule.className}:{self.tabName}. Cleaned inputSpectrumGroups')
+            return
+        for pid in sgPids:
+            obj = self.guiModule.project.getByPid(pid)
+            if obj:
+                backend.addInputSpectrumGroup(obj)
+                getLogger().info(f'{self.guiModule.className}:{self.tabName}. {obj} added to InputSpectrumGroups')
+
     def _fitAndFecthOutputData(self, *args):
         getLogger().info('Starting fit')
         backend = self.guiModule.backendHandler
@@ -322,16 +422,25 @@ class GuiInputDataPanel(GuiSettingPanel):
         if len(backend.inputDataTables) == 0:
             dataTablePids = self.getSettingsAsDict().get(guiNameSpaces.WidgetVarName_DataTablesSelection, [])
             if len(dataTablePids) == 0:
-                getLogger().warning('Cannot create any output DataTable. Select an input DataTable first.')
+                msg = 'Cannot create any output DataTable. Select/add an input DataTable first.'
+                getLogger().warning(msg)
+                showWarning('Missing InputData', msg)
+                return
             for pid in dataTablePids:
                 obj = self.guiModule.project.getByPid(pid)
                 if obj:
                     backend.addInputDataTable(obj)
-        backend.fitInputData()
+
+        outputDataTable = backend.fitInputData()
         outputPulldown = self.getWidget(guiNameSpaces.WidgetVarName_OutputDataTablesSelection)
-        if outputPulldown:
+        if outputPulldown and outputDataTable is not None:
             outputPulldown.update() #there seems to be a bug on pulldown not updating straight-away
-            outputPulldown.select(name)
+            outputPulldown.select(outputDataTable.pid)
+
+        # preselect the NmrResidue code if available in the bar graph
+        appearancePanel = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
+        appearancePanel._preselectDefaultXaxisBarGraph()
+
         self.guiModule.updateAll()
 
     def _filterOutputDataOnPulldown(self, pids, *args):
@@ -344,6 +453,19 @@ class GuiInputDataPanel(GuiSettingPanel):
         pids = self.guiModule.project.getPidsByObjects(filteredDataTables)
         return pids
 
+    def _resultDataTablePulldownCallback(self, *args):
+        """Callback upon widget selection """
+        self.guiModule.updateAll()
+
+    def _filterInputCollections(self, pids, *args):
+        """ Add collections only if contain a subset of other collections. Avoid massive lists! """
+        collections = self.guiModule.project.getByPids(pids)
+        filteredCollectionPids = []
+        for collection in collections:
+            types = [type(item) for item in collection.items]
+            if type(collection) in types:
+                filteredCollectionPids.append(collection.pid)
+        return filteredCollectionPids
 
     def _limitSelectionOnInputData(self):
         "Allow only one selection on SpectrumGroups and DataTable. "
@@ -356,7 +478,7 @@ class GuiInputDataPanel(GuiSettingPanel):
             dtSelectionWidget.setMaximumItemSelectionCount(1)
 
     def _createInputDataTableCallback(self, *args):
-        """ """
+        """ Create InputDataTable from widget Callback. """
         settingsPanelHandler = self.guiModule.settingsPanelHandler
         inputSettings = settingsPanelHandler.getInputDataSettings()
         sgPids = inputSettings.get(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection, [None])
@@ -425,7 +547,7 @@ class GuiCalculationPanel(GuiSettingPanel):
              {'label': guiNameSpaces.Label_CalculationOptions,
               'type': compoundWidget.RadioButtonsCompoundWidget,
               'postInit': None,
-              'callBack': self._commonCallback,
+              'callBack': self._calculationModeChanged,
               'kwds': {'labelText': guiNameSpaces.Label_CalculationOptions,
                        'hAlign': 'l',
                        'tipText': '',
@@ -500,7 +622,7 @@ class GuiCalculationPanel(GuiSettingPanel):
               }}),
         ))
         self.widgetDefinitions.update(calculationWidgetDefinitions)
-        self.widgetDefinitions.update(filteringWidgetDefinitions)
+        # self.widgetDefinitions.update(filteringWidgetDefinitions)
 
         return self.widgetDefinitions
 
@@ -517,8 +639,20 @@ class GuiCalculationPanel(GuiSettingPanel):
         getLogger().info('_setCalculationOptionsToBackend: NIY...')
         pass
 
+    def _calculationModeChanged(self, *args):
+        """Triggered after a change in the Calculation widget.
+         Auto-set the BarGraph to show the first Argument Result based on the model"""
+        self._commonCallback(*args)
+        appearancePanel = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
+        yAxisWidget = appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
+        backend = self.guiModule.backendHandler
+        currentCalculationModel = backend.currentCalculationModel
+        if currentCalculationModel is not None and currentCalculationModel.ModelName != sv.BLANKMODELNAME:
+            firstArg, *_ = currentCalculationModel.modelArgumentNames or [None]
+            if yAxisWidget:
+                yAxisWidget.select(firstArg)
+
     def _commonCallback(self, *args):
-        print('setting callback')
         calculationSettings = self.getSettingsAsDict()
         selectedCalcPeakProperty = calculationSettings.get(guiNameSpaces.WidgetVarName_CalcPeakProperty, None)
 
@@ -592,6 +726,7 @@ class GuiFittingPanel(GuiSettingPanel):
         tipTexts_ddFittingModels = [model.FullDescription for model in models]
         modelNames = [model.ModelName for model in models]
         extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddFittingModels]
+        enabledModels = [model.isEnabled for model in models]
         settingsDict = od((
             (guiNameSpaces.WidgetVarName_FittingSeparator,
              {'label': guiNameSpaces.Label_FittingSeparator,
@@ -605,7 +740,7 @@ class GuiFittingPanel(GuiSettingPanel):
              {'label': guiNameSpaces.Label_FittingModel,
               'type': compoundWidget.RadioButtonsCompoundWidget,
               'postInit': None,
-              'callBack': self._commonCallback,
+              'callBack': self._fittingModeChanged,
               'tipText': guiNameSpaces.TipText_FittingModel,
               'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_FittingModel,
@@ -614,7 +749,7 @@ class GuiFittingPanel(GuiSettingPanel):
                        'compoundKwds': {'texts': modelNames,
                                         'extraLabels': extraLabels_ddFittingModels,
                                         'tipTexts': tipTexts_ddFittingModels,
-
+                                        'enabledTexts': enabledModels,
                                         'direction': 'v',
                                         'tipText': '',
                                         'hAlign': 'l',
@@ -628,6 +763,11 @@ class GuiFittingPanel(GuiSettingPanel):
         """ Update FittingModel Settings at Backend"""
         self._setFittingSettingToBackend()
         super()._commonCallback(self, *args)
+
+    def _fittingModeChanged(self, *args):
+        """Triggered after a change in the fitting widget.
+         Auto-set the BarGraph Y widget to show the first Argument Result based on the model"""
+        self._commonCallback(*args)
 
     def _setFittingSettingToBackend(self):
         """ Update the backend """
@@ -674,12 +814,30 @@ class AppearancePanel(GuiSettingPanel):
               'enabled': True,
               '_init': None,
               'type': settingWidgets.SpectrumDisplaySelectionWidget,
-              'kwds': {'texts': ['Current'],
+              'kwds': {'texts': [UseCurrent],
                        'displayText': [UseCurrent],
                        'defaults': [UseCurrent],
+                       'standardListItems':[UseCurrent],
                        'objectName': guiNameSpaces.WidgetVarName_SpectrumDisplSelection,
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'tipText': guiNameSpaces.TipText_SpectrumDisplSelection}}),
+
+            (guiNameSpaces.WidgetVarName_NavigateToOpt,
+             {'label': guiNameSpaces.Label_NavigateToOpt,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': None,
+              'callBack': self._changeNavigateToDisplayTrigger,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_NavigateToOpt,
+                       'hAlign': 'l',
+                       'tipText': '',
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds': {'texts': [guiNameSpaces.SingleClick, guiNameSpaces.DoubleClick, guiNameSpaces.Disabled ],
+                                        'tipTexts': ["","", "Don't navigate to SpectrumDisplay(s)"],
+                                        'direction': 'v',
+                                        'selectedInd': 0,
+                                        }}}),
+
             (guiNameSpaces.WidgetVarName_BarGraphSeparator,
              {'label': guiNameSpaces.Label_BarGraphAppearance,
               'type': LabeledHLine,
@@ -792,6 +950,24 @@ class AppearancePanel(GuiSettingPanel):
                        'selectItem': guiNameSpaces.BAR_thresholdLine,
                        'compoundKwds': {'includeGradients': False,
                                         }}}),
+            (guiNameSpaces.WidgetVarName_BarXTickOpt,
+             {'label': guiNameSpaces.Label_BarXTickOpt,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': None,
+              'callBack': self._changeBarXTicks,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_BarXTickOpt,
+                       'hAlign': 'l',
+                       'tipText': guiNameSpaces.TipText_BarXTickOpt,
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds': {
+                           'texts': TICKOPTIONS,
+                           'tipTexts': ["Always show all ticks", "Show minimal ticks on zoom-in/out",],
+                           'direction': 'v',
+                           'selectedInd': 0,
+                           }}}),
+
+            ##Tables
             (guiNameSpaces.WidgetVarName_TableSeparator,
              {'label': guiNameSpaces.Label_TableSeparator,
               'type': LabeledHLine,
@@ -803,12 +979,12 @@ class AppearancePanel(GuiSettingPanel):
             (guiNameSpaces.WidgetVarName_TableView,
              {'label': guiNameSpaces.Label_TableView,
               'tipText': guiNameSpaces.TipText_TableView,
-              'enabled': False,
+              'enabled': True,
               'type': compoundWidget.CheckBoxesCompoundWidget,
               'kwds': {
                   'labelText': guiNameSpaces.Label_TableView,
                   'tipText': guiNameSpaces.TipText_TableView,
-                  'texts': ['Assignments', 'Raw Data', 'Calculation', 'Fitting', 'Stats', 'Errors', ],
+                  'texts': guiNameSpaces.TableGrouppingHeaders,
                   'callback': self._mainTableColumnViewCallback,
                   'fixedWidths': SettingsWidgetFixedWidths,
                   'compoundKwds': {'direction': 'v',
@@ -840,6 +1016,28 @@ class AppearancePanel(GuiSettingPanel):
 
         ))
         return self.widgetDefinitions
+
+    def postInitWidgets(self):
+        self._preselectDefaultXaxisBarGraph()
+        self._preselectDefaultYaxisBarGraph()
+
+    def _preselectDefaultXaxisBarGraph(self):
+        """ Preselect the NmrResidue code if available """
+        xAxisWidget = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphXcolumnName)
+        valueToSelect = guiNameSpaces.ASHTAG
+        dataFrame = self.guiModule.getGuiResultDataFrame()
+        if dataFrame is None:
+            return
+        codes = dataFrame.get(sv.NMRRESIDUECODE)
+        if codes is None:
+            return
+        if codes.all():
+            valueToSelect = sv.NMRRESIDUECODE
+        if xAxisWidget:
+            xAxisWidget.select(valueToSelect)
+
+    def _preselectDefaultYaxisBarGraph(self):
+        pass
 
     @property
     def _axisYOptions(self):
@@ -886,8 +1084,8 @@ class AppearancePanel(GuiSettingPanel):
 
         """ Get the threshold value based on selected Y axis. called from _setThresholdValueForData"""
         mo = self.guiModule
-        value = mo.backendHandler.getThresholdValueForData(data=mo.getGuiOutputDataFrame(), columnName=columnName,
-                                            calculationMode=calculationMode, factor=factor)
+        value = mo.backendHandler.getThresholdValueForData(data=mo.getGuiResultDataFrame(), columnName=columnName,
+                                                           calculationMode=calculationMode, factor=factor)
         return value
 
     def _settingsChangedCallback(self, settingsDict, *args):
@@ -905,17 +1103,48 @@ class AppearancePanel(GuiSettingPanel):
             displays = displayWidget.getDisplays()
         return displays
 
+    def _getMainTable(self):
+
+        tablePanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.TablePanel)
+        if tablePanel is not None:
+            table = tablePanel.mainTable
+            return table
+
+    def _getMainBarGraphWidget(self):
+
+        barGraphPanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.BarPlotPanel)
+        if barGraphPanel is not None:
+            barGraphWidget = barGraphPanel.barGraphWidget
+            return barGraphWidget
+
     def _mainTableColumnViewCallback(self, *args):
 
         widget = self.getWidget(guiNameSpaces.WidgetVarName_TableView)
         if not widget:
             return
         checked = widget.get() #get the checked values
-        tablePanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.TablePanel)
-        if tablePanel is not None:
-            table = tablePanel.mainTable
-            print(f'NYI: TODO: Need to tick {checked} in {table}')
-            # TODO change the column view on table!
+        table = self._getMainTable()
+        for value in widget.getTexts():
+            funcName = f'_toggle{value}Headers'
+            func = getattr(table, funcName)
+            try:
+                func(setVisible=value in checked)
+            except Exception as err:
+                getLogger().warning(f'Failed to call the function {funcName}. Error:{err}')
+
+    def _changeNavigateToDisplayTrigger(self, *args):
+        table = self._getMainTable()
+        widget = self.getWidget(guiNameSpaces.WidgetVarName_NavigateToOpt)
+        if table and widget:
+            table.setNavigateToPeakTrigger(widget.getByText())
+
+    def _changeBarXTicks(self, *args):
+        widget = self.getWidget(guiNameSpaces.WidgetVarName_BarXTickOpt)
+        if widget:
+            value = widget.getByText()
+            barGraph = self._getMainBarGraphWidget()
+            barGraph.setTickOption(value)
+            self._commonCallback()
 
 
 TABPOS += 1

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:10 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:27 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -101,13 +101,12 @@ class DataTableModule(CcpnModule):
         self._settings = None
         if self.activePulldownClass:
             # add to settings widget - see sequenceGraph for more detailed example
-            settingsDict = OrderedDict(((LINKTOPULLDOWNCLASS, {'label'   : 'Link to current %s' % self.activePulldownClass.className,
-                                                               'tipText' : 'Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
+            settingsDict = OrderedDict(((LINKTOPULLDOWNCLASS, {'label'   : f'Link to current {self.activePulldownClass.className}',
+                                                               'tipText' : f'Set/update current {self.activePulldownClass.className} when selecting from pulldown',
                                                                'callBack': None,
                                                                'enabled' : True,
                                                                'checked' : False,
-                                                               '_init'   : None,
-                                                               }),
+                                                               '_init'   : None}),
                                         ))
             self._settings = ModuleSettingsWidget(parent=self.settingsWidget, mainWindow=self.mainWindow,
                                                   settingsDict=settingsDict,
@@ -132,14 +131,14 @@ class DataTableModule(CcpnModule):
                                          mainWindow=self.mainWindow,
                                          moduleParent=self,
                                          setLayout=True,
+                                         showVerticalHeader=False,
                                          grid=(0, 0))
 
-        # main widgets at the top
-        row = 0
         Spacer(_topWidget, 5, 5,
                QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                grid=(0, 0), gridSpan=(1, 1))
-        row += 1
+
+        row = 1
         self._modulePulldown = KlassPulldown(parent=_topWidget,
                                              mainWindow=self.mainWindow, default=None,
                                              grid=(row, 0), gridSpan=(1, 2), minimumWidths=(0, 100),
@@ -188,16 +187,20 @@ class DataTableModule(CcpnModule):
         """
         Maximise the attached table
         """
-        if self._table:
-            pass
-        else:
+        if not self._table:
             self.clear()
 
     def _closeModule(self):
         """
         CCPN-INTERNAL: used to close the module
         """
-        self._tableWidget._close()
+        if self._modulePulldown:
+            self._modulePulldown.unRegister()
+        if self._tableWidget:
+            self._tableWidget._close()
+        if self._metadata:
+            self._metadata.close()
+
         super()._closeModule()
 
     def _selectTable(self, table=None):
@@ -241,7 +244,7 @@ class DataTableModule(CcpnModule):
         else:
             self._tableWidget.updateDf(pd.DataFrame({}))
 
-        self.lineEditComment.setText(self._table.comment if self._table.comment else '')
+        self.lineEditComment.setText(self._table.comment or '')
 
         _df = pd.DataFrame({'name'     : self._table.metadata.keys(),
                             'parameter': self._table.metadata.values()})
@@ -313,9 +316,12 @@ class _TableWidget(Table):
     _internalColumns = []
     _hiddenColumns = []
 
+    _defaultEditable = False
     _enableDelete = False
 
-    def __init__(self, parent=None, mainWindow=None, moduleParent=None, **kwds):
+    _rowHeightScale = 1.0
+
+    def __init__(self, parent=None, mainWindow=None, moduleParent=None, showVerticalHeader=True, **kwds):
         """Initialise the widgets for the module.
         """
         # Derive application, project, and current from mainWindow
@@ -340,7 +346,7 @@ class _TableWidget(Table):
 
         # initialise the table
         super().__init__(parent=parent,
-                         grid=(3, 0), gridSpan=(1, 6)
+                         grid=(3, 0), gridSpan=(1, 6), showVerticalHeader=showVerticalHeader,
                          )
 
         self.moduleParent = moduleParent
@@ -392,21 +398,21 @@ class _TableWidget(Table):
 
         selectableObjects = [obj for obj in objs if isinstance(obj, objType)]
         others = [obj for obj in objs if not isinstance(obj, objType)]
-        if len(selectableObjects) > 0:
+
+        if selectableObjects:
             _openItemObject(self.mainWindow, selectableObjects[1:])
             pulldown.select(selectableObjects[0].pid)
 
         else:
             from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 
-            othersClassNames = list(set([obj.className for obj in others if hasattr(obj, 'className')]))
-            if len(othersClassNames) > 0:
+            if othersClassNames := list({obj.className for obj in others if hasattr(obj, 'className')}):
                 if len(othersClassNames) == 1:
-                    title, msg = 'Dropped wrong item.', 'Do you want to open the %s in a new module?' % ''.join(othersClassNames)
+                    title, msg = 'Dropped wrong item.', f"Do you want to open the {''.join(othersClassNames)} in a new module?"
                 else:
                     title, msg = 'Dropped wrong items.', 'Do you want to open items in new modules?'
-                openNew = showYesNo(title, msg)
-                if openNew:
+
+                if showYesNo(title, msg):
                     _openItemObject(self.mainWindow, others)
 
     #=========================================================================================

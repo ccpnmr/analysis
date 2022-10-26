@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:26 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,15 +30,10 @@ import numpy as np
 from scipy import stats
 import pandas as pd
 from abc import ABC
-from collections import defaultdict
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Logging import getLogger
-from ccpn.core.Peak import Peak
-from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
-from ccpn.core.NmrResidue import NmrResidue
-from ccpn.core.NmrAtom import NmrAtom
-from ccpn.core.Collection import Collection
+from ccpn.core.DataTable import DataTable
 from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.CcpNmrTraits import Any, List, Bool, Odict, CString, Set
 from ccpn.framework.Application import getApplication, getCurrent, getProject
@@ -111,6 +106,28 @@ class SeriesAnalysisABC(ABC):
         return dataTable
 
     @property
+    def inputCollection(self):
+        """The parent collection containing all subPeakCollections """
+        return self._inputCollection
+
+    @inputCollection.setter
+    def inputCollection(self, collection):
+        """The parent collection containing all subPeakCollections """
+        self._inputCollection = collection
+
+    @property
+    def inputSpectrumGroups(self):
+        return list(self._inputSpectrumGroups)
+
+    def addInputSpectrumGroup(self, spectrumGroup):
+        """Add a spectrumGroup to the inputList. Used to create InputDataTables"""
+        self._inputSpectrumGroups.add(spectrumGroup)
+
+    def removeInputSpectrumGroup(self, spectrumGroup):
+        """Remove a spectrumGroup to the inputList. Used to create InputDataTables"""
+        self._inputSpectrumGroups.discard(spectrumGroup)
+
+    @property
     def exclusionHandler(self):
         """Get an object containing all excluded pids"""
         exclusionHandler = self._exclusionHandler
@@ -130,18 +147,17 @@ class SeriesAnalysisABC(ABC):
         else:
             getLogger().warning(f'Impossible to set untraceableValue to {value}. Use type int or float.')
 
-    def fitInputData(self):
+    def fitInputData(self) -> DataTable:
         """
         Perform calculation using the currentFittingModel and currentCalculationModel to the inputDataTables
         and save outputs to a single newDataTable.
         Resulting dataTables are available in the outputDataTables.
-        :return: None. Creates a new output dataTable in outputDataTables
+        :return: output dataTable . Creates a new output dataTable in outputDataTables
         """
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
 
         if len(self.inputDataTables) == 0:
-            getLogger().warning('Cannot run any fitting models. Add a valid inputData first')
-            return
+            raise RuntimeError('Cannot run any fitting models. Add a valid inputData first')
         inputFrame = self.inputDataTables[-1].data
         fittingFrame = self.currentFittingModel.fitSeries(inputFrame)
         fittingFrame.joinNmrResidueCodeType()
@@ -152,6 +168,14 @@ class SeriesAnalysisABC(ABC):
         merged = pd.merge(fittingFrame, cdf, on=[sv.COLLECTIONPID], how='left')
         outputDataTable = self._fetchOutputDataTable(name=self._outputDataTableName)
         outputDataTable.data = merged
+        return outputDataTable
+
+    def _rebuildInputData(self):
+        """Rebuild all the inputData tables from the defined SpectrumGroups."""
+        inputCollection = self.inputCollection
+        for spGroup in self.inputSpectrumGroups:
+            for inputData in self.inputDataTables:
+                inputData.data.buildFromSpectrumGroup(spGroup, parentCollection=inputCollection)
 
     @property
     def currentFittingModel(self):
@@ -236,8 +260,9 @@ class SeriesAnalysisABC(ABC):
         if not isinstance(spectrumGroup, SpectrumGroup):
             raise TypeError(f'spectrumGroup argument must be a SpectrumGroup Type. Given: {type(spectrumGroup)}')
         project = spectrumGroup.project
+        inputCollection = self.inputCollection
         seriesFrame = InputSeriesFrameBC()
-        seriesFrame.buildFromSpectrumGroup(spectrumGroup, peakListIndices=peakListIndices)
+        seriesFrame.buildFromSpectrumGroup(spectrumGroup, parentCollection=inputCollection, peakListIndices=peakListIndices)
         dataTable = project.newDataTable(name=dataTableName, data=seriesFrame)
         dataTable.setMetadata(sv.DATATABLETYPE, sv.SERIESANALYSISINPUTDATA)
         self._setRestoringMetadata(dataTable, seriesFrame, spectrumGroup)
@@ -303,6 +328,18 @@ class SeriesAnalysisABC(ABC):
             if not isinstance(dataTable.data.__class__ , InputSeriesFrameBC):
                 dataTable.data.__class__ = InputSeriesFrameBC
 
+    def _isPidInDataTables(self, header, pid):
+        """Check if a pid is in the inputDataTables.
+         :param header: str, dataTable header e.g.: sv.PeakPid
+         :param pid: str, the pid to search in the column
+         :return bool. True if pid in data"""
+        if len(self.inputDataTables) > 0:
+            for inputDataTable in self.inputDataTables:
+                data = inputDataTable.data
+                filteredData = data.getByHeader(header, [pid])
+                if not filteredData.empty:
+                    return True
+        return False
 
     @classmethod
     def exportToFile(cls, path, fileType, *args, **kwargs):
@@ -319,6 +356,11 @@ class SeriesAnalysisABC(ABC):
             dd[model.ModelName] = model
         return dd
 
+    def _getSeriesStepValues(self):
+        """ Get the series values from the first input SpectrumGroups"""
+        for spectrumGroup in self.inputSpectrumGroups:
+            return spectrumGroup.series
+
     def plotResults(self, *args, **kwargs):
         pass
 
@@ -327,6 +369,8 @@ class SeriesAnalysisABC(ABC):
         self.application = getApplication()
         self.current = getCurrent()
         self._inputDataTables = OrderedSet()
+        self._inputSpectrumGroups = OrderedSet()
+        self._inputCollection = None
         self._outputDataTableName = sv.SERIESANALYSISOUTPUTDATA
         self._untraceableValue = 1.0   # default value for replacing NaN values in untraceableValues.
         self.fittingModels = dict()
@@ -334,6 +378,7 @@ class SeriesAnalysisABC(ABC):
         self._currentFittingModel = None     ## e.g.: ExponentialDecay for relaxation
         self._currentCalculationModel = None ## e.g.: HetNoe for Relaxation
         self._needsRefitting = False
+        self._needsRebuildingInputDataTables = False
         self._exclusionHandler = ExclusionHandler()
 
     def close(self):

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:11 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:28 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,14 +50,13 @@ class ExperimentAnalysisHandlerABC(object):
 
     example:
         experimentAnalysis = ExperimentAnalysis()
-        # use the backend manager to start the backend server
+        # use the backendHandler to interact to the backend built-in methods
         experimentAnalysis.backend.start(...)
-        experimentAnalysis.backend.calculate(...)
-        # use the panels controller to install a panel
+        experimentAnalysis.backend.fitInputData(...)
+        # use the panelsHandler to install a panel
         experimentAnalysis.panels.install(MyPanel(name))
         panel = experimentAnalysis.panels.get(name)
         # etc
-
     """
 
     @property
@@ -255,6 +254,15 @@ class SettingsPanelHandler(ExperimentAnalysisHandlerABC):
 
     def getInputDataSettings(self) -> dict:
         return self.getAllSettings().get(guiNameSpaces.Label_InputData, {})
+
+    def _getSelectedSpectrumGroup(self):
+        """ Get the SpectrumGroup Obj from the Widgets. """
+        inputSettings = self.getInputDataSettings()
+        sgPids = inputSettings.get(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection, [None])
+        if not sgPids:
+            return
+        spGroup = self.guiModule.project.getByPid(sgPids[-1])
+        return spGroup
 
     def close(self):
         pass

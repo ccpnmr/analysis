@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:12 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:29 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -76,6 +76,7 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
             self.current = None
         self._sourcePeakList = None
         self._spectrumGroup = None
+        self._topCollection = None
         self._fixedWidthsCW = [200, 200]
         self.setWidgets()
         self._populate()
@@ -207,14 +208,14 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         useSliceColour = self.coloursOption.isChecked()
         with undoBlockWithoutSideBar():
             if self.copyInPlace:
-                self.spectrumGroup.copyAndCollectPeaksInSeries(self.sourcePeakList,
+                self._topCollection = self.spectrumGroup.copyAndCollectPeaksInSeries(self.sourcePeakList,
                                              refit=refit,
                                              useSliceColour=useSliceColour,
                                              newTargetPeakList=self._isNewTargetPeakListNeeded,
                                              topCollectionName=self.collectionName
                                              )
             else:
-                self.spectrumGroup.followAndCollectPeaksInSeries(self.sourcePeakList,
+                self._topCollection = self.spectrumGroup.followAndCollectPeaksInSeries(self.sourcePeakList,
                                              engine=self._followMethod,
                                              newTargetPeakList=self._isNewTargetPeakListNeeded,
                                              pickPeaks=self._isFindPeaksNeeded,

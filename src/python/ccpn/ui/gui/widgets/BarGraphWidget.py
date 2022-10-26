@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:12 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:29 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,9 @@ import pyqtgraph as pg
 from PyQt5 import QtWidgets, QtGui, QtCore
 from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox
 from ccpn.ui.gui.widgets.Widget import Widget
-
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_LABELLING
+from ccpn.ui.gui.guiSettings import getColours
+from ccpn.util.Colour import hexToRgb, rgbaRatioToHex
 
 AboveX = 'aboveX'
 AboveY = 'aboveY'
@@ -37,6 +39,7 @@ BelowX = 'belowX'
 BelowY = 'belowY'
 DisappearedX = 'disappearedX'
 DisappearedY = 'disappearedY'
+ErrorHeight = 'errorHeight'
 AboveObjects = 'aboveObjects'
 AllAboveObjects = 'allAboveObjects'
 AllBelowObjects = 'allBelowObjects'
@@ -47,6 +50,9 @@ AboveBrushes = 'aboveBrushes'
 BelowBrush = 'belowBrush'
 DisappearedBrush = 'disappearedBrush'
 DrawLabels = 'drawLabels'
+AllTicks  = 'All Ticks'
+MinimalTicks = 'Minimal Ticks'
+TICKOPTIONS = [MinimalTicks, AllTicks]
 
 
 class XBarAxisItem(pg.AxisItem):
@@ -111,13 +117,14 @@ class YBarAxisItem(pg.AxisItem):
 class BarGraphWidget(Widget):
 
     def __init__(self, parent, application=None, xValues=None, yValues=None, colour='r', actionCallback=None,
-                 selectionCallback=None, hoverCallback=None, objects=None, threshouldLine=0, backgroundColour='w', **kwds):
+                 selectionCallback=None, hoverCallback=None, objects=None, threshouldLine=0, backgroundColour='w',
+                 selectionBoxEnabled=True, **kwds):
         super().__init__(parent, **kwds)
 
         self.application = application
         self.backgroundColour = backgroundColour
         self.thresholdLineColour = 'b'
-
+        self._selectionBoxEnabled = selectionBoxEnabled
         self._setViewBox()
         self._setLayout()
         self.setContentsMargins(1, 1, 1, 1)
@@ -140,9 +147,11 @@ class BarGraphWidget(Widget):
         self._actionCallback = actionCallback
         self._selectionCallback = selectionCallback
         self._hoverCallback = hoverCallback
-
-
+        self._tickOption = MinimalTicks # one of AllTicks or MinimalTicks
         # plot.addItem(text)
+        self.errorBars = None
+        colour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
+        self.errorBarsPen = pg.functions.mkPen(colour, width=1, style=QtCore.Qt.SolidLine)
 
         self._dataDict = {
             AboveX            : [],
@@ -180,18 +189,43 @@ class BarGraphWidget(Widget):
 
     def fitXZoom(self):
         xs, ys = self._getPlotData()
+        xRange, yRange = self.customViewBox.viewRange()
+        xm, xM = xRange
         if len(xs) > 0:
-            _max = np.max([np.max(a) for a in xs])
-            _min = np.min([np.min(a) for a in xs])
-            self.plotWidget.setXRange(_min, _max)
+            xAll = [a for j in xs for a in j]
+            xAll = np.array(xAll)
+            xAll.sort()
+            masked = np.ma.masked_inside(xAll, xm, xM)
+            filtered = xAll[masked.mask]
+            # filter for only the visible range.
+            if len(filtered)>0:
+                _max = np.max(filtered)
+                _min = np.min(filtered)
+                self.plotWidget.setXRange(_min, _max)
+            else:
+                self.zoomFull()
 
     def fitYZoom(self):
-        """ToDo get this from the current view, rather then the whole data """
+        """"""
         xs, ys = self._getPlotData()
+        xRange, yRange = self.customViewBox.viewRange()
+        xm, xM = xRange
         if len(ys) > 0:
-            _max = np.max([np.max(a) for a in ys])
-            _min = np.min([np.min(a) for a in ys])
-            self.plotWidget.setYRange(_min, _max)
+            yAll = [a for j in ys for a in j]
+            yAll = np.array(yAll)
+            xAll = [a for j in xs for a in j]
+            xAll = np.array(xAll)
+            # filter for only the visible range.
+            masked = np.ma.masked_inside(xAll, xm, xM)
+            filtered = yAll[masked.mask]
+            if len(filtered) > 0:
+                self.plotWidget.setYRange(np.min(filtered),  np.max(filtered))
+            else:
+                self.zoomFull()
+
+    def setTickOption(self, value):
+        if value in TICKOPTIONS:
+            self._tickOption = value
 
     def _setViewBox(self):
         self.customViewBox = CustomViewBox(application=self.application)
@@ -229,18 +263,26 @@ class BarGraphWidget(Widget):
         self.barGraphs.append(self.barGraph)
         self.customViewBox.addItem(self.barGraph)
         self.customViewBox.addItem(self._hoverBox)
+        self.customViewBox._selectionBoxEnabled = self._selectionBoxEnabled
         self.xValues = xValues
         self.yValues = yValues
         self.objects = objects
         self.updateViewBoxLimits()
 
     def _mouseDoubleClickCallback(self, x, y):
+        self._selectBarNumbers(selected=[x])
         if self._actionCallback:
             self._actionCallback(x,y)
 
     def _mouseSingleClickCallback(self, x, y):
+        self._selectBarNumbers(selected=[x])
         if self._selectionCallback:
             self._selectionCallback(x,y)
+
+    def _selectBarNumbers(self, selected=[]):
+        """ Redraw with selected items """
+        for bar in self.barGraphs:
+            bar.drawPicture(selected)
 
     def _mouseHoverCallback(self, barIndex, x, y):
         if self._hoverCallback:
@@ -256,12 +298,22 @@ class BarGraphWidget(Widget):
         self.customViewBox.setLimits(xMin=xMin, xMax=xMax, yMin=yMin, yMax=yMax)
 
     def updateViewBoxLimits(self):
-        """Updates with default paarameters. Minimum values to show the data only
+        """Updates with default parameters. Minimum values to show the data only
         """
         if self.xValues and self.yValues:
             self.customViewBox.setLimits(xMin=min(self.xValues) / 2, xMax=max(self.xValues) + (max(self.xValues) * 0.5),
                                          yMin=min(self.yValues) / 2, yMax=max(self.yValues) + (max(self.yValues) * 0.5),
                                          )
+        else:
+            xValues = []
+            yValues = []
+            for bar in self.barGraphs:
+                xValues.extend(bar.xValues)
+                yValues.extend(bar.yValues)
+
+            if xValues and yValues:
+                self.customViewBox.setLimits(xMin=0, xMax=max(xValues)*2, yMin=min(yValues), yMax=max(yValues)*2)
+
 
     def setXRange(self, xMin, xMax, padding=None, update=True):
         self.customViewBox.setXRange(xMin, xMax, padding=padding, update=update)
@@ -319,6 +371,7 @@ class BarGraphWidget(Widget):
             aboveObjects = args[AboveObjects]
             belowX = args[BelowX]
             belowY = args[BelowY]
+            errorHeights = args.get(ErrorHeight, {})
             belowObjects = args[BelowObjects]
             disappearedObjects = args[DisappearedObjects]
             self.aboveBrush = args[AboveBrush]
@@ -338,7 +391,7 @@ class BarGraphWidget(Widget):
             disappearedY = []
             disappearedObjects = []
             aboveBrushes = []
-
+            errorHeights = {}
             pos = self.xLine.pos().y()
             self.xLine.show()
             if self.xValues:
@@ -379,11 +432,19 @@ class BarGraphWidget(Widget):
                                          hoverCallback=self._mouseHoverCallback,
                                          xValues=disappearedX, yValues=disappearedY, objects=disappearedObjects,
                                          brush=self.disappearedBrush)
-
+        xErr = errorHeights.get('xError', np.array([]))
+        yErr = errorHeights.get('yError', np.array([]))
+        topErr = errorHeights.get('topError', np.array([]))
+        topErr = topErr.astype(float)
+        top = np.nan_to_num(topErr)
+        self.errorBars = pg.ErrorBarItem(x=xErr, y=yErr, top=top, beam=0.5, pen=self.errorBarsPen)
+        self.customViewBox.addItem(self.errorBars)
         self.customViewBox.addItem(self.aboveThreshold)
         self.customViewBox.addItem(self.belowThreshold)
         self.customViewBox.addItem(self.disappearedPeaks)
+
         self.customViewBox.addItem(self._hoverBox)
+        self.customViewBox._selectionBoxEnabled = self._selectionBoxEnabled
         self.barGraphs.append(self.aboveThreshold)
         self.barGraphs.append(self.belowThreshold)
         self.barGraphs.append(self.disappearedPeaks)

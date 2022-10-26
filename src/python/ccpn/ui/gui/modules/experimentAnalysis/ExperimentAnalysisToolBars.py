@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:11 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:28 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -22,8 +22,10 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
+from collections import OrderedDict as od
 from PyQt5 import QtCore, QtWidgets
+from ccpn.ui.gui.widgets.Action import Action
+from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
@@ -118,46 +120,16 @@ class ToolBarPanel(GuiPanel):
         self.guiModule.updateAll()
 
     def _showStructureButtonCallback(self):
-        getLogger().warn('Not implemented. Clicked _showStructureButtonCallback')
-
-    def getUpdateState(self):
-        return self._updateState
-
-    def setUpdateState(self, value):
-
-        dataEnum = None
-        if isinstance(value, DataEnum):
-            dataEnum = value
-        else:
-            for i in PanelUpdateState:
-                if i.value == value:
-                    dataEnum = value
-
-        if dataEnum:
-            self._updateState = dataEnum.value
-            updateButton = self.getButton(guiNameSpaces.UpdateButton)
-            if updateButton:
-                iconValue = dataEnum.description
-                updateButton.setIcon(Icon(iconValue))
-
-
-
-class CSMToolBarPanel(ToolBarPanel):
-    """
-    A GuiPanel containing the ToolBar Widgets for the CSM Analysis Module
-    """
-
-    def _showStructureButtonCallback(self):
         from ccpn.ui.gui.modules.PyMolUtil import _CSMSelection2PyMolFileNew
-        import json
         import subprocess
         import os
         from ccpn.util.Path import aPath, fetchDir
         from ccpn.ui.gui.widgets.MessageDialog import showOkCancelWarning, showWarning
         scriptsPath = self.application.scriptsPath
         pymolScriptsPath = fetchDir(scriptsPath, guiNameSpaces.PYMOL)
-        settingsDict = self.guiModule.settingsPanelHandler.getAllSettings().get(guiNameSpaces.Label_GeneralAppearance,{})
-        barPanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.CSMBarPlotPanel)
+        settingsDict = self.guiModule.settingsPanelHandler.getAllSettings().get(guiNameSpaces.Label_GeneralAppearance,
+                                                                                {})
+        barPanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.BarPlotPanel)
         barGraph = barPanel.barGraphWidget
         moleculeFilePath = settingsDict.get(guiNameSpaces.WidgetVarName_MolStructureFile, '')
         moleculeFilePath = aPath(moleculeFilePath)
@@ -182,21 +154,120 @@ class CSMToolBarPanel(ToolBarPanel):
         coloursDict = barGraph.getPlottedColoursDict()
         import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
         # get the match  index-residueCode so that can be mapped to the PDB and pymol
-        df = self.guiModule.getGuiOutputDataFrame()
+        df = self.guiModule.getGuiResultDataFrame()
+        if df is None or df.empty:
+            showWarning('No Data available', f'To start calculations, set the input Data from the Settings Panel')
+            return
         sequenceCodeColoursDict = {}
         for i, row in df.iterrows():
             num = row[sv.ASHTAG]
             code = row[sv.NMRRESIDUECODE]
             vv = coloursDict.get(num, '')
             sequenceCodeColoursDict[code] = vv
-        selection = "+".join([str(x.sequenceCode) for x in self.current.nmrResidues]) #FIXME this is broken
+        selection = "+".join([str(x.sequenceCode) for x in self.current.nmrResidues])  # FIXME this is broken
         scriptPath = _CSMSelection2PyMolFileNew(scriptFilePath, moleculeFilePath, sequenceCodeColoursDict, selection)
         try:
             self.pymolProcess = subprocess.Popen(str(pymolPath) + ' -r ' + str(scriptPath),
-                                                     shell=True,
-                                                     stdout=subprocess.PIPE,
-                                                     stderr=subprocess.PIPE)
+                                                 shell=True,
+                                                 stdout=subprocess.PIPE,
+                                                 stderr=subprocess.PIPE)
         except Exception as e:
             getLogger().warning('Pymol not started. Check executable.', e)
 
+    def getUpdateState(self):
+        return self._updateState
 
+    def setUpdateState(self, value):
+
+        dataEnum = None
+        if isinstance(value, DataEnum):
+            dataEnum = value
+        else:
+            for i in PanelUpdateState:
+                if i.value == value:
+                    dataEnum = value
+
+        if dataEnum:
+            self._updateState = dataEnum.value
+            updateButton = self.getButton(guiNameSpaces.UpdateButton)
+            if updateButton:
+                iconValue = dataEnum.description
+                updateButton.setIcon(Icon(iconValue))
+
+
+class ExperimentAnalysisPlotToolBar(ToolBar):
+
+    def __init__(self, parent, plotItem, guiModule, **kwds):
+        super().__init__(parent=parent, **kwds)
+        self.plotItem = plotItem
+        self.plotItem.toolbar = self
+        self.guiModule = guiModule
+        self.setToolActions(self.getToolBarDefs())
+        self.setMaximumHeight(30)
+
+    def setToolActions(self, actionDefinitions):
+        for name, dd in actionDefinitions.items():
+            if isinstance(dd, od):
+                action = Action(self, **dd)
+                action.setObjectName(name)
+                self.addAction(action)
+            else:
+                self.addSeparator()
+
+    def getToolBarDefs(self):
+        toolBarDefs = od((
+            ('Zoom-All', od((
+                ('text', 'Zoom-All'),
+                ('toolTip', 'Zoom All Axes'),
+                ('icon', Icon('icons/zoom-full')),
+                ('callback', self.plotItem.zoomFull),
+                ('enabled', True)
+                ))),
+            ('Zoom-X', od((
+                ('text', 'Zoom-X-axis'),
+                ('toolTip', 'Reset X-axis to fit view'),
+                ('icon', Icon('icons/zoom-full-1d')),
+                ('callback', self.plotItem.fitXZoom),
+                ('enabled', True)
+            ))),
+            ('Zoom-Y', od((
+                ('text', 'Zoom-Y-axis'),
+                ('toolTip', 'Reset Y-axis to fit view'),
+                ('icon', Icon('icons/zoom-best-fit-1d')),
+                ('callback', self.plotItem.fitYZoom),
+                ('enabled', True)
+            ))),
+            ('Sep', ()),
+            ))
+        return toolBarDefs
+
+
+class BarPlotToolBar(ExperimentAnalysisPlotToolBar):
+
+    def __init__(self, parent, plotItem, guiModule, **kwds):
+        super().__init__(parent, plotItem=plotItem, guiModule=guiModule, **kwds)
+
+        self.parentPanel = parent
+
+
+    def getToolBarDefs(self):
+        toolBarDefs = super().getToolBarDefs()
+        extraDefs = (
+            ('ErrorBars', od((
+                ('text', 'Toggle ErrorBars'),
+                ('toolTip', 'Toggle the ErrorBars from the plot'),
+                ('icon', Icon('icons/errorBars')),
+                ('callback', self._toggleErrorBars),
+                ('enabled', True),
+                ('checkable', True)
+                ))
+             ),
+
+            )
+        toolBarDefs.update(extraDefs)
+        return toolBarDefs
+
+
+    def _toggleErrorBars(self):
+        action = self.sender()
+        self.parentPanel.toggleErrorBars(action.isChecked())

@@ -13,12 +13,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:40 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:27 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -113,7 +113,7 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
                                                  #minimumWidths=(colwidth, 0, 0),
                                                  fixedWidths=(colwidth, 2 * colwidth, None),
                                                  orientation='left',
-                                                 labelText='Display(s):',
+                                                 labelText='Display(s)',
                                                  tipText='SpectrumDisplay modules to respond to double-click',
                                                  texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
                                                  )
@@ -125,7 +125,7 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
                 #minimumWidths=(colwidth, 0),
                 fixedWidths=(colwidth, 30),
                 orientation='left',
-                labelText='Show sequential strips:',
+                labelText='Show sequential strips',
                 checked=False
                 )
 
@@ -135,7 +135,7 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
                 #minimumWidths=(colwidth, 0),
                 fixedWidths=(colwidth, 30),
                 orientation='left',
-                labelText='Mark positions:',
+                labelText='Mark positions',
                 checked=True
                 )
         self.autoClearMarksWidget = CheckBoxCompoundWidget(
@@ -144,7 +144,7 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
                 #minimumWidths=(colwidth, 0),
                 fixedWidths=(colwidth, 30),
                 orientation='left',
-                labelText='Auto clear marks:',
+                labelText='Auto clear marks',
                 checked=True
                 )
 
@@ -153,7 +153,7 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
         width = 130
         self.frame1 = Frame(self._assignmentFrame, grid=(0, 0), **policies, fShape='styledPanel', fShadow='plain', setLayout=True)  # ejb
         self.frame1.setFixedWidth(width)
-        self.nmrAtomLabel = Label(self.frame1, 'NmrAtom(s):', bold=True,
+        self.nmrAtomLabel = Label(self.frame1, 'NmrAtom(s)', bold=True,
                                   grid=(0, 0), gridSpan=(1, 1), vAlign='center', margins=[2, 5, 2, 5])
 
         self.attachedNmrAtomsList = ListWidget(self.frame1,
@@ -166,7 +166,7 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
 
         # Frame-2: peaks
         self.frame2 = Frame(self._assignmentFrame, grid=(0, 1), gridSpan=(1, 5), **policies, fShape='styledPanel', fShadow='plain', setLayout=True)  # ejb
-        self.peaksLabel = Label(self.frame2, 'Peaks assigned to NmrAtom(s):', bold=True,
+        self.peaksLabel = Label(self.frame2, 'Peaks assigned to NmrAtom(s)', bold=True,
                                 grid=(0, 0), gridSpan=(1, 1), vAlign='center', margins=[2, 5, 2, 5])
 
         # initialise the currently attached dataFrame

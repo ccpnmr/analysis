@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:11 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:28 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,30 +50,49 @@ BAR_thresholdLine       = 'blue'
 
 ##### SETTINGS  ######
 
-SETTINGS = 'settings'
+SETTINGS                = 'settings'
 WidgetVarName_          = 'VarName'
 Label_                  = 'Label'
 tipText_                = 'tipText'
 
+SingleClick             = 'Single Click'
+DoubleClick             = 'Double Click'
+Disabled                = 'Disabled'
 
 ####################################################
 ##########  TAB: GuiInputDataPanel
 ####################################################
 
+WidgetVarName_InputCollectionSeparator  = 'InputCollectionSeparator'
+Label_InputCollection                   = 'Input Collection'
+TipText_InputCollection                 = 'Select the top parent Collection containing all subset of peakCollections'
+
+WidgetVarName_SetupCollection           = 'CreateCollectionButton'
+Label_SetupCollection                   = 'Setup the input Collection'
+TipText_SetupCollection                 = 'Setup the top Collection and its subset of peakCollections'
+
+WidgetVarName_InputCollectionSelection  = 'InputCollectionSelection'
+Label_InputCollectionSelection          = Label_InputCollection
+TipText_InputCollectionSelection        = TipText_InputCollection
+
 Label_InputData                         = 'Input data'
 TipText_GuiInputDataPanel               = 'This tab will allow user to create and set the input DataTable(s)'
 
-WidgetVarName_SpectrumGroupsSeparator   = 'SpectrumGroupsSeparator'
-Label_SpectrumGroups                    = 'SpectrumGroups'
-TipText_SpectrumGroupsSeparator         = 'SpectrumGroup Section. Create here a new input DataTable if none is already available.'
+WidgetVarName_GeneralSetupSeparator     = 'GeneralSetupSeparator'
+Label_GeneralSetup                      = 'General Setup'
+TipText_GeneralSetup                    = 'General setup section. Create here a new input SpectrumGroup, collections etc...'
+
+WidgetVarName_CreateSGroup              = 'CreateSGroupButton'
+Label_CreateSGroup                      = 'Create SpectrumGroup'
+TipText_CreateSGroup                    = 'Create the input SpectrumGroup to use in the analysis'
 
 WidgetVarName_SpectrumGroupsSelection   = 'SpectrumGroupsSelection'
 Label_SelectSpectrumGroups              = 'SpectrumGroup'
-TipText_SpectrumGroupSelectionWidget    = 'Select the SpectrumGroup containing the series of interest'
+TipText_SpectrumGroupSelectionWidget    = 'Select the SpectrumGroup containing the series of interest to create a new Input DataTable'
 
 WidgetVarName_DataTableName             = 'dataTableName'
 Label_InputDataTableName                = 'Input DataTable Name'
-TipText_dataTableNameSelectionWidget    = 'Select the name for the new DataTable input'
+TipText_dataTableNameSelectionWidget    = 'Select the name for the new DataTable input.'
 
 WidgetVarName_CreateDataTable           = 'CreateDataTableName'
 Label_CreateInput                       = 'Create Input DataTable'
@@ -81,27 +100,27 @@ TipText_createInputdataTableWidget      = 'Create the new input DataTable for th
 
 WidgetVarName_DataTableSeparator        = 'DataTableSeparator'
 Label_DataTables                        = 'Input DataTables'
-TipText_DataTableSeparator              = 'DataTable Section. Select input DataTable(s) to start the Experiment Analysis'
+TipText_DataTableSeparator              = 'DataTable Section. Select input DataTable(s) to start the Experiment Analysis. If None available, create one using a SpectrumGroup.'
 
 WidgetVarName_DataTablesSelection       = 'DataTablesSelection'
 Label_SelectDataTable                   = 'Input DataTable(s)'
 TipText_DataTableSelection              = 'Select input DataTable(s) to start the Experiment Analysis'
 
-WidgetVarName_OutPutDataTableName       = 'OutputDataTableName'
-Label_OutputDataTableName               = 'Output DataTable Name'
-TipText_OutputDataTableName             = 'Select the name for the DataTable Output. Create new if not existing, otherwise override exsiting.'
+WidgetVarName_OutPutDataTableName       = 'ResultDataTableName'
+Label_OutputDataTableName               = 'Results DataTable Name'
+TipText_OutputDataTableName             = 'Select the name for the Results DataTable. Create new if not existing, otherwise override exsiting.'
 
 WidgetVarName_OutputDataTableSeparator  = 'DataTableSeparator2'
-Label_OutputDataTable                   = 'Output DataTable'
-TipText_OutputDataTableSeparator        = 'Output DataTable Section. Select the output DataTable to display results'
+Label_OutputDataTable                   = 'Results DataTable'
+TipText_OutputDataTableSeparator        = 'Results DataTable Section. Select the results DataTable to display results'
 
 WidgetVarName_FitInputData              = 'FitInputData'
-Label_FitInput                          = 'Fit and Fetch Output Data'
-TipText_createOutputdataTableWidget     = 'Fit or refit input DataTable and store result in an output dataTable.'
+Label_FitInput                          = 'Fit and Fetch Results Data'
+TipText_createOutputdataTableWidget     = 'Fit or refit input DataTable and store outputs in a results dataTable.'
 
-WidgetVarName_OutputDataTablesSelection = 'OutputDataTablesSelection'
-Label_SelectOutputDataTable             = 'Output DataTable'
-TipText_OutputDataTableSelection        = 'Select Output DataTable(s) to display the Experiment Analysis results'
+WidgetVarName_OutputDataTablesSelection = 'ResultDataTablesSelection'
+Label_SelectOutputDataTable             = 'Results DataTable'
+TipText_OutputDataTableSelection        = 'Select Results DataTable(s) to display the Experiment Analysis results'
 
 #############################################################
 ##########  TAB: Calculation
@@ -233,17 +252,21 @@ WidgetVarName_SpectrumDisplSelection    = 'SpectrumDisplaySelection'
 Label_SpectrumDisplSelection            = 'Navigate to SpectrumDisplay'
 TipText_SpectrumDisplSelection          = 'Navigate to Peaks/NmrResidues in the selected SpectrumDisplay(s)'
 
+WidgetVarName_NavigateToOpt             = 'NavigateToOnClick'
+Label_NavigateToOpt                     = 'Navigate trigger'
+TipText_NavigateToOpt                   = 'Navigate to Peaks/NmrResidues in the selected SpectrumDisplay(s) using Single or Double click on the main table'
+
 WidgetVarName_BarGraphSeparator         = 'GeneralAppearanceSeparator'
 Label_BarGraphAppearance                = 'BarGraph'
 TipText_BarGraphAppearance              = 'General Appearance settings for the BarGraph'
 
 WidgetVarName_BarGraphXcolumnName       = 'XcolumnName'
-Label_XcolumnName                       = 'X axis data'
-TipText_XcolumnName                     = 'Set the BarGraph X axis data'
+Label_XcolumnName                       = 'X Axis Data'
+TipText_XcolumnName                     = 'Set the BarGraph X Axis Data'
 
 WidgetVarName_BarGraphYcolumnName       = 'YcolumnName'
-Label_YcolumnName                       = 'Y axis data'
-TipText_YcolumnName                     = 'Set the BarGraph Y axis data'
+Label_YcolumnName                       = 'Y Axis Data'
+TipText_YcolumnName                     = 'Set the BarGraph Y Axis Data'
 
 WidgetVarName_ThreshValue               = 'ThreshValue'
 Label_ThreshValue                       = 'Threshold Value'
@@ -263,6 +286,10 @@ TipText_ThreshValueCalcOptions          = 'Select the calculation method for the
 WidgetVarName_ThreshValueFactor         = 'ThreshValueCalcFactor'
 Label_ThreshValueFactor                 = 'Threshold Factor'
 TipText_ThreshValueFactor               = 'Increase (multiply) the threshold value by a factor.'
+
+WidgetVarName_BarXTickOpt               = 'BarXTickOpt'
+Label_BarXTickOpt                       = 'X axis Ticks'
+TipText_BarXTickOpt                     = 'Display X axis ticks option. Display all ticks or show major/minor depending on zoom levels'
 
 ### Threshold Values for BarGraph options
 
@@ -338,23 +365,26 @@ Callback = 'Callback'
 RefitButton = 'refitButton'
 
 
-
-RelaxationBarPlotPanel = 'RelaxationBarPlotPanel'
+BarPlotPanel = 'BarPlotPanel'
 RelaxationFittingPlotPanel = 'RelaxationFittingPlotPanel'
 
 
 
-CSMBarPlotPanel = 'CSMBarPlotPanel'
 CSMFittingPlotPanel = 'CSMFittingPlotPanel'
-
-RelativeDisplacement = 'Relative Displacement'
 ToolbarPanel = 'ToolbarPanel'
 TablePanel = 'TablePanel'
 PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
 PYMOL = 'pymol'
 
+# Table Groupping Headers
+_Assignments = 'Assignments'
+_SeriesSteps = 'SeriesSteps'
+_Calculation = 'Calculation'
+_Stats = 'Stats'
+_Errors = 'Errors'
+_Fitting = 'Fitting'
+TableGrouppingHeaders = [_Assignments, _SeriesSteps, _Calculation, _Fitting, _Stats, _Errors]
 
-    
 ### Appearance BarGraph X axis
 XBarGraphColumnNameOptions =  [
                                 seriesVariables.ASHTAG,

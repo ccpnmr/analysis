@@ -29,6 +29,8 @@ This module contains the GUI Settings panels for the Relaxation module.
 
 
 from collections import OrderedDict as od
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets, QtGui
 import ccpn.ui.gui.widgets.CompoundWidgets as compoundWidget
@@ -79,6 +81,19 @@ class RelaxationFittingPanel(GuiFittingPanel):
     tabName = guiNameSpaces.Label_Fitting
     tabTipText = 'Set the various Fitting modes and options for the Relaxation module'
 
+    def _fittingModeChanged(self, *args):
+        """Triggered after a change in the fitting widget.
+         Auto-set the BarGraph Y widget to show the first Argument Result based on the model"""
+        self._commonCallback(*args)
+        appearancePanel = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
+        yAxisWidget = appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
+        backend = self.guiModule.backendHandler
+        model = backend.currentFittingModel
+        if model is not None and model.ModelName != sv.BLANKMODELNAME:
+            firstArg, *_ = model.modelArgumentNames or [None]
+            if yAxisWidget:
+                yAxisWidget.select(firstArg)
+
 
 #####################################################################
 #####################   Appearance Panel  ###########################
@@ -90,6 +105,14 @@ class RelaxationAppearancePanel(AppearancePanel):
         """ Get the threshold value based on selected Y axis. called from _setThresholdValueForData"""
         return super()._getThresholdValueFromBackend(columnName, calculationMode, factor)
 
+    def _preselectDefaultYaxisBarGraph(self):
+        yAxisWidget = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
+        backend = self.guiModule.backendHandler
+        model = backend.currentFittingModel
+        if model is not None and model.ModelName != sv.BLANKMODELNAME:
+            firstArg, secondArg, *_ = model.modelArgumentNames or [None, None]
+            if yAxisWidget:
+                yAxisWidget.select(secondArg)
 
 #####################################################################
 #####################   Filtering Panel   ###########################

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:11 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:28 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -23,72 +23,62 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 # Start of code
 #=========================================================================================
 
-import numpy as np
 import pyqtgraph as pg
-from pyqtgraph.graphicsItems.ROI import MouseDragHandler, Handle
-from PyQt5 import QtCore, QtWidgets, QtGui
-from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, MEDIUM_BLUE, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_GRID, CCPNGLWIDGET_LABELLING
-from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
-from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
-from ccpn.ui.gui.widgets.Font import Font, getFont,getFontHeight
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import ExperimentAnalysisPlotToolBar
+from ccpn.util.Logging import getLogger
+from pyqtgraph.graphicsItems.ROI import Handle
+from PyQt5 import QtCore, QtWidgets
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_LABELLING
+from ccpn.ui.gui.guiSettings import getColours
+from ccpn.util.Colour import hexToRgb, rgbaRatioToHex
+from ccpn.ui.gui.widgets.Font import getFont
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
-import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
-from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Label import Label
-from collections import OrderedDict as od
-from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.Action import Action
 from ccpn.core.Peak import Peak
 from ccpn.ui.gui.widgets.ViewBox import CrossHair
-from ccpn.util.Common import percentage
 from ccpn.core.lib.Notifiers import Notifier
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.util.Common import percentage
+import numpy as np
+from collections import OrderedDict as od
+from ccpn.ui.gui.widgets.Icon import Icon
 
-class ExperimentAnalysisPlotToolBar(ToolBar):
+class FittingPlotToolBar(ExperimentAnalysisPlotToolBar):
 
-    def __init__(self, parent, plotItem, **kwds):
-        super().__init__(parent=parent, **kwds)
-        self.plotItem = plotItem
-        self.plotItem.toolbar = self
-        self.setToolActions(self._defaultToolBarDefs())
-        self.setMaximumHeight(30)
+    def __init__(self, parent, plotItem, guiModule, **kwds):
+        super().__init__(parent, plotItem=plotItem, guiModule=guiModule, **kwds)
 
-    def setToolActions(self, actionDefinitions):
-        for v in actionDefinitions:
-            if len(v) == 2:
-                if isinstance(v[1], od):
-                    action = Action(self, **v[1])
-                    action.setObjectName(v[0])
-                    self.addAction(action)
-            else:
-                self.addSeparator()
+        self.fittingPanel = parent
 
-    def _defaultToolBarDefs(self):
-        toolBarDefs = (
-            ('Zoom-All', od((
-                ('text', 'Zoom-All'),
-                ('toolTip', 'Zoom All Axes'),
-                ('icon', Icon('icons/zoom-full')),
-                ('callback', self.plotItem.zoomFull),
-                ('enabled', True)
+    def getToolBarDefs(self):
+        toolBarDefs = super().getToolBarDefs()
+        extraDefs = (
+            ('FittedCurve', od((
+                ('text', 'Toggle Fitted Curve'),
+                ('toolTip', 'Toggle the Fitted Curve'),
+                ('icon', Icon('icons/curveFit')),
+                ('callback', self._toggleFittedCurve),
+                ('enabled', True),
+                ('checkable', True)
                 ))),
-            ('Zoom-X', od((
-                ('text', 'Zoom-X-axis'),
-                ('toolTip', 'Reset X-axis to fit view'),
-                ('icon', Icon('icons/zoom-full-1d')),
-                ('callback', self.plotItem.fitXZoom),
-                ('enabled', True)
-            ))),
-            ('Zoom-Y', od((
-                ('text', 'Zoom-Y-axis'),
-                ('toolTip', 'Reset Y-axis to fit view'),
-                ('icon', Icon('icons/zoom-best-fit-1d')),
-                ('callback', self.plotItem.fitYZoom),
-                ('enabled', True)
-            ))),
-            (),
-            )
+            ('RawData', od((
+                ('text', 'ToggleRawDataScatter'),
+                ('toolTip', 'Toggle the RawData Scatter Plot'),
+                ('icon', Icon('icons/curveFitScatter')),
+                ('callback', self._toggleRawDataScatter),
+                ('enabled', True),
+                ('checkable', True)
+            ))))
+        toolBarDefs.update(extraDefs)
         return toolBarDefs
 
+    def _toggleFittedCurve(self):
+        action = self.sender()
+        self.fittingPanel.toggleFittedData(action.isChecked())
+
+    def _toggleRawDataScatter(self):
+        action = self.sender()
+        self.fittingPanel.toggleRawData(action.isChecked())
 
 class LeftAxisItem(pg.AxisItem):
     """ Overridden class for the left axis to show minimal decimals and stop resizing to massive space.
@@ -99,7 +89,7 @@ class LeftAxisItem(pg.AxisItem):
     def tickStrings(self, values, scale, spacing):
         """ Overridden method to show minimal decimals.
         """
-        return [f'{v:.4f}' for v in values]
+        return [f'{v:.2e}' for v in values]
 
 class FittingHandle(Handle):
     """Experimental.  A class to allow manual refitting of a curve based.  """
@@ -173,22 +163,24 @@ class FittingPlot(pg.PlotItem):
         self.buttonsHidden = True
         self.autoBtn.hide()
         self.crossHair = CrossHair(plotWidget=self)
-        self.fittingHandle = FittingHandle(pen=self.gridPen)
-        self.fittingHandle.sigMoved.connect(self._handleMoved)
-        self.fittingHandle.sigHovered.connect(self._handleHovered)
-        self.fittingHandle.sigClicked.connect(self._handleClicked)
-        self.addItem(self.fittingHandle)
 
-    def _handleMoved(self, pos, *args):
-        self.parentWidget._replot(**{'pos':pos})
+        ## fittingHandle temporarly disabled. This feature (manual refitting) might be not necessary at all.
+        # self.fittingHandle = FittingHandle(pen=self.gridPen)
+        # self.fittingHandle.sigMoved.connect(self._handleMoved)
+        # self.fittingHandle.sigHovered.connect(self._handleHovered)
+        # self.fittingHandle.sigClicked.connect(self._handleClicked)
+        # self.addItem(self.fittingHandle)
 
-    def _handleHovered(self, *args):
-        # Action to be decided: maybe a tooltip of what it can do.
-        pass
-
-    def _handleClicked(self, *args):
-        # Action to be decided. maybe open a context menu gor right-click?
-        pass
+    # def _handleMoved(self, pos, *args):
+    #     pass
+    #
+    # def _handleHovered(self, *args):
+    #     # Action to be decided: maybe a tooltip of what it can do.
+    #     pass
+    #
+    # def _handleClicked(self, *args):
+    #     # Action to be decided. maybe open a context menu gor right-click?
+    #     pass
 
     def clear(self):
         """
@@ -208,17 +200,26 @@ class FittingPlot(pg.PlotItem):
 
     def fitXZoom(self):
         xs,ys = self._getPlotData()
-        if len(xs)>0:
+        if xs is not None and len(xs)>0:
             x,y = xs[-1], ys[-1]
-            xMin, xMax = min(x), max(x)
-            self.setXRange(xMin, xMax, padding=None, update=True)
+            if len(x) > 0:
+                xMin, xMax = min(x), max(x)
+                try:
+                    self.setXRange(xMin, xMax, padding=None, update=True)
+                except:
+                    getLogger().debug2('Cannot fit XZoom')
 
     def fitYZoom(self):
         xs, ys = self._getPlotData()
-        if len(xs) > 0:
+        if xs is not None and len(xs) > 0:
             x, y = xs[-1], ys[-1]
-            yMin, yMax = min(y), max(y)
-            self.setYRange(yMin, yMax, padding=None, update=True)
+            if len(y) > 0:
+                yMin, yMax = min(y), max(y)
+                try:
+                    self.setYRange(yMin, yMax, padding=None, update=True)
+                except:
+                    getLogger().debug2('Cannot fit XZoom')
+
 
     def _getPlotData(self):
         xs = []
@@ -302,7 +303,7 @@ class FitPlotPanel(GuiPanel):
     def __init__(self, guiModule, *args, **Framekwargs):
         GuiPanel.__init__(self, guiModule, showBorder=True, *args , **Framekwargs)
         self.fittedCurve = None #not sure if this var should Exist
-
+        self.rawDataScatterPlot = None
 
     def initWidgets(self):
 
@@ -310,6 +311,121 @@ class FitPlotPanel(GuiPanel):
         self._setExtraWidgets()
         self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
                                                  callback=self._currentCollectionCallback, onceOnly=True)
+        self.setXLabel(label='X')
+        self.setYLabel(label='Y')
+        self.labels = []
+
+    def updatePanel(self, *args, **kwargs):
+        self.plotCurrentData()
+
+    def plotCurrentData(self, *args):
+        """ Plot a curve based on Current Collection.
+         Get Plotting data from the Output-GUI-dataTable (getSelectedOutputDataTable)"""
+
+        self.clearData()
+
+        ## Get the current Collections if any or return
+        collections = self.current.collections
+        if not collections:
+            return
+
+        ## Get the raw data from the output DataTable if any or return
+        outputData = self.guiModule.getSelectedOutputDataTable()
+        if outputData is None:
+            return
+
+        ## Check if the current Collection pids are in the Table. If Pids not on table, return.
+        dataFrame = outputData.data
+        pids = [co.pid for co in self.current.collections]
+        filtered = dataFrame.getByHeader(sv.COLLECTIONPID, pids)
+        if filtered.empty:
+            return
+
+        ## Consider only the last selected Collection.
+        lastCollectionPid = filtered[sv.COLLECTIONPID].values[-1]
+        filteredDf = dataFrame[dataFrame[sv.COLLECTIONPID] == lastCollectionPid]
+
+        ## Grab the Pids/Objs for each spot in the scatter plot. Peaks
+        peakPids = filteredDf[sv.PEAKPID].values
+        objs = [self.project.getByPid(pid) for pid in peakPids]
+
+        ## Grab the Fitting Model, to recreate the fitted Curve from the fitting results.
+        modelNames = filteredDf[sv.MODEL_NAME].values
+        if len(modelNames) > 0:
+            modelName = modelNames[0]
+        else:
+            modelName = None
+        model = self.guiModule.backendHandler.getFittingModelByName(modelName)
+        if model is None:  ## get it from settings
+            model = self.guiModule.backendHandler.currentFittingModel
+        else:
+            model = model()
+
+        ## Grab the columns to plot the raw data, the header name from the model
+        Xs = filteredDf[model.xSeriesStepHeader].values
+        Ys = filteredDf[model.ySeriesStepHeader].values
+
+        ## Grab the Fitting function from the model and its needed Args from the DataTable. (I.e. Kd, Decay etc)
+        func = model.getFittingFunc(model)
+        funcArgs = model.modelArgumentNames
+        argsFit = filteredDf.iloc[0][funcArgs]
+        fittingArgs = argsFit.astype(float).to_dict()
+
+        ## Add and extra of filling data at the end of the fitted curve to don't just sharp end on the last raw data Point
+        extra = percentage(50, max(Xs))
+        initialPoint = min(Xs)
+        finalPoint = max(Xs) + extra
+
+        ## Build the fitted curve arrays
+        xf = np.linspace(initialPoint, finalPoint, 3000)
+        yf = func(xf, **fittingArgs)
+
+        ## Grab the axes label
+        seriesUnits = filteredDf[sv.SERIESUNIT].values
+        if len(seriesUnits) > 0:
+            seriesUnit = seriesUnits[0]
+        else:
+            seriesUnit = 'X (Series Unit Not Given)'
+        xAxisLabel = seriesUnit
+        yAxisLabel = model._ySeriesLabel
+
+        ## Setup the various labels.
+        self.currentCollectionLabel.setText('')
+        self.setXLabel(label=xAxisLabel)
+        self.setYLabel(label=yAxisLabel)
+        labelText = f'{lastCollectionPid}'
+        if len(self.current.collections) > 1:
+            labelText += f' - (Last selected)'
+        self.currentCollectionLabel.setText(labelText)
+
+        ## Plot the fittedCurve
+        if yf is None:
+            yf = [0]*len(xf)
+        self.fittedCurve = self.bindingPlot.plot(xf, yf, pen=self.bindingPlot.gridPen)
+
+        ## Plot the Raw Data
+        spots = []
+        self.labels = []
+        for obj, x, y in zip(objs, Xs, Ys):
+            brush = pg.mkBrush(255, 0, 0)
+            dd = {'pos': [0, 0], 'data': 'obj', 'brush': brush, 'symbol': 'o', 'size': 10, 'pen': None}
+            dd['pos'] = [x, y]
+            dd['data'] = obj
+            if obj is None:
+                continue
+            if hasattr(obj.spectrum, 'positiveContourColour'):  # colour from the spectrum.
+                brush = pg.functions.mkBrush(hexToRgb(obj.spectrum.positiveContourColour))
+                dd['brush'] = brush
+            spots.append(dd)
+            label = _CustomLabel(obj=obj, textProperty='id')
+            self.bindingPlot.addItem(label)
+            label.setPos(x, y)
+            self.labels.append(label)
+
+        self.rawDataScatterPlot = pg.ScatterPlotItem(spots)
+        self.bindingPlot.addItem(self.rawDataScatterPlot)
+        self.bindingPlot.scene().sigMouseMoved.connect(self.bindingPlot.mouseMoved)
+        self.bindingPlot.zoomFull()
 
     def setXLabel(self, label=''):
         self.bindingPlot.setLabel('bottom', label)
@@ -322,17 +438,24 @@ class FitPlotPanel(GuiPanel):
         self._bindingPlotView = pg.GraphicsLayoutWidget()
         self._bindingPlotView.setBackground(self.backgroundColour)
         self.bindingPlot = FittingPlot(parentWidget=self)
-        self.toolbar = ExperimentAnalysisPlotToolBar(parent=self, plotItem=self.bindingPlot,
-                                                     grid=(0, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
+        self.toolbar = FittingPlotToolBar(parent=self, plotItem=self.bindingPlot, guiModule=self.guiModule,
+                                          grid=(0, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
         self.currentCollectionLabel = Label(self, text='', grid=(0, 2), hAlign='r',)
         self._bindingPlotView.addItem(self.bindingPlot)
         self.getLayout().addWidget(self._bindingPlotView, 1,0,1,3)
 
-    def _replot(self,  *args, **kwargs):
-        pass
-
     def _currentCollectionCallback(self, *args):
-        self.plotCurrentData()
+        if self.current.collection is None:
+            self.clearData()
+            return
+        df = self.guiModule.getGuiResultDataFrame()
+        if df is None or df.empty:
+            self.clearData()
+            return
+        pids = [co.pid for co in self.current.collections]
+        filtered = df.getByHeader(sv.COLLECTIONPID, pids)
+        if not filtered.empty:
+            self.plotCurrentData()
 
     def plotCurve(self, xs, ys):
         self.clearData()
@@ -340,6 +463,21 @@ class FitPlotPanel(GuiPanel):
 
     def clearData(self):
         self.bindingPlot.clear()
+        self.currentCollectionLabel.clear()
+
+    def toggleRawDataLabels(self, setVisible=True):
+        for la in self.labels:
+            la.setVisible(setVisible)
+
+    def toggleRawData(self, setVisible=True):
+        """Show/Hide the raw data from the plot Widget """
+        self.rawDataScatterPlot.setVisible(setVisible)
+        self.toggleRawDataLabels(setVisible)
+
+
+    def toggleFittedData(self, setVisible=True):
+        """Show/Hide the fitted data from the plot Widget """
+        self.fittedCurve.setVisible(setVisible)
 
     def close(self):
         self._selectCurrentCONotifier.unRegister()

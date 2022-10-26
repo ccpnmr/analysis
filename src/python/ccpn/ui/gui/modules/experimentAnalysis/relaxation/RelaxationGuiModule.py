@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:11 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:40:29 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,9 +29,9 @@ from ccpn.util.Logging import getLogger
 ######## gui/ui imports ########
 from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import ToolBarPanel
-from ccpn.ui.gui.modules.experimentAnalysis.relaxation.RelaxationBarPlotPanel import RelaxationBarPlotPanel
-from ccpn.ui.gui.modules.experimentAnalysis.relaxation.RelaxationFitPlotPanel import RelaxationFitPlotPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import ToolBarPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import ExperimentAnalysisGuiModuleBC
 import ccpn.ui.gui.modules.experimentAnalysis.relaxation.RelaxationSettingsPanel as settingsPanel
@@ -56,13 +56,8 @@ class RelaxationGuiModule(ExperimentAnalysisGuiModuleBC):
     #################################################################
 
     def addPanels(self):
-        """ Add the Gui Panels to the panelHandler.
-        Each Panel is a stand-alone frame with information where about to be added on the general GUI.
-        Override in Subclasses"""
-        self.panelHandler.addToolBar(ToolBarPanel(self))
-        self.panelHandler.addPanel(TablePanel(self))
-        self.panelHandler.addPanel(RelaxationFitPlotPanel(self))
-        self.panelHandler.addPanel(RelaxationBarPlotPanel(self))
+        """ Add the Gui Panels to the panelHandler."""
+        super().addPanels()
 
     def addSettingsPanels(self):
         """

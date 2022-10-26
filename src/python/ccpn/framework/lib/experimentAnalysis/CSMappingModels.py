@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-26 14:51:44 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:00:42 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,10 +50,11 @@ class EuclideanCalculationModel(CalculationModel):
     Description = f'''Model:
                     d = √ 1/N * ∑(𝝰_i * δ_i)^2
                     {sv.uALPHA}: the alpha factor for each atom of interest
-                    i: atom type (defined by isotope code 1H, 15N...)
+                    i: atom type (isotope code per dimension 1H, 15N...)
                     N: atom count
                     {sv.uDelta}: delta shift per atom in the series
-                    (with ∑ i=1 to N)'''
+                    (with ∑ i=1 to N)
+                    Note peak assignments are not mandatory for the calculation.'''
     References  = '''
                     1) Eq. (9) M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
                     2) Mureddu, L. & Vuister, G. W. Simple high-resolution NMR spectroscopy as a tool in molecular biology.

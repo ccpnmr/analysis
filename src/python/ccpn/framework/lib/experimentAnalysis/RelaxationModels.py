@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-25 19:50:28 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 11:25:47 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -234,8 +234,6 @@ class HetNoeCalculation(CalculationModel):
             seriesValues = groupDf[self.PeakProperty]
             nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf) # join the atom names from different rows in a list
             seriesUnits = groupDf[sv.SERIESUNIT].unique()
-            satPeakPid = groupDf[sv.PEAKPID].values[satIndex]
-            unSatPeakPid = groupDf[sv.PEAKPID].values[unSatIndex]
             satPeakSNR = groupDf[sv._SNR].values[satIndex]
             unSatPeakSNR = groupDf[sv._SNR].values[unSatIndex]
             unSatValue = seriesValues.values[unSatIndex]

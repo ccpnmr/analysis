@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-17 18:36:23 +0100 (Mon, October 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 11:25:47 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,7 @@ BelowX = 'belowX'
 BelowY = 'belowY'
 DisappearedX = 'disappearedX'
 DisappearedY = 'disappearedY'
+ErrorHeight = 'errorHeight'
 AboveObjects = 'aboveObjects'
 AllAboveObjects = 'allAboveObjects'
 AllBelowObjects = 'allBelowObjects'
@@ -365,6 +366,7 @@ class BarGraphWidget(Widget):
             aboveObjects = args[AboveObjects]
             belowX = args[BelowX]
             belowY = args[BelowY]
+            errorHeights = args.get(ErrorHeight, {})
             belowObjects = args[BelowObjects]
             disappearedObjects = args[DisappearedObjects]
             self.aboveBrush = args[AboveBrush]
@@ -384,7 +386,7 @@ class BarGraphWidget(Widget):
             disappearedY = []
             disappearedObjects = []
             aboveBrushes = []
-
+            errorHeights = {}
             pos = self.xLine.pos().y()
             self.xLine.show()
             if self.xValues:
@@ -425,10 +427,17 @@ class BarGraphWidget(Widget):
                                          hoverCallback=self._mouseHoverCallback,
                                          xValues=disappearedX, yValues=disappearedY, objects=disappearedObjects,
                                          brush=self.disappearedBrush)
-
+        xErr = errorHeights.get('xError', np.array([]))
+        yErr = errorHeights.get('yError', np.array([]))
+        topErr = errorHeights.get('topError', np.array([]))
+        topErr = topErr.astype(float)
+        top = np.nan_to_num(topErr)
+        self.errorBars = pg.ErrorBarItem(x=xErr, y=yErr, top=top, beam=0.5, pen={'color': 'b', 'width': 1})
+        self.customViewBox.addItem(self.errorBars)
         self.customViewBox.addItem(self.aboveThreshold)
         self.customViewBox.addItem(self.belowThreshold)
         self.customViewBox.addItem(self.disappearedPeaks)
+
         self.customViewBox.addItem(self._hoverBox)
         self.customViewBox._selectionBoxEnabled = self._selectionBoxEnabled
         self.barGraphs.append(self.aboveThreshold)

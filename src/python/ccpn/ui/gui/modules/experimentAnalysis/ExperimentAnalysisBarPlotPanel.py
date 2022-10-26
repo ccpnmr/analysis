@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-25 12:12:14 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 11:25:47 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -51,6 +51,7 @@ class BarPlotPanel(GuiPanel):
         self._aboveX = []
         self._belowX = []
         self._untraceableX = []
+        self._errorHeights = {}
         ## Y
         self._aboveY = []
         self._belowY = []
@@ -266,6 +267,14 @@ class BarPlotPanel(GuiPanel):
         self._untraceableBrush = colourNameToHexDict.get(self.untraceableBrushColour, guiNameSpaces.BAR_untracBrushHex)
         self._tresholdLineBrush = colourNameToHexDict.get(self.thresholdBrushColour, guiNameSpaces.BAR_thresholdLineHex)
         self._gradientbrushes = colorSchemeTable.get(self.aboveThresholdBrushColour, []) #in case there is one.
+        index = dataFrame[xColumnName].index
+        # get the errors
+        errorColumn = f'{yColumnName}{sv._ERR}'
+        if errorColumn in dataFrame.columns:
+            xError = index
+            yError = dataFrame[yColumnName].values
+            topError = dataFrame[errorColumn].values
+            self._errorHeights = {'xError': xError.values, 'yError': yError, 'topError': topError}
         ## set ticks for the xAxis. As they Xs are strs, Need to create a dict Index:Value
         ticks = dict(zip(dataFrame[xColumnName].index, dataFrame[xColumnName].values))
         xaxis = self._getAxis('bottom')
@@ -339,6 +348,8 @@ class BarPlotPanel(GuiPanel):
                                        aboveY=self._aboveY,
                                        belowY=self._belowY,
                                        disappearedY=self._untraceableY,
+                                       ## errors
+                                       errorHeight = self._errorHeights,
                                        ## Objects
                                        aboveObjects=self._aboveObjects,
                                        belowObjects=self._belowObjects,

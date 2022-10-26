@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-26 14:29:57 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 14:48:21 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,9 @@ import pyqtgraph as pg
 from PyQt5 import QtWidgets, QtGui, QtCore
 from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox
 from ccpn.ui.gui.widgets.Widget import Widget
-
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_LABELLING
+from ccpn.ui.gui.guiSettings import getColours
+from ccpn.util.Colour import hexToRgb, rgbaRatioToHex
 
 AboveX = 'aboveX'
 AboveY = 'aboveY'
@@ -148,6 +150,8 @@ class BarGraphWidget(Widget):
         self._tickOption = MinimalTicks # one of AllTicks or MinimalTicks
         # plot.addItem(text)
         self.errorBars = None
+        colour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
+        self.errorBarsPen = pg.functions.mkPen(colour, width=1, style=QtCore.Qt.SolidLine)
 
         self._dataDict = {
             AboveX            : [],
@@ -433,7 +437,7 @@ class BarGraphWidget(Widget):
         topErr = errorHeights.get('topError', np.array([]))
         topErr = topErr.astype(float)
         top = np.nan_to_num(topErr)
-        self.errorBars = pg.ErrorBarItem(x=xErr, y=yErr, top=top, beam=0.5, pen={'color': 'b', 'width': 1})
+        self.errorBars = pg.ErrorBarItem(x=xErr, y=yErr, top=top, beam=0.5, pen=self.errorBarsPen)
         self.customViewBox.addItem(self.errorBars)
         self.customViewBox.addItem(self.aboveThreshold)
         self.customViewBox.addItem(self.belowThreshold)

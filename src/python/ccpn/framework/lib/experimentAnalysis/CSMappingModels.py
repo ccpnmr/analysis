@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-25 19:50:27 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 14:51:44 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -49,9 +49,9 @@ class EuclideanCalculationModel(CalculationModel):
     # MaTex       = r'$\sqrt{\frac{1}{N}\sum_{i=0}^N (\alpha_i*\delta_i)^2}$'
     Description = f'''Model:
                     d = √ 1/N * ∑(𝝰_i * δ_i)^2
-                    {sv.uALPHA}: the factor for each atom of interest;
-                    i: atom;
-                    N: atom count;
+                    {sv.uALPHA}: the alpha factor for each atom of interest
+                    i: atom type (defined by isotope code 1H, 15N...)
+                    N: atom count
                     {sv.uDelta}: delta shift per atom in the series
                     (with ∑ i=1 to N)'''
     References  = '''

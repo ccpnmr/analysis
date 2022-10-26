@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-25 17:10:02 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 14:51:45 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -622,7 +622,7 @@ class GuiCalculationPanel(GuiSettingPanel):
               }}),
         ))
         self.widgetDefinitions.update(calculationWidgetDefinitions)
-        self.widgetDefinitions.update(filteringWidgetDefinitions)
+        # self.widgetDefinitions.update(filteringWidgetDefinitions)
 
         return self.widgetDefinitions
 

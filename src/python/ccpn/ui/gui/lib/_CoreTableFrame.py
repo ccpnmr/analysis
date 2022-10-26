@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-25 15:59:09 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 15:17:02 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -504,8 +504,8 @@ class _CoreTableFrameABC(Frame):
             raise RuntimeError(f'Col has to be >= {self._addWidgetCol}')
         self._moduleHeaderFrame.getLayout().addWidget(widget, row, col, rowSpan, colSpan)
 
-    def _closeFrame(self):
-        """CCPN-INTERNAL: used to close the module
+    def _cleanupWidget(self):
+        """CCPN-INTERNAL: used to clean-up when closing
         """
         self._modulePulldown.unRegister()
         self._tableWidget._close()

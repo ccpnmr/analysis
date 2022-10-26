@@ -69,7 +69,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:20:50 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-26 16:02:47 +0100 (Wed, October 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -378,9 +378,11 @@ class ChemicalShiftsMapping(CcpnModule):
         self.showOnViewerButton = Button(self.nmrResidueFrame, tipText='Show on Molecular Viewer',
                                          icon=self.showStructureIcon, callback=self._showOnMolecularViewer,
                                          grid=(1, 2), hAlign='l')
+        self.nmrResidueFrame.addWidgetToTop(self.showOnViewerButton, 2)
         self.showOnViewerButton.setFixedHeight(25)
         self.updateButton1 = Button(self.nmrResidueFrame, text='', icon=self.updateIcon, tipText='Update all',
                                     callback=self._updateModule, grid=(1, 3), hAlign='r')
+        self.nmrResidueFrame.addWidgetToTop(self.updateButton1, 3)
         self.updateButton1.setFixedHeight(25)
 
         self.hPlotsTableSplitter.addWidget(self.nmrResidueFrame)

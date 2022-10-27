@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-26 15:00:42 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-27 11:32:49 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -106,13 +106,22 @@ class EuclideanCalculationModel(CalculationModel):
                     csmValue = np.mean(deltaDeltas[1:])  ## first item is excluded from as it is always 0 by definition.
 
                     nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf)
-                    seriesSteps = groupDf[self.xSeriesStepHeader].unique()
+
+                    # seriesSteps = groupDf[self.xSeriesStepHeader].unique() #cannot use unique! Could be series with same value!!
                     seriesUnits = groupDf[sv.SERIESUNIT].unique()
                     peakPids = groupDf[sv.PEAKPID].unique()
                     peaks = self.project.getByPids(peakPids)
                     csmValueError = None
-                    for delta, seriesStep, peakPid in zip(deltaDeltas, seriesSteps, peakPids):
+                    for delta, peakPid in zip(deltaDeltas, peakPids):
                         # build the outputFrame
+                        peak = self.project.getByPid(peakPid)
+                        if not peak:
+                            getLogger().warn(f'Cannot find Peak {peakPid}.Skipping...')
+                            continue
+                        spectrum = peak.spectrum
+
+                        seriesStep = groupDf[groupDf[sv.SPECTRUMPID] == spectrum.pid][sv.SERIES_STEP_X].values[-1]
+                        print(seriesStep)# the dataFrame with spectrumPid series steps unique
                         outputFrame.loc[rowIndex, sv.COLLECTIONID] = collectionId
                         outputFrame.loc[rowIndex, sv.PEAKPID] = peakPid
                         outputFrame.loc[rowIndex, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]

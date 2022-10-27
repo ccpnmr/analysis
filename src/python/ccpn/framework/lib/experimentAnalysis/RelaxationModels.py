@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-26 11:25:47 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-27 13:06:09 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -239,7 +239,7 @@ class HetNoeCalculation(CalculationModel):
             unSatValue = seriesValues.values[unSatIndex]
             satValue = seriesValues.values[satIndex]
             ratio = satValue/unSatValue
-            error = lf.peakErrorBySNR(satPeakSNR, unSatPeakSNR, ratio)
+            error = lf.peakErrorBySNRs([satPeakSNR, unSatPeakSNR], factor=ratio, power=-2, method='sum')
             # build the outputFrame
             outputFrame.loc[collectionId, sv.COLLECTIONID] = collectionId
             outputFrame.loc[collectionId, sv.PEAKPID] = groupDf[sv.PEAKPID].values[0]
@@ -251,27 +251,6 @@ class HetNoeCalculation(CalculationModel):
             outputFrame.loc[collectionId, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
             outputFrame.loc[collectionId, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''
         return outputFrame
-
-    def _calculateHetNoeErrorFromPids(self, satPeakPid, unSatPeakPid, satValue=None, unSatValue=None):
-        # get the NoiseLevel from peakPid
-        satPeak = self.project.getByPid(satPeakPid)
-        unSatPeak = self.project.getByPid(unSatPeakPid)
-        if not satPeak:
-            getLogger().warning(f'Peak not found for {satPeakPid}. Cannot calculate Error.')
-            return None
-        if not unSatPeak:
-            getLogger().warning(f'Peak not found for {unSatPeakPid}. Cannot calculate Error.')
-            return None
-        satNoiseLevel = satPeak.spectrum.noiseLevel or satPeak.spectrum.estimateNoise()
-        unSatNoiseLevel = unSatPeak.spectrum.noiseLevel or unSatPeak.spectrum.estimateNoise()
-        unSatValue = unSatValue or getattr(unSatPeak, self.PeakProperty, None)
-        satValue = satValue or getattr(satPeak, self.PeakProperty, None)
-        if not all([satValue, unSatValue, satNoiseLevel, unSatNoiseLevel]):
-            return None
-        factor = abs(satValue / unSatValue)
-        error = lf.hetNoeError(satValue, unSatValue, satNoiseLevel, unSatNoiseLevel,factor=factor)
-        return error
-
 
 #####################################################
 ###########      Register models    #################

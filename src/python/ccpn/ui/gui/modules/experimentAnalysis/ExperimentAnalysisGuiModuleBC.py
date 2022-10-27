@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:28 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-27 16:20:49 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -119,8 +119,13 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         outDataFrame.set_index(sv.COLLECTIONPID, drop=False, inplace=True)
 
         # add the rawData as new columns (Transposed from column to row)
+        lastSeenSeriesStep = None
         for ix, ys in dataFrame.groupby(sv.COLLECTIONPID)[[sv.SERIES_STEP_X, sv.SERIES_STEP_Y]]:
-            outDataFrame.loc[ix, ys[sv.SERIES_STEP_X].astype(str).values] = ys[sv.SERIES_STEP_Y].values
+            for seriesStep, seriesValue in zip(ys[sv.SERIES_STEP_X].astype(str).values, ys[sv.SERIES_STEP_Y].values):
+                if seriesStep == lastSeenSeriesStep:
+                    seriesStep += sv.SEP # this is the case when two series Steps are the same! Cannot create two identical columns or 1 will disappear
+                outDataFrame.loc[ix, seriesStep] = seriesValue
+                lastSeenSeriesStep = seriesStep
 
         # drop columns that should not be on the Gui. To remove: peak properties (dim, height, ppm etc)
         toDrop = sv.PeakPropertiesHeaders + [sv._SNR, sv.DIMENSION, sv.ISOTOPECODE, sv.NMRATOMNAME, sv.NMRATOMPID]

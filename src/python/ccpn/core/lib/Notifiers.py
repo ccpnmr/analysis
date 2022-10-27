@@ -10,7 +10,7 @@ preventing unnecessary code duplication. They are translated into multiple notif
 of the 'Project V3-machinery' (i.e., the Rasmus callbacks)
 
 The callback function is passed a callback dictionary with relevant info (see
-docstring of Notifier class. This idea was copied from the Traitlets package.
+docstring of Notifier class). This idea was copied from the Traitlets package.
 
 April 2017: First design by Geerten Vuister
 
@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:05 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-27 16:20:48 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -87,17 +87,15 @@ class NotifierABC(object):
 
         self._theObject = theObject  # The object we are monitoring
 
-        if triggers is not None:
-            if not (isinstance(triggers, list) or isinstance(triggers, tuple)) \
-                    or len(triggers) == 0:
-                raise RuntimeError('Invalid triggers (%r); should be a list or tuple' % triggers)
+        if triggers is not None and (not isinstance(triggers, (list, tuple)) or len(triggers) == 0):
+            raise RuntimeError('Invalid triggers (%r); should be a list or tuple' % triggers)
+
         for trigger in triggers:
-            if not trigger in self._triggerKeywords:
+            if trigger not in self._triggerKeywords:
                 raise ValueError('Invalid trigger "%s" for <%s>' % (trigger, self.__class__.__name__))
         self._triggers = tuple(triggers)
 
         self._targetName = targetName
-
         self._callback = callback
         self._kwargs = kwargs
 
@@ -119,11 +117,11 @@ class NotifierABC(object):
         return self._project()
 
     def setDebug(self, flag: bool):
-        "Set debug output on/off"
+        """Set debug output on/off"""
         self._debug = flag
 
     def setBlanking(self, flag: bool):
-        "Set blanking on/off"
+        """Set blanking on/off"""
         self._isBlanked = flag
 
     def triggersOn(self, trigger) -> bool:
@@ -148,17 +146,17 @@ class NotifierABC(object):
 
     def __str__(self) -> str:
         if self.isRegistered():
-            trigs = '%s' % [(t, self._targetName) for t in self._triggers]
+            trigs = f'{[(t, self._targetName) for t in self._triggers]}'
             return '<%s (%d): theObject:%s triggers:%s>' % \
                    (self.__class__.__name__,
                     self.id,
                     self._theObject,
                     trigs[1:-1])
-        else:
-            return '<%s (%d): not registered>' % \
-                   (self.__class__.__name__,
-                    self.id
-                    )
+
+        return '<%s (%d): not registered>' % \
+               (self.__class__.__name__,
+                self.id
+                )
 
     __repr__ = __str__
 
@@ -357,7 +355,7 @@ class Notifier(NotifierABC):
                 notifier = (trigger, targetName)
                 if _project is None:
                     # This should not happen
-                    raise RuntimeError('Undefined project: cannot register notifier for %s' % theObject)
+                    raise RuntimeError(f'Undefined project: cannot register notifier for {theObject}')
                 func = _project.registerNotifier(className=targetName,
                                                  target=trigger,
                                                  func=partial(self, notifier=notifier),
@@ -398,7 +396,7 @@ class Notifier(NotifierABC):
         """
 
         if not self.isRegistered():
-            getLogger().warning('Triggering unregistered notifier %s' % self)
+            getLogger().warning(f'Triggering unregistered notifier {self}')
             return
 
         if self._isBlanked:
@@ -490,7 +488,7 @@ class Notifier(NotifierABC):
 
 
 # def currentNotifier(attributeName, callback, onlyOnce=False, debug=False, **kwargs):
-#     """Convienience method: Return a Notifier instance for current.attributeName
+#     """Convenience method: Return a Notifier instance for current.attributeName
 #     """
 #     app = getApplication()
 #     notifier = Notifier(app.current, [Notifier.CURRENT], targetName=attributeName,
@@ -523,9 +521,8 @@ class NotifierBase(object):
         objNotifiers = getattr(self, self._NOTIFIERSDICT)
         # check type
         if not isinstance(objNotifiers, _NotifiersDict):
-            raise RuntimeError('Invalid NotifiersDict, got %s, expected %s' %
-                               (type(objNotifiers), type(_NotifiersDict))
-                               )
+            raise RuntimeError(f'Invalid NotifiersDict, got {type(objNotifiers)}, expected {type(_NotifiersDict)}')
+
         return objNotifiers
 
     def setNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., Optional[str]], **kwargs) -> Notifier:
@@ -617,16 +614,13 @@ class NotifierBase(object):
         if not isinstance(notifier, NotifierABC):
             raise ValueError('"%s" is not a valid notifier instance' % notifier)
 
-        if notifier.id in objNotifiers:
-            return True
-
-        return False
+        return notifier.id in objNotifiers
 
     def searchNotifiers(self, objects=[], triggers=None, targetName=None):
         """Search whether a notifier with the given parameters is already in the list.
         The triggers CREATE, DELETE, RENAME and CHANGE can be combined in the call signature
 
-        :param theObject: valid V3 core object or current object to watch
+        :param objects: valid V3 core object or current object to watch
         :param triggers: list of trigger keywords
         :param targetName: valid className, attributeName or ANY
         :return: None or list of existing notifiers
@@ -727,6 +721,4 @@ def _removeDuplicatedNotifiers(notifierQueue):
             # this is in reverse order
             executeQueue.append((func, data))
 
-    result = list(reversed(executeQueue))
-
-    return result
+    return list(reversed(executeQueue))

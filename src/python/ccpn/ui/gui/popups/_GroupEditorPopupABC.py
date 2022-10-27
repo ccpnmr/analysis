@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-17 17:45:30 +0100 (Tue, May 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-27 16:20:49 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1128,8 +1128,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
     def _leftPullDownCallback(self, value=None):
         """Callback when selecting the left spectrumGroup pulldown item"""
-        obj = self.project.getByPid(value)
-        if obj:
+        if obj := self.project.getByPid(value):
             # set the new object
             self.obj = obj
         self._updateStateOnSelection()
@@ -1149,13 +1148,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         return result
 
     def _getRenames(self):
-        result = {}
-
-        for name, rename in self._updatedNames.items():
-            if name != rename:
-                result[name] = rename
-
-        return result
+        return {name: rename for name, rename in self._updatedNames.items() if name != rename}
 
     # def _revertClicked(self):
     #     super()._revertClicked()
@@ -1221,20 +1214,36 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
         return True
 
-    def _cancel(self):
+    def unRegister(self):
+        """Clean up notifiers on closing
+        """
         if self.EDITMODE:
             self.leftPullDown.unRegister()
         self.rightPullDown.unRegister()
         self._disconnectModels()
+
+    def _cancel(self):
+        """Callback from cancel button
+        """
         self.reject()
 
     def _applyAndClose(self):
+        """Callback from apply-and-close button
+        """
         if self._applyChanges() is True:
-            if self.EDITMODE:
-                self.leftPullDown.unRegister()
-            self.rightPullDown.unRegister()
-            self._disconnectModels()
             self.accept()
+
+    def accept(self):
+        """Dialog accepted
+        """
+        self.unRegister()
+        super().accept()
+
+    def reject(self) -> None:
+        """Dialog rejected
+        """
+        self.unRegister()
+        super().reject()
 
     def _updateGl(self, spectra):
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier

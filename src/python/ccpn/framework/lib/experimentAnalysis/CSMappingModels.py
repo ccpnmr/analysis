@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:25 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-27 16:20:48 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -106,13 +106,20 @@ class EuclideanCalculationModel(CalculationModel):
                     csmValue = np.mean(deltaDeltas[1:])  ## first item is excluded from as it is always 0 by definition.
 
                     nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf)
-                    seriesSteps = groupDf[self.xSeriesStepHeader].unique()
+
+                    # seriesSteps = groupDf[self.xSeriesStepHeader].unique() #cannot use unique! Could be series with same value!!
                     seriesUnits = groupDf[sv.SERIESUNIT].unique()
                     peakPids = groupDf[sv.PEAKPID].unique()
-                    peaks = self.project.getByPids(peakPids)
-                    csmValueError = None
-                    for delta, seriesStep, peakPid in zip(deltaDeltas, seriesSteps, peakPids):
+                    snrs = groupDf[sv._SNR].unique()
+                    csmValueError = lf.peakErrorBySNRs(snrs, factor=csmValue, power=-2, method='std')
+                    for delta, peakPid in zip(deltaDeltas, peakPids):
                         # build the outputFrame
+                        peak = self.project.getByPid(peakPid)
+                        if not peak:
+                            getLogger().warn(f'Cannot find Peak {peakPid}.Skipping...')
+                            continue
+                        spectrum = peak.spectrum
+                        seriesStep = groupDf[groupDf[sv.SPECTRUMPID] == spectrum.pid][sv.SERIES_STEP_X].values[-1]
                         outputFrame.loc[rowIndex, sv.COLLECTIONID] = collectionId
                         outputFrame.loc[rowIndex, sv.PEAKPID] = peakPid
                         outputFrame.loc[rowIndex, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
@@ -144,35 +151,6 @@ class EuclideanCalculationModel(CalculationModel):
             deltaDeltas.append(dd)
         return deltaDeltas
 
-    @staticmethod
-    def _calculateDeltaDeltasError(peaks, factor=1):
-        """
-        Calculate the average error for peaks based on the Peak height and noiseLevel
-        :param peaks:
-        :return: float
-        """
-        # TODO Double check if is the right calculation error.
-        error = None
-        if len(peaks)<1:
-            return None
-        peak1 = peaks[0]
-        peaks = peaks[1:-1]
-        p1nl = peak1.spectrum.noiseLevel
-        values = []
-        for peak in peaks:
-            try:
-                notAllowed = [0, None, np.nan,]
-                for vv in [peak.height, peak1.height, peak.spectrum.noiseLevel, p1nl]:
-                    if vv in notAllowed:
-                        continue
-                else:
-                    e = factor * np.sqrt((peak1.height / peak.height) ** 2 + (p1nl / peak.spectrum.noiseLevel) ** 2)
-                    values.append(e)
-            except Exception as err:
-                e = None # don't add values
-        if all(values):
-            error = np.mean(values)
-        return error
 
 ########################################################################################################################
 ####################################          Saturation Models                      ###################################

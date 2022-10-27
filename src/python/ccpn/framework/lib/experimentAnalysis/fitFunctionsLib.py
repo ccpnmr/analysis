@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:26 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-27 16:20:49 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,12 @@ pearson7_func    = ls.pearson7
 students_t_func  = ls.students_t
 powerlaw_func    = ls.powerlaw
 
-
+CommonStatFuncs = {
+                sv.MEAN     : np.mean,
+                sv.MEDIAN   : np.median,
+                sv.STD      : np.std,
+                sv.VARIANCE : np.var,
+                }
 
 
 ########################################################################################################################
@@ -263,33 +268,28 @@ def _checkValidValues(values):
             return False
     return True
 
-def peakErrorBySNR(snrPeak1, snrPeak2, factor=1):
+def peakErrorBySNRs(snrs, factor=1, power=-2, method='sum'):
     """
-    Calculate the Error of NOE measurements (as in AnalysisV2)
+    Calculate error by signal to noise ratio and a scaling factor.
+    :param snrs: list of floats, list of signal to noise ratio for Peaks
     :param factor: float, correction factor.
-    :param snrPeak1: float, signal to noise ratio for Peak 1
-    :param snrPeak2: float, signal to noise ratio for Peak 2
+    :param power: float/int, the power value. -2 as default
+    :param method: str, the calculation mode for combining observation values. One of mean, sum, std, median
     :return: float or None
-    Ref.: 1) eq. 4 from Kharchenko, V., et al. Dynamic 15N{1H} NOE measurements: a tool for studying protein dynamics.
+    Ref.: 1) derived from eq. 4 from Kharchenko, V., et al. Dynamic 15N{1H} NOE measurements: a tool for studying protein dynamics.
              J Biomol NMR 74, 707–716 (2020). https://doi.org/10.1007/s10858-020-00346-6
     """
-    if not _checkValidValues([snrPeak1, snrPeak2, factor]):
+    if not _checkValidValues(snrs+[factor]):
         return
-    error = abs(factor) * np.sqrt(snrPeak1**-2 + snrPeak2**-2)
-    return error
-
-def hetNoeError(sat, nonSat, noiseSat, noiseNonSat, factor=1):
-    """
-    Calculate the Error of NOE measurements (as in AnalysisV2)
-    :param factor: float, correction factor. E.g.: intensity  ratio value for the saturated/unsaturated
-    :param sat: float, intensity value for the saturated Peak
-    :param nonSat: float, intensity value for the unsaturated(reference) Peak
-    :param noiseSat: float, noise value for the saturated Spectrum
-    :param noiseNonSat: float, noise value for the unsaturated Spectrum
-    :return:
-    Ref.:
-    """
-    error = factor * np.sqrt((noiseSat / sat) ** 2 + (noiseNonSat / nonSat) ** 2)
+    defaultMethod = 'sum'
+    allowedMethods = ['mean', 'sum', 'std', 'median']
+    if method not in allowedMethods:
+        getLogger().warning(f'Method not available. Reverted to default: {defaultMethod}. Use one of {allowedMethods}')
+        method = defaultMethod
+    func = getattr(np, method, np.sum)
+    values = np.array(snrs, dtype=float)
+    inner = func(np.power(values, power))
+    error = abs(factor) * np.sqrt(inner)
     return error
 
 def _scaleMinMaxData(data, minMaxRange=(1.e-5, 1)):
@@ -330,12 +330,7 @@ def _formatValue(value, maxInt=3, floatPrecision=3, expDigits=1):
         getLogger().debug2(f'Impossible to format {value}. Error:{ex}')
     return value
 
-CommonStatFuncs = {
-                sv.MEAN     : np.mean,
-                sv.MEDIAN   : np.median,
-                sv.STD      : np.std,
-                sv.VARIANCE : np.var,
-                }
+
 
 
 # import matplotlib.pyplot as plt

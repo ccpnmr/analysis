@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:27 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-27 16:20:49 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -200,6 +200,8 @@ class DataTableModule(CcpnModule):
             self._tableWidget._close()
         if self._metadata:
             self._metadata.close()
+        if self.activePulldownClass and self._setCurrentPulldown:
+            self._setCurrentPulldown.unRegister()
 
         super()._closeModule()
 
@@ -377,12 +379,6 @@ class _TableWidget(Table):
         """
         pids = data.get('pids', [])
         self._handleDroppedItems(pids, KlassTable, self.moduleParent._modulePulldown)
-
-    def _close(self):
-        """
-        Cleanup the notifiers when the window is closed
-        """
-        pass
 
     def _handleDroppedItems(self, pids, objType, pulldown):
         """

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:30 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-27 16:20:49 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,6 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 from functools import partial
-from ccpn.ui.gui.widgets.Base import SignalBlocking
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -45,14 +44,11 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.CompoundBaseWidget import CompoundBaseWidget
 from ccpn.ui.gui.widgets.CompoundView import CompoundView
-from ccpn.ui.gui.widgets.TextEditor import TextEditor, PlainTextEditor
+from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
-from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown
+from ccpn.util.Colour import spectrumColours, fillColourPulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.util.Logging import getLogger
 
 
 class ListCompoundWidget(CompoundBaseWidget):
@@ -60,8 +56,8 @@ class ListCompoundWidget(CompoundBaseWidget):
     Compound class comprising a Label, a PulldownList, and a ListWidget, combined in a
     CompoundBaseWidget (i.e.a Frame)
 
-    NB: can also be used as only a Label and a ListWidget by hiding the Pulldown:
-          myWidget.showPulldownList(False)
+    Can also be used as only a Label and a ListWidget by hiding the Pulldown:
+    myWidget.showPulldownList(False)
 
       orientation       widget layout
       ------------      ------------------------
@@ -136,7 +132,7 @@ class ListCompoundWidget(CompoundBaseWidget):
 
         # pulldown
         texts = ['> select-to-add <'] + list(texts) if texts else ['> select-to-add <']
-        self.pulldownListAdditionalCallback = kwds.get('pulldownCallback', None)
+        self.pulldownListAdditionalCallback = kwds.get('pulldownCallback')
         self.pulldownList = PulldownList(parent=self, texts=texts, callback=self._addToListWidget, index=0)
         self.pulldownList.setObjectName(labelText)
         self._addWidget(self.pulldownList)
@@ -153,7 +149,7 @@ class ListCompoundWidget(CompoundBaseWidget):
         self._addWidget(self.listWidget)
 
         styleSheet = '.ListWidget {border: %ipx solid %s; border-radius: 3px}'
-        styleSheet = styleSheet % (self.LIST_BORDER_WIDTH, self.LIST_BORDER_COLOR)
+        styleSheet %= (self.LIST_BORDER_WIDTH, self.LIST_BORDER_COLOR)
         self.listWidget.setStyleSheet(styleSheet)
 
         if minimumWidths is not None:
@@ -197,8 +193,6 @@ class ListCompoundWidget(CompoundBaseWidget):
 
     def clearList(self):
         self.listWidget._deleteAll()
-
-
 
     def setMaximumItemSelectionCount(self, value):
         self.maxItemSelection = value
@@ -252,27 +246,23 @@ class ListCompoundWidget(CompoundBaseWidget):
         if item in texts:
             self.addText(item)
             return
-        try:
-            item = texts[int(item) + 1]  # added "select-to-add" to pulldownlist
+        with contextlib.suppress(Exception):
+            item = texts[int(item) + 1]  # added "select-to-add" to pulldown-list
             self.addText(item)
-        except:
-            pass
 
     def _addToListWidget(self, item):
         """Callback for Pulldown, adding the selcted item to the listWidget"""
 
-        if self.maxItemSelection is None:
-            if item is not None and self.pulldownList.getSelectedIndex() != 0:
-                self.addText(item)
+        if self.maxItemSelection is None and item is not None and self.pulldownList.getSelectedIndex() != 0:
+            self.addText(item)
 
         if isinstance(self.maxItemSelection, int):
             if self.listWidget.count() == self.maxItemSelection:
                 showWarning(f'{self.pulldownList.objectName()}',
                             'Cannot add more to selection. Please remove any existing item(s) to add new')
 
-            else:
-                if item is not None and self.pulldownList.getSelectedIndex() != 0:
-                    self.addText(item)
+            elif item is not None and self.pulldownList.getSelectedIndex() != 0:
+                self.addText(item)
 
         # reset to first > select-to-add < entry
         with self.blockWidgetSignals(recursive=False, additionalWidgets=[self.pulldownList, ]):
@@ -291,8 +281,6 @@ class ListCompoundWidget(CompoundBaseWidget):
         Internal. Called for saving/restoring the widget state.
         """
         return self.setTexts(value)
-
-
 
 
 class EntryCompoundWidget(CompoundBaseWidget):
@@ -385,6 +373,7 @@ class EntryCompoundWidget(CompoundBaseWidget):
         Internal. Called for saving/restoring the widget state.
         """
         return self.setText(value)
+
 
 class EntryPathCompoundWidget(CompoundBaseWidget):
     """
@@ -555,7 +544,6 @@ class TextEditorCompoundWidget(CompoundBaseWidget):
         """
         self.textEditor.set(text)
 
-
     def _getSaveState(self):
         """
         Internal. Called for saving/restoring the widget state.
@@ -628,7 +616,7 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
                                     showBorder=showBorder, **kwds)
 
-        self.label = Label(parent=self, vAlign='center') #this attribute needs to be set.
+        self.label = Label(parent=self, vAlign='center')  #this attribute needs to be set.
         self._addWidget(self.label)
         if labelText is not None and len(labelText) > 0:
             self.label.setText(labelText)
@@ -696,7 +684,7 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         """Convenience: Set item in Pulldown; works with text or item"""
 
         if blockSignals:
-            with self.blockWidgetSignals(recursive=False, additionalWidgets=[self.pulldownList,]):
+            with self.blockWidgetSignals(recursive=False, additionalWidgets=[self.pulldownList, ]):
                 self.pulldownList.select(item)
         else:
             self.pulldownList.select(item)
@@ -812,7 +800,7 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
         self.label = Label(parent=self, text=labelText, vAlign='center')
         self._addWidget(self.label)
 
-        hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
+        hAlign = orientation if orientation in ['left', 'right'] else 'center'
         checkboxKwds = {'checked'  : checked,
                         'text'     : text,
                         'hAlign'   : hAlign,
@@ -907,9 +895,9 @@ class CheckBoxesCompoundWidget(CompoundBaseWidget):
         self._addWidget(self.label)
 
         checkboxKwds = {
-                        'texts'     : texts,
-                        'callback'  : callback,
-                        }
+            'texts'   : texts,
+            'callback': callback,
+            }
         checkboxKwds.update(compoundKwds or {})
         self.checkBoxes = CheckBoxes(parent=self, **checkboxKwds)
         self.checkBoxes.setObjectName(labelText)
@@ -953,6 +941,7 @@ class CheckBoxesCompoundWidget(CompoundBaseWidget):
         Internal. Called for saving/restoring the widget state.
         """
         return self.set(value)
+
 
 class ButtonCompoundWidget(CompoundBaseWidget):
     """
@@ -1005,13 +994,13 @@ class ButtonCompoundWidget(CompoundBaseWidget):
         self.label = Label(parent=self, text=labelText, vAlign='center')
         self._addWidget(self.label)
 
-        hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
-        buttonKwds = { 'toggle'    : toggle,
-                        'text'     : text,
-                        'hAlign'   : hAlign,
-                        'icon'     : icon,
-                        'callback' : callback,
-                        }
+        hAlign = orientation if orientation in ['left', 'right'] else 'center'
+        buttonKwds = {'toggle'  : toggle,
+                      'text'    : text,
+                      'hAlign'  : hAlign,
+                      'icon'    : icon,
+                      'callback': callback,
+                      }
         buttonKwds.update(compoundKwds or {})
         self.button = Button(parent=self, **buttonKwds)
         self.button.setObjectName(labelText)
@@ -1026,6 +1015,7 @@ class ButtonCompoundWidget(CompoundBaseWidget):
 
         if fixedWidths is not None:
             self.setFixedWidths(fixedWidths)
+
 
 class LabelCompoundWidget(CompoundBaseWidget):
     """
@@ -1080,9 +1070,9 @@ class LabelCompoundWidget(CompoundBaseWidget):
 
         hAlign = orientation if orientation in ['left', 'right'] else 'center'
         label2Kwds = {
-                        'text'     : label2Text,
-                        'icon'     : icon,
-                        }
+            'text': label2Text,
+            'icon': icon,
+            }
         label2Kwds.update(compoundKwds or {})
         self.label2 = Label(parent=self, hAlign='r', **label2Kwds)
         self.label2.setObjectName(label2Text)
@@ -1103,6 +1093,7 @@ class LabelCompoundWidget(CompoundBaseWidget):
 
     def _setSavedState(self, value):
         self.label2.setText(value)
+
 
 class SpinBoxCompoundWidget(CompoundBaseWidget):
     """
@@ -1439,7 +1430,6 @@ class SelectorWidget(Widget):
         return self.select(value)
 
 
-
 class InputPulldown(PulldownList):
 
     def __init__(self, parent=None, callback=None, **kwds):
@@ -1477,7 +1467,6 @@ class InputPulldown(PulldownList):
         return self.set(value)
 
 
-
 class LineEditPopup(QtWidgets.QDialog, Base):
 
     def __init__(self, parent=None, dataType=None, **kwds):
@@ -1490,7 +1479,7 @@ class LineEditPopup(QtWidgets.QDialog, Base):
         ButtonList(self, grid=(1, 1), callbacks=[self.reject, self.returnItem], texts=['Cancel', 'OK'])
 
         if dataType:
-            inputLabel.setText('New %s name' % dataType)
+            inputLabel.setText(f'New {dataType} name')
 
     def returnItem(self):
         self.accept()
@@ -1535,8 +1524,8 @@ class ColourSelectionWidget(Widget):
         pix = QtGui.QPixmap(QtCore.QSize(20, 20))
         pix.fill(QtGui.QColor(newColour))
         newIndex = str(len(spectrumColours.items()) + 1)
-        self.pulldownList.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
-        spectrumColours[newColour.name()] = 'Colour %s' % newIndex
+        self.pulldownList.addItem(icon=QtGui.QIcon(pix), text=f'Colour {newIndex}')
+        spectrumColours[newColour.name()] = f'Colour {newIndex}'
         self.pulldownList.setCurrentIndex(int(newIndex) - 1)
 
     def colour(self):
@@ -1559,7 +1548,6 @@ class ColourSelectionWidget(Widget):
         Internal. Called for saving/restoring the widget state.
         """
         return self.setColour(value)
-
 
 
 class RadioButtonsCompoundWidget(CompoundBaseWidget):
@@ -1592,7 +1580,7 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
                  labelText='', texts=[], tipTexts=[], icons=[], callback=None,
                  enabledTexts=None,
-                 selectedText = None,
+                 selectedText=None,
                  selectedInd=0, direction='h',
                  editable=True, compoundKwds=None,
                  **kwds):
@@ -1616,7 +1604,7 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
         self.label = Label(parent=self, text=labelText, vAlign='center')
         self._addWidget(self.label)
 
-        hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
+        hAlign = orientation if orientation in ['left', 'right'] else 'center'
         if compoundKwds is None:
             compoundKwds = {}
         self.radioButtons = RadioButtons(parent=self, callback=callback, **compoundKwds)
@@ -1649,7 +1637,7 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
     def setIndex(self, index):
         """Convenience: set the radioButtons index
         """
-        self.radioButtons.setIndex(index if index else 0)
+        self.radioButtons.setIndex(index or 0)
 
     def getByText(self, *args):
         """Convenience: get the radioButtons selected text
@@ -1667,6 +1655,7 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
     def _setSavedState(self, value):
         self.setByText(value)
 
+
 class ColourSelectionCompoundWidget(PulldownListCompoundWidget):
 
     def __init__(self, parent=None, vAlign='top', stretch=(0, 0), hAlign='left',
@@ -1674,7 +1663,6 @@ class ColourSelectionCompoundWidget(PulldownListCompoundWidget):
                  labelText=None, tipText=None, selectItem=None,
                  callback=None, compoundKwds=None,
                  **kwds):
-
         super().__init__(parent=parent,
                          vAlign=vAlign, stretch=stretch, hAlign=hAlign, vPolicy=vPolicy,
                          labelText=labelText, tipText=tipText,
@@ -1688,6 +1676,7 @@ class ColourSelectionCompoundWidget(PulldownListCompoundWidget):
         if selectItem:
             with pulldown.blockWidgetSignals():
                 pulldown.select(selectItem)
+
 
 class CompoundViewCompoundWidget(CompoundBaseWidget):
     """
@@ -1736,7 +1725,7 @@ class CompoundViewCompoundWidget(CompoundBaseWidget):
         self.label = Label(parent=self, text=labelText, vAlign='center')
         self._addWidget(self.label)
 
-        hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
+        hAlign = orientation if orientation in ['left', 'right'] else 'center'
         viewKwds = {'hAlign': hAlign,
                     'smiles': '',
                     }
@@ -1771,22 +1760,18 @@ class CompoundViewCompoundWidget(CompoundBaseWidget):
             self._initSize = True
 
 
-if __name__ == '__main__':
+def main():
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.widgets.BasePopup import BasePopup
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
-
     app = TestApplication()
-
 
     def callback1(obj):
         print('callback1', obj)
 
-
     def callback2():
         print('callback2')
-
 
     popup = CcpnDialog(windowTitle='Test widget', setLayout=True)
 
@@ -1798,14 +1783,8 @@ if __name__ == '__main__':
             vAlign='top',
             # hAlign='left',
             )
-    # policyDict = dict(
-    #   hAlign='left',
-    # )
-    # policyDict = {}
 
-    row = -1
-
-    row += 1
+    row = 0
     checkBox1 = CheckBoxCompoundWidget(parent=popup, orientation='left', showBorder=True,
                                        minimumWidths=(150, 100),
                                        labelText='CheckboxCompoundWidget', text="test2",
@@ -1859,3 +1838,7 @@ if __name__ == '__main__':
     popup.show()
     popup.raise_()
     app.start()
+
+
+if __name__ == '__main__':
+    main()

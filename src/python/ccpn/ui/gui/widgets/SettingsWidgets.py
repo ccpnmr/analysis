@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-25 16:36:19 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-27 15:27:57 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -128,7 +128,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         # store callbacks
         self.callback = callback
-        self.returnCallback = returnCallback if returnCallback else self.doCallback
+        self.returnCallback = returnCallback or self.doCallback
         self.applyCallback = applyCallback
 
         # set up the widgets
@@ -419,7 +419,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self._setAxesUnits(xAxisUnits, yAxisUnits)
 
             self.useAspectRatioModeButtons.setIndex(aspectRatioMode)
-            for ii, aspect in enumerate(sorted(aspectRatios.keys())):
+            for aspect in sorted(aspectRatios.keys()):
                 aspectValue = aspectRatios[aspect]
                 self.aspectData[aspect].setValue(aspectValue)
                 self.aspectScreen[aspect].setText(self.aspectData[aspect].textFromValue(aspectValue))
@@ -457,12 +457,9 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
     def getValues(self):
         """Return a dict containing the current settings
         """
-        aspectRatios = {}
-        for axis, data in self.aspectData.items():
-            aspectRatios[axis] = data.get()
+        aspectRatios = {axis: data.get() for axis, data in self.aspectData.items()}
 
         # NOTE:ED - should really use an intermediate data structure here
-
         return {AXISXUNITS            : self.xAxisUnitsData.getIndex(),
                 AXISYUNITS            : self.yAxisUnitsData.getIndex(),
                 AXISASPECTRATIOMODE   : self.useAspectRatioModeButtons.getIndex(),
@@ -613,7 +610,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.aliasLabelsEnabledData.setEnabled(_enabled)
             self.aliasShadeData.setEnabled(_enabled)
 
-            self.mainWindow.statusBar().showMessage("Cycle Symbol Labelling: %s " % self.annotationsData.get())
+            self.mainWindow.statusBar().showMessage(f"Cycle Symbol Labelling: {self.annotationsData.get()} ")
 
             self.blockSignals(False)
 
@@ -681,126 +678,130 @@ class _commonSettings():
                         else:
                             validSpectrumViews[sv.spectrum] = validSpectrumViews[sv.spectrum] or sv.isDisplayed
 
-        if validSpectrumViews:
-            maxLen = 0
-            refAxisCodes = None
-
-            # need a list of all unique axisCodes in the spectra in the selected spectrumDisplays
-            from ccpn.util.OrderedSet import OrderedSet
-
-            # have to assume that there is only one display it this point
-            activeDisplay = displays[0]
-
-            # get list of unique axisCodes
-            visibleAxisCodes = {}
-            spectrumIndices = {}
-            for spectrum, visible in validSpectrumViews.items():
-
-                indices = getAxisCodeMatchIndices(spectrum.axisCodes, activeDisplay.axisCodes)
-                spectrumIndices[spectrum] = indices
-                for ii, axis in enumerate(spectrum.axisCodes):
-                    ind = indices[ii]
-                    if ind is not None:
-                        if ind in visibleAxisCodes:
-                            visibleAxisCodes[ind].add(axis)
-                        else:
-                            visibleAxisCodes[ind] = OrderedSet([axis])
-
-            ll = len(activeDisplay.axisCodes)
-            axisLabels = [None] * ll
-            for ii in range(ll):
-                axisLabels[ii] = ', '.join(visibleAxisCodes[ii])
-
-            return ll, axisLabels, spectrumIndices, validSpectrumViews
-
-            # from ccpn.util.OrderedSet import OrderedSet
-            #
-            # # get list of unique axisCodes
-            # visibleAxisCodes = OrderedSet()
-            # for spectrum, visible in validSpectrumViews.items():
-            #     for axis in spectrum.axisCodes:
-            #         visibleAxisCodes.add(axis)
-            #
-            # # get mapping of each spectrum onto this list
-            # spectrumIndices = {}
-            # for spectrum, visible in validSpectrumViews.items():
-            #     indices = getAxisCodeMatchIndices(spectrum.axisCodes, visibleAxisCodes, exactMatch=False)  #True)
-            #     spectrumIndices[spectrum] = indices
-            #     maxLen = max(spectrum.dimensionCount, maxLen)
-            #
-            # # return if nothing to process
-            # if not maxLen:
-            #     return 0, None, None, None
-            #
-            # axisLabels = [', '.join(ax) for ax in visibleAxisCodes]
-            #
-            # return maxLen, tuple(visibleAxisCodes), spectrumIndices, validSpectrumViews
-
-            # for spectrum, visible in validSpectrumViews.items():
-            #
-            #     # get the max length of the axisCodes for the displayed spectra
-            #     if len(spectrum.axisCodes) > maxLen:
-            #         maxLen = len(spectrum.axisCodes)
-            #         refAxisCodes = list(spectrum.axisCodes)
-            #
-            # mappings = {}
-            # for spectrum, visible in validSpectrumViews.items():
-            #
-            #     matchAxisCodes = spectrum.axisCodes
-            #
-            #     foundMap = getAxisCodeMatch(matchAxisCodes, refAxisCodes, allMatches=True)
-            #     mappings.update(foundMap)
-            #
-            #     # for refAxisCode in refAxisCodes:
-            #     #     for matchAxisCode in matchAxisCodes:
-            #     #         mapping = getAxisCodeMatch([matchAxisCode], [refAxisCode])
-            #     #         for k, v in mapping.items():
-            #     #             if v not in mappings:
-            #     #                 mappings[v] = set([k])
-            #     #             else:
-            #     #                 mappings[v].add(k)
-            #
-            # # example of mappings dict
-            # # ('Hn', 'C', 'Nh')
-            # # {'Hn': {'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
-            # # {'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
-            # # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
-            # # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
-            #
-            # # far too complicated!
-            # axisLabels = [set() for ii in range(len(mappings))]
-            #
-            # spectrumIndex = {}
-            # # go through the spectra again
-            # for spectrum, visible in validSpectrumViews.items():
-            #
-            #     spectrumIndex[spectrum] = [0 for ii in range(len(spectrum.axisCodes))]
-            #
-            #     # get the spectrum dimension axisCode, and see if is already there
-            #     for spectrumDim, spectrumAxis in enumerate(spectrum.axisCodes):
-            #
-            #         axisTestCodes = tuple(mappings.keys())
-            #         if spectrumAxis in axisTestCodes:
-            #             spectrumIndex[spectrum][spectrumDim] = axisTestCodes.index(spectrumAxis)
-            #             axisLabels[spectrumIndex[spectrum][spectrumDim]].add(spectrumAxis)
-            #
-            #         else:
-            #             # if the axisCode is not in the reference list then find the mapping from the dict
-            #             for k, v in mappings.items():
-            #                 if spectrumAxis in v:
-            #                     # refAxisCodes[dim] = k
-            #                     spectrumIndex[spectrum][spectrumDim] = axisTestCodes.index(k)
-            #                     axisLabels[axisTestCodes.index(k)].add(spectrumAxis)
-            #
-            # axisLabels = [', '.join(ax) for ax in axisLabels]
-            #
-            # return maxLen, axisLabels, spectrumIndex, validSpectrumViews
-            # # self.axisCodeOptions.setCheckBoxes(texts=axisLabels, tipTexts=axisLabels)
-
-        else:
+        if not validSpectrumViews:
             return 0, None, None, None
 
-    def _removeWidget(self, widget, removeTopWidget=False):
+        # maxLen = 0
+        # refAxisCodes = None
+
+        # need a list of all unique axisCodes in the spectra in the selected spectrumDisplays
+        from ccpn.util.OrderedSet import OrderedSet
+
+        # have to assume that there is only one display it this point
+        activeDisplay = displays[0]
+
+        # get list of unique axisCodes
+        visibleAxisCodes = {}
+        spectrumIndices = {}
+        for spectrum, visible in validSpectrumViews.items():
+
+            indices = getAxisCodeMatchIndices(spectrum.axisCodes, activeDisplay.axisCodes)
+            spectrumIndices[spectrum] = indices
+            for ii, axis in enumerate(spectrum.axisCodes):
+                ind = indices[ii]
+                if ind is not None:
+                    if ind in visibleAxisCodes:
+                        visibleAxisCodes[ind].add(axis)
+                    else:
+                        visibleAxisCodes[ind] = OrderedSet([axis])
+
+        ll = len(activeDisplay.axisCodes)
+        axisLabels = [None] * ll
+        for ii in range(ll):
+            axisLabels[ii] = ', '.join(visibleAxisCodes[ii])
+
+        return ll, axisLabels, spectrumIndices, validSpectrumViews
+
+        # if not validSpectrumViews:
+        # from ccpn.util.OrderedSet import OrderedSet
+        #
+        # # get list of unique axisCodes
+        # visibleAxisCodes = OrderedSet()
+        # for spectrum, visible in validSpectrumViews.items():
+        #     for axis in spectrum.axisCodes:
+        #         visibleAxisCodes.add(axis)
+        #
+        # # get mapping of each spectrum onto this list
+        # spectrumIndices = {}
+        # for spectrum, visible in validSpectrumViews.items():
+        #     indices = getAxisCodeMatchIndices(spectrum.axisCodes, visibleAxisCodes, exactMatch=False)  #True)
+        #     spectrumIndices[spectrum] = indices
+        #     maxLen = max(spectrum.dimensionCount, maxLen)
+        #
+        # # return if nothing to process
+        # if not maxLen:
+        #     return 0, None, None, None
+        #
+        # axisLabels = [', '.join(ax) for ax in visibleAxisCodes]
+        #
+        # return maxLen, tuple(visibleAxisCodes), spectrumIndices, validSpectrumViews
+
+        # for spectrum, visible in validSpectrumViews.items():
+        #
+        #     # get the max length of the axisCodes for the displayed spectra
+        #     if len(spectrum.axisCodes) > maxLen:
+        #         maxLen = len(spectrum.axisCodes)
+        #         refAxisCodes = list(spectrum.axisCodes)
+        #
+        # mappings = {}
+        # for spectrum, visible in validSpectrumViews.items():
+        #
+        #     matchAxisCodes = spectrum.axisCodes
+        #
+        #     foundMap = getAxisCodeMatch(matchAxisCodes, refAxisCodes, allMatches=True)
+        #     mappings.update(foundMap)
+        #
+        #     # for refAxisCode in refAxisCodes:
+        #     #     for matchAxisCode in matchAxisCodes:
+        #     #         mapping = getAxisCodeMatch([matchAxisCode], [refAxisCode])
+        #     #         for k, v in mapping.items():
+        #     #             if v not in mappings:
+        #     #                 mappings[v] = set([k])
+        #     #             else:
+        #     #                 mappings[v].add(k)
+        #
+        # # example of mappings dict
+        # # ('Hn', 'C', 'Nh')
+        # # {'Hn': {'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
+        # # {'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
+        # # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
+        # # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
+        #
+        # # far too complicated!
+        # axisLabels = [set() for ii in range(len(mappings))]
+        #
+        # spectrumIndex = {}
+        # # go through the spectra again
+        # for spectrum, visible in validSpectrumViews.items():
+        #
+        #     spectrumIndex[spectrum] = [0 for ii in range(len(spectrum.axisCodes))]
+        #
+        #     # get the spectrum dimension axisCode, and see if is already there
+        #     for spectrumDim, spectrumAxis in enumerate(spectrum.axisCodes):
+        #
+        #         axisTestCodes = tuple(mappings.keys())
+        #         if spectrumAxis in axisTestCodes:
+        #             spectrumIndex[spectrum][spectrumDim] = axisTestCodes.index(spectrumAxis)
+        #             axisLabels[spectrumIndex[spectrum][spectrumDim]].add(spectrumAxis)
+        #
+        #         else:
+        #             # if the axisCode is not in the reference list then find the mapping from the dict
+        #             for k, v in mappings.items():
+        #                 if spectrumAxis in v:
+        #                     # refAxisCodes[dim] = k
+        #                     spectrumIndex[spectrum][spectrumDim] = axisTestCodes.index(k)
+        #                     axisLabels[axisTestCodes.index(k)].add(spectrumAxis)
+        #
+        # axisLabels = [', '.join(ax) for ax in axisLabels]
+        #
+        # return maxLen, axisLabels, spectrumIndex, validSpectrumViews
+        # # self.axisCodeOptions.setCheckBoxes(texts=axisLabels, tipTexts=axisLabels)
+        #
+        # else:
+        #     return 0, None, None, None
+
+    @staticmethod
+    def _removeWidget(widget, removeTopWidget=False):
         """Destroy a widget and all it's contents
         """
 
@@ -941,7 +942,7 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
             displayText = []
 
         self.callback = callback
-        self.returnCallback = returnCallback if returnCallback else self.doCallback
+        self.returnCallback = returnCallback or self.doCallback
         self.applyCallback = applyCallback
 
         self.includePeakLists = includePeakLists
@@ -969,7 +970,7 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
                        'Mark positions',
                        'Auto clear marks']
         if self.activePulldownClass is not None:
-            optionTexts += ['Link to current {}'.format(self.activePulldownClass.className)]
+            optionTexts += [f'Link to current {self.activePulldownClass.className}']
         _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
         colwidth = maxDim.width()
 
@@ -1011,16 +1012,14 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
 
         if self.activePulldownClass is not None:
             row += 1
-            setattr(self, LINKTOPULLDOWNCLASS, CheckBoxCompoundWidget(
-                    self,
-                    grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                    #minimumWidths=(colwidth, 0),
-                    fixedWidths=(colwidth, None),
-                    orientation='left',
-                    labelText=optionTexts[3],
-                    tipText='Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
-                    checked=activePulldownInitialState,  # LINKTOACTIVESTATE
-                    ))
+            setattr(self, LINKTOPULLDOWNCLASS,
+                    CheckBoxCompoundWidget(self, grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+                                           fixedWidths=(colwidth, None),
+                                           orientation='left',
+                                           labelText=optionTexts[3],
+                                           tipText=f'Set/update current {self.activePulldownClass.className} when selecting from pulldown',
+                                           checked=activePulldownInitialState
+                                           ))
 
         row += 1
         texts = []
@@ -1230,6 +1229,8 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
     def _cleanupWidget(self):
         """Cleanup the notifiers that are left behind after the widget is closed
         """
+        if self.displaysWidget:
+            self.displaysWidget._close()
         self._unRegisterNotifiers()
 
     def _selectionPulldownCallback(self, item):
@@ -1514,8 +1515,7 @@ class ObjectSelectionWidget(ListCompoundWidget):
         model.rowsRemoved.connect(self._objectWidgetChanged)
         self.listWidget.cleared.connect(self._objectWidgetChanged)
 
-        #     Notifiers
-        self._notifierRename = None
+        # Notifiers
         if self.project:
             self._notifierRename = Notifier(theObject=self.project,
                                             triggers=[Notifier.RENAME],
@@ -1526,6 +1526,17 @@ class ObjectSelectionWidget(ListCompoundWidget):
                                             triggers=[Notifier.DELETE],
                                             targetName=self.KLASS.className,
                                             callback=self._objDeletedCallback)
+
+        else:
+            self._notifierRename = self._notifierDelete = None
+
+    def _close(self):
+        if self._notifierRename:
+            self._notifierRename.unRegister()
+            self._notifierRename = None
+        if self._notifierDelete:
+            self._notifierDelete.unRegister()
+            self._notifierDelete = None
 
     def select(self, name):
         self.pulldownList.select(name)

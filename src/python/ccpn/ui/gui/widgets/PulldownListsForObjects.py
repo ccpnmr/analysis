@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:21:38 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-27 15:25:02 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -148,20 +148,16 @@ class _PulldownABC(PulldownListCompoundWidget):
 
         # add a notifier to update the pulldown list
         if project:
-            self._notifier1 = Notifier(project,
-                                       [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                       self._className,
-                                       self._updatePulldownList)
-            self._notifier2 = None
+            self.addNotifier(Notifier(project,
+                                      [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                                      self._className,
+                                      self._updatePulldownList))
             if self._followCurrent:
-                self._notifier2 = Notifier(self.current,
-                                           [Notifier.CURRENT],
-                                           targetName=self._currentAttributeName,
-                                           callback=self._updateFromCurrent
-                                           )
-
-        else:
-            self._notifier1 = self._notifier2 = None
+                self.addNotifier(Notifier(self.current,
+                                          [Notifier.CURRENT],
+                                          targetName=self._currentAttributeName,
+                                          callback=self._updateFromCurrent
+                                          ))
 
     @property
     def textList(self):
@@ -226,9 +222,7 @@ class _PulldownABC(PulldownListCompoundWidget):
     def unRegister(self):
         """Unregister the notifiers; needs to be called when disgarding a instance
         """
-        for ntf in (self._notifier1, self._notifier2):
-            if ntf:
-                ntf.unRegister()
+        self.deleteNotifiers()
 
     #==============================================================================================
     # Implementation

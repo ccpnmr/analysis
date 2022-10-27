@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-26 14:29:56 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-27 13:07:03 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -306,7 +306,8 @@ class BarPlotPanel(GuiPanel):
     def _mouseDoubleClickEvent(self, x, y):
         from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import _navigateToPeak
         self._setCurrentObjs(self._plottedDf, x)
-        _navigateToPeak(self.guiModule, self.current.peaks[-1])
+        if len(self.current.peaks)>0:
+            _navigateToPeak(self.guiModule, self.current.peaks[-1])
 
     def _mouseSingleClickEvent(self, x, y):
         self._setCurrentObjs(self._plottedDf, x)

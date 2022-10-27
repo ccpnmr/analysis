@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:16:45 +0100 (Wed, October 26, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-10-27 15:49:12 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -441,6 +441,10 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         # self._kwargs = collections.OrderedDict(sorted(widgetsState.items()))
         return collections.OrderedDict(sorted(widgetsState.items(), key=lambda x: x[0]))
 
+    def _getLastSeenWidgetsState(self):
+        """ Internal. Used to restore last closed module in the same program instance. """
+        return self.widgetsState
+
     #=========================================================================================
     # Widget Methods
     #=========================================================================================
@@ -544,7 +548,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                         self._container = i
 
         if self._includeInLastSeen:
-            self.area._seenModuleStates[self.className] = {MODULENAME: self._defaultName, WIDGETSTATE: self.widgetsState}
+            self.area._seenModuleStates[self.className] = {MODULENAME: self._defaultName, WIDGETSTATE: self._getLastSeenWidgetsState()}
 
         try:
             super().close()

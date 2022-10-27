@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-20 09:23:43 +0100 (Tue, September 20, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-10-27 15:49:12 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -390,6 +390,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
                     nextAvailableName = self._incrementModuleName(module.titleName, module._nameSplitter)
                     module.renameModule(nextAvailableName)
                     ## reset  widgets  as last time the module was opened
+                    print('_restoreAsTheLastSeenModule kwds', kwds)
                     self._restoreAsTheLastSeenModule(module)
 
 
@@ -487,6 +488,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
                 if seenModule:
                     name = seenModule.get(MODULENAME, module.titleName)
                     state = seenModule.get(WIDGETSTATE, {})
+                    print('_restoreAsTheLastSeenModule,===', state)
                     nextAvailableName = self._incrementModuleName(name, module._nameSplitter)
                     module.renameModule(nextAvailableName)
                     module.restoreWidgetsState(**state)

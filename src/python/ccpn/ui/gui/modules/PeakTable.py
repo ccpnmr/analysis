@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:20:50 +0100 (Wed, October 26, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-10-27 15:49:12 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -155,6 +155,18 @@ class PeakTableModule(CcpnModule):
         if self.tableFrame:
             self.tableFrame._cleanupWidget()
         super()._closeModule()
+
+    def _getLastSeenWidgetsState(self):
+        """ Internal. Used to restore last closed module in the same program instance. """
+        widgetsState = self.widgetsState
+        try:
+            # Don't restore the pulldown selection from last seen.
+            pulldownSaveName = self.tableFrame._modulePulldown.pulldownList.objectName()
+            widgetsState.pop(f'__{pulldownSaveName}', None)
+        except Exception as err:
+            getLogger().debug2(f'Could not remove the pulldown state from PeakTable module. {err}')
+        return widgetsState
+
 
 
 #=========================================================================================

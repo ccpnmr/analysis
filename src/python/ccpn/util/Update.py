@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-04 13:48:30 +0100 (Thu, August 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-27 18:13:15 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -622,28 +622,38 @@ class UpdateAgent(object):
         return updateFilesInstalled
 
     def _updateSingleFile(self, n, updateFile, updateFilesInstalled):
-        try:
-            if not self._dryRun:
-                if updateFile.fileHashCode == DELETEHASHCODE:
-                    self.showInfo('Install Updates', 'Removing %s' % (updateFile.fullFilePath))
+        ATTEMPTS = 2
+
+        for attempt in range(ATTEMPTS):
+            try:
+                if self._dryRun:
+                    if updateFile.fileHashCode == DELETEHASHCODE:
+                        self.showInfo('Install Updates', f'dry-run Removing {updateFile.fullFilePath}')
+                    else:
+                        self.showInfo('Install Updates', f'dry-run Installing {updateFile.fullFilePath}')
+
+                elif updateFile.fileHashCode == DELETEHASHCODE:
+                    self.showInfo('Install Updates', f'Removing {updateFile.fullFilePath}')
                     if not updateFile.installDeleteUpdate():
                         raise RuntimeError("error deleting original file")
 
                 else:
-                    self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
+                    self.showInfo('Install Updates', f'Installing {updateFile.fullFilePath}')
                     if not updateFile.installUpdate():
                         raise RuntimeError("error installing update")
 
-            else:
-                if updateFile.fileHashCode == DELETEHASHCODE:
-                    self.showInfo('Install Updates', 'dry-run Removing %s' % (updateFile.fullFilePath))
-                else:
-                    self.showInfo('Install Updates', 'dry-run Installing %s' % (updateFile.fullFilePath))
+                n += 1
+                updateFilesInstalled.append(updateFile)
 
-            n += 1
-            updateFilesInstalled.append(updateFile)
-        except Exception as e:
-            self.showError('Install Error', 'Could not install %s: %s' % (updateFile.fullFilePath, e))
+            except Exception as e:
+                retry = ' - retrying...' if attempt < (ATTEMPTS - 1) else ''
+                self.showError('Install Error', f'Could not install {updateFile.fullFilePath}: {e} {retry}')
+
+            else:
+                break
+
+        else:  # no_break
+            self.showError('Install Error', f'Could not install {updateFile.fullFilePath} after {ATTEMPTS} attempts')
 
         return n
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-10 17:26:26 +0100 (Mon, October 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-27 15:20:30 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -551,7 +551,7 @@ class Project(AbstractWrapperObject):
                         getLogger().error(f'Strip {strp} contains bad axes - please close SpectrumDisplay {sd} outlined in red.')
 
         except Exception as es:
-            getLogger().warning(f'There was an issue checking the spectrumDisplays')
+            getLogger().warning('There was an issue checking the spectrumDisplays')
 
         # don't need to call super here
         return project
@@ -563,7 +563,7 @@ class Project(AbstractWrapperObject):
         """Clean up the wrapper project previous to deleting or replacing
         Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)
         """
-        getLogger().info("Closing %s" % self.path)
+        getLogger().info(f"Closing {self.path}")
 
         # close any spectra
         for sp in self.spectra:
@@ -584,16 +584,16 @@ class Project(AbstractWrapperObject):
     def __repr__(self):
         """String representation"""
         if self.isDeleted:
-            return "<Project:%s, isDeleted=True>" % self.name
+            return "<Project:-deleted-, isDeleted=True>"
         else:
-            return "<Project:%s>" % self.name
+            return f"<Project:{self.name}>"
 
     def __str__(self):
         """String representation"""
         if self.isDeleted:
-            return "<PR:%s, isDeleted=True>" % self.name
+            return "<PR:-deleted-, isDeleted=True>"
         else:
-            return "<PR:%s>" % self.name
+            return f"<PR:{self.name}>"
 
     # CCPN properties
     @property
@@ -1775,7 +1775,6 @@ class Project(AbstractWrapperObject):
 
         return _newStructureEnsemble(self, name=name, data=data, comment=comment, **kwds)
 
-
     def newDataTable(self, name: str = None, data=None, comment: str = None, **kwds):
         """Create new DataTable.
 
@@ -1789,7 +1788,8 @@ class Project(AbstractWrapperObject):
         :return: a new DataTable instance.
         """
         from ccpn.core.DataTable import _newDataTable
-        getLogger().info(f'project.newDataTable(name={name})') # don't log the full dataFrame. is not needed! Add exclusions on Decorator logCommand
+
+        getLogger().info(f'project.newDataTable(name={name})')  # don't log the full dataFrame. is not needed! Add exclusions on Decorator logCommand
         return _newDataTable(self, name=name, data=data, comment=comment, **kwds)
 
     @logCommand('project.')

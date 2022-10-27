@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-17 10:25:32 +0000 (Thu, March 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-27 18:13:14 +0100 (Thu, October 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
-from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
+from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.util.Update import UpdateAgent
 from ccpn.framework.Version import applicationVersion
 
@@ -129,6 +129,8 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
 
         self.infoBox = TextEditor(self.mainWidget, grid=(row, 0), gridSpan=(1, 3))  # NOTE:ED - do not set valign here
         self.infoBox.setVisible(False)
+        self.infoBox.setEnabled(True)
+        self.infoBox.setReadOnly(True)
 
         self.setFixedWidth(self.sizeHint().width())
         self._hideInfoBox()
@@ -140,13 +142,13 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
         self._updateButton.setEnabled(self._check())
 
         self._downloadButton = self.buttonList.getButton(DOWNLOADBUTTONTEXT)
-        self._downloadButton.setEnabled(True if (self.updateFiles and len(self.updateFiles) > 0) else False)
+        self._downloadButton.setEnabled(bool(self.updateFiles and len(self.updateFiles) > 0))
 
     def _resetClicked(self):
         """Reset button clicked,update the count and reset the download button
         """
         self.resetFromServer()
-        self._downloadButton.setEnabled(True if (self.updateFiles and len(self.updateFiles) > 0) else False)
+        self._downloadButton.setEnabled(bool(self.updateFiles and len(self.updateFiles) > 0))
 
     def _install(self):
         """The update button has been clicked. Install updates and flag that files have been changed
@@ -158,12 +160,11 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
         # QtCore.QTimer.singleShot(0, self._handleUpdates)
 
     def _handleUpdates(self):
-        updateFilesInstalled = self.installUpdates()
-        if updateFilesInstalled:
+        if updateFilesInstalled := self.installUpdates():
             self._numUpdatesInstalled += len(updateFilesInstalled)
             self.buttonList.getButton(self.CLOSEBUTTONTEXT).setText(CLOSEEXITBUTTONTEXT)
 
-        self._downloadButton.setEnabled(True if (self.updateFiles and len(self.updateFiles) > 0) else False)
+        self._downloadButton.setEnabled(bool(self.updateFiles and len(self.updateFiles) > 0))
 
     def _closeProgram(self):
         """Call the mainWindow close function giving user option to save, then close program
@@ -206,7 +207,7 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
         # self.setMaximumHeight(16 * getFontHeight())
         self.setMinimumHeight(_height)
         self.setMaximumHeight(_height * 2)
-        self.resize(QtCore.QSize( self.width(), _height * 2))
+        self.resize(QtCore.QSize(self.width(), _height * 2))
         self._refreshQT()
 
     def _hideInfoBox(self):
@@ -217,13 +218,18 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
         self._refreshQT()
 
     def _showInfo(self, *args):
+        self._showInfoBox()
         for arg in args:
-            self.infoBox.append(arg)
+            if arg:
+                txt = f'<span style="color:#101010;" >{arg}</span>'
+                self.infoBox.append(txt)
 
     def _showError(self, *args):
         self._showInfoBox()
         for arg in args:
-            self.infoBox.append(arg)
+            if arg:
+                txt = f'<span style="color:#ff1008;" >{arg}</span>'
+                self.infoBox.append(txt)
 
     def _refreshQT(self):
         # force a refresh of the popup - makes the updating look a little cleaner
@@ -235,10 +241,9 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
             self.preferences.general.checkUpdatesAtStartup = value
 
 
-if __name__ == '__main__':
+def main():
     import sys
     import os
-
 
     qtApp = QtWidgets.QApplication(['Update'])
 
@@ -249,3 +254,11 @@ if __name__ == '__main__':
     popup.exec_()
 
     # os._exit(qtApp.exec_()) - not required with exec_
+
+
+if __name__ == '__main__':
+    main()
+
+
+if __name__ == '__main__':
+    main()

@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 15:26:21 +0100 (Thu, October 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-28 12:43:29 +0100 (Fri, October 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -502,19 +502,18 @@ class NmrResidueTableFrame(_CoreTableFrameABC):
             getLogger().debug2(f'{self.__class__.__name__}.navigateToNmrResidueCallBack: No selection\n{es}')
             return
 
-        if isinstance(objs, (tuple, list)):
-            nmrResidue = objs[0]
-        else:
-            nmrResidue = objs
+        nmrResidue = objs[0] if isinstance(objs, (tuple, list)) else objs
+        if nmrResidue is None or nmrResidue.isDeleted:
+            return
 
-        logger.debug('nmrResidue=%s' % str(nmrResidue.id if nmrResidue else None))
+        logger.debug(f'nmrResidue={str(nmrResidue.id if nmrResidue else None)}')
         displays = []
         if self.nmrResidueTableSettings.displaysWidget:
             displays = self.nmrResidueTableSettings.displaysWidget.getDisplays()
-        else:
-            if self.current.strip:
-                displays = [self.current.strip.spectrumDisplay]
-        if len(displays) == 0 and self.nmrResidueTableSettings.displaysWidget:
+        elif self.current.strip:
+            displays = [self.current.strip.spectrumDisplay]
+
+        if not displays and self.nmrResidueTableSettings.displaysWidget:
             logger.warning('Undefined display module(s); select in settings first')
             showWarning('startAssignment', 'Undefined display module(s);\nselect in settings first')
             return

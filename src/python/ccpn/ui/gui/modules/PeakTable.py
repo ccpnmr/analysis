@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-27 15:49:12 +0100 (Thu, October 27, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-10-31 17:55:28 +0000 (Mon, October 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -338,7 +338,7 @@ class _NewPeakTableWidget(_PeakTableOptions, _CoreTableWidgetABC):
     def _sourceObjects(self):
         """Get/set the list of source objects
         """
-        return self._table.peaks
+        return (self._table and self._table.peaks) or []
 
     @_sourceObjects.setter
     def _sourceObjects(self, value):

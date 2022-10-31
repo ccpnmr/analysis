@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-28 12:43:29 +0100 (Fri, October 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-31 18:00:17 +0000 (Mon, October 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -176,6 +176,7 @@ Deltas = 'Ddelta'
 class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
     """Class to present a nmrResidue Table
     """
+
     className = 'NmrResidueTable'
     attributeName = 'nmrChains'
 
@@ -209,7 +210,7 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
     def _sourceObjects(self):
         """Get/set the list of source objects
         """
-        return self._table.nmrResidues
+        return (self._table and self._table.nmrResidues) or []
 
     @_sourceObjects.setter
     def _sourceObjects(self, value):
@@ -233,6 +234,9 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
     # Selection/Action callbacks
     #=========================================================================================
 
+    def _updateTableCallback(self, data):
+        pass
+
     def actionCallback(self, selection, lastItem):
         """If current strip contains the double-clicked peak will navigateToPositionInStrip
         """
@@ -245,10 +249,7 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
             getLogger().debug2(f'{self.__class__.__name__}.actionCallback: No selection\n{es}')
             return
 
-        if isinstance(objs, (list, tuple)):
-            nmrResidue = objs[0]
-        else:
-            nmrResidue = objs
+        nmrResidue = objs[0] if isinstance(objs, (list, tuple)) else objs
 
         if self.current.strip is not None:
             self.application.ui.mainWindow.clearMarks()
@@ -424,7 +425,7 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
         try:
             if getattr(self, '_caching', False):
                 if self._objCache is None:
-                    self._objCache = list(id(pp) for pp in nmrRes.nmrChain.nmrResidues)
+                    self._objCache = [id(pp) for pp in nmrRes.nmrChain.nmrResidues]
                 return self._objCache.index(id(nmrRes))
 
             else:
@@ -434,7 +435,7 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
 
                 return _getNmrIndex(nmrRes)
                 # return nmrRes.nmrChain.nmrResidues.index(nmrRes)  # ED: THIS IS VERY SLOW
-        except Exception as es:
+        except Exception:
             return None
 
     @staticmethod
@@ -443,14 +444,14 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
         """
         try:
             return int(getattr(row, name))
-        except:
+        except Exception:
             return None
 
     @staticmethod
     def _getNmrAtomNames(nmrResidue):
         """Returns a sorted list of NmrAtom names
         """
-        return ', '.join(sorted(set([atom.name for atom in nmrResidue.nmrAtoms if not atom.isDeleted]),
+        return ', '.join(sorted({atom.name for atom in nmrResidue.nmrAtoms if not atom.isDeleted},
                                 key=CcpnSorting.stringSortKey))
 
     @staticmethod
@@ -629,7 +630,7 @@ class _NewCSMNmrResidueTableWidget(_NewNmrResidueTableWidget):
         """
         try:
             return nmrResidue.spectraCount
-        except:
+        except Exception:
             return None
 
     @staticmethod
@@ -638,7 +639,7 @@ class _NewCSMNmrResidueTableWidget(_NewNmrResidueTableWidget):
         """
         try:
             return ', '.join(nmrResidue.selectedNmrAtomNames)
-        except:
+        except Exception:
             return None
 
     def _selectPullDown(self, value):
@@ -648,8 +649,8 @@ class _NewCSMNmrResidueTableWidget(_NewNmrResidueTableWidget):
         try:
             if self.chemicalShiftsMappingModule is not None:
                 self.chemicalShiftsMappingModule._updateModule()
-        except Exception as e:
-            getLogger().warning('Impossible update chemicalShiftsMappingModule from restoring %s' % e)
+        except Exception as es:
+            getLogger().warning(f'Impossible update chemicalShiftsMappingModule from restoring {es}')
 
 
 #=========================================================================================

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-28 10:42:43 +0100 (Fri, October 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-31 18:13:41 +0000 (Mon, October 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -448,9 +448,9 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         """
         if self._enableSelectionCallback and self._selectionCallback is not None:
             # get the unique df-rows from the selections
-            newRows = OrderedSet([(dd := idx.data(INDEX_ROLE)) is not None and dd[0] for sel in selected for idx in sel.indexes()]) - {False}
-            oldRows = OrderedSet([(dd := idx.data(INDEX_ROLE)) is not None and dd[0] for sel in deselected for idx in sel.indexes()]) - {False}
-            sRows = OrderedSet([(dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes()]) - {False}
+            newRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for sel in selected for idx in sel.indexes())
+            oldRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for sel in deselected for idx in sel.indexes())
+            sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes())
 
             df = self._df
             new = df.iloc[list(newRows)]
@@ -510,7 +510,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
 
         if self._enableActionCallback and self._actionCallback is not None:
             # get the df-rows from the selection
-            sRows = OrderedSet([(dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes()]) - {False}
+            sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes())
 
             df = self._df
             sel = df.iloc[list(sRows)]
@@ -548,7 +548,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         """
         :return: a DataFrame with selected rows
         """
-        sRows = OrderedSet([(dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes()]) - {False}
+        sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes())
         df = self._df
         return df.iloc[list(sRows)]
 

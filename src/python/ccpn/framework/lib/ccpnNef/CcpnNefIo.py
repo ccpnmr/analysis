@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:07 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-31 18:50:33 +0000 (Mon, October 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -3531,10 +3531,10 @@ class CcpnNefReader(CcpnNefContent):
 
         project = self.project
 
+        assignmentData = {}
         for saveFrameName, saveFrame in dataBlock.items():
 
             # get all NmrResidue data in chemicalshift lists
-            assignmentData = {}
             if saveFrameName.startswith('nef_chemical_shift_list'):
                 loop = saveFrame.get('nef_chemical_shift')
                 if loop:

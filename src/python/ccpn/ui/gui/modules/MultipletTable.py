@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:27 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-31 18:50:34 +0000 (Mon, October 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -258,7 +258,7 @@ class _NewMultipletTableWidget(_CoreTableWidgetABC):
     def _sourceObjects(self):
         """Get/set the list of source objects
         """
-        return self._table.multiplets
+        return (self._table and self._table.multiplets) or []
 
     @_sourceObjects.setter
     def _sourceObjects(self, value):

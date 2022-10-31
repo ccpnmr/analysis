@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:30 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-31 18:50:34 +0000 (Mon, October 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -608,29 +608,30 @@ class _ProjectTableABC(TableABC, Base):
         otherwise is a Pandas series object corresponding to the selected row(s).
         """
         model = self.selectionModel()
-        # selects all the items in the row - may need to check selectionMode
-        selection = fromSelection if fromSelection else model.selectedRows()
 
-        if selection:
+        # selects all the items in the row - may need to check selectionMode
+        if selection := (fromSelection or model.selectedRows()):
             selectedObjects = []
+
             valuesDict = defaultdict(list)
             col = self._df.columns.get_loc(self.OBJECTCOLUMN)
             for idx in selection:
+                # it may be a bad index - returns None
+                if loc := idx.data(INDEX_ROLE):
+                    row, _col = loc
 
-                row, _col = idx.data(INDEX_ROLE)
+                    # col = idx.column()
+                    # if self._objects and len(self._objects) > 0:
+                    #     if isinstance(self._objects[0], pd.Series):
+                    #         h = self.horizontalHeaderItem(col).text()
+                    #         v = self.item(row, col).text()
+                    #         valuesDict[h].append(v)
+                    #
+                    #     else:
 
-                # col = idx.column()
-                # if self._objects and len(self._objects) > 0:
-                #     if isinstance(self._objects[0], pd.Series):
-                #         h = self.horizontalHeaderItem(col).text()
-                #         v = self.item(row, col).text()
-                #         valuesDict[h].append(v)
-                #
-                #     else:
-
-                objIndex = self._df.iat[row, col]
-                if (obj := self.project.getByPid(objIndex.strip('<>')) if isinstance(objIndex, str) else objIndex):
-                    selectedObjects.append(obj)
+                    objIndex = self._df.iat[row, col]
+                    if (obj := self.project.getByPid(objIndex.strip('<>')) if isinstance(objIndex, str) else objIndex):
+                        selectedObjects.append(obj)
 
             if valuesDict:
                 selectedObjects = [row for i, row in pd.DataFrame(valuesDict).iterrows()]

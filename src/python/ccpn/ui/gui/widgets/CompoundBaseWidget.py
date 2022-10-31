@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 15:22:44 +0100 (Thu, October 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-31 18:46:56 +0000 (Mon, October 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -41,8 +41,6 @@ class CompoundBaseWidget(Frame, SignalBlocking):
     Base widget for Compound classes; inherits from Frame (and hence Base)
     Implements the addNotifier and deleteNotifiers methods
     """
-    _notifiers = []
-
     def __init__(self, parent, layoutDict, orientation, showBorder, **kwds):
         """
         :param parent: parent widget
@@ -60,6 +58,8 @@ class CompoundBaseWidget(Frame, SignalBlocking):
         self._gridding = layoutDict[orientation]  # list of grid tuples for all successive widgets
         self._widgets = []  # list of all the widgets; use addWidget to add using the layoutDict
         self._blockingLevel = 0
+
+        self._notifiers = []
 
     def _addWidget(self, widget):
         """Add widget, using the layout as defined previously by layoutDict and orientation"""

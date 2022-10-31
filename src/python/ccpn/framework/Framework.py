@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-24 12:50:21 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-10-31 11:23:49 +0000 (Mon, October 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -862,6 +862,7 @@ class Framework(NotifierBase, GuiBase):
         """
         # local import to avoid cycles
         from ccpn.core.Project import _newProject
+        name = name or 'default'
 
         if Project._checkName(name, correctName=False) is None:
             raise ValueError(f'Invalid project name "{name}"; check log/console for details')

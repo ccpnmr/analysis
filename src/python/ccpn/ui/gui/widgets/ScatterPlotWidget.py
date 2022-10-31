@@ -4,19 +4,19 @@ Module Documentation Here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 18:30:41 +0100 (Fri, October 29, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-10-31 11:49:11 +0000 (Mon, October 31, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -55,21 +55,13 @@ from ccpn.ui.gui.widgets.Font import Font, DEFAULTFONTNAME, DEFAULTFONTSIZE, get
 from ccpn.util.Common import _getObjectsByPids, splitDataFrameWithinRange
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.ui.gui.widgets.Icon import Icon, ICON_DIR
+from pyqtgraph.graphicsItems.ROI import Handle
 
 
 # colours
-BackgroundColour = gs.getColours()[gs.CCPNGLWIDGET_HEXBACKGROUND]
-OriginAxes = pg.functions.mkPen(hexToRgb(gs.getColours()[gs.GUISTRIP_PIVOT]), width=1, style=QtCore.Qt.DashLine)
-SelectedPointPen = pg.functions.mkPen(rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_HIGHLIGHT]), width=4)
-ROIline = rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_SELECTAREA])
-ROIPen = pg.functions.mkPen(ROIline, width=3, style=QtCore.Qt.SolidLine)
-HandlePen = pg.functions.mkPen(hexToRgb(gs.getColours()[gs.GUISTRIP_PIVOT]), width=5, style=QtCore.Qt.SolidLine)
 DefaultRoiLimits = [[0, 0], [0, 0]]  #
 
-SelectedLabel = pg.functions.mkBrush(rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_HIGHLIGHT]), width=4)
-c = rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_LABELLING])
-GridPen = pg.functions.mkPen(c, width=1, style=QtCore.Qt.SolidLine)
-GridFont = getFont()
+
 DefaultPointSize = 10
 DefaultPointColour = '#000000'  # black
 DefaultInnerPointColour = '#7080EE'
@@ -135,14 +127,25 @@ class ScatterROI(pg.ROI):
     Re-implemetation of pg.ROI to allow customised functionalities
     """
 
-    def __init__(self, parentWidget, *args, **kwargs):
-        pg.ROI.__init__(self, *args, **kwargs)
-        self.parentWidget = parentWidget
-        self.handleSize = 8
+    def __init__(self, parentPlot, pos, pen=None, *args, **kwargs):
+        pg.ROI.__init__(self, *pos, *args, **kwargs)
+        self.parentPlot = parentPlot
+        self._penHexColour = rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_GRID])
+        self.ROIPen = pg.functions.mkPen(self._penHexColour, width=2, style=QtCore.Qt.SolidLine)
+        self.handlePen = self.ROIPen #pg.functions.mkPen(hexToRgb('#550361'), width=6, style=QtCore.Qt.SolidLine)
+
+        self.handleSize = 10
+        self.handlePen = self.handlePen
         self.translatable = False  # keep False otherwise it doesn't allow normal pan/selection of the plotItems within the ROI region.
         self._setROIhandles()
         self.roiIsLinkedToSelection = True
+        if pen is None:
+            pen = self.ROIPen
+        self.setPen(pen)
+
         # self._isEnabled = True
+    def _getRoiHexColour(self):
+        return self._penHexColour
 
     def _setROIhandles(self):
         """ sets the handles,"""
@@ -192,7 +195,7 @@ class ScatterROI(pg.ROI):
         """
         :return: the pointItems within the ROI limits (included extremes)
         """
-        return _getPointsWithinLimits(self.parentWidget.scatterPlot.points(), self.getLimits())
+        return _getPointsWithinLimits(self.parentPlot.points(), self.getLimits())
 
     def getInnerData(self):
         """
@@ -213,6 +216,12 @@ class ScatterROI(pg.ROI):
         innerSeries = self.getInnerData()
         return pd.DataFrame(innerSeries)
 
+    def setHandlesPen(self, pen):
+        for i in self.handles:
+            h = i.get('item', None)
+            if h is not None:
+                h.currentPen = pen
+                h.update()
 
 class ScatterPlot(Widget):
     dataSelectedSignal = QtCore.pyqtSignal(object)
@@ -237,6 +246,16 @@ class ScatterPlot(Widget):
         self.project = None
         if self.application:
             self.project = self.application.project
+
+        # colours
+        self.backgroundColour = gs.getColours()[gs.CCPNGLWIDGET_HEXBACKGROUND]
+
+        self.originAxes = pg.functions.mkPen(hexToRgb(gs.getColours()[gs.GUISTRIP_PIVOT]), width=1, style=QtCore.Qt.DashLine)
+        self.selectedPointPen = pg.functions.mkPen(rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_HIGHLIGHT]), width=4)
+        # fonts
+        c = rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_LABELLING])
+        self.gridPen = pg.functions.mkPen(c, width=1, style=QtCore.Qt.SolidLine)
+        self.gridFont = getFont()
         self._dataFrame = dataFrame
         self._roiLimits = DefaultRoiLimits
         self._roiDataFrame = None
@@ -247,7 +266,7 @@ class ScatterPlot(Widget):
         self.hexPointColour = hexPointColour
         self.innerRoiPointColour = innerRoiPointColour
         self._scatterView = pg.GraphicsLayoutWidget()
-        self._scatterView.setBackground(BackgroundColour)
+        self._scatterView.setBackground(self.backgroundColour)
         self._plotItem = self._scatterView.addPlot()
         self._scatterViewbox = self._plotItem.vb
         self._addScatterSelectionBox()
@@ -266,17 +285,17 @@ class ScatterPlot(Widget):
         setWidgetFont(self)
         ## adjustable ROI box
         self.roiIsLinkedToSelection = True
-        self.roiItem = ScatterROI(self, *DefaultRoiLimits, pen=ROIPen)
+        self.roiItem = ScatterROI(parentPlot=self.scatterPlot, pos=DefaultRoiLimits)
         self.roiItem.sigRegionChangeFinished.connect(self._roiChangedCallback)
         self._plotItem.addItem(self.roiItem)
         self.showROI(roiVisible)
         self.tipText = pg.TextItem(anchor=(-0.1, -0.6), angle=0, border='w', fill=(0, 0, 255, 100))
         # self.tipText.hide()
-        self.tipText.setFont(GridFont)
+        self.tipText.setFont(self.gridFont)
         self._plotItem.addItem(self.tipText)
         self._plotItem.autoRange()
-        self.xOriginLine = pg.InfiniteLine(angle=90, pos=0, pen=OriginAxes)
-        self.yOriginLine = pg.InfiniteLine(angle=0, pos=0, pen=OriginAxes)
+        self.xOriginLine = pg.InfiniteLine(angle=90, pos=0, pen=self.originAxes)
+        self.yOriginLine = pg.InfiniteLine(angle=0, pos=0, pen=self.originAxes)
         self.pointSelectionCallback = pointSelectionCallback  # single click
         self.pointActionCallback = pointActionCallback  # double click
         self._plotItem.addItem(self.scatterPlot)
@@ -609,7 +628,7 @@ class ScatterPlot(Widget):
         """
         if len(self.dataFrame) == 0: return []
         indices, series = zip(*self.dataFrame.iterrows())
-        pens = [SelectedPointPen if i in [j.name for j in self._selectedData] else None for i in indices]
+        pens = [self.selectedPointPen if i in [j.name for j in self._selectedData] else None for i in indices]
         return pens
 
     def _axisSelectionCallback(self, *args):
@@ -624,10 +643,10 @@ class ScatterPlot(Widget):
 
     def _setPlotItemFonts(self):
         if self.application:
-            self._plotItem.getAxis('bottom').setPen(GridPen)
-            self._plotItem.getAxis('left').setPen(GridPen)
-            self._plotItem.getAxis('bottom').tickFont = GridFont
-            self._plotItem.getAxis('left').tickFont = GridFont
+            self._plotItem.getAxis('bottom').setPen(self.gridPen)
+            self._plotItem.getAxis('left').setPen(self.gridPen)
+            self._plotItem.getAxis('bottom').tickFont = self.gridPen
+            self._plotItem.getAxis('left').tickFont = self.gridPen
 
     ###### Context menu setups ######
 

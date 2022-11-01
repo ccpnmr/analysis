@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-31 11:49:11 +0000 (Mon, October 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-01 10:32:49 +0000 (Tue, November 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -155,9 +155,9 @@ class ScatterROI(pg.ROI):
         self.yMinHandle = self.addTranslateHandle((0.5, 0), name='yMinHandle')
         self.yMaxHandle = self.addTranslateHandle((0.5, 1), name='yMaxHandle')
         ## ScaleHandle -> reshape the ROI without translating it
-        self.topRightHandle = self.addScaleHandle([1, 1], [0.5, 0.5], name='topRight')
+        self.topRightHandle = self.addScaleHandle([1, 1], [0, 0], name='topRight')
         self.topLeft = self.addScaleHandle([0, 1], [1, 0], name='topLeft')
-        self.bottomLeft = self.addScaleHandle([0, 0], [0.5, 0.5], name='bottomLeft')
+        self.bottomLeft = self.addScaleHandle([0, 0], [1, 1], name='bottomLeft')
         self.bottomRight = self.addScaleHandle([1, 0], [0, 1], name='bottomRight'),
 
     def getLimits(self):

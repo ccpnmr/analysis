@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-26 16:56:17 +0100 (Mon, September 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-01 16:40:04 +0000 (Tue, November 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,9 @@ import re
 import sys
 import string
 import platform
+import collections
 from collections.abc import Iterable
+from itertools import islice
 from string import whitespace
 
 from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices
@@ -865,6 +867,18 @@ def loadModules(paths):
                 traceback.print_tb(err.__traceback__)
                 getLogger().warning('Error Loading Module %s. %s' % (name, str(err)))
     return modules
+
+
+def consume(iterator, n=None):
+    """Advance the iterator n-steps ahead. If n is None, consume entirely
+    """
+    # Use functions that consume iterators at C speed.
+    if n is None:
+        # feed the entire iterator into a zero-length deque
+        collections.deque(iterator, maxlen=0)
+    else:
+        # advance to the empty slice starting at position n
+        next(islice(iterator, n, n), None)
 
 
 def main():

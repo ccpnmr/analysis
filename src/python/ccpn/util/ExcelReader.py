@@ -7,12 +7,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-13 12:22:39 +0100 (Mon, June 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-02 22:05:56 +0000 (Wed, November 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -48,7 +48,8 @@ SUBSTANCE_NAME = 'substanceName'
 SPECTRUM_NAME = 'spectrumName'
 SPECTRUMGROUP = 'SpectrumGroup'
 SERIES = 'series'
-
+SPECTRUMHEXCOLOUR = 'spectrumHexColour'
+SPECTRUMGROUPHEXCOLOUR = 'spectrumGroupHexColour'
 ### Substance properties: # do not change these names
 comment = 'comment'
 smiles = 'smiles'
@@ -100,8 +101,20 @@ SUBSTANCE_PROPERTIES = [comment, smiles, synonyms, molecularMass, empiricalFormu
                         hBondAcceptorCount, hBondDonorCount, bondCount, ringCount, polarSurfaceArea,
                         logPartitionCoefficient, userCode, ]
 
-SUBSTANCES_SHEET_COLUMNS = [SUBSTANCE_NAME, SPECTRUM_PATH, SPECTRUM_GROUP_NAME, EXP_TYPE] + SUBSTANCE_PROPERTIES
-SAMPLE_SHEET_COLUMNS = [SAMPLE_NAME, SPECTRUM_GROUP_NAME, SPECTRUM_PATH, SPECTRUM_NAME] + SAMPLE_PROPERTIES
+SUBSTANCES_SHEET_COLUMNS = [SUBSTANCE_NAME,
+                                        SPECTRUM_PATH,
+                                        SPECTRUM_GROUP_NAME,
+                                        SPECTRUMHEXCOLOUR,
+                                        SPECTRUMGROUPHEXCOLOUR, EXP_TYPE] \
+                                       + SUBSTANCE_PROPERTIES
+
+SAMPLE_SHEET_COLUMNS = [SAMPLE_NAME,
+                        SPECTRUM_GROUP_NAME,
+                        SPECTRUM_PATH,
+                        SPECTRUM_NAME,
+                        SPECTRUMHEXCOLOUR,
+                        SPECTRUMGROUPHEXCOLOUR] \
+                       + SAMPLE_PROPERTIES
 
 TOP_SG_COLOURS = ['red', 'blue', 'purple', 'green', 'gold', 'dimgrey', 'darksalmon']
 
@@ -200,24 +213,16 @@ class ExcelReader(object):
 
 
         """
-        from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
-
         self._project = project
         self.excelPath = aPath(excelPath)
         self.pandasFile = pd.ExcelFile(self.excelPath)
         self.sheets = self._getSheets(self.pandasFile)
         self.dataframes = self._getDataFrameFromSheets(self.sheets)
 
-        # self._project.blankNotification()
-        # getLogger().info('Loading Excel File...')
-
-        # with undoBlockWithoutSideBar():
-        #     getLogger().info('Loading Excel File...')
-        #     with notificationEchoBlocking():
-
     def load(self):
         """Load the actual data in the the project
         """
+        self._addDefaultSpectrumColours = True
         self._tempSpectrumGroupsSpectra = {}  # needed to improve the loading speed
         self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
         self.samplesDicts = self._createSamplesDataDicts(self.dataframes)
@@ -427,6 +432,9 @@ class ExcelReader(object):
             if EXP_TYPE in dct:  # use exp name as it is much faster and safer to save than exp type.
                 sp.experimentName = dct[EXP_TYPE]
                 # getLogger().debug3(msg=(e, data[0], dct[EXP_TYPE]))
+            if SPECTRUMHEXCOLOUR in dct:
+                sp.sliceColour = dct[SPECTRUMHEXCOLOUR]
+                self._addDefaultSpectrumColours = False
 
     ######################################################################################################################
     ######################              ADD SPECTRUM TO RELATIVE OBJECTS              ####################################
@@ -461,10 +469,11 @@ class ExcelReader(object):
             if spectrumGroup is not None:
                 spectrumGroup.spectra = spectra
             # give some default colours
-            hexColour = name2Hex( next(colourNames))
-            spectrumGroup.sliceColour = hexColour
-            for sp in spectra:
-                sp.sliceColour = hexColour
+            if self._addDefaultSpectrumColours:
+                hexColour = name2Hex( next(colourNames))
+                spectrumGroup.sliceColour = hexColour
+                for sp in spectra:
+                    sp.sliceColour = hexColour
 
 
     ######################################################################################################################

@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-09-16 15:02:25 +0100 (Fri, September 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-02 17:17:22 +0000 (Wed, November 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -428,9 +428,21 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 self.isotopeCodes[i] = dimDict.get('AXNUC')
                 self.axisLabels[i] = dimDict.get('AXNAME')
 
+                # SW_p is in Hz; from the procs file, likely denotes "SW_processed", not "SW_ppm"
+                # SW_p can be zero in topspin 4.1.4 for time domain dimensions
+                # SW_h is in Hz; from the acqus file
+                swHz = float(dimDict.get('SW_p', dimDict.get('SW_h', 1.0)))  # SW in Hz
+                if swHz == 0.0:
+                    swHz = float(dimDict.get('SW_h', 1.0))
+                # check again; swHz cannot be zero as this will (later) violate valuePerPoint in the model
+                if swHz == 0.0:
+                    swHz = 1.0
+                    getLogger().warning(f'Extracting parameters for {self}: spectralWidthHz[{i}] set to 1.0')
+                self.spectralWidthsHz[i] = swHz
 
-                self.spectralWidthsHz[i] = float(dimDict.get('SW_p', 1.0))  # SW in Hz processed (from proc file)
-                self.spectrometerFrequencies[i] = float(dimDict.get('SF', dimDict.get('SF01', 1.0)))
+                # SF is in MHz; from the procs file, but generally less digits
+                # SFO1 - SF08: the eight spectrometer RF channels; no direct relation to SF of a dimension
+                self.spectrometerFrequencies[i] = float(dimDict.get('SF', 1.0))
 
                 self.referenceValues[i] = float(dimDict.get('OFFSET', 0.0))
                 self.referencePoints[i] = float(dimDict.get('refPoint', 1.0)) # CCPN first point is defined as 1

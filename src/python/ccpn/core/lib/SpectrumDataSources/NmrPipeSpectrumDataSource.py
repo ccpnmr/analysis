@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-10-11 16:17:12 +0100 (Tue, October 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-02 17:16:28 +0000 (Wed, November 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -55,8 +55,8 @@ import ccpn.core.lib.SpectrumLib as specLib
 #define FD_PSEUDOQUAD 2
 #define FD_SE         3
 #define FD_GRAD       4
-from ccpn.core.lib.SpectrumLib import DATA_TYPE_REAL, DATA_TYPE_PN, DATA_TYPE_COMPLEX
-dataTypeMap = {0:DATA_TYPE_COMPLEX, 1:DATA_TYPE_REAL, 2:DATA_TYPE_REAL, 3:DATA_TYPE_PN, 4:DATA_TYPE_REAL}
+from ccpn.core.lib.SpectrumLib import DATA_TYPE_REAL, DATA_TYPE_COMPLEX_PN, DATA_TYPE_COMPLEX_nRnI, DATA_TYPE_COMPLEX_nRI
+dataTypeMap = {0:DATA_TYPE_COMPLEX_nRnI, 1:DATA_TYPE_REAL, 2:DATA_TYPE_REAL, 3:DATA_TYPE_COMPLEX_PN, 4:DATA_TYPE_REAL}
 
 from ccpn.core.lib.SpectrumLib import DIMENSION_FREQUENCY, DIMENSION_TIME
 PIPE_TIME_DOMAIN  = 0

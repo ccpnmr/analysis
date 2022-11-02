@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-10-11 16:17:13 +0100 (Tue, October 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-02 17:16:28 +0000 (Wed, November 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -339,7 +339,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             spectrumAttribute='dimensionTypes',
             hasSetterInSpectrumClass=True
             )
-    dataTypes = CList(trait=CInt(), default_value=[specLib.DATA_TYPE_REAL] * MAXDIM, maxlen=MAXDIM).tag(
+    dataTypes = CList(trait=CString(), default_value=[specLib.DATA_TYPE_REAL] * MAXDIM, maxlen=MAXDIM).tag(
             info='Data type identifier (real, complex, pn) along each dimension',
             isDimensional=True,
             doCopy=True,

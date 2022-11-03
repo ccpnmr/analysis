@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-20 10:10:06 +0100 (Tue, September 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-03 15:27:22 +0000 (Thu, November 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -106,8 +106,7 @@ class MagnetisationTransferTable(TableABC):
     def getMagnetisationTransfers(self):
         """Get the magnetisation-transfers from the table.
         """
-        magTransfers = tuple(MagnetisationTransferTuple(*row) for row in self._df.itertuples(index=False))
-        return magTransfers
+        return tuple(MagnetisationTransferTuple(*row) for row in self._df.itertuples(index=False))
 
     def populateTable(self, magnetisationTransfers=None, editable=True):
         """Populate the table from the current spectrum.
@@ -182,10 +181,7 @@ class MagnetisationTransferTable(TableABC):
         """Remove the selected magnetisation-transfer from the table.
         """
         model = self.selectionModel()
-        # selects all the items in the row - may need to check selectionMode
-        selection = model and model.selectedRows()
-
-        if selection:
+        if selection := (model and model.selectedRows()):
             _sortIndex = self.model()._sortIndex
             for idx in selection:
                 row = _sortIndex[idx.row()]
@@ -274,13 +270,11 @@ class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
             widget.closeOnLineEditClick = False
 
             self.customWidget = widget
-
             return widget
 
-        else:
-            self.customWidget = None
+        self.customWidget = None
 
-            return super().createEditor(parentWidget, itemStyle, index)
+        return super().createEditor(parentWidget, itemStyle, index)
 
     def setEditorData(self, widget, index) -> None:
         """Populate the editor widget when the cell is edited.
@@ -299,7 +293,7 @@ class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
             if hasattr(widget, 'selectValue'):
                 widget.selectValue(*value)
             else:
-                raise Exception(f'Widget {widget} does not expose a set method; required for table editing')
+                raise RuntimeError(f'Widget {widget} does not expose a set method; required for table editing')
 
         else:
             super().setEditorData(widget, index)
@@ -314,9 +308,8 @@ class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
         if self.customWidget:
             if hasattr(widget, 'get'):
                 value = widget.get()
-
             else:
-                raise Exception(f'Widget {widget} does not expose a get method; required for table editing')
+                raise RuntimeError(f'Widget {widget} does not expose a get method; required for table editing')
 
             try:
                 model = index.model()

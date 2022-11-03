@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 10:45:10 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-03 15:41:33 +0000 (Thu, November 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -94,6 +94,18 @@ C_DIM_INDEX = 5
 D_DIM_INDEX = 6
 E_DIM_INDEX = 7
 UNDEFINED_DIM_INDEX = 8
+
+# # data types
+# DATA_TYPE_REAL    = 0  # real data points
+# DATA_TYPE_COMPLEX = 1  # size/2 real and size/2 imag points
+# DATA_TYPE_PN      = 2  # size/2 P and size/2 N points
+# dataTypeMap = {DATA_TYPE_REAL:"real", DATA_TYPE_COMPLEX:"complex", DATA_TYPE_PN:"PN"}
+
+DATA_TYPE_REAL         = 'nR' # n real data points; pointCount = n
+DATA_TYPE_COMPLEX_nRnI = '(nR)(nI)' # n real followed by n imag points; pointCount = 2*n
+DATA_TYPE_COMPLEX_nRI  = 'n(RI)'  # n (real, imag) pairs; pointCount = 2*n
+DATA_TYPE_COMPLEX_PN   = 'n(PN)'   # n (P, N) pairs; pointCount = 2*n
+DATA_TYPES = (DATA_TYPE_REAL, DATA_TYPE_COMPLEX_nRnI, DATA_TYPE_COMPLEX_nRI, DATA_TYPE_COMPLEX_PN)
 
 MagnetisationTransferTypes = ('onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'through-space', 'relayed-alternate')
 MagnetisationTransferParameters = ('dimension1 dimension2 transferType isIndirect'.split())

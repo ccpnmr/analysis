@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-16 17:21:44 +0000 (Wed, March 16, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-11-03 15:41:33 +0000 (Thu, November 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -169,6 +169,17 @@ class SpectrumDataABC(np.ndarray):
         return tuple(list(self.shape)[::-1])
 
     @property
+    def dataTypes(self) -> tuple:
+        """Conveniance:
+        :return dataSource.dataTypes in self.dimension's order
+        """
+        if self.dataSource is not None:
+            result  = [self.dataSource.dataTypes[dimIdx] for dimIdx in self.dimensionIndices]
+        else:
+            result = [specLib.DATA_TYPE_REAL]*self.ndim
+        return tuple(result)
+
+    @property
     def isComplex(self) -> tuple:
         """Conveniance:
         :return dataSource.isComplex in self.dimension's order
@@ -185,7 +196,7 @@ class SpectrumDataABC(np.ndarray):
         order as used throughout the code
         :return the shape of self  self.dimension's order
         """
-        result = [(np/2 if isC else np) for np, isC in zip(self.pointCounts, self.isComplex)]
+        result = [(np//2 if isC else np) for np, isC in zip(self.pointCounts, self.isComplex)]
         return tuple(result)
 
     @property

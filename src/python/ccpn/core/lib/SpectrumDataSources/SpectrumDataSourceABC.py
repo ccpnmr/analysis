@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-19 12:41:18 +0200 (Wed, October 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-03 15:41:33 +0000 (Thu, November 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -319,22 +319,32 @@ class SpectrumDataSourceABC(CcpNmrJson):
             hasSetterInSpectrumClass=False
             )
     pointCounts = CList(trait=CInt(allow_none=False), default_value=[0] * MAXDIM, maxlen=MAXDIM).tag(
+            info='Total number of data points along each dimension',
             isDimensional=True,
             doCopy=True,
             spectrumAttribute='pointCounts',
             hasSetterInSpectrumClass=True
             )
     blockSizes = CList(trait=CInt(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+            info='Sub-matrix number of points along each dimension',
             isDimensional=True,
             doCopy=False,
             spectrumAttribute=None,
             hasSetterInSpectrumClass=False
             )
     dimensionTypes = CList(trait=CString(allow_none=True), default_value=[specLib.DIMENSION_FREQUENCY] * MAXDIM, maxlen=MAXDIM).tag(
+            info='Dimension type (Frequency or Time) identifier along each dimension',
             isDimensional=True,
             doCopy=True,
             spectrumAttribute='dimensionTypes',
             hasSetterInSpectrumClass=True
+            )
+    dataTypes = CList(trait=CString(), default_value=[specLib.DATA_TYPE_REAL] * MAXDIM, maxlen=MAXDIM).tag(
+            info='Data type identifier (real, complex, pn) along each dimension',
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute=None,
+            hasSetterInSpectrumClass=False
             )
     isComplex = CList(trait=CBool(), default_value=[False] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,
@@ -526,6 +536,16 @@ class SpectrumDataSourceABC(CcpNmrJson):
         else:
             result = (self.headerSize + self.totalNumberOfPoints) * self.wordSize
 
+        return result
+
+    @property
+    def realPointCounts(self) -> list:
+        """Conveniance to yield the number of real points along each dimension
+        """
+        result = []
+        for isComplex, p in zip(self.isComplex, self.pointCounts):
+            _p = p // 2 if isComplex else p
+            result.append(_p)
         return result
 
     #=========================================================================================

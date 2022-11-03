@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 15:25:47 +0100 (Thu, October 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-03 19:11:16 +0000 (Thu, November 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -256,15 +256,16 @@ class _ListWidget(ListWidget):
         #     item = self._itemFactory.createItem(str(text), datum)
         #     self.addItem(item)
 
-    def _buildItemData(self, objects, data):
+    @staticmethod
+    def _buildItemData(objects, data):
 
         data = copy.deepcopy(data)
-        for i, object in enumerate(objects):
+        for i, obj in enumerate(objects):
 
             if i < len(data):
-                data[i]['USER_ROLE'] = id(object)
+                data[i]['USER_ROLE'] = id(obj)
             else:
-                data.append({'USER_ROLE': id(object)})
+                data.append({'USER_ROLE': id(obj)})
 
         return data
 
@@ -346,14 +347,17 @@ class _ListWidget(ListWidget):
         return True
 
     def dropEvent(self, event):
-
+        """Handle dropping items from left-to-right, right-to-left, or re-ordering the items in the right-hand list
+        """
         if self._isAcceptableDrag(event):
-
             data = self.parseEvent(event)
             if self._rearrangeable and data['source'] == self:
+                # re-ordering the list of items in the group
+                event.setDropAction(Qt.CopyAction)  # required otherwise item disappears
                 QtWidgets.QListWidget.dropEvent(self, event)
+
             else:
-                data = self.parseEvent(event)
+                # dropping left-to-right or right-to-left
                 super().dropEvent(event=event)
 
             self._dragReset()
@@ -374,7 +378,7 @@ class _ListWidget(ListWidget):
         if self.count() == 0:
             enabledAll = False
 
-        # Context temporarly disabled. Need to fix the signal block or risk of a massive signal-leakage
+        # Context temporarily disabled. Need to fix the signal block or risk of a massive signal-leakage
         # contextMenu.addItem("Move %s" % self._oppositeRole, callback=self.move, enabled=enabled)
         # contextMenu.addItem("Move All %s" % self._oppositeRole, callback=self.moveAll, enabled=enabledAll)
 
@@ -446,7 +450,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
     _buttonFilter = 'Filter by:'
     _buttonCancel = 'Cancel'
-    _setRevertButton = True
+    _setRevertButton = False
 
     _useTab = None
     _numberTabs = 0
@@ -482,14 +486,55 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self.obj = obj
         self.EDITMODE = editMode
         self._modelsConnected = False
+        self._initialState = None
 
+        # set up the main widgets
+        self._setWidgets(defaultItems)
+
+        # enable the buttons
+        self.setOkButton(callback=self._applyAndClose, text=self._acceptButtonText, tipText='Apply according to current settings and close')
+        self.setCancelButton(callback=self._cancel, text=self._buttonCancel, tipText='Cancel the New/Edit operation')
+        self.setRevertButton(callback=self._revertClicked, enabled=False)
+
+        self.setDefaultButton(CcpnDialogMainWidget.OKBUTTON)
+
+        self.__postInit__()
+        self._applyButton = self.getButton(self.OKBUTTON)
+        self._cancelButton = self.getButton(self.CANCELBUTTON)
+        self._revertButton = self.getButton(self.RESETBUTTON)
+
+        self._connectLists()
+        self._populateLists()
+
+        self._revertButton.setEnabled(False)
+
+        # # one cannot be a copy of the other unless it's a deep copy...
+        # # this is easier
+        # self._previousState = self._getPreviousState()
+        # self._updatedState = copy.deepcopy(self._getPreviousState())
+        #
+        # self._previousNames = {key: key for key in self._previousState}
+        # self._updatedNames = dict(self._previousNames)
+        #
+        # self.connectModels()
+        # self._updateStateOnSelection()
+        # self.setMinimumSize(self.sizeHint())
+        # self.resize(500, 350)  # change to a calculation rather than a guess
+
+    def _setWidgets(self, defaultItems):
+        """Set up the main widgets for the dialog
+        """
         # open popup with these items already added to left ListWidget. Ready to create the group.
         # assumes that defaultItems is a list of core objects (with pid)
         self.defaultItems = [itm.pid for itm in defaultItems] if defaultItems else None
-
         if self._useTab is None:
             # define the destination for the widgets - Dialog has mainWidget, will change for tabbed widgets
-            self._dialogWidget = self.mainWidget
+            # self._dialogWidget = self.mainWidget
+
+            self._dialogWidget = ScrollableFrame(self.mainWidget, setLayout=True, grid=(0, 0),
+                                                 spacing=DEFAULTSPACING, margins=TABMARGINS,
+                                                 scrollBarPolicies=('asNeeded', 'asNeeded'))
+
         else:
             # hPolicy='expanding' gives weird results
             self._tabWidget = Tabs(self.mainWidget, grid=(0, 0))
@@ -508,36 +553,6 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
         self._setLeftWidgets()
         self._setRightWidgets()
-
-        # enable the buttons
-        self.setOkButton(callback=self._applyAndClose, text=self._acceptButtonText, tipText='Apply according to current settings and close')
-        self.setCancelButton(callback=self._cancel, text=self._buttonCancel, tipText='Cancel the New/Edit operation')
-        self.setRevertButton(callback=self._revertClicked, enabled=False)
-
-        self.setDefaultButton(CcpnDialogMainWidget.OKBUTTON)
-
-        self.__postInit__()
-        self._applyButton = self.getButton(self.OKBUTTON)
-        self._cancelButton = self.getButton(self.CANCELBUTTON)
-        self._revertButton = self.getButton(self.RESETBUTTON)
-
-        # self._setApplyButtons()
-        # self._addWidgetsToLayout()
-        self._connectLists()
-        self._populateLists()
-
-        # # one cannot be a copy of the other unless it's a deep copy...
-        # # this is easier
-        # self._previousState = self._getPreviousState()
-        # self._updatedState = copy.deepcopy(self._getPreviousState())
-        #
-        # self._previousNames = {key: key for key in self._previousState}
-        # self._updatedNames = dict(self._previousNames)
-        #
-        # self.connectModels()
-        # self._updateStateOnSelection()
-        # self.setMinimumSize(self.sizeHint())
-        # self.resize(500, 350)  # change to a calculation rather than a guess
 
     def _populateLists(self):
         # one cannot be a copy of the other unless it's a deep copy...
@@ -625,8 +640,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                                           grid=(0, 0), dragRole='right', acceptDrops=True, sortOnDrop=False, copyDrop=False,
                                           emptyText=self._leftEmptyText, rearrangeable=True, itemFactory=OrderedListWidgetItemFactory())
 
-        self.leftListFeedbackWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
-        # self.leftListWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        self.leftListWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        # make this is primary expanding row
+        self._dialogWidget.getLayout().setRowStretch(row, 2)
 
     def _connectModels(self):
         if not self._modelsConnected:
@@ -662,8 +678,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                                            grid=(0, 0), dragRole='left', acceptDrops=True, sortOnDrop=False, copyDrop=False,
                                            emptyText=self._rightEmptyText, sorted=True, itemFactory=OrderedListWidgetItemFactory())
 
-        self.rightListFeedbackWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
-        # self.rightListWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        self.rightListWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        # make this is primary expanding row
+        self._dialogWidget.getLayout().setRowStretch(row, 2)
 
         # small frame for holding the pulldown list
         row += 1
@@ -702,7 +719,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
     @property
     def _editedObject(self):
-        "Convenience to get the edited object"
+        """Convenience to get the edited object"""
         result = None
         if self.EDITMODE:
             result = self.leftPullDown.getSelectedObject()
@@ -786,8 +803,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         currentEdits = self._currentEditorState()
 
         if self.EDITMODE and self._editedObject is not None:
-            for id, selections in currentEdits.items():
-                self._updatedState[id] = selections
+            for idd, selections in currentEdits.items():
+                self._updatedState[idd] = selections
 
             editedObjectName = self._editedObject.name
             newName = self.nameEdit.text()
@@ -800,8 +817,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         currentEdits = self._currentEditorState()
 
         if self.EDITMODE and self._editedObject is not None:
-            for id, selections in currentEdits.items():
-                self._updatedState[id] = selections
+            for idd, selections in currentEdits.items():
+                self._updatedState[idd] = selections
 
         self._updateButton()
 
@@ -952,6 +969,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
     def _updateButton(self):
 
         self.errors = []
+        self._initialState = self._initialState or self._currentEditorState()
 
         if not self.EDITMODE:
 
@@ -976,6 +994,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             if check:
                 enabled = False
                 self.errors.append(message)
+
+            revertEnabled = (self._currentEditorState() != self._initialState)
 
         elif self.EDITMODE:
 
@@ -1007,11 +1027,14 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                 enabled = False
                 self.errors.append(message)
 
-        # self.applyButtons.setButtonEnabled(self._acceptButtonText, enabled)
+            revertEnabled = enabled
+
         self._applyButton.setEnabled(enabled)
 
         if self._setRevertButton:
             self._revertButton.setEnabled(True)
+        else:
+            self._revertButton.setEnabled(revertEnabled)
 
         self._emptyErrorFrame()
 

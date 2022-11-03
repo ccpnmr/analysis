@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-28 18:45:17 +0100 (Wed, September 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-03 15:35:54 +0000 (Thu, November 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -82,7 +82,7 @@ from ccpn.core.lib.SpectrumLib import _includeInDimensionalCopy, _includeInCopy,
     checkSpectrumPropertyValue, _setDefaultAxisOrdering
 
 from ccpn.core.lib.ContextManagers import \
-    newObject, deleteObject, ccpNmrV3CoreSimple, \
+    newObject, deleteObject, ccpNmrV3CoreUndoBlock, \
     undoStackBlocking, renameObject, undoBlock, notificationBlanking, \
     ccpNmrV3CoreSetter, inactivity, undoBlockWithoutSideBar
 
@@ -642,6 +642,7 @@ class Spectrum(AbstractWrapperObject):
 
     @experimentType.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreUndoBlock(updateExperimentType=True)
     def experimentType(self, value: str):
         from ccpn.core.lib.SpectrumLib import _setApiExpTransfers, _setApiRefExperiment, _clearLinkToRefExp
 
@@ -1112,7 +1113,7 @@ class Spectrum(AbstractWrapperObject):
 
     @referenceExperimentDimensions.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
+    @ccpNmrV3CoreSetter(updateReferenceExperimentDimensions=True)
     @checkSpectrumPropertyValue(iterable=True, unique=True, allowNone=True, types=(str,))
     def referenceExperimentDimensions(self, values: Sequence):
         apiDataSource = self._wrappedData
@@ -1132,16 +1133,16 @@ class Spectrum(AbstractWrapperObject):
         for ii, (dataDim, val) in enumerate(zip(apiDataSource.sortedDataDims(), values)):
             expDim = dataDim.expDim
             if expDim is None and val is not None:
-                raise ValueError('Cannot set referenceExperimentDimension %s in dimension %s' % (val, ii + 1))
+                raise ValueError(f'Cannot set referenceExperimentDimension {val} in dimension {ii + 1}')
+
+            _update = {'expDimToRefExpDim': val}
+            _ccpnInt = expDim.ccpnInternalData
+            if _ccpnInt is None:
+                expDim.ccpnInternalData = _update
             else:
-                _update = {'expDimToRefExpDim': val}
-                _ccpnInt = expDim.ccpnInternalData
-                if _ccpnInt is None:
-                    expDim.ccpnInternalData = _update
-                else:
-                    _expDimCID = expDim.ccpnInternalData.copy()
-                    _ccpnInt.update(_update)
-                    expDim.ccpnInternalData = _ccpnInt
+                _expDimCID = expDim.ccpnInternalData.copy()
+                _ccpnInt.update(_update)
+                expDim.ccpnInternalData = _ccpnInt
 
     def getAvailableReferenceExperimentDimensions(self, _experimentType=None) -> tuple:
         """Return list of available reference experiment dimensions based on spectrum isotopeCodes
@@ -1156,19 +1157,15 @@ class Spectrum(AbstractWrapperObject):
 
         # match against the current reference experiment or passed in value
         apiExperiment = self._wrappedData.experiment
-        apiRefExperiment = _refExperiment or apiExperiment.refExperiment
-
-        if apiRefExperiment:
+        if apiRefExperiment := (_refExperiment or apiExperiment.refExperiment):
             # get the permutations of the axisCodes and nucleusCodes
             axisCodePerms = permutations(apiRefExperiment.axisCodes)
             nucleusPerms = permutations(apiRefExperiment.nucleusCodes)
 
             # return only those that match the current nucleusCodes (from isotopeCodes)
-            result = tuple(ac for ac, nc in zip(axisCodePerms, nucleusPerms) if nCodes == nc)
-            return result
+            return tuple(ac for ac, nc in zip(axisCodePerms, nucleusPerms) if nCodes == nc)
 
-        else:
-            return ()
+        return ()
 
     @property
     @_includeInDimensionalCopy
@@ -1400,6 +1397,7 @@ class Spectrum(AbstractWrapperObject):
         #
         return tuple(result)
 
+    @ccpNmrV3CoreUndoBlock(updateMagnetisationTransfers=True)
     def _setMagnetisationTransfers(self, value: Tuple[MagnetisationTransferTuple, ...]):
         """Setter for magnetisation transfers
 
@@ -1409,7 +1407,6 @@ class Spectrum(AbstractWrapperObject):
         does this function set the magnetisation transfers, and the corresponding values are
         ignored if the experimentType is later set
         """
-
         apiExperiment = self._wrappedData.experiment
         apiRefExperiment = apiExperiment.refExperiment
         if apiRefExperiment is None:
@@ -1420,11 +1417,9 @@ class Spectrum(AbstractWrapperObject):
                 try:
                     dim1, dim2, transferType, isIndirect = tt
                     expDimRefs = (mainExpDimRefs[dim1 - 1], mainExpDimRefs[dim2 - 1])
-                except:
-                    raise ValueError(
-                            "Attempt to set incorrect magnetisationTransfer value %s in spectrum %s"
-                            % (tt, self.pid)
-                            )
+                except Exception:
+                    raise ValueError(f"Attempt to set incorrect magnetisationTransfer value {tt} in spectrum {self.pid}")
+
                 apiExperiment.newExpTransfer(expDimRefs=expDimRefs, transferType=transferType,
                                              isDirect=(not isIndirect))
         else:

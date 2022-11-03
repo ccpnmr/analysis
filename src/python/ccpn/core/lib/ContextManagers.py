@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-28 18:45:17 +0100 (Wed, September 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-03 15:35:55 +0000 (Thu, November 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1205,7 +1205,7 @@ def ccpNmrV3CoreSetter(doNotify=True, **actionKwds):
     return theDecorator
 
 
-def ccpNmrV3CoreUndoBlock(action='change'):
+def ccpNmrV3CoreUndoBlock(action='change', **actionKwds):
     """A decorator wrap the property setters method in an undo block and triggering the
     action notification; default is 'change' but occasionally may use 'rename'
     """
@@ -1223,14 +1223,14 @@ def ccpNmrV3CoreUndoBlock(action='change'):
                 # must be done like this as the undo functions are not known
                 with undoStackBlocking(application=application) as addUndoItem:
                     # incorporate the change notifier to simulate the decorator
-                    addUndoItem(undo=partial(self._finaliseAction, action))
+                    addUndoItem(undo=partial(self._finaliseAction, action, **actionKwds))
                     addUndoItem(undo=application.project.unblankNotification,
                                 redo=application.project.blankNotification)
 
                 try:
                     # call the wrapped function
                     result = func(*args, **kwds)
-                except Exception as es:
+                except Exception:
                     raise
 
                 finally:
@@ -1238,9 +1238,9 @@ def ccpNmrV3CoreUndoBlock(action='change'):
                         # incorporate the change notifier to simulate the decorator
                         addUndoItem(undo=application.project.blankNotification,
                                     redo=application.project.unblankNotification)
-                        addUndoItem(redo=partial(self._finaliseAction, action))
+                        addUndoItem(redo=partial(self._finaliseAction, action, **actionKwds))
 
-        self._finaliseAction(action)
+        self._finaliseAction(action, **actionKwds)
 
         return result
 

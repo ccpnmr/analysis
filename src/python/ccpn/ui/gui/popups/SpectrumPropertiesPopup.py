@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-14 16:11:15 +0100 (Wed, September 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-03 15:36:48 +0000 (Thu, November 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -771,14 +771,14 @@ class GeneralTab(Widget):
             objects = ('',) + tuple(experimentTypes.values()) if experimentTypes else ()
             self.spectrumType.setData(texts=texts, objects=objects)
 
-            text = self.spectrum.experimentName
-            if experimentTypes and text not in experimentTypes:
-                text = self.spectrum.experimentType
-            # apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
-            # text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
-            # Added to account for renaming of experiments
-            text = priorityNameRemapping.get(text, text)
-            self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))
+            if (text := self.spectrum.experimentType):
+                # reference-experiment is set
+                key = self.spectrum.synonym or text
+                # Added to account for renaming of experiments
+                key = priorityNameRemapping.get(key, key)
+
+                if (idx := self.spectrumType.findText(key)) > 0:
+                    self.spectrumType.setCurrentIndex(idx)
 
             value = self.spectrum.spinningRate
             self.spinningRateData.setValue(value if value is not None else 0)
@@ -895,18 +895,20 @@ class GeneralTab(Widget):
         _text, sample = self.samplesPulldownList.getSelected()
         return partial(self._changeSampleSpectrum, spectrum, sample)
 
-    def _changeSampleSpectrum(self, spectrum, sample):
+    @staticmethod
+    def _changeSampleSpectrum(spectrum, sample):
         spectrum.sample = sample
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetSpectrumType(self, spectrum, value):
-        if self.spectrumType.getObject():
-            expType = self.spectrumType.objects[value]
+        if self.spectrumType.getObject() is not None:
+            expType = self.spectrumType.objects[value] if 0 <= value < len(self.spectrumType.objects) else None
             if expType != spectrum.experimentType:
                 return partial(self._setSpectrumType, spectrum, expType)
 
-    def _setSpectrumType(self, spectrum, expType):
-        spectrum.experimentType = expType
+    @staticmethod
+    def _setSpectrumType(spectrum, expType):
+        spectrum.experimentType = expType or None
 
     # spectrum sliceColour button and pulldown
     def _queueSetSpectrumColour(self, spectrum):
@@ -1353,13 +1355,15 @@ class DimensionsTab(Widget):
         objects = ('',) + tuple(experimentTypes.values()) if experimentTypes else ()
         self.spectrumType.setData(texts=texts, objects=objects)
 
-        text = self.spectrum.experimentName
-        if experimentTypes and text not in experimentTypes:
-            text = self.spectrum.experimentType
-        text = priorityNameRemapping.get(text, text)
-        self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))
+        self._referenceExperiment = None
+        if (text := self.spectrum.experimentType):
+            # reference-experiment is set
+            key = self.spectrum.synonym or text
+            key = priorityNameRemapping.get(key, key)
 
-        self._referenceExperiment = text
+            if (idx := self.spectrumType.findText(key)) > 0:
+                self.spectrumType.setCurrentIndex(idx)
+                self._referenceExperiment = key
 
     def _populateMagnetisationTransfers(self):
         """Populate the magnetisation transfers table
@@ -1377,7 +1381,8 @@ class DimensionsTab(Widget):
                 self.referenceDimensionPullDowns[ii].setIndex(refList.index(ref))
 
         if self._referenceExperiment:
-            magTransfers = _getApiExpTransfers(self.spectrum, refExperimentName, refDimensions)
+            # need the same behaviour as the api - defaults to axisCode if not defined
+            magTransfers = _getApiExpTransfers(self.spectrum, refExperimentName, [(ref or ax) for ref, ax in zip(refDimensions, self.spectrum.axisCodes)])
             editable = False
 
         else:

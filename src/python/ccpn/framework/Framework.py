@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-31 11:23:49 +0000 (Mon, October 31, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-11-03 14:06:59 +0000 (Thu, November 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1520,7 +1520,7 @@ class Framework(NotifierBase, GuiBase):
         if not self.project.peakLists:
             txt = 'Project has no PeakList\'s. Peak Lists cannot be copied'
             getLogger().warning(txt)
-            MessageDialog.showWarning(txt)
+            MessageDialog.showWarning('Cannot perform a copy',txt)
             return
         else:
             from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup

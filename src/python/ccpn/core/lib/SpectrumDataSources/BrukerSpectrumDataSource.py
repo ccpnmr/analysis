@@ -3,7 +3,7 @@ This file contains the Bruker data access class
 it serves as an interface between the V3 Spectrum class and the actual spectral data
 Some routines rely on code from the Nmrglue package, included in the miniconda distribution
 
-See SpectrumDataSourceABC for a description of the methods
+See SpectrumDataSourceABC for a description of the attributes and methods
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-03 15:41:33 +0000 (Thu, November 03, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-11-04 14:13:26 +0000 (Fri, November 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -303,8 +303,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         self._brukerRoot = None
         self._binaryData = None
 
-        self.acqus = None   # list of the acqu files, parsed as dicts
-        self.procs = None   # list of the proc files, parsed as dicts
+        # self.acqus = None   # list of the acqu files, parsed as dicts
+        # self.procs = None   # list of the proc files, parsed as dicts
 
         if path is None:
             _path = None
@@ -321,24 +321,36 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             elif _path.is_file() and _path.stem in self._procFiles:
                 # Bruker proc file
                 self._pdataDir = _path.basename
+                if not self._hasBinaryData(self._pdataDir):
+                    logger.debug2(f'"{path}" does not yield a valid Bruker directory with binary data' % path)
+                    return None
                 self._brukerRoot = _path.parent.parent.parent
                 self._binaryData = None
 
             elif self._isBrukerTopDir(_path):
                 # Bruker top directory
                 self._brukerRoot = _path
-                self._pdataDir = self._findFirstPdataDir()
+                if (_pdataDir := self._findFirstPdataDir()) is None:
+                    logger.debug2('"%s" does not define a valid path with Bruker data' % path)
+                    return None
+                self._pdataDir = _pdataDir
                 self._binaryData = None
 
             elif _path.is_dir() and _path.stem == self._PDATA and self._isBrukerTopDir(_path.parent):
                 # Bruker/pdata directory
                 self._brukerRoot = _path.parent
-                self._pdataDir = self._findFirstPdataDir()
+                if (_pdataDir := self._findFirstPdataDir()) is None:
+                    logger.debug2('"%s" does not define a valid path with Bruker data' % path)
+                    return None
+                self._pdataDir = _pdataDir
                 self._binaryData = None
 
             elif self._isBrukerPdataDir(_path):
                 # Bruker pdata 'proc'-directory
                 self._pdataDir = _path
+                if not self._hasBinaryData(self._pdataDir):
+                    logger.debug2(f'"{path}" is not a valid Bruker pdata directory with binary data' % path)
+                    return None
                 self._brukerRoot = _path.parent.parent
                 self._binaryData = None
 
@@ -368,7 +380,9 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         logger = getLogger()
 
         self.setDefaultParameters()
-        self.dimensionCount = self._getDimensionality()
+
+        _dimensionCount = self._getDimensionality()
+        self.setDimensionCount(_dimensionCount)
 
         try:
             # read acqus and procs
@@ -394,39 +408,39 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             self.temperature = self.acqus[0]['TE']
 
             # Dimensional parameters
-            for i in range(self.dimensionCount):
-                # collaps the acq and proc dicts into one, so we do not have to
+            for dimIndx in range(self.dimensionCount):
+                # collapse the acq and proc dicts into one, so we do not have to
                 # remember where the parameter lives
                 dimDict = dict()
-                dimDict.update(self.acqus[i])
-                dimDict.update(self.procs[i])
+                dimDict.update(self.acqus[dimIndx])
+                dimDict.update(self.procs[dimIndx])
 
                 # establish dimension type (time/frequency)
                 if int(float(dimDict.get('FT_mod', 1))) == 0:
                     # point/time axis
-                    self.dimensionTypes[i] = specLib.DIMENSION_TIME
-                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_TIME
+                    self.dimensionTypes[dimIndx] = specLib.DIMENSION_TIME
+                    self.measurementTypes[dimIndx] = specLib.MEASUREMENT_TYPE_TIME
                 else:
                     # frequency axis
-                    self.dimensionTypes[i] = specLib.DIMENSION_FREQUENCY
-                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_SHIFT
+                    self.dimensionTypes[dimIndx] = specLib.DIMENSION_FREQUENCY
+                    self.measurementTypes[dimIndx] = specLib.MEASUREMENT_TYPE_SHIFT
 
-                self.pointCounts[i] = int(dimDict['SI'])
-                if self.dimensionTypes[i] == specLib.DIMENSION_TIME:
+                self.pointCounts[dimIndx] = int(dimDict['SI'])
+                if self.dimensionTypes[dimIndx] == specLib.DIMENSION_TIME:
                     tdeff = int(dimDict['TDeff'])
-                    if tdeff > 0 and tdeff < self.pointCounts[i]:
-                        self.pointCounts[i] = tdeff
+                    if tdeff > 0 and tdeff < self.pointCounts[dimIndx]:
+                        self.pointCounts[dimIndx] = tdeff
 
-                self.blockSizes[i] = int(dimDict['XDIM'])
-                if self.blockSizes[i] == 0:
-                    self.blockSizes[i] = self.pointCounts[i]
+                self.blockSizes[dimIndx] = int(dimDict['XDIM'])
+                if self.blockSizes[dimIndx] == 0:
+                    self.blockSizes[dimIndx] = self.pointCounts[dimIndx]
                 else:
                     # for 1D data blockSizes can be > numPoints, which is wrongaaaaaaaaa
                     # (comment from orginal V2-based code)
-                    self.blockSizes[i] = min(self.blockSizes[i], self.pointCounts[i])
+                    self.blockSizes[dimIndx] = min(self.blockSizes[dimIndx], self.pointCounts[dimIndx])
 
-                self.isotopeCodes[i] = dimDict.get('AXNUC')
-                self.axisLabels[i] = dimDict.get('AXNAME')
+                self.isotopeCodes[dimIndx] = dimDict.get('AXNUC')
+                self.axisLabels[dimIndx] = dimDict.get('AXNAME')
 
                 # SW_p is in Hz; from the procs file, likely denotes "SW_processed", not "SW_ppm"
                 # SW_p can be zero in topspin 4.1.4 for time domain dimensions
@@ -437,19 +451,26 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 # check again; swHz cannot be zero as this will (later) violate valuePerPoint in the model
                 if swHz == 0.0:
                     swHz = 1.0
-                    getLogger().warning(f'Extracting parameters for {self}: spectralWidthHz[{i}] set to 1.0')
-                self.spectralWidthsHz[i] = swHz
+                    getLogger().warning(f'Extracting parameters for {self}: spectralWidthHz[{dimIndx}] set to 1.0')
+                self.spectralWidthsHz[dimIndx] = swHz
 
-                # SF is in MHz; from the procs file, but generally less digits
+                # SF is in MHz; from the procs file, but generally less digits for dimension 1 (!)
                 # SFO1 - SF08: the eight spectrometer RF channels; no direct relation to SF of a dimension
-                self.spectrometerFrequencies[i] = float(dimDict.get('SF', 1.0))
+                sf = float(dimDict.get('SF', 1.0))
+                # Correct dimension 1
+                sfo1 = self.acqus[0].get('SFO1')
+                o1 = self.acqus[0].get('O1')
+                if dimIndx == 0 and sfo1 is not None and o1 is not None and \
+                    round(sf,2) - round(sfo1, 2) == 0.0:
+                    sf = sfo1 - o1 * 1e-6
+                self.spectrometerFrequencies[dimIndx] = sf
 
-                self.referenceValues[i] = float(dimDict.get('OFFSET', 0.0))
-                self.referencePoints[i] = float(dimDict.get('refPoint', 1.0)) # CCPN first point is defined as 1
+                self.referenceValues[dimIndx] = float(dimDict.get('OFFSET', 0.0))
+                self.referencePoints[dimIndx] = float(dimDict.get('refPoint', 1.0)) # CCPN first point is defined as 1
                 # origNumPoints[i] = int(dimDict.get('$FTSIZE', 0))
                 # pointOffsets[i] = int(dimDict.get('$STSR', 0))
-                self.phases0[i] = float(dimDict.get('PHC0', 0.0))
-                self.phases1[i] = float(dimDict.get('PHC1', 0.0))
+                self.phases0[dimIndx] = float(dimDict.get('PHC0', 0.0))
+                self.phases1[dimIndx] = float(dimDict.get('PHC1', 0.0))
 
         except Exception as es:
             errTxt = 'Parsing parameters for %s; %s' % (self._brukerRoot, es)

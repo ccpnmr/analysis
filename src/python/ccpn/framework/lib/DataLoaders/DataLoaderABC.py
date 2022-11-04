@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-22 17:43:35 +0100 (Thu, September 22, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-11-04 14:13:26 +0000 (Fri, November 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -180,36 +180,15 @@ def checkPathForDataLoader(path, pathFilter=None):
     if len(_loaders) == 0:
         getLogger().debug2(f'No valid loader found for {path}')
 
-    elif len(_loaders) == 1 and not _loaders[0].isValid:
-        getLogger().debug2(f'{_loaders[0].errorString}')
-
     else:
-        txt = 'tried:\n' + '\n'.join(dl.errorString for dl in _loaders)
+        txt = f'checkPathForDataLoader "{path}": tried:\n'
+        for dl in _loaders:
+            txt += f'--- "{dl.dataFormat}" failed: {dl.errorString}\n'
+        txt = txt[:-1]  # remove last \n
         getLogger().debug2(txt)
 
     return None
 
-    # if not isinstance(path, (str, Path)):
-    #     raise ValueError('checkPathForDataLoader: invalid path %r' % path)
-    #
-    # if pathFilter is None:
-    #     pathFilter = list(getDataLoaders().keys())
-    #
-    # _loaders = _getPotentialDataLoaders(path)
-    # for cls in _loaders:
-    #
-    #     # create an instance and check
-    #     instance = cls.newFromPath(path)
-    #     if instance.checkValid():
-    #         # we found a valid format for path
-    #         if instance.dataFormat in pathFilter:
-    #             getLogger().debug2('%-20s %-20s: %s' % (instance.dataFormat, '(Valid, in filter)', path))
-    #             return instance
-    #         else:
-    #             getLogger().debug2('%-20s %-20s: %s' % (instance.dataFormat, '(Valid, not in filter)', path))
-    #
-    # getLogger().debug2(f'No valid loader found for {path}')
-    # return None
 
 #--------------------------------------------------------------------------------------------
 # DataLoader class

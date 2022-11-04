@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-27 15:49:12 +0100 (Thu, October 27, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-11-04 14:01:30 +0000 (Fri, November 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -547,7 +547,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                     if isinstance(i, Container):
                         self._container = i
 
-        if self._includeInLastSeen:
+        if self._includeInLastSeen and self.area:
             self.area._seenModuleStates[self.className] = {MODULENAME: self._defaultName, WIDGETSTATE: self._getLastSeenWidgetsState()}
 
         try:

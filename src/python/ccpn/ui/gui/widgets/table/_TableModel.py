@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-25 15:59:09 +0100 (Tue, October 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-04 10:41:26 +0000 (Fri, November 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,8 +29,8 @@ __date__ = "$Date: 2022-09-08 17:27:34 +0100 (Thu, September 08, 2022) $"
 import numpy as np
 import pandas as pd
 from PyQt5 import QtCore, QtGui
-from operator import or_
-from functools import reduce
+# from operator import or_
+# from functools import reduce
 
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
@@ -121,10 +121,9 @@ class _TableModel(QtCore.QAbstractTableModel):
             self._chrWidth = 1 + bbox('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789').width() / 36
             self._chrHeight = bbox('A').height() + 8
 
-        # initialise sorting
+        # initialise sorting/filtering
         self._sortColumn = 0
         self._sortOrder = QtCore.Qt.AscendingOrder
-        # NOTE:ED - could I use another self._filterIndex here? so _df doesn't need to be changed
         self._filterIndex = None
 
         # create a pixmap for the editable icon (currently a pencil)
@@ -677,6 +676,7 @@ class _TableObjectModel(_TableModel):
 
             if (func := self.setAttribRole.get(role)):
                 func(colDef, obj, value)
+                self.dataChanged.emit(index, index)
 
                 self._view.viewport().update()  # repaint the view
                 return True

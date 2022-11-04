@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-28 12:43:29 +0100 (Fri, October 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-04 17:27:04 +0000 (Fri, November 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -78,7 +78,7 @@ def navigateToPositionInStrip(strip,
             continue
         stripAxisIndex = indices[ii]
 
-        if positions[ii]:
+        if positions[ii] is not None:
             _setStripAxisPosition(strip, axisIndex=stripAxisIndex, position=positions[ii], update=True)
 
         if widths:  # is not None:      # and strip._CcpnGLWidget.aspectRatioMode == 0:
@@ -134,12 +134,14 @@ def _setStripToLimits(strip, axisIndex, update=True):
     strip.setAxisRegion(axisIndex=axisIndex, region=region, update=update)
 
 
-def copyStripAxisPositionsAndWidths(fromStrip, toStrip):
+def copyStripAxisPositionsAndWidths(fromStrip, toStrip, positions=None):
     """copy the strip axes to the new strip
     """
-    positions = [axis.position for axis in fromStrip.orderedAxes]
-    widths = [axis.width for axis in fromStrip.orderedAxes]
+    if positions is None:
+        # use the position from the source strip
+        positions = [axis.position for axis in fromStrip.orderedAxes]
 
+    widths = [axis.width for axis in fromStrip.orderedAxes]
     # remove non-XY widths
     for ii in range(2, len(widths)):
         widths[ii] = None

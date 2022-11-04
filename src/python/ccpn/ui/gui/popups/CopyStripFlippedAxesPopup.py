@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:30:50 +0000 (Thu, January 13, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-11-04 17:27:04 +0000 (Fri, November 04, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,7 +44,7 @@ class CopyStripFlippedSpectraPopup(CcpnDialogMainWidget):
     Set the axis ordering for the new spectrumDisplay from a popup
     """
 
-    def __init__(self, parent=None, mainWindow=None, strip=None, title='Copy Strip with Axes Flipped', label='', **kwds):
+    def __init__(self, parent=None, mainWindow=None, strip=None, title='Copy Strip with Axes Flipped', label='', positions=None, **kwds):
         # super().__init__(parent, mainWindow=mainWindow, title=title, **kwds)
         super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 
@@ -60,10 +60,11 @@ class CopyStripFlippedSpectraPopup(CcpnDialogMainWidget):
         self.axisCodes = strip.axisCodes
         self._axisOrderingOptions = tuple(permutations(list(range(len(self.axisCodes)))))
         self._axisOrdering = None
+        self._positions = positions
 
         if strip.axisCodes:
             row = 0
-            Label(self.mainWidget, text=label + ' - ' + str(self._axisOrdering), bold=True, grid=(row, 0), gridSpan=(1, 3))
+            Label(self.mainWidget, text=f'{label} - {str(self._axisOrdering)}', bold=True, grid=(row, 0), gridSpan=(1, 3))
 
             row += 1
             self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self.mainWidget,
@@ -98,8 +99,8 @@ class CopyStripFlippedSpectraPopup(CcpnDialogMainWidget):
         axisPerms = []
         if self.mainWindow:
             # add permutations for the axes
-            axisPerms = permutations([axisCode for axisCode in self.axisCodes])
-            ll += [" ".join(ax for ax in perm) for perm in axisPerms]
+            axisPerms = permutations(list(self.axisCodes))
+            ll += [" ".join(perm) for perm in axisPerms]
 
         self.preferredAxisOrderPulldown.pulldownList.setData(ll)
         self.preferredAxisOrderPulldown.setIndex(1)
@@ -108,17 +109,12 @@ class CopyStripFlippedSpectraPopup(CcpnDialogMainWidget):
         """Set the preferred axis ordering from the pullDown selection
         """
         indx = self.preferredAxisOrderPulldown.getIndex()
-
-        if indx > 0:
-            self._axisOrdering = self._axisOrderingOptions[indx - 1]
-        else:
-            self._axisOrdering = None
+        self._axisOrdering = self._axisOrderingOptions[indx - 1] if indx > 0 else None
 
     def _accept(self):
         self.accept()
 
         try:
-            display = self.strip._flipAxes(axisOrderIndices=self._axisOrdering)
+            display = self.strip._flipAxes(axisOrderIndices=self._axisOrdering, positions=self._positions)
         except (RuntimeError, ValueError) as es:
-            getLogger().warning('flipAxes %s' % es)
-
+            getLogger().warning(f'flipAxes {es}')

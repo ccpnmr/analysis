@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-03 14:06:59 +0000 (Thu, November 03, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-11-04 17:27:04 +0000 (Fri, November 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1939,21 +1939,26 @@ class Framework(NotifierBase, GuiBase):
         else:
             getLogger().warning('No strip selected')
 
-    def showFlipArbitraryAxisPopup(self):
-        if self.current.strip is not None:
+    def showFlipArbitraryAxisPopup(self, usePosition=False):
+        if (strp := self.current.strip) is None:
+            getLogger().warning('No strip selected')
 
-            if self.current.strip.spectrumDisplay.is1D:
-                getLogger().warning('Function not permitted on 1D spectra')
-            else:
-
-                from ccpn.ui.gui.popups.CopyStripFlippedAxesPopup import CopyStripFlippedSpectraPopup
-
-                popup = CopyStripFlippedSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
-                                                     strip=self.current.strip, label=self.current.strip.id)
-                popup.exec_()
+        elif self.current.strip.spectrumDisplay.is1D:
+            getLogger().warning('Function not permitted on 1D spectra')
 
         else:
-            getLogger().warning('No strip selected')
+            from ccpn.ui.gui.popups.CopyStripFlippedAxesPopup import CopyStripFlippedSpectraPopup
+
+            try:
+                mDict = usePosition and self.current.mouseMovedDict[1]
+                positions = [poss[0] if (poss := mDict.get(ax)) else None
+                             for ax in strp.axisCodes] if usePosition else None
+                popup = CopyStripFlippedSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+                                                     strip=strp, label=strp.id,
+                                                     positions=positions)
+                popup.exec_()
+            except Exception as es:
+                getLogger().warning(f'Cannot show popup: {es}')
 
     def showReorderPeakListAxesPopup(self):
         """

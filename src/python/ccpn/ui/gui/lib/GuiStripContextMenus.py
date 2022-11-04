@@ -14,12 +14,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-11 16:03:57 +0100 (Thu, August 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-04 17:27:04 +0000 (Fri, November 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -303,7 +303,7 @@ def _separator():
 def _newStripPlotItem(strip):
     return _SCMitem(name='New Spectrum Display with same Axes',
                     typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip',
-                    callback=strip.copyStrip)
+                    callback=partial(strip.copyStrip, usePosition=True))
 
 
 def _newStripPlotXYItem(strip):
@@ -311,7 +311,7 @@ def _newStripPlotXYItem(strip):
                     typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip\n'
                                                           'with the X-Y axes flipped',
                     shortcut='xy',
-                    callback=strip.flipXYAxis)
+                    callback=partial(strip.flipXYAxis, usePosition=True))
 
 
 def _newStripPlotXZItem(strip):
@@ -319,7 +319,7 @@ def _newStripPlotXZItem(strip):
                     typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip\n'
                                                           'with the X-Z axes flipped',
                     shortcut='xz',
-                    callback=strip.flipXZAxis)
+                    callback=partial(strip.flipXZAxis, usePosition=True))
 
 
 def _newStripPlotYZItem(strip):
@@ -327,7 +327,7 @@ def _newStripPlotYZItem(strip):
                     typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip\n'
                                                           'with the Y-Z axes flipped',
                     shortcut='yz',
-                    callback=strip.flipYZAxis)
+                    callback=partial(strip.flipYZAxis, usePosition=True))
 
 
 def _newStripPlotFAItem(strip):
@@ -337,7 +337,7 @@ def _newStripPlotFAItem(strip):
     return _SCMitem(name='New Spectrum Display with Axes flipped...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip',
                     shortcut='fa',
-                    callback=app.showFlipArbitraryAxisPopup)
+                    callback=partial(app.showFlipArbitraryAxisPopup, usePosition=True))
 
 
 ##############################  Common Integral menu items ##############################
@@ -491,6 +491,7 @@ def _newMultipletItem():
     return _SCMitem(name='New Multiplet',
                     typeItem=ItemTypes.get(ITEM), toolTip='Add New Multiplet', shortcut='AM',
                     callback=_app.mainWindow.addMultiplet)
+
 
 def _newCollectionItem():
     from ccpn.framework.Application import getApplication

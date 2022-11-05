@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-22 17:43:36 +0100 (Thu, September 22, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-11-05 10:42:26 +0000 (Sat, November 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -66,8 +66,13 @@ class SpectrumDataLoaderABC(DataLoaderABC):
         :param path: path to (binary) spectrum file; may contain redirections (e.g $DATA)
         """
         dataStore = DataStore.newFromPath(path, dataFormat=self.spectumDataSourceClass.dataFormat)
+        dataSource = self.spectumDataSourceClass.checkForValidFormat(dataStore.aPath())
+
         super().__init__(path=dataStore.aPath())
+
         self.dataStore = dataStore
+        self.dataSource = dataSource
+        self.checkValid()
 
     def checkValid(self) -> bool:
         """check if path defines one of the valid spectrum data formats
@@ -78,11 +83,12 @@ class SpectrumDataLoaderABC(DataLoaderABC):
         """
         if not super().checkValid():
             return False
-        if (dataSource := self.spectumDataSourceClass.checkForValidFormat(self.path)) is None:
+
+        if self.dataSource is None:
             self.isValid = False
             self.errorString = f'Failed to initiate a {self.spectumDataSourceClass.__name__} instance for "{self.path}"'
             return False
-        self.dataSource = dataSource
+
         return True
 
     @classmethod

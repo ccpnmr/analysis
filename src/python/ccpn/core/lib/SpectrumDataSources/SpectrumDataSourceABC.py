@@ -92,8 +92,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-03 15:41:33 +0000 (Thu, November 03, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-11-05 10:42:26 +0000 (Sat, November 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1208,57 +1208,63 @@ class SpectrumDataSourceABC(CcpNmrJson):
     # data access functions
     #=========================================================================================
 
+    def checkValid(self) -> bool:
+        """check if valid format corresponding to dataFormat by:
+        - checking suffix and existence of path
+        - reading (and checking dimensionCount) parameters
+
+        :return: True if ok, False otherwise
+        """
+        logger = getLogger()
+
+        # checking path
+        _p = self.path
+        if _p is None or not self.checkSuffix(_p):
+            logger.debug2('path "%s" has invalid suffix for dataFormat "%s"' %
+                         (_p, self.dataFormat))
+            return False
+
+        if _p is None or not _p.exists():
+            logger.debug2('path "%s" is not valid for reading SpectrumDataSource dataFormat "%s"' %
+                         (_p, self.dataFormat))
+            return False
+
+        if not self.allowDirectory and self.path.is_dir():
+            logger.debug2('path "%s" is directory and not valid for reading SpectrumDataSource dataFormat "%s"' %
+                         (_p, self.dataFormat))
+            return False
+
+        # checking opening file and reading parameters
+        try:
+            with self.openExistingFile():  # This will also read the parameters
+                pass
+                # self.readParameters()
+        except RuntimeError as es:
+            logger.debug2('path "%s", SpectrumDataSource dataFormat "%s": bailing on reading with error: "%s"' %
+                         (_p, self.dataFormat, es))
+            return False
+
+        # Check dimensionality; should be > 0
+        if self.dimensionCount == 0:
+            logger.debug2('path "%s": reading parameters in SpectrumDataSource dataFormat "%s" yielded dimensionCount 0' %
+                         (_p, self.dataFormat))
+            return False
+
+        return True
+
     @classmethod
     def checkForValidFormat(cls, path):
         """check if valid format corresponding to dataFormat by:
         - creating an instance of the class
-        - setting and checking path
-        - reading (and checking dimensionCount) parameters
+        - calling checkValid method
 
         :return: None or instance of the class
         """
-        logger = getLogger()
-
-        instance = cls()
-
-        # checking path
-        if instance.setPath(path, substituteSuffix=False) is None:
-            logger.debug2('path "%s" is not valid for SpectrumDataSource dataFormat "%s"' %
-                         (path, instance.dataFormat))
+        instance = cls(path = path)
+        if not instance.checkValid():
             return None
-
-        if (_p := instance.path) is None or not _p.exists():
-            logger.debug2('path "%s" is not valid for reading SpectrumDataSource dataFormat "%s"' %
-                         (path, instance.dataFormat))
-            return None
-
-        if not instance.allowDirectory and instance.path.is_dir():
-            logger.debug2('path "%s" is directory and not valid for reading SpectrumDataSource dataFormat "%s"' %
-                         (path, instance.dataFormat))
-            return None
-
-        # checking opening file and reading parameters
-        try:
-            with instance.openExistingFile():  # This will also read the parameters
-                pass
-                # instance.readParameters()
-        except RuntimeError as es:
-            logger.debug2('path "%s", SpectrumDataSource dataFormat "%s": bailing on reading with error: "%s"' %
-                         (path, instance.dataFormat, es))
-            return None
-
-        # Check dimensionality; should be > 0
-        if instance.dimensionCount == 0:
-            logger.debug2('path "%s": reading parameters in SpectrumDataSource dataFormat "%s" yielded dimensionCount 0' %
-                         (path, instance.dataFormat))
-            return None
-
-        elif instance.dimensionCount > 0:
-            logger.debug2('path "%s" is valid for SpectrumDataSource dataFormat "%s"' %
-                         (path, instance.dataFormat))
-            return instance  # found the file with right attributes
-
-        return None
+        else:
+            return instance
 
     def _checkFilePath(self, newFile, mode):
         """Helper function to do checks on path"""

@@ -52,6 +52,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-11-05 10:42:25 +0000 (Sat, November 05, 2022) $"
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified: 2022-12-05 17:27:38 +0000 (Mon, December 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
@@ -3506,8 +3508,9 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     dataStore._saveInternal()
     spectrum._spectrumTraits.dataStore = dataStore
 
-    # update dataSource with proper expanded path
-    dataSource.setPath(dataStore.aPath())
+    # # update dataSource with proper expanded path; GWV 3/11/2022: not required
+    # dataSource.setPath(dataStore.aPath())
+
     # Update all parameters from the dataSource to the Spectrum instance; retain the dataSource instance
     dataSource.exportToSpectrum(spectrum, includePath=False)
     spectrum._spectrumTraits.dataSource = dataSource

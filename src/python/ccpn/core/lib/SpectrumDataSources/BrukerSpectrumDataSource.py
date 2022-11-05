@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-04 14:13:26 +0000 (Fri, November 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-05 10:42:25 +0000 (Sat, November 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -160,13 +160,13 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 'ZGOPTNS'    : 'acquisition (zg) options',
                 }
 
-    def __init__(self, path=None, spectrum=None):
+    def __init__(self, path=None, spectrum=None, dimensionCount=None):
         "Init local attributes"
         self._pdataDir = None
         self._brukerRoot = None
         self.acqus = None
         self.procs = None
-        super().__init__(path, spectrum)
+        super().__init__(path=path, spectrum=spectrum, dimensionCount=dimensionCount)
 
     def _isBrukerTopDir(self, path):
         """Return True if path (of type Path) is a Bruker top directory with acqu* files
@@ -174,9 +174,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         """
         hasAcquFiles = len(path.globList('acqu*')) > 0
         pdata = path / self._PDATA
-        return path is not None and path.exists() and path.is_dir() and \
-               pdata.exists() and pdata.is_dir() and \
-               hasAcquFiles
+        return path is not None and path.exists() and path.is_dir() and hasAcquFiles and \
+               pdata.exists() and pdata.is_dir()
 
     def _checkBrukerTopDir(self, path):
         """Check if path (of type Path) is a Bruker top directory with acqu* files
@@ -202,16 +201,35 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             getLogger().debug2(errorMsg)
             raise RuntimeError(errorMsg)
 
-    def _hasBinaryData(self, path=None):
-        """Return True if path (defaults to self._pdataDir) contains binary data
+    def _hasBinaryData(self, path) -> bool:
+        """Return True if path contains  bruker binary data
         """
         if path is None:
-            path = self._pdataDir
-        return len(path.globList('[1-8][r,i]*')) > 0
+            return False
+        _binaryData = path.globList('[1-8][r,i]*')
+        return len(_binaryData) > 0
+
+    def _getBinaryData(self):
+        """:returns binary-data file in self._pdataDir as a Path instance or None if none present
+        """
+        if self._pdataDir is None:
+            return None
+
+        if len(self._pdataDir.globList('proc*')) == 0:
+            return None
+
+        if not self._hasBinaryData(self._pdataDir):
+            return None
+
+        dimensionality = self._getDimensionality()
+        if dimensionality not in self._processedDataFilesDict:
+            return None
+
+        return self._pdataDir / self._processedDataFilesDict[dimensionality][0]
 
     def _isBrukerPdataDir(self, path):
         """Return True if path (of type Path) is a Bruker pdata directory with
-        proc files and binary data
+        proc files
         """
         if path is None:
             return False
@@ -241,7 +259,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             getLogger().debug2(errorMsg)
             raise RuntimeError(errorMsg)
 
-        if not self._hasBinaryData():
+        if not self._hasBinaryData(self._pdataDir):
             errorMsg = 'Bruker pdata directory "%s": has no valid processed data' % path
             getLogger().debug2(errorMsg)
             raise RuntimeError(errorMsg)
@@ -292,7 +310,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
 
     def setPath(self, path, substituteSuffix=False):
         """Parse and set path, assure there is the directory with acqus and pdata dirs
-        set the _brukerRoot and _pdata attributes to point to the relevant directories
+        set the _brukerRoot and _pdataDir attributes to point to the relevant directories
 
         Return self or None on error
         """
@@ -303,9 +321,6 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         self._brukerRoot = None
         self._binaryData = None
 
-        # self.acqus = None   # list of the acqu files, parsed as dicts
-        # self.procs = None   # list of the proc files, parsed as dicts
-
         if path is None:
             _path = None
 
@@ -314,47 +329,40 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
 
             if _path.is_file() and _path.stem in self._processedDataFiles:
                 # Bruker binary processed data file
-                self._pdataDir = _path.parent
                 self._brukerRoot = _path.parent.parent.parent
+                self._pdataDir = _path.parent
                 self._binaryData = _path
+                self._getDimensionality()
 
             elif _path.is_file() and _path.stem in self._procFiles:
                 # Bruker proc file
-                self._pdataDir = _path.basename
-                if not self._hasBinaryData(self._pdataDir):
-                    logger.debug2(f'"{path}" does not yield a valid Bruker directory with binary data' % path)
-                    return None
                 self._brukerRoot = _path.parent.parent.parent
-                self._binaryData = None
+                self._pdataDir = _path.parent
+                self._binaryData = self._getBinaryData()
 
             elif self._isBrukerTopDir(_path):
                 # Bruker top directory
                 self._brukerRoot = _path
-                if (_pdataDir := self._findFirstPdataDir()) is None:
-                    logger.debug2('"%s" does not define a valid path with Bruker data' % path)
-                    return None
-                self._pdataDir = _pdataDir
-                self._binaryData = None
+                self._pdataDir = self._findFirstPdataDir()
+                self._binaryData = self._getBinaryData()
 
             elif _path.is_dir() and _path.stem == self._PDATA and self._isBrukerTopDir(_path.parent):
                 # Bruker/pdata directory
                 self._brukerRoot = _path.parent
-                if (_pdataDir := self._findFirstPdataDir()) is None:
-                    logger.debug2('"%s" does not define a valid path with Bruker data' % path)
-                    return None
-                self._pdataDir = _pdataDir
-                self._binaryData = None
+                self._pdataDir = self._findFirstPdataDir()
+                self._binaryData = self._getBinaryData()
 
             elif self._isBrukerPdataDir(_path):
                 # Bruker pdata 'proc'-directory
-                self._pdataDir = _path
-                if not self._hasBinaryData(self._pdataDir):
-                    logger.debug2(f'"{path}" is not a valid Bruker pdata directory with binary data' % path)
-                    return None
                 self._brukerRoot = _path.parent.parent
-                self._binaryData = None
+                self._pdataDir = _path
+                self._binaryData = self._getBinaryData()
 
             else:
+                logger.debug2('"%s" does not define a valid path with Bruker data' % path)
+                return None
+
+            if self._brukerRoot is None or self._pdataDir is None or self._binaryData is None:
                 logger.debug2('"%s" does not define a valid path with Bruker data' % path)
                 return None
 
@@ -362,12 +370,6 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             self._checkBrukerTopDir(self._brukerRoot)
             self._checkBrukerPdataDir(self._pdataDir)
 
-            dimensionality = self._getDimensionality()
-            if dimensionality not in self._processedDataFilesDict:
-                raise RuntimeError('Undefined Bruker dimensionality "%s"in "%s"' % (dimensionality, self._pdataDir))
-
-            if self._binaryData is None:
-                self._binaryData = self._pdataDir / self._processedDataFilesDict[dimensionality][0]
             if not self._binaryData.exists():
                 raise RuntimeError('Unable to find Bruker binary data "%s"' % self._binaryData)
 
@@ -457,12 +459,12 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 # SF is in MHz; from the procs file, but generally less digits for dimension 1 (!)
                 # SFO1 - SF08: the eight spectrometer RF channels; no direct relation to SF of a dimension
                 sf = float(dimDict.get('SF', 1.0))
-                # Correct dimension 1
-                sfo1 = self.acqus[0].get('SFO1')
-                o1 = self.acqus[0].get('O1')
-                if dimIndx == 0 and sfo1 is not None and o1 is not None and \
-                    round(sf,2) - round(sfo1, 2) == 0.0:
-                    sf = sfo1 - o1 * 1e-6
+                # # Correct dimension 1
+                # sfo1 = self.acqus[0].get('SFO1')
+                # o1 = self.acqus[0].get('O1')
+                # if dimIndx == 0 and sfo1 is not None and o1 is not None and \
+                #     round(sf,2) - round(sfo1, 2) == 0.0:
+                #     sf = sfo1 - o1 * 1e-6
                 self.spectrometerFrequencies[dimIndx] = sf
 
                 self.referenceValues[dimIndx] = float(dimDict.get('OFFSET', 0.0))

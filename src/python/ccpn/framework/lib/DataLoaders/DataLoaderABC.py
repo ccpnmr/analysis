@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-04 14:13:26 +0000 (Fri, November 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-05 10:42:26 +0000 (Sat, November 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -133,6 +133,14 @@ def _getPotentialDataLoaders(path) -> list:
         # in case there was none defined for suffix
         loaders = _suffixDict.get(path.suffix,
                                   _suffixDict.get(ANY_SUFFIX, []))
+
+    # if it is a file: exclude loaders that require a directory
+    if path.is_file():
+        loaders = [ld for ld in loaders if not ld.requireDirectory]
+
+    # if it is a directory: include loaders that do allow a directory
+    if path.is_dir():
+        loaders = [ld for ld in loaders if ld.allowDirectory]
 
     return loaders
 
@@ -282,19 +290,17 @@ class DataLoaderABC(TraitBase):
         :return: None or instance of the class
 
         Can be subclassed;
-        GWV 20/09/2022: depricated; maintained for code backward compatibility
+        GWV 20/09/2022: deprecated; maintained for code backward compatibility
         """
         instance = cls(path)
-        if not instance.isValid:
-            # instance.isValid = False
-            # instance.errorString = f'Invalid path "{instance.path}"; required sub-directory "{CCPN_API_DIRECTORY}" not found'
+        if not instance.checkValid():
             return None
 
         return instance
 
     def checkValid(self) -> bool:
         """Check if self.path is valid.
-        Calls _checkPath and _checkSuffix
+        Calls _checkPath which also calls _checkSuffix
         sets self.isValid and self.errorString
         :returns True if ok or False otherwise
 
@@ -317,6 +323,9 @@ class DataLoaderABC(TraitBase):
 
         Can be subclassed
         """
+        if not self.isValid:
+            raise RuntimeError(f'Error loading "{self.path}"; invalid loader')
+
         try:
             func, attributeName = self.loadFunction
             obj = getattr(self, attributeName)

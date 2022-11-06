@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-05 10:42:26 +0000 (Sat, November 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-06 18:24:24 +0000 (Sun, November 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -186,14 +186,15 @@ def checkPathForDataLoader(path, pathFilter=None):
 
     # log errors
     if len(_loaders) == 0:
-        getLogger().debug2(f'No valid loader found for {path}')
+        txt = f'DataLoader for "{path}"; None found'
+        getLogger().warning(txt)
 
     else:
-        txt = f'checkPathForDataLoader "{path}": tried:\n'
+        txt = f'DataLoader(s) for "{path}"; tried:\n'
         for dl in _loaders:
             txt += f'--- "{dl.dataFormat}" failed: {dl.errorString}\n'
         txt = txt[:-1]  # remove last \n
-        getLogger().debug2(txt)
+        getLogger().warning(txt)
 
     return None
 

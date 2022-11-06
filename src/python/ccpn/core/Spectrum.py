@@ -53,6 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-11-06 18:24:24 +0000 (Sun, November 06, 2022) $"
 __dateModified__ = "$dateModified: 2022-11-05 10:42:25 +0000 (Sat, November 05, 2022) $"
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified: 2022-12-05 17:27:38 +0000 (Mon, December 05, 2022) $"
@@ -3461,7 +3462,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     if dataSource is None:
         raise ValueError('dataSource cannot be None')
     if dataSource.dimensionCount == 0:
-        raise ValueError('dataSource.dimensionCount = 0')
+        raise ValueError(f'{dataSource}: dimensionCount = 0')
 
     if name is None:
         name = dataSource.nameFromPath()

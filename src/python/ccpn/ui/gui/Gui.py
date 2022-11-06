@@ -14,6 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-11-06 18:24:24 +0000 (Sun, November 06, 2022) $"
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified: 2022-11-29 18:06:02 +0000 (Tue, November 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
@@ -662,7 +664,7 @@ class Gui(Ui):
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
 
         result = []
-        errorStringTemplate = 'Loading "%s" failed:' % dataLoader.path + '\n%s'
+        errorStringTemplate = f'Loading "{dataLoader.path}" failed:\n\n' + '%s'
         with catchExceptions(errorStringTemplate=errorStringTemplate):
             # For data loads that are possibly time consuming, use progressManager
             if isinstance(dataLoader, (StarDataLoader, NefDataLoader)):

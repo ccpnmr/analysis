@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-05 10:42:26 +0000 (Sat, November 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-06 18:24:24 +0000 (Sun, November 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -469,6 +469,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
         ]
     )
 
+    # new implementation, using newFromPath method and validity testing later on
+    isValid = Bool(default_value=False).tag(info='flag to indicate if path denotes a valid dataType')
+    shouldBeValid = Bool(default_value=False).tag(info='flag to indicate that path should denotes a valid dataType, but some elements are missing')
+    errorString = CString(default_value='').tag(info='error description for validity testing')
+
     #=========================================================================================
     # Convenience properties and methods
     #=========================================================================================
@@ -597,6 +602,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self._initBlockCache()  # This wil initiate the cache instance
         # if not self.hasBlockCached:
         #     self.disableCache()
+
+        self.checkValid()
 
     def setDefaultParameters(self, nDim=MAXDIM):
         """Set default values for all parameters
@@ -1217,22 +1224,34 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
         logger = getLogger()
 
+        self.isValid = False
+        self.errorString = 'Checking validity'
+
         # checking path
         _p = self.path
+
+        _iniTxt = f'{self.dataFormat} spectrum, path "{_p}"'
+
         if _p is None or not self.checkSuffix(_p):
-            logger.debug2('path "%s" has invalid suffix for dataFormat "%s"' %
-                         (_p, self.dataFormat))
+            txt = f'{_iniTxt}: invalid suffix'
+            logger.debug2(txt)
+            self.errorString = txt
             return False
 
-        if _p is None or not _p.exists():
-            logger.debug2('path "%s" is not valid for reading SpectrumDataSource dataFormat "%s"' %
-                         (_p, self.dataFormat))
+        if not self.hasValidPath():
+            txt = f'{_iniTxt}: invalid path'
+            logger.debug2(txt)
+            self.errorString = txt
             return False
 
         if not self.allowDirectory and self.path.is_dir():
-            logger.debug2('path "%s" is directory and not valid for reading SpectrumDataSource dataFormat "%s"' %
-                         (_p, self.dataFormat))
+            txt = f'{_iniTxt}: path is directory and not valid'
+            logger.debug2(txt)
+            self.errorString = txt
             return False
+
+        # at this point we would expect the file to be correct
+        self.shouldBeValid = True
 
         # checking opening file and reading parameters
         try:
@@ -1240,16 +1259,20 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 pass
                 # self.readParameters()
         except RuntimeError as es:
-            logger.debug2('path "%s", SpectrumDataSource dataFormat "%s": bailing on reading with error: "%s"' %
-                         (_p, self.dataFormat, es))
+            txt = f'{_iniTxt}: bailing on reading parameters with error: "{es}"'
+            logger.debug2(txt)
+            self.errorString = txt
             return False
 
         # Check dimensionality; should be > 0
         if self.dimensionCount == 0:
-            logger.debug2('path "%s": reading parameters in SpectrumDataSource dataFormat "%s" yielded dimensionCount 0' %
-                         (_p, self.dataFormat))
+            txt = f'{_iniTxt}: dimensionCount = 0'
+            logger.debug2(txt)
+            self.errorString = txt
             return False
 
+        self.isValid = True
+        self.errorString =''
         return True
 
     @classmethod
@@ -2066,7 +2089,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     def __str__(self):
         if self.dimensionCount == 0:
-            return '<%s: _D (), %s>' % (self.__class__.__name__, self.path.name)
+            fName = self.path.name if self.path is not None else str(None)
+            return '<%s: _D (), %s>' % (self.__class__.__name__, fName)
         else:
             if self.isBuffered:
                 fpStatus = '%r' % 'buffered'

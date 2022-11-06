@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-05 10:42:26 +0000 (Sat, November 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-06 18:24:24 +0000 (Sun, November 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -65,14 +65,10 @@ class SpectrumDataLoaderABC(DataLoaderABC):
         """
         :param path: path to (binary) spectrum file; may contain redirections (e.g $DATA)
         """
-        dataStore = DataStore.newFromPath(path, dataFormat=self.spectumDataSourceClass.dataFormat)
-        dataSource = self.spectumDataSourceClass.checkForValidFormat(dataStore.aPath())
+        self.dataStore = DataStore.newFromPath(path, dataFormat=self.spectumDataSourceClass.dataFormat)
+        self.dataSource = self.spectumDataSourceClass(self.dataStore.aPath())
 
-        super().__init__(path=dataStore.aPath())
-
-        self.dataStore = dataStore
-        self.dataSource = dataSource
-        self.checkValid()
+        super().__init__(path=self.dataStore.aPath())
 
     def checkValid(self) -> bool:
         """check if path defines one of the valid spectrum data formats
@@ -84,11 +80,15 @@ class SpectrumDataLoaderABC(DataLoaderABC):
         if not super().checkValid():
             return False
 
+        self.isValid = False
+        self.errorString = 'Checking validity'
+
         if self.dataSource is None:
-            self.isValid = False
-            self.errorString = f'Failed to initiate a {self.spectumDataSourceClass.__name__} instance for "{self.path}"'
+            self.errorString = f'"{self.path}": Failed to initiate a {self.spectumDataSourceClass.__name__} instance'
             return False
 
+        self.isValid = self.dataSource.isValid or self.dataSource.shouldBeValid
+        self.errorString = self.dataSource.errorString
         return True
 
     @classmethod
@@ -107,14 +107,14 @@ class SpectrumDataLoaderABC(DataLoaderABC):
         :return: a list of [spectrum]
         """
         if self.dataSource is None:
-            raise RuntimeError('Error loading "%s"' % self.path)
+            raise RuntimeError(f'DataSource is None')
 
-        try:
-            spectrum = _newSpectrumFromDataSource(project=self.project,
-                                                  dataStore=self.dataStore,
-                                                  dataSource=self.dataSource)
-        except (RuntimeError, ValueError) as es:
-            raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
+        if not self.dataSource.isValid:
+            raise RuntimeError(f'Error: {self.dataSource.errorString}')
+
+        spectrum = _newSpectrumFromDataSource(project=self.project,
+                                              dataStore=self.dataStore,
+                                              dataSource=self.dataSource)
 
         return [spectrum]
 

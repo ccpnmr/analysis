@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-21 15:03:26 +0100 (Wed, September 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-11-07 15:54:19 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,7 @@ from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
 
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
+from ccpn.util.traits.CcpNmrTraits import CPath
 
 
 XEASY_PARAM_DICT = {
@@ -81,6 +82,18 @@ class XeasySpectrumDataSource(SpectrumDataSourceABC):
     suffixes = ['.param', '.16']
     openMethod = open
     defaultOpenReadMode = 'rb'
+
+    #=========================================================================================
+
+    _parameterFile = CPath(default_value=None, allow_none=True).tag(info =
+                                        'an attribute to store the (parsed) path to the Xeasy parameter file'
+                                                                    )
+    _binaryFile = CPath(default_value=None, allow_none=True).tag(info =
+                                        'an attribute to store the path to the Xeasy binary file; used during parsing'
+                                                                 )
+    _path = CPath(default_value=None, allow_none=True).tag(info =
+                                        'an attribute to store the path used to define the Xeasy file; used during parsing'
+                                                           )
     #=========================================================================================
 
     @property
@@ -92,24 +105,41 @@ class XeasySpectrumDataSource(SpectrumDataSourceABC):
         """Set the path, optionally change .par in .spc suffix and do some checks by calling the super class
         Return self or None on error
         """
-        if path is not None:
-            path = aPath(path)
-            if path.suffix == '.param':
-                path = path.with_suffix('.16')
-            path = str(path)
-        return super().setPath(path, substituteSuffix=substituteSuffix)
+        if path is None:
+            self._path = None
+            _path = None
+
+        else:
+            _path = aPath(path)
+            self._path = path
+
+            if _path.is_file() and path.suffix == '.param':
+                self._parameterFile = _path
+                self._binaryFile = _path.with_suffix('.16')
+                self.shouldBeValid = True
+
+            elif _path.is_file() and path.suffix == '.16':
+                self._binaryFile = _path
+                self._parameterFile = _path.with_suffix('.param')
+                self.shouldBeValid = True
+
+            else:
+                self.shouldBeValid = False
+                return None
+
+        return super().setPath(self._binaryFile, substituteSuffix=substituteSuffix)
 
     def readParameters(self):
         """Read the parameters from the Xeasy parameter file
         Returns self
         """
-        if not self.parameterPath.exists():
-            raise RuntimeError('Cannot find Xeasy parameter file "%s"' % self.parameterPath)
+        if not self._parameterFile.exists():
+            raise RuntimeError('Cannot find Xeasy parameter file "%s"' % self._parameterFile)
 
         self.setDefaultParameters()
 
         # Parse the parameter file
-        with open(str(self.parameterPath), mode='rU', encoding='utf-8') as fp:
+        with open(self._parameterFile, mode='rU', encoding='utf-8') as fp:
             self._parseDict = {}
             for lineIndx, line in enumerate(fp.readlines()):
                 key = line[:32].replace('.', '').strip()
@@ -118,11 +148,11 @@ class XeasySpectrumDataSource(SpectrumDataSourceABC):
 
         version = self._getValue('version', None, int)
         if version != 1:
-            raise ValueError('Invalid Xeasy parameter file "%s"' % self.parameterPath)
+            raise ValueError('Invalid Xeasy parameter file "%s"' % self._parameterFile)
 
         self.dimensionCount = self._getValue('ndim', None, int)
         if self.dimensionCount is None:
-            raise ValueError('decoding "%s"' % self.parameterPath)
+            raise ValueError('decoding "%s"' % self._parameterFile)
 
         for dim in self.dimensions:
             # There is a mapping defined in the parameter file
@@ -150,9 +180,65 @@ class XeasySpectrumDataSource(SpectrumDataSourceABC):
         else:
             paramKey = XEASY_PARAM_DICT[key]
         if paramKey not in self._parseDict:
-            getLogger().debug2('parameterKey "%s" not present in "%s"' % (paramKey, self.parameterPath))
+            getLogger().debug2('parameterKey "%s" not present in "%s"' % (paramKey, self._parameterFile))
             return None
         return func(self._parseDict[paramKey])
+
+    def checkValid(self) -> bool:
+        """check if valid format corresponding to dataFormat by:
+        - checking parameter and binary files are defined
+
+        call super class for:
+        - checking suffix and existence of path
+        - reading (and checking dimensionCount) parameters
+
+        :return: True if ok, False otherwise
+        """
+
+        self.isValid = False
+        self.errorString = 'Checking validity'
+
+        if not self.shouldBeValid:
+            errorMsg = f'Path "{self._path}" did not define a valid Xeasy file'
+            return self._returnFalse(errorMsg)
+
+        # checking parameter file
+        if self._parameterFile is None and self._binaryFile is not None:
+            errorMsg = f'Xeasy parameter file is undefined; did find binary file "{self._binaryFile}"'
+            return self._returnFalse(errorMsg)
+
+        if self._parameterFile is None:
+            errorMsg = f'Xeasy parameter file is undefined'
+            return self._returnFalse(errorMsg)
+
+        if not self._parameterFile.exists():
+            errorMsg = f'Xeasy parameter file "{self._parameterFile}" does not exist'
+            return self._returnFalse(errorMsg)
+
+        if not self._parameterFile.is_file():
+            errorMsg = f'Xeasy parameter file "{self._parameterFile}" is not a file'
+            return self._returnFalse(errorMsg)
+
+        # checking binary file
+        if self._binaryFile is None and self._parameterFile is not None:
+            errorMsg = f'Xeasy binary file is undefined; did find parameter file "{self._parameterFile}"'
+            return self._returnFalse(errorMsg)
+
+        if self._binaryFile is None:
+            errorMsg = f'Xeasy binary file is undefined'
+            return self._returnFalse(errorMsg)
+
+        if not self._binaryFile.exists():
+            errorMsg = f'Xeasy binary file "{self._binaryFile}" does not exist'
+            return self._returnFalse(errorMsg)
+
+        if not self._binaryFile.is_file():
+            errorMsg = f'Xeasy binary file "{self._binaryFile}" is not a file'
+            return self._returnFalse(errorMsg)
+
+        self.isValid = True
+        self.errorString = ''
+        return super().checkValid()
 
     @property
     def dtype(self):

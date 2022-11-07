@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 12:05:55 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 13:58:48 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -114,7 +114,7 @@ def _getSuffixDict() -> Tuple[dict, defaultdict]:
 def _getPotentialDataLoaders(path) -> list:
     """
     :param path: path to evaluate
-    :return list of possible dataLoader classes based on suffix
+    :return list of possible dataLoader classes based on suffix and path type (directory, file)
 
     NB: Only to be used internally
     """

@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 10:03:56 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 13:58:48 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1254,9 +1254,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
             logger.debug2(txt)
             self.errorString = txt
             return False
-
-        # at this point we would expect the file to be correct
-        self.shouldBeValid = True
 
         # checking opening file and reading parameters
         try:

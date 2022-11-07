@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 12:05:55 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 20:53:05 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -92,6 +92,19 @@ class SpectrumDataLoaderABC(DataLoaderABC):
         self.errorString = self.dataSource.errorString
         return self.isValid
 
+    def getAllFiles(self) -> list:
+        """
+        Get all the files handles by this loader. Generally, this will be the path that
+        the loader represented, but sometimes there might be more; i.e. for certain spectrum
+        loaders that handle more files; like a binary and a parameter file.
+        To be subclassed for those instances
+
+        :return: list of Path instances
+        """
+        if self.dataSource is None:
+            raise RuntimeError('dataSource undefined: unable to get files')
+        return self.dataSource.getAllFiles()
+
     @classmethod
     def _documentClass(cls) -> str:
         """:return a documentation string comprised of __doc__ and some class attributes
@@ -158,6 +171,7 @@ UcsfSpectrumLoader._initClass()   # also registers
 class AzaraSpectrumLoader(SpectrumDataLoaderABC):
     from ccpn.core.lib.SpectrumDataSources.AzaraSpectrumDataSource import AzaraSpectrumDataSource
     spectumDataSourceClass = AzaraSpectrumDataSource
+
 AzaraSpectrumLoader._initClass()   # also registers
 
 

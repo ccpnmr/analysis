@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 20:06:36 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 20:53:05 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -76,8 +76,13 @@ class DirectoryDataLoader(DataLoaderABC):
         if not self.path.is_dir():
             raise RuntimeError(f'{self.path} is not a directory' )
 
-        _files = list(self.path.glob('*'))
-        for f in _files:
+        _filesToExamine = list(self.path.glob('*'))
+        _nFilesToExamine = len(_filesToExamine)
+
+        # for f in _filesToExamine:
+        while len(_filesToExamine) > 0:
+            f = _filesToExamine.pop(0)
+
             dataLoader = None
             if f.stem.startswith("."):  # Exclude dotted-files
                 pass
@@ -88,6 +93,11 @@ class DirectoryDataLoader(DataLoaderABC):
                 (dataLoader := checkPathForDataLoader(f, pathFilter=pathFilter)) is not None:
                 self.dataLoaders.append(dataLoader)
                 self.count += 1
+                # remove all files already handled by the dataLoader; this prevent types that
+                # have two files; e.g. a binary data file and a paramter file, to be added twice
+                for _handledFile in dataLoader.getAllFiles():
+                    if _handledFile in _filesToExamine:
+                        _filesToExamine.remove(_handledFile)
 
             # get directories if recursive is True
             elif f.is_dir():
@@ -105,7 +115,7 @@ class DirectoryDataLoader(DataLoaderABC):
                         self.dataLoaders.append(dataLoader)
                         self.count += len(dataLoader)
 
-        getLogger().debug2(f'Directory "{self.path}": {self.count} loadable items out of {len(_files)}')
+        getLogger().debug2(f'Directory "{self.path}": {self.count} loadable items out of {_nFilesToExamine}')
 
         self.checkValid()
 

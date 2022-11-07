@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 20:06:06 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 20:53:05 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -323,9 +323,20 @@ class DataLoaderABC(TraitBase):
             result = func(obj, self.path)
 
         except (ValueError, RuntimeError) as es:
-            raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
+            raise RuntimeError(f'Error loading "{self.path}": {es}')
 
         return result
+
+    def getAllFiles(self) -> list:
+        """
+        Get all the files handles by this loader. Generally, this will be the path that
+        the loader represented, but sometimes there might be more; i.e. for certain spectrum
+        loaders that handle more files; like a binary and a parameter file.
+        To be subclassed for those instances
+
+        :return: list of Path instances
+        """
+        return [self.path]
 
     def _checkSuffix(self) -> bool:
         """Check if suffix of self.path confirms to settings of class attribute suffixes.
@@ -347,7 +358,7 @@ class DataLoaderABC(TraitBase):
             return True
 
         self.isValid = False
-        self.errorString = f'Invalid path suffix for "{_path}"; should be one of {self.suffixes}'
+        self.errorString = f'Invalid path suffix; should be one of {self.suffixes}'
         return False
 
     def _checkPath(self):
@@ -358,26 +369,26 @@ class DataLoaderABC(TraitBase):
         _path = self.path
         if not _path.exists():
             self.isValid = False
-            self.errorString = f'Path "{_path}" does not exists'
+            self.errorString = f'Path does not exists'
             return False
 
         if not self._checkSuffix():
             return False
 
         if _path.basename == '':
-            self.errorString = f'Invalid path "{_path}"'
+            self.errorString = f'Invalid path'
             self.isValid = False
             return False
 
         if _path.is_dir() and not self.allowDirectory:
             # path is a directory: cls does not allow
-            self.errorString = f'Invalid path "{_path}"; directory not allowed'
+            self.errorString = f'Invalid path; directory not allowed'
             self.isValid = False
             return False
 
         if not _path.is_dir() and self.requireDirectory:
             # path is a file, but cls requires a directory
-            self.errorString = f'Invalid path "{_path}"; directory required'
+            self.errorString = f'Invalid path; directory required'
             self.isValid = False
             return False
 

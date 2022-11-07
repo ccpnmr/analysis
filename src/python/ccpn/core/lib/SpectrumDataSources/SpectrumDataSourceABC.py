@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 20:06:06 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 20:53:05 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1310,6 +1310,17 @@ class SpectrumDataSourceABC(CcpNmrJson):
             raise FileNotFoundError('parent of "%s" does not exist' % _path)
         if newFile and _path.exists() and mode != self.defaultAppendMode:
             raise FileExistsError('path "%s" exists (mode=%s)' % (_path, mode))
+
+    def getAllFiles(self) -> list:
+        """
+        Get all the files handles by this dataSource. Generally, this will be the path that
+        the dataSource represents, but sometimes there might be more; i.e. for certain spectrum
+        dataFormats that handle more files; like a binary and a parameter file.
+        To be subclassed for those instances
+
+        :return: list of Path instances
+        """
+        return [self.path]
 
     def openFile(self, mode, **kwds):
         """open self.path, set self.fp,

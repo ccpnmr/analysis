@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-06 18:24:24 +0000 (Sun, November 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 10:03:56 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -510,6 +510,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
         items = [i for i in self.items(isDimensional=lambda i: not i)]
         return OrderedDict(items)
 
+    def parameterKeys(self):
+        """Those keys that define the spectrum parameters
+        """
+        return self.keys(isDimensional=False) + self.keys(isDimensional=True)
+
     @property
     def dimensions(self) -> tuple:
         """A one-based tuple of dimensions [1,dimensionCount]
@@ -608,7 +613,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def setDefaultParameters(self, nDim=MAXDIM):
         """Set default values for all parameters
         """
-        for par in self.keys():
+        for par in self.parameterKeys():
             self.setTraitDefaultValue(par)
 
     def _assureProperDimensionality(self):
@@ -711,7 +716,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def _copyParametersFromSpectrum(self, spectrum):
         """Copy parameters values from a Spectrum instance
         """
-        for param in self.keys():
+        for param in self.parameterKeys():
             doCopy = self.getMetadata(param, 'doCopy')
             spectrumAttribute = self.getMetadata(param, 'spectrumAttribute')
             if spectrumAttribute is not None and doCopy:
@@ -721,7 +726,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def _copyParametersToSpectrum(self, spectrum):
         """Copy parameter values to a Spectrum instance
         """
-        for param in self.keys():
+        for param in self.parameterKeys():
             doCopy = self.getMetadata(param, 'doCopy')
             spectrumAttribute = self.getMetadata(param, 'spectrumAttribute')
             hasSetter = self.getMetadata(param, 'hasSetterInSpectrumClass')
@@ -791,7 +796,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             raise TypeError('%s.copyDataTo: Wrong target class type; got %s' %
                             (self.__class__.__name__, target))
 
-        for param in self.keys():
+        for param in self.parameterKeys():
             doCopy = self.getMetadata(param, 'doCopy') and target.hasTrait(param)
             if doCopy:
                 values = self.getTraitValue(param)

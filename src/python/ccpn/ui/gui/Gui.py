@@ -15,6 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-11-07 10:03:56 +0000 (Mon, November 07, 2022) $"
 __dateModified__ = "$dateModified: 2022-11-06 18:24:24 +0000 (Sun, November 06, 2022) $"
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified: 2022-11-29 18:06:02 +0000 (Tue, November 29, 2022) $"
@@ -333,12 +334,6 @@ class Gui(Ui):
             getLogger().warning(txt)
             return (None, False, False)
 
-        # if (dataLoader :=  checkPathForDataLoader(path, pathFilter=pathFilter)) is None:
-        #     dataFormats = [dl.dataFormat for dl in _getPotentialDataLoaders(path)]
-        #     txt = f'Loading "{path}" unsuccessful; tried all of {dataFormats}, but failed'
-        #     getLogger().warning(txt)
-        #     return (None, False, False)
-
         createNewProject = dataLoader.createNewProject
         ignore = False
 
@@ -403,7 +398,7 @@ class Gui(Ui):
 
         elif dataLoader.isSpectrumLoader and dataLoader.existsInProject():
             ok = MessageDialog.showYesNoWarning('Loading Spectrum',
-                                                f'"{dataLoader.path}"\n' 
+                                                f'"{dataLoader.dataSource.path}"\n' 
                                                 f'already exists in the project\n'
                                                 '\n'
                                                 'do you want to load?'

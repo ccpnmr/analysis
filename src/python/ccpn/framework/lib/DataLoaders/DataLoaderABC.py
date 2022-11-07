@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-06 18:24:24 +0000 (Sun, November 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 12:05:55 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -164,11 +164,12 @@ def _checkPathForDataLoader(path, pathFilter=None) -> list:
     for cls in _loaders:
         instance = cls.newFromPath(path)
         result.append(instance)
-        if instance.isValid:
+        if instance.isValid or instance.shouldBeValid:
             if instance.dataFormat in pathFilter:
                 break
             else:
                 instance.isValid = False
+                instance.shouldBeValid = False
                 instance.errorString = f'DataFormat "{instance.dataFormat}" for valid path "{instance.path}" not in filter'
     return result
 
@@ -183,18 +184,6 @@ def checkPathForDataLoader(path, pathFilter=None):
     if len(_loaders) > 0 and _loaders[-1].isValid:
         # found a valid one; return that
         return _loaders[-1]
-
-    # log errors
-    if len(_loaders) == 0:
-        txt = f'DataLoader for "{path}"; None found'
-        getLogger().warning(txt)
-
-    else:
-        txt = f'DataLoader(s) for "{path}"; tried:\n'
-        for dl in _loaders:
-            txt += f'--- "{dl.dataFormat}" failed: {dl.errorString}\n'
-        txt = txt[:-1]  # remove last \n
-        getLogger().warning(txt)
 
     return None
 
@@ -239,6 +228,7 @@ class DataLoaderABC(TraitBase):
 
     # new implementation, using newFromPath method and validity testing later on
     isValid = Bool(default_value=False).tag(info='flag to indicate if path denotes a valid dataType')
+    shouldBeValid = Bool(default_value=False).tag(info='flag to indicate that path should denotes a valid dataType, but some elements are missing')
     errorString = CString(default_value='').tag(info='error description for validity testing')
 
     ignore = Bool(default_value=False).tag(info='flag to indicate if loader needs ignoring')
@@ -294,7 +284,7 @@ class DataLoaderABC(TraitBase):
         GWV 20/09/2022: deprecated; maintained for code backward compatibility
         """
         instance = cls(path)
-        if not instance.checkValid():
+        if not instance.isValid:
             return None
 
         return instance

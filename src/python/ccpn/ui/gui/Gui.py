@@ -15,6 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-11-07 12:05:55 +0000 (Mon, November 07, 2022) $"
 __dateModified__ = "$dateModified: 2022-11-07 10:03:56 +0000 (Mon, November 07, 2022) $"
 __dateModified__ = "$dateModified: 2022-11-06 18:24:24 +0000 (Sun, November 06, 2022) $"
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
@@ -299,6 +300,8 @@ class Gui(Ui):
         :param path: the path to get a dataLoader for
         :param pathFilter: a list/tuple of optional dataFormat strings; (defaults to all dataFormats)
         :returns a tuple (dataLoader, createNewProject, ignore)
+
+        raises RuntimeError in case of failure to define a proper dataLoader
         """
         # local import here
         from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
@@ -313,26 +316,26 @@ class Gui(Ui):
             pathFilter =  tuple(getDataLoaders().keys())
 
         _loaders = _checkPathForDataLoader(path=path, pathFilter=pathFilter)
+
+        dataLoader = None
+        # log errors
+        errMsg = None
+
         if len(_loaders) > 0 and _loaders[-1].isValid:
-            # found a valid one; use that
+            # there is a valid one; use that
             dataLoader = _loaders[-1]
 
-        # log errors
-        elif len(_loaders) == 0:
-            dataLoader = None
-            txt = f'No valid loader found for {path}'
+        elif len(_loaders) > 0 and _loaders[-1].shouldBeValid:
+            # found a one that should have been valid
+            errMsg = f'{_loaders[-1].dataFormat} loader reported: {_loaders[-1].errorString}'
 
-        elif len(_loaders) == 1 and not _loaders[0].isValid:
-            dataLoader = None
-            txt = f'No valid loader: {_loaders[0].errorString}'
+        elif len(_loaders) == 0 or (len(_loaders) > 0 and not _loaders[-1].isValid):
+            errMsg = f'No valid loader found for {path}; tried {[dl.dataFormat for dl in _loaders]}'
 
-        else:
-            dataLoader = None
-            txt = f'No valid loader found for {path}; tried {[dl.dataFormat for dl in _loaders]}'
-
-        if dataLoader is None:
-            getLogger().warning(txt)
-            return (None, False, False)
+        # raise error if needed
+        if errMsg:
+            getLogger().warning(errMsg)
+            raise RuntimeError(errMsg)
 
         createNewProject = dataLoader.createNewProject
         ignore = False
@@ -692,23 +695,22 @@ class Gui(Ui):
                 txt = f'"{path}" does not exist'
                 getLogger().warning(txt)
                 MessageDialog.showError('Load Data', txt, parent=self)
-                if len(paths) == 1:
-                    return []
-                else:
-                    continue
-
-            dataLoader, createNewProject, ignore = self._getDataLoader(path, pathFilter=pathFilter)
-            if ignore:
                 continue
 
-            if dataLoader is None:
-                txt = f'Unable to load "{path}"'
-                getLogger().warning(txt)
-                MessageDialog.showError('Load Data', txt, parent=self)
+            try:
+                dataLoader, createNewProject, ignore = self._getDataLoader(path, pathFilter=pathFilter)
+
+            except RuntimeError as es:
+                MessageDialog.showError(f'Loading "{_path}"',
+                                        f'{es}',
+                                        parent=self.mainWindow)
                 if len(paths) == 1:
                     return []
                 else:
                     continue
+
+            if ignore:
+                continue
 
             dataLoaders.append(dataLoader)
 

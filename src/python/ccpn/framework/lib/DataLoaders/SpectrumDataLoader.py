@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 10:03:56 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 12:05:55 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -87,9 +87,10 @@ class SpectrumDataLoaderABC(DataLoaderABC):
             self.errorString = f'"{self.path}": Failed to initiate a {self.spectumDataSourceClass.__name__} instance'
             return False
 
-        self.isValid = self.dataSource.isValid or self.dataSource.shouldBeValid
+        self.isValid = self.dataSource.isValid
+        self.shouldBeValid = self.dataSource.shouldBeValid
         self.errorString = self.dataSource.errorString
-        return True
+        return self.isValid
 
     @classmethod
     def _documentClass(cls) -> str:

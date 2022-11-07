@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-05 10:42:26 +0000 (Sat, November 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 12:05:55 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -72,7 +72,9 @@ class DirectoryDataLoader(DataLoaderABC):
             pathFilter.remove(_DIRECTORY_DATA)
 
         # Find valid files to load
-        self.isValid = False
+        if not self.path.is_dir():
+            raise RuntimeError(f'{self.path} is not a directory' )
+
         _files = list(self.path.glob('*'))
         for f in _files:
             dataLoader = None
@@ -97,6 +99,7 @@ class DirectoryDataLoader(DataLoaderABC):
                     self.isValid = True
 
         getLogger().debug2(f'Directory "{self.path}": {self.count} loadable items out of {len(_files)}')
+
         self.checkValid()
 
     def checkValid(self) -> bool:
@@ -107,9 +110,16 @@ class DirectoryDataLoader(DataLoaderABC):
         """
         if not super().checkValid():
             return False
+
         if self.count == 0:
+            self.shouldBeValid = True
             self.isValid = False
-            self.errorString = f'Invalid directory path "{self.path}"; no recognised files found'
+            self.errorString = f'No recognised files found'
+            return False
+
+        self.isValid = True
+        self.errorString = ''
+        return True
 
     def load(self):
         """The actual loading method;

@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 12:05:55 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 20:06:36 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,8 @@ __date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 
 from ccpn.util.Logging import getLogger
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import \
-    DataLoaderABC, checkPathForDataLoader, getDataLoaders, NO_SUFFIX, ANY_SUFFIX
+    DataLoaderABC, checkPathForDataLoader, getDataLoaders, _getPotentialDataLoaders, \
+    NO_SUFFIX, ANY_SUFFIX
 from ccpn.util.traits.CcpNmrTraits import Bool, List, Int
 from ccpn.core.lib.ContextManagers import logCommandManager
 
@@ -87,16 +88,22 @@ class DirectoryDataLoader(DataLoaderABC):
                 (dataLoader := checkPathForDataLoader(f, pathFilter=pathFilter)) is not None:
                 self.dataLoaders.append(dataLoader)
                 self.count += 1
-                self.isValid = True
 
             # get directories if recursive is True
-            elif f.is_dir() and self.recursive:
-                dataLoader = DirectoryDataLoader(path=f, recursive=recursive, pathFilter=pathFilter)
-                if dataLoader is not None and len(dataLoader) > 0:
-                    # Loadable files were found
+            elif f.is_dir():
+                _dirFilter = [dl.dataFormat for dl in _getPotentialDataLoaders(f)
+                               if dl.dataFormat != DirectoryDataLoader.dataFormat]
+                # Add f if it was anything but a general directory
+                if (dataLoader := checkPathForDataLoader(f, pathFilter=_dirFilter)) is not None:
                     self.dataLoaders.append(dataLoader)
-                    self.count += len(dataLoader)
-                    self.isValid = True
+                    self.count += 1
+                # Haven't found a dataLoader yet; add f using DirectoryLoader if recursive is True
+                if dataLoader is None and recursive:
+                    if (dataLoader := DirectoryDataLoader(path=f, recursive=recursive, pathFilter=pathFilter)) is not None and \
+                        len(dataLoader) > 0:
+                        # Loadable files were found
+                        self.dataLoaders.append(dataLoader)
+                        self.count += len(dataLoader)
 
         getLogger().debug2(f'Directory "{self.path}": {self.count} loadable items out of {len(_files)}')
 
@@ -111,9 +118,13 @@ class DirectoryDataLoader(DataLoaderABC):
         if not super().checkValid():
             return False
 
+        # We now have found a directory; expect to find loadable files
+        self.shouldBeValid = True
+
+        self.isValid = False
+        self.errorString = 'Checking validity'
+
         if self.count == 0:
-            self.shouldBeValid = True
-            self.isValid = False
             self.errorString = f'No recognised files found'
             return False
 

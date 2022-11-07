@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-04 17:27:04 +0000 (Fri, November 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 11:28:41 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -234,21 +234,22 @@ def navigateToNmrAtomsInStrip(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom], w
     #print('shiftDict>>', shiftDict)
     #print('atomPositions', atomPositions)
 
-    positions = []
-    for atomPos in atomPositions:
-        # 20181029: GWV amended to take first value only
-        if atomPos and len(atomPos) >= 1:
-            positions.append(atomPos[0])
-            # if len(atomPos) < 2:
-            #   positions.append(atomPos[0])
-            # else:
-            #   # positions.append(max(atomPos)-min(atomPos)/2)
-            #
-            #   # get the midpoint of each axis
-            #   #positions.append((max(atomPos)+min(atomPos))/2)
-
-        else:
-            positions.append('')
+    # positions = []
+    # for atomPos in atomPositions:
+    #     # 20181029: GWV amended to take first value only
+    #     if atomPos and len(atomPos) >= 1:
+    #         positions.append(atomPos[0])
+    #         # if len(atomPos) < 2:
+    #         #   positions.append(atomPos[0])
+    #         # else:
+    #         #   # positions.append(max(atomPos)-min(atomPos)/2)
+    #         #
+    #         #   # get the midpoint of each axis
+    #         #   #positions.append((max(atomPos)+min(atomPos))/2)
+    #
+    #     else:
+    #         positions.append('')
+    positions = [atomPos[0] if atomPos else None for atomPos in atomPositions]
 
     if axisMask:
         positions = [pos if mask else None for pos, mask in zip(positions, axisMask)]

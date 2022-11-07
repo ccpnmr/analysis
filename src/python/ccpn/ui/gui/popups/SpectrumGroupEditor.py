@@ -1,6 +1,8 @@
 """
 Module Documentation here
 """
+
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -10,12 +12,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-17 17:26:06 +0100 (Tue, May 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 14:45:55 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,11 +28,14 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
+import pandas as pd
 from functools import partial
 from PyQt5 import QtWidgets, QtGui, QtCore
 from ast import literal_eval
 from typing import Tuple, Any
-from collections import OrderedDict, Iterable
+from collections import OrderedDict, Iterable, defaultdict
+import contextlib
+
 from ccpn.util.Common import _compareDict
 from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
 from ccpn.core.lib.ContextManagers import undoStackBlocking
@@ -52,8 +57,6 @@ from ccpn.ui.gui.popups.SpectrumPropertiesPopup import ColourTab, ContoursTab, C
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Constants import ALL_SERIES_UNITS
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
-import pandas as pd
-from collections import defaultdict
 
 
 DEFAULTSPACING = (3, 3)
@@ -69,7 +72,8 @@ GENERALTAB1D_LABEL = 'General 1d'
 GENERALTABND_LABEL = 'General Nd'
 SERIES_LABEL = 'Series'
 MAX_WIDGET_COUNT = 50  # For severe speed issues. If a SG contains more Spectra than this value, widgets are not created.
-TAB_WARNING_MSG = 'This option is not available for Spectrum Groups containing more than %s spectra.' % MAX_WIDGET_COUNT
+TAB_WARNING_MSG = f'This option is not available for Spectrum Groups containing more than {MAX_WIDGET_COUNT} spectra.'
+
 _PidsHeader = 'Pids'
 _WidgetsHeader = 'Widgets'
 _ValuesHeader = 'Values'
@@ -126,7 +130,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         _allTabs = self.getActiveTabList()
 
         # get the list of widgets that have been changed - exit if all empty
-        allChanges = any(t._changes for t in _allTabs if t is not None) or (True if self._currentEditorState() else False)
+        allChanges = any(t._changes for t in _allTabs if t is not None) or bool(self._currentEditorState())
         if not allChanges:
             return True
 
@@ -182,37 +186,30 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             self._applyAllChanges(self.spectraTab._changes)
 
         for tt in range(self._colourTabs1d.count()):
-            _changes = self._colourTabs1d.widget(tt)._changes
-            if _changes:
+            if _changes := self._colourTabs1d.widget(tt)._changes:
                 self._applyAllChanges(_changes)
 
         for tt in range(self._colourTabsNd.count()):
-            _changes = self._colourTabsNd.widget(tt)._changes
-            if _changes:
+            if _changes := self._colourTabsNd.widget(tt)._changes:
                 self._applyAllChanges(_changes)
 
-        try:
-            _changes = self._group1dColours._changes
-            if _changes:
+        with contextlib.suppress(Exception):
+            if _changes := self._group1dColours._changes:
                 # self._group1dColours.spectrumGroup = self.obj
                 self._applyAllChanges(_changes)
                 if self.obj != self._group1dColours.spectrumGroup:
                     # if a dummy spectrumGroup then copy to actual group
                     for k, val in self._group1dColours.spectrumGroup.items():
                         setattr(self.obj, k, val)
-        except:
-            pass
-        try:
-            _changes = self._groupNdColours._changes
-            if _changes:
+
+        with contextlib.suppress(Exception):
+            if _changes := self._groupNdColours._changes:
                 # self._groupNdColours.spectrumGroup = self.obj
                 self._applyAllChanges(_changes)
                 if self.obj != self._groupNdColours.spectrumGroup:
                     # if a dummy spectrumGroup then copy to actual group
                     for k, val in self._groupNdColours.spectrumGroup.items():
                         setattr(self.obj, k, val)
-        except Exception as es:
-            pass
 
         self._spectrumGroupSeriesEdited = OrderedDict()
         self._spectrumGroupSeriesValues = list(self.obj.series)
@@ -432,14 +429,10 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             for aTab in tuple(colourTab.widget(ii) for ii in range(colourTab.count())):
                 aTab._fillPullDowns()
 
-        try:
+        with contextlib.suppress(Exception):
             self._group1dColours._fillPullDowns()
-        except:
-            pass
-        try:
+        with contextlib.suppress(Exception):
             self._groupNdColours._fillPullDowns()
-        except:
-            pass
 
     def _populate(self):
         """Populate the widgets in the tabs
@@ -455,14 +448,10 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             for aTab in tuple(colourTab.widget(ii) for ii in range(colourTab.count())):
                 aTab._populateColour()
 
-        try:
+        with contextlib.suppress(Exception):
             self._group1dColours._populateColour()
-        except:
-            pass
-        try:
+        with contextlib.suppress(Exception):
             self._groupNdColours._populateColour()
-        except:
-            pass
 
         with self.blockWidgetSignals():  # we already filled when calling _spectraChanged
             self.seriesTab._fillSeriesFrame(self._defaultSpectra, spectrumGroup=self.obj)

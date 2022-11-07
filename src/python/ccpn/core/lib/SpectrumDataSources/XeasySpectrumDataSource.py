@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 15:54:19 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 21:02:00 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -239,6 +239,19 @@ class XeasySpectrumDataSource(SpectrumDataSourceABC):
         self.isValid = True
         self.errorString = ''
         return super().checkValid()
+
+    def getAllFiles(self) -> list:
+        """
+        Get all the files handled by this dataSource: i.e. the binary and a parameter file.
+
+        :return: list of Path instances
+        """
+        result = []
+        if self._binaryFile is not None:
+            result.append(self._binaryFile)
+        if self._parameterFile is not None:
+            result.append(self._parameterFile)
+        return result
 
     @property
     def dtype(self):

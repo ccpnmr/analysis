@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-03 15:41:33 +0000 (Thu, November 03, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-11-07 15:31:46 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -121,32 +121,16 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
     template = CString(allow_none=True, default_value=None).tag(
                                         info='The template to generate the path of the individual files comprising the nD',
-                                        isDimensional=False,
-                                        doCopy=True,
-                                        spectrumAttribute=None,
-                                        hasSetterInSpectrumClass=False
                                        )
-
     nFiles = CInt(default_value=0).tag(
                                         info='The number of files comprising the nD',
-                                        isDimensional=False,
-                                        doCopy=True,
-                                        spectrumAttribute=None,
-                                        hasSetterInSpectrumClass=False
                                        )
-
     baseDimensionality = CInt(default_value=2).tag(
                                         info='Dimensionality of the NmrPipe files comprising the nD',
-                                        isDimensional=False,
-                                        doCopy=True,
-                                        spectrumAttribute=None,
-                                        hasSetterInSpectrumClass=False
                                        )
-    isTransposed = Bool(default_value=False).tag(isDimensional=False,
-                                                 doCopy=False,
-                                                 spectrumAttribute=None,
-                                                 hasSetterInSpectrumClass=False
-                                                 )
+    isTransposed = Bool(default_value=False).tag(
+                                        info='Data of underpinning NmrPipe files are transposed',
+                                        )
 
     def __init__(self, path=None, spectrum=None, temporaryBuffer=True, bufferPath=None):
         """Initialise; optionally set path or extract from spectrum
@@ -388,6 +372,34 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                 _path = files[0]
 
         return super().setPath(path=_path, substituteSuffix=substituteSuffix)
+
+    def checkValid(self) -> bool:
+        """check if valid format corresponding to dataFormat by:
+        - checking template and binary files are defined
+
+        call super class for:
+        - checking suffix and existence of path
+        - reading (and checking dimensionCount) parameters
+
+        :return: True if ok, False otherwise
+        """
+
+        if not super().checkValid():
+            return False
+
+        self.isValid = False
+        self.shouldBeValid = True
+
+        self.errorString = 'Checking validity'
+
+        if self.nFiles > 1 and self.template is None:
+            errorMsg = f'No NmrPipe template defined, in spite of {self.nFiles} files comprising the {self.dimensionCount}D'
+            return self._returnFalse(errorMsg)
+
+        self.isValid = True
+        self.errorString = ''
+        return True
+
 
     def fillHdf5Buffer(self):
         """Fill hdf5buffer with data from self

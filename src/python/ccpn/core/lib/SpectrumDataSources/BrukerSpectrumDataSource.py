@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-06 18:24:24 +0000 (Sun, November 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 15:31:46 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -353,68 +353,57 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
 
         :return: True if ok, False otherwise
         """
-        logger = getLogger()
-
-        def _returnFalse(txt) -> False:
-            """
-            Helper function to set self.errorString, debug and return False
-            :param txt:
-            :return: False
-            """
-            logger.debug2(txt)
-            self.errorString = txt
-            return False
 
         self.isValid = False
         self.errorString = 'Checking validity'
 
         if not self.shouldBeValid:
             errorMsg = f'Path "{self._path}" did not define a valid Bruker file'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         # checking Bruker topdir
         if self._brukerRoot is None:
             errorMsg = 'Bruker top directory is undefined'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         if not self._brukerRoot.exists():
             errorMsg = f'Bruker top directory "{self._brukerRoot}" does not exist'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         if not self._brukerRoot.is_dir():
             errorMsg = f'Bruker top directory "{self._brukerRoot}" is not a directory'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         pdata = self._brukerRoot / self._PDATA
         if not pdata.exists() or not pdata.is_dir():
             errorMsg = f'Bruker top directory "{self._brukerRoot}" has no valid pdata directory'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         hasAcquFiles = len(self._brukerRoot.globList('acqu*')) > 0
         if not hasAcquFiles:
             errorMsg = f'Bruker top directory "{self._brukerRoot}" has no acqu* files'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         if self._pdataDir is None or not self._pdataDir.exists():
             errorMsg = 'No valid Bruker pdata/n (n=[1,..]) directory with (binary, proc) data'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         if not self._pdataDir.is_dir():
             errorMsg = f'Bruker pdata "{self._pdataDir}" is not a directory'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         hasProcFiles = len(self._pdataDir.globList('proc*')) > 0
         if not hasProcFiles:
             errorMsg = f'Bruker pdata "{self._pdataDir}" has no proc* files'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         if self._binaryData is None:
             errorMsg = f'Bruker "{self._pdataDir}" directory: no valid binary data defined'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         if not self._binaryData.exists():
             errorMsg = f'Bruker "{self._binaryData}" binary data not found'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         self.isValid = True
         self.errorString = ''

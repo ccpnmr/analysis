@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 13:58:48 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 15:31:46 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -258,6 +258,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
     saveAllTraitsToJson = True
     classVersion = 1.0  # for json saving
 
+    # isDimensional: bool: defines a spectral parameter, either as dimensional or not
+    # doCopy: bool: copy parameter to/from spectra and between dataSource instances
+    # spectrumAttribute: name of corresponding attribute in Spectrum class
+    # hasSetterInSpectrumClass: bool: corresponding attribute in Spectrum class can be set
     date = CString(allow_none=True, default_value=None).tag(isDimensional=False,
                                                             doCopy=True,
                                                             spectrumAttribute=None,
@@ -1220,6 +1224,16 @@ class SpectrumDataSourceABC(CcpNmrJson):
     # data access functions
     #=========================================================================================
 
+    def _returnFalse(self, errMsg) -> False:
+        """
+        Helper function to set self.errorString, write to debug2 and return False
+        :param errMsg:
+        :return: False
+        """
+        getLogger().debug2(errMsg)
+        self.errorString = errMsg
+        return False
+
     def checkValid(self) -> bool:
         """check if valid format corresponding to dataFormat by:
         - checking suffix and existence of path
@@ -1227,8 +1241,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         :return: True if ok, False otherwise
         """
-        logger = getLogger()
-
         self.isValid = False
         self.errorString = 'Checking validity'
 
@@ -1239,21 +1251,15 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         if _p is None or not self.checkSuffix(_p):
             txt = f'{_iniTxt}: invalid suffix'
-            logger.debug2(txt)
-            self.errorString = txt
-            return False
+            return self._returnFalse(txt)
 
         if not self.hasValidPath():
             txt = f'{_iniTxt}: invalid path'
-            logger.debug2(txt)
-            self.errorString = txt
-            return False
+            return self._returnFalse(txt)
 
         if not self.allowDirectory and self.path.is_dir():
             txt = f'{_iniTxt}: path is directory and not valid'
-            logger.debug2(txt)
-            self.errorString = txt
-            return False
+            return self._returnFalse(txt)
 
         # checking opening file and reading parameters
         try:
@@ -1261,17 +1267,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 pass
                 # self.readParameters()
         except RuntimeError as es:
-            txt = f'{_iniTxt}: bailing on reading parameters with error: "{es}"'
-            logger.debug2(txt)
-            self.errorString = txt
-            return False
+            txt = f'{_iniTxt}: Reading parameters failed with error: "{es}"'
+            return self._returnFalse(txt)
 
         # Check dimensionality; should be > 0
         if self.dimensionCount == 0:
             txt = f'{_iniTxt}: dimensionCount = 0'
-            logger.debug2(txt)
-            self.errorString = txt
-            return False
+            return self._returnFalse(txt)
 
         self.isValid = True
         self.errorString =''

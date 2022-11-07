@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 10:03:56 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 15:31:45 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -300,54 +300,43 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
 
         :return: True if ok, False otherwise
         """
-        logger = getLogger()
-
-        def _returnFalse(txt) -> False:
-            """
-            Helper function to set self.errorString, debug and return False
-            :param txt:
-            :return: False
-            """
-            logger.debug2(txt)
-            self.errorString = txt
-            return False
 
         self.isValid = False
         self.errorString = 'Checking validity'
 
         if not self.shouldBeValid:
             errorMsg = f'Path "{self._path}" did not define a valid Azara file'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         # checking parameter file
         if self._parameterFile is None:
             errorMsg = f'Azara parameter file is undefined'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         if not self._parameterFile.exists():
             errorMsg = f'Azara parameter file "{self._parameterFile}" does not exist'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         if not self._parameterFile.is_file():
             errorMsg = f'Azara parameter file "{self._parameterFile}" is not a file'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         # checking binary file
         if self._binaryFile is None and self._parameterFile is not None:
             errorMsg = f'Azara binary file is undefined; checked "{self._parameterFile}"'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         if self._binaryFile is None:
             errorMsg = f'Azara binary file is undefined'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         if not self._binaryFile.exists():
             errorMsg = f'Azara binary file "{self._binaryFile}" does not exist'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         if not self._binaryFile.is_file():
             errorMsg = f'Azara binary file "{self._binaryFile}" is not a file'
-            return _returnFalse(errorMsg)
+            return self._returnFalse(errorMsg)
 
         self.isValid = True
         self.errorString = ''

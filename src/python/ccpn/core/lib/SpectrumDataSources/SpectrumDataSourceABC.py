@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 15:31:46 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 16:51:37 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -172,8 +172,11 @@ def getSpectrumDataSource(path, dataFormat):
         raise ValueError('getSpectrumDataSource: invalid format "%s"; must be one of %s' %
                          (dataFormat, [k for k in dataFormats.keys()])
                          )
-    instance = cls.checkForValidFormat(path)
-    return instance
+    instance = cls(path=path)
+    if not instance.isValid:
+        return None
+    else:
+        return instance
 
 
 def checkPathForSpectrumFormats(path):
@@ -181,8 +184,8 @@ def checkPathForSpectrumFormats(path):
     :return a SpectrumDataSource instance with parameters read or None if there was no match
     """
     for fmt, cls in getDataFormats().items():
-        instance = cls.checkForValidFormat(path)
-        if instance is not None:
+        instance = cls(path=path)
+        if instance.isValid:
             return instance  # we found a valid format for path
     return None
 
@@ -193,6 +196,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
     """
 
     classVersion = 1.0  # For json saving
+    saveAllTraitsToJson = True
+    keysInOrder = True  # maintain the definition order
 
     # 'local' definition of MAXDIM; defining defs in SpectrumLib to prevent circular imports
     MAXDIM = specLib.MAXDIM  # 8  # Maximum dimensionality
@@ -251,12 +256,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
     # parameter definitions and mappings onto the Spectrum class
     #=========================================================================================
-    keysInOrder = True  # maintain the definition order
 
     _bigEndian = (sys.byteorder == 'big')
-
-    saveAllTraitsToJson = True
-    classVersion = 1.0  # for json saving
 
     # isDimensional: bool: defines a spectral parameter, either as dimensional or not
     # doCopy: bool: copy parameter to/from spectra and between dataSource instances

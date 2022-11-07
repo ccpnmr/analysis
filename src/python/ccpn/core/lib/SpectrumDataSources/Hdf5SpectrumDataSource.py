@@ -24,8 +24,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-21 15:03:25 +0100 (Wed, September 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-11-07 16:51:37 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -121,8 +121,8 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         :param spectrum: associate instance with spectrum and import spectrum's parameters
         :param dimensionCount: limit instance to dimensionCount dimensions
         """
-        super().__init__(path=path, spectrum=spectrum, dimensionCount=dimensionCount)
         self._hdf5Metadata = Hdf5Metadata()
+        super().__init__(path=path, spectrum=spectrum, dimensionCount=dimensionCount)
 
     @property
     def spectrumData(self):

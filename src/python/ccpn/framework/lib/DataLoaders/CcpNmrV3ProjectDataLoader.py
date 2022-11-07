@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-22 17:43:35 +0100 (Thu, September 22, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-11-07 16:51:37 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ __date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 #=========================================================================================
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
-from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX, CCPN_API_DIRECTORY
+from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX, CCPN_API_DIRECTORY, CCPN_STATE_DIRECTORY
 from ccpn.framework.Framework import Framework
 
 
@@ -53,11 +53,17 @@ class CcpNmrV3ProjectDataLoader(DataLoaderABC):
         """
         if not super().checkValid():
             return False
-        _apiPath = self.path / CCPN_API_DIRECTORY
-        if not _apiPath.exists():
-            self.isValid = False
-            self.errorString = f'Invalid path "{self.path}"; required sub-directory "{CCPN_API_DIRECTORY}" not found'
-            return False
+
+        # We now have asserted that it is a directory with .ccpn suffix
+        self.shouldBeValid = True
+
+        # check sub directories
+        for subDir in (CCPN_API_DIRECTORY, CCPN_STATE_DIRECTORY):
+            _p = self.path / subDir
+            if not _p.exists():
+                self.isValid = False
+                self.errorString = f'Required sub-directory "{subDir}" not found'
+                return False
 
         self.isValid = True
         self.errorString =  ''

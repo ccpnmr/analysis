@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-03 15:35:54 +0000 (Thu, November 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 15:52:57 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -115,7 +115,9 @@ from ccpn.util.Path import Path, aPath
 # defined here too as imported from Spectrum throughout the code base
 MAXALIASINGRANGE = specLib.MAXALIASINGRANGE
 _SCALECHANGED = 'scaleChanged'
+_ALLCHANGED = 'allChanged'
 _UPDATECHEMICALSHIFTS = 'updateChemicalShifts'
+_IGNORECHILDREN = 'ignoreChildren'
 
 #=========================================================================================
 # Spectrum class
@@ -305,26 +307,25 @@ class Spectrum(AbstractWrapperObject):
         return self._spectrumTraits.peakPicker
 
     @peakPicker.setter
-    def peakPicker(self, peakPicker):
+    def peakPicker(self, pkPicker):
         """Set the current peakPicker or deassign when None
         """
-        if peakPicker and peakPicker.spectrum != self:
-            raise ValueError(f'Invalid peakPicker: already linked to {peakPicker.spectrum}')
+        if pkPicker and pkPicker.spectrum != self:
+            raise ValueError(f'Invalid peakPicker: already linked to {pkPicker.spectrum}')
 
-        if peakPicker:
+        if pkPicker:
             with undoBlockWithoutSideBar():
                 # set the current peakPicker
-                self._spectrumTraits.peakPicker = peakPicker
+                self._spectrumTraits.peakPicker = pkPicker
                 # automatically store in the spectrum CCPN internal store
-                peakPicker._storeAttributes()
-                getLogger().debug('Setting peakPicker to %s' % peakPicker)
-        else:
+                pkPicker._storeAttributes()
+                getLogger().debug(f'Setting peakPicker to {pkPicker}')
+        elif self._spectrumTraits.peakPicker is not None:
+            # clear the current peakPicker
             with undoBlockWithoutSideBar():
-                # clear the current peakPicker
-                if self._spectrumTraits.peakPicker is not None:
-                    self._spectrumTraits.peakPicker._detachFromSpectrum()
-                    self._spectrumTraits.peakPicker = None
-                    getLogger().debug('Clearing current peakPicker')
+                self._spectrumTraits.peakPicker._detachFromSpectrum()
+                self._spectrumTraits.peakPicker = None
+                getLogger().debug('Clearing current peakPicker')
 
     #-----------------------------------------------------------------------------------------
     # Spectrum properties
@@ -531,32 +532,29 @@ class Spectrum(AbstractWrapperObject):
         """
         value = self._wrappedData.scale
         if value is None:
-            getLogger().warning('Scaling {} changed from None to 1.0'.format(self))
+            getLogger().warning(f'Scaling {self} changed from None to 1.0')
             value = 1.0
         if -SCALETOLERANCE < value < SCALETOLERANCE:
-            getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+            getLogger().warning(f'Scaling {self} by minimum tolerance (±{SCALETOLERANCE})')
 
         return value
 
     @scale.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter(scaleChanged=True, dancing=True)
+    @ccpNmrV3CoreSetter(scaleChanged=True)
     def scale(self, value: Union[float, int, None]):
         if value is None:
-            getLogger().warning('Scaling {} changed from None to 1.0'.format(self))
+            getLogger().warning(f'Scaling {self} changed from None to 1.0')
             value = 1.0
 
         if not isinstance(value, (float, int)):
-            raise TypeError('Spectrum.scale {} must be a float or integer'.format(self))
+            raise TypeError(f'Spectrum.scale {self} must be a float or integer')
 
         if value is not None and -SCALETOLERANCE < value < SCALETOLERANCE:
             # Display a warning, but allow to be set
-            getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+            getLogger().warning(f'Scaling {self} by minimum tolerance (±{SCALETOLERANCE})')
 
-        if value is None:
-            self._wrappedData.scale = None
-        else:
-            self._wrappedData.scale = float(value)
+        self._wrappedData.scale = None if value is None else float(value)
 
         if self.dimensionCount == 1 and self._intensities is not None:
             # some 1D data were read before; update the intensities as the scale has changed
@@ -1263,6 +1261,7 @@ class Spectrum(AbstractWrapperObject):
 
     @assignmentTolerances.setter
     @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(float, int))
+    @ccpNmrV3CoreUndoBlock(ignoreChildren=True)
     def assignmentTolerances(self, value):
         self._setDimensionalAttributes('assignmentTolerance', value)
 
@@ -1365,21 +1364,18 @@ class Spectrum(AbstractWrapperObject):
 
         result = []
         apiExperiment = self._wrappedData.experiment
-        apiRefExperiment = apiExperiment.refExperiment
-
-        if apiRefExperiment:
+        if apiRefExperiment := apiExperiment.refExperiment:
             # We should use the refExperiment - if present
             magnetisationTransferDict = apiRefExperiment.magnetisationTransferDict()
             mainExpDimRefs = [dim._expDimRef for dim in self.spectrumReferences]
             refExpDimRefs = [x if x is None else x.refExpDimRef for x in mainExpDimRefs]
             for ii, rxdr in enumerate(refExpDimRefs):
-                dim1 = ii + 1
                 if rxdr is not None:
+                    dim1 = ii + 1
                     for jj in range(dim1, len(refExpDimRefs)):
                         rxdr2 = refExpDimRefs[jj]
                         if rxdr2 is not None:
-                            tt = magnetisationTransferDict.get(frozenset((rxdr, rxdr2)))
-                            if tt:
+                            if tt := magnetisationTransferDict.get(frozenset((rxdr, rxdr2))):
                                 result.append(MagnetisationTransferTuple(dim1, jj + 1, tt[0], tt[1]))
 
         else:
@@ -1388,12 +1384,9 @@ class Spectrum(AbstractWrapperObject):
             for apiExpTransfer in apiExperiment.expTransfers:
                 item = [x.expDim.dim for x in apiExpTransfer.expDimRefs]
                 item.sort()
-                item.append(apiExpTransfer.transferType)
-                item.append(not (apiExpTransfer.isDirect))
+                item.extend((apiExpTransfer.transferType, not (apiExpTransfer.isDirect)))
                 ll.append(item)
-            for item in sorted(ll):
-                result.append(MagnetisationTransferTuple(*item))
-
+            result.extend(MagnetisationTransferTuple(*item) for item in sorted(ll))
         #
         return tuple(result)
 
@@ -1444,12 +1437,13 @@ class Spectrum(AbstractWrapperObject):
         return self._intensities
 
     @intensities.setter
+    @ccpNmrV3CoreSetter(allChanged=True)
     def intensities(self, value: numpy.array):
         self._intensities = value
 
-        # NOTE:ED - temporary hack for showing straight the result of intensities change
-        for spectrumView in self.spectrumViews:
-            spectrumView.refreshData()
+        # # NOTE:ED - temporary hack for immediately showing the result of intensities change
+        # for spectrumView in self.spectrumViews:
+        #     spectrumView.refreshData()
 
     @property
     def positions(self) -> numpy.array:
@@ -1465,13 +1459,13 @@ class Spectrum(AbstractWrapperObject):
         return self._positions
 
     @positions.setter
-    @ccpNmrV3CoreSetter()  # scaleChanged=True)
+    @ccpNmrV3CoreSetter(allChanged=True)
     def positions(self, value):
         self._positions = value
 
-        # NOTE:ED - temporary hack for showing straight the result of intensities change
-        for spectrumView in self.spectrumViews:
-            spectrumView.refreshData()
+        # # NOTE:ED - temporary hack for immediately showing the result of intensities change
+        # for spectrumView in self.spectrumViews:
+        #     spectrumView.refreshData()
 
     @property
     @_includeInCopy
@@ -1479,10 +1473,7 @@ class Spectrum(AbstractWrapperObject):
         """Return whether the folded spectrum contours are to be displayed
         """
         result = self._getInternalParameter(self._DISPLAYFOLDEDCONTOURS)
-        if result is None:
-            # default to True
-            return True
-        return result
+        return True if result is None else result
 
     @displayFoldedContours.setter
     def displayFoldedContours(self, value):
@@ -1501,10 +1492,7 @@ class Spectrum(AbstractWrapperObject):
         if items is not None:
             series = ()
             for sg in self.spectrumGroups:
-                if sg.pid in items:
-                    series += (items[sg.pid],)
-                else:
-                    series += (None,)
+                series += (items[sg.pid], ) if sg.pid in items else (None, )
             return series
 
     @_seriesItems.setter
@@ -1526,7 +1514,7 @@ class Spectrum(AbstractWrapperObject):
             raise ValueError('Number of items does not match number of spectrumGroups')
 
         if isinstance(items, tuple):
-            diffItems = set(type(item) for item in items)
+            diffItems = {type(item) for item in items}
             if len(diffItems) > 2 or (len(diffItems) == 2 and type(None) not in diffItems):
                 raise ValueError('Items must be of the same type (or None)')
 
@@ -1553,9 +1541,9 @@ class Spectrum(AbstractWrapperObject):
 
         spectrumGroup = self.project.getByPid(spectrumGroup) if isinstance(spectrumGroup, str) else spectrumGroup
         if not isinstance(spectrumGroup, SpectrumGroup):
-            raise TypeError('%s is not a spectrumGroup' % str(spectrumGroup))
+            raise TypeError(f'{str(spectrumGroup)} is not a spectrumGroup')
         if self not in spectrumGroup.spectra:
-            raise ValueError('Spectrum %s does not belong to spectrumGroup %s' % (str(self), str(spectrumGroup)))
+            raise ValueError(f'Spectrum {str(self)} does not belong to spectrumGroup {str(spectrumGroup)}')
 
         seriesItems = self._getInternalParameter(self._SERIESITEMS)
         if seriesItems and spectrumGroup.pid in seriesItems:
@@ -1572,7 +1560,7 @@ class Spectrum(AbstractWrapperObject):
         if not isinstance(spectrumGroup, SpectrumGroup):
             raise TypeError('%s is not a spectrumGroup', spectrumGroup)
         if self not in spectrumGroup.spectra:
-            raise ValueError('Spectrum %s does not belong to spectrumGroup %s' % (str(self), str(spectrumGroup)))
+            raise ValueError(f'Spectrum {str(self)} does not belong to spectrumGroup {str(spectrumGroup)}')
 
         seriesItems = self._getInternalParameter(self._SERIESITEMS)
 
@@ -1586,7 +1574,7 @@ class Spectrum(AbstractWrapperObject):
         """rename the keys in the seriesItems to reflect the updated spectrumGroup name
         """
         seriesItems = self._getInternalParameter(self._SERIESITEMS)
-        if oldPid in (seriesItems if seriesItems else ()):
+        if oldPid in (seriesItems or ()):
             # insert new items with the new pid
             oldItems = seriesItems[oldPid]
             del seriesItems[oldPid]
@@ -2897,7 +2885,7 @@ class Spectrum(AbstractWrapperObject):
         # Assure at least one peakList
         if len(spectrum.peakLists) == 0:
             spectrum.newPeakList()
-            getLogger().warning('%s had no peakList; created one' % spectrum)
+            getLogger().warning(f'{spectrum} had no peakList; created one')
 
         # This will fix any spurious settings on the aliasing (also in update_3_0_4 code)
         _aIndices = spectrum.aliasingIndices
@@ -2970,20 +2958,16 @@ class Spectrum(AbstractWrapperObject):
         if not super()._finaliseAction(action, **actionKwds):
             return
 
-        # get the changed attribute states - defined in the ccpNmrV3CoreSetter arguments
-        scaleChanged = actionKwds.get(_SCALECHANGED, False)
-        updateShifts = actionKwds.get(_UPDATECHEMICALSHIFTS, False)
-
-        if action == 'create':
-            # No need; done by _newSpectrum
-            # self._saveSpectrumMetaData()
-            pass
+        # if action == 'create':
+        #     # No need; done by _newSpectrum
+        #     # self._saveSpectrumMetaData()
+        #     pass
 
         if action == 'delete':
             self._deleteSpectrumMetaData()
 
         # notify peak/integral/multiplet list
-        if action in ['create', 'delete']:
+        if action in {'create', 'delete'}:
             for peakList in self.peakLists:
                 peakList._finaliseAction(action)
             for multipletList in self.multipletLists:
@@ -2992,16 +2976,24 @@ class Spectrum(AbstractWrapperObject):
                 integralList._finaliseAction(action)
 
         # propagate the rename-action to associated spectrumViews
-        elif action in ['change']:
+        elif action == 'change':
+            # get the changed attribute states - defined in the ccpNmrV3CoreSetter arguments
+            scaleChanged = actionKwds.get(_SCALECHANGED, False)
+            allChanged = actionKwds.get(_ALLCHANGED, False)
+            updateShifts = actionKwds.get(_UPDATECHEMICALSHIFTS, False)
+
+            if actionKwds.get(_IGNORECHILDREN, False):  # here or after specView?
+                return
+
             for specView in self.spectrumViews:
                 if specView:
                     # force a rebuild of the contours/etc.
                     specView.buildContoursOnly = scaleChanged
+                    specView.buildContours = allChanged
                     # other changes may need to be recognised here
                     specView._finaliseAction(action)
 
-            if scaleChanged:
-
+            if scaleChanged or allChanged:
                 # notify peaks/multiplets/integrals that the scale has changed
                 for peakList in self.peakLists:
                     for peak in peakList.peaks:

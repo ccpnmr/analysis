@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 15:27:57 +0100 (Thu, October 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 15:52:57 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -559,19 +559,19 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
     def _aspectRatioChangedInDisplay(self, aDict):
         """Respond to an external change in the aspect ratio of a strip
         """
-        if aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._spectrumDisplay:
-            _aspectRatios = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLASPECTRATIOS]
-            if not _aspectRatios:
-                return
+        if aDict[GLNotifier.GLSPECTRUMDISPLAY] != self._spectrumDisplay:
+            return
+        if not (_aspectRatios := aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLASPECTRATIOS]):
+            return
 
-            self.blockSignals(True)
+        self.blockSignals(True)
 
-            for aspect in _aspectRatios.keys():
+        for aspect in _aspectRatios.keys():
+            if aspect in self.aspectScreen and aspect in self.aspectData:
                 aspectValue = _aspectRatios[aspect]
-                if aspect in self.aspectScreen and aspect in self.aspectData:
-                    self.aspectScreen[aspect].setText(self.aspectData[aspect].textFromValue(aspectValue))
+                self.aspectScreen[aspect].setText(self.aspectData[aspect].textFromValue(aspectValue))
 
-            self.blockSignals(False)
+        self.blockSignals(False)
 
     @pyqtSlot()
     def _symbolsChanged(self):
@@ -652,7 +652,7 @@ class _commonSettings():
 
     # separated from settings widgets below, but only one seems to use it now
 
-    def _getSpectraFromDisplays(self, displays):
+    def _getSpectraFromDisplays(self, displays, data=None):
         """Get the list of active spectra from the spectrumDisplays
         """
         if not self.application or not displays or len(displays) > 1:
@@ -672,11 +672,16 @@ class _commonSettings():
             if dp.strips:
                 for sv in dp.strips[0].spectrumViews:
 
-                    if not sv.isDeleted:
-                        if sv.spectrum not in validSpectrumViews:
-                            validSpectrumViews[sv.spectrum] = sv.isDisplayed
-                        else:
-                            validSpectrumViews[sv.spectrum] = validSpectrumViews[sv.spectrum] or sv.isDisplayed
+                    if sv.isDeleted:
+                        continue
+                    if data and data[Notifier.OBJECT] == sv and data[Notifier.TRIGGER] == Notifier.DELETE:
+                        # ignore spectrumView if it about to be deleted - should re-introduce the flag :|
+                        continue
+
+                    if sv.spectrum not in validSpectrumViews:
+                        validSpectrumViews[sv.spectrum] = sv.isDisplayed
+                    else:
+                        validSpectrumViews[sv.spectrum] = validSpectrumViews[sv.spectrum] or sv.isDisplayed
 
         if not validSpectrumViews:
             return 0, None, None, None
@@ -693,8 +698,7 @@ class _commonSettings():
         # get list of unique axisCodes
         visibleAxisCodes = {}
         spectrumIndices = {}
-        for spectrum, visible in validSpectrumViews.items():
-
+        for spectrum in validSpectrumViews:
             indices = getAxisCodeMatchIndices(spectrum.axisCodes, activeDisplay.axisCodes)
             spectrumIndices[spectrum] = indices
             for ii, axis in enumerate(spectrum.axisCodes):
@@ -819,7 +823,7 @@ class _commonSettings():
         if removeTopWidget:
             del widget
 
-    def _fillSpectrumFrame(self, displays):
+    def _fillSpectrumFrame(self, displays, data=None):
         """Populate then spectrumFrame with the selectable spectra
         """
         if self._spectraWidget:
@@ -831,7 +835,7 @@ class _commonSettings():
                                      grid=(2, 1), gridSpan=(self._spectraRows, 2), vAlign='top', hAlign='left')
 
         # calculate the maximum number of axes
-        self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays(displays)
+        self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays(displays, data)
         if not self.maxLen:
             return
 
@@ -1198,6 +1202,8 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
             self._spectrumViewNotifier.unRegister()
         if self.includeNmrChainPullSelection:
             self.ncWidget.unRegister()
+        if self.includeSpectrumTable:
+            self.spectrumDisplayPulldown.unRegister()
 
     def _spectrumViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
@@ -1205,7 +1211,7 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         if self.includeSpectrumTable:
             # self._fillSpectrumFrame(self.displaysWidget._getDisplays())
             gid = self.spectrumDisplayPulldown.getText()
-            self._fillSpectrumFrame([self.application.getByGid(gid)])
+            self._fillSpectrumFrame([self.application.getByGid(gid)], data)
 
     def _spectrumViewVisibleChanged(self):
         """Respond to a visibleChanged in one of the spectrumViews
@@ -1229,9 +1235,9 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
     def _cleanupWidget(self):
         """Cleanup the notifiers that are left behind after the widget is closed
         """
+        self._unRegisterNotifiers()
         if self.displaysWidget:
             self.displaysWidget._close()
-        self._unRegisterNotifiers()
 
     def _selectionPulldownCallback(self, item):
         """Notifier Callback for selecting NmrChain
@@ -1243,7 +1249,8 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
 
 
 class _SpectrumRow(Frame):
-    """Class to make a spectrum row"""
+    """Class to make a spectrum row
+    """
 
     def __init__(self, parent, application, spectrum, spectrumDisplay, row=0, startCol=0, visible=True, **kwds):
         super().__init__(parent, **kwds)
@@ -1272,7 +1279,7 @@ class _SpectrumRow(Frame):
                     fixedWidths=(None, _height * 4),
                     labelText=axisCode,
                     value=spectrum.assignmentTolerances[ii],
-                    decimals=decimals, step=step, range=(step, None),
+                    decimals=decimals, step=step, minimum=step
                     )
             ds.setObjectName(str(spectrum.pid + axisCode))
             self.spinBoxes.append(ds)

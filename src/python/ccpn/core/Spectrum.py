@@ -50,8 +50,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-08 11:54:18 +0000 (Tue, November 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-11-07 16:12:10 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -66,44 +66,33 @@ from typing import Sequence, Tuple, Optional, Union, List
 from functools import partial
 from itertools import permutations
 import numpy
-
+import pandas as pd
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.SpectrumTraits import SpectrumTraits
 from ccpn.core._implementation.SpectrumData import SliceData, PlaneData, RegionData
-
 from ccpn.core.Project import Project
 from ccpn.core.lib import Pid
-
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection, getDefaultSpectrumColours
 from ccpn.core.lib.SpectrumLib import _includeInDimensionalCopy, _includeInCopy, _includeInCopyList, \
     checkSpectrumPropertyValue, _setDefaultAxisOrdering
-
 from ccpn.core.lib.ContextManagers import \
     newObject, deleteObject, ccpNmrV3CoreUndoBlock, \
     undoStackBlocking, renameObject, undoBlock, notificationBlanking, \
     ccpNmrV3CoreSetter, inactivity, undoBlockWithoutSideBar
-
 from ccpn.core.lib.DataStore import DataStore, DataStoreTrait
-
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import \
     getDataFormats, getSpectrumDataSource, checkPathForSpectrumFormats, DataSourceTrait
 from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
 from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
-
 from ccpn.core.lib.Cache import cached
-
 from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerTrait
-
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson, jsonHandler
 from ccpn.util.traits.CcpNmrTraits import Int, Float, Instance, Any
 from ccpn.core.lib.SpectrumLib import SpectrumDimensionTrait
-
 from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY, CCPN_SPECTRA_DIRECTORY
 from ccpn.framework.Application import getApplication
-
 from ccpn.util.Constants import SCALETOLERANCE
 from ccpn.util.Common import isIterable, _getObjectsByPids
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatch
@@ -2178,6 +2167,11 @@ class Spectrum(AbstractWrapperObject):
 
         self.dataSource.setSliceData(data=data, position=position, sliceDim=sliceDim)
 
+    def getAllRegionData(self):
+        """ Get  all region data. """
+        ppmRegions = dict(zip(self.axisCodes, self.spectrumLimits))
+        return self.getRegion(**ppmRegions)
+
     @logCommand(get='self')
     def extractSliceToFile(self, axisCode, position, path=None, dataFormat='Hdf5'):
         """Extract 1D slice from self as new Spectrum instance;
@@ -2737,6 +2731,23 @@ class Spectrum(AbstractWrapperObject):
         CCPN Internal
         """
         return self._wrappedData.serial
+
+    def getAsDataFrame(self):
+        """ Write all the spectrum properties per dimension in a dataFrame.
+         This is useful when comparing multiple spectra by their properties. """
+        df = pd.DataFrame()
+        for _attr in dir(self):
+            try:
+                if not _attr.startswith(('_', '__')):
+                    vv = getattr(self, _attr)
+                    if isinstance(vv, (list, tuple)) and len(vv) == self.dimensionCount: # skip non-dimensional properties
+                        if isinstance(vv[0], (str, float, int)): #skip objects
+                            for dim in self.dimensionIndices:
+                                df.loc[0, f'{_attr}_{str(dim)}'] = vv[dim] # write to df.
+            except Exception as e:
+                getLogger().debug3(f'Error in creating spectrumAsDataFrame. Attr: {_attr}. Error:{e}')
+        return df
+
 
     def _getDataSourceFromPath(self, path, dataFormat=None, checkParameters=True) -> tuple:
         """Return a (dataStore, dataSource) tuple if path points  a file compatible

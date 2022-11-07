@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-03 19:11:16 +0000 (Thu, November 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 12:09:30 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -95,20 +95,14 @@ class DefaultItemFactory:
         if roleMap is not None:
             for role in roleMap.values():
                 if role == QtCore.Qt.UserRole:
-                    raise Exception('role QtCore.Qt.UserRole is reserved for ccpn use a value > QtCore.Qt.UserRole ')
+                    raise RuntimeError('role QtCore.Qt.UserRole is reserved for ccpn use a value > QtCore.Qt.UserRole ')
 
             self._roleMap.update(roleMap)
 
         self._roleMap['USER_ROLE'] = QtCore.Qt.UserRole
 
     def instantiateItem(self, item, parent):
-
-        if not isinstance(item, QtWidgets.QListWidgetItem):
-            result = QtWidgets.QListWidgetItem(item, parent)
-        else:
-            result = None
-
-        return result
+        return None if isinstance(item, QtWidgets.QListWidgetItem) else QtWidgets.QListWidgetItem(item, parent)
 
     def ensureItem(self, item, parent=None):
 
@@ -151,14 +145,17 @@ class DefaultItemFactory:
         data = self.decodeDragData(data)
 
         result = []
-        for i, item in enumerate(data.values()):
+        for item in data.values():
             string = item[0].value()
             del item[0]
             result.append(self.createItem(string, data=item))
 
         return result
 
-    def createItem(self, string, data=[], parent=None):
+    def createItem(self, string, data=None, parent=None):
+        if data is None:
+            data = []
+
         result = self.ensureItem(string, parent=parent)
         for role, value in data.items():
             result.setData(role, value)
@@ -172,13 +169,7 @@ class OrderedListWidgetItemFactory(DefaultItemFactory):
         super().__init__({_ListWidget._searchRole: _ListWidget._searchRoleIndex})
 
     def instantiateItem(self, item, parent):
-
-        if not isinstance(item, OrderedListWidgetItem):
-            result = OrderedListWidgetItem(item, parent)
-        else:
-            result = None
-
-        return result
+        return None if isinstance(item, OrderedListWidgetItem) else OrderedListWidgetItem(item, parent)
 
 
 class _ListWidget(ListWidget):
@@ -195,7 +186,7 @@ class _ListWidget(ListWidget):
         super().__init__(*args, **kwds)
 
         if dragRole.capitalize() not in self._roles:
-            raise Exception('position must be one of left or right')
+            raise ValueError('position must be one of left or right')
 
         self._rearrangeable = rearrangeable
         self.setDropIndicatorShown(self._rearrangeable)
@@ -241,14 +232,17 @@ class _ListWidget(ListWidget):
     def startDrag(self, *args, **kwargs):
         super().startDrag(*args, **kwargs)
 
-    def setTexts(self, texts, clear=True, data=[]):
+    def setTexts(self, texts, clear=True, data=None):
+        # could use a sentinel for data
+        if data is None:
+            data = []
 
         if clear:
             self.clear()
             self.cleared.emit()
 
         if len(texts) < len(data):
-            raise Exception('more data than items!')
+            raise ValueError('more data than items!')
 
         self.insertItems(0, texts)  #this avoids the notification leakage of adding one at the time
 
@@ -269,14 +263,18 @@ class _ListWidget(ListWidget):
 
         return data
 
-    def setObjects(self, objects, name='pid', data=[]):
+    def setObjects(self, objects, name='pid', data=None):
+        # could use a sentinel for data
+        if data is None:
+            data = []
+
         self.clear()
         self.cleared.emit()
 
         self.objects = {id(obj): obj for obj in objects}  # list(objects)
 
         if len(objects) < len(data):
-            raise Exception('more data than items!')
+            raise ValueError('more data than items!')
 
         data = self._buildItemData(objects, data)
         for obj, datum in zip_longest(objects, data, fillvalue={}):
@@ -306,7 +304,7 @@ class _ListWidget(ListWidget):
         pen = QtGui.QPen(QtGui.QColor("grey"))
         oldPen = p.pen()
         p.setPen(pen)
-        p.drawText(self.rect(), QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop, " " + self._emptyText)
+        p.drawText(self.rect(), QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop, f" {self._emptyText}")
         p.setPen(oldPen)
         p.end()
 
@@ -401,20 +399,16 @@ class _ListWidget(ListWidget):
         # this needs to be handled with a context manager to disable the signals leakage
         count = self.count()
         if count > 0 and self._partner is not None:
-            rows = []
             selected = self.selectedItems()
             if len(selected) > 0:
-                for item in selected:
-                    rows.append(self.row(item))
+                rows = [self.row(item) for item in selected]
                 for i in reversed(sorted(rows)):
                     item = self.takeItem(i)
                     self._partner.addItem(item)
-            else:
-                item = self.itemAt(self._currentMousePos)
-                if item:
-                    row = self.row(item)
-                    self.takeItem(row)
-                    self._partner.addItem(item)
+            elif item := self.itemAt(self._currentMousePos):
+                row = self.row(item)
+                self.takeItem(row)
+                self._partner.addItem(item)
 
     def moveAll(self):
         # this needs to be handled with a context manager to disable the signals leakage
@@ -466,12 +460,11 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
         self._groupName = camelCaseSplit(self._class.className)
 
-        title = 'Edit ' + self._groupName if editMode else 'New ' + self._groupName
+        title = f'Edit {self._groupName}' if editMode else f'New {self._groupName}'
 
-        self._leftEmptyText = 'Drag or double click %s to add here' % self._projectItemAttribute
-        self._rightEmptyText = "No %s: try 'Filter by' settings" % self._projectItemAttribute
-
-        self._acceptButtonText = 'Save changes to %s' % self._pluralGroupName
+        self._leftEmptyText = f'Drag or double click {self._projectItemAttribute} to add here'
+        self._rightEmptyText = f"No {self._projectItemAttribute}: try 'Filter by' settings"
+        self._acceptButtonText = f'Save changes to {self._pluralGroupName}'
 
         super().__init__(parent=parent, windowTitle=title, setLayout=True, margins=(0, 0, 0, 0),
                          spacing=(5, 5), size=size, **kwds)
@@ -592,10 +585,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
         # self.leftTopLabel = Label(self._dialogWidget, '', bold=True, grid=(0, 0), gridSpan=(1, 3))
 
-        if not self.EDITMODE:
-            labelName = 'New %s Name' % self._groupName
-        else:
-            labelName = 'Name'
+        labelName = 'Name' if self.EDITMODE else f'New {self._groupName} Name'
 
         optionTexts = [labelName, 'Comment', self._groupName, 'Selection']
         _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
@@ -604,7 +594,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         row = 1
         self.nameLabel = Label(self._dialogWidget, labelName, grid=(row, 0), tipText=getAttributeTipText(self._class, 'name'))
         self._nameEditFrame = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(row, 1), gridSpan=(1, 2))
-        self.nameEdit = LineEdit(self._nameEditFrame, backgroundText='%s Name' % self._groupName, hAlign='l', textAlignment='left', grid=(row, 1))
+        self.nameEdit = LineEdit(self._nameEditFrame, backgroundText=f'{self._groupName} Name', hAlign='l', textAlignment='left', grid=(row, 1))
 
         row += 1
         self.commentLabel = Label(self._dialogWidget, 'Comment', grid=(row, 0), tipText=getAttributeTipText(self._class, 'comment'))
@@ -720,10 +710,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
     @property
     def _editedObject(self):
         """Convenience to get the edited object"""
-        result = None
-        if self.EDITMODE:
-            result = self.leftPullDown.getSelectedObject()
-        return result
+        return self.leftPullDown.getSelectedObject() if self.EDITMODE else None
 
     @property
     def _groupedObjects(self) -> list:
@@ -753,9 +740,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         in case of SpectrumGroup)
         Returns list or None on error
         """
-        if not hasattr(self.project, self._projectItemAttribute):
-            return None
-        return getattr(self.project, self._projectItemAttribute)
+        return getattr(self.project, self._projectItemAttribute) if hasattr(self.project, self._projectItemAttribute) else None
 
     @property
     def _editedObjectComment(self) -> [str, None]:
@@ -774,21 +759,14 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             self._applyButton.setEnabled(True)
 
     def _currentEditorState(self):
-        result = {}
         if self.EDITMODE and self._editedObject:
             key = self._editedObject.name
-            items = self._groupedObjects
-            comment = self.commentEdit.text() or None
         else:
             key = self.nameEdit.text()
-            items = self._groupedObjects
-            comment = self.commentEdit.text() or None
-        if len(key) > 0:
-            result = {key: {'spectra': items,
-                            'comment': comment}
-                      }
+        comment = self.commentEdit.text() or None
+        items = self._groupedObjects
 
-        return result
+        return {key: {'spectra': items, 'comment': comment}} if len(key) > 0 else {}
 
     def _updateNameOnEdit(self):
         if self.EDITMODE and self._editedObject is not None:
@@ -822,28 +800,27 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
         self._updateButton()
 
-    def _checkForTrailingSpacesOnGroupName(self):
-        result = False
-        resultString = ''
-        badNames = []
-        for name in self._updatedState.keys():
-            if len(name.strip()) != 0:
-                if len(name.strip()) != len(name):
-                    result = True
-                    badNames.append(name.strip())
-
-        if result:
-            joinedNames = ', '.join(badNames)
-            resultString = 'Some %s have names with leading or trailing spaces %s' % (self._pluralGroupName, joinedNames)
-
-        return result, resultString
+    # def _checkForTrailingSpacesOnGroupName(self):
+    #     result = False
+    #     resultString = ''
+    #     badNames = []
+    #     for name in self._updatedState.keys():
+    #         if len(name.strip()) not in [0, len(name)]:
+    #             result = True
+    #             badNames.append(name.strip())
+    #
+    #     if result:
+    #         joinedNames = ', '.join(badNames)
+    #         resultString = f'Some {self._pluralGroupName} have names with leading or trailing spaces {joinedNames}'
+    #
+    #     return result, resultString
 
     def _checkForEmptyNames(self):
         result = False
         badKeys = []
         for name in self._updatedState.keys():
             if len(name.strip()) == 0:
-                raise Exception('unexpected')
+                raise ValueError(f'{self.__class__.__name__}._checkForEmptyNames: unexpected empty name')
                 # result  = True
 
         for key, name in self._updatedNames.items():
@@ -854,7 +831,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         resultString = ''
         if result:
             badKeys.sort()
-            resultString = 'Some %s have an empty name (original names: %s)' % (self._pluralGroupName, ','.join(badKeys))
+            resultString = f"Some {self._pluralGroupName} have an empty name (original names: {','.join(badKeys)})"
 
         return result, resultString
 
@@ -867,7 +844,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         if result:
             duplicateNames = [item[0] for item in duplicateNameCounts]
             duplicateNameString = ','.join(duplicateNames)
-            resultString = 'Duplicate Names: %s' % duplicateNameString
+            resultString = f'Duplicate Names: {duplicateNameString}'
 
         return result, resultString
 
@@ -888,16 +865,16 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
     #
     #     return result, resultString
 
-    def _checkForTrailingSpacesName(self):
+    def _checkForSpacesInName(self):
 
         result = False
         badKeys = []
         for key, name in self._updatedNames.items():
-            if len(name.strip()) != len(name):
+            if len(name.strip()) != len(name) or len(name.split()) > 1:
                 badKeys.append(key)
                 result = True
 
-        msg = 'Some %s names have leading or tailings spaces\n (original names are: %s)'
+        msg = 'Some %s names contain white-space\n (original names are: %s)'
         resultString = msg % (self._pluralGroupName, ','.join(badKeys))
 
         return result, resultString
@@ -914,7 +891,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
                 # GST when i used 'The Spectrum Group %s already exists' % name igot an odd effect
                 # the space and a in already were deleted...
-                resultString = 'The ' + self._singularGroupName + ' ' + name + ' already exists'
+                resultString = f'The {self._singularGroupName} {name} already exists'
 
         return result, resultString
 
@@ -941,16 +918,15 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
         return result, resultString
 
-    def _checkForTrailingSpaceOnName_New(self):
+    def _checkForSpaceInName_New(self):
         result = False
         resultString = ''
-
-        spacesString = 'The %s name has leading or trailing spaces' % self._pluralGroupName
+        spacesString = f'The {self._pluralGroupName} name contains white-space'
 
         currentEdits = self._currentEditorState()
         if currentEdits != {}:
             name = list(currentEdits.keys())[0]
-            if len(name.strip()) != len(name):
+            if len(name.strip()) != len(name) or len(name.split()) > 1:
                 result = True
                 resultString = spacesString
 
@@ -985,7 +961,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             #     enabled = False
             #     self.errors.append(message)
 
-            check, message = self._checkForTrailingSpaceOnName_New()
+            check, message = self._checkForSpaceInName_New()
             if check:
                 enabled = False
                 self.errors.append(message)
@@ -997,8 +973,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
             revertEnabled = (self._currentEditorState() != self._initialState)
 
-        elif self.EDITMODE:
-
+        else:
             enabled = False
 
             if self._updatedState != self._previousState:
@@ -1022,7 +997,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             #     enabled = False
             #     self.errors.append(message)
 
-            check, message = self._checkForTrailingSpacesName()
+            check, message = self._checkForSpacesInName()
             if check:
                 enabled = False
                 self.errors.append(message)
@@ -1038,7 +1013,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
         self._emptyErrorFrame()
 
-        if len(self.errors) != 0:
+        if self.errors:
             self.errorFrame.layout().setColumnStretch(0, 0)
             self.errorFrame.layout().setColumnStretch(1, 1000)
             for i, error in enumerate(self.errors):
@@ -1060,7 +1035,6 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
     def _updateStateOnSelection(self):
         """Update state
         """
-
         # Note well model updates must be off while the selected
         # group to edit is being changed else the changes applied
         # will trigger model changes
@@ -1077,14 +1051,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self._connectModels()
 
     def _getItemPositions(self, items):
-
-        result = []
-
         orderedPids = [elem.pid for elem in getattr(self.project, self._projectItemAttribute)]
-        for item in items:
-            result.append({_ListWidget._searchRoleIndex: orderedPids.index(item)})
-
-        return result
+        return [{_ListWidget._searchRoleIndex: orderedPids.index(item)} for item in items]
 
     def _updateLeft(self):
         """Update Left

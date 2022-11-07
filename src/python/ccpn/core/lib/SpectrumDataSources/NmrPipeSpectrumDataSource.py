@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 15:31:46 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 16:16:56 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -101,6 +101,10 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
     The NmrPipe files are stored as either:
     - a single file
     - or for 3D/4D as a series of 2D planes defined by a template name; e.g. 'myFile%003d.ft3'
+
+    NmrPipe spectra can be loaded by either:
+    - A nD plane file; if required, the template will be reconstructed
+    - A folder with a series of 2D planes with .dator .pipe suffixes
     """
 
     #=========================================================================================
@@ -114,6 +118,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
     MAXDIM = 4          # Explicitly overide as NmrPipe can only handle upto 4 dimensions
 
     suffixes = ['.pipe', '.fid', '.ft', '.ft1', '.ft2', '.ft3', '.ft4', '.dat']
+    allowDirectory = True
     openMethod = open
     defaultOpenReadMode = 'rb'
 
@@ -131,6 +136,11 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
     isTransposed = Bool(default_value=False).tag(
                                         info='Data of underpinning NmrPipe files are transposed',
                                         )
+    isDirectory = Bool(default_value=False).tag(
+                                        info='Initiating path was a directory',
+                                        )
+
+    #=========================================================================================
 
     def __init__(self, path=None, spectrum=None, temporaryBuffer=True, bufferPath=None):
         """Initialise; optionally set path or extract from spectrum
@@ -366,12 +376,22 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
             return self
 
         _path = aPath(path)
-        if _path.is_dir():
-            files = [f for f in _path.glob('*001.dat')]
-            if len(files) > 0:
-                _path = files[0]
+        # check directories
+        if _path.is_dir() and _path.suffix in self.suffixes:
+            for pattern in ['*001.dat', '*001.pipe']:
+                files = [f for f in _path.glob(pattern)]
+                if len(files) > 0:
+                    _path = files[0]
+                    self.isDirectory = True
+                    break
 
         return super().setPath(path=_path, substituteSuffix=substituteSuffix)
+
+    def nameFromPath(self) -> str:
+        """Return a name derived from path (to be subclassed for specific cases; e.g. Bruker)
+        """
+        name = self.path.parent.stem if self.isDirectory else self.path.stem
+        return name
 
     def checkValid(self) -> bool:
         """check if valid format corresponding to dataFormat by:

@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-17 11:11:51 +0100 (Wed, August 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 16:38:24 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -91,12 +91,21 @@ FONTPREFS = 'font{}'
 def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays, userWorkingPath=None):
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
+    pref = self.application.preferences
+
+    # remember the previous autoBackup settings
+    lastBackup = (pref.general.autoBackupEnabled, pref.general.autoBackupFrequency)
+
     # update the preferences, but keep in place
-    self.application.preferences.clear()
-    self.application.preferences.update(newPrefs)
+    pref.clear()
+    pref.update(newPrefs)
 
     # application preferences updated so re-save
     self.application._savePreferences()
+
+    if (pref.general.autoBackupEnabled, pref.general.autoBackupFrequency) != lastBackup:
+        # update the autoBackup with the new settings
+        self.application._updateAutoBackup()
 
     # update the current userWorkingPath in the active file dialogs
     if userWorkingPath:
@@ -462,7 +471,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.autoBackupFrequencyLabel = _makeLabel(parent, text="Backup frequency (mins)", grid=(row, 0))
-        self.autoBackupFrequencyData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', min=10, decimals=0, step=10)
+        self.autoBackupFrequencyData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', min=1, decimals=0, step=10)
         self.autoBackupFrequencyData.setMinimumWidth(LineEditsMinimumWidth)
         self.autoBackupFrequencyData.valueChanged.connect(self._queueSetAutoBackupFrequency)
 
@@ -752,7 +761,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """
         prefGen = self.preferences.general
         prefApp = self.preferences.appearance
-        
+
         self.useNativeFileBox.setChecked(prefGen.useNative)
         self.useNativeMenus.setChecked(prefGen.useNativeMenus)
         self.useNativeWebBox.setChecked(prefGen.useNativeWebbrowser)
@@ -801,10 +810,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
                 name, size, _, _, _, _, _, _, _, _, type = fontList
             else:
                 name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
-        except:
+        except Exception:
             name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
 
-        fontName = '{}, {}pt, {}'.format(name, size, type) if type else '{}, {}pt'.format(name, size, )
+        fontName = f'{name}, {size}pt, {type}' if type else f'{name}, {size}pt'
         widget._fontString = fontString
         widget.setText(fontName)
 
@@ -1531,7 +1540,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             return True
 
         except Exception as e:
-            getLogger().warning('Testing External program: Failed.' + str(e))
+            getLogger().warning(f'Testing External program: Failed.{str(e)}')
             return False
 
     @queueStateChange(_verifyPopupApply)
@@ -1555,7 +1564,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.userDataPathText.setText(directory[0])
 
     def _enableUserDataPath(self):
-        "callback upon changing autoSetDataPathBox"
+        """callback upon changing autoSetDataPathBox"""
         value = self.autoSetDataPathBox.get()
         self.userDataPathText.enableWidget(not value)
 
@@ -1757,9 +1766,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _toggleGeneralOptions(self, option, checked):
         self.preferences.general[option] = checked
 
-        if option == 'autoBackupEnabled':
-            self.application._updateAutoBackup()
-
     @queueStateChange(_verifyPopupApply)
     def _queueToggleAppearanceOptions(self, option, checked):
         """Toggle a general checkbox option in the preferences
@@ -1819,11 +1825,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
             dialog = ExecutablesFileDialog(parent=self, acceptMode='select', directory=str(value))
             dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
             dialog._show()
-            file = dialog.selectedFile()
-            if file:
+            if file := dialog.selectedFile():
                 extPath.setText(file)
 
-        except Exception as es:
+        except Exception:
             raise RuntimeError(f'{external} does not contain the correct widgets')
 
     @queueStateChange(_verifyPopupApply)
@@ -1836,7 +1841,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     def _setAutoBackupFrequency(self, value):
         self.preferences.general.autoBackupFrequency = value
-        self.application._updateAutoBackup()
 
     def _enableAutoBackupFrequency(self):
         value = self.autoBackupEnabledBox.get()

@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 16:38:24 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,16 +26,19 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import sys
-from PyQt5 import QtGui, QtWidgets, QtCore
-from PyQt5.QtCore import QTimer
 import os
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtCore import QTimer
+from ccpn.util.Logging import getLogger
+
+
+logger = getLogger()
 
 ##QT_MAC_WANTS_LAYER: Patch for MacOs >= 11. Without this flag, Testing widgets/windows from PyQt5 don't show at all.
 os.environ['QT_MAC_WANTS_LAYER'] = '1'
 
-class Application(QtWidgets.QApplication):
 
+class Application(QtWidgets.QApplication):
     progressAboutToChangeSignal = QtCore.pyqtSignal(int)
     progressChangedSignal = QtCore.pyqtSignal(int)
 
@@ -51,10 +54,12 @@ class Application(QtWidgets.QApplication):
 
     @QtCore.pyqtSlot(object)
     def runFunctionOnThread(self, func):
+        logger.debug3(f'run function on main thread {func}')
         func()
 
     @QtCore.pyqtSlot(object)
     def runFunctionOnThreadAtIdle(self, func):
+        logger.debug3(f'run function on main thread at idle {func}')
         timer = QTimer(self)
         timer.timeout.connect(func)
         timer.setSingleShot(True)
@@ -117,7 +122,7 @@ def newTestApplication(projectPath=None, useTestProjects=False,
         raise TypeError('useProjects must be a bool')
     if not isinstance(nologging, bool):
         raise TypeError('nologging must be a bool')
-    if not interface in ['NoUi', 'Gui']:
+    if interface not in ['NoUi', 'Gui']:
         raise TypeError('interface must be NoUi|Gui')
     if not isinstance(debug, bool):
         raise TypeError('debug must be a bool')
@@ -136,6 +141,7 @@ def newTestApplication(projectPath=None, useTestProjects=False,
         # store temporary variable so that the qtApp event execution loop can be skipped
         # allows flow to continue after creation of mainWindow
         import builtins
+
         builtins._skipExecuteLoop = True
 
     # build new ccpn application/project
@@ -144,7 +150,7 @@ def newTestApplication(projectPath=None, useTestProjects=False,
                                            lightColourScheme=True, darkColourScheme=False)
     _project = _framework.project
     if _project is None:
-        raise RuntimeError("No project found for project path %s" % projectPath)
+        raise RuntimeError(f"No project found for project path {projectPath}")
 
     # initialise the undo stack
     _project._resetUndo(debug=True, application=_framework)

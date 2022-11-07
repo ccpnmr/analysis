@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-04 17:27:04 +0000 (Fri, November 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 16:38:23 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,12 +31,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import json
 import os
 import sys
-import re
 import subprocess
 import platform
 
 import faulthandler
-
 
 try:
     # set the soft limits for the maximum number of open files
@@ -58,7 +56,7 @@ try:
         resource.setrlimit(resource.RLIMIT_NOFILE, (2048, hard))
 
 except Exception:
-    sys.stderr.write(f'Error setting maximum number of files that can be open')
+    sys.stderr.write('Error setting maximum number of files that can be open')
 
 faulthandler.enable()
 
@@ -100,15 +98,17 @@ from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
 from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS, loadTipsSetup
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
+from ccpn.ui.gui import Layout
 
 from ccpn.util import Logging
 from ccpn.util.Path import Path, aPath, fetchDir
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui import Layout
 from ccpn.util.decorators import logCommand
 
+
+logger = getLogger()
 
 #-----------------------------------------------------------------------------------------
 # how frequently to check if license dialog has closed when waiting to show the tip of the day
@@ -174,7 +174,10 @@ class Framework(NotifierBase, GuiBase):
         self.useFileLogger = not self.args.nologging
 
         # map to 0-3, with 0 no debug
-        _level = ([self.args.debug, self.args.debug2, self.args.debug3, True].index(True) + 1) % 4
+        _level = ([self.args.debug,
+                   self.args.debug2,
+                   self.args.debug3 or self.args.debug3_backup_thread,
+                   True].index(True) + 1) % 4
         self.setDebug(_level)
 
         self.preferences = Preferences(application=self)
@@ -439,16 +442,17 @@ class Framework(NotifierBase, GuiBase):
             from queue import Queue
 
             self._backupTimerQ = Queue(maxsize=1)
+
         if self._backupTimerQ.full():
-            self._backupTimerQ.get()
-        if isinstance(time, (float, int)):
-            self._backupTimerQ.put(time * 60)
-        else:
-            self._backupTimerQ.put(time)
+            while not self._backupTimerQ.empty():
+                self._backupTimerQ.get()
+
         if self._autoBackupThread is None:
-            self._autoBackupThread = AutoBackup(q=self._backupTimerQ,
+            self._autoBackupThread = AutoBackup(backupFrequencyQueue=self._backupTimerQ,
                                                 backupFunction=self._backupProject)
             self._autoBackupThread.start()
+
+        self._backupTimerQ.put(time)
 
     def _backupProject(self):
         try:
@@ -492,7 +496,7 @@ class Framework(NotifierBase, GuiBase):
         newProject._initialiseProject()
 
         if newProject._isUpgradedFromV2:
-            getLogger().debug(f'initialising v2 noise and contour levels')
+            getLogger().debug('initialising v2 noise and contour levels')
             for spectrum in newProject.spectra:
                 # calculate the new noise level
                 spectrum.noiseLevel = spectrum.estimateNoise()

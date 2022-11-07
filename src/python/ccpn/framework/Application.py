@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 16:38:23 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -140,6 +140,7 @@ def defineProgramArguments():
     parser.add_argument('--debug1', dest='debug', action='store_true', help='Set logging level to debug1 (=debug)')
     parser.add_argument('--debug2', dest='debug2', action='store_true', help='Set logging level to debug2')
     parser.add_argument('--debug3', dest='debug3', action='store_true', help='Set logging level to debug3')
+    parser.add_argument('--debug3-backup-thread', dest='debug3_backup_thread', action='store_true', help='Display logging for the backup thread when debug3 is enabled')
 
     # Ccpn logging options - traceback can sometimes be masked in undo/redo
     # --disable-<option>-exception removes the try:except to allow full traceback to occur

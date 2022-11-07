@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 13:58:48 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 20:06:06 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -272,7 +272,7 @@ class DataLoaderABC(TraitBase):
         """New instance with path
         :return: instance of the class
         """
-        instance = cls(path)
+        instance = cls(path=path)
         return instance
 
     @classmethod
@@ -281,9 +281,9 @@ class DataLoaderABC(TraitBase):
         :return: None or instance of the class
 
         Can be subclassed;
-        GWV 20/09/2022: deprecated; maintained for code backward compatibility
+        GWV 20/09/2022: deprecated; maintained for code backward compatibility; still used in some instances
         """
-        instance = cls(path)
+        instance = cls(path=path)
         if not instance.isValid:
             return None
 

@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 16:51:37 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 20:06:06 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1287,9 +1287,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
         - calling checkValid method
 
         :return: None or instance of the class
+
+        depricated: initate an instance and use the isValid attribute
         """
         instance = cls(path = path)
-        if not instance.checkValid():
+        if not instance.isValid:
             return None
         else:
             return instance

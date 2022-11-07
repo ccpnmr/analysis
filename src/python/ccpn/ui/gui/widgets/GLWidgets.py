@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-02 13:52:51 +0000 (Wed, November 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 15:50:26 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1661,6 +1661,8 @@ class Gui1dWidget(CcpnGLWidget):
 
     def drawSpectra(self):
         if self.strip.isDeleted:
+            return
+        if self.strip._isPhasingOn and not self.showSpectraOnPhasing:
             return
 
         currentShader = self.globalGL._shaderProgram1

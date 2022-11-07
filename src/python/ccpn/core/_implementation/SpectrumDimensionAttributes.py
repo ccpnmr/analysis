@@ -497,10 +497,10 @@ class SpectrumDimensionAttributes(object):
 
     @assignmentTolerance.setter
     def assignmentTolerance(self, value):
-        # has to be >= than 0.0
+        # has to be > than 0.0
         if value is not None:
             value = max(value, 0.0)
-        self._dataDimRef.assignmentTolerance = value
+        self._dataDimRef.assignmentTolerance = value or None
 
     @property
     def defaultAssignmentTolerance(self) -> float:

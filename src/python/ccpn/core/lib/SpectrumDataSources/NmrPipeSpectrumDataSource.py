@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 16:16:56 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-07 16:28:21 +0000 (Mon, November 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -378,12 +378,17 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         _path = aPath(path)
         # check directories
         if _path.is_dir() and _path.suffix in self.suffixes:
+            self.isDirectory = False
             for pattern in ['*001.dat', '*001.pipe']:
                 files = [f for f in _path.glob(pattern)]
                 if len(files) > 0:
                     _path = files[0]
                     self.isDirectory = True
                     break
+
+            if not self.isDirectory:
+                # did not find a "001" file
+                return None
 
         return super().setPath(path=_path, substituteSuffix=substituteSuffix)
 

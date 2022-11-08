@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-08 16:35:02 +0000 (Tue, March 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 09:01:38 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -265,6 +265,11 @@ class Path(_Path_):
 
     def __len__(self):
         return len(self.asString())
+
+    def __hash__(self):
+        _p = str(self)
+        _hash = _p.__hash__()
+        return _hash
 
     def __eq__(self, other):
         return (str(self).strip() == str(other).strip())

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-20 18:54:09 +0100 (Tue, September 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 17:51:38 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -47,7 +47,6 @@ INDEX_ROLE = QtCore.Qt.UserRole + 1002
 EDIT_ROLE = QtCore.Qt.EditRole
 _EDITOR_SETTER = ('setColor', 'selectValue', 'setData', 'set', 'setValue', 'setText', 'setFile')
 _EDITOR_GETTER = ('get', 'value', 'text', 'getFile')
-_replaceAlternativeColor = QtGui.QColor(getColours()[BORDERFOCUS])
 
 
 #=========================================================================================
@@ -106,7 +105,7 @@ class _TableDelegate(QtWidgets.QStyledItemDelegate):
                 break
 
         else:
-            raise Exception(f'Widget {widget} does not expose a set method; required for table editing')
+            raise RuntimeError(f'Widget {widget} does not expose a set method; required for table editing')
 
     def setModelData(self, widget, mode, index):
         """Set the object to the new value
@@ -123,7 +122,7 @@ class _TableDelegate(QtWidgets.QStyledItemDelegate):
                 break
 
         else:
-            raise Exception(f'Widget {widget} does not expose a get method; required for table editing')
+            raise RuntimeError(f'Widget {widget} does not expose a get method; required for table editing')
 
         row, col = index.row(), index.column()
         try:
@@ -142,32 +141,27 @@ class _TableDelegate(QtWidgets.QStyledItemDelegate):
         except Exception as es:
             getLogger().debug('Error handling cell editing: %i %i - %s    %s    %s' % (row, col, str(es), self._parent.model()._sortIndex, value))
 
-    def updateEditorGeometry(self, widget, itemStyle, index):  # ensures that the editor is displayed correctly
-
-        if self.customWidget:
-            cellRect = itemStyle.rect
-            pos = widget.mapToGlobal(cellRect.topLeft())
-            x, y = pos.x(), pos.y()
-            hint = widget.sizeHint()
-            width = max(hint.width(), cellRect.width())
-            height = max(hint.height(), cellRect.height())
-
-            # force the pulldownList to be a popup - will always close when clicking outside
-            widget.setParent(self._parent, QtCore.Qt.Popup)
-            widget.setGeometry(x, y, width, height)
-
-            # # QT delay to popup ensures that focus is correct when opening
-            # # - requires subclass of pulldown to delay closing in double-click
-            # QtCore.QTimer.singleShot(0, widget.showPopup)
-
-        else:
+    def updateEditorGeometry(self, widget, itemStyle, index):
+        """Display the required editor for the cell
+        """
+        if not self.customWidget:
             return super().updateEditorGeometry(widget, itemStyle, index)
+
+        cellRect = itemStyle.rect
+        pos = widget.mapToGlobal(cellRect.topLeft())
+        x, y = pos.x(), pos.y()
+        hint = widget.sizeHint()
+        width = max(hint.width(), cellRect.width())
+        height = max(hint.height(), cellRect.height())
+
+        # force the pulldownList to be a popup - will always close when clicking outside
+        widget.setParent(self._parent, QtCore.Qt.Popup)
+        widget.setGeometry(x, y, width, height)
 
     def _returnPressedCallback(self, widget):
         """Capture the returnPressed event from the widget, because the setModeData event seems to be a frame behind the widget
         when getting the text()
         """
-
         # check that it is a QLineEdit - check for other types later (see old table class)
         if isinstance(widget, QtWidgets.QLineEdit):
             self._editorValue = widget.text()
@@ -179,8 +173,16 @@ class _TableDelegate(QtWidgets.QStyledItemDelegate):
 #=========================================================================================
 
 class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
-    """handle the setting of data when editing the table
+    """Handle the setting of data when editing the table
     """
+
+    def __init__(self, *args, **kwds):
+        """Initialise the class
+        """
+        super().__init__(*args, **kwds)
+
+        # set the required alternative colour
+        self._replaceAlternativeColor = QtGui.QColor(getColours()[BORDERFOCUS])
 
     def paint(self, painter, option, index):
         """Paint the contents of the cell.
@@ -204,13 +206,13 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
             painter.fillRect(option.rect, brush)
             if focus:
                 # move the focus rectangle drawing to after, otherwise, alternative-background-color is used
-                painter.setPen(_replaceAlternativeColor)
+                painter.setPen(self._replaceAlternativeColor)
                 painter.drawRect(option.rect.adjusted(0, 0, -1, -1))
             painter.restore()
 
         elif focus:
             # move the focus rectangle drawing to after, otherwise, alternative-background-color is used
             painter.save()
-            painter.setPen(_replaceAlternativeColor)
+            painter.setPen(self._replaceAlternativeColor)
             painter.drawRect(option.rect.adjusted(0, 0, -1, -1))
             painter.restore()

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-08 15:10:25 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 17:51:38 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -758,9 +758,9 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         # need to get values from padding
         header = self.horizontalHeader()
         width = -2  # left/right borders
-        for nn in range(header.count()):
-            if not header.isSectionHidden(nn) and header.sectionViewportPosition(nn) >= 0:
-                width += (self.columnWidth(nn) + 1)  # cell border on right-hand-side
+        # +1 for cell border on right-hand-side
+        width += sum((self.columnWidth(nn) + 1) for nn in range(header.count())
+                     if not header.isSectionHidden(nn) and header.sectionViewportPosition(nn) >= 0)
 
         self.setFixedWidth(width)
 

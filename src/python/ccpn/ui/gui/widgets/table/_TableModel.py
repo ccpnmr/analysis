@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-08 15:10:25 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 17:51:38 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -87,7 +87,7 @@ class _TableModel(QtCore.QAbstractTableModel):
     """A simple table-model to view pandas DataFrames
     """
 
-    _defaultForegroundColour = QtGui.QColor(getColours()[GUITABLE_ITEM_FOREGROUND])
+    _defaultForegroundColour = None
     _CHECKROWS = 5
     _MINCHARS = 4
     _MAXCHARS = 100
@@ -120,6 +120,9 @@ class _TableModel(QtCore.QAbstractTableModel):
             # get an estimate for an average character width/height - must be floats for estimate-column-widths
             self._chrWidth = 1 + bbox('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789').width() / 36
             self._chrHeight = bbox('A').height() + 6
+
+        # set default colours
+        self._defaultForegroundColour = QtGui.QColor(getColours()[GUITABLE_ITEM_FOREGROUND])
 
         # initialise sorting/filtering
         self._sortColumn = 0

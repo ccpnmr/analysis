@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-02 13:52:51 +0000 (Wed, November 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 11:33:53 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -871,11 +871,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.axisR = 1.0
         self.axisT = 1.0
         self.axisB = -1.0
-        self.storedZooms = []
-        self._currentZoom = 0
+
         self._zoomHistory = [None] * ZOOMHISTORYSTORE
         self._zoomHistoryCurrent = 0
         self._zoomHistoryHead = 0
+        self._zoomHistoryTail = 0
         self._zoomTimerLast = time.time()
 
         self.base = None
@@ -1971,36 +1971,34 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if update:
             self.update()
 
-    def _storeZoomHistory(self):
+    def _storeZoomHistory(self, force=False):
         """Store the current axis state to the zoom history
         """
         currentAxis = (self.axisL, self.axisR, self.axisB, self.axisT)
+        zC = self._zoomHistoryCurrent % len(self._zoomHistory)
 
         # store the current value if current zoom has not been set
-        if self._zoomHistory[self._zoomHistoryHead] is None:
-            self._zoomHistory[self._zoomHistoryHead] = currentAxis
+        if self._zoomHistory[zC] is None:
+            self._zoomHistory[zC] = currentAxis
 
-        if self._widthsChangedEnough(currentAxis, self._zoomHistory[self._zoomHistoryHead], tol=1e-8):
+        if self._widthsChangedEnough(currentAxis, self._zoomHistory[zC], tol=1e-8) or force:
+            currentTime = time.time()
+            if currentTime - self._zoomTimerLast < ZOOMTIMERDELAY:
 
-            for stored in self.storedZooms:
-                if not self._widthsChangedEnough(currentAxis, self._zoomHistory[self._zoomHistoryHead], tol=1e-8):
-                    break
+                # still on the current zoom item - write new value
+                self._zoomHistory[zC] = currentAxis
+
             else:
-                currentTime = time.time()
-                if currentTime - self._zoomTimerLast < ZOOMTIMERDELAY:
+                # increment the head of the zoom history
+                self._zoomHistoryCurrent += 1
+                zC = self._zoomHistoryCurrent % len(self._zoomHistory)
+                self._zoomHistory[zC] = currentAxis
+                self._zoomHistoryHead = self._zoomHistoryCurrent
+                if (self._zoomHistoryHead - self._zoomHistoryTail) >= len(self._zoomHistory):
+                    self._zoomHistoryTail = self._zoomHistoryHead - len(self._zoomHistory) + 1
 
-                    # still on the current zoom item - write new value
-                    self._zoomHistory[self._zoomHistoryHead] = currentAxis
-
-                else:
-
-                    # increment the head of the zoom history
-                    self._zoomHistoryHead = (self._zoomHistoryHead + 1) % len(self._zoomHistory)
-                    self._zoomHistory[self._zoomHistoryHead] = currentAxis
-                    self._zoomHistoryCurrent = self._zoomHistoryHead
-
-                # reset the timer so you have to wait another 5 seconds
-                self._zoomTimerLast = currentTime
+            # reset the timer, so you have to wait another 5 seconds
+            self._zoomTimerLast = currentTime
 
     def getCurrentCursorCoordinate(self):
 

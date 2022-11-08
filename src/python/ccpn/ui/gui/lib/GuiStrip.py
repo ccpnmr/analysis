@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-20 11:07:01 +0200 (Thu, October 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 11:33:52 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -148,7 +148,6 @@ class GuiStrip(Frame):
         self._stripToolBarWidget.getLayout().setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
 
         self.viewStripMenu = None
-        self.storedZooms = []
         # self.beingUpdated = False
         self.planeAxisBars = ()
 
@@ -816,7 +815,7 @@ class GuiStrip(Frame):
         """
         if self.navigateCursorMenu:
             mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
-            position = [mouseDict[ax][0] if mouseDict[ax] else None if ax in mouseDict else None
+            position = [mouseDict[ax][0] if (mouseDict and ax in mouseDict and mouseDict[ax]) else None
                         for ax in self.axisCodes]
             if None in position:
                 return
@@ -827,7 +826,7 @@ class GuiStrip(Frame):
         """Mark the X/Y/XY axisCodes by index
         """
         mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
-        position = [mouseDict[ax][0] if mouseDict[ax] else None if ax in mouseDict else None
+        position = [mouseDict[ax][0] if (mouseDict and ax in mouseDict and mouseDict[ax]) else None
                     for ax in self.axisCodes]
         if indices is None:
             indices = tuple(range(len(self.axisCodes)))
@@ -904,7 +903,7 @@ class GuiStrip(Frame):
         """
         from ccpn.ui.gui.lib.GuiStripContextMenus import _addCopyMenuItems
 
-        copyAttribs, matchAttribs = _addCopyMenuItems(self, viewPort, thisMenu, is1D)
+        copyAttribs, matchAttribs = _addCopyMenuItems(self, viewPort, thisMenu, is1D, overwrite=True)
 
         self._addItemsToCopyAxisFromMenus(copyAttribs)
         for nm, ax in matchAttribs:
@@ -952,10 +951,12 @@ class GuiStrip(Frame):
     def _addItemsToMarkAxesMenuMainView(self, axisMenu=None, indices=None):
         """Set up the menu for the main view for marking axis codes
         """
-        axisName = axisMenu if axisMenu else self.markAxesMenu
+        axisName = axisMenu or self.markAxesMenu
         mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
-        position = [mouseDict[ax][0] if mouseDict[ax] else None
-                    for ax in self.axisCodes if mouseDict.get(ax)]
+        # position = [mouseDict[ax][0] if mouseDict[ax] else None
+        #             for ax in self.axisCodes if mouseDict.get(ax)]
+        position = [mouseDict[ax][0] if (mouseDict and ax in mouseDict and mouseDict[ax]) else None
+                    for ax in self.axisCodes]
         if None in position:
             return
 
@@ -2003,13 +2004,11 @@ class GuiStrip(Frame):
         Restore zoom from a saved state
         :param zoomState: list of Axis coordinate Left, Right, Bottom, Top
         """
-        if zoomState is not None:
-            if len(zoomState) == 4:
-                # self._restoreZoom(zoomState=zoomState)
-                axisL, axisR, axisB, axisT = zoomState[0], zoomState[1], zoomState[2], zoomState[3]
+        if zoomState is not None and len(zoomState) == 4:
+            axisL, axisR, axisB, axisT = zoomState[0], zoomState[1], zoomState[2], zoomState[3]
 
-                self._CcpnGLWidget.setXRegion(axisL, axisR)
-                self._CcpnGLWidget.setYRegion(axisT, axisB)
+            self._CcpnGLWidget.setXRegion(axisL, axisR)
+            self._CcpnGLWidget.setYRegion(axisT, axisB)
 
     def _restoreZoom(self, zoomState=None):
         """Restores last saved region to the zoom stack for the strip.

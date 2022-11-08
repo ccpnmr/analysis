@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-14 17:34:54 +0000 (Mon, November 14, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-11-08 16:58:51 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -631,6 +631,15 @@ class GeneralTab(Widget):
                                            enabled=(not self.spectrum.isEmptySpectrum()),
                                            callback=partial(self._queueSpectrumPathChange, spectrum),
                                            )
+        row += 1
+
+        from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+        _dataFormats = list(getDataFormats().keys())
+        Label(self, text="DataFormat ", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'Format of the binary data defined by path'))
+        self.dataFormatWidget = PulldownList(parent=self, vAlign='t', grid=(row, 1), editable=False, texts=_dataFormats,
+                                           )
+        self.dataFormatWidget.select(self.spectrum.dataFormat)
+        self.dataFormatWidget.disable()
         row += 1
 
         Label(self, text="Chemical Shift List ", vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'chemicalShiftList'))

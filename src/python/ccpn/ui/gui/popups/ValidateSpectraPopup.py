@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-28 16:54:26 +0000 (Fri, January 28, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-11-08 16:58:06 +0000 (Tue, November 08, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -52,7 +52,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Splitter import Splitter
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, showOkCancel
 from ccpn.ui.gui.lib.GuiPath import VALIDROWCOLOUR, ACCEPTROWCOLOUR, REJECTROWCOLOUR, INVALIDROWCOLOUR
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.util.Logging import getLogger
@@ -117,9 +117,9 @@ class PathRowABC(object):
 
     def __init__(self, parentWidget, row, labelText, obj, enabled=True, callback=None):
         """
-        :param parentWidget:
-        :param labelText:
-        :param row:
+        :param parentWidget: widget for row to be inserted
+        :param labelText: text for the label
+        :param row: row index
         :param obj: object being displayed
         :param callback: func(self) is called when changing value of the dataWidget
         """
@@ -330,14 +330,42 @@ class SpectrumPathRow(PathRowABC):
     dialogFileMode = 1
     validatorClass = SpectrumValidator
 
-    def __init__(self, *args, **kwds):
-        super(SpectrumPathRow, self).__init__(*args, **kwds)
+    def __init__(self, parentWidget, row, labelText, obj, enabled=True, callback=None, addReloadButton=False):
+        """
+        :param parentWidget: widget for row to be inserted
+        :param labelText: text for the label
+        :param row: row index
+        :param obj: object being displayed
+        :param callback: func(self) is called when changing value of the dataWidget
+        """
+
+        self.reloadButtonWidget = None
+        self.addReloadButton=addReloadButton
+
+        super(SpectrumPathRow, self).__init__(parentWidget=parentWidget, row=row, labelText=labelText,
+                                              obj=obj, enabled=enabled, callback=callback
+                                              )
 
         # remember the initial filePath for the popups
         self._initialFilePath = str(self.obj.filePath) if self.obj else None
         pass
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def _addRow(self, widget, row):
+
+        super()._addRow(widget=widget, row=row)
+        if self.addReloadButton and self.enabled:
+            self.reloadButtonWidget = Button(parent=widget, text='Reload', grid=(row, 3),
+                                             callback=self._reloadCallback)
+
+    def _reloadCallback(self):
+        """Callback when pressing reload
+        """
+        _path = self.getPath()
+        ok = showOkCancel(f'Reload {self.obj.name}', f'This will load the paremeters from "{_path}", overwriting the current spectrum parameters')
+        if ok:
+            self.obj.reload(path=_path)
 
     @property
     def initialFilePath(self):
@@ -516,7 +544,8 @@ class ValidateSpectraPopup(CcpnDialog):
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        self._spectrumFrame = Frame(self, setLayout=True, grid=(row, 0), gridSpan=(1, 3), showBorder=False)
+        _colSpan = 4
+        self._spectrumFrame = Frame(self, setLayout=True, grid=(row, 0), gridSpan=(1, _colSpan), showBorder=False)
 
         specRow = 0
         HLine(self._spectrumFrame, grid=(specRow, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
@@ -524,7 +553,7 @@ class ValidateSpectraPopup(CcpnDialog):
 
         # radiobuttons
         self.buttonFrame = Frame(self._spectrumFrame, setLayout=True, showBorder=False, fShape='noFrame',
-                                 grid=(specRow, 0), gridSpan=(1, 3),
+                                 grid=(specRow, 0), gridSpan=(1, _colSpan),
                                  vAlign='top', hAlign='left')
         self.showValidLabel = Label(self.buttonFrame, text="Show spectra: ", vAlign='t', grid=(0, 0), bold=True)
         self.showValid = RadioButtons(self.buttonFrame,
@@ -541,7 +570,7 @@ class ValidateSpectraPopup(CcpnDialog):
         specRow += 1
 
         # set up a scroll area
-        self.spectrumScrollArea = ScrollArea(self._spectrumFrame, setLayout=True, grid=(specRow, 0), gridSpan=(1, 3))
+        self.spectrumScrollArea = ScrollArea(self._spectrumFrame, setLayout=True, grid=(specRow, 0), gridSpan=(1, _colSpan))
         self.spectrumScrollArea.setWidgetResizable(True)
         self.spectrumScrollAreaWidgetContents = Frame(self, setLayout=True, showBorder=False)
         self.spectrumScrollArea.setWidget(self.spectrumScrollAreaWidgetContents)
@@ -557,7 +586,7 @@ class ValidateSpectraPopup(CcpnDialog):
             _row = SpectrumPathRow(parentWidget=self.spectrumScrollAreaWidgetContents, row=scrollRow,
                                    labelText='%s  (%dD, %s)' % (sp.pid, sp.dimensionCount, sp.dataFormat),
                                    obj=sp, enabled=enabled,
-                                   callback=self._spectrumRowCallback)
+                                   callback=self._spectrumRowCallback, addReloadButton=True)
             scrollRow += 1
             self.spectrumData[sp] = _row
 
@@ -572,10 +601,10 @@ class ValidateSpectraPopup(CcpnDialog):
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         row = 1
-        self.splitter = Splitter(self, grid=(row, 0), setLayout=True, horizontal=False, gridSpan=(1, 3))
+        self.splitter = Splitter(self, grid=(row, 0), setLayout=True, horizontal=False, gridSpan=(1, _colSpan))
         self.splitter.addWidget(self.dataUrlScrollArea)
         self.splitter.addWidget(self._spectrumFrame)
-        self.getLayout().addWidget(self.splitter, row, 0, 1, 3)
+        self.getLayout().addWidget(self.splitter, row, 0, 1, _colSpan)
         # self.splitter.setStretchFactor(0, 5)
         # self.splitter.setStretchFactor(1, 1)
         self.splitter.setChildrenCollapsible(False)
@@ -586,7 +615,7 @@ class ValidateSpectraPopup(CcpnDialog):
         self.applyButtons = ButtonList(self, texts=['Close'],
                                        callbacks=[self._closeButton],
                                        tipTexts=[''], direction='h',
-                                       hAlign='r', grid=(row, 0), gridSpan=(1, 3))
+                                       hAlign='r', grid=(row, 0), gridSpan=(1, _colSpan))
 
         self.setMinimumHeight(500)
         self.setMinimumWidth(800)

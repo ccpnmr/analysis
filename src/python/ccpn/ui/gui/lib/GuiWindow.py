@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-08 11:44:33 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 12:11:28 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -940,7 +940,7 @@ class GuiWindow():
         if mode in MouseModes:
             # self.mouseMode = mode
             setCurrentMouseMode(mode)
-            for sd in self.spectrumDisplays:
+            for sd in self.project.spectrumDisplays:
                 for strp in sd.strips:
                     strp.mouseModeAction.setChecked(mode == PICK)
             mouseModeText = ' Mouse Mode: '

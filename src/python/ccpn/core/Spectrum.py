@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-08 11:45:52 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 11:54:18 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1775,7 +1775,7 @@ class Spectrum(AbstractWrapperObject):
         # find the map of newAxisCodeOrder to self.axisCodes; eg. 'H' to 'Hn'
         axisCodeMap = getAxisCodeMatch(axisCodes, self.axisCodes)
         if len(axisCodeMap) == 0:
-            raise ValueError('axisCodes %r contains an invalid element' % axisCodes)
+            raise ValueError(f'axisCodes {axisCodes} contains an invalid element')
         return [axisCodeMap[a] for a in axisCodes]
 
     def orderByAxisCodes(self, iterable, axisCodes: Sequence[str] = None, exactMatch: bool = False) -> list:
@@ -1811,7 +1811,7 @@ class Spectrum(AbstractWrapperObject):
 
         # we now should have valid axisCodes
         for ac in axisCodes:
-            if not ac in self.axisCodes:
+            if ac not in self.axisCodes:
                 raise ValueError('%s.orderByAxisCodes: invalid axisCode "%s" in %r' %
                                  (self.className, ac, axisCodes))
 
@@ -1819,9 +1819,7 @@ class Spectrum(AbstractWrapperObject):
         mapping = dict([(ac, dim) for dimIndx, ac, dim in self.dimensionTriples])
         # get the dimensions in axisCode order
         dimensions = [mapping[ac] for ac in axisCodes]
-        # get the values of iterable in axisCode==dimensions order
-        values = _orderByDimensions(iterable, dimensions=dimensions, dimensionCount=self.dimensionCount)
-        return values
+        return _orderByDimensions(iterable, dimensions=dimensions, dimensionCount=self.dimensionCount)
 
     def getByAxisCodes(self, parameterName: str, axisCodes: Sequence[str] = None,
                        exactMatch: bool = False) -> list:

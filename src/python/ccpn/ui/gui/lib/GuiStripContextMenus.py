@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-08 11:44:33 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 15:23:03 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -77,8 +77,7 @@ def _createMenu(strip, items):
 
     for i in items:
         try:
-            ff = getattr(menu, i.typeItem)
-            if ff:
+            if ff := getattr(menu, i.typeItem):
                 action = ff(i.name, **vars(i))
                 if i.stripMethodName:
                     if hasattr(strip, i.stripMethodName):
@@ -89,7 +88,7 @@ def _createMenu(strip, items):
                         strip._spectrumUtilActions[i.stripMethodName] = action
 
         except Exception as e:
-            getLogger().warning('_createMenu error: %s' % str(e))
+            getLogger().warning(f'_createMenu error: {str(e)}')
     return menu
 
 
@@ -109,7 +108,7 @@ def _addMenuItems(widget, menu, items, overwrite=False):
                         widget._spectrumUtilActions[i.stripMethodName] = action
 
         except Exception as e:
-            getLogger().warning('_addMenuItems error: %s' % str(e))
+            getLogger().warning(f'_addMenuItems error: {str(e)}')
 
 
 ##############################  Common default  menu items ##############################
@@ -263,8 +262,8 @@ def _mouseModeItem(strip):
     from ccpn.framework.Application import getApplication
 
     _app = getApplication()
-    return _SCMitem(name='Mouse-Mode',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Mouse-Mode',
+    return _SCMitem(name='Peak-Picking Mouse Mode',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Mouse mode for peak-picking using single mouse-click',
                     checkable=True, checked=(getCurrentMouseMode() == PICK),
                     stripMethodName='mouseModeAction',
                     shortcut='MM', callback=_app.mainWindow.switchMouseMode)
@@ -612,14 +611,14 @@ def _markAxesMenuItem2(strip):
 
 
 def _markCursorXPosItem(strip):
-    return _SCMitem(name='Mark %s' % strip.axisCodes[0],
-                    typeItem=ItemTypes.get(ITEM), toolTip='Mark %s axiscode' % strip.axisCodes[0],
+    return _SCMitem(name=f'Mark {strip.axisCodes[0]}',
+                    typeItem=ItemTypes.get(ITEM), toolTip=f'Mark {strip.axisCodes[0]} axiscode',
                     callback=partial(strip.markAxisIndices, indices=(0,)))
 
 
 def _markCursorYPosItem(strip):
-    return _SCMitem(name='Mark %s' % strip.axisCodes[1],
-                    typeItem=ItemTypes.get(ITEM), toolTip='Mark %s axiscode' % strip.axisCodes[1],
+    return _SCMitem(name=f'Mark {strip.axisCodes[1]}',
+                    typeItem=ItemTypes.get(ITEM), toolTip=f'Mark {strip.axisCodes[1]} axiscode',
                     callback=partial(strip.markAxisIndices, indices=(1,)))
 
 
@@ -653,15 +652,15 @@ def _copyAllAxisRangeFromStripMenuItem(strip):
 
 
 def _copyXAxisCodeRangeFromStripMenuItem(strip):
-    return _SCMitem(name='Copy Axis Range to %s from:' % strip.axisCodes[0],
-                    typeItem=ItemTypes.get(MENU), toolTip='Copy axis range to %s from selected strip' % strip.axisCodes[0],
+    return _SCMitem(name=f'Copy Axis Range to {strip.axisCodes[0]} from:',
+                    typeItem=ItemTypes.get(MENU), toolTip=f'Copy axis range to {strip.axisCodes[0]} from selected strip',
                     stripMethodName='matchXAxisCodeToMenu',
                     callback=None)
 
 
 def _copyYAxisCodeRangeFromStripMenuItem(strip):
-    return _SCMitem(name='Copy Axis Range to %s from:' % strip.axisCodes[1],
-                    typeItem=ItemTypes.get(MENU), toolTip='Copy axis range to %s from selected strip' % strip.axisCodes[1],
+    return _SCMitem(name=f'Copy Axis Range to {strip.axisCodes[1]} from:',
+                    typeItem=ItemTypes.get(MENU), toolTip=f'Copy axis range to {strip.axisCodes[1]} from selected strip',
                     stripMethodName='matchYAxisCodeToMenu',
                     callback=None)
 
@@ -693,15 +692,15 @@ def _copyAllAxisRangeFromStripMenuItem2(strip):
 
 
 def _copyXAxisCodeRangeFromStripMenuItem2(strip):
-    return _SCMitem(name='Copy Axis Range to %s from:' % strip.axisCodes[0],
-                    typeItem=ItemTypes.get(MENU), toolTip='Copy axis range to %s from selected strip' % strip.axisCodes[0],
+    return _SCMitem(name=f'Copy Axis Range to {strip.axisCodes[0]} from:',
+                    typeItem=ItemTypes.get(MENU), toolTip=f'Copy axis range to {strip.axisCodes[0]} from selected strip',
                     stripMethodName='matchXAxisCodeToMenu2',
                     callback=None)
 
 
 def _copyYAxisCodeRangeFromStripMenuItem2(strip):
-    return _SCMitem(name='Copy Axis Range to %s from:' % strip.axisCodes[1],
-                    typeItem=ItemTypes.get(MENU), toolTip='Copy axis range to %s from selected strip' % strip.axisCodes[1],
+    return _SCMitem(name=f'Copy Axis Range to {strip.axisCodes[1]} from:',
+                    typeItem=ItemTypes.get(MENU), toolTip=f'Copy axis range to {strip.axisCodes[1]} from selected strip',
                     stripMethodName='matchYAxisCodeToMenu2',
                     callback=None)
 
@@ -784,9 +783,9 @@ def _exitPhasingConsoleItem(strip):
 
 
 def _exitMouseModeItem(strip):
-    return _SCMitem(name='Exit Mouse-Mode',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Exit Mouse-Mode',
-                    checkable=True, checked=getCurrentMouseMode() == PICK,
+    return _SCMitem(name='Peak-Picking Mouse Mode',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Mouse mode for peak-picking using single mouse-click',
+                    checkable=True, checked=(getCurrentMouseMode() == PICK),
                     shortcut='MM', callback=strip.spectrumDisplay.toggleMouseMode)
 
 
@@ -1216,20 +1215,18 @@ def _addCopyMenuItems(guiStrip, viewPort, thisMenu, is1D, overwrite=False):
                        (guiStrip.copyXAxisFromMenu2, 'X'),
                        (guiStrip.copyYAxisFromMenu2, 'Y'),
                        )
-        matchAttribs = ((guiStrip.matchXAxisCodeToMenu2, 0),
-                        (guiStrip.matchYAxisCodeToMenu2, 1),
-                        ) if not is1D else ()
+        matchAttribs = () if is1D else ((guiStrip.matchXAxisCodeToMenu2, 0),
+                                        (guiStrip.matchYAxisCodeToMenu2, 1))
+
     elif viewPort == BOTTOMAXIS:
         copyAttribs = ((guiStrip.copyAllAxisFromMenu2, 'All'),
                        (guiStrip.copyXAxisFromMenu2, 'X'),
                        )
-        matchAttribs = ((guiStrip.matchXAxisCodeToMenu2, 0),
-                        ) if not is1D else ()
+        matchAttribs = () if is1D else ((guiStrip.matchXAxisCodeToMenu2, 0),)
     elif viewPort == RIGHTAXIS:
         copyAttribs = ((guiStrip.copyAllAxisFromMenu2, 'All'),
                        (guiStrip.copyYAxisFromMenu2, 'Y'),
                        )
-        matchAttribs = ((guiStrip.matchYAxisCodeToMenu2, 1),
-                        ) if not is1D else ()
+        matchAttribs = () if is1D else ((guiStrip.matchYAxisCodeToMenu2, 1),)
 
     return copyAttribs, matchAttribs

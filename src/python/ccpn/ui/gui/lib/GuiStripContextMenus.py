@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-04 17:27:04 +0000 (Fri, November 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 11:44:33 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ __date__ = "$Date: 2018-05-17 10:28:43 +0000 (Thu, May 17, 2018) $"
 #=========================================================================================
 
 from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode, PICK
 from ccpn.util.Logging import getLogger
 from functools import partial
 
@@ -92,16 +93,15 @@ def _createMenu(strip, items):
     return menu
 
 
-def _addMenuItems(widget, menu, items):
+def _addMenuItems(widget, menu, items, overwrite=False):
     """Add items to an existing menu
     """
     for i in items:
         try:
-            ff = getattr(menu, i.typeItem)
-            if ff:
+            if ff := getattr(menu, i.typeItem):
                 action = ff(i.name, **vars(i))
                 if i.stripMethodName:
-                    if hasattr(widget, i.stripMethodName):
+                    if hasattr(widget, i.stripMethodName) and not overwrite:
                         # check whether items already in widget
                         raise RuntimeError(f'Strip already contains action {i.stripMethodName}')
                     setattr(widget, i.stripMethodName, action)
@@ -254,9 +254,20 @@ def _toggleVerticalTraceItem(strip):
 
 
 def _phasingConsoleItem(strip):
-    return _SCMitem(name='Enter Phasing Console',
-                    typeItem=ItemTypes.get(ITEM), icon='icons/phase-console', toolTip='Enter Phasing Console',
+    return _SCMitem(name='Enter Phasing-Console',
+                    typeItem=ItemTypes.get(ITEM), icon='icons/phase-console', toolTip='Enter Phasing-Console',
                     shortcut='PC', callback=strip.spectrumDisplay.togglePhaseConsole)
+
+
+def _mouseModeItem(strip):
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
+    return _SCMitem(name='Mouse-Mode',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Mouse-Mode',
+                    checkable=True, checked=(getCurrentMouseMode() == PICK),
+                    stripMethodName='mouseModeAction',
+                    shortcut='MM', callback=_app.mainWindow.switchMouseMode)
 
 
 def _marksItem(strip):
@@ -767,9 +778,16 @@ def _setPivotItem(strip):
 
 
 def _exitPhasingConsoleItem(strip):
-    return _SCMitem(name='Exit Phasing Console',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Exit phasing console',
+    return _SCMitem(name='Exit Phasing-Console',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Exit phasing-console',
                     shortcut='PC', callback=strip.spectrumDisplay.togglePhaseConsole, icon='icons/phase-console', )
+
+
+def _exitMouseModeItem(strip):
+    return _SCMitem(name='Exit Mouse-Mode',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Exit Mouse-Mode',
+                    checkable=True, checked=getCurrentMouseMode() == PICK,
+                    shortcut='MM', callback=strip.spectrumDisplay.toggleMouseMode)
 
 
 def _stackSpectraDefaultItem(strip):
@@ -804,6 +822,8 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         _calibrateY(guiStrip1d),
         _stackSpectraDefaultItem(guiStrip1d),
         _phasingConsoleItem(guiStrip1d),
+        _separator(),
+        _mouseModeItem(guiStrip1d),
         _separator(),
 
         _marksItem(guiStrip1d),
@@ -847,12 +867,12 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         ]
     items = [itm for itm in items if itm is not None]
     # attach to the _copyAxesMenu submenu
-    _addMenuItems(guiStrip1d, guiStrip1d._copyAxesMenu, items)
+    _addMenuItems(guiStrip1d, guiStrip1d._copyAxesMenu, items, overwrite=True)
 
     # _selectedPeaksMenu submenu - add to Strip._selectedPeaksMenu
     items = _getNdPeakMenuItems(menuId='Main')
     # attach to the _selectedPeaksMenu submenu
-    _addMenuItems(guiStrip1d, guiStrip1d._selectedPeaksMenu, items)
+    _addMenuItems(guiStrip1d, guiStrip1d._selectedPeaksMenu, items, overwrite=True)
 
     return menu
 
@@ -971,6 +991,8 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _toggleVerticalTraceItem(guiStripNd),
         _phasingConsoleItem(guiStripNd),
         _separator(),
+        _mouseModeItem(guiStripNd),
+        _separator(),
 
         _marksItem(guiStripNd),
         _markAxesMenuItem(guiStripNd),
@@ -1019,7 +1041,7 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         ]
     items = [itm for itm in items if itm is not None]
     # attach to the _copyAxesMenu submenu
-    _addMenuItems(guiStripNd, guiStripNd._copyAxesMenu, items)
+    _addMenuItems(guiStripNd, guiStripNd._copyAxesMenu, items, overwrite=True)
 
     # _flipAxesMenu submenu - add to Strip._flipAxesMenu
     items = [
@@ -1031,12 +1053,12 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         ]
     items = [itm for itm in items if itm is not None]
     # attach to the _flipAxesMenu submenu
-    _addMenuItems(guiStripNd, guiStripNd._flipAxesMenu, items)
+    _addMenuItems(guiStripNd, guiStripNd._flipAxesMenu, items, overwrite=True)
 
     # _selectedPeaksMenu submenu - add to Strip._selectedPeaksMenu
     items = _getNdPeakMenuItems(menuId='Main')
     # attach to the _selectedPeaksMenu submenu
-    _addMenuItems(guiStripNd, guiStripNd._selectedPeaksMenu, items)
+    _addMenuItems(guiStripNd, guiStripNd._selectedPeaksMenu, items, overwrite=True)
 
     return menu
 
@@ -1160,7 +1182,7 @@ def _getSpectrumDisplayMenu(guiStripNd) -> Menu:
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import MAINVIEW, BOTTOMAXIS, RIGHTAXIS, AXISCORNER
 
 
-def _addCopyMenuItems(guiStrip, viewPort, thisMenu, is1D):
+def _addCopyMenuItems(guiStrip, viewPort, thisMenu, is1D, overwrite=False):
     items = copyAttribs = matchAttribs = ()
     if viewPort in (MAINVIEW, AXISCORNER):
         items = (_copyAllAxisRangeFromStripMenuItem2(guiStrip),
@@ -1187,7 +1209,7 @@ def _addCopyMenuItems(guiStrip, viewPort, thisMenu, is1D):
                              )
         items = items + (_separator(),)
 
-    _addMenuItems(guiStrip, thisMenu, items)
+    _addMenuItems(guiStrip, thisMenu, items, overwrite=overwrite)
 
     if viewPort in (MAINVIEW, AXISCORNER):
         copyAttribs = ((guiStrip.copyAllAxisFromMenu2, 'All'),

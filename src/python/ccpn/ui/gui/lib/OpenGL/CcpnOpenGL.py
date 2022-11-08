@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-08 11:33:52 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 11:44:33 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -6181,7 +6181,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # This is the correct future style for cursorPosition handling
         self.current.cursorPosition = (xPosition, yPosition)
 
-        if getCurrentMouseMode() == PICK:
+        if getCurrentMouseMode() == PICK and leftMouse(event):
             if self._validRegionPick:
                 self._pickAtMousePosition(event)
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-31 18:13:41 +0000 (Mon, October 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 15:10:25 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -188,8 +188,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         self.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
         setWidgetFont(self, name=TABLEFONT)
-
-        height = getFontHeight(name=TABLEFONT, size='MEDIUM')
+        height = getFontHeight(name=TABLEFONT)
         self._setHeaderWidgets(height, showHorizontalHeader, showVerticalHeader)
         self.setMinimumSize(2 * height, 2 * height + self.horizontalScrollBar().height())
 
@@ -289,8 +288,8 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
             self.moduleParent.mainWidget._dropEventCallback = self._processDroppedItems
 
         self._droppedNotifier = GuiNotifier(self,
-                                           [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                           self._processDroppedItems)
+                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                            self._processDroppedItems)
 
         # add a widget handler to give a clean corner widget for the scroll area
         self._cornerDisplay = ScrollBarVisibilityWatcher(self)
@@ -316,7 +315,6 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         _header.setHighlightSections(self.font().bold())
         _header.setVisible(showHorizontalHeader)
         setWidgetFont(_header, name=TABLEFONT)
-        setWidgetFont(self.verticalHeader(), name=TABLEFONT)
 
         # set the verticalHeader information
         _header = self.verticalHeader()
@@ -331,9 +329,11 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
 
         setWidgetFont(_header, name=TABLEFONT)
         if self._rowHeightScale:
+            # set the fixed row-height
             _header.setSectionResizeMode(QtWidgets.QHeaderView.Fixed)
             _height *= self._rowHeightScale
         else:
+            # otherwise user-changeable
             _header.setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
 
         _header.setDefaultSectionSize(_height)

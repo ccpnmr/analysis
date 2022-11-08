@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-04 10:41:26 +0000 (Fri, November 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 15:10:25 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -117,9 +117,9 @@ class _TableModel(QtCore.QAbstractTableModel):
             fontMetric = QtGui.QFontMetricsF(view.font())
             bbox = fontMetric.boundingRect
 
-            # get an estimate for an average character width
+            # get an estimate for an average character width/height - must be floats for estimate-column-widths
             self._chrWidth = 1 + bbox('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789').width() / 36
-            self._chrHeight = bbox('A').height() + 8
+            self._chrHeight = bbox('A').height() + 6
 
         # initialise sorting/filtering
         self._sortColumn = 0
@@ -421,18 +421,18 @@ class _TableModel(QtCore.QAbstractTableModel):
         return False
 
     def headerData(self, col, orientation, role=None):
-        """Return the column headers
+        """Return the information for the row/column headers
         """
         if role == DISPLAY_ROLE and orientation == QtCore.Qt.Horizontal:
             try:
-                # quickest way to get the column
+                # quickest way to get the column header
                 return self._df.columns[col]
             except Exception:
                 return None
 
         elif role == TOOLTIP_ROLE and orientation == QtCore.Qt.Horizontal:
             try:
-                # quickest way to get the column
+                # quickest way to get the column tooltip
                 return self._headerToolTips[orientation][col]
             except Exception:
                 return None
@@ -460,6 +460,9 @@ class _TableModel(QtCore.QAbstractTableModel):
                 except Exception:
                     # return the default QSize
                     return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))
+
+            # return the default QSize for vertical header
+            return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))
 
         elif role == ICON_ROLE and self._isColumnEditable(col) and self.showEditIcon:
             # return the pixmap

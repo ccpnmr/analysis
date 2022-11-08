@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 20:53:05 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 09:00:52 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -77,6 +77,7 @@ class DirectoryDataLoader(DataLoaderABC):
             raise RuntimeError(f'{self.path} is not a directory' )
 
         _filesToExamine = list(self.path.glob('*'))
+        _filesToExamine.sort()
         _nFilesToExamine = len(_filesToExamine)
 
         # for f in _filesToExamine:
@@ -95,7 +96,7 @@ class DirectoryDataLoader(DataLoaderABC):
                 self.count += 1
                 # remove all files already handled by the dataLoader; this prevent types that
                 # have two files; e.g. a binary data file and a paramter file, to be added twice
-                for _handledFile in dataLoader.getAllFiles():
+                for _handledFile in dataLoader.getAllFilePaths():
                     if _handledFile in _filesToExamine:
                         _filesToExamine.remove(_handledFile)
 

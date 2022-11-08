@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 20:53:05 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 09:00:52 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -327,7 +327,7 @@ class DataLoaderABC(TraitBase):
 
         return result
 
-    def getAllFiles(self) -> list:
+    def getAllFilePaths(self) -> list:
         """
         Get all the files handles by this loader. Generally, this will be the path that
         the loader represented, but sometimes there might be more; i.e. for certain spectrum

@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 16:28:21 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 09:00:52 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -391,6 +391,32 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                 return None
 
         return super().setPath(path=_path, substituteSuffix=substituteSuffix)
+
+    def getAllFilePaths(self) -> list:
+        """
+        Get all the files handled by this dataSource: the binary and a parameter file.
+
+        :return: list of Path instances
+        """
+
+        if self.nFiles == 0:
+            raise RuntimeError(f'DataSource {self.dataFormat}: nFiles = 0')
+        elif self.nFiles == 1:
+            result = [self.path]
+        else:
+            # nD's: get all the nmrPipe files
+            sliceTuples = [(1, p) for p in self.pointCounts]
+
+            result = []
+            # loop over all the xy-planes
+            for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=(specLib.X_DIM, specLib.Y_DIM)):
+                path, offset = self._getPathAndOffset(position)
+                result.append(path)
+
+            # remove any duplicates
+            result = list(set(result))
+
+        return result
 
     def nameFromPath(self) -> str:
         """Return a name derived from path (to be subclassed for specific cases; e.g. Bruker)

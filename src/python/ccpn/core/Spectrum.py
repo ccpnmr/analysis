@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-07 15:52:57 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-08 11:45:52 +0000 (Tue, November 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2975,23 +2975,24 @@ class Spectrum(AbstractWrapperObject):
             for integralList in self.integralLists:
                 integralList._finaliseAction(action)
 
-        # propagate the rename-action to associated spectrumViews
+        # propagate the rename-action to associated spectrumViews/children
         elif action == 'change':
             # get the changed attribute states - defined in the ccpNmrV3CoreSetter arguments
             scaleChanged = actionKwds.get(_SCALECHANGED, False)
             allChanged = actionKwds.get(_ALLCHANGED, False)
-            updateShifts = actionKwds.get(_UPDATECHEMICALSHIFTS, False)
-
-            if actionKwds.get(_IGNORECHILDREN, False):  # here or after specView?
-                return
 
             for specView in self.spectrumViews:
                 if specView:
                     # force a rebuild of the contours/etc.
-                    specView.buildContoursOnly = scaleChanged
-                    specView.buildContours = allChanged
+                    if scaleChanged:
+                        specView.buildContoursOnly = scaleChanged
+                    elif allChanged:
+                        specView.buildContours = allChanged
                     # other changes may need to be recognised here
                     specView._finaliseAction(action)
+
+            if actionKwds.get(_IGNORECHILDREN, False):  # here or before specView?
+                return
 
             if scaleChanged or allChanged:
                 # notify peaks/multiplets/integrals that the scale has changed
@@ -3013,7 +3014,7 @@ class Spectrum(AbstractWrapperObject):
                 for integralList in self.integralLists:
                     integralList._finaliseAction(action)
 
-            if self.chemicalShiftList and updateShifts:
+            if self.chemicalShiftList and actionKwds.get(_UPDATECHEMICALSHIFTS, False):
                 # notify the chemical-shifts to recalculate
                 self.chemicalShiftList.recalculatePeakShifts()
 

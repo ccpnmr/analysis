@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-07 16:12:10 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-09 14:33:21 +0000 (Wed, November 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -66,7 +66,6 @@ from typing import Sequence, Tuple, Optional, Union, List
 from functools import partial
 from itertools import permutations
 import numpy
-import pandas as pd
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.SpectrumTraits import SpectrumTraits
@@ -2731,23 +2730,6 @@ class Spectrum(AbstractWrapperObject):
         CCPN Internal
         """
         return self._wrappedData.serial
-
-    def getAsDataFrame(self):
-        """ Write all the spectrum properties per dimension in a dataFrame.
-         This is useful when comparing multiple spectra by their properties. """
-        df = pd.DataFrame()
-        for _attr in dir(self):
-            try:
-                if not _attr.startswith(('_', '__')):
-                    vv = getattr(self, _attr)
-                    if isinstance(vv, (list, tuple)) and len(vv) == self.dimensionCount: # skip non-dimensional properties
-                        if isinstance(vv[0], (str, float, int)): #skip objects
-                            for dim in self.dimensionIndices:
-                                df.loc[0, f'{_attr}_{str(dim)}'] = vv[dim] # write to df.
-            except Exception as e:
-                getLogger().debug3(f'Error in creating spectrumAsDataFrame. Attr: {_attr}. Error:{e}')
-        return df
-
 
     def _getDataSourceFromPath(self, path, dataFormat=None, checkParameters=True) -> tuple:
         """Return a (dataStore, dataSource) tuple if path points  a file compatible

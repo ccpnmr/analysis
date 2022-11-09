@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-31 11:20:15 +0000 (Mon, October 31, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-11-09 14:18:34 +0000 (Wed, November 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -4837,16 +4837,20 @@ class CcpnNefReader(CcpnNefContent):
                                                 'atom_name'))
             element = row.get('element')
             isotope = row.get('isotope_number')
-            if element:
-                if isotope:
+            if element not in DEFAULT_ISOTOPE_DICT:
+                # Unknown / wrong element definition (Q instead of H is not valid)
+                isotopeCode = None
+            else:
+                if element is not None:
+                    if isotope:
+                        isotopeCode = '%s%s' % (isotope, element.title())
+                    else:
+                        isotopeCode = DEFAULT_ISOTOPE_DICT.get(element.upper())
+                elif isotope:
+                    element = name2ElementSymbol(tt[3])
                     isotopeCode = '%s%s' % (isotope, element.title())
                 else:
-                    isotopeCode = DEFAULT_ISOTOPE_DICT.get(element.upper())
-            elif isotope:
-                element = name2ElementSymbol(tt[3])
-                isotopeCode = '%s%s' % (isotope, element.title())
-            else:
-                isotopeCode = None
+                    isotopeCode = None
 
             try:
                 if (nmrResidue := self.produceNmrResidue(*tt[:3])) and \

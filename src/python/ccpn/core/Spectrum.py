@@ -53,6 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-11-09 09:47:27 +0000 (Wed, November 09, 2022) $"
 __dateModified__ = "$dateModified: 2022-11-06 18:24:24 +0000 (Sun, November 06, 2022) $"
 __dateModified__ = "$dateModified: 2022-11-05 10:42:25 +0000 (Sat, November 05, 2022) $"
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
@@ -706,6 +707,45 @@ class Spectrum(AbstractWrapperObject):
             return
 
         self._openFile(path=value, dataFormat=self.dataFormat, checkParameters=True)
+
+    def _makeAbsolutePath(self) -> Path:
+        """Resolve any redirections in the path, as maintained in the dataStore object
+        by creating a new one with the expanded, absolute path.
+        NB. The dataSource object already used this path, so no need to re-initialise
+
+        :return The new absolute path as a Path object
+
+        CCPNINTERNAL: used in the ValidateSpectra popup
+        """
+        _dataStore = DataStore.newFromPath(path=self._dataStore.aPath(),
+                                           dataFormat=self._dataStore.dataFormat,
+                                           autoRedirect=self._dataStore.autoRedirect,
+                                           autoVersioning=self._dataStore.autoVersioning,
+                                           )
+        _dataStore.spectrum = self
+        _dataStore._saveInternal()
+        self._spectrumTraits.dataStore = _dataStore
+        return self._dataStore.aPath()
+
+    def _makeRelativePath(self) -> Path:
+        """Insert a possible redirection in the path, as maintained in the dataStore object
+        by creating a new one with the relative path.
+        NB. The dataSource object already used the absolute path, so no need to re-initialise
+
+        :return The new relative path as a Path object
+
+        CCPNINTERNAL: used in the ValidateSpectra popup
+        """
+        _path = self._dataStore.redirectPath()
+        _dataStore = DataStore.newFromPath(path=_path,
+                                           dataFormat=self._dataStore.dataFormat,
+                                           autoRedirect=self._dataStore.autoRedirect,
+                                           autoVersioning=self._dataStore.autoVersioning,
+                                           )
+        _dataStore.spectrum = self
+        _dataStore._saveInternal()
+        self._spectrumTraits.dataStore = _dataStore
+        return self._dataStore.path
 
     @property
     def dataFormat(self) -> str:

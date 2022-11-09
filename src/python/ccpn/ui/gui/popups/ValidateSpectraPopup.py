@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-08 16:58:06 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-09 09:47:27 +0000 (Wed, November 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -612,14 +612,44 @@ class ValidateSpectraPopup(CcpnDialog):
         row += 1
 
         # add exit buttons
-        self.applyButtons = ButtonList(self, texts=['Close'],
-                                       callbacks=[self._closeButton],
-                                       tipTexts=[''], direction='h',
+        self.applyButtons = ButtonList(self,
+                                       texts=['Make absolute paths',
+                                              'Make relative paths',
+                                              'Close'
+                                              ],
+                                       callbacks=[self._makeAbsoluteCallback,
+                                                  self._makeRelativeCallback,
+                                                  self._closeButton
+                                                  ],
+                                       tipTexts=['Expand any redirections into an absolute path',
+                                                 'Reduce an absolute path into a relative path using redirections',
+                                                 'Close the popup'
+                                                 ],
+                                       direction='h',
                                        hAlign='r', grid=(row, 0), gridSpan=(1, _colSpan))
 
         self.setMinimumHeight(500)
         self.setMinimumWidth(800)
         # self.setFixedWidth(self.sizeHint().width()+24)
+
+    def _makeAbsoluteCallback(self):
+        """Callback for make aboslute button; converts all paths to absolute
+        """
+        for sp, row in self.spectrumData.items():
+            _path = sp._makeAbsolutePath().asString()
+            row.setPath(_path)
+            row.setText(_path)
+            row.validate()
+
+    def _makeRelativeCallback(self):
+        """Callback for make relative button; converts all paths to relative paths
+        """
+        for sp, row in self.spectrumData.items():
+            _path = sp._makeRelativePath().asString()
+            row.setPath(_path)
+            row.setText(_path)
+            row.validate()
+
 
     # def exec_(self):
     #     "catch errors"

@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-07 16:12:10 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-09 14:34:42 +0000 (Wed, November 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -66,7 +66,6 @@ from typing import Sequence, Tuple, Optional, Union, List
 from functools import partial
 from itertools import permutations
 import numpy
-import pandas as pd
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.SpectrumTraits import SpectrumTraits

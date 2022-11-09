@@ -4,18 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-16 14:38:52 +0100 (Fri, October 16, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2022-11-09 18:44:04 +0000 (Wed, November 09, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -41,15 +42,14 @@ DEFAULTFONTSIZE = 12
 DEFAULTFONTREGULAR = 'Regular'
 
 
-# This only works when we have a QtApp instance working; hence it need to go somewhere else.
+# This only works when we have a QtApp instance working; hence it needs to go somewhere else.
 #from ccpn.framework.PathsAndUrls import fontsPath
 #QtGui.QFontDatabase.addApplicationFont(os.path.join(fontsPath, 'open-sans/OpenSans-Regular.ttf'))
 
 
 def _readFontFromAppearances(fontRequest, preferences):
     # read font name from the preferences file
-    fontName = preferences.appearance.get(fontRequest)
-    return fontName
+    return preferences.appearance.get(fontRequest)
 
 
 class Font(QtGui.QFont):
@@ -85,8 +85,9 @@ def setWidgetFont(widget, name=DEFAULTFONT, size='MEDIUM', bold=False, italic=Fa
         getApp = getApplication()
         font = getApp._fontSettings.getFont(name, size, bold, italic)
         widget.setFont(font)
-    except:
-        getLogger().debug('Cannot set font')
+
+    except Exception:
+        getLogger().debug('setWidgetFont: Cannot set font')
 
 
 def getWidgetFontHeight(name=DEFAULTFONT, size='MEDIUM', bold=False, italic=False):
@@ -96,8 +97,9 @@ def getWidgetFontHeight(name=DEFAULTFONT, size='MEDIUM', bold=False, italic=Fals
         getApp = getApplication()
         font = getApp._fontSettings.getFont(name, size, bold, italic)
         return QtGui.QFontMetrics(font).height()
-    except:
-        getLogger().debug('Cannot get font, returning default {}pt'.format(DEFAULTFONTSIZE))
+
+    except Exception:
+        getLogger().debug(f'getWidgetFontHeight: Cannot get font, returning default {DEFAULTFONTSIZE}pt')
         return DEFAULTFONTSIZE
 
 
@@ -108,8 +110,9 @@ def getFontHeight(name=DEFAULTFONT, size='MEDIUM'):
         getApp = getApplication()
         font = getApp._fontSettings.getFont(name, size, False, False)
         return QtGui.QFontMetrics(font).height()
-    except:
-        getLogger().debug('Cannot get font, returning default {}pt'.format(DEFAULTFONTSIZE))
+
+    except Exception:
+        getLogger().debug(f'getFontHeight: Cannot get font, returning default {DEFAULTFONTSIZE}pt')
         return DEFAULTFONTSIZE
 
 
@@ -118,10 +121,10 @@ def getFont(name=DEFAULTFONT, size='MEDIUM'):
     """
     try:
         getApp = getApplication()
-        font = getApp._fontSettings.getFont(name, size, False, False)
-        return font
-    except:
-        getLogger().debug('Cannot get font, returning default font'.format(DEFAULTFONTSIZE))
+        return getApp._fontSettings.getFont(name, size, False, False)
+
+    except Exception:
+        getLogger().debug(f'getFont: Cannot get font, returning default font {DEFAULTFONTNAME}')
         return Font(DEFAULTFONTNAME, DEFAULTFONTSIZE)
 
 
@@ -132,24 +135,25 @@ def getTextDimensionsFromFont(name=DEFAULTFONT, size='MEDIUM', bold=False, itali
         getApp = getApplication()
         font = getApp._fontSettings.getFont(name, size, bold, italic)
 
-    except:
-        getLogger().debug('Cannot get font, returning default {}pt'.format(DEFAULTFONTSIZE))
+    except Exception:
+        getLogger().debug(f'getTextDimensionsFromFont: Cannot get font, returning default {DEFAULTFONTSIZE}pt')
         font = Font(DEFAULTFONTNAME, DEFAULTFONTSIZE)
 
     fontMetrics = QtGui.QFontMetrics(font, )
-    wPoints = []
-    hPoints = []
 
-    for text in textList:
-        # best estimate for the width of the text, plus a lit extra
-        bRect = fontMetrics.boundingRect(text + '__')
-        wPoints.append(bRect.width())
-        hPoints.append(bRect.height())
+    if textList and isinstance(textList, (list, tuple)):
+        wPoints = []
+        hPoints = []
 
-    if textList:
+        for text in textList:
+            # best estimate for the width of the text, plus a lit extra
+            bRect = fontMetrics.boundingRect(f'{text}__')
+            wPoints.append(bRect.width())
+            hPoints.append(bRect.height())
+
         minDimensions = QtCore.QSize(np.min(wPoints), np.min(hPoints))
         maxDimensions = QtCore.QSize(np.max(wPoints), np.max(hPoints))
         return minDimensions, maxDimensions
 
-    else:
-        return QtCore.QSize(0, 0), QtCore.QSize(0, 0)
+    getLogger().debug('getTextDimensionsFromFont: textList is empty or undefined')
+    return QtCore.QSize(0, 0), QtCore.QSize(0, 0)

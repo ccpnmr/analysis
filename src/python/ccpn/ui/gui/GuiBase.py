@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-04 13:41:18 +0000 (Fri, November 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-10 16:20:09 +0000 (Thu, November 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -662,7 +662,6 @@ class GuiBase(object):
         """Displays html files in program QT viewer or using native webbrowser
         depending on useNativeWebbrowser option in preferences
         """
-        mainWindow = self.ui.mainWindow
         useNative = self.preferences.general.useNativeWebbrowser
 
         if useNative:
@@ -691,7 +690,10 @@ class GuiBase(object):
             # self._systemOpen(path)
 
         else:
-            mainWindow.newHtmlModule(urlPath=urlPath, position='top', relativeTo=mainWindow.moduleArea)
+            # mainWindow = self.ui.mainWindow
+            #
+            # mainWindow.newHtmlModule(urlPath=urlPath, position='top', relativeTo=mainWindow.moduleArea)
+            getLogger().debug('non-native newHtmlModule has been removed')
 
     def _addApplicationMenuSpec(self, spec, position=-3):
         """Add an entirely new menu at specified position"""
@@ -704,7 +706,7 @@ class GuiBase(object):
                 spec[1].insert(position, menuItem)
                 return
 
-        raise Exception('No menu with name %s' % menuName)
+        raise Exception(f'No menu with name {menuName}')
 
     def _addApplicationMenuItems(self, menuName, menuItems, position):
         """Add a new items to an existing menu starting at specified position"""

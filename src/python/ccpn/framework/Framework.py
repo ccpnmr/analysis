@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-08 16:38:23 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-10 16:20:09 +0000 (Thu, November 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1122,9 +1122,12 @@ class Framework(NotifierBase, GuiBase):
         """Load html file path into a HtmlModule
         CCPNINTERNAL: called from HtmlDataLoader
         """
-        mainWindow = self.mainWindow
-        path = aPath(path)
-        mainWindow.newHtmlModule(urlPath=str(path), position='top', relativeTo=mainWindow.moduleArea)
+        # mainWindow = self.mainWindow
+        # path = aPath(path)
+        # mainWindow.newHtmlModule(urlPath=str(path), position='top', relativeTo=mainWindow.moduleArea)
+
+        # non-native webview is currently disabled
+        self._showHtmlFile('', str(path))
         return []
 
     def _cloneSpectraToProjectDir(self):

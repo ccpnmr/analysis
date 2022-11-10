@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-09 19:36:13 +0000 (Wed, November 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-10 13:37:21 +0000 (Thu, November 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ import contextlib
 from PyQt5 import QtWidgets, QtGui
 
 
-def alignWidgets(self):
+def alignWidgets(self, columnScale=None):
     """Align the first column of widgets
     """
     from ccpn.ui.gui.widgets.Font import getTextDimensionsFromFont
@@ -52,9 +52,14 @@ def alignWidgets(self):
         # set the size of the first column for normal widgets
         if (layout := self.getLayout()):
             layout.setColumnMinimumWidth(0, maxW)
+            if columnScale:
+                layout.setColumnMinimumWidth(1, maxW * columnScale)
 
         # try and align the compound-widgets
         for widg in widgets:
             with contextlib.suppress(Exception):
-                widths = [maxW] + [None] * (len(widg._widgets) - 1)
+                if columnScale:
+                    widths = [maxW] + [maxW * columnScale] * (len(widg._widgets) - 1)
+                else:
+                    widths = [maxW] + [None] * (len(widg._widgets) - 1)
                 widg.setFixedWidths(widths)

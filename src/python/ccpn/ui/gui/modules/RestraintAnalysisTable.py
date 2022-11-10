@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:21:38 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-10 13:37:21 +0000 (Thu, November 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -44,6 +44,7 @@ from ccpn.core.ViolationTable import ViolationTable
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+import ccpn.ui.gui.modules.PyMolUtil as pyMolUtil
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
 from ccpn.ui.gui.widgets.GuiTable import GuiTable, _getValueByHeader
 from ccpn.ui.gui.widgets.Column import ColumnClass
@@ -55,10 +56,10 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.TableSorting import MultiColumnTableWidgetItem
 from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget, \
     RestraintTableSelectionWidget, SpectrumDisplaySelectionWidget, ViolationTableSelectionWidget
+from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.ui.gui.lib.alignWidgets import alignWidgets
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList
-import ccpn.ui.gui.modules.PyMolUtil as pyMolUtil
-from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.util.Common import flattenLists
 from ccpn.util.Path import Path, aPath, fetchDir, joinPath
 
@@ -270,6 +271,8 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                                    moduleParent=self,
                                                                    setLayout=True,
                                                                    grid=(0, 0))
+
+        alignWidgets(self._RATwidget)
 
         if peakList is not None:
             self.selectPeakList(peakList)

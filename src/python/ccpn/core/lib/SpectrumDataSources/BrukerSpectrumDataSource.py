@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 15:31:46 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-10 13:36:25 +0000 (Thu, November 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,7 @@ __date__ = "$Date: 2020-11-20 10:28:48 +0000 (Fri, November 20, 2020) $"
 
 import os
 from typing import Sequence
+from itertools import permutations, combinations_with_replacement
 
 from ccpn.util.Path import Path, aPath
 from ccpn.util.Logging import getLogger
@@ -39,6 +40,25 @@ from ccpn.util.Common import flatten
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 from ccpn.framework.constants import NO_SUFFIX, ANY_SUFFIX
+
+
+def _makeBrukerFileNames(dimensionCount) -> list:
+    """helper function to constucts all possible bruker filenames for dimensionCount
+    :return list with the names
+    """
+    _first = combinations_with_replacement('ri', dimensionCount)
+
+    # we still need to permute the _first expansion
+    _second = []
+    for _n in _first:
+        _second.extend(permutations(_n))
+
+    # remove the duplicates
+    _names = list(set(_second))
+    _names.sort()
+
+    # creat in reverse order so that 'rrr' comes first
+    return tuple(f'{dimensionCount}' +''.join(_n) for _n in _names[::-1])
 
 
 class BrukerSpectrumDataSource(SpectrumDataSourceABC):
@@ -65,12 +85,12 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
     _processedDataFilesDict = dict([
         (1, '1r 1i'.split()),
         (2, '2rr 2ri 2ir 2ii'.split()),
-        (3, '3rrr 3rri 3rir 3rii 3irr 3iri 3iir 3iii'.split()),
-        (4, '4rrrr 4rrri 4rrir 4rrii 4rirr 4riri 4riir 4riii 4irrr 4irri 4irir 4irii 4iirr 4iiri 4iiir 4iiii'.split()),
-        (5, '5rrrrr'),
-        (6, '6rrrrrr'),
-        (7, '7rrrrrrr'),
-        (8, '8rrrrrrrr'),
+        (3, _makeBrukerFileNames(3)),
+        (4, _makeBrukerFileNames(4)),
+        (5, _makeBrukerFileNames(5)),
+        (6, _makeBrukerFileNames(6)),
+        (7, _makeBrukerFileNames(7)),
+        (8, _makeBrukerFileNames(8)),
     ])
     _processedDataFiles = [f for f in flatten(_processedDataFilesDict.values())]  # all the possible processed data files as a list
     _acqusFiles = 'acqus acqu2s acqu3s acqu4s acqu5s acqu6s acqu7s acqu8s'.split()

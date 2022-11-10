@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-08 16:38:23 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-10 16:05:24 +0000 (Thu, November 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -75,10 +75,11 @@ class AutoBackup(Thread):
 
             if not self._backupFrequencyQueue.empty():
 
+                backupFrequency = None
                 while not self._backupFrequencyQueue.empty():
                     backupFrequency = self._backupFrequencyQueue.get()
 
-                if backupFrequency is not None:
+                if isinstance(backupFrequency, (int, float)):
                     backupFrequency *= SECONDS_IN_MINUTE
 
                 waitTime = backupFrequency

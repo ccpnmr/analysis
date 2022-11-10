@@ -1930,6 +1930,32 @@ class Spectrum(AbstractWrapperObject):
 
         return newValues
 
+    def getByIsotopeCodes(self, parameterName: str, isotopeCodes: Sequence[str] = None) -> dict:
+        """
+        A way of getting spectrum properties given a list of isotopeCodes.
+        :param parameterName: a str denoting a Spectrum dimensional attribute
+        :param isotopeCodes: a tuple or list of isotopeCodes
+        :return: a dict, key the isotopeCode, list of values result of the parameterName
+
+        example get the axisCodes for a 13C-NOESY spectrum:
+        >>> self.getByIsotopeCodes('axisCodes', ['1H', '13C'])
+        >>> {'1H': ['H1', 'H2'], '13C':['C'] }
+
+        """
+        from ccpn.core.lib.SpectrumLib import _getParameterValues
+        from collections import defaultdict
+        dd = defaultdict(list)
+        for ic, dim in zip(self.isotopeCodes, self.dimensions):
+            dd[ic].append(dim)
+        newValues = {}
+        for isotopeCode in isotopeCodes:
+            dimensions = dd.get(isotopeCode, [])
+            values = _getParameterValues(self, parameterName,
+                                         dimensions=dimensions,
+                                         dimensionCount=self.dimensionCount)
+            newValues[isotopeCode] = values
+        return newValues
+
     def _setDefaultContourValues(self, base=None, multiplier=1.41, count=10):
         """Set default contour values
         """

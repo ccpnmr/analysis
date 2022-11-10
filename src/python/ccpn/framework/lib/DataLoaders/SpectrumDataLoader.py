@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-08 09:00:52 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-10 13:35:48 +0000 (Thu, November 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -133,13 +133,14 @@ class SpectrumDataLoaderABC(DataLoaderABC):
         return [spectrum]
 
     def existsInProject(self) -> bool:
-        """:return True if spectrum exists in the project
+        """Check for existance of spectra with the identical binary data.
+        :return True if such a spectrum exists in the project
         """
-        # check the dataSources of all spectra of the project for  file pointers to the same file
+        # check the dataSources of all spectra of the project for file pointers to the same file
+        _binaryData = self.dataSource.path if self.dataSource is not None else ''
         for ds in [sp.dataSource for sp in self.project.spectra if sp.hasValidPath()]:
-            _p1 = ds.path
-            _p2 = self.dataSource.path if self.dataSource is not None else ''
-            if _p1 == _p2:
+            _p = ds.path
+            if _p is not None and len(_p) > 0 and _p == _binaryData:
                 return True
         return False
 

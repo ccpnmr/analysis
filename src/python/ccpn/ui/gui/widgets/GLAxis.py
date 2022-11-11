@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-08 11:33:53 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-11 16:11:01 +0000 (Fri, November 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -82,18 +82,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         super().__init__(parent)
 
-        # GST add antiAliasing, no perceptible speed impact on my Mac (intel iris graphics!)
-        # samples = 4 is good enough but 8 also works well in terms of speed...
-        try:
-            fmt = QtGui.QSurfaceFormat()
-            fmt.setSamples(antiAlias)
-            self.setFormat(fmt)
-
-            samples = self.format().samples()  # GST a use for the walrus
-            if samples != antiAlias:
-                getLogger().warning(f'hardware changed anti-alias level, expected {samples} got {antiAlias}...')
-        except Exception as es:
-            getLogger().warning(f'error during anti-aliasing setup {str(es)}, anti-aliasing disabled...')
+        self.setUpdateBehavior(QtWidgets.QOpenGLWidget.PartialUpdate)
 
         # flag to display paintGL but keep an empty screen
         self._blankDisplay = False

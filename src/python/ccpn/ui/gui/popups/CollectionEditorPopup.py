@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-15 15:44:02 +0000 (Tue, November 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-15 15:44:30 +0000 (Tue, November 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,7 @@ from ccpn.core.Collection import Collection
 from ccpn.ui.gui.widgets.PulldownListsForObjects import CollectionPulldown
 
 
-class CollectionPopup(_GroupEditorPopupABC):
+class CollectionEditorPopup(_GroupEditorPopupABC):
     """A class to maintain edit the collections
     """
 

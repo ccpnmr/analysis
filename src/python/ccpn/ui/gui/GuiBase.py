@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-10 16:20:09 +0000 (Thu, November 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-11 15:42:50 +0000 (Fri, November 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -676,15 +676,12 @@ class GuiBase(object):
                 pass
             elif urlPath.startswith('file://'):
                 urlPath = urlPath[len('file://'):]
-                if isWindowsOS():
-                    urlPath = urlPath.replace(os.sep, posixpath.sep)
-                else:
-                    urlPath = 'file://' + urlPath
+                urlPath = urlPath.replace(os.sep, posixpath.sep) if isWindowsOS() else f'file://{urlPath}'
+
+            elif isWindowsOS():
+                urlPath = urlPath.replace(os.sep, posixpath.sep)
             else:
-                if isWindowsOS():
-                    urlPath = urlPath.replace(os.sep, posixpath.sep)
-                else:
-                    urlPath = 'file://' + urlPath
+                urlPath = f'file://{urlPath}'
 
             webbrowser.open(urlPath)
             # self._systemOpen(path)
@@ -706,7 +703,7 @@ class GuiBase(object):
                 spec[1].insert(position, menuItem)
                 return
 
-        raise Exception(f'No menu with name {menuName}')
+        raise ValueError(f'No menu with name {menuName}')
 
     def _addApplicationMenuItems(self, menuName, menuItems, position):
         """Add a new items to an existing menu starting at specified position"""
@@ -729,25 +726,24 @@ class GuiBase(object):
 
         topActionDict = {}
         for topMenu in menuChildren:
-            mainActionDict = {}
-            for mainAction in topMenu.actions():
-                mainActionDict[mainAction.text()] = mainAction
+            mainActionDict = {mainAction.text(): mainAction for mainAction in topMenu.actions()}
+
             topActionDict[topMenu.title()] = mainActionDict
 
         openModuleKeys = set(mainWindow.moduleArea.modules.keys())
         for key, topActionText, mainActionText in (('SEQUENCE', 'Molecules', 'Show Sequence'),
                                                    ('PYTHON CONSOLE', 'View', 'Python Console')):
             if key in openModuleKeys:
-                mainActionDict = topActionDict.get(topActionText)  # should always exist but play safe
-                if mainActionDict:
-                    mainAction = mainActionDict.get(mainActionText)
-                    if mainAction:
+                if mainActionDict := topActionDict.get(topActionText):
+                    if mainAction := mainActionDict.get(mainActionText):
                         mainAction.setChecked(True)
 
-    def _testShortcuts0(self):
+    @staticmethod
+    def _testShortcuts0():
         print('>>> Testing shortcuts0')
 
-    def _testShortcuts1(self):
+    @staticmethod
+    def _testShortcuts1():
         print('>>> Testing shortcuts1')
 
     # GWV 22022/1/24: Copied from Ui
@@ -776,10 +772,7 @@ def _getOpenLayoutPath(mainWindow):
     dialog = LayoutsFileDialog(parent=mainWindow, acceptMode='open', fileFilter=fType)
     dialog._show()
     path = dialog.selectedFile()
-    if not path:
-        return None
-    if path:
-        return path
+    return path or None
 
 
 def _getSaveLayoutPath(mainWindow):

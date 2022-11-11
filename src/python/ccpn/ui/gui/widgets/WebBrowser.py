@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-10 16:20:10 +0000 (Thu, November 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-11 15:42:50 +0000 (Fri, November 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,108 +26,108 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import webbrowser as wb
-
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.WebView import WebViewPopup
-
-
-browserNames = ['firefox', 'netscape', 'mozilla', 'konqueror', 'kfm', 'mosaic',
-                'grail', 'w3m', 'windows-default', 'internet-config']
-
-
-class WebBrowser:
-
-    def __init__(self, parent, name=None, url=None):
-
-        names = getBrowserList()
-        if names and (not name):
-            name = names[0]
-
-        self.name = name
-
-        if url:
-            self.open(url)
-
-    def open(self, url):
-
-        try:
-            browser = wb.get(self.name)
-            browser.open(url)
-
-        except Exception:
-            WebViewPopup(url)
-
-
-class WebBrowserPulldown(PulldownList):
-
-    def __init__(self, parent, browser=None, **kwds):
-
-        super().__init__(parent, **kwds)
-
-        self.browserList = getBrowserList()
-
-        if not browser:
-            browser = getDefaultBrowser()
-
-        if self.browserList:
-            if (not browser) or (browser not in self.browserList):
-                browser = self.browserList[0]
-        self.browser = browser
-
-        if self.browserList:
-            self.setup(self.browserList, self.browserList, self.browserList.index(self.browser))
-
-        self.callback = self.setWebBrowser
-
-    def setWebBrowser(self, name):
-
-        if name != self.browser:
-            self.browser = name
-
-    def destroy(self):
-
-        pass
-
-
-def getBrowserList():
-    browsers = []
-    default = getDefaultBrowser()
-    if default:
-        browsers = [default, ]
-
-    for name in browserNames:
-        if name == default:
-            continue
-
-        try:
-            wb.get(name)
-            browsers.append(name)
-        except Exception:
-            try:
-                if wb._iscommand(name):
-                    wb.register(name, None, wb.Netscape(name))
-                    wb.get(name)
-                    browsers.append(name)
-            except Exception:
-                continue
-
-    return browsers
-
-
-def getDefaultBrowser():
-    try:
-        br = wb.get()
-    except Exception:
-        return
-
-    if not hasattr(br, 'name'):
-        # Max OS X
-        return
-
-    try:
-        wb.get(br.name)
-    except Exception:
-        wb.register(br.name, None, br)
-
-    return br.name
+# import webbrowser as wb
+#
+# from ccpn.ui.gui.widgets.PulldownList import PulldownList
+# from ccpn.ui.gui.widgets.WebView import WebViewPopup
+#
+#
+# browserNames = ['firefox', 'netscape', 'mozilla', 'konqueror', 'kfm', 'mosaic',
+#                 'grail', 'w3m', 'windows-default', 'internet-config']
+#
+#
+# class WebBrowser:
+#
+#     def __init__(self, parent, name=None, url=None):
+#
+#         names = getBrowserList()
+#         if names and (not name):
+#             name = names[0]
+#
+#         self.name = name
+#
+#         if url:
+#             self.open(url)
+#
+#     def open(self, url):
+#
+#         try:
+#             browser = wb.get(self.name)
+#             browser.open(url)
+#
+#         except Exception:
+#             WebViewPopup(url)
+#
+#
+# class WebBrowserPulldown(PulldownList):
+#
+#     def __init__(self, parent, browser=None, **kwds):
+#
+#         super().__init__(parent, **kwds)
+#
+#         self.browserList = getBrowserList()
+#
+#         if not browser:
+#             browser = getDefaultBrowser()
+#
+#         if self.browserList:
+#             if (not browser) or (browser not in self.browserList):
+#                 browser = self.browserList[0]
+#         self.browser = browser
+#
+#         if self.browserList:
+#             self.setup(self.browserList, self.browserList, self.browserList.index(self.browser))
+#
+#         self.callback = self.setWebBrowser
+#
+#     def setWebBrowser(self, name):
+#
+#         if name != self.browser:
+#             self.browser = name
+#
+#     def destroy(self):
+#
+#         pass
+#
+#
+# def getBrowserList():
+#     browsers = []
+#     default = getDefaultBrowser()
+#     if default:
+#         browsers = [default, ]
+#
+#     for name in browserNames:
+#         if name == default:
+#             continue
+#
+#         try:
+#             wb.get(name)
+#             browsers.append(name)
+#         except Exception:
+#             try:
+#                 if wb._iscommand(name):
+#                     wb.register(name, None, wb.Netscape(name))
+#                     wb.get(name)
+#                     browsers.append(name)
+#             except Exception:
+#                 continue
+#
+#     return browsers
+#
+#
+# def getDefaultBrowser():
+#     try:
+#         br = wb.get()
+#     except Exception:
+#         return
+#
+#     if not hasattr(br, 'name'):
+#         # Max OS X
+#         return
+#
+#     try:
+#         wb.get(br.name)
+#     except Exception:
+#         wb.register(br.name, None, br)
+#
+#     return br.name

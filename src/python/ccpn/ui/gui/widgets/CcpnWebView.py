@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-10 16:20:09 +0000 (Thu, November 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-11 15:42:50 +0000 (Fri, November 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # import os
 # import posixpath
 # from PyQt5 import QtCore
-# # from PyQt5.QtWebEngineWidgets import QWebEngineView
+# from PyQt5.QtWebEngineWidgets import QWebEngineView
 # from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 # from ccpn.util.Common import isWindowsOS
 # from ccpn.util.Path import aPath
@@ -69,37 +69,36 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #                 urlPath = 'file://' + str(aPath(urlPath))
 #
 #         self.webView.load(QtCore.QUrl.fromUserInput(urlPath))
-
-
-def main():
-    from ccpn.ui.gui.widgets.Application import newTestApplication
-    from ccpn.framework.Application import getApplication
-
-    # create a new test application
-    app = newTestApplication(interface='Gui')
-    application = getApplication()
-    # mainWindow = application.ui.mainWindow
-
-    # # add a module
-    # _module = CcpnWebView(mainWindow=None, name='My Module', urlPath='http://www.ccpn.ac.uk')
-    # mainWindow.moduleArea.addModule(_module)
-
-    # show the mainWindow
-    app.start()
-
-    # # example on how to use a javascript viewer can be found here
-    # # https://code.tutsplus.com/tutorials/how-to-create-a-pdf-viewer-in-javascript--cms-32505
-    #
-    # # PDFJS = 'file:///path/to/pdfjs-1.9.426-dist/web/viewer.html'
-    # PDFJS = 'file:///Users/ejb66/Downloads/pdfjs-2.4.456-dist/web/viewer.html'
-    # # PDFJS = 'file:///usr/share/pdf.js/web/viewer.html'
-    # PDF = 'file:///path/to/my/sample.pdf'
-    #
-    # class Window(QWebEngineView):
-    #     def __init__(self):
-    #         super(Window, self).__init__()
-    #         self.load(QtCore.QUrl.fromUserInput('{}?file={}'.format(PDFJS, PDF)))
-
-
-if __name__ == '__main__':
-    main()
+#
+#
+# def main():
+#     from ccpn.ui.gui.widgets.Application import newTestApplication
+#     from ccpn.framework.Application import getApplication
+#
+#     # create a new test application
+#     app = newTestApplication(interface='Gui')
+#     application = getApplication()
+#     # mainWindow = application.ui.mainWindow
+#     # add a module
+#     # _module = CcpnWebView(mainWindow=None, name='My Module', urlPath='http://www.ccpn.ac.uk')
+#     # mainWindow.moduleArea.addModule(_module)
+#
+#     # show the mainWindow
+#     app.start()
+#
+#     # # example on how to use a javascript viewer can be found here
+#     # # https://code.tutsplus.com/tutorials/how-to-create-a-pdf-viewer-in-javascript--cms-32505
+#     #
+#     # # PDFJS = 'file:///path/to/pdfjs-1.9.426-dist/web/viewer.html'
+#     # PDFJS = 'file:///Users/ejb66/Downloads/pdfjs-2.4.456-dist/web/viewer.html'
+#     # # PDFJS = 'file:///usr/share/pdf.js/web/viewer.html'
+#     # PDF = 'file:///path/to/my/sample.pdf'
+#     #
+#     # class Window(QWebEngineView):
+#     #     def __init__(self):
+#     #         super(Window, self).__init__()
+#     #         self.load(QtCore.QUrl.fromUserInput('{}?file={}'.format(PDFJS, PDF)))
+#
+#
+# if __name__ == '__main__':
+#     main()

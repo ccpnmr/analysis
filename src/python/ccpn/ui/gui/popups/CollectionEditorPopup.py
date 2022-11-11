@@ -20,37 +20,60 @@ __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: CCPN $"
-__date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
+__author__ = "$Author: gvuister $"
+__date__ = "$Date: 2022-11-11 11:28:58 +0100 (Fri, November 11, 2022) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-from ccpn.core.Complex import Complex
-from ccpn.ui.gui.widgets.PulldownListsForObjects import ComplexPulldown
 from ccpn.ui.gui.popups._GroupEditorPopupABC import _GroupEditorPopupABC
+from ccpn.core.Collection import Collection
+
+from ccpn.ui.gui.widgets.PulldownListsForObjects import CollectionPulldown
 
 
-class ComplexEditorPopup(_GroupEditorPopupABC):
+class CollectionPopup(_GroupEditorPopupABC):
+    """A class to maintain edit the collections
     """
-    A popup to create and manage Complexes
-    """
-    _class = Complex
-    _classPulldown = ComplexPulldown
 
-    _classItemAttribute = 'chains'  # Attribute in _class containing items
-
-    _projectNewMethod = 'newComplex'  # Method of Project to create new _class instance
-    _projectItemAttribute = 'chains'  # Attribute of Project containing items
+    _class = Collection  # e.g. SpectrumGroup
+    _classPulldown = CollectionPulldown  # SpectrumGroupPulldown
+    _enableClassPulldown = False
 
     # define these
-    _singularItemName = 'Chain'  # eg 'Spectrum'
-    _pluralItemName = 'Chains'  # eg 'Spectra'
+    _singularItemName = 'Item'  # eg 'Spectrum'
+    _pluralItemName = 'Items'  # eg 'Spectra'
 
+    def getItems(self) -> list:
+        """Get the items that can be included in the group
+        :return A list of items
+        """
+        items = [obj for obj in self.project._getAllDecendants()
+                     if not (obj.shortClassName in ['SR'] or
+                             obj._isGuiClass or
+                             obj == self.obj
+                             )
+                 ]
 
-    def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, **kwds):
+        return items
+
+    def newObject(self, name, comment=None):
+        """Create a new object with name, comment. Add items
         """
-        Initialise the widget, note defaultItems is only used for create
+        obj = self.project.newCollection(name=name, comment=comment)
+        return obj
+
+    def setObjectItems(self, items):
+        """et the items of the object; i.e. the items that form the group
         """
-        super().__init__(parent=parent, mainWindow=mainWindow, editMode=editMode, obj=obj,
-                         defaultItems=defaultItems, **kwds)
+        if (obj := self.obj) is not None:
+            obj.items = items
+
+    def getObjectItems(self) -> list:
+        """Get the items from self.object; i.e. the items that form the group
+        :return A list of items
+        """
+        if (obj := self.obj) is not None:
+            return obj.items
+        else:
+            return []

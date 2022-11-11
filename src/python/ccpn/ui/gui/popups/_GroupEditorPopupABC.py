@@ -1,5 +1,6 @@
 """
 Module Documentation here
+TODO More decision making on functionalities and subsequent code cleaning
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -15,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-07 12:09:30 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-15 13:44:12 +0000 (Tue, November 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -428,21 +429,43 @@ class _ListWidget(ListWidget):
             taken = self.takeItem(row)
             self._partner.addItem(item)
 
+from ccpn.ui.gui.widgets.PulldownListsForObjects import CollectionPulldown
 
 class _GroupEditorPopupABC(CcpnDialogMainWidget):
     """
-    An abstract base class to create and manage popups for _class
+    An abstract base class to create and manage popups for _class of the "grouping" kind
+
+    NB: Note the left and right are interchanged in the actual display!
+        i.e. "right" widgets appear on the left; "left" widgets on the right
     """
     # These need sub-classing
-    _class = None  # e.g. SpectrumGroup
-    _classItemAttribute = None  # e.g. 'spectra' # Attribute in _class containing items
-    _classPulldown = None  # SpectrumGroupPulldown
 
+    # Definitions for the "grouping class"
+    _class = None  #  e.g. SpectrumGroup
+    _classPulldown = None  # SpectrumGroupPulldown
+    _enableClassPulldown = False  # Enable the class pulldown widget
+
+    # either define _projectNewMethod, _projectItemAttribute or subclass the newObject, getItems methods
     _projectNewMethod = None  # e.g. 'newSpectrumGroup'  # Method of Project to create new _class instance
     _projectItemAttribute = None  # e.g. 'spectra'  # Attribute of Project containing items
+
+    # # define these
+    # _pluralGroupName = None  # eg 'Spectrum Groups'
+    # _singularGroupName = None  # eg'Spectrum Group'
+
+    # Definitions for the Items of the group
+    # either define _classItemAttribute or subclass the getObjectItems, setObjectItems methods
+    _classItemAttribute = None  # e.g. 'spectra' # Attribute in _class containing items
+
+    # define these; need specific definition as some use cases (e.g. Collection) will have
+    # variable types of items
+    _singularItemName = None  # eg 'Spectrum'
+    _pluralItemName = None  # eg 'Spectra'
+
+    # post init routine to populate any new values as necessary
     _groupEditorInitMethod = None
 
-    _buttonFilter = 'Filter by:'
+    _buttonFilter = 'Filter:'
     _buttonCancel = 'Cancel'
     _setRevertButton = False
 
@@ -453,21 +476,21 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
     FIXEDHEIGHT = False
     _FIXEDWIDTH = 120
 
-    def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, size=(600, 350), **kwds):
+    def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, size=(800, 500), **kwds):
         """
         Initialise the widget, note defaultItems is only used for create
         """
-
-        self._groupName = camelCaseSplit(self._class.className)
-
-        title = f'Edit {self._groupName}' if editMode else f'New {self._groupName}'
-
-        self._leftEmptyText = f'Drag or double click {self._projectItemAttribute} to add here'
-        self._rightEmptyText = f"No {self._projectItemAttribute}: try 'Filter by' settings"
-        self._acceptButtonText = f'Save changes to {self._pluralGroupName}'
+        title = f'Edit {self._class.className}' if editMode else f'New {self._class.className}'
 
         super().__init__(parent=parent, windowTitle=title, setLayout=True, margins=(0, 0, 0, 0),
                          spacing=(5, 5), size=size, **kwds)
+
+        self._singularGroupName = camelCaseSplit(self._class.className)
+        self._pluralGroupName = camelCaseSplit(self._class._pluralLinkName).capitalize()
+
+        self._leftEmptyText = f'Drag or double click {self._singularItemName} to add here'
+        self._rightEmptyText = f"No {self._pluralItemName}: try 'Filter by' settings"
+        self._acceptButtonText = f'Save'
 
         self.errorIcon = Icon('icons/exclamation_small')
 
@@ -513,6 +536,54 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         # self._updateStateOnSelection()
         # self.setMinimumSize(self.sizeHint())
         # self.resize(500, 350)  # change to a calculation rather than a guess
+
+#-----------------------------------------------------------------------------------
+# GWV: new methods; possible to subclass
+#-----------------------------------------------------------------------------------
+
+    def getItems(self) -> list:
+        """Get the items that can be included in the group
+        :return A list of items
+
+        NB Likely to be subclassed
+        """
+        if hasattr(self.project, self._projectItemAttribute):
+            return getattr(self.project, self._projectItemAttribute)
+        else:
+            raise RuntimeError(f'Project.{self._projectItemAttribute} does not exists')
+
+    def newObject(self, name, comment=None):
+        """Create a new object
+        :return The new object
+
+        NB Can be subclassed
+        """
+        func = getattr(self.project, self._projectNewMethod)
+        obj = func(name=name, comment=comment)
+        return obj
+
+    def getObjectItems(self) -> list:
+        """Get the items from self.object; i.e. the items that form the group
+        :return A list of items
+
+        NB Likely to be subclassed
+        """
+        if (obj := self.obj) is not None:
+            return getattr(obj, self._classItemAttribute)
+        else:
+            return []
+
+    def setObjectItems(self, items) :
+        """Set the items of the object; i.e. the items that form the group
+
+        NB Likely to be subclassed
+        """
+        if (obj := self.obj) is not None:
+            setattr(obj, self._classItemAttribute, items)
+
+#-----------------------------------------------------------------------------------
+# GWV: end new methods; possible to subclass
+#-----------------------------------------------------------------------------------
 
     def _setWidgets(self, defaultItems):
         """Set up the main widgets for the dialog
@@ -569,13 +640,14 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         return changeState(self, False, False, False, self._applyButton, None, self._revertButton, 0)
 
     def _getPreviousState(self):
+        #TODO remove dependence on _pid2Obj
         result = {}
-        beforeKeys = self.project._pid2Obj.get(self._groupPidKey)
+        beforeKeys = self.project._pid2Obj.get(self._class.shortClassName)
         if beforeKeys is not None:
             for key in beforeKeys:
                 #GST do I need to filter object in an undo-state, if so could we add some interface for this...
-                obj = self.project._pid2Obj.get(self._groupPidKey)[key]
-                items = [elem.pid for elem in getattr(obj, self._projectItemAttribute)]
+                obj = self.project._pid2Obj.get(self._class.shortClassName)[key]
+                items = [elem.pid for elem in self.getObjectItems()]
                 comment = obj.comment or None
                 result[key] = {'spectra': items,
                                'comment': comment}
@@ -585,30 +657,18 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
         # self.leftTopLabel = Label(self._dialogWidget, '', bold=True, grid=(0, 0), gridSpan=(1, 3))
 
-        labelName = 'Name' if self.EDITMODE else f'New {self._groupName} Name'
+        labelName = 'Name' if self.EDITMODE else f'New {self._singularGroupName} Name'
 
-        optionTexts = [labelName, 'Comment', self._groupName, 'Selection']
+        optionTexts = [labelName, 'Comment', self._singularGroupName, 'Selection']
         _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
         self._FIXEDWIDTH = maxDim.width()
 
-        row = 1
-        self.nameLabel = Label(self._dialogWidget, labelName, grid=(row, 0), tipText=getAttributeTipText(self._class, 'name'))
-        self._nameEditFrame = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(row, 1), gridSpan=(1, 2))
-        self.nameEdit = LineEdit(self._nameEditFrame, backgroundText=f'{self._groupName} Name', hAlign='l', textAlignment='left', grid=(row, 1))
-
-        row += 1
-        self.commentLabel = Label(self._dialogWidget, 'Comment', grid=(row, 0), tipText=getAttributeTipText(self._class, 'comment'))
-        self.commentEdit = LineEdit(self._dialogWidget, backgroundText='> Optional <', textAlignment='left', grid=(row, 1), gridSpan=(1, 2))
-
-        # GST need something better than this..!
-        # self.nameEdit.setFixedWidth(self._FIXEDWIDTH * 1.5)
-        self.nameEdit.setFixedWidth(self._FIXEDWIDTH * 2)
-        # self.nameEdit.setVisible(True)
+        row = 0
 
         row += 1
         if self.EDITMODE:
             self._leftPullDownLabel = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(row, 1), gridSpan=(1, 2))
-            self.leftPullDownLabel = Label(self._dialogWidget, self._groupName, grid=(row, 0))
+            self.leftPullDownLabel = Label(self._dialogWidget, self._singularGroupName, grid=(row, 0), hAlign='r')
 
             self.leftPullDown = self._classPulldown(parent=self._leftPullDownLabel,
                                                     mainWindow=self.mainWindow,
@@ -618,13 +678,34 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                                                     fixedWidths=[0, None],
                                                     hAlign='l', grid=(row, 1),
                                                     )
-            self.leftPullDown.setEnabled(False)  ## Editing of different SG from the same popup is disabled.
+            self.leftPullDown.setEnabled(self._enableClassPulldown)  ## Editing of different SG from the same popup is disabled.
             ## It is confusing and error-prone in notifying changes to the other tabs.
+
+        row += 1
+        self.nameLabel = Label(self._dialogWidget, labelName, grid=(row, 0), hAlign='r',
+                               tipText=f'Name for {self._singularGroupName}')
+        self._nameEditFrame = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(row, 1),
+                                    gridSpan=(1, 2))
+        self.nameEdit = LineEdit(self._nameEditFrame, backgroundText=f'{self._singularGroupName} Name', hAlign='l',
+                                 textAlignment='left', grid=(row, 1))
+
+        row += 1
+        self.commentLabel = Label(self._dialogWidget, 'Comment', grid=(row, 0), hAlign='r',
+                                  tipText=f'Comment for {self._singularGroupName}')
+        self.commentEdit = LineEdit(self._dialogWidget, backgroundText='> Optional <',
+                                    textAlignment='left', grid=(row, 1), gridSpan=(1, 2))
+
+        # GST need something better than this..!
+        # self.nameEdit.setFixedWidth(self._FIXEDWIDTH * 1.5)
+        self.nameEdit.setFixedWidth(self._FIXEDWIDTH * 2)
+        # self.nameEdit.setVisible(True)
+
         row += 2
-        self.selectionLabel = Label(self._dialogWidget, self._classItemAttribute.capitalize(), grid=(row, 0), tipText=getAttributeTipText(self._class, self._classItemAttribute))
         self.leftItemsLabel = Label(self._dialogWidget, 'Not Included', grid=(row, 1))
 
         row += 1
+        self.selectionLabel = Label(self._dialogWidget, self._pluralItemName, grid=(row, 0), hAlign='r',
+                                    tipText=f'{self._pluralItemName} included or not-included in {self._singularGroupName}')
         self.leftListFeedbackWidget = FeedbackFrame(self._dialogWidget, grid=(row, 2))
         self.leftListWidget = _ListWidget(self.leftListFeedbackWidget, feedbackWidget=self.leftListFeedbackWidget,
                                           grid=(0, 0), dragRole='right', acceptDrops=True, sortOnDrop=False, copyDrop=False,
@@ -672,6 +753,18 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         # make this is primary expanding row
         self._dialogWidget.getLayout().setRowStretch(row, 2)
 
+# GWV insertion
+        # create a search box at the bottom of the sidebar frame container
+        row += 1
+        self._searchWidgetContainer = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(row, 1), gridSpan=(1, 1))
+
+        Label(self._searchWidgetContainer, self._buttonFilter, hAlign='l', grid=(0, 0))
+        txt = 'Filter for Pid/String e.g Sp:H*qC'
+        self._searchWidget = LineEdit(self._searchWidgetContainer, backgroundText=txt, grid=(0, 1))
+        self._searchWidget.textChanged.connect(self._searchWidgetCallback)
+
+# end GWV insertion
+
         # small frame for holding the pulldown list
         row += 1
         self.rightListFilterFrame = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(row, 1), gridSpan=(1, 2))
@@ -685,6 +778,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                                                  filterFunction=self._rightPullDownFilter,
                                                  hAlign='l', grid=(0, 1)
                                                  )
+        # GWV
+        self.rightListFilterFrame.hide()
         self.rightListFilterFrame.getLayout().setColumnStretch(2, 1)
 
         row += 1
@@ -697,6 +792,11 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self.addSpacer(0, 10, grid=(row, 0), gridSpan=(1, 3), parent=self._dialogWidget)
 
         # self.rightListWidget.setFixedWidth(2*self.FIXEDWIDTH)
+
+    def _searchWidgetCallback(self):
+        """Private callback from search widget
+        """
+        self._updateStateOnSelection()
 
     def _rightPullDownFilter(self, pids):
         if self._editedObject and self._editedObject.pid in pids:
@@ -733,14 +833,6 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             return None
         state = self._updatedState[obj.name]
         return state.get('spectra')
-
-    @property
-    def _projectObjectItems(self) -> [list, None]:
-        """Convenience to get the list from project of items we are editing for object (e.g. spectra
-        in case of SpectrumGroup)
-        Returns list or None on error
-        """
-        return getattr(self.project, self._projectItemAttribute) if hasattr(self.project, self._projectItemAttribute) else None
 
     @property
     def _editedObjectComment(self) -> [str, None]:
@@ -800,21 +892,6 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
         self._updateButton()
 
-    # def _checkForTrailingSpacesOnGroupName(self):
-    #     result = False
-    #     resultString = ''
-    #     badNames = []
-    #     for name in self._updatedState.keys():
-    #         if len(name.strip()) not in [0, len(name)]:
-    #             result = True
-    #             badNames.append(name.strip())
-    #
-    #     if result:
-    #         joinedNames = ', '.join(badNames)
-    #         resultString = f'Some {self._pluralGroupName} have names with leading or trailing spaces {joinedNames}'
-    #
-    #     return result, resultString
-
     def _checkForEmptyNames(self):
         result = False
         badKeys = []
@@ -847,23 +924,6 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             resultString = f'Duplicate Names: {duplicateNameString}'
 
         return result, resultString
-
-    # def _checkForEmptyGroups(self):
-    #
-    #     badKeys = []
-    #     for key, selection in self._updatedState.items():
-    #         values = selection.get('spectra')
-    #         values = self.filterEmptyText(values)
-    #         if len(values) == 0:
-    #             badKeys.append(key)
-    #
-    #     result = False
-    #     resultString = ''
-    #     if len(badKeys) > 0:
-    #         result = True
-    #         resultString = 'Empty %s: %s' % (self._pluralGroupName, ','.join(badKeys))
-    #
-    #     return result, resultString
 
     def _checkForSpacesInName(self):
 
@@ -931,16 +991,6 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                 resultString = spacesString
 
         return result, resultString
-
-    # def _checkForEmptyGroup_New(self):
-    #     result = False
-    #     resultString = ''
-    #
-    #     if len(self._groupedObjects) == 0:
-    #         result = True
-    #         resultString = 'The %s is empty' % self._singularGroupName
-    #
-    #     return result, resultString
 
     def _updateButton(self):
 
@@ -1051,7 +1101,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self._connectModels()
 
     def _getItemPositions(self, items):
-        orderedPids = [elem.pid for elem in getattr(self.project, self._projectItemAttribute)]
+        orderedPids = [elem.pid for elem in self.getItems()]
         return [{_ListWidget._searchRoleIndex: orderedPids.index(item)} for item in items]
 
     def _updateLeft(self):
@@ -1091,13 +1141,11 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
     def _updateRight(self):
         """Update Right
         """
-        if self.rightPullDown.getSelectedObject() is None:
-            self._setRightListWidgetItems(self._projectObjectItems)
+        if (obj := self.rightPullDown.getSelectedObject()) is None:
+            self._setRightListWidgetItems(self.getItems())
         else:
             self.rightListWidget.clear()
-            group = self.rightPullDown.getSelectedObject()
-            if group is not None:
-                self._setRightListWidgetItems(getattr(group, self._projectItemAttribute))
+            self._setRightListWidgetItems(self.getObjectItems())
 
     def _setLeftListWidgetItems(self, pids: list):
         """Convenience to set the items in the left ListWidget
@@ -1106,14 +1154,28 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         data = self._getItemPositions(pids)
         self.leftListWidget.setTexts(pids, clear=True, data=data)
 
+    def _filterPids(self, pids) -> list:
+        """:return the list of filtered pids
+        """
+        filter = self._searchWidget.get()
+        if len(filter) == 0:
+            return pids
+        pids = [pid for pid in pids if pid.startswith(filter)]
+        return pids
+
     def _setRightListWidgetItems(self, items: list):
         """Convenience to set the items in the right ListWidget
         """
         # convert items to pids
         pids = [s.pid for s in items]
+
         # filter for those pids already on the left-hand side
         leftPids = self.leftListWidget.getTexts()
         pids = [s for s in pids if s not in leftPids]
+
+        # GWV addition; apply the search filter
+        pids = self._filterPids(pids)
+
         data = self._getItemPositions(pids)
         self.rightListWidget.setTexts(pids, clear=True, data=data)
 
@@ -1158,27 +1220,20 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             try:
                 if self.EDITMODE:
                     # edit mode
+                    if self.obj is None:
+                        raise RuntimeError(f'Undefined object in edit mode')
+
                     for name, state in updateList.items():
                         items = state.get('spectra')
-                        pid = '%s:%s' % (self._groupPidKey, name)
-                        obj = self.project.getByPid(pid)
-
-                        setattr(obj, self._classItemAttribute, items)
-                        obj.comment = state.get('comment')
+                        self.setObjectItems(items)
+                        self.obj.comment = state.get('comment')
 
                     for name in renameList:
-                        pid = '%s:%s' % (self._groupPidKey, name)
-
-                        obj = self.project.getByPid(pid)
                         newName = renameList[name]
-                        obj.rename(newName)
+                        self.obj.rename(newName)
 
                     # call the post init routine to populate any new values as necessary
                     if self._groupEditorInitMethod:
-                        # for name, state in updateList.items():
-                        #     pid = '%s:%s' % (self._groupPidKey, name)
-                        #     obj = self.project.getByPid(pid)
-                        #     if obj == self.obj:
                         self._groupEditorInitMethod()
 
                 else:
@@ -1190,8 +1245,10 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                         items = state.get('spectra')
                         comment = state.get('comment')
 
-                        func = getattr(self.project, self._projectNewMethod)
-                        self.obj = func(name, items, comment=comment)
+                        # func = getattr(self.project, self._projectNewMethod)
+                        # self.obj = func(name, items, comment=comment)
+                        self.obj = self.newObject(name=name, comment=comment)
+                        self.setObjectItems(items=items)
 
                         # call the post init routine to populate any new values as necessary - only the current object
                         if self._groupEditorInitMethod:

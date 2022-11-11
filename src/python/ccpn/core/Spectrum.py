@@ -53,11 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-09 09:47:27 +0000 (Wed, November 09, 2022) $"
-__dateModified__ = "$dateModified: 2022-11-06 18:24:24 +0000 (Sun, November 06, 2022) $"
-__dateModified__ = "$dateModified: 2022-11-05 10:42:25 +0000 (Sat, November 05, 2022) $"
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-05 17:27:38 +0000 (Mon, December 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-11 15:36:02 +0000 (Fri, November 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -771,18 +767,19 @@ class Spectrum(AbstractWrapperObject):
         if path is None:
             raise ValueError(f'Undefined path')
 
-        self._close()
         newDataStore = DataStore.newFromPath(path=path, dataFormat=dataFormat)
         newDataStore.spectrum = self
-        self._spectrumTraits.dataStore = newDataStore
-        self._dataStore._saveInternal()
 
         if (newDataSource := self._getDataSource(dataStore=newDataStore, checkParameters=checkParameters)) is None:
             getLogger().warning('Spectrum._openFile: unable to open "%s"' % path)
         else:
             # we defined a new file
+            self._close()
             self._spectrumTraits.dataSource = newDataSource
             self._saveSpectrumMetaData()
+            self._spectrumTraits.dataStore = newDataStore
+            self._dataStore._saveInternal()
+            self._saveObject()
 
     @logCommand(get='self')
     def reload(self, path: str = None):

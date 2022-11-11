@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-15 13:44:12 +0000 (Tue, November 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-15 15:44:02 +0000 (Tue, November 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -44,11 +44,29 @@ class CollectionPopup(_GroupEditorPopupABC):
     _singularItemName = 'Item'  # eg 'Spectrum'
     _pluralItemName = 'Items'  # eg 'Spectra'
 
+    def _allCoreObjects(self, project):
+        """:return a list with all the project's core objects
+        """
+        #TODO: remove depency on _pid2Obj by wrapping it in a Project method
+        result = []
+        for _className, _itemDict in project._pid2Obj.items():
+
+            # check is we have a result,
+            # all object are referenced twice: both short and long pid's,
+            # e.g. SP and Spectrum
+            #
+            if _itemDict is not None:
+                _values = list(_itemDict.values())
+                if len(_values) > 0 and _values[0] not in result:
+                    result.extend(_values)
+
+        return result
+
     def getItems(self) -> list:
         """Get the items that can be included in the group
         :return A list of items
         """
-        items = [obj for obj in self.project._getAllDecendants()
+        items = [obj for obj in self._allCoreObjects(self.project)
                      if not (obj.shortClassName in ['SR'] or
                              obj._isGuiClass or
                              obj == self.obj

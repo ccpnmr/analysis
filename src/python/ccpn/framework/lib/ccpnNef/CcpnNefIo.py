@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-09 14:18:34 +0000 (Wed, November 09, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-11-14 11:42:53 +0000 (Mon, November 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -5131,7 +5131,20 @@ class CcpnNefReader(CcpnNefContent):
                     item = (defaultChainCode,) + item[1:]
                 idStrings.append(Pid.IDSEP.join(('' if x is None else str(x)) for x in item))
             try:
+                # create the contribution
                 contribution.addRestraintItem(idStrings, string2ItemMap)
+
+                # NOTE:ED - check with Eliza - create the required nmrAtoms/atoms
+                for atm in idStrings:
+                    if atm:
+                        chn, seq, res, atmType = atm.split(Pid.IDSEP)
+                        nmrChain = self.project.fetchNmrChain(chn)
+                        if res:
+                            nmrResidue = nmrChain.fetchNmrResidue(seq, res)
+                        else:
+                            nmrResidue = nmrChain.fetchNmrResidue(seq)
+                        nmrResidue.fetchNmrAtom(atmType)
+
             except ValueError:
                 self.warning("Cannot Add restraintItem %s. Identical to previous. Skipping" % idStrings, loop)
 

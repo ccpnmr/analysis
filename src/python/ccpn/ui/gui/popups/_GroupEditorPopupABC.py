@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-15 13:44:12 +0000 (Tue, November 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-15 15:45:06 +0000 (Tue, November 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1157,10 +1157,12 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
     def _filterPids(self, pids) -> list:
         """:return the list of filtered pids
         """
+        from fnmatch import fnmatchcase
+
         filter = self._searchWidget.get()
         if len(filter) == 0:
             return pids
-        pids = [pid for pid in pids if pid.startswith(filter)]
+        pids = [pid for pid in pids if fnmatchcase(pid, filter)]
         return pids
 
     def _setRightListWidgetItems(self, items: list):

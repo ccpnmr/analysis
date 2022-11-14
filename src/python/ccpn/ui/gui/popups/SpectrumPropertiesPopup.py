@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-03 15:36:48 +0000 (Thu, November 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-14 17:34:54 +0000 (Mon, November 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -312,18 +312,18 @@ class _SpectrumPropertiesFrame(ScrollableFrame):
         super(_SpectrumPropertiesFrame, self).__init__(*args, **kwds)
         self._widget = None
 
-    def _revertClicked(self):
-        """Revert button signal comes here
-        Revert (roll-back) the state of the project to before the popup was opened
-        """
-        if self._widget:
-            return self._thisparent.parent()._revertClicked()
-
-    def _getChangeState(self):
-        """Get the change state from the popup tabs
-        """
-        if self._widget:
-            return self._thisparent.parent()._getChangeState()
+    # def _revertClicked(self):
+    #     """Revert button signal comes here
+    #     Revert (roll-back) the state of the project to before the popup was opened
+    #     """
+    #     if self._widget:
+    #         return self._thisparent.parent()._revertClicked()
+    #
+    # def _getChangeState(self):
+    #     """Get the change state from the popup tabs
+    #     """
+    #     if self._widget:
+    #         return self._thisparent.parent()._getChangeState()
 
     def addWidget(self, widget, *args):
         """Add a widget to the frame
@@ -354,8 +354,8 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
 
         if spectrum.dimensionCount == 1:
             self._generalTab = self._dimensionsTab = self._contoursTab = None
-            for (tabName, attrName, tabFunc) in (('General', '_generalTab', partial(GeneralTab, mainWindow=self.mainWindow, spectrum=spectrum)),
-                                                 ('Dimensions', '_dimensionsTab', partial(DimensionsTab, mainWindow=self.mainWindow, spectrum=spectrum, dimensions=spectrum.dimensionCount)),
+            for (tabName, attrName, tabFunc) in (('General', '_generalTab', partial(GeneralTab, container=self, mainWindow=self.mainWindow, spectrum=spectrum)),
+                                                 ('Dimensions', '_dimensionsTab', partial(DimensionsTab, container=self, mainWindow=self.mainWindow, spectrum=spectrum, dimensions=spectrum.dimensionCount)),
                                                  ):
                 fr = _SpectrumPropertiesFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
                                               scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
@@ -369,9 +369,9 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
 
         else:
             self._generalTab = self._dimensionsTab = self._contoursTab = None
-            for (tabName, attrName, tabFunc) in (('General', '_generalTab', partial(GeneralTab, mainWindow=self.mainWindow, spectrum=spectrum)),
-                                                 ('Dimensions', '_dimensionsTab', partial(DimensionsTab, mainWindow=self.mainWindow, spectrum=spectrum, dimensions=spectrum.dimensionCount)),
-                                                 ('Contours', '_contoursTab', partial(ContoursTab, mainWindow=self.mainWindow, spectrum=spectrum, showCopyOptions=False)),
+            for (tabName, attrName, tabFunc) in (('General', '_generalTab', partial(GeneralTab, container=self, mainWindow=self.mainWindow, spectrum=spectrum)),
+                                                 ('Dimensions', '_dimensionsTab', partial(DimensionsTab, container=self, mainWindow=self.mainWindow, spectrum=spectrum, dimensions=spectrum.dimensionCount)),
+                                                 ('Contours', '_contoursTab', partial(ContoursTab, container=self, mainWindow=self.mainWindow, spectrum=spectrum, showCopyOptions=False)),
                                                  ):
                 fr = _SpectrumPropertiesFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
                                               scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
@@ -450,7 +450,8 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
         self.orderedSpectra = OrderedSet([spec.spectrum for spec in self.orderedSpectrumViews])
 
         for specNum, thisSpec in enumerate(self.orderedSpectra):
-            contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec,
+            contoursTab = ContoursTab(parent=self, container=self, mainWindow=self.mainWindow,
+                                      spectrum=thisSpec,
                                       showCopyOptions=True if len(self.orderedSpectra) > 1 else False,
                                       copyToSpectra=self.orderedSpectra)
             self.tabWidget.addTab(contoursTab, thisSpec.name)
@@ -525,7 +526,8 @@ class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
         self.orderedSpectra = [spec.spectrum for spec in self.orderedSpectrumViews]
 
         for specNum, thisSpec in enumerate(self.orderedSpectra):
-            colourTab = ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec,
+            colourTab = ColourTab(parent=self, container=self, mainWindow=self.mainWindow,
+                                  spectrum=thisSpec,
                                   showCopyOptions=True if len(self.orderedSpectra) > 1 else False,
                                   copyToSpectra=self.orderedSpectra
                                   )
@@ -586,12 +588,13 @@ class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
 #=========================================================================================
 
 class GeneralTab(Widget):
-    def __init__(self, parent=None, mainWindow=None, spectrum=None, item=None, colourOnly=False):
+    def __init__(self, parent=None, container=None, mainWindow=None, spectrum=None, item=None, colourOnly=False):
 
         super().__init__(parent, setLayout=True, spacing=DEFAULTSPACING)  # ejb
         self.setWindowTitle("Spectrum Properties")
 
         self._parent = parent
+        self._container = container  # master widget that this is attached to
         self.mainWindow = mainWindow
         self.application = self.mainWindow.application
         self.project = self.mainWindow.project
@@ -795,7 +798,7 @@ class GeneralTab(Widget):
     def _getChangeState(self):
         """Get the change state from the parent widget
         """
-        return self._parent._getChangeState()
+        return self._container._getChangeState()
 
     # @queueStateChange(_verifyPopupApply)
     # def _queueSetValidateDataUrl(self, dataUrl, newUrl, urlValid, dim):
@@ -917,7 +920,7 @@ class GeneralTab(Widget):
         newColour = dialog.getColor()
         if newColour:
             addNewColour(newColour)
-            self._parent._fillPullDowns()
+            self._container._fillPullDowns()
             self.colourBox.setCurrentText(spectrumColours[newColour.name()])
 
     @queueStateChange(_verifyPopupApply)
@@ -964,10 +967,11 @@ class GeneralTab(Widget):
 #=========================================================================================
 
 class DimensionsTab(Widget):
-    def __init__(self, parent=None, mainWindow=None, spectrum=None, dimensions=None):
+    def __init__(self, parent=None, container=None, mainWindow=None, spectrum=None, dimensions=None):
         super().__init__(parent, setLayout=True, spacing=DEFAULTSPACING)
 
         self._parent = parent
+        self._container = container  # master widget that this is attached to
         self.mainWindow = mainWindow
         self.spectrum = spectrum
         self.dimensions = dimensions
@@ -1489,7 +1493,7 @@ class DimensionsTab(Widget):
     def _getChangeState(self):
         """Get the change state from the parent widget
         """
-        return self._parent._getChangeState()
+        return self._container._getChangeState()
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetAssignmentTolerances(self, spectrum, dim, textFromValue, value):
@@ -1808,11 +1812,12 @@ class DimensionsTab(Widget):
 
 class ContoursTab(Widget):
 
-    def __init__(self, parent=None, mainWindow=None, spectrum=None, showCopyOptions=False, copyToSpectra=None):
+    def __init__(self, parent=None, container=None, mainWindow=None, spectrum=None, showCopyOptions=False, copyToSpectra=None):
 
         super().__init__(parent, setLayout=True, spacing=DEFAULTSPACING)
 
         self._parent = parent
+        self._container = container  # master widget that this is attached to
         self.mainWindow = mainWindow
         self.application = mainWindow.application
         self.preferences = self.application.preferences
@@ -2063,7 +2068,7 @@ class ContoursTab(Widget):
     def _getChangeState(self):
         """Get the change state from the parent widget
         """
-        return self._parent._getChangeState()
+        return self._container._getChangeState()
 
     def _populateCheckBoxes(self):
         """Populate the checkbox from preferences and fill the pullDown from the list of spectra
@@ -2219,7 +2224,7 @@ class ContoursTab(Widget):
         newColour = dialog.getColor()
         if newColour is not None:
             addNewColour(newColour)
-            self._parent._fillPullDowns()
+            self._container._fillPullDowns()
             self.positiveColourBox.setCurrentText(spectrumColours[newColour.name()])
 
     @queueStateChange(_verifyPopupApply)
@@ -2248,7 +2253,7 @@ class ContoursTab(Widget):
         newColour = dialog.getColor()
         if newColour is not None:
             addNewColour(newColour)
-            self._parent._fillPullDowns()
+            self._container._fillPullDowns()
             self.negativeColourBox.setCurrentText(spectrumColours[newColour.name()])
 
     @queueStateChange(_verifyPopupApply)
@@ -2338,7 +2343,7 @@ class ContoursTab(Widget):
                 toSpectra = [self.application.project.getByPid(toSpectraPids)]
 
             # call the parent tab copy action
-            self._parent.copySpectra(self.spectrum, toSpectra)
+            self._container.copySpectra(self.spectrum, toSpectra)
 
     def _copySpectrumAttributes(self, fromSpectrumTab):
         """Copy the attributes to the other spectra
@@ -2367,12 +2372,13 @@ class ContoursTab(Widget):
 #=========================================================================================
 
 class ColourTab(Widget):
-    def __init__(self, parent=None, mainWindow=None, spectrum=None, item=None, colourOnly=False,
+    def __init__(self, parent=None, container=None, mainWindow=None, spectrum=None, item=None, colourOnly=False,
                  showCopyOptions=False, copyToSpectra=None):
 
         super().__init__(parent, setLayout=True, spacing=DEFAULTSPACING)
 
         self._parent = parent
+        self._container = container  # master widget that this is attached to
         self.mainWindow = mainWindow
         self.application = self.mainWindow.application
         self.project = self.mainWindow.project
@@ -2495,7 +2501,7 @@ class ColourTab(Widget):
     def _getChangeState(self):
         """Get the change state from the parent widget
         """
-        return self._parent._getChangeState()
+        return self._container._getChangeState()
 
     def _populateCheckBoxes(self):
         """Populate the checkbox from preferences and fill the pullDown from the list of spectra
@@ -2523,7 +2529,7 @@ class ColourTab(Widget):
         newColour = dialog.getColor()
         if newColour is not None:
             addNewColour(newColour)
-            self._parent._fillPullDowns()
+            self._container._fillPullDowns()
             self.positiveColourBox.setCurrentText(spectrumColours[newColour.name()])
 
     @queueStateChange(_verifyPopupApply)
@@ -2569,7 +2575,7 @@ class ColourTab(Widget):
                 toSpectra = [self.application.project.getByPid(toSpectraPids)]
 
             # call the parent tab copy action
-            self._parent.copySpectra(self.spectrum, toSpectra)
+            self._container.copySpectra(self.spectrum, toSpectra)
 
     def _copySpectrumAttributes(self, fromSpectrumTab):
         """Copy the attributes to the other spectra
@@ -2621,7 +2627,7 @@ class ColourFrameABC(Frame):
         super().__init__(parent, **kwds)
 
         self._parent = parent
-        self._container = container  # master widget, that this is attached to
+        self._container = container  # master widget that this is attached to
         self.mainWindow = mainWindow
         self.application = self.mainWindow.application
         self.project = self.mainWindow.project

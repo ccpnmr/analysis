@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-07 14:45:55 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-14 17:34:54 +0000 (Mon, November 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -346,7 +346,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         for specNum, thisSpec in enumerate(spectra1d):
 
             if thisSpec.dimensionCount == 1:
-                contoursTab = ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec,
+                contoursTab = ColourTab(parent=self, container=self, mainWindow=self.mainWindow,
+                                        spectrum=thisSpec,
                                         showCopyOptions=True if len(spectra1d) > 1 else False,
                                         copyToSpectra=spectra1d)
 
@@ -404,7 +405,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         for specNum, thisSpec in enumerate(spectraNd):
 
             if thisSpec.dimensionCount > 1:
-                contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec,
+                contoursTab = ContoursTab(parent=self, container=self, mainWindow=self.mainWindow,
+                                          spectrum=thisSpec,
                                           showCopyOptions=True if len(spectraNd) > 1 else False,
                                           copyToSpectra=spectraNd)
 
@@ -584,7 +586,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                 self._oldTabs[spec]._populateColour()
             else:
                 if spec.dimensionCount == 1:
-                    contoursTab = ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=spec,
+                    contoursTab = ColourTab(parent=self, container=self, mainWindow=self.mainWindow,
+                                            spectrum=spec,
                                             showCopyOptions=True if len(spectra1d) > 1 else False,
                                             copyToSpectra=spectra1d)
 
@@ -637,7 +640,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                 self._oldTabs[spec]._populateColour()
             else:
                 if spec.dimensionCount > 1:
-                    contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=spec,
+                    contoursTab = ContoursTab(parent=self, container=self, mainWindow=self.mainWindow,
+                                              spectrum=spec,
                                               showCopyOptions=True if len(spectraNd) > 1 else False,
                                               copyToSpectra=spectraNd)
 

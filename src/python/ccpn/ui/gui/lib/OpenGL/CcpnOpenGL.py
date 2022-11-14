@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-14 11:19:38 +0000 (Mon, November 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-14 11:38:21 +0000 (Mon, November 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -192,7 +192,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if samples != antiAlias:
                 getLogger().warning('hardware changed antialias level, expected %i got %i...' % (samples, antiAlias))
         except Exception as es:
-            getLogger().warning('error during anti aliasing setup %s, anti aliasing disabled...' % str(es))
+            getLogger().warning(f'error during anti aliasing setup {str(es)}, anti aliasing disabled...')
 
         # flag to display paintGL but keep an empty screen
         self._blankDisplay = False
@@ -217,7 +217,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._preferences = self.application.preferences.general
         self.globalGL = None
 
-        self.stripIDLabel = stripIDLabel if stripIDLabel else ''
+        self.stripIDLabel = stripIDLabel or ''
 
         self.setMouseTracking(True)  # generate mouse events when button not pressed
 
@@ -230,7 +230,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # set a minimum size so that the strips resize nicely
         self.setMinimumSize(self.AXIS_MARGINRIGHT + 10, self.AXIS_MARGINBOTTOM + 10)
 
-        # initialise the pyqtsignal notifier
+        # initialise the pyqt-signal notifier
         self.GLSignals = GLNotifier(parent=self, strip=strip)
 
         self.lastPixelRatio = None

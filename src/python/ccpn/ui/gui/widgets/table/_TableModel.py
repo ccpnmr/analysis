@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-08 17:51:38 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-14 15:29:39 +0000 (Mon, November 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -604,9 +604,10 @@ class _TableModel(QtCore.QAbstractTableModel):
     def resetFilter(self):
         """Reset the table to unsorted
         """
-        self.beginResetModel()
-        self._filterIndex = None
-        self.endResetModel()
+        if self._filterIndex:
+            self.beginResetModel()
+            self._filterIndex = None
+            self.endResetModel()
 
 
 #=========================================================================================

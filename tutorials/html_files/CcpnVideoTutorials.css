@@ -93,6 +93,11 @@ h3 {
 	line-height: 1.4;
 }
 
+div.sections {
+	font-size: 1.6rem;
+	line-height: 1.7;
+}
+
 div.indexSection {
 	background: #6a3b71;
 	color: #FFF;

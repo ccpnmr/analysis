@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-14 10:50:00 +0000 (Mon, November 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-14 11:19:38 +0000 (Mon, November 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -151,14 +151,12 @@ class Gui(Ui):
         # NOTE:ED - this is essential for multi-window applications
         QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, True)
 
-        fm = QtGui.QSurfaceFormat()
-        fm.setSamples(4)
-
-        # NOTE:ED - Do not do this, they cause QT to exhibit strange behaviour
-        # fm.setSwapInterval(0)  # disable VSync
-        # fm.setSwapBehavior(QtGui.QSurfaceFormat.DoubleBuffer)
-
-        fm.setDefaultFormat(fm)
+        # fm = QtGui.QSurfaceFormat()
+        # fm.setSamples(4)
+        # # NOTE:ED - Do not do this, they cause QT to exhibit strange behaviour
+        # # fm.setSwapInterval(0)  # disable VSync
+        # # fm.setSwapBehavior(QtGui.QSurfaceFormat.DoubleBuffer)
+        # QtGui.QSurfaceFormat.setDefaultFormat(fm)
 
         self.qtApp = Application(self.application.applicationName,
                                  self.application.applicationVersion,

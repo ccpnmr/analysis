@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-10 16:20:09 +0000 (Thu, November 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-14 12:38:45 +0000 (Mon, November 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1182,6 +1182,8 @@ class Framework(NotifierBase, GuiBase):
         :return Project instance (either newly created or the existing)
         CCPNINTERNAL: called from NefDataLoader.load()
         """
+        from ccpn.core.Project import DEFAULT_CHEMICALSHIFTLIST
+
         if dataLoader.createNewProject:
             project = self._newProject(dataLoader.nefImporter.getName())
         else:
@@ -1189,7 +1191,17 @@ class Framework(NotifierBase, GuiBase):
 
         # TODO: find a different solution for this
         with rebuildSidebar(application=self):
+            if ch := project.getChemicalShiftList(DEFAULT_CHEMICALSHIFTLIST):
+                # remove the existing chemical-shift-list, should not be done lightly
+                ch._delete()
+
+            # import the nef-file
             dataLoader._importIntoProject(project=project)
+
+            if not project.chemicalShiftLists:
+                # create a new default of none added by the import
+                project.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
+
         return project
 
     def _exportNEF(self):

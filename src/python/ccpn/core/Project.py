@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 15:20:30 +0100 (Thu, October 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-14 12:38:45 +0000 (Mon, November 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -95,6 +95,9 @@ SPECTRUMGROUPS = 'spectrumGroups'
 NOTES = 'notes'
 # _PEAKCLUSTERS = '_peakClusters'
 COLLECTIONS = 'collections'
+
+# define the default chemical-shift-list name
+DEFAULT_CHEMICALSHIFTLIST = 'default'
 
 
 class Project(AbstractWrapperObject):
@@ -520,8 +523,8 @@ class Project(AbstractWrapperObject):
             self._restoreObject(self, self._wrappedData)
 
             # we always have the default chemicalShift list
-            if len(self.chemicalShiftLists) == 0:
-                self.newChemicalShiftList(name='default')
+            if not self.chemicalShiftLists:
+                self.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
 
             # Call any updates
             self._update()

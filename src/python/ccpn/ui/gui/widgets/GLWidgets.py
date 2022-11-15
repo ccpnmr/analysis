@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-07 15:50:26 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-15 19:07:13 +0000 (Tue, November 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -175,7 +175,20 @@ class GuiNdWidget(CcpnGLWidget):
 
         for specView in tuple(self._spectrumSettings.keys()):
             if specView not in self._ordering:
-                del self._spectrumSettings[specView]
+                getLogger().debug(f'>>>_updateVisibleSpectrumViews GLWidgets  nD   delete {specView} {id(specView)}')
+                getLogger().debug(f'>>> _ordering {[id(spec) for spec in self._ordering]}')
+                if specView in self._spectrumSettings:
+                    del self._spectrumSettings[specView]
+                if specView in self._contourList:
+                    self._contourList[specView]._delete()
+                    del self._contourList[specView]
+                if specView in self._visibleOrdering:
+                    self._visibleOrdering.remove(specView)
+                for k in self._visibleOrderingDict:
+                    sp, _dd = k
+                    if sp == specView:
+                        self._visibleOrderingDict.remove(k)
+                        break
 
                 # delete the 1d string relating to the spectrumView
                 self._spectrumLabelling.removeString(specView)
@@ -1420,9 +1433,20 @@ class Gui1dWidget(CcpnGLWidget):
 
         for specView in tuple(self._spectrumSettings.keys()):
             if specView not in self._ordering:
-                # print('>>>_updateVisibleSpectrumViews delete', specView, id(specView))
-                # print('>>>', [id(spec) for spec in self._ordering])
-                del self._spectrumSettings[specView]
+                getLogger().debug(f'>>>_updateVisibleSpectrumViews GLWidgets  1D   delete {specView} {id(specView)}')
+                getLogger().debug(f'>>> _ordering {[id(spec) for spec in self._ordering]}')
+                if specView in self._spectrumSettings:
+                    del self._spectrumSettings[specView]
+                if specView in self._contourList:
+                    self._contourList[specView]._delete()
+                    del self._contourList[specView]
+                if specView in self._visibleOrdering:
+                    self._visibleOrdering.remove(specView)
+                for k in self._visibleOrderingDict:
+                    sp, _dd = k
+                    if sp == specView:
+                        self._visibleOrderingDict.remove(k)
+                        break
 
                 # delete the 1d string relating to the spectrumView
                 self._spectrumLabelling.removeString(specView)

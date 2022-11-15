@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-15 13:44:12 +0000 (Tue, November 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-15 16:51:16 +0000 (Tue, November 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -46,11 +46,3 @@ class ComplexEditorPopup(_GroupEditorPopupABC):
     # define these
     _singularItemName = 'Chain'  # eg 'Spectrum'
     _pluralItemName = 'Chains'  # eg 'Spectra'
-
-
-    def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, **kwds):
-        """
-        Initialise the widget, note defaultItems is only used for create
-        """
-        super().__init__(parent=parent, mainWindow=mainWindow, editMode=editMode, obj=obj,
-                         defaultItems=defaultItems, **kwds)

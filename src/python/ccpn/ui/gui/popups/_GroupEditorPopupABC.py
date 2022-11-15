@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-15 15:45:06 +0000 (Tue, November 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-15 16:51:17 +0000 (Tue, November 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,7 @@ from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Tabs import Tabs
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.util.Constants import INTERNALQTDATA
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
@@ -429,7 +429,6 @@ class _ListWidget(ListWidget):
             taken = self.takeItem(row)
             self._partner.addItem(item)
 
-from ccpn.ui.gui.widgets.PulldownListsForObjects import CollectionPulldown
 
 class _GroupEditorPopupABC(CcpnDialogMainWidget):
     """
@@ -488,9 +487,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self._singularGroupName = camelCaseSplit(self._class.className)
         self._pluralGroupName = camelCaseSplit(self._class._pluralLinkName).capitalize()
 
-        self._leftEmptyText = f'Drag or double click {self._singularItemName} to add here'
-        self._rightEmptyText = f"No {self._pluralItemName}: try 'Filter by' settings"
-        self._acceptButtonText = f'Save'
+        self._targetEmptyText = f'Drag or double click {self._singularItemName} to add here'
+        self._sourceEmptyText = f"No {self._pluralItemName}: try 'Filter by' settings"
+        self._acceptButtonText = 'Save'
 
         self.errorIcon = Icon('icons/exclamation_small')
 
@@ -520,6 +519,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self._revertButton = self.getButton(self.RESETBUTTON)
 
         self._connectLists()
+
+        self._allItems = self.getItems()
         self._populateLists()
 
         self._revertButton.setEnabled(False)
@@ -537,9 +538,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         # self.setMinimumSize(self.sizeHint())
         # self.resize(500, 350)  # change to a calculation rather than a guess
 
-#-----------------------------------------------------------------------------------
-# GWV: new methods; possible to subclass
-#-----------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------
+    # GWV: new methods; possible to subclass
+    #-----------------------------------------------------------------------------------
 
     def getItems(self) -> list:
         """Get the items that can be included in the group
@@ -573,7 +574,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         else:
             return []
 
-    def setObjectItems(self, items) :
+    def setObjectItems(self, items):
         """Set the items of the object; i.e. the items that form the group
 
         NB Likely to be subclassed
@@ -581,14 +582,14 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         if (obj := self.obj) is not None:
             setattr(obj, self._classItemAttribute, items)
 
-#-----------------------------------------------------------------------------------
-# GWV: end new methods; possible to subclass
-#-----------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------
+    # GWV: end new methods; possible to subclass
+    #-----------------------------------------------------------------------------------
 
     def _setWidgets(self, defaultItems):
         """Set up the main widgets for the dialog
         """
-        # open popup with these items already added to left ListWidget. Ready to create the group.
+        # open popup with these items already added to target ListWidget. Ready to create the group.
         # assumes that defaultItems is a list of core objects (with pid)
         self.defaultItems = [itm.pid for itm in defaultItems] if defaultItems else None
         if self._useTab is None:
@@ -615,8 +616,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             else:
                 raise RuntimeError('self._tabWidget: invalid _useTab setting')
 
-        self._setLeftWidgets()
-        self._setRightWidgets()
+        self._setTargetWidgets()
+        self._setSourceWidgets()
 
     def _populateLists(self):
         # one cannot be a copy of the other unless it's a deep copy...
@@ -653,34 +654,33 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                                'comment': comment}
         return result
 
-    def _setLeftWidgets(self):
+    def _setTargetWidgets(self):
 
         # self.leftTopLabel = Label(self._dialogWidget, '', bold=True, grid=(0, 0), gridSpan=(1, 3))
 
-        labelName = 'Name' if self.EDITMODE else f'New {self._singularGroupName} Name'
+        labelName = f'{self._singularGroupName} Name' if self.EDITMODE else f'New {self._singularGroupName} Name'
 
         optionTexts = [labelName, 'Comment', self._singularGroupName, 'Selection']
         _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
         self._FIXEDWIDTH = maxDim.width()
 
-        row = 0
+        row = 1
+        # if self.EDITMODE:
+        #     self._leftPullDownLabel = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(row, 1), gridSpan=(1, 2))
+        #     self.leftPullDownLabel = Label(self._dialogWidget, self._singularGroupName, grid=(row, 0), hAlign='r')
+        #
+        #     self.leftPullDown = self._classPulldown(parent=self._leftPullDownLabel,
+        #                                             mainWindow=self.mainWindow,
+        #                                             showSelectName=False,
+        #                                             default=self.obj,
+        #                                             callback=self._leftPullDownCallback,
+        #                                             fixedWidths=[0, None],
+        #                                             hAlign='l', grid=(row, 1),
+        #                                             )
+        #     self.leftPullDown.setEnabled(self._enableClassPulldown)  ## Editing of different SG from the same popup is disabled.
+        #     ## It is confusing and error-prone in notifying changes to the other tabs.
 
-        row += 1
-        if self.EDITMODE:
-            self._leftPullDownLabel = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(row, 1), gridSpan=(1, 2))
-            self.leftPullDownLabel = Label(self._dialogWidget, self._singularGroupName, grid=(row, 0), hAlign='r')
-
-            self.leftPullDown = self._classPulldown(parent=self._leftPullDownLabel,
-                                                    mainWindow=self.mainWindow,
-                                                    showSelectName=False,
-                                                    default=self.obj,
-                                                    callback=self._leftPullDownCallback,
-                                                    fixedWidths=[0, None],
-                                                    hAlign='l', grid=(row, 1),
-                                                    )
-            self.leftPullDown.setEnabled(self._enableClassPulldown)  ## Editing of different SG from the same popup is disabled.
-            ## It is confusing and error-prone in notifying changes to the other tabs.
-
+        # still needs to be in the correct place
         row += 1
         self.nameLabel = Label(self._dialogWidget, labelName, grid=(row, 0), hAlign='r',
                                tipText=f'Name for {self._singularGroupName}')
@@ -701,17 +701,18 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         # self.nameEdit.setVisible(True)
 
         row += 2
-        self.leftItemsLabel = Label(self._dialogWidget, 'Not Included', grid=(row, 1))
+        targetCol = 2
+        Label(self._dialogWidget, 'Included', grid=(row, targetCol))
 
         row += 1
         self.selectionLabel = Label(self._dialogWidget, self._pluralItemName, grid=(row, 0), hAlign='r',
                                     tipText=f'{self._pluralItemName} included or not-included in {self._singularGroupName}')
-        self.leftListFeedbackWidget = FeedbackFrame(self._dialogWidget, grid=(row, 2))
-        self.leftListWidget = _ListWidget(self.leftListFeedbackWidget, feedbackWidget=self.leftListFeedbackWidget,
-                                          grid=(0, 0), dragRole='right', acceptDrops=True, sortOnDrop=False, copyDrop=False,
-                                          emptyText=self._leftEmptyText, rearrangeable=True, itemFactory=OrderedListWidgetItemFactory())
+        self.targetListFeedbackWidget = FeedbackFrame(self._dialogWidget, grid=(row, targetCol))
+        self.targetListWidget = _ListWidget(self.targetListFeedbackWidget, feedbackWidget=self.targetListFeedbackWidget,
+                                            grid=(0, 0), dragRole='right', acceptDrops=True, sortOnDrop=False, copyDrop=False,
+                                            emptyText=self._targetEmptyText, rearrangeable=True, itemFactory=OrderedListWidgetItemFactory())
 
-        self.leftListWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        self.targetListWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         # make this is primary expanding row
         self._dialogWidget.getLayout().setRowStretch(row, 2)
 
@@ -719,41 +720,42 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         if not self._modelsConnected:
             self.nameEdit.textChanged.connect(self._updateNameOnEdit)
             self.commentEdit.textChanged.connect(self._updateCommentOnEdit)
-            self.leftListWidget.model().dataChanged.connect(self._updateModelsOnEdit)
-            self.leftListWidget.model().rowsRemoved.connect(self._updateModelsOnEdit)
-            self.leftListWidget.model().rowsInserted.connect(self._updateModelsOnEdit)
-            self.leftListWidget.model().rowsMoved.connect(self._updateModelsOnEdit)
+            self.targetListWidget.model().dataChanged.connect(self._updateModelsOnEdit)
+            self.targetListWidget.model().rowsRemoved.connect(self._updateModelsOnEdit)
+            self.targetListWidget.model().rowsInserted.connect(self._updateModelsOnEdit)
+            self.targetListWidget.model().rowsMoved.connect(self._updateModelsOnEdit)
             self._modelsConnected = True
 
     def _disconnectModels(self):
         if self._modelsConnected:
             self.nameEdit.textChanged.disconnect(self._updateNameOnEdit)
             self.commentEdit.textChanged.disconnect(self._updateCommentOnEdit)
-            self.leftListWidget.model().dataChanged.disconnect(self._updateModelsOnEdit)
-            self.leftListWidget.model().rowsRemoved.disconnect(self._updateModelsOnEdit)
-            self.leftListWidget.model().rowsInserted.disconnect(self._updateModelsOnEdit)
-            self.leftListWidget.model().rowsMoved.disconnect(self._updateModelsOnEdit)
+            self.targetListWidget.model().dataChanged.disconnect(self._updateModelsOnEdit)
+            self.targetListWidget.model().rowsRemoved.disconnect(self._updateModelsOnEdit)
+            self.targetListWidget.model().rowsInserted.disconnect(self._updateModelsOnEdit)
+            self.targetListWidget.model().rowsMoved.disconnect(self._updateModelsOnEdit)
             self._modelsConnected = False
 
-    def _setRightWidgets(self):
+    def _setSourceWidgets(self):
 
         row = 4
         self.addSpacer(0, 5, grid=(row, 0), gridSpan=(1, 3), parent=self._dialogWidget)
 
         row += 1
-        self.rightItemsLabel = Label(self._dialogWidget, 'Included', grid=(row, 2))
+        sourceCol = 1
+        Label(self._dialogWidget, 'Not Included', grid=(row, sourceCol))
 
         row += 1
-        self.rightListFeedbackWidget = FeedbackFrame(self._dialogWidget, grid=(row, 1))
-        self.rightListWidget = _ListWidget(self.rightListFeedbackWidget, feedbackWidget=self.rightListFeedbackWidget,
-                                           grid=(0, 0), dragRole='left', acceptDrops=True, sortOnDrop=False, copyDrop=False,
-                                           emptyText=self._rightEmptyText, sorted=True, itemFactory=OrderedListWidgetItemFactory())
+        self.sourceListFeedbackWidget = FeedbackFrame(self._dialogWidget, grid=(row, sourceCol))
+        self.sourceListWidget = _ListWidget(self.sourceListFeedbackWidget, feedbackWidget=self.sourceListFeedbackWidget,
+                                            grid=(0, 0), dragRole='left', acceptDrops=True, sortOnDrop=False, copyDrop=False,
+                                            emptyText=self._sourceEmptyText, sorted=True, itemFactory=OrderedListWidgetItemFactory())
 
-        self.rightListWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        self.sourceListWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         # make this is primary expanding row
         self._dialogWidget.getLayout().setRowStretch(row, 2)
 
-# GWV insertion
+        # GWV insertion
         # create a search box at the bottom of the sidebar frame container
         row += 1
         self._searchWidgetContainer = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(row, 1), gridSpan=(1, 1))
@@ -763,24 +765,24 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self._searchWidget = LineEdit(self._searchWidgetContainer, backgroundText=txt, grid=(0, 1))
         self._searchWidget.textChanged.connect(self._searchWidgetCallback)
 
-# end GWV insertion
+        # end GWV insertion
 
         # small frame for holding the pulldown list
         row += 1
-        self.rightListFilterFrame = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(row, 1), gridSpan=(1, 2))
-        self.rightFilterLabel = Label(self.rightListFilterFrame, self._buttonFilter, hAlign='l', grid=(0, 0))
-        self.rightPullDown = self._classPulldown(parent=self.rightListFilterFrame,
-                                                 mainWindow=self.mainWindow,
-                                                 showSelectName=True,
-                                                 selectNoneText='none',
-                                                 callback=self._rightPullDownCallback,
-                                                 fixedWidths=[0, None],
-                                                 filterFunction=self._rightPullDownFilter,
-                                                 hAlign='l', grid=(0, 1)
-                                                 )
-        # GWV
-        self.rightListFilterFrame.hide()
-        self.rightListFilterFrame.getLayout().setColumnStretch(2, 1)
+        # self.rightListFilterFrame = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(row, 1), gridSpan=(1, 2))
+        # self.rightFilterLabel = Label(self.rightListFilterFrame, self._buttonFilter, hAlign='l', grid=(0, 0))
+        # self.rightPullDown = self._classPulldown(parent=self.rightListFilterFrame,
+        #                                          mainWindow=self.mainWindow,
+        #                                          showSelectName=True,
+        #                                          selectNoneText='none',
+        #                                          callback=self._sourcePullDownCallback,
+        #                                          fixedWidths=[0, None],
+        #                                          filterFunction=self._rightPullDownFilter,
+        #                                          hAlign='l', grid=(0, 1)
+        #                                          )
+        # # GWV
+        # self.rightListFilterFrame.hide()
+        # self.rightListFilterFrame.getLayout().setColumnStretch(2, 1)
 
         row += 1
         self.addSpacer(0, 5, grid=(row, 0), gridSpan=(1, 3), parent=self._dialogWidget)
@@ -791,12 +793,12 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         row += 1
         self.addSpacer(0, 10, grid=(row, 0), gridSpan=(1, 3), parent=self._dialogWidget)
 
-        # self.rightListWidget.setFixedWidth(2*self.FIXEDWIDTH)
+        # self.sourceListWidget.setFixedWidth(2*self.FIXEDWIDTH)
 
     def _searchWidgetCallback(self):
         """Private callback from search widget
         """
-        self._updateStateOnSelection()
+        self._updateSource()  # update the contents of the source list-widget
 
     def _rightPullDownFilter(self, pids):
         if self._editedObject and self._editedObject.pid in pids:
@@ -804,24 +806,25 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         return pids
 
     def _connectLists(self):
-        self.leftListWidget.setPartner(self.rightListWidget)
-        self.rightListWidget.setPartner(self.leftListWidget)
+        self.targetListWidget.setPartner(self.sourceListWidget)
+        self.sourceListWidget.setPartner(self.targetListWidget)
 
     @property
     def _editedObject(self):
         """Convenience to get the edited object"""
-        return self.leftPullDown.getSelectedObject() if self.EDITMODE else None
+        # return self.leftPullDown.getSelectedObject() if self.EDITMODE else None
+        return self.obj if self.EDITMODE else None
 
     @property
     def _groupedObjects(self) -> list:
-        result = self.leftListWidget.getTexts()
-        if self._leftEmptyText in result:
-            result.remove(self._leftEmptyText)
+        result = self.targetListWidget.getTexts()
+        if self._targetEmptyText in result:
+            result.remove(self._targetEmptyText)
         return result
 
     @_groupedObjects.setter
     def _groupedObjects(self, vv):
-        self.leftListWidget.setTexts(vv)
+        self.targetListWidget.setTexts(vv)
 
     @property
     def _editedObjectItems(self) -> [list, None]:
@@ -880,6 +883,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             newName = self.nameEdit.text()
             self._updatedNames[editedObjectName] = newName
 
+        self._updateSource()
         self._updateButton()
 
     def _updateCommentOnEdit(self, *args, **kwargs):
@@ -956,8 +960,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         return result, resultString
 
     def filterEmptyText(self, items):
-        if self._leftEmptyText in items:
-            items.remove(self._leftEmptyText)
+        if self._targetEmptyText in items:
+            items.remove(self._targetEmptyText)
         return items
 
     def _checkForNoName_New(self):
@@ -1090,107 +1094,112 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         # will trigger model changes
 
         self._disconnectModels()
-        self._updateLeft()
-        self._updateRight()
+        self._updateTarget()
+        self._updateSource()
         self._updateButton()
-        self.rightPullDown._updatePulldownList()
-        if len(self.rightPullDown.getObjects()) < 2:
-            self.rightPullDown.setEnabled(False)
-        else:
-            self.rightPullDown.setEnabled(True)
+        # self.rightPullDown._updatePulldownList()
+        # if len(self.rightPullDown.getObjects()) < 2:
+        #     self.rightPullDown.setEnabled(False)
+        # else:
+        #     self.rightPullDown.setEnabled(True)
         self._connectModels()
 
     def _getItemPositions(self, items):
-        orderedPids = [elem.pid for elem in self.getItems()]
+        orderedPids = [elem.pid for elem in self._allItems]
         return [{_ListWidget._searchRoleIndex: orderedPids.index(item)} for item in items]
 
-    def _updateLeft(self):
-        """Update Left
+    def _updateTarget(self):
+        """Update target list
         """
         # block widget signals to stop feedback loops
         with self.blockWidgetSignals(recursive=False):
             if self.EDITMODE:
 
-                self.leftPullDownLabel.show()
-                self.leftPullDown.show()
-                self.rightPullDown.setEnabled(len(self.leftPullDown.getObjects()) > 0)
+                # self.leftPullDownLabel.show()
+                # self.leftPullDown.show()
+                # self.rightPullDown.setEnabled(len(self.leftPullDown.getObjects()) > 0)
+
                 obj = self._editedObject
                 if obj is not None:
                     name = self._updatedNames[obj.name]
                     self.nameEdit.setText(name)
                     self.commentEdit.setText(self._editedObjectComment)
-                    self._setLeftListWidgetItems(self._editedObjectItems)
+                    self._setTargetListWidgetItems(self._editedObjectItems)
                     self.nameEdit.setEnabled(True)
-                    self.leftListWidget.setEnabled(True)
-                    self.rightListWidget.setEnabled(True)
+                    self.targetListWidget.setEnabled(True)
+                    self.sourceListWidget.setEnabled(True)
                 else:
                     self.nameEdit.setText('')
                     self.commentEdit.setText('')
-                    self.leftListWidget.clear()
+                    self.targetListWidget.clear()
                     self.nameEdit.setEnabled(False)
-                    self.leftListWidget.setEnabled(False)
-                    self.rightListWidget.setEnabled(False)
+                    self.targetListWidget.setEnabled(False)
+                    self.sourceListWidget.setEnabled(False)
 
             else:
-                self.leftListWidget.clear()
+                self.targetListWidget.clear()
                 if self.defaultItems is not None:
-                    self._setLeftListWidgetItems(self.defaultItems)
+                    self._setTargetListWidgetItems(self.defaultItems)
                 self.nameEdit.setText(self._class._uniqueName(self.project))
                 self.commentEdit.setText('')
 
-    def _updateRight(self):
-        """Update Right
+    def _updateSource(self):
+        """Update Source list
         """
-        if (obj := self.rightPullDown.getSelectedObject()) is None:
-            self._setRightListWidgetItems(self.getItems())
-        else:
-            self.rightListWidget.clear()
-            self._setRightListWidgetItems(self.getObjectItems())
+        # if (obj := self.rightPullDown.getSelectedObject()) is None:
+        # if self.obj:
+        #     self._setSourceListWidgetItems(self._allItems)
+        # else:
+        #     self.sourceListWidget.clear()
+        #     self._setSourceListWidgetItems(self.getObjectItems())
 
-    def _setLeftListWidgetItems(self, pids: list):
-        """Convenience to set the items in the left ListWidget
+        self._setSourceListWidgetItems(self._allItems)
+
+    def _setTargetListWidgetItems(self, pids: list):
+        """Convenience to set the items in the target ListWidget
         """
         # convert items to pids
         data = self._getItemPositions(pids)
-        self.leftListWidget.setTexts(pids, clear=True, data=data)
+        self.targetListWidget.setTexts(pids, clear=True, data=data)
 
     def _filterPids(self, pids) -> list:
-        """:return the list of filtered pids
+        """
+        :return: the list of filtered pids
         """
         from fnmatch import fnmatchcase
 
-        filter = self._searchWidget.get()
-        if len(filter) == 0:
+        filt = self._searchWidget.get()
+        if len(filt) == 0:
             return pids
-        pids = [pid for pid in pids if fnmatchcase(pid, filter)]
+        pids = [pid for pid in pids if fnmatchcase(pid, filt)]
         return pids
 
-    def _setRightListWidgetItems(self, items: list):
-        """Convenience to set the items in the right ListWidget
+    def _setSourceListWidgetItems(self, items: list):
+        """Convenience to set the items in the source ListWidget
         """
         # convert items to pids
         pids = [s.pid for s in items]
 
-        # filter for those pids already on the left-hand side
-        leftPids = self.leftListWidget.getTexts()
-        pids = [s for s in pids if s not in leftPids]
+        # filter for those pids already in the target
+        targetPids = self.targetListWidget.getTexts()
+        pids = [s for s in pids if s not in targetPids]
 
         # GWV addition; apply the search filter
         pids = self._filterPids(pids)
 
         data = self._getItemPositions(pids)
-        self.rightListWidget.setTexts(pids, clear=True, data=data)
+        self.sourceListWidget.setTexts(pids, clear=True, data=data)
 
-    def _leftPullDownCallback(self, value=None):
-        """Callback when selecting the left spectrumGroup pulldown item"""
-        if obj := self.project.getByPid(value):
-            # set the new object
-            self.obj = obj
-        self._updateStateOnSelection()
-
-    def _rightPullDownCallback(self, value=None):
-        """Callback when selecting the right spectrumGroup pulldown item"""
-        self._updateRight()
+    # def _targetPullDownCallback(self, value=None):
+    #     """Callback when selecting the target spectrumGroup pulldown item"""
+    #     if obj := self.project.getByPid(value):
+    #         # set the new object
+    #         self.obj = obj
+    #     self._updateStateOnSelection()
+    #
+    # def _sourcePullDownCallback(self, value=None):
+    #     """Callback when selecting the right spectrumGroup pulldown item"""
+    #     self._updateSource()
 
     def _updatedStateToObjects(self):
         result = {}
@@ -1218,7 +1227,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         updateList = self._updatedStateToObjects()
         renameList = self._getRenames()
 
-        with undoBlockWithoutSideBar():
+        with undoBlock():
             try:
                 if self.EDITMODE:
                     # edit mode
@@ -1267,9 +1276,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
     def unRegister(self):
         """Clean up notifiers on closing
         """
-        if self.EDITMODE:
-            self.leftPullDown.unRegister()
-        self.rightPullDown.unRegister()
+        # if self.EDITMODE:
+        #     self.leftPullDown.unRegister()
+        # self.rightPullDown.unRegister()
         self._disconnectModels()
 
     def _cancel(self):

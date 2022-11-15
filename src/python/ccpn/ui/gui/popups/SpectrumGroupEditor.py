@@ -2,7 +2,6 @@
 Module Documentation here
 """
 
-
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -17,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-15 13:44:12 +0000 (Tue, November 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-15 16:51:16 +0000 (Tue, November 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -279,7 +278,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         if obj and editMode:
             defaultItems = obj.spectra
         # replace the tab widget with a new seriesWidget
-        seriesTabContents = SeriesFrame(parent=self, mainWindow=self.mainWindow, spectrumGroup=obj, editMode=editMode,
+        seriesTabContents = SeriesFrame(parent=self, container=self, mainWindow=self.mainWindow, spectrumGroup=obj, editMode=editMode,
                                         showCopyOptions=True if defaultItems and len(defaultItems) > 1 else False,
                                         defaultItems=defaultItems or ())
         self._tabWidget.widget(SERIESTABNUM).setWidget(seriesTabContents)
@@ -319,10 +318,10 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         # connect to changes in the spectrumGroup
         self.nameEdit.textChanged.connect(self.seriesTab._queueChangeName)
         self.commentEdit.textChanged.connect(self.seriesTab._queueChangeComment)
-        self.leftListWidget.model().dataChanged.connect(self._spectraChanged)
-        self.leftListWidget.model().rowsRemoved.connect(self._spectraChanged)
-        self.leftListWidget.model().rowsInserted.connect(self._spectraChanged)
-        self.leftListWidget.model().rowsMoved.connect(self._spectraChanged)
+        self.targetListWidget.model().dataChanged.connect(self._spectraChanged)
+        self.targetListWidget.model().rowsRemoved.connect(self._spectraChanged)
+        self.targetListWidget.model().rowsInserted.connect(self._spectraChanged)
+        self.targetListWidget.model().rowsMoved.connect(self._spectraChanged)
 
     def getActiveTabList(self):
         """Return the list of active tabs
@@ -346,7 +345,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         for specNum, thisSpec in enumerate(spectra1d):
 
             if thisSpec.dimensionCount == 1:
-                contoursTab = ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec,
+                contoursTab = ColourTab(parent=self, container=self, mainWindow=self.mainWindow, spectrum=thisSpec,
                                         showCopyOptions=True if len(spectra1d) > 1 else False,
                                         copyToSpectra=spectra1d)
 
@@ -404,7 +403,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         for specNum, thisSpec in enumerate(spectraNd):
 
             if thisSpec.dimensionCount > 1:
-                contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec,
+                contoursTab = ContoursTab(parent=self, container=self, mainWindow=self.mainWindow, spectrum=thisSpec,
                                           showCopyOptions=True if len(spectraNd) > 1 else False,
                                           copyToSpectra=spectraNd)
 
@@ -527,14 +526,14 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
     def _closeColourTabNd(self, index):
         self._colourTabsNd.removeTab(index)
 
-    def _leftPullDownCallback(self, value=None):
+    def _targetPullDownCallback(self, value=None):
         """Callback when selecting the left spectrumGroup pulldown item
         """
         obj = self.project.getByPid(value)
         if obj:
             # set the new object
             self.defaultObject = obj
-        super(SpectrumGroupEditor, self)._leftPullDownCallback(value)
+        super(SpectrumGroupEditor, self)._targetPullDownCallback(value)
 
     def _spectraChanged(self, *args):
         """Respond to a change in the list of spectra to add the spectrumGroup
@@ -584,7 +583,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                 self._oldTabs[spec]._populateColour()
             else:
                 if spec.dimensionCount == 1:
-                    contoursTab = ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=spec,
+                    contoursTab = ColourTab(parent=self, container=self, mainWindow=self.mainWindow, spectrum=spec,
                                             showCopyOptions=True if len(spectra1d) > 1 else False,
                                             copyToSpectra=spectra1d)
 
@@ -637,7 +636,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                 self._oldTabs[spec]._populateColour()
             else:
                 if spec.dimensionCount > 1:
-                    contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=spec,
+                    contoursTab = ContoursTab(parent=self, container=self, mainWindow=self.mainWindow, spectrum=spec,
                                               showCopyOptions=True if len(spectraNd) > 1 else False,
                                               copyToSpectra=spectraNd)
 
@@ -678,12 +677,13 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 class SeriesFrame(Frame):
     _editMode = False
 
-    def __init__(self, parent=None, mainWindow=None, spectrumGroup=None, editMode=False,
+    def __init__(self, parent=None, container=None, mainWindow=None, spectrumGroup=None, editMode=False,
                  showCopyOptions=False, defaultItems=None):
 
         super().__init__(parent, setLayout=True, spacing=DEFAULTSPACING)
 
         self._parent = parent
+        self._container = container
         self.mainWindow = mainWindow
         self.application = mainWindow.application
         self.preferences = self.application.preferences

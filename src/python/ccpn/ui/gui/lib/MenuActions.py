@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-19 17:52:06 +0200 (Wed, October 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-15 16:52:35 +0000 (Tue, November 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -68,7 +68,7 @@ from ccpn.ui.gui.popups.StructureEnsemblePopup import StructureEnsemblePopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 from ccpn.ui.gui.popups.DataTablePopup import DataTablePopup
 from ccpn.ui.gui.popups.ViolationTablePopup import ViolationTablePopup
-from ccpn.ui.gui.popups.CollectionPopup import CollectionPopup
+from ccpn.ui.gui.popups.CollectionEditorPopup import CollectionEditorPopup
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, \
     undoBlockWithoutSideBar, undoStackBlocking
 
@@ -377,7 +377,7 @@ class _raiseViolationTablePopup(RaisePopupABC):
 
 
 class _raiseCollectionPopup(RaisePopupABC):
-    popupClass = CollectionPopup
+    popupClass = CollectionEditorPopup
     # objectArgumentName = 'obj'
 
 

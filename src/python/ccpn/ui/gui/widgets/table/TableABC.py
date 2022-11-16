@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-08 17:51:38 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-16 13:27:09 +0000 (Wed, November 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -848,11 +848,11 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     def setTableMenu(self) -> Menu:
         """Set up the context menu for the main table
         """
-        menu = Menu('', self, isFloatWidget=True)
+        self._thisTableMenu = menu = Menu('', self, isFloatWidget=True)
         setWidgetFont(menu, )
 
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(partial(self._raiseTableContextMenu, menu))
+        self.customContextMenuRequested.connect(self._raiseTableContextMenu)
 
         self.addTableMenuOptions(menu)
 
@@ -875,11 +875,13 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         # Subclass to add extra options
         pass
 
-    def _raiseTableContextMenu(self, menu, pos):
+    def _raiseTableContextMenu(self, pos):
         """Create a new menu and popup at cursor position
         """
-        if not menu:
-            raise ValueError('menu is not defined')
+        if not (menu := self._thisTableMenu):
+            getLogger().warning('menu is not defined')
+            # raise ValueError('menu is not defined')
+            return
 
         # call the class setup
         self.setTableMenuOptions(menu)

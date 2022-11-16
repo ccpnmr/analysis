@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-14 12:38:45 +0000 (Mon, November 14, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-11-16 13:06:42 +0000 (Wed, November 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -574,6 +574,13 @@ class Framework(NotifierBase, GuiBase):
         # translator.setDebug(True)
         sys.stderr.write('==> Language set to "%s"\n' % translator._language)
 
+
+    def cleanGarbageCollector(self):
+        """ Force the garbageCollector to clean. See more at
+        https://docs.python.org/3/library/gc.html"""
+        import gc
+        gc.collect()
+
     #-----------------------------------------------------------------------------------------
 
     def _correctColours(self):
@@ -951,6 +958,8 @@ class Framework(NotifierBase, GuiBase):
             _project._close()
             self._project = None
             del (_project)
+
+        self.cleanGarbageCollector()
 
     #-----------------------------------------------------------------------------------------
     # Data loaders

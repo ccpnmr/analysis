@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-01 10:32:49 +0000 (Tue, November 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-16 13:11:27 +0000 (Wed, November 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -55,7 +55,7 @@ from ccpn.ui.gui.widgets.Font import Font, DEFAULTFONTNAME, DEFAULTFONTSIZE, get
 from ccpn.util.Common import _getObjectsByPids, splitDataFrameWithinRange
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.ui.gui.widgets.Icon import Icon, ICON_DIR
-from pyqtgraph.graphicsItems.ROI import Handle
+from ccpn.ui.gui.widgets import MessageDialog
 
 
 # colours
@@ -426,7 +426,7 @@ class ScatterPlot(Widget):
             self._updateBrushes()  # update colours
             self._plotItem.autoRange()
         else:
-            Widgets.MessageDialog.showWarning('Error displaying data', 'Values length mismatch')
+            MessageDialog.showWarning('Error displaying data', 'Values length mismatch')
         # self.scatterPlot.updatePoints()
 
     def _setZoomFull(self, *args):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 15:26:21 +0100 (Thu, October 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-16 15:48:30 +0000 (Wed, November 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -173,6 +173,9 @@ class ViolationTableModule(CcpnModule):
         Label(_topWidget, text='\nmetadata', grid=(row, 0), hAlign='r', vAlign='t')
         self._metadata = Table(_topWidget, showVerticalHeader=False, grid=(row, 1), gridSpan=(1, 3))
         self._metadata.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self._metadata._enableSelectionCallback = False
+        self._metadata._enableActionCallback = False
+        self._metadata.setEditable(False)
 
         row += 1
         Spacer(_topWidget, 5, 5,

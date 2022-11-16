@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-16 13:27:09 +0000 (Wed, November 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-16 14:30:02 +0000 (Wed, November 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,8 +30,7 @@ import numpy as np
 import pandas as pd
 from PyQt5 import QtWidgets, QtCore, QtGui
 from dataclasses import dataclass
-from contextlib import contextmanager
-from functools import partial
+from contextlib import contextmanager, suppress
 import typing
 
 from ccpn.ui.gui.guiSettings import getColours
@@ -380,6 +379,12 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         if self._droppedNotifier:
             self._droppedNotifier.unRegister()
             self._droppedNotifier = None
+        # remove signals from header/table
+        if header := self.horizontalHeader():
+            with suppress(Exception):
+                header.customContextMenuRequested.disconnect(self._raiseHeaderContextMenu)
+        with suppress(Exception):
+            self.customContextMenuRequested.disconnect(self._raiseTableContextMenu)
 
     #=========================================================================================
     # Properties
@@ -880,7 +885,6 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         """
         if not (menu := self._thisTableMenu):
             getLogger().warning('menu is not defined')
-            # raise ValueError('menu is not defined')
             return
 
         # call the class setup
@@ -902,12 +906,12 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     def setHeaderMenu(self) -> Menu:
         """Set up the context menu for the table header
         """
-        menu = Menu('', self, isFloatWidget=True)
+        self._thisTableHeaderMenu = menu = Menu('', self, isFloatWidget=True)
         setWidgetFont(menu, )
 
         headers = self.horizontalHeader()
         headers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        headers.customContextMenuRequested.connect(partial(self._raiseHeaderContextMenu, menu))
+        headers.customContextMenuRequested.connect(self._raiseHeaderContextMenu)
 
         self.addHeaderMenuOptions(menu)
 
@@ -925,11 +929,12 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         # Subclass to add extra options
         pass
 
-    def _raiseHeaderContextMenu(self, menu, pos):
+    def _raiseHeaderContextMenu(self, pos):
         """Raise the menu on the header
         """
-        if not menu:
-            raise ValueError('menu is not defined')
+        if not (menu := self._thisTableHeaderMenu):
+            getLogger().warning('header-menu is not defined')
+            return
         if self._df is None or self._df.empty:
             return
 

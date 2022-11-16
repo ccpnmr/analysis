@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-04 17:37:46 +0100 (Tue, October 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-11-16 15:46:17 +0000 (Wed, November 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1058,6 +1058,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             except Exception as es:
                 # wrapped C/C++ object of type StripDisplay1d has been deleted
                 getLogger().debug(f'_closeExtraWindowModules: {es}')
+
+    def _stopPythonConsole(self):
+        if  self.pythonConsoleModule:
+            self.pythonConsoleModule.pythonConsoleWidget._stopChannels()
 
     def _closeWindowFromUpdate(self, event=None, disableCancel=True):
         # set the active window to mainWindow so that the quit popup centres correctly.

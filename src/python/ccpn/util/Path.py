@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-08 09:01:38 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-16 16:18:59 +0000 (Wed, November 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,7 @@ import os
 import shutil
 import glob
 import datetime
+import re
 
 dirsep = '/'
 # note, cannot just use os.sep below because can have window file names cropping up on unix machines
@@ -87,33 +88,35 @@ class Path(_Path_):
         return self.parent / (self.stem + '-' + str(now) + self.suffix)
 
     @property
-    def version(self):
+    def version(self) -> int:
         """Parse self to yield a version integer, presumably generated with the incrementVersion method
-        Return 0 if not found
+        versions are encoded as "(version)" string at the end of basename; e.g. xyz/basename(10).fid
+        :return version number or 0 if not found
         """
-        suffixes = self.suffixes
-        version = 0
-        if len(suffixes) > 0:
-            try:
-                version = int(suffixes[0][1:])
-            except:
-                version = 0
-        return version
+        basename = self.basename
+        _m = re.search('\([0-9]+\)', basename)
+        if _m is None:
+            return 0
+
+        start, stop = _m.span()
+        try:
+            value = int(basename[start+1:stop-1])
+        except ValueError:
+            value = 0
+
+        return value
 
     def incrementVersion(self):
-        """Return a Path instance with path.version.suffix profile
+        """return: a Path instance with directory/basename(version).suffixes profile
         """
-        suffixes = self.suffixes
-        version = 0
-        if len(suffixes) > 0:
-            try:
-                version = int(suffixes[0][1:])
-                suffixes.pop(0)
-            except:
-                version = 0
-        version += 1
-        suffixes.insert(0, '.' + str(version))
-        return self.parent / (self.basename + ''.join(suffixes))
+        _dir = self.parent
+        _basename = self.basename
+        _version = self.version
+        if _version > 0:
+            _basename = _basename[: -len(f'({_version})')]
+
+        _version += 1
+        return _dir / _basename + f'({_version})' + ''.join(self.suffixes)
 
     def uniqueVersion(self):
         """Return a Path instance which is unique by incrementing version index

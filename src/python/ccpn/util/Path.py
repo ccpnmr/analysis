@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-16 16:18:59 +0000 (Wed, November 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-16 16:27:31 +0000 (Wed, November 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -99,10 +99,16 @@ class Path(_Path_):
             return 0
 
         start, stop = _m.span()
+        if stop != len(basename):
+            return 0
+
         try:
             value = int(basename[start+1:stop-1])
         except ValueError:
-            value = 0
+            return 0
+
+        if value < 1:
+            return 0
 
         return value
 

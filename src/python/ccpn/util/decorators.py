@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-11-16 15:54:36 +0000 (Wed, November 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -504,6 +504,76 @@ def timeitDecorator(method):
 
     return timed
 
+######### Memory leak inspection ###########
+
+
+def _startInspectMemory():
+    """  Call this before a suspected leaking bit.
+    Starts a tracemalloc and  take an initial snapshot
+    return tracemalloc, snapshot
+    """
+    import tracemalloc
+    tracemalloc.start()
+    snapshot = tracemalloc.take_snapshot()
+    return tracemalloc, snapshot
+
+def _closeInspectMemory(tracemalloc, snapshot, savingPath=None, topCount=20):
+    """  Call this after  a suspected leaking bit  and pass
+    :param tracemalloc, snapshot from the _startInspectMemory func.
+    :param SavingPath: a global path for a csv if you want save the result to file.
+    :return a dataFrame containing the top results,
+      including file name, line number  and memory usage in KiB per call
+
+      Usage:
+     tracemalloc, snapshot =  _startInspectMemory()
+      ... run the slow/leaky func
+      df = _closeInspectMemory(tracemalloc, snapshot, '~/resultFile.csv')
+      """
+
+    import pandas as pd
+    snapshotCurrent = tracemalloc.take_snapshot()
+    stats = snapshotCurrent.compare_to(snapshot, 'lineno')
+    df = pd.DataFrame()
+    for index, stat in enumerate(stats[:topCount]):
+        frame = stat.traceback[0]
+        ix = index
+        df.loc[ix, 'index'] = index
+        df.loc[ix, 'filename'] = frame.filename
+        df.loc[ix, 'line'] = frame.lineno
+        df.loc[ix, 'size (KiB)'] = stat.size / 1024
+    if savingPath is not None:
+        if not savingPath.endswith('.csv'):
+            raise UserWarning('FilePath must be a valid *.csv path.')
+        df.to_csv(savingPath)
+    tracemalloc.stop()
+    return df
+
+def _getObjectCountInMemory(savingPath=None, topCount=100):
+
+    """ Create a DataFrame with a count of the most seen
+    Object types held in memory.
+    :param SavingPath: str, a global path for a csv if you want save the result to file.
+    :param  topCount: int. Number of obj to consider in the most common
+    :return pd.DataFrame.
+    """
+
+    import pandas as pd
+    from collections import Counter
+    import gc
+    df = pd.DataFrame()
+    obs = gc.get_objects()
+    obs = [type(i) for i in obs]
+    c = Counter(obs)
+    for ix, mostCommon in enumerate(c.most_common(topCount)):
+        _type, count = mostCommon
+        df.loc[ix, 'Index'] = ix
+        df.loc[ix, 'Object'] = str(_type)
+        df.loc[ix, 'Count'] = count
+    if savingPath is not None:
+        if not savingPath.endswith('.csv'):
+            raise UserWarning('FilePath must be a valid *.csv path.')
+        df.to_csv(savingPath)
+    return df
 
 def debugEnter(verbosityLevel=Logging.DEBUG1):
     """A decorator to log the invocation of the call

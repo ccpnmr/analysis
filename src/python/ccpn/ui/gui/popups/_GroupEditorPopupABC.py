@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-15 16:51:17 +0000 (Tue, November 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-16 16:21:13 +0000 (Wed, November 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -800,10 +800,10 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         """
         self._updateSource()  # update the contents of the source list-widget
 
-    def _rightPullDownFilter(self, pids):
-        if self._editedObject and self._editedObject.pid in pids:
-            pids.remove(self._editedObject.pid)
-        return pids
+    # def _rightPullDownFilter(self, pids):
+    #     if self._editedObject and self._editedObject.pid in pids:
+    #         pids.remove(self._editedObject.pid)
+    #     return pids
 
     def _connectLists(self):
         self.targetListWidget.setPartner(self.sourceListWidget)
@@ -1104,9 +1104,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         #     self.rightPullDown.setEnabled(True)
         self._connectModels()
 
-    def _getItemPositions(self, items):
-        orderedPids = [elem.pid for elem in self._allItems]
-        return [{_ListWidget._searchRoleIndex: orderedPids.index(item)} for item in items]
+    # def _getItemPositions(self, items):
+    #     orderedPids = [elem.pid for elem in self._allItems]
+    #     return [{_ListWidget._searchRoleIndex: orderedPids.index(item)} for item in items]
 
     def _updateTarget(self):
         """Update target list
@@ -1159,8 +1159,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         """Convenience to set the items in the target ListWidget
         """
         # convert items to pids
-        data = self._getItemPositions(pids)
-        self.targetListWidget.setTexts(pids, clear=True, data=data)
+        # data = self._getItemPositions(pids)
+        self.targetListWidget.setTexts(pids, clear=True)  # , data=data)
 
     def _filterPids(self, pids) -> list:
         """
@@ -1187,8 +1187,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         # GWV addition; apply the search filter
         pids = self._filterPids(pids)
 
-        data = self._getItemPositions(pids)
-        self.sourceListWidget.setTexts(pids, clear=True, data=data)
+        # data = self._getItemPositions(pids)
+        self.sourceListWidget.setTexts(pids, clear=True)  # , data=data)
 
     # def _targetPullDownCallback(self, value=None):
     #     """Callback when selecting the target spectrumGroup pulldown item"""

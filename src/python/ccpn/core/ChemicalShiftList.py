@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-16 13:12:26 +0000 (Wed, November 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-17 16:23:31 +0000 (Thu, November 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -103,6 +103,10 @@ class _ChemicalShiftListFrame(DataFrameABC):
     # functionality can be moved from main class below to here at some point as required
     # - currently not using undo/redo ability of superclass
     pass
+
+
+# register the class with DataFrameABC for json loading/saving
+_ChemicalShiftListFrame.register()
 
 
 from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION

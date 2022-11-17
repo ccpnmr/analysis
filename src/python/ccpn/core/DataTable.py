@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-27 14:36:44 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-17 16:23:31 +0000 (Thu, November 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -49,6 +49,10 @@ class TableFrame(DataFrameABC):
     Generic data - as a Pandas DataFrame.
     """
     pass
+
+
+# register the class with DataFrameABC for json loading/saving
+TableFrame.register(setDefault=True)
 
 
 class DataTable(AbstractWrapperObject):
@@ -255,9 +259,16 @@ class DataTable(AbstractWrapperObject):
 
         _data = result._wrappedData.data
         if not isinstance(_data, TableFrame):
-            # make sure that data is the correct type
-            getLogger().warning(f'Failed restoring object {result.pid}: data not of type {TableFrame} - resetting to an empty table')
-            result._wrappedData.data = TableFrame()
+
+            if isinstance(_data, pd.DataFrame):
+                # make sure that data is the correct type
+                getLogger().debug(f'Restoring object - converting to {TableFrame}')
+                result._wrappedData.data = TableFrame(_data)
+
+            else:
+                # make sure that data is the correct type
+                getLogger().debug(f'Failed restoring object {result.pid}: data not of type {TableFrame} - resetting to an empty table')
+                result._wrappedData.data = TableFrame()
 
         return result
 

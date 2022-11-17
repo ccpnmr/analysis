@@ -9,12 +9,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-27 14:36:45 +0100 (Wed, July 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-17 16:23:31 +0000 (Thu, November 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import collections
+import pandas as pd
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble as ApiStructureEnsemble
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -34,7 +35,6 @@ from ccpn.core.lib.ContextManagers import newObject, renameObject
 from ccpn.util.StructureData import EnsembleData
 from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
-from ccpn.util import Common as commonUtil
 
 
 logger = getLogger()
@@ -102,23 +102,20 @@ class StructureEnsemble(AbstractWrapperObject):
         will be echoed and put on the undo-stack.
         Changing the data by direct pandas access will not."""
         apiObj = self._wrappedData.findFirstParameter(name='data')
-        if apiObj is None:
-            return None
-        else:
-            return apiObj.value
+        return None if apiObj is None else apiObj.value
 
     @data.setter
     def data(self, value: EnsembleData):
         wrappedData = self._wrappedData
-        if isinstance(value, EnsembleData):
-            apiObj = wrappedData.findFirstParameter(name='data')
-            if apiObj is None:
-                wrappedData.newParameter(name='data', value=value)
-            else:
-                apiObj.value = value
-        else:
+        if not isinstance(value, EnsembleData):
             raise TypeError("Value is not of type EnsembleData")
-        #
+
+        apiObj = wrappedData.findFirstParameter(name='data')
+        if apiObj is None:
+            wrappedData.newParameter(name='data', value=value)
+        else:
+            apiObj.value = value
+
         value._containingObject = self
 
     def resetModels(self):
@@ -126,7 +123,7 @@ class StructureEnsemble(AbstractWrapperObject):
         data = self.data
         if data.shape[0]:
             # data present
-            modelNumbers = set(x for x in data['modelNumber'] if x is not None)
+            modelNumbers = {x for x in data['modelNumber'] if x is not None}
             serial2Model = collections.OrderedDict((x.serial, x) for x in self.models)
 
             # remove models without data
@@ -156,6 +153,27 @@ class StructureEnsemble(AbstractWrapperObject):
         NB, the serial remains immutable.
         """
         return self._rename(value)
+
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Restore the object and update ccpnInternalData as required
+        """
+        result = super()._restoreObject(project, apiObj)
+
+        _data = result.data
+        if not isinstance(_data, EnsembleData):
+
+            if isinstance(_data, pd.DataFrame):
+                # make sure that data is the correct type
+                getLogger().debug(f'Restoring object - converting to {EnsembleData}')
+                result.data = EnsembleData(_data)
+
+            else:
+                # make sure that data is the correct type
+                getLogger().debug(f'Failed restoring object {result.pid}: data not of type {EnsembleData} - resetting to an empty table')
+                result.data = EnsembleData()
+
+        return result
 
     #=========================================================================================
     # CCPN functions
@@ -232,7 +250,7 @@ def _newStructureEnsemble(self: Project, name: str = None, data: EnsembleData = 
         data._containingObject = result
         for modelNumber in sorted(data['modelNumber'].unique()):
             # _validateName
-            _label = 'my%s_%s' % (Model.className, modelNumber)
+            _label = f'my{Model.className}_{modelNumber}'
             _model = result.newModel(label=_label)
             _model._resetSerial(modelNumber)
 

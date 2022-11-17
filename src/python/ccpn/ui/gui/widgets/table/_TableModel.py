@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-14 15:29:39 +0000 (Mon, November 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-17 13:44:40 +0000 (Thu, November 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -595,9 +595,9 @@ class _TableModel(QtCore.QAbstractTableModel):
         """Return whether the column number is editable.
         """
         try:
-            # return True if the column contains an edit function
+            # return True if the column contains an edit function and table is editable
             # NOTE:ED - need to remove _dataFrameObject, move options to TableABC? BUT Column class is still good
-            return self._view._dataFrameObject.setEditValues[col] is not None
+            return self._defaultEditable and self._view._dataFrameObject.setEditValues[col] is not None
         except Exception:
             return self._defaultEditable
 

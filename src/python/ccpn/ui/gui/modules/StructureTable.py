@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:20:51 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-17 13:44:40 +0000 (Thu, November 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -85,14 +85,13 @@ class StructureTableModule(CcpnModule):
         self._settings = None
         if self.activePulldownClass:
             # add to settings widget - see sequenceGraph for more detailed example
-            settingsDict = OrderedDict(((LINKTOPULLDOWNCLASS, {'label'   : 'Link to current %s' % self.activePulldownClass.className,
-                                                               'tipText' : 'Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
+            settingsDict = OrderedDict(((LINKTOPULLDOWNCLASS, {'label'   : f'Link to current {self.activePulldownClass.className}',
+                                                               'tipText' : f'Set/update current {self.activePulldownClass.className} when selecting from pulldown',
                                                                'callBack': None,
                                                                'enabled' : True,
                                                                'checked' : False,
-                                                               '_init'   : None,
-                                                               }),
-                                        ))
+                                                               '_init'   : None}),))
+
             self._settings = ModuleSettingsWidget(parent=settingsWidget, mainWindow=self.mainWindow,
                                                   settingsDict=settingsDict,
                                                   grid=(0, 0))
@@ -140,6 +139,11 @@ class StructureTableModule(CcpnModule):
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
         """
+        if self.activePulldownClass:
+            if self._setCurrentPulldown:
+                self._setCurrentPulldown.unRegister()
+            if self._settings:
+                self._settings._cleanupWidget()
         self.tableFrame._cleanupWidget()
         super()._closeModule()
 
@@ -171,6 +175,8 @@ class _NewStructureTableWidget(_CoreTableWidgetABC):
     selectCurrent = False
     callBackClass = None
     search = False
+
+    _defaultEditable = False
 
     # set the queue handling parameters
     _maximumQueueLength = 10
@@ -225,8 +231,20 @@ class _NewStructureTableWidget(_CoreTableWidgetABC):
     #=========================================================================================
 
     #=========================================================================================
-    # Widget callbacks
+    # Selection/Action callbacks
     #=========================================================================================
+
+    def selectionCallback(self, selected, deselected, selection, lastItem):
+        """Handle item selection has changed in table - call user callback
+        :param selected: table indexes selected
+        :param deselected: table indexes deselected
+        """
+        pass
+
+    def actionCallback(self, selection, lastItem):
+        """Handle item selection has changed in table - call user callback
+        """
+        pass
 
     #=========================================================================================
     # Create table and row methods
@@ -235,20 +253,12 @@ class _NewStructureTableWidget(_CoreTableWidgetABC):
     def _updateTableCallback(self, data):
         """Respond to table notifier.
         """
-        print(f'>>> _updateTableCallback - widget  {self}')
-
         obj = data[Notifier.OBJECT]
         if obj != self._table:
             # discard the wrong object
             return
 
         self._update()
-
-    def _selectionChangedCallback(self, selected, deselected):
-        """Handle item selection has changed in table - call user callback
-        Includes checking for clicking below last row
-        """
-        pass
 
     #=========================================================================================
     # Table context menu
@@ -293,12 +303,7 @@ class _NewStructureTableWidget(_CoreTableWidgetABC):
         The columns are based on the 'func' functions in the columnDefinitions.
         :return pandas dataFrame
         """
-        if self.displayMode == 0:
-            result = self._buildStructureTable()
-        else:
-            result = self._buildAverageTable()
-
-        return result
+        return self._buildStructureTable() if self.displayMode == 0 else self._buildAverageTable()
 
     def _buildStructureTable(self):
         """Return the dataFrame for the structure table
@@ -316,11 +321,9 @@ class _NewStructureTableWidget(_CoreTableWidgetABC):
         df.columns = [self._columnHeaders.get(col) or col for col in list(df.columns)]
 
         # create the dataFrame object
-        _dfObject = DataFrameObject(dataFrame=df,
-                                    columnDefs=self._columnDefs or [],
-                                    table=self)
-
-        return _dfObject
+        return DataFrameObject(dataFrame=df,
+                               columnDefs=self._columnDefs or [],
+                               table=self)
 
     def _buildAverageTable(self):
         """Return the dataFrame for the ensemble-average table
@@ -336,12 +339,9 @@ class _NewStructureTableWidget(_CoreTableWidgetABC):
         df.columns = [self._columnHeaders.get(col) or col for col in list(df.columns)]
 
         # create the dataFrame object
-        _dfObject = DataFrameObject(dataFrame=df,
-                                    columnDefs=self._columnDefs or [],
-                                    table=self)
-
-        return _dfObject
-
+        return DataFrameObject(dataFrame=df,
+                               columnDefs=self._columnDefs or [],
+                               table=self)
 
     def getSelectedObjects(self, fromSelection=None):
         """Return the selected core objects.
@@ -351,14 +351,10 @@ class _NewStructureTableWidget(_CoreTableWidgetABC):
         otherwise is a Pandas-series object corresponding to the selected row(s).
         """
         model = self.selectionModel()
-        # selects all the items in the row - may need to check selectionMode
-        selection = fromSelection if fromSelection else model.selectedRows()
-
-        if selection:
+        if selection := fromSelection or model.selectedRows():
             _sortIndex = self.model()._sortIndex
-            selectedObjects = [row for row in self._df.iloc[[_sortIndex[idx.row()] for idx in selection if idx.row() in _sortIndex]].iterrows()]
 
-            return selectedObjects
+            return list(self._df.iloc[[_sortIndex[idx.row()] for idx in selection if idx.row() in _sortIndex]].iterrows())
 
     #=========================================================================================
     # Updates
@@ -383,7 +379,7 @@ class _NewStructureTableWidget(_CoreTableWidgetABC):
         """
         try:
             return int(getattr(row, name))
-        except:
+        except Exception:
             return None
 
     @staticmethod
@@ -393,7 +389,7 @@ class _NewStructureTableWidget(_CoreTableWidgetABC):
         """
         try:
             return float(getattr(row, name))
-        except:
+        except Exception:
             return None
 
     @staticmethod
@@ -403,7 +399,7 @@ class _NewStructureTableWidget(_CoreTableWidgetABC):
         """
         try:
             return str(getattr(row, name))
-        except:
+        except Exception:
             return None
 
 
@@ -471,17 +467,16 @@ class StructureTableFrame(_CoreTableFrameABC):
         item = self.stButtons.get()
         getLogger().debug('>selectionPulldownCallback>', item, type(item))
 
-        if self.table is not None:
-            if item == 'Ensemble':
-                self._tableWidget.displayMode = 0
-                self._tableWidget._update()
-
-            elif item == 'Average':
-                self._tableWidget.displayMode = 1
-                self._tableWidget._update()
-
-        else:
+        if self.table is None:
             self._tableWidget.populateEmptyTable()
+
+        elif item == 'Ensemble':
+            self._tableWidget.displayMode = 0
+            self._tableWidget._update()
+
+        elif item == 'Average':
+            self._tableWidget.displayMode = 1
+            self._tableWidget._update()
 
     def _selectionPulldownCallback(self, item):
         """Selection table from the pulldown and calculate the ensemble-average
@@ -493,10 +488,9 @@ class StructureTableFrame(_CoreTableFrameABC):
 
         if self.table is not None:
             self._getAttachedDataSet()
-        else:
+        elif len(self.stButtons.radioButtons) > 0:
             # disable the 'average' button
-            if len(self.stButtons.radioButtons) > 0:
-                self.stButtons.radioButtons[1].setEnabled(False)
+            self.stButtons.radioButtons[1].setEnabled(False)
 
     def _getAttachedDataSet(self):
         """Get the StructureData object attached to this StructureEnsemble

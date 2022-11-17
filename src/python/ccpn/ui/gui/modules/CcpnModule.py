@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-16 13:06:42 +0000 (Wed, November 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-17 17:51:55 +0000 (Thu, November 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -550,7 +550,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         if self._includeInLastSeen and self.area:
             self.area._seenModuleStates[self.className] = {MODULENAME: self._defaultName, WIDGETSTATE: self._getLastSeenWidgetsState()}
 
-        self.application.cleanGarbageCollector()
+        self.mainWindow.application.cleanGarbageCollector()
         try:
             super().close()
         except Exception:

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AnalysisScreen Hit Analysis Flags</title>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a
+        href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://forums.ccpn.ac.uk"><img
+        src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
+<br>
+<div class="headerBar">AnalysisScreen Hit Analysis Flags</div>
+<div class="tutorial">
+
+    <h2>AnalysisScreen Hit Analysis Flags</h2>
+    <p>You can apply a variety of flags to your Peak Matches, Substances or Samples in the Hit Analysis module. By default, Peak Matches involving a reference peak that has a Merit value of 0, will be given an <span class="action">Excluded</span> flag. This way it is easy to exclude these Peak Matches from your tables via the <a href="ScreenHAFiltering.html">Filtering tools</a>, but you can still look at them, should you feel they might be relevant after all.</p>
+    <p>To apply Flags, simply select items in a table or the plot, right-click and select <span class="action">Flag selected items</span> and then the flag of your choice or <span class="action">Remove Flag</span> to remove a flag again. You can also select items in the <a href="./ScreenHATables.html#peakBindingScore">Peak Binding Scores Table</a> and then click on the <span class="action">Select Flag</span> button in the <span class="action">Edit Panel</span> to apply or remove Flags.</p>
+    <p>We provide a number of Flags which we suggest you might like to use in the following situations:</p>
+    <p><span class="action">Hit</span>
+    <br>For anything deemed to be a Hit.</p>
+
+    <p><span class="action">NonHit</span>
+    <br>For anything deemed not to be a Hit.
+
+    <p><span class="action">CompetitiveHit</span>
+    <br>For anything deemed to be a Competitive Hit, i.e. Hits where the Displacer removes binding again, indicating that binding is taking place at the desired binding site.</p>
+
+    <p><span class="action">NonCompetitiveHit</span>
+    <br>For anything deemed to be a Non-competitive Hit, i.e. Hits where the Displacer does not remove binding, indicating that binding is taking place at an alternative binding site not being targeted.</p>
+
+    <p><span class="action">Inconclusive</span>
+    <br>For anything which is inconclusive because of e.g. a very low signal/noise ratio, a higher peak intensity for the Target than the Control peak or other irregularities.</p>
+
+    <p><span class="action">InconclusiveCompetitiveHit</span>
+    <br>For anything deemed to be a Competitive Hit but is inconclusive because of e.g. a very low signal/noise ratio or other irregularities.</p>
+
+    <p><span class="action">Excluded</span>
+    <br>For anything you wish to exclude from the analysis, e.g. because of a significant change in peak position relative to the reference, peak splitting, possible compound degradation etc.</p>
+
+    <p><span class="action">Other</span>
+    <br>For anything else you wish to flag.</p>
+
+
+
+</div>
+</body>
+</html>

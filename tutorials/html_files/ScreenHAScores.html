@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AnalysisScreen Hit Analysis Scores</title>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a
+        href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://forums.ccpn.ac.uk"><img
+        src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
+<br>
+<div class="headerBar">AnalysisScreen Hit Analysis Scores</div>
+<div class="tutorial">
+
+    <h2>AnalysisScreen Hit Analysis Scores</h2>
+    <p>The tables in the Hit Analysis module contain a number of different scores which can help you identify hits, distinguish between competitive and non-competitive hits or suggest peaks that need to be inspected and checked manually.</p>
+
+    <h3>Peak Binding Scores</h3>
+    <p>The <span class="action">Peak Binding Scores</span> are provided in the <span class="action">Peak Binding Scores Table</span> (see our <a href="ScreenHATables.html#peakBindingScore">Hit Analysis Tables page</a> for more information on this table). The way in which the <span class="action">Peak Binding Scores</span> are calculated is determined by the selections made in the <span class="action">Settings</span> panel <span class="action">Calculation</span> tab. The <span class="action">Mode</span> specifies whether the peak height, line width or volume are used for the calculation. Note that peaks have to have been fitted (e.g. with <span class="action">RG</span>) to determine the line width, and volume estimation also has to be done explicitly (e.g. with <span class="action">EV</span>). The <span class="action">Engine</span> specifies the equation used to calculate the Binding Score. Hovering over each option in the Calculation panel, will show you the equations used:</p>
+    <p><span class="action">Simple Ratio</span>
+    <br>T / C
+    <br>where
+    <br>T : +Target. Ligand signal in the presence of the target.
+    <br>C : -Target. Ligand signal in the absence  of the target (Control).
+    <br>A lower value indicates a greater value change, e.g. a larger intensity drop. A value of 1 indicates no changes between +Target and -Target signals. Values above 1 might suggest scaling issues.</p>
+
+    <p><span class="action">Relative Change</span>
+    <br>(C-T) / C
+    <br>where
+    <br>T : +Target. Ligand signal in the presence of the target.
+    <br>C : -Target. Ligand signal in the absence  of the target (Control).
+    <br>A lower value indicates a greater value change, e.g. a larger intensity drop.</p>
+
+    <p><span class="action">Absolute Relative Change</span>
+    <br>||C|-|T|| / |C|
+    <br>where
+    <br>T : +Target. Ligand signal in the presence of the target.
+    <br>C : -Target. Ligand signal in the absence  of the target (Control).
+    <br>A lower value indicates a greater value change, e.g. a larger intensity drop.</p>
+
+    <p><span class="action">AbsoluteRelativeDifference</span>
+    <br>|C-T| / (|T+C| / 2)
+    <br>where
+    <br>T : +Target. Ligand signal in the presence of the target.
+    <br>C : -Target. Ligand signal in the absence  of the target (Control).
+    <br>A lower value indicates a greater value change, e.g. a larger intensity drop. A value of zero indicates no changes.</p>
+
+    <p><span class="action">STD efficiency</span>
+    <br>|off−on| / |off|
+    <br>where
+    <br>off : Ligand signal from the Off resonance spectrum.
+    <br>on : Ligand signal from the On  resonance spectrum.
+    <br>A lower value indicates a lower efficiency.</p>
+
+    <p><span class="action">WLOGSY Factor</span>
+    <br>|T – C| / |C|
+    <br>where
+    <br>T : +Target. Ligand signal in the presence of the target.
+    <br>C : -Target. Ligand signal in the absence  of the target (Control).
+    <br>A lower factor might indicate a solvent-exposed atom, a higher factor might indicate a buried atom.</p>
+
+    <p><span class="action">User defined equation</span>
+    <br>Here you can define your own equation using the variables V1 and V2.
+    <br>V1 : +Target. Ligand signal in the presence of the target. Or for STD experiments: Ligand signal from the Off resonance spectrum.
+    <br>V2 : -Target. Ligand signal in the absence  of the target (Control). Or for STD experiments: Ligand signal from the On resonance spectrum.
+    <br>Note that absolute values need to be specified as <span class="action">abs(V1)</span> rather than <span class="action">|V1|</span>.</p>
+
+    <h3>Peak Displacement Scores</h3>
+    <p>The <span class="action">Peak Displacement Scores</span> are provided in the <span class="action">Peak Binding Scores Table</span> (see our <a href="ScreenHATables.html#peakBindingScore">Hit Analysis Tables page</a> for more information on this table). The way in which the <span class="action">Peak Displacement Scores</span> are calculated is determined by the selections made in the <span class="action">Settings</span> panel <span class="action">Calculation</span> tab. As with the Binding Score, the <span class="action">Mode</span> specifies whether the peak height, line width or volume are used for the calculation. Note that peaks have to have been fitted (e.g. with <span class="action">RG</span>) to determine the line width, and volume estimation also has to be done explicitly (e.g. with <span class="action">EV</span>). The <span class="action">Displacement Engine</span> specifies the equation used to calculate the Binding Score. Hovering over each option in the Calculation panel, will show you the equations used:</p>
+    <p><span class="action">Displacement Fraction</span>
+    <br>[(D/C) - (T/C)] / 1-(T/C)
+    <br>where
+    <br>T : +Target. Ligand signal in the presence of the target.
+    <br>C : -Target. Ligand signal in the absence  of the target (Control).
+    <br>D : +Target+Displacer. Ligand signal in the presence of the target and displacer (Displacer).
+    <br>A lower factor might indicate a solvent-exposed atom, a higher factor might indicate a buried atom.</p>
+
+    <p><span class="action">User defined equation</span>
+    <br>Here you can define your own equation using the variables V1 and V2.
+    <br>V1 : +Target. Ligand signal in the presence of the target.
+    <br>V2 : -Target. Ligand signal in the absence  of the target (Control).
+    <br>V3 : +Target+Displacer. Ligand signal in the presence of the target and displacer (Displacer).
+    <br>Note that absolute values need to be specified as <span class="action">abs(V1)</span> rather than <span class="action">|V1|</span>.</p>
+
+    <h3>Substance/Sample Binding and Displacement Scores</h3>
+    <p>In the <span class="action">Substance</span> and <span class="action">Samples</span> tables the Binding and Displacement Scores are aggregated for each Substance or Sample from the constituent Peak Binding/Displacement Scores. The way in which this is done is specified by the <span class="action">TotalScore</span> in the <span class="action">Settings Calculation</span> panel. It can be set to <span class="action">minimum, maximum, standard deviation, mean</span> or <span class="action">sum</span>. You can also select to scale the scores from 0-1 if you wish.</p>
+
+    <h3>Relative Signal/Noise Ratio</h3>
+    <p>The Signal/Noise ratio observed for the peaks in the Control spectra are provided in the <span class="action">Peak Binding Scores Table</span>. In the <span class="action">Substances Tables</span> these are aggregated across all peaks in the Substance according to the selection made in the <span class="action">Settings Calculation</span> panel. Options for the <span class="action">Relative SNR</span> are <span class="action">minimum, maximum, mean, standard deviation</span> or <span class="action">median</span>.</p>
+
+    <h3>Peak Matching Scores</h3>
+    <p><span class="action">Peak Matching Scores</span> are provided in the <span class="action">Peak Binding Scores Table</span>. They are  calculated when the peak matching is conducted automatically, and represent a quality score for how reliable the matching is. The Peak Matching Scores run from 0-5 with 5 representing a highly reliable match and 0 representing an unreliable match. We recommend that you manually inspect and check matches with a Peak Matching Score of 3 or less.</p>
+    <p>An aggregated <span class="action">Substance/Sample Matching Score</span> is provided in the <span class="action">Substance</span> and <span class="action">Samples Tables</span>. In the <span class="action">Settings Matching</span> tab you can select how this is done by setting <span class="action">Total Score</span> to <span class="action">minimum, maximum</span> or <span class="action">mean</span>. </p>
+
+</div>
+</body>
+</html>

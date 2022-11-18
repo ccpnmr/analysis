@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-18 16:34:45 +0000 (Fri, November 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-18 18:21:36 +0000 (Fri, November 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -189,17 +189,17 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                                 'minimumWidths' : (180, 100, 100)},
                                                    }),
                                     (_COLLECTIONBUTTON, {'label'   : '',
-                                                           'tipText' : '',
-                                                           'callBack': self._collectionPulldownReset,
-                                                           'enabled' : True,
-                                                           '_init'   : None,
-                                                           'type'    : ButtonCompoundWidget,
-                                                           'kwds'    : {'text'           : ' Update ',
-                                                                        'buttonAlignment': 'right',
-                                                                        'objectName'     : 'CollectionSelect',
-                                                                        'icon'           : Icon('icons/redo'),
-                                                                        'minimumWidths'  : (180, 100, 100)},
-                                                           }),
+                                                         'tipText' : 'Refresh the module from the first peakList in the collection',
+                                                         'callBack': self._collectionPulldownReset,
+                                                         'enabled' : True,
+                                                         '_init'   : None,
+                                                         'type'    : ButtonCompoundWidget,
+                                                         'kwds'    : {'text'           : ' Refresh ',
+                                                                      'buttonAlignment': 'right',
+                                                                      'objectName'     : 'CollectionSelect',
+                                                                      'icon'           : Icon('icons/redo'),
+                                                                      'minimumWidths'  : (180, 100, 100)},
+                                                         }),
                                     (_RESTRAINTTABLES, {'label'   : '',
                                                         'tipText' : '',
                                                         'callBack': None,  #self.restraintTablePulldown,
@@ -337,6 +337,7 @@ class RestraintAnalysisTableModule(CcpnModule):
 
         self.restraintAnalysisTable.aboutToUpdate.connect(self._changePeakList)
         self.restraintAnalysisTable.pLwidget.pulldownList.popupAboutToBeShown.connect(self._applyPeakListFilter)
+        self._updateCollectionButton(False)
 
         self._registerNotifiers()
 
@@ -399,6 +400,7 @@ class RestraintAnalysisTableModule(CcpnModule):
             restraintTables = [self.project.getByPid(rList) for rList in restraintTables]
             restraintTables = [rList for rList in restraintTables if rList is not None and isinstance(rList, RestraintTable)]
 
+        self._updateCollectionButton(True)
         self.restraintAnalysisTable.updateRestraintTables(restraintTables)
 
     def _updateOutputTables(self, *args):
@@ -411,6 +413,7 @@ class RestraintAnalysisTableModule(CcpnModule):
             outputTables = [self.project.getByPid(rList) for rList in outputTables]
             outputTables = list(filter(None, outputTables))
 
+        self._updateCollectionButton(True)
         self.restraintAnalysisTable.updateOutputTables(outputTables)
 
     def _updateAutoExpand(self, expand):
@@ -548,6 +551,8 @@ class RestraintAnalysisTableModule(CcpnModule):
             self._resetPulldowns()
             self._clearFilters()
 
+        self._updateCollectionButton(False)
+
     def _changePeakList(self, pid):
         """Update the settings-widget depending on the peak selection
         """
@@ -575,6 +580,8 @@ class RestraintAnalysisTableModule(CcpnModule):
         self._restraintTable.clearList()
         self._outputTable.clearList()
         self._applyPeakListFilter()
+
+        self._updateCollectionButton(True)
 
     def _resetPulldowns(self):
         self._thisPeakList = None
@@ -718,6 +725,14 @@ class RestraintAnalysisTableModule(CcpnModule):
             getLogger().info(f'Collection {obj.pid} in {self} needs refreshing')
             self._resetPulldowns()
             self._clearFilters()
+
+            self._updateCollectionButton(True)
+
+
+    def _updateCollectionButton(self, value):
+        """Enable/disable the collection button as required
+        """
+        self._collectionButton.button.setEnabled(value and self.collectionSelected)
 
 
 class RestraintAnalysisTableWidget(GuiTable):

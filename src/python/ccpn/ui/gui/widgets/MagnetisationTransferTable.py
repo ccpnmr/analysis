@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-03 15:27:22 +0000 (Thu, November 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-18 10:57:48 +0000 (Fri, November 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -157,7 +157,7 @@ class MagnetisationTransferTable(TableABC):
     def setTableMenu(self):
         """Set up the context menu for the main table.
         """
-        menu = Menu('', self, isFloatWidget=True)
+        self._thisTableMenu = menu = Menu('', self, isFloatWidget=True)
         setWidgetFont(menu, )
 
         # no options from the super-class are required

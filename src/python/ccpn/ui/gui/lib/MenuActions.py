@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-15 16:52:35 +0000 (Tue, November 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-18 18:21:01 +0000 (Fri, November 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,6 @@ __date__ = "$Date: 2020-06-15 10:06:31 +0000 (Mon, June 15, 2020) $"
 #=========================================================================================
 
 from functools import partial
-from ccpn.util.Logging import getLogger
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.PeakList import PeakList
@@ -46,6 +45,7 @@ from ccpn.core.Collection import Collection
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
+from ccpn.ui.gui.widgets.Font import setWidgetFont
 from ccpn.ui.gui.popups.ChainPopup import ChainPopup
 from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListEditor
 from ccpn.ui.gui.popups.ComplexEditorPopup import ComplexEditorPopup
@@ -71,9 +71,13 @@ from ccpn.ui.gui.popups.ViolationTablePopup import ViolationTablePopup
 from ccpn.ui.gui.popups.CollectionEditorPopup import CollectionEditorPopup
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, \
     undoBlockWithoutSideBar, undoStackBlocking
+from ccpn.ui.gui.guiSettings import getColours, TOOLTIP_BACKGROUND
+from ccpn.util.OrderedSet import OrderedSet
+from ccpn.util.Logging import getLogger
 
 
 MAXITEMLOGGING = 2
+_NEW_COLLECTION = 'New Collection'
 _ADD_TO_COLLECTION = 'Add to Collection'
 _REMOVE_FROM_COLLECTION = 'Remove from Collection'
 _ITEMS_COLLECTION = 'Items'
@@ -109,7 +113,7 @@ class CreateNewObjectABC():
         # generate the new object
         func = getattr(obj, self.parentMethodName)
         if func is None:
-            raise RuntimeError('Undefined function; cannot create new object (%s)' % dataPid)
+            raise RuntimeError(f'Undefined function; cannot create new object ({dataPid})')
         newObj = func(**self.kwds)
         return newObj
 
@@ -414,7 +418,8 @@ class OpenItemABC():
         useNone: set obj to None
         """
         if self.useApplication is False and self.openItemDirectMethod is None:
-            raise RuntimeError('useApplication==False requires definition of openItemDirectMethod (%s)' % self)
+            raise RuntimeError(f'useApplication==False requires definition of openItemDirectMethod ({self})')
+
         self.useNone = useNone
         self.kwds = kwds
         # these get set upon callback
@@ -452,14 +457,14 @@ class OpenItemABC():
         self.application = self.mainWindow.application
         openableObjs = [obj for obj in objs if isinstance(obj, self.validActionTargets)]
 
-        if self.hasOpenMethod and len(openableObjs) > 0:
+        if self.hasOpenMethod and openableObjs:
             if self.useApplication:
                 func = getattr(self.application, self.openItemMethod)
             else:
                 func = self.openItemDirectMethod
 
             if func is None:
-                raise RuntimeError('Undefined function; cannot open object (%s)' % dataPid)
+                raise RuntimeError(f'Undefined function; cannot open object ({dataPid})')
 
             self.openAction = partial(func, **self.kwds)
 
@@ -471,20 +476,16 @@ class OpenItemABC():
             contextMenu.addAction(self.contextMenuText, self.openAction)
 
         spectra = [obj for obj in objs if isinstance(obj, Spectrum)]
-        if len(spectra) > 0:
+        if spectra:
             contextMenu.addAction('Make SpectrumGroup From Selected',
                                   partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False, defaultItems=spectra),
                                           self.mainWindow, self.getObj(), self.node))
-        if any([any(sp.isTimeDomains) for sp in spectra]):  # 3.1.0 alpha feature from macro.
+        if any(any(sp.isTimeDomains) for sp in spectra):  # 3.1.0 alpha feature from macro.
             contextMenu.addAction('Split Planes to SpectrumGroup', partial(self._splitPlanesToSpectrumGroup, objs))
         contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
         self._addCollectionMenu(contextMenu, objs)
         contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
-        canBeCloned = True
-        for obj in objs:
-            if not hasattr(obj, 'clone'):  # TODO: possibly should check that is a method...
-                canBeCloned = False
-                break
+        canBeCloned = all(hasattr(obj, 'clone') for obj in objs)
         if canBeCloned:
             contextMenu.addAction('Clone', partial(self._cloneObject, objs))
 
@@ -513,7 +514,7 @@ class OpenItemABC():
 
         try:
             if len(objs) > 0:
-                getLogger().info('Deleting: %s' % ', '.join(map(str, objs)))
+                getLogger().info(f"Deleting: {', '.join(map(str, objs))}")
                 project = objs[-1].project
                 with undoBlockWithoutSideBar():
                     with notificationEchoBlocking():
@@ -535,6 +536,9 @@ class OpenItemABC():
     def _addCollectionMenu(self, menu, objs):
         """Add a quick submenu containing a list of collections
         """
+        # add item to a new collection
+        _action = menu.addItem(_NEW_COLLECTION, callback=partial(self._makeNewCollection, selectionWidget=menu, objs=objs))
+
         # create subMenu for adding selected items to a single collection
         subMenu = menu.addMenu(_ADD_TO_COLLECTION)
         collections = self.mainWindow.application.project.collections
@@ -579,11 +583,8 @@ class OpenItemABC():
 
         # show the collection popup
         pos = QtGui.QCursor().pos()
-        mouse_screen = None
-        for screen in QtGui.QGuiApplication.screens():
-            if screen.geometry().contains(pos):
-                mouse_screen = screen
-                break
+        mouse_screen = next((screen for screen in QtGui.QGuiApplication.screens() if screen.geometry().contains(pos)),
+                            None)
         collectionPopup.showAt(pos, preferred_side=Side.RIGHT,
                                side_priority=(Side.TOP, Side.BOTTOM, Side.RIGHT, Side.LEFT),
                                target_screen=mouse_screen)
@@ -597,6 +598,124 @@ class OpenItemABC():
                 showWarning('3.1.0 Alpha version', 'This functionality has been implemented for Time Domain spectra only.')
                 return
             splitPseudo3DSpectrumIntoPlanes(obj)
+
+    def _createNewCollection(self, pulldown, popup, selectionWidget, items=None):
+        """Create a new collection, or add to existing collection
+        and close the editPopup"""
+        from ccpn.framework.Application import getProject
+
+        collection = pulldown.getText()
+        popup.hide()
+        popup.deleteLater()
+
+        _project = getProject()
+        if (coll := _project.getObjectsById(className=Collection.__name__, id=collection)):
+
+            # only select items that are not in the collection to stop duplicate-error
+            items = list(OrderedSet(items) - set(coll[0].items))
+
+            # add to the existing collection
+            coll[0].addItems(items)
+
+        else:
+            # create a new collection
+            _project.newCollection(name=collection, items=items)
+
+    def _newPulldown(self, parent, allowEmpty=True, name=Collection.__name__, **kwds):
+        """Create a new pulldown-list to insert ino the new-collections widget
+        """
+        from ccpn.ui.gui.lib.Validators import LineEditValidator
+        from ccpn.ui.gui.widgets.PulldownList import PulldownList
+
+        combo = PulldownList(parent, editable=True, **kwds)
+        combo.setMinimumWidth(50)
+        _validator = LineEditValidator(parent=combo, allowSpace=False,
+                                       allowEmpty=allowEmpty)
+        combo.setValidator(_validator)
+        combo.lineEdit().setPlaceholderText(f'<{name} Name>')
+
+        combo.setToolTip('Select existing collection, or enter a name to create new collection.')
+        combo.setCompleter(None)
+
+        return combo
+
+    def _makeNewCollection(self, selectionWidget, objs):
+        """Make a small popup to enter a new collection name
+        """
+        from ccpn.util.OrderedSet import OrderedSet
+        from ccpn.framework.Application import getProject
+
+        # make a simple popup for editing collection
+        class EditCollection(SpeechBalloon):
+            """Balloon to hold the pulldown list for editing/selecting the collection name
+            """
+
+            def __init__(self, parent, newPulldown, selectionWidget, *args, **kwds):
+                """Initialise the class
+
+                :param parent: parent class from which popup is instanciated
+                :param newPulldown: func to create a new pulldown
+                :param args: values to pass on to SpeechBalloon
+                :param kwds: values to pass on to SpeechBalloon
+                """
+                super().__init__(*args, **kwds)
+
+                self._parent = parent
+                self._newPulldown = newPulldown
+                self._selectionWidget = selectionWidget
+                setWidgetFont(self)
+
+                # simplest way to make the popup function as modal and disappear as required
+                self.setWindowFlags(int(self.windowFlags()) | QtCore.Qt.Popup)
+                self._metrics.corner_radius = 1
+                self._metrics.pointer_height = 0
+
+                # set the background/fontSize for the tooltips
+                _toolBG = getColours()[TOOLTIP_BACKGROUND]
+                self.setStyleSheet(f'QToolTip {{ background-color: {_toolBG}; font-size: {self.font().pointSize()}pt ; }}')
+
+                # add the widgets
+                _frame = Frame(self, setLayout=True, margins=(10, 10, 10, 10))
+                title = 'New Collection/Add to Existing'
+                _label = Label(_frame, text=title, grid=(0, 0), gridSpan=(1, 2))
+                self._pulldownWidget = self._newPulldown(_frame, grid=(1, 0), gridSpan=(1, 2), )
+
+                # set to the class central widget
+                self.setCentralWidget(_frame)
+
+            # add methods for setting pulldown options
+            def setPulldownData(self, texts):
+                self._pulldownWidget.setData(texts=texts)
+
+            def setPulldownCallback(self, callback):
+                self._pulldownWidget.activated.connect(partial(callback, self._pulldownWidget, self, selectionWidget=self._selectionWidget))
+
+            @property
+            def centralWidgetSize(self):
+                """Return the sizeHint for the central widget
+                """
+                return self._central_widget_size()
+
+
+        _project = getProject()
+        # get the collection names from the project
+        colData = _project.collections
+        colNames = OrderedSet(['', ] + [co.name for co in colData])
+
+        # create a small editor
+        editPopup = EditCollection(parent=self, newPulldown=self._newPulldown,
+                                   selectionWidget=selectionWidget,
+                                   on_top=True)
+        editPopup.setPulldownData(list(colNames))
+        editPopup.setPulldownCallback(partial(self._createNewCollection, items=objs))
+
+        # get the desired position of the popup
+        pos = QtGui.QCursor().pos()
+        _size = editPopup.centralWidgetSize / 2
+        popupPos = pos - QtCore.QPoint(_size.width(), _size.height())
+
+        # show the editPopup near the mouse position
+        editPopup.showAt(popupPos)
 
 
 from ccpn.ui.gui.widgets.SpeechBalloon import SpeechBalloon, Side
@@ -788,24 +907,23 @@ class _openItemSampleDisplay(OpenItemABC):
         # with undoBlockWithoutSideBar():
         with undoStackBlocking() as _:  # Do not add to undo/redo stack
             with notificationEchoBlocking():
-                if len(sample.spectra) > 0:
-                    if len(spectrumDisplay.strips) > 0:
-                        # spectrumDisplay.clearSpectra()
-                        for sampleComponent in sample.sampleComponents:
-                            if sampleComponent.substance is not None:
-                                for spectrum in sampleComponent.substance.referenceSpectra:
-                                    spectrumDisplay.displaySpectrum(spectrum)
-                        for spectrum in sample.spectra:
-                            spectrumDisplay.displaySpectrum(spectrum)
-                        if autoRange:
-                            spectrumDisplay.autoRange()
+                if len(sample.spectra) > 0 and len(spectrumDisplay.strips) > 0:
+                    # spectrumDisplay.clearSpectra()
+                    for sampleComponent in sample.sampleComponents:
+                        if sampleComponent.substance is not None:
+                            for spectrum in sampleComponent.substance.referenceSpectra:
+                                spectrumDisplay.displaySpectrum(spectrum)
+                    for spectrum in sample.spectra:
+                        spectrumDisplay.displaySpectrum(spectrum)
+                    if autoRange:
+                        spectrumDisplay.autoRange()
 
     def _openSampleSpectra(self, sample, position=None, relativeTo=None):
         """Add spectra linked to sample and sampleComponent. Particularly used for screening
         """
-        mainWindow = self.mainWindow
-
         if len(sample.spectra) > 0:
+            mainWindow = self.mainWindow
+
             spectrumDisplay = mainWindow.newSpectrumDisplay(sample.spectra[0])
             mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
             self._openSampleSpectraOnDisplay(sample, spectrumDisplay, autoRange=True)
@@ -855,7 +973,6 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
         Also hides the spectrumToolBar and shows spectrumGroupToolBar.
         """
         mainWindow = self.mainWindow
-        current = mainWindow.application.current
 
         if len(spectrumGroup.spectra) > 0:
 
@@ -864,6 +981,7 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
 
             checkSpectraToOpen(mainWindow, [spectrumGroup])
 
+            current = mainWindow.application.current
             # with undoBlockWithoutSideBar():
             with undoStackBlocking() as _:  # Do not add to undo/redo stack
                 with notificationEchoBlocking():
@@ -898,8 +1016,7 @@ class _openItemSpectrumInGroupDisplay(_openItemSpectrumDisplay):
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
 
-        spectra = [obj for obj in objs if isinstance(obj, Spectrum)]
-        if len(spectra) > 0:
+        if spectra := [obj for obj in objs if isinstance(obj, Spectrum)]:
             contextMenu.addAction('Make SpectrumGroup From Selected',
                                   partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False, defaultItems=spectra),
                                           self.mainWindow, self.getObj(), self.node))
@@ -909,11 +1026,7 @@ class _openItemSpectrumInGroupDisplay(_openItemSpectrumDisplay):
             contextMenu.addSeparator()
 
         contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
-        canBeCloned = True
-        for obj in objs:
-            if not hasattr(obj, 'clone'):  # TODO: possibly should check that is a method...
-                canBeCloned = False
-                break
+        canBeCloned = all(hasattr(obj, 'clone') for obj in objs)
         if canBeCloned:
             contextMenu.addAction('Clone', partial(self._cloneObject, objs))
 

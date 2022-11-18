@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-16 13:06:42 +0000 (Wed, November 16, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-11-18 11:10:23 +0000 (Fri, November 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1193,14 +1193,14 @@ class Framework(NotifierBase, GuiBase):
         """
         from ccpn.core.Project import DEFAULT_CHEMICALSHIFTLIST
 
-        if dataLoader.createNewProject:
+        if _newProject := dataLoader.createNewProject:
             project = self._newProject(dataLoader.nefImporter.getName())
         else:
             project = self.project
 
         # TODO: find a different solution for this
         with rebuildSidebar(application=self):
-            if ch := project.getChemicalShiftList(DEFAULT_CHEMICALSHIFTLIST):
+            if _newProject and (ch := project.getChemicalShiftList(DEFAULT_CHEMICALSHIFTLIST)):
                 # remove the existing chemical-shift-list, should not be done lightly
                 ch._delete()
 

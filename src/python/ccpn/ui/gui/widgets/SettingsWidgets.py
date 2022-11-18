@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-09 19:37:03 +0000 (Wed, November 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-18 16:34:45 +0000 (Fri, November 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1319,21 +1319,16 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
             self.application = mainWindow.application
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
-            displayText = [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
+            # displayText = [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
         else:
-            self.application = None
-            self.project = None
-            self.current = None
-            displayText = []
+            self.application = self.project = self.current = None
+            # displayText = []
 
         self.callback = callback
-        self.returnCallback = returnCallback if returnCallback else self.doCallback
+        self.returnCallback = returnCallback or self.doCallback
         self.applyCallback = applyCallback
         self.widgetsDict = {}
 
-        # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
-        # underpinning the addNotifier call does not allow for it either
-        row = 0
         # texts = [ALL] + defaultListItem.pid if defaultListItem else ([ALL] + displayText)
         # self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=[ALL], displayText=[])
         # row += 1
@@ -1341,26 +1336,29 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
 
         self.checkBoxes = {}
         if settingsDict:
-            optionTexts = []
-            for item, data in settingsDict.items():
-                optionTexts += [data['label']]
+            optionTexts = [data['label'] for item, data in settingsDict.items()]
             _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
             colwidth = maxDim.width()
 
-            for item, data in settingsDict.items():
-                row += 1
-
+            for row, (item, data) in enumerate(settingsDict.items(), start=1):
                 if 'type' in data:
                     widgetType = data['type']
                     kws = {}
-                    if 'callBack' in data:  # this avoid a crash if the widget init doesn't have a callback/mainWindow arg
-                        kws.update({'callback': data['callBack']})
-                    kws.update({'mainWindow': self.mainWindow})
-                    if 'kwds' in data:
-                        kws.update(data['kwds'])
-                        newItem = widgetType(self, grid=(row, 0), **kws, )
+                    if widgetType == HLine:
+                        # hack for a divider
+                        if 'kwds' in data:
+                            kws.update(data['kwds'])
+                        newItem = widgetType(self, grid=(row, 0), colour=getColours()[DIVIDER], **kws,)
+
                     else:
-                        newItem = widgetType(self, self.mainWindow, grid=(row, 0), **kws)
+                        if 'callBack' in data:  # this avoids a crash if the widget init doesn't have a callback/mainWindow arg
+                            kws['callback'] = data['callBack']
+                        kws['mainWindow'] = self.mainWindow
+                        if 'kwds' in data:
+                            kws.update(data['kwds'])
+                            newItem = widgetType(self, grid=(row, 0), **kws, )
+                        else:
+                            newItem = widgetType(self, self.mainWindow, grid=(row, 0), **kws)
 
                 else:
                     newItem = CheckBoxCompoundWidget(
@@ -1380,13 +1378,13 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
                     newItem.setEnabled(data['enabled'])
                 self.widgetsDict[item] = newItem
 
+                # need to check this - is confusing mix of widgets
                 self.checkBoxes[item] = {'widget'    : newItem,
                                          'item'      : item,
                                          'signalFunc': None
                                          }
                 if 'postInit' in data:
-                    func = data['postInit']
-                    if func:
+                    if func := data['postInit']:
                         func(newItem)
 
                 # if data['_init']:
@@ -1583,6 +1581,7 @@ class ObjectSelectionWidget(ListCompoundWidget):
     def _fillPulldownListWidget(self):
         """Fill the pulldownList with the currently available objects
         """
+        print(f' filling pulldown {self}')
         ll = [SelectToAdd] + self.standardListItems
         pulldownObjs = [None] * len(ll)
         if self.project:

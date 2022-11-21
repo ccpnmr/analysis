@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-18 16:34:45 +0000 (Fri, November 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-21 17:29:00 +0000 (Mon, November 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -227,6 +227,12 @@ class ListCompoundWidget(CompoundBaseWidget):
         with self.blockWidgetSignals():
             self.pulldownList.clear()
             self.pulldownList.setData(texts=texts)
+
+    def modifyListWidgetTexts(self, texts):
+        """Modify the listWidget texts, with signal-blocking
+        """
+        with self.blockWidgetSignals():
+            self.setTexts(texts)
 
     def getTexts(self):
         """Convenience: Return list of texts in listWidget"""
@@ -1109,6 +1115,14 @@ class LabelCompoundWidget(CompoundBaseWidget):
 
         if fixedWidths is not None:
             self.setFixedWidths(fixedWidths)
+
+    def getText(self):
+        """Convenience: Return text of label"""
+        return self.label2.get()
+
+    def setText(self, text):
+        """Convenience: set text of label"""
+        self.label2.set(text)
 
     def _getSaveState(self):
         return self.label2.get()

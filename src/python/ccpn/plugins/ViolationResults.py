@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-08 17:58:39 +0000 (Tue, March 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-21 17:29:00 +0000 (Mon, November 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,19 +31,21 @@ from PyQt5 import QtWidgets
 
 from ccpn.core.ViolationTable import ViolationTable
 from ccpn.core.lib import Pid
+from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.modules.PluginModule import PluginModule
-from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, EntryCompoundWidget
-from ccpn.ui.gui.widgets.PulldownListsForObjects import RestraintTablePulldown, ViolationTablePulldown
+from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, EntryCompoundWidget, LabelCompoundWidget
+from ccpn.ui.gui.widgets.PulldownListsForObjects import RestraintTablePulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.HLine import LabeledHLine
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.guiSettings import BORDERNOFOCUS_COLOUR
 from ccpn.ui.gui.lib.Validators import LineEditValidatorCoreObject
+from ccpn.ui.gui.lib.alignWidgets import alignWidgets
 from ccpn.framework.lib.Plugin import Plugin
 from ccpn.util.AttrDict import AttrDict
 
@@ -84,6 +86,7 @@ class ViolationResultsGuiPlugin(PluginModule):
         self._setWidgets()
         self._populate()
 
+        self._registerNotifiers()
         self.plugin._loggerCallback = self._guiLogger
 
     def _guiLogger(self, *args):
@@ -112,7 +115,7 @@ class ViolationResultsGuiPlugin(PluginModule):
         row += 1
         self._rTable = RestraintTablePulldown(parent=parent,
                                               mainWindow=self.mainWindow,
-                                              labelText='Restraint Table',
+                                              labelText='RestraintTable',
                                               grid=(row, 0), gridSpan=(1, 2),
                                               showSelectName=True,
                                               minimumWidths=(250, 100),
@@ -120,9 +123,10 @@ class ViolationResultsGuiPlugin(PluginModule):
                                               callback=self._selectRTableCallback)
 
         row += 1
+        # only needs to be populated by the restraint-table pulldown
         self._vTable = PulldownListCompoundWidget(parent=parent,
                                                   mainWindow=self.mainWindow,
-                                                  labelText="Source Violation Table",
+                                                  labelText="Source ViolationTable",
                                                   grid=(row, 0), gridSpan=(1, 2),
                                                   minimumWidths=(250, 100),
                                                   sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
@@ -131,7 +135,7 @@ class ViolationResultsGuiPlugin(PluginModule):
         row += 1
         self._outputName = EntryCompoundWidget(parent=parent,
                                                mainWindow=self.mainWindow,
-                                               labelText="Output Violation Table Name",
+                                               labelText="Output Name",
                                                grid=(row, 0), gridSpan=(1, 2),
                                                minimumWidths=(250, 100),
                                                sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
@@ -139,6 +143,14 @@ class ViolationResultsGuiPlugin(PluginModule):
                                                compoundKwds={'backgroundText': '> Enter name <'},
                                                )
         self._outputName.entry.returnPressed.connect(self.runGui)
+        self._outputName.entry.textChanged.connect(self._updateLabel)
+
+        row += 1
+        self._outputLabel = LabelCompoundWidget(parent=parent,
+                                                labelText="Output ViolationTable Name",
+                                                grid=(row, 0), gridSpan=(1, 3),
+                                                minimumWidths=(250, 100),
+                                                )
 
         row += 1
         texts = [RUNBUTTON]
@@ -155,7 +167,9 @@ class ViolationResultsGuiPlugin(PluginModule):
         self._textEditor.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
 
         row += 1
-        parent.getLayout().setColumnStretch(2, 1)
+        parent.getLayout().setColumnStretch(2, 2)
+
+        alignWidgets(parent)
 
     def runGui(self):
         """Run the plugin
@@ -163,6 +177,7 @@ class ViolationResultsGuiPlugin(PluginModule):
         _rTable = self.project.getByPid(self._rTable.getText())
         _vTable = self.project.getByPid(self._vTable.getText())
         _runName = self._outputName.getText()
+        _runLabel = self._outputLabel.getText()
 
         _title = 'Create Restraint Analysis Data'
         if not (_rTable and _vTable):
@@ -177,10 +192,34 @@ class ViolationResultsGuiPlugin(PluginModule):
             # create the data
             self.obj[_RESTRAINTTABLE] = _rTable
             self.obj[_VIOLATIONTABLE] = _vTable
-            self.obj[_RUNNAME] = _runName
+            self.obj[_RUNNAME] = self._restraintName(_rTable, _runName)
 
             if (result := self.plugin.run(**self.obj)):
                 self._populate(name=result.name)
+
+    @staticmethod
+    def _restraintName(rTable, output):
+        """Generate the violation-table name from the restraint-table and output name
+        """
+        return (output or '<output>') + '_' + rTable.name if rTable else ''
+
+    def _updateLabel(self):
+        """Update the output violation-table name in the widget as the outpu name is edited
+        """
+        _rTable = self.project.getByPid(self._rTable.getText())
+        _vTable = self.project.getByPid(self._vTable.getText())
+        _runName = self._outputName.getText()
+
+        try:
+            name = Pid.Pid.new(ViolationTable.shortClassName,
+                               _rTable.structureData.name if _rTable else '',
+                               self._restraintName(_rTable, _runName)
+                               )
+        except Exception:
+            # ignore bad names
+            name = ''
+
+        self._outputLabel.setText(name)
 
     def _populate(self, name=None):
         """Populate the pulldowns from the project restraintTables
@@ -192,12 +231,12 @@ class ViolationResultsGuiPlugin(PluginModule):
         self._outputName.setText(name or DEFAULT_RUNNAME)
         self._selectRTableCallback(firstItemName)
 
-    def _selectRTableCallback(self, pid):
+    def _selectRTableCallback(self, pid, deleted=None):
         """Handle the callback from the restraintTable selection
         """
         if (resTable := self.project.getByPid(pid)):
             _texts = [''] + [vt.pid for vt in self.project.violationTables
-                             if vt.getMetadata(_RESTRAINTTABLE) == pid and vt.getMetadata(_VIOLATIONRESULT) is not True]
+                             if not (deleted and vt in deleted) and vt.getMetadata(_RESTRAINTTABLE) == pid and vt.getMetadata(_VIOLATIONRESULT) is not True]
             self._vTable.modifyTexts(texts=_texts)
 
             # set validator to check names in the parent structureData
@@ -205,6 +244,28 @@ class ViolationResultsGuiPlugin(PluginModule):
                                                      allowSpace=False, allowEmpty=False)
             self._outputName.entry.setValidator(_validator)
             self._outputName.entry.validator().resetCheck()
+            self._updateLabel()
+
+    def _violationCallback(self, data):
+        """Re-populate the module
+        """
+        pid = self._rTable.getText()
+        trigger = data[Notifier.TRIGGER]
+
+        self._selectRTableCallback(pid, [data[Notifier.OBJECT]] if trigger == 'delete' else None)
+
+    def _registerNotifiers(self):
+        """Add notifiers to handle violation-tables
+        """
+        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE, Notifier.RENAME],
+                         ViolationTable.__name__, self._violationCallback, onceOnly=True)
+
+    def closePlugin(self):
+        """Clean up and close plugin
+        """
+        if self._rTable:
+            self._rTable.unRegister()
+        super().closePlugin()
 
 
 class ViolationResultsPlugin(Plugin):
@@ -248,15 +309,11 @@ class ViolationResultsPlugin(Plugin):
         self._logger(f'Running - {self.PLUGINNAME}')
         self._logger(f'  {_df.columns}')
 
-        _invalidColumns = [col for col in _requiredColumns if col not in _df.columns]
-        if _invalidColumns:
+        if _invalidColumns := [col for col in _requiredColumns if col not in _df.columns]:
             self._logger(f'ERROR:   missing required columns {_invalidColumns}')
             return
 
-        # get the models defined for the violations
-        models = [v for k, v in _df.groupby(['model_id'], as_index=False)]
-
-        if models:
+        if models := [v for k, v in _df.groupby(['model_id'], as_index=False)]:
             self._logger(f'MODELS {len(models)}')
             self._logger(f'{models[0].columns}')
 
@@ -264,7 +321,7 @@ class ViolationResultsPlugin(Plugin):
             targetsFromModels = []
 
             # use the serial to get the restraint from the peak - make list for each model just to check is actually working
-            for mm, _mod in enumerate(models):
+            for _mod in models:
                 restraintsFromModel = []
                 restraintsFromModels.append(restraintsFromModel)
                 targetsFromModel = []

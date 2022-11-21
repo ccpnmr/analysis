@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-18 18:21:36 +0000 (Fri, November 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-21 17:29:00 +0000 (Mon, November 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -408,13 +408,33 @@ class RestraintAnalysisTableModule(CcpnModule):
         """
         outputTables = self._outputTable.getTexts()
         if ALL in outputTables:
-            outputTables = self.project.violationTables
+            outputTables = [vt for vt in self.project.violationTables if vt.getMetadata(_VIOLATIONRESULT)]
         else:
             outputTables = [self.project.getByPid(rList) for rList in outputTables]
             outputTables = list(filter(None, outputTables))
 
         self._updateCollectionButton(True)
         self.restraintAnalysisTable.updateOutputTables(outputTables)
+
+    def _updateRestraintViolationTables(self, *args):
+        """Update the selected restraintTables/outputTables
+        """
+        restraintTables = self._restraintTable.getTexts()
+        if ALL in restraintTables:
+            restraintTables = self.project.restraintTables
+        else:
+            restraintTables = [self.project.getByPid(rList) for rList in restraintTables]
+            restraintTables = [rList for rList in restraintTables if rList is not None and isinstance(rList, RestraintTable)]
+
+        outputTables = self._outputTable.getTexts()
+        if ALL in outputTables:
+            outputTables = [vt for vt in self.project.violationTables if vt.getMetadata(_VIOLATIONRESULT)]
+        else:
+            outputTables = [self.project.getByPid(rList) for rList in outputTables]
+            outputTables = list(filter(None, outputTables))
+
+        self._updateCollectionButton(True)
+        self.restraintAnalysisTable.updateRestraintViolationTables(restraintTables, outputTables)
 
     def _updateAutoExpand(self, expand):
         # index = self._expandSelector.getIndex()
@@ -451,14 +471,30 @@ class RestraintAnalysisTableModule(CcpnModule):
 
         objs = [self.project.getByPid(pid) for pid in pids]
         selectableObjects = [obj for obj in objs if isinstance(obj, Collection)]
+        rTables = [obj for obj in objs if isinstance(obj, RestraintTable)]
+        vTables = [obj for obj in objs if isinstance(obj, ViolationTable)]
 
         if len(selectableObjects) > 1:
-            MessageDialog.showWarning('Restraint Analysis Table', 'Please noly drop one collection')
+            MessageDialog.showWarning('Restraint Analysis Table', 'Please only drop one collection')
             return
 
         if selectableObjects:
             # select the collection from the pulldown - activates callback
             self._collectionPulldown.select(selectableObjects[0].pid)
+
+        elif (rTables or vTables):
+
+            if rTables:
+                ll = self._restraintTable.getTexts()
+                newRTables = OrderedSet(ll) | {rt.pid for rt in rTables}
+                self._restraintTable.modifyListWidgetTexts(list(newRTables))
+            if vTables:
+                ll = self._outputTable.getTexts()
+                newVTables = OrderedSet(ll) | {vt.pid for vt in vTables if vt.getMetadata(_VIOLATIONRESULT)}
+                self._outputTable.modifyListWidgetTexts(list(newVTables))
+
+            self._updateRestraintViolationTables()
+            self.restraintAnalysisTable._updateTable()
 
         # process dropped items
         # could be:
@@ -540,10 +576,16 @@ class RestraintAnalysisTableModule(CcpnModule):
             else:
                 self._outputTable.clearList()
 
-            # select the first-peakList
-            self._thisPeakList = plList[0]
-            self.selectPeakList(plList[0])
-            self._applyPeakListFilter()
+            self._updateRestraintViolationTables()
+            if len(plList) == 1:
+                # select the first-peakList
+                self._thisPeakList = plList[0]
+                self.selectPeakList(plList[0])
+                self._applyPeakListFilter()
+            else:
+                self._thisPeakList = None
+                self.restraintAnalysisTable.pLwidget.setIndex(0)
+                self._applyPeakListFilter()
 
         else:
             # self._restraintTable.clearList()
@@ -636,7 +678,7 @@ class RestraintAnalysisTableModule(CcpnModule):
         table = self._outputTable
         combo = table.pulldownList
         filt = self._outputTableFilter.get(self._thisPeakList) or []
-        objs = self.project.violationTables
+        objs = [vt for vt in self.project.violationTables if vt.getMetadata(_VIOLATIONRESULT)]
 
         filtAll = reduce(add, self._outputTableFilter.values(), [])
         filtOther = list(OrderedSet(filtAll) - set(filt))
@@ -899,6 +941,13 @@ class RestraintAnalysisTableWidget(GuiTable):
         self._outputTables = outputTables
         self._updateTable()
 
+    def updateRestraintViolationTables(self, restraintTables, outputTables):
+        """Update all tables and re-populate
+        """
+        # must be done prior to the peakListPulldown callback
+        self._restraintTables = restraintTables
+        self._outputTables = outputTables
+
     def _updateTable(self, useSelectedPeakList=True, peaks=None, peakList=None):
         """Display the restraints on the table for the selected PeakList.
         Obviously, If the restraint has not been previously deleted
@@ -906,6 +955,25 @@ class RestraintAnalysisTableWidget(GuiTable):
         self._selectedPeakList = self.project.getByPid(self.pLwidget.getText())
         self._groups = None
         self.hide()
+
+        # get the correct restraintTables/violationTables from the settings
+        rTables = self.moduleParent._restraintTable.getTexts()
+        if ALL in rTables:
+            rTables = self.project.restraintTables
+        else:
+            rTables = [self.project.getByPid(rList) for rList in rTables]
+            rTables = [rList for rList in rTables if rList is not None and isinstance(rList, RestraintTable)]
+
+        vTables = self.moduleParent._outputTable.getTexts()
+        if ALL in vTables:
+            vTables = [vt for vt in self.project.violationTables if vt.getMetadata(_VIOLATIONRESULT)]
+        else:
+            vTables = [self.project.getByPid(rList) for rList in vTables]
+            vTables = list(filter(None, vTables))
+        self.moduleParent._updateCollectionButton(True)
+
+        self._restraintTables = rTables
+        self._outputTables = vTables
 
         if useSelectedPeakList:
             if self._selectedPeakList:

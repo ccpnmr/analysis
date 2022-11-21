@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-17 13:44:40 +0000 (Thu, November 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-21 12:50:49 +0000 (Mon, November 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -204,8 +204,13 @@ class _TableModel(QtCore.QAbstractTableModel):
             # notify that the table is about to be changed
             self.layoutAboutToBeChanged.emit()
 
+            # keep sorted
             self._df.loc[row] = newRow  # dependent on the index
+            self._df.sort_index(inplace=True)
             iLoc = self._df.index.get_loc(row)
+
+            # update the sorted list
+            self._sortIndex[:] = [(val if val < iLoc else val + 1) for val in self._sortIndex]
 
             # sLoc = self._sortIndex[iLoc]  # signals?
             # self.beginInsertRows(QtCore.QModelIndex(), sLoc, sLoc)
@@ -296,11 +301,18 @@ class _TableModel(QtCore.QAbstractTableModel):
 
         else:
             if self._view.isSortingEnabled():
-                # notify rows are going to be inserted - remove from filtered?
                 sortedLoc = self._sortIndex.index(iLoc)
                 self.beginRemoveRows(QtCore.QModelIndex(), sortedLoc, sortedLoc)
 
+                # remove the row from the dataFrame
                 self._df.drop([row], inplace=True)
+
+                if self._filterIndex is not None:
+                    # remove from the filtered list - undo?
+                    filt = self._sortIndex.index(iLoc)
+                    self._filterIndex[:] = [(val if val < filt else val - 1) for val in self._filterIndex if val != filt]
+
+                # remove from the sorted list
                 self._sortIndex[:] = [(val if val < iLoc else val - 1) for val in self._sortIndex if val != iLoc]
 
             else:
@@ -331,7 +343,7 @@ class _TableModel(QtCore.QAbstractTableModel):
         """
         if index.isValid():
             # get the source cell
-            fRow = self._filterIndex[index.row()] if self._filterIndex is not None else index.row()
+            fRow = self._filterIndex[index.row()] if self._filterIndex is not None and 0 <= index.row() < len(self._filterIndex) else index.row()
             row, col = self._sortIndex[fRow], index.column()
 
             if role == DISPLAY_ROLE:

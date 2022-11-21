@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-16 14:30:02 +0000 (Wed, November 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-21 12:50:49 +0000 (Mon, November 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -352,7 +352,8 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
 
         if model._sortIndex and model._oldSortIndex:
             # get the pre-sorted mapping
-            if rows := {model._oldSortIndex[itm.row()] for itm in selection if itm.row() in model._oldSortIndex}:
+            itmRows = {itm.row() for itm in selection}
+            if rows := [model._oldSortIndex[rr] for rr in itmRows if 0 <= rr < len(model._oldSortIndex)]:
                 # block so no signals emitted
                 self.blockSignals(True)
                 selModel.blockSignals(True)

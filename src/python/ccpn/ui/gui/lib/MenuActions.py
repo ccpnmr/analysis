@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-18 18:21:01 +0000 (Fri, November 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-22 18:58:02 +0000 (Tue, November 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -684,6 +684,9 @@ class OpenItemABC():
                 self.setCentralWidget(_frame)
 
             # add methods for setting pulldown options
+            def setDefaultName(self, name):
+                self._pulldownWidget.lineEdit().setText(name)
+
             def setPulldownData(self, texts):
                 self._pulldownWidget.setData(texts=texts)
 
@@ -708,6 +711,7 @@ class OpenItemABC():
                                    on_top=True)
         editPopup.setPulldownData(list(colNames))
         editPopup.setPulldownCallback(partial(self._createNewCollection, items=objs))
+        editPopup.setDefaultName(Collection._uniqueName(_project))
 
         # get the desired position of the popup
         pos = QtGui.QCursor().pos()
@@ -716,6 +720,8 @@ class OpenItemABC():
 
         # show the editPopup near the mouse position
         editPopup.showAt(popupPos)
+        # set the focus to the pulldown-list
+        editPopup._pulldownWidget.setFocus()
 
 
 from ccpn.ui.gui.widgets.SpeechBalloon import SpeechBalloon, Side

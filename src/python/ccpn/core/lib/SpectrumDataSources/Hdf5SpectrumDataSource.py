@@ -25,7 +25,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 16:51:37 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-22 15:44:33 +0000 (Tue, November 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -262,7 +262,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
             self.fp.create_dataset(self._HDF5dataSetName,
                                    self.pointCounts[::-1],  # data are organised numpy style z, y, x
-                                   dtype=self.dataType,
+                                   dtype=self._dtype,
                                    chunks=True,
                                    track_times=False,  # to assure same hash after opening/storing
                                    **dataSetKwds)

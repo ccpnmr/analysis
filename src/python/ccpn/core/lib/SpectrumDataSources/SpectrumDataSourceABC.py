@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-22 13:54:16 +0000 (Tue, November 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-22 15:44:33 +0000 (Tue, November 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -231,7 +231,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
     # data formats
     #=========================================================================================
-    dataType = numpy.float32   # numpy data format of the resulting slice, plane, region data
+    _dtype = numpy.float32   # numpy data format of the resulting slice, plane, region data
 
     # A dict of registered spectrum data formats: filled by _registerFormat classmethod, called
     # once after each definition of a new derived class (e.g. Hdf5SpectrumDataSource)
@@ -1062,8 +1062,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def _convertBlockData(self, blockdata):
         """Convert the blockdata array if dtype is not self.dataType (ie. currently float32)
         """
-        if blockdata.dtype != self.dataType:
-            blockdata = numpy.array(blockdata, self.dataType)
+        if blockdata.dtype != self._dtype:
+            blockdata = numpy.array(blockdata, self._dtype)
         return blockdata
 
     @property

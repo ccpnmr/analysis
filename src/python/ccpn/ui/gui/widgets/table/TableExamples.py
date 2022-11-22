@@ -47,6 +47,8 @@ def simplestTable():
     # Add to a layout if not given a grid and a parent layout to TableABC
     _buildLayout(_testApp, table)
 
+def _selectionCallback(*args, **kwargs):
+    print('Selected', args)
 
 def customPandasTable():
     """ Build the simplest table possible"""
@@ -59,9 +61,10 @@ def customPandasTable():
     df = pd.DataFrame(
                                 {
                             'Cars': ['BMW', 'AUDI'],
-                            'Vel ocity_': [122, 144],
+                            'Velocity_': [122, 144],
                              'Colours':['Red', 'Green'],
-                             'year': ['1999', '2000'],
+                            #  'year': ['1999', '2000'],
+                            # 'Symbol': ['B', 'A'],
                                  }
                                  )
 
@@ -70,9 +73,12 @@ def customPandasTable():
         Column('Vehicle', 'Cars', rawDataHeading='Cars', tipText='CarsCars ', isHidden=False),
         Column('Tint', 'Colours', rawDataHeading='Colours', tipText='ColoursColoursColours '),
         Column('Speed', 'Velocity', rawDataHeading='Velocity', tipText='VelocityVelocity ', isHidden=False),
+        # Column('Symbol', 'Symbol', tipText='Symbol '),
+
     ]
 
-    table = CustomDataFrameTable(None, dataFrame=df, columns=_columns)
+    table = CustomDataFrameTable(None, dataFrame=df, columns=_columns
+                                 ,selectionCallback=_selectionCallback)
 
     # Add to a layout if not given a grid and a parent layout to TableABC
     _buildLayout(_testApp, table)

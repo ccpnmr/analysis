@@ -6,68 +6,16 @@ import pandas as pd
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.Column import Column
 from ccpn.ui.gui.widgets.table.Table import Table
-from ccpn.ui.gui.widgets.table._TableModel import _TableModel, DISPLAY_ROLE, CHECK_ROLE, \
-    BACKGROUND_ROLE, CHECKED, UNCHECKED, ENABLED, CHECKABLE, SELECTABLE, EDIT_ROLE, \
-    INDEX_ROLE, ICON_ROLE, TOOLTIP_ROLE, ALIGNMENT_ROLE
+from ccpn.ui.gui.widgets.table._TableModel import  INDEX_ROLE
 from ccpn.util.OrderedSet import OrderedSet
 
-
-def _getDisplayRole(colDef, obj):
-    return None if isinstance((value := colDef.getFormatValue(obj)), bool) else value
-
-def _getCheckRole(colDef, obj):
-    if isinstance((value := colDef.getValue(obj)), bool):
-        return CHECKED if value else UNCHECKED
-    return None
-
-class _DataFrameTableModel(_TableModel):
-    " A DataFrame TableModel "
-    defaultFlags = ENABLED | SELECTABLE | CHECKABLE
-
-    getAttribRole = {
-        DISPLAY_ROLE: _getDisplayRole,
-        CHECK_ROLE: _getCheckRole,
-        ICON_ROLE: lambda colDef, obj: colDef.getIcon(obj),
-        EDIT_ROLE: lambda colDef, obj: colDef.getEditValue(obj),
-        TOOLTIP_ROLE: lambda colDef, obj: colDef.tipText,
-        BACKGROUND_ROLE: lambda colDef, obj: colDef.getColor(obj),
-        ALIGNMENT_ROLE: lambda colDef, obj: colDef.alignment
-    }
-
-    setAttribRole = {EDIT_ROLE: lambda colDef, obj, value: colDef.setEditValue(obj, value),
-                     CHECK_ROLE: lambda colDef, obj, value: colDef.setEditValue(obj,
-                                                                                True if (value == CHECKED) else False)
-                     }
-
-    def data(self, index, role=DISPLAY_ROLE):
-        result = None
-        if index.isValid():
-            # get the source cell
-            row, col = self._sortIndex[index.row()], index.column()
-            obj = self._view._objects[row]
-            colDef = self._view._columnDefs._columns[col]
-            if (func := self.getAttribRole.get(role)):
-                return func(colDef, obj)
-        return result
-
-    def setData(self, index, value, role=EDIT_ROLE) -> bool:
-        if index.isValid():
-            row, col = self._sortIndex[index.row()], index.column()
-            obj = self._view._objects[row]
-            colDef = self._view._columnDefs._columns[col]
-            if (func := self.setAttribRole.get(role)):
-                func(colDef, obj, value)
-                self.dataChanged.emit(index, index)
-                self._view.viewport().update()  # repaint the view
-                return True
-        return False
-
 class CustomDataFrameTable(Table):
-    defaultTableModel = _DataFrameTableModel
-
-    def __init__(self, parent, dataFrame, columns=None, **kwds):
+    _defaultEditable = False
+    def __init__(self, parent, dataFrame=None, columns=None, **kwds):
         super().__init__(parent, **kwds)
         self._columnDefs = self.getColumnDefs(columns)
+        if dataFrame is None:
+            dataFrame = pd.DataFrame()
         self.setDataFrame(dataFrame)
 
     def getColumnDefs(self, columns=None):
@@ -80,12 +28,25 @@ class CustomDataFrameTable(Table):
     def setDataFrame(self, dataFrame):
         self._buildColumnsFromDataFrame(dataFrame)
 
+    # def selectionCallback(self, selected, deselected, selection, lastItem):
+    #     """Handle item selection has changed in table - call user callback
+    #     :param selected: table indexes selected
+    #     :param deselected: table indexes deselected
+    #     """
+    #     # print('Selected', selected, 'DESE', deselected, 'sel', selection)
+    #     print(self.getSelectedObjects(), 'OBJ')
+
+
     def getSelectedObjects(self):
         """
         :return: list of Pandas series object corresponding to the selected row(s).
         """
         sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes())
         return [self._objects[row] for row in sRows]
+
+    def getCurrentObject(self):
+        """ Deprecated, backcompatibility only"""
+        return self.getSelectedObjects()
 
     @staticmethod
     def _checkColumns(columnDefs, dataframeToBeSet):
@@ -114,7 +75,10 @@ class CustomDataFrameTable(Table):
             oldHeadings = columnDefs._columns
             newHeadings = []
             for missingHeading in missingHeadings:
-                c = Column(headerText=missingHeading, getValue=missingHeading, rawDataHeading=missingHeading, )
+                c = Column(headerText=missingHeading,
+                           getValue=missingHeading,
+                           rawDataHeading=missingHeading,
+                           isHidden=True)
                 newHeadings.append(c)
             columnDefs.setColumns(oldHeadings+newHeadings)
 

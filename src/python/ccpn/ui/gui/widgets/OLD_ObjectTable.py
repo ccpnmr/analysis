@@ -110,19 +110,19 @@ Methods
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-10 11:37:28 +0000 (Fri, December 10, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-11-22 15:56:47 +0000 (Tue, November 22, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1505,7 +1505,7 @@ class ObjectTableFilter(Widget):
         self.table.setObjects(selected)
 
 
-class Column:
+class OLD_Column:
 
     def __init__(self, heading, getValue, getEditValue=None, setEditValue=None,
                  editClass=None, editArgs=None, editKw=None, tipText=None,
@@ -1630,37 +1630,37 @@ if __name__ == '__main__':
 
     popup = CcpnDialog(windowTitle='Test Table', setLayout=True)
 
-    cString = Column(heading='Str',
-                     getValue=lambda i: mockObj.exampleStr,
-                     setEditValue=lambda mockObj, value: mockObj.editStr(mockObj, value),
-                     getColor=lambda i: mockObj.y,
-                     )
+    cString = OLD_Column(heading='Str',
+                         getValue=lambda i: mockObj.exampleStr,
+                         setEditValue=lambda mockObj, value: mockObj.editStr(mockObj, value),
+                         getColor=lambda i: mockObj.y,
+                         )
 
-    cFloat = Column(heading='Float',
-                    getValue=lambda i: mockObj.exampleFloat,
-                    setEditValue=lambda mockObj, value: mockObj.editFloat(mockObj, value),
-                    editDecimals=3, editStep=0.1,
-                    getColor=lambda i: mockObj.r,
-                    )
-    cBool = Column(heading='Bool',
-                   getValue=lambda i: mockObj.exampleBool,
-                   setEditValue=lambda mockObj, value: mockObj.editBool(mockObj, value),
-                   getColor=lambda i: mockObj.b,
-                   )
-
-    cPulldown = Column(heading='Pulldown',
-                       getValue=lambda i: mockObj.exampleList,
-                       setEditValue=lambda mockObj, value: mockObj.editPulldown(mockObj, value),
+    cFloat = OLD_Column(heading='Float',
+                        getValue=lambda i: mockObj.exampleFloat,
+                        setEditValue=lambda mockObj, value: mockObj.editFloat(mockObj, value),
+                        editDecimals=3, editStep=0.1,
+                        getColor=lambda i: mockObj.r,
+                        )
+    cBool = OLD_Column(heading='Bool',
+                       getValue=lambda i: mockObj.exampleBool,
+                       setEditValue=lambda mockObj, value: mockObj.editBool(mockObj, value),
+                       getColor=lambda i: mockObj.b,
                        )
-    cIcon = Column(heading='Icon',
-                   getValue=None,
-                   getIcon=lambda i: mockObj.icon,
-                   )
-    cFlags = Column(heading='Flags',
-                    getValue=lambda i: mockObj.flagsList,
-                    setEditValue=lambda mockObj, value: mockObj.editFlags(mockObj, value),
-                    getColor=lambda i: mockObj.color,
-                    )
+
+    cPulldown = OLD_Column(heading='Pulldown',
+                           getValue=lambda i: mockObj.exampleList,
+                           setEditValue=lambda mockObj, value: mockObj.editPulldown(mockObj, value),
+                           )
+    cIcon = OLD_Column(heading='Icon',
+                       getValue=None,
+                       getIcon=lambda i: mockObj.icon,
+                       )
+    cFlags = OLD_Column(heading='Flags',
+                        getValue=lambda i: mockObj.flagsList,
+                        setEditValue=lambda mockObj, value: mockObj.editFlags(mockObj, value),
+                        getColor=lambda i: mockObj.color,
+                        )
 
     table = ObjectTable(parent=popup, columns=[cString, cFloat, cBool, cPulldown, cIcon, cFlags], objects=None, grid=(0, 0))
     table.setObjects([mockObj] * 5)

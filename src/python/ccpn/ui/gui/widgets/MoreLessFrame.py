@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-20 19:34:52 +0100 (Mon, June 20, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-11-22 18:56:31 +0000 (Tue, November 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ from ccpn.ui.gui.widgets.Label import ActiveLabel, Label
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+
 
 class MoreLessFrame(Frame):
     """
@@ -74,7 +75,7 @@ class MoreLessFrame(Frame):
         self._openButton.setSelectionCallback(self._toggleContents)
         self.scrollArea = None
         if scrollable:
-            self.scrollArea = ScrollArea(self, setLayout=True,grid=(row, 0), gridSpan=(1, 2))
+            self.scrollArea = ScrollArea(self, setLayout=True, grid=(row, 0), gridSpan=(1, 2))
             self.scrollArea.setWidgetResizable(True)
             self.scrollAreaWidgetContents = self._contentsFrame
             self.scrollArea.setWidget(self.scrollAreaWidgetContents)
@@ -114,6 +115,12 @@ class MoreLessFrame(Frame):
         self._showContents(visible)
 
     @property
+    def contentsVisible(self):
+        """Return True if the contents are visible
+        """
+        return self._contentsFrame.isVisible()
+
+    @property
     def name(self):
         """Set/get the name of the widget
         """
@@ -122,7 +129,7 @@ class MoreLessFrame(Frame):
     @name.setter
     def name(self, value):
         if not isinstance(value, str):
-            raise TypeError('name {} must be a string'.format(value))
+            raise TypeError(f'name {value} must be a string')
 
         self._name = value
         self._label.setText(value)

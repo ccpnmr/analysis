@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-19 20:15:00 +0100 (Thu, May 19, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-11-22 18:58:19 +0000 (Tue, November 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -40,7 +40,7 @@ UNCHECKED = QtCore.Qt.Unchecked
 
 class Button(QtWidgets.QPushButton, Base):
 
-    def __init__(self, parent=None, text='', callback=None, icon=None, toggle=None, **kwds):
+    def __init__(self, parent=None, text='', callback=None, icon=None, toggle=None, enabled=True, **kwds):
 
         #text = translator.translate(text): not needed as it calls setText which does the work
 
@@ -65,6 +65,9 @@ class Button(QtWidgets.QPushButton, Base):
 
         self._callback = None
         self.setCallback(callback)
+
+        # set the initial enabled state of the button
+        self.setEnabled(enabled)
 
     def setSelected(self, selected):
         if self.isCheckable():

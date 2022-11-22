@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-08 09:00:52 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-22 13:54:16 +0000 (Tue, November 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -299,12 +299,14 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                               spectrumAttribute=None,
                                               hasSetterInSpectrumClass=False
                                               )
-    sampledValues = List(default_value=[]).tag(isDimensional=False,
+    sampledValues = List(default_value=[None for dim in range(0, MAXDIM)]).tag(
+                                               isDimensional=True,
                                                doCopy=True,
                                                spectrumAttribute=None,
                                                hasSetterInSpectrumClass=False
                                                )
-    sampledSigmas = List(default_value=[]).tag(isDimensional=False,
+    sampledSigmas = List(default_value=[None for dim in range(0, MAXDIM)]).tag(
+                                               isDimensional=True,
                                                doCopy=True,
                                                spectrumAttribute=None,
                                                hasSetterInSpectrumClass=False
@@ -345,7 +347,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             hasSetterInSpectrumClass=True
             )
     dataTypes = CList(trait=CString(), default_value=[specLib.DATA_TYPE_REAL] * MAXDIM, maxlen=MAXDIM).tag(
-            info='Data type identifier (real, complex, pn) along each dimension',
+            info='Data type identifier (nR, (nR)(nI), n(RI), n(PN)) along each dimension',
             isDimensional=True,
             doCopy=True,
             spectrumAttribute=None,
@@ -852,7 +854,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if self.dimensionCount != source.dimensionCount:
             raise RuntimeError('%s.copyDataFrom: incompatible dimensionCount with source' %
                                self.__class__.__name__)
-        source.copyParametersTo(self)
+        source.copyDataTo(self)
         return self
 
     def _mapDimensionalParameters(self, dimensionsMap: dict):
@@ -1250,7 +1252,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         _iniTxt = f'{self.dataFormat} spectrum, path "{_p}"'
 
-        if _p is None or not self.checkSuffix(_p):
+        if _p is None:
+            txt = f'{_iniTxt}: undefined path'
+            return self._returnFalse(txt)
+
+        if not self.checkSuffix(_p):
             txt = f'{_iniTxt}: invalid suffix'
             return self._returnFalse(txt)
 
@@ -1407,12 +1413,17 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         except Exception as es:
             self.closeFile()
-            getLogger().error('%s.openNewFile: %s' % (self.__class__.__name__, str(es)))
+            txt = f'{self.__class__.__name__}.openNewFile: {es}'
+            self.isValid = False
+            self.errorString = txt
+            getLogger().error(txt)
             raise es
 
         finally:
             getLogger().debug('%s.openNewFile: writing parameters and calling closeFile' %
                               self.__class__.__name__)
+            self.isValid = True
+            self.errorString = ''
             self.writeParameters()
             self.closeFile()
 

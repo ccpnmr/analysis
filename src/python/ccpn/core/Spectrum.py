@@ -53,7 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-11 15:36:02 +0000 (Fri, November 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-22 13:54:16 +0000 (Tue, November 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -69,6 +69,7 @@ from functools import partial
 from itertools import permutations
 import numpy
 import pandas as pd
+
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.SpectrumTraits import SpectrumTraits
@@ -1799,14 +1800,17 @@ class Spectrum(AbstractWrapperObject):
 
     def _mapAxisCodes(self, axisCodes: Sequence[str]) -> list:
         """Map axisCodes on self.axisCodes
+        :param axisCodes: list or tuple of axisCodes
         :return mapped axisCodes as list
 
         CCPNMRINTERNAL: used in SpectrumDisplay._getDimensionsMapping()
         """
         # find the map of newAxisCodeOrder to self.axisCodes; eg. 'H' to 'Hn'
+        if not isinstance(axisCodes, (list,tuple)):
+            raise ValueError(f'Invalid axisCodes: expected list or tuple, got "{axisCodes}"')
         axisCodeMap = getAxisCodeMatch(axisCodes, self.axisCodes)
         if len(axisCodeMap) == 0:
-            raise ValueError(f'axisCodes {axisCodes} contains an invalid element')
+            raise ValueError(f'Unable to map axisCodes {axisCodes}: likely contains an invalid element')
         return [axisCodeMap[a] for a in axisCodes]
 
     def orderByAxisCodes(self, iterable, axisCodes: Sequence[str] = None, exactMatch: bool = False) -> list:
@@ -2641,7 +2645,7 @@ class Spectrum(AbstractWrapperObject):
 
     def _extractToFile(self, axisCodes, position, path, dataFormat, tag):
         """Local helper routine to prevent code duplication across extractSliceToFile, extractPlaneToFile,
-        extractProjectionToFile.
+        extractProjectionToFile, pseudoToSpectrumGroup
         :return: new Spectrum instance
         """
         from ccpn.framework.PathsAndUrls import CCPN_SPECTRA_DIRECTORY
@@ -2691,6 +2695,9 @@ class Spectrum(AbstractWrapperObject):
 
                 except Exception as es2:
                     raise RuntimeError(f'Cannot extract to path:\n\n{es}\n\n{es2}')
+
+        else:
+            path = aPath(path)
 
         dataStore = DataStore.newFromPath(path=path.withoutSuffix(),
                                           autoVersioning=True, withSuffix=suffix,
@@ -3723,8 +3730,13 @@ def _extractRegionToFile(spectrum, dimensions, position, dataStore, name=None) -
     if klass is None:
         raise ValueError('Invalid dataStore.dataFormat %r' % dataStore.dataFormat)
 
-    # Create a dataSource object; import spectrum to initialise the dataSource values
-    dataSource = klass().importFromSpectrum(spectrum=spectrum, includePath=False)
+    # Create a dataSource object with apath and dimensionCount
+    # Use spectrum and spectrum.dataSource to initialise the dataSource values
+    dataSource = klass(path=dataStore.aPath(), dimensionCount=spectrum.dimensionCount)
+    # first get all parameters from the spectrum dataSource object
+    dataSource.copyParametersFrom(spectrum.dataSource)
+    # update them with current spectrum settings
+    dataSource.importFromSpectrum(spectrum=spectrum, includePath=False)
 
     disgardedDimensions = list(set(spectrum.dimensions) - set(dimensions))
     # The dimensional parameters of spectrum were copied on initialisation
@@ -3750,7 +3762,7 @@ def _extractRegionToFile(spectrum, dimensions, position, dataStore, name=None) -
 
     # with spectrum.dataSource.openExistingFile() as inputFile:
     inputFile = spectrum.dataSource
-    with dataSource.openNewFile(path=dataStore.aPath()) as output:
+    with dataSource.openNewFile() as output:
         # loop over all requested slices
         for position, aliased in inputFile._selectedPointsIterator(sliceTuples=sliceTuples,
                                                                    excludeDimensions=[readSliceDim]):

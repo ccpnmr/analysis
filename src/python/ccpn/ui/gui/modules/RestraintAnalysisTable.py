@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-22 19:08:12 +0000 (Tue, November 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-23 13:37:03 +0000 (Wed, November 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1348,6 +1348,7 @@ class RestraintAnalysisTableWidget(GuiTable):
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
 
         def _getContributions(restraint):
+            # create a table of the cross-links for speed - does not update!
             return [' - '.join(sorted(ri)) for rc in restraint.restraintContributions
                     for ri in rc.restraintItems]
 
@@ -1370,17 +1371,16 @@ class RestraintAnalysisTableWidget(GuiTable):
                         # pkRes[pk].setdefault(resList, set()).add(res)
 
             # get the maximum number of restraintItems from each restraint list
-            counts = [np.array([sum([
-                len(contribs[res]) for res in (pkRestraints.get(pk.serial) or ()) if res and res.restraintTable == rList
-                ])
-                for pk in pks])
-                for rList in resLists]
+            counts = [np.array([sum(len(contribs[res]) for res in (pkRestraints.get(pk.serial) or ()) if res and res.restraintTable == rList
+                                    )
+                                for pk in pks])
+                      for rList in resLists]
             maxCount = np.max(counts, axis=0)
             # print(f' max counts {list(maxCount)}')
             # maxCount += 1
 
             # allPks = pd.DataFrame([(pk.serial, pk, None)  for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['Peak', '_object', 'Expand'])
-            allPkSerials = pd.DataFrame([pk.serial for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['PeakSerial', ])
+            allPkSerials = pd.DataFrame([pk.serial for pk, count in zip(pks, maxCount) for _ in range(count)], columns=['PeakSerial', ])
             index = pd.DataFrame(list(range(1, len(allPkSerials) + 1)), columns=['index',])
 
             allPks = pd.DataFrame([(pk.serial, pk.pid, self._downIcon) for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['PeakSerial', '_object', 'Expand'])
@@ -1438,11 +1438,20 @@ class RestraintAnalysisTableWidget(GuiTable):
 
                     if resList in violationResults:
                         _left = dfs[resList]
-                        _right = violationResults[resList]
+                        # remove any duplicated violations - these add bad rows
+                        _right = violationResults[resList].drop_duplicates([f'{HeaderRestraint}_{ii + 1}', f'Atoms_{ii + 1}'])
                         if (f'{HeaderRestraint}_{ii + 1}' in _left.columns and f'Atoms_{ii + 1}' in _left.columns) and \
-                                            (f'{HeaderRestraint}_{ii + 1}' in _right.columns and f'Atoms_{ii + 1}' in _right.columns):
+                                (f'{HeaderRestraint}_{ii + 1}' in _right.columns and f'Atoms_{ii + 1}' in _right.columns):
                             _new = pd.merge(_left, _right, on=[f'{HeaderRestraint}_{ii + 1}', f'Atoms_{ii + 1}'], how='left').drop(columns=['PeakSerial']).fillna(0.0)
                             _out.append(_new)
+
+                            # check to duplicates
+                            # s1 = [(v[2], v[3]) for v in _left.itertuples()]
+                            # s2 = [(v[1], v[2]) for v in _right.itertuples()]
+                            # print([(rr, s, s1.count(s)) for rr, s in enumerate(s1) if s1.count(s) > 1])
+                            # print([(rr, s, s2.count(s)) for rr, s in enumerate(s2) if s2.count(s) > 1])
+                            # _right.drop_duplicates([col1, col2])
+
                             zeroCols.append(f'{HeaderMean}_{ii + 1}')
 
                         for _colID in (HeaderRestraint, HeaderAtoms,

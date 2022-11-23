@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-22 15:56:47 +0000 (Tue, November 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-23 12:32:56 +0000 (Wed, November 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -116,7 +116,7 @@ class Column:
                  editClass=None, editArgs=None, editKw=None, tipText=None,
                  getColor=None, getIcon=None, stretch=False, format=None,
                  editDecimals=None, editStep=None, rawDataHeading=None,
-                 isHidden = False,
+                 isHidden = False, isInternal = False, columnWidth=None,
                  alignment=QtCore.Qt.AlignLeft, **kwargs):
         # editDecimals=None, editStep=None, alignment=QtCore.Qt.AlignLeft,
         # orderFunc=None):
@@ -137,6 +137,8 @@ class Column:
         if isinstance(getValue, str) and rawDataHeading is None:
             self.rawDataHeading = getValue
         self.isHidden = isHidden
+        self.isInternal = isInternal
+        self.columnWidth = columnWidth
         #self.alignment = ALIGN_OPTS.get(alignment, alignment) | Qt.AlignVCenter
         # Alignment combinations broken in PyQt4 v1.1.1
         # Use better default than top left

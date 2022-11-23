@@ -61,7 +61,7 @@ def customPandasTable():
     df = pd.DataFrame(
                                 {
                             'Cars': ['BMW', 'AUDI'],
-                            'Velocity_': [122, 144],
+                            # 'Velocity_': [122, 144],
                              'Colours':['Red', 'Green'],
                             #  'year': ['1999', '2000'],
                             # 'Symbol': ['B', 'A'],
@@ -71,8 +71,8 @@ def customPandasTable():
     # init the table
     _columns = [
         Column('Vehicle', 'Cars', rawDataHeading='Cars', tipText='CarsCars ', isHidden=False),
-        Column('Tint', 'Colours', rawDataHeading='Colours', tipText='ColoursColoursColours '),
-        Column('Speed', 'Velocity', rawDataHeading='Velocity', tipText='VelocityVelocity ', isHidden=False),
+        Column('Tint', 'Colours', rawDataHeading='Colours', tipText='ColoursColoursColours ', isInternal=True),
+        Column('Speed', 'Velocity', rawDataHeading='Velocity', tipText='VelocityVelocity ', isInternal=True),
         # Column('Symbol', 'Symbol', tipText='Symbol '),
 
     ]

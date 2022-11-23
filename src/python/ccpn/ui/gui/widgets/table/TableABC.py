@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-21 12:50:49 +0000 (Mon, November 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-11-23 12:32:57 +0000 (Wed, November 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -557,6 +557,16 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes())
         df = self._df
         return df.iloc[list(sRows)]
+
+    def selectFirstRow(self, doCallback=True):
+        from ccpn.core.lib.ContextManagers import nullContext
+        context = nullContext if doCallback else self._blockTableSignals
+        model = self.model()
+        rowIndex = model.index(0, 0) #First Row!
+        with context('selectFirstRow'):
+            selectionModel = self.selectionModel()
+            selectionModel.clearSelection()
+            selectionModel.select(rowIndex, selectionModel.Select | selectionModel.Rows)
 
     def selectRowsByValues(self, values, headerName, scrollToSelection=True, doCallback=True):
         """

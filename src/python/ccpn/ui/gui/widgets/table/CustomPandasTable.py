@@ -28,15 +28,6 @@ class CustomDataFrameTable(Table):
     def setDataFrame(self, dataFrame):
         self._buildColumnsFromDataFrame(dataFrame)
 
-    # def selectionCallback(self, selected, deselected, selection, lastItem):
-    #     """Handle item selection has changed in table - call user callback
-    #     :param selected: table indexes selected
-    #     :param deselected: table indexes deselected
-    #     """
-    #     # print('Selected', selected, 'DESE', deselected, 'sel', selection)
-    #     print(self.getSelectedObjects(), 'OBJ')
-
-
     def getSelectedObjects(self):
         """
         :return: list of Pandas series object corresponding to the selected row(s).
@@ -70,7 +61,7 @@ class CustomDataFrameTable(Table):
             dataframeToBeSet[missingColumnsInDf] =  [None] * len(missingColumnsInDf)
 
         ## case: Heading defs are fewer than the columns in the DataFrame.
-        ##  add definitions to show all data on table.
+        ##  add definitions but set as internal so to DON'T show these on table.
         if len(missingHeadings)>0:
             oldHeadings = columnDefs._columns
             newHeadings = []
@@ -78,25 +69,30 @@ class CustomDataFrameTable(Table):
                 c = Column(headerText=missingHeading,
                            getValue=missingHeading,
                            rawDataHeading=missingHeading,
+                           isInternal=True,
                            isHidden=True)
                 newHeadings.append(c)
             columnDefs.setColumns(oldHeadings+newHeadings)
 
 
     def _buildColumnsFromDataFrame(self, dataFrame):
-        hidden = []
+        hiddenColumns = []
+        _internalColumns = []
         data={}
         self._checkColumns(self._columnDefs, dataFrame)
         for col in self._columnDefs._columns:
             values = dataFrame[col.rawDataHeading].values
             data[col.headerText] = values
             if col.isHidden:
-                hidden.append(col.headerText)
+                hiddenColumns.append(col.headerText)
+            if col.isInternal:
+                _internalColumns.append(col.headerText)
         df = pd.DataFrame(data)
         frames = [s for h, s in dataFrame.iterrows()]
         self._objects = frames
         self.updateDf(df)
-        self.setHiddenColumns(hidden)
+        self._internalColumns.extend(_internalColumns)
+        self.setHiddenColumns(hiddenColumns)
 
     def getObjects(self):
         return self._objects

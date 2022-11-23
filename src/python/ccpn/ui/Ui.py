@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-23 15:31:34 +0000 (Wed, November 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -140,7 +140,7 @@ class Ui(NotifierBase):
         _version = applicationVersion  # .withoutRelease()
         updateAgent = UpdateAgent(_version, dryRun=False)
         numUpdates = updateAgent.checkNumberUpdates()
-        getLogger().debug('_checkUpdates: %s updates available' % numUpdates)
+        getLogger().debug(f'_checkUpdates: {numUpdates} updates available')
         if numUpdates > 0:
             self._execUpdates()
 
@@ -163,8 +163,7 @@ class Ui(NotifierBase):
         md5 = regDict.get(TERMSANDCONDITIONS)
         if os.path.exists(licensePath):
             currentHashCode = calcHashCode(licensePath)
-            latestTerms = (currentHashCode == md5)
-            return latestTerms
+            return (currentHashCode == md5)
 
     def _checkUpdateTermsConditions(self, registered, acceptedTerms):
         """Update the registration file if fully registered and accepted
@@ -238,16 +237,16 @@ class Ui(NotifierBase):
 
         return newProject
 
-    def _checkForBadSpectra(self, project):
+    @staticmethod
+    def _checkForBadSpectra(project):
         """Report bad spectra in a popup
         """
-        badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.hasValidPath()]
-        if badSpectra:
+        if badSpectra := [str(spectrum) for spectrum in project.spectra if not spectrum.hasValidPath()]:
             text = 'Detected invalid Spectrum file path(s) for:\n\n'
             for sp in badSpectra:
                 text += '%s\n' % str(sp)
             text += '\nUse menu "Spectrum --> Validate paths.." or "VP" shortcut to correct\n'
-            getLogger().warning('Spectrum file paths: %s' % text)
+            getLogger().warning(f'Spectrum file paths: {text}')
 
     @staticmethod
     def getProgressHandler():
@@ -278,7 +277,7 @@ class NoUi(Ui):
 
         try:
             self.application.showLicense()
-        except:
+        except Exception:
             sys.stderr.write('The licence file can be found at %s\n' % licensePath)
 
         validEmailRegex = re.compile(r'^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-_]+\.)+[A-Za-z]{2,63}$')

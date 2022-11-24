@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-24 12:08:08 +0000 (Thu, November 24, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-11-24 14:02:35 +0000 (Thu, November 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -414,11 +414,11 @@ class Framework(NotifierBase, GuiBase):
             return
 
         self._experimentClassifications = project.getExperimentClassifications()
-        self._updateAutoBackup()
+        # self._updateAutoBackup()
 
         sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
         self.ui.startUi()
-        self._cleanup()
+        # self._cleanup()
 
     def _cleanup(self):
         """Cleanup at the end of program execution; i.e. once the command loop
@@ -432,12 +432,16 @@ class Framework(NotifierBase, GuiBase):
 
     def _updateAutoBackup(self):
         # CCPNINTERNAL: also called from preferences popup
+        raise NotImplementedError('AutoBackup is not available in the current release')
+
         if self.preferences.general.autoBackupEnabled:
             self._setAutoBackupTime(self.preferences.general.autoBackupFrequency)
         else:
             self._setAutoBackupTime(None)
 
     def _setAutoBackupTime(self, time):
+        raise NotImplementedError('AutoBackup is not available in the current release')
+
         if self._backupTimerQ is None:
             from queue import Queue
 

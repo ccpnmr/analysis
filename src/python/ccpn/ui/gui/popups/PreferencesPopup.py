@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-24 12:05:40 +0000 (Thu, November 24, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-11-24 14:02:36 +0000 (Thu, November 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -94,7 +94,7 @@ def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays, 
     pref = self.application.preferences
 
     # remember the previous autoBackup settings
-    lastBackup = (pref.general.autoBackupEnabled, pref.general.autoBackupFrequency)
+    # lastBackup = (pref.general.autoBackupEnabled, pref.general.autoBackupFrequency)
 
     # update the preferences, but keep in place
     pref.clear()
@@ -103,9 +103,9 @@ def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays, 
     # application preferences updated so re-save
     self.application._savePreferences()
 
-    if (pref.general.autoBackupEnabled, pref.general.autoBackupFrequency) != lastBackup:
-        # update the autoBackup with the new settings
-        self.application._updateAutoBackup()
+    # if (pref.general.autoBackupEnabled, pref.general.autoBackupFrequency) != lastBackup:
+    #     # update the autoBackup with the new settings
+    #     self.application._updateAutoBackup()
 
     # update the current userWorkingPath in the active file dialogs
     if userWorkingPath:
@@ -474,6 +474,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.autoBackupFrequencyData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', min=1, decimals=0, step=10)
         self.autoBackupFrequencyData.setMinimumWidth(LineEditsMinimumWidth)
         self.autoBackupFrequencyData.valueChanged.connect(self._queueSetAutoBackupFrequency)
+        self.autoBackupEnabledBox.setChecked(False)
+        self.autoBackupEnabledBox.setEnabled(False)
+        self.autoBackupFrequencyData.setEnabled(False)
 
         #====== Paths ======
         row += 1
@@ -823,8 +826,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.languageBox.setCurrentIndex(self.languageBox.findText(self.preferences.general.language))
         self.autoSaveLayoutOnQuitBox.setChecked(self.preferences.general.autoSaveLayoutOnQuit)
         self.restoreLayoutOnOpeningBox.setChecked(self.preferences.general.restoreLayoutOnOpening)
-        self.autoBackupEnabledBox.setChecked(self.preferences.general.autoBackupEnabled)
-        self.autoBackupFrequencyData.setValue(self.preferences.general.autoBackupFrequency)
+        # self.autoBackupEnabledBox.setChecked(self.preferences.general.autoBackupEnabled)
+        # self.autoBackupFrequencyData.setValue(self.preferences.general.autoBackupFrequency)
 
         self.userWorkingPathData.setText(self.preferences.general.userWorkingPath)
         self.useProjectPathBox.setChecked(self.preferences.general.useProjectPath)
@@ -847,7 +850,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         # set the enabled state of some settings boxes
         self._enableProxyButtons()
-        self._enableAutoBackupFrequency()
+        # self._enableAutoBackupFrequency()
         self._enableUserWorkingPath()
 
     def _populateSpectrumTab(self):
@@ -905,7 +908,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # multipletAveraging = self.preferences.general.multipletAveraging
         # self.multipletAveraging.setIndex(MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0)
         self.singleContoursBox.setChecked(self.preferences.general.generateSinglePlaneContours)
-        self.negativeTraceColourBox.setChecked(self.preferences.general.traceIncludeNegative)
+        # self.negativeTraceColourBox.setChecked(self.preferences.general.traceIncludeNegative)
 
         for aspect, aspectValue in self.preferences.general.aspectRatios.items():
             if aspect in self.aspectData:
@@ -1751,8 +1754,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         elif option == 'autoSetDataPath':
             self._enableUserDataPath()
 
-        elif option == 'autoBackupEnabled':
-            self._enableAutoBackupFrequency()
+        # elif option == 'autoBackupEnabled':
+        #     self._enableAutoBackupFrequency()
 
         elif option == 'aliasEnabled':
             _enabled = self.aliasEnabledData.get()
@@ -1833,6 +1836,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetAutoBackupFrequency(self, _value):
+        raise NotImplementedError('AutoBackup is not available in the current release')
         textFromValue = self.autoBackupFrequencyData.textFromValue
         value = self.autoBackupFrequencyData.get()
         prefValue = textFromValue(self.preferences.general.autoBackupFrequency)
@@ -1840,9 +1844,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
             return partial(self._setAutoBackupFrequency, value)
 
     def _setAutoBackupFrequency(self, value):
+        raise NotImplementedError('AutoBackup is not available in the current release')
         self.preferences.general.autoBackupFrequency = value
 
     def _enableAutoBackupFrequency(self):
+        raise NotImplementedError('AutoBackup is not available in the current release')
         value = self.autoBackupEnabledBox.get()
         self.autoBackupFrequencyData.enableWidget(value)
 

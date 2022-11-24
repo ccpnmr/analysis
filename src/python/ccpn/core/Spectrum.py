@@ -10,7 +10,7 @@ Per-axis values are given in the order data are stored in the spectrum file
 
 The axisCodes are used as an alternative axis identifier. These are unique strings that typically
 reflect the isotope on the relevant axis.
-By default upon loading a new spectrum, the axisCodes are derived from the isotopeCodes that define
+By default, upon loading a new spectrum, the axisCodes are derived from the isotopeCodes that define
 the experimental data for each dimension.
 They can match the dimension identifiers in the reference experiment templates, linking a dimension
 to the correct reference experiment dimension.
@@ -37,6 +37,8 @@ getByDimension(), setByDimension(), getByAxisCode(), setByAxisCode()
 See doc strings of these methods for detailed documentation
 
 """
+from __future__ import annotations  # pycharm still highlights as errors
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -51,7 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-24 12:08:08 +0000 (Thu, November 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-24 12:25:18 +0000 (Thu, November 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created

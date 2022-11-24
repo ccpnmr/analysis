@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-18 11:00:48 +0000 (Fri, November 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-24 15:24:51 +0000 (Thu, November 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -82,7 +82,7 @@ class MagnetisationTransferTable(TableABC):
         self._columnDefs = ColumnClass(_cols)
 
         for ii, (colType, options) in enumerate(colDefs):
-            # define the edit widget for the 'merit' column
+            # define the edit widget for each column
             col = self._columnDefs.columns[ii]
             col.editClass = _SmallPulldown
             col.editKw = {'texts': options}

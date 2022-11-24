@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-08 16:38:24 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-24 12:05:40 +0000 (Thu, November 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -905,7 +905,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # multipletAveraging = self.preferences.general.multipletAveraging
         # self.multipletAveraging.setIndex(MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0)
         self.singleContoursBox.setChecked(self.preferences.general.generateSinglePlaneContours)
-        # self.negativeTraceColourBox.setChecked(self.preferences.general.traceIncludeNegative)
+        self.negativeTraceColourBox.setChecked(self.preferences.general.traceIncludeNegative)
 
         for aspect, aspectValue in self.preferences.general.aspectRatios.items():
             if aspect in self.aspectData:

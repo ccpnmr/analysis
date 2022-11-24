@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-18 11:10:23 +0000 (Fri, November 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-24 12:08:08 +0000 (Thu, November 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1472,6 +1472,16 @@ class Framework(NotifierBase, GuiBase):
             popup = SeriesPeakCollectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
             return popup
+
+    def showPseudoSpectrumPopup(self):
+        if not self.project.spectra:
+            getLogger().warning('Project has no Spectra. Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
+            MessageDialog.showWarning('Project contains no spectra.', 'Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
+        else:
+            from ccpn.ui.gui.popups.PseudoToSpectrumGroupPopup import PseudoToSpectrumGroupPopup
+
+            popup = PseudoToSpectrumGroupPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup.exec_()
 
     def showProjectionPopup(self):
         if not self.project.spectra:

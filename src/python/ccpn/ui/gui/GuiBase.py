@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-11 15:42:50 +0000 (Fri, November 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-24 12:08:09 +0000 (Thu, November 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -75,7 +75,7 @@ class GuiBase(object):
         self._menuSpec = None
 
     def _setupMenus(self):
-        """Setup the menu specification.
+        """Set up the menu specification.
 
         The menus are specified by a list of lists (actually, an iterable of iterables, but the term
         ‘list’ will be used here to mean any iterable).  Framework provides 7 menus: Project, Spectrum,
@@ -270,6 +270,7 @@ class GuiBase(object):
             ("Make Strip Plot...", self.makeStripPlotPopup, [('shortcut', 'sp')]),
 
             (),
+            ("Pseudo Spectrum to SpectrumGroup...", self.showPseudoSpectrumPopup),
             ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
             (),
             ("Print to File...", self.showPrintSpectrumDisplayPopup, [('shortcut', '⌃p')]),

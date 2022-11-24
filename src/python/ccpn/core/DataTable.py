@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-17 16:23:31 +0000 (Thu, November 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-24 16:15:05 +0000 (Thu, November 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -122,17 +122,13 @@ class DataTable(AbstractWrapperObject):
         pd.DataFrames will be converted to ccpn TableFrames
         """
         if not isinstance(value, (TableFrame, type(None))):
-            if isinstance(value, pd.DataFrame):
-                value = TableFrame(value)
-                getLogger().debug(f'Data must be of type {TableFrame}. The value pd.DataFrame was converted to {TableFrame}.')
-            else:
+            if not isinstance(value, pd.DataFrame):
                 raise RuntimeError(f'Data must be of type {TableFrame}, pd.DataFrame or None')
 
-        if value is None:
-            # create a new, empty table
-            self._wrappedData.data = TableFrame()
-        else:
-            self._wrappedData.data = value
+            value = TableFrame(value)
+            getLogger().debug(f'Data must be of type {TableFrame}. The value pd.DataFrame was converted to {TableFrame}.')
+
+        self._wrappedData.data = TableFrame() if value is None else value
 
     @property
     def metadata(self) -> dict:
@@ -145,7 +141,7 @@ class DataTable(AbstractWrapperObject):
         including OrderedDict, numpy.ndarray, ccpn.util.Tensor,
         or pandas DataFrame, Series, or Panel.
         """
-        return dict((x.name, x.value) for x in self._wrappedData.dataTableParameters)
+        return {x.name: x.value for x in self._wrappedData.dataTableParameters}
 
     @logCommand(get='self')
     def getMetadata(self, name: str):
@@ -171,7 +167,7 @@ class DataTable(AbstractWrapperObject):
 
         # check that the metadata parameter belongs to the defined list
         if not _checkMetaTypes(value):
-            raise ValueError(f'value contains non-serialisable element')
+            raise ValueError('value contains non-serialisable element')
 
         apiData = self._wrappedData
         metadata = apiData.findFirstDataTableParameter(name=name)
@@ -187,7 +183,7 @@ class DataTable(AbstractWrapperObject):
         apiData = self._wrappedData
         metadata = apiData.findFirstDataTableParameter(name=name)
         if metadata is None:
-            raise KeyError("No metadata named %s" % name)
+            raise KeyError(f'No metadata named {name}')
         else:
             metadata.delete()
 
@@ -231,10 +227,10 @@ class DataTable(AbstractWrapperObject):
         :param value: RestraintTable or str
         """
         _rTable = self.project.getByPid(value) if isinstance(value, str) else value
-        if not isinstance(_rTable, RestraintTable):
-            raise ValueError(f'{self.className}.restraintTableLink is not a RestraintTable')
+        if not isinstance(_rTable, (RestraintTable, type(None))):
+            raise ValueError(f'{self.className}._restraintTableLink is not a RestraintTable, or None')
 
-        self.setMetadata(_RESTRAINTTABLE, value)
+        self.setMetadata(_RESTRAINTTABLE, _rTable.pid if _rTable else None)
 
     #=========================================================================================
     # Implementation functions

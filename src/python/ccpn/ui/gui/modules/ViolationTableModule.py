@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-16 15:48:30 +0000 (Wed, November 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-24 16:15:05 +0000 (Thu, November 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -187,13 +187,16 @@ class ViolationTableModule(CcpnModule):
         """Set the active callbacks for the module
         """
         if self.activePulldownClass:
-            self._setCurrentPulldown = Notifier(self.current,
-                                                [Notifier.CURRENT],
-                                                targetName=self.activePulldownClass._pluralLinkName,
-                                                callback=self._selectCurrentPulldownClass)
+            self._setCurrentPulldown = self.setNotifier(self.current,
+                                                        [Notifier.CURRENT],
+                                                        targetName=self.activePulldownClass._pluralLinkName,
+                                                        callback=self._selectCurrentPulldownClass)
 
             # set the active callback from the pulldown
             self._activeCheckbox = self._settings.checkBoxes[LINKTOPULLDOWNCLASS]['widget']
+
+        self._violationNotifier = self.setNotifier(self.project, [Notifier.CHANGE, Notifier.DELETE],
+                                                   KlassTable.__name__, self._updateViolationTable, onceOnly=True)
 
     def _maximise(self):
         """
@@ -216,6 +219,8 @@ class ViolationTableModule(CcpnModule):
             self._metadata.close()
         if self.activePulldownClass and self._setCurrentPulldown:
             self._setCurrentPulldown.unRegister()
+        if self._violationNotifier:
+            self._violationNotifier.unRegister()
 
         super()._closeModule()
 
@@ -252,10 +257,7 @@ class ViolationTableModule(CcpnModule):
         """
         try:
             with undoBlockWithoutSideBar():
-                if (_rTable := self.project.getByPid(item)):
-                    self._table.setMetadata(_RESTRAINTTABLE, item)
-                else:
-                    self._table.setMetadata(_RESTRAINTTABLE, None)
+                self._table._restraintTableLink = item
 
         except Exception as es:
             # need to immediately set back to stop error on loseFocus which also fires editingFinished
@@ -278,9 +280,15 @@ class ViolationTableModule(CcpnModule):
         else:
             self._tableWidget.updateDf(pd.DataFrame({}))
 
-        _rTablePid = self._table.getMetadata(_RESTRAINTTABLE)
-        self.rtWidget.select(_rTablePid)
-        self.lineEditComment.setText(self._table.comment or '')
+        _rTable = self._table._restraintTableLink
+        with self.rtWidget.blockWidgetSignals():
+            try:
+                self.rtWidget.select(_rTable.pid)
+            except Exception:
+                self.rtWidget.setIndex(0)
+
+        with self.lineEditComment.blockWidgetSignals():
+            self.lineEditComment.setText(self._table.comment or '')
 
         _df = pd.DataFrame({'name'     : self._table.metadata.keys(),
                             'parameter': self._table.metadata.values()})
@@ -322,6 +330,21 @@ class ViolationTableModule(CcpnModule):
             else:
                 self._modulePulldown.setIndex(0, blockSignals=True)
                 self._updateEmptyTable()
+
+    def _updateViolationTable(self, data):
+        """Respond to change in violationTable
+        """
+        if data:
+            trigger = data.get(Notifier.TRIGGER)
+            obj = data.get(Notifier.OBJECT)
+            if trigger in [Notifier.DELETE, Notifier.CREATE]:
+                # update pulldown
+                pass
+
+            elif trigger == Notifier.CHANGE and data[Notifier.SPECIFIERS].get('metadata'):
+                # update pulldown and table
+                if obj.pid == self._modulePulldown.getText():
+                    self._update()
 
     #=========================================================================================
     # Properties

@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-21 19:04:44 +0100 (Tue, June 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-24 19:03:31 +0000 (Thu, November 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -95,6 +95,20 @@ class EstimateVolumesABC(CcpnDialogMainWidget):
         """
         # MUST BE SUBCLASSED
         raise NotImplementedError(f'Code error: function {repr(sys._getframe().f_code.co_name)} not implemented')
+
+    def _cleanupDialog(self):
+        """Clean up notifiers for closing
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError(f'Code error: function {repr(sys._getframe().f_code.co_name)} not implemented')
+
+    def accept(self) -> None:
+        self._cleanupDialog()
+        return super().accept()
+
+    def reject(self) -> None:
+        self._cleanupDialog()
+        return super().reject()
 
 
 #=========================================================================================
@@ -233,6 +247,12 @@ class EstimatePeakListVolumes(EstimateVolumesABC):
                 self.peakListWidget._disableLabels([pp.pid for pp in peakLists])
                 self.accept()
 
+    def _cleanupDialog(self):
+        """Clean up notifiers for closing
+        """
+        if self.spectrumPullDown:
+            self.spectrumPullDown.unRegister()
+
 
 #=========================================================================================
 # EstimatePeakListVolumes
@@ -316,3 +336,8 @@ class EstimateCurrentVolumes(EstimateVolumesABC):
 
             estimateVolumes(currentPks, noWarning=True)
             self.accept()
+
+    def _cleanupDialog(self):
+        """Clean up notifiers for closing
+        """
+        pass

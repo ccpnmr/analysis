@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-24 12:08:09 +0000 (Thu, November 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-24 19:03:31 +0000 (Thu, November 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -525,18 +525,21 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
 
         return True
 
-    def accept(self):
-        super(CcpnDialogMainWidget, self).accept()
+    def accept(self) -> None:
+        result = super(CcpnDialogMainWidget, self).accept()
 
         # store the state of any required widgets
         self.storeWidgetState()
+        return result
 
     def reject(self) -> None:
-        super(CcpnDialogMainWidget, self).reject()
+        result = super(CcpnDialogMainWidget, self).reject()
 
         if self.storeStateOnReject:
             # store the state of any required widgets
             self.storeWidgetState()
+
+        return result
 
     def _cleanupDialog(self):
         """Clean-up any extra widgets/data before closing

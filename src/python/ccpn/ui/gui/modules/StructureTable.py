@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-17 13:44:40 +0000 (Thu, November 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-24 19:04:17 +0000 (Thu, November 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -531,6 +531,12 @@ class StructureTableFrame(_CoreTableFrameABC):
             return
 
         self._tableWidget._update()
+
+    def _cleanupWidget(self):
+        if self._ensembleNotifier:
+            self._ensembleNotifier.unRegister()
+
+        super()._cleanupWidget()
 
 
 #=========================================================================================

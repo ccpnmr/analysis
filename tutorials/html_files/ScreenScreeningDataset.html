@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Screening Datasets</title>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a
+        href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://forums.ccpn.ac.uk"><img
+        src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
+<br>
+<div class="headerBar">Screening Datasets</div>
+<div class="tutorial">
+
+    <h2>Screening Datasets</h2>
+    <p><span class="action">Screening Datasets</span> are tables containing all the information needed to analyse your screening data in the <span class="action">Hit Analysis</span> module. They are stored in the <span class="action">DataTables</span> part of the sidebar. A key element to these datasets is that they track which peaks are linked (or matched) across your Reference, Control and Target spectra. The matching of peaks (and thus the setup of the datasets) can be done either manually or automatically.</p>
+
+    <h3>Manual Setup</h3>
+    <p>Open the <span class="action">Hit Analysis</span> module by going to the <span class="action">Screen</span> menu and selecting <span class="action">Hit Analysis</span> or using the shortcut <span class="action">HA</span>. In the <span class="action">DataTable</span> drop-down menu select <span class="action">New Item...</span>. Give your dataset a name and select your <span class="action">Reference, Control</span> and <span class="action">Target</span> (optionally also <span class="action">Displacer</span>) <span class="action">SpectrumGroups</span>. Clicking <span class="action">OK</span> will then add a new <span class="action">DataTable</span> to your sidebar and open the new empty Screening Dataset in the Hit Analysis module.</p>
+    <p>You can now start to populate your dataset with Peak Matches. Using one or more SpectrumDisplays, select a set of equivalent peaks in your Reference, Control and Target spectra, click on <span class="action">New/Edit Match</span> in the Hit Analysis module and then <span class="action">OK</span> in the pop-up window. This will add a Peak Match to your dataset which should become visible in your Hit Analysis module tables. You can also select multiple peaks in each spectrum and match them in one go (but make sure you have selected the same number of peaks in each spectrum).</p>
+
+    <h3>Automatic Setup</h3>
+    <p>You can automatically set up a dataset and match your peaks using the <span class="action">Pipelines</span> module. Open the <span class="action">Pipelines</span> module by going to the <span class="action">Screen</span> menu and selecting <span class="action">Pipelines</span> or using the shortcut <span class="action">PI</span>. Double-click on the <span class="action">Set up Screening dataset</span> pipe in the list of <span class="action">Pipes</span> or drag it into the <span class="action">Drop Pipes</span> area. Give your dataset a <span class="action">Run name</span> and select your <span class="action">Reference, Control</span> and <span class="action">Target</span> (optionally also <span class="action">Displacer</span>) <span class="action">SpectrumGroups</span>. If you are using Reference Singleton spectra rather than Reference Mixtures, leave the <span class="action">Reference SpectrumGroup</span> unspecified and select <span class="action">Use Substance referenceSpectra</span> instead. Finally, select the <span class="action">Matching Engine</span> of your choice (we recommend <span class="action">Nearest Match</span>), the correct <span class="action">Experiment Type</span> and whether or not to use <span class="action">AutoScale Control-Target Spectra</span>. Run the pipe(line) by pressing the green <span class="action">Play</span> button. Note that this procedure assumes that you have already copied your peaks from your Reference to your Control/Target/Displacer Spectra. For more information about how to do this, see our <a href="https://ccpn.ac.uk/support/tutorials/#screening">Hit Analysis Tutorial</a>.</p>
+
+    <h3>Creating Subsets</h3>
+    <p>Once you are using a Screening Dataset in the Hit Analysis module you can at any time select a subset of Matches in your tables or the plot and then turn these into a new Screening Dataset. If you right-click on a selected item in the plot, select <span class="action">New from selected</span>, and a new DataTable containing only these matches will be added to your sidebar. It is given a default name which you can change if you wish by double-clicking on it and entering a new name (and comment).</p>
+    <p>Note that the two datasets are entirely separate. Any flag, deletions or additions in one dataset will not affect the other one.</p>
+
+
+</div>
+</body>
+</html>

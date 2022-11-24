@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>AnalysisScreen Nomenclature</title>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a
+        href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://forums.ccpn.ac.uk"><img
+        src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
+<br>
+<div class="headerBar">AnalysisScreen Nomenclature</div>
+<div class="tutorial">
+
+    <h2>AnalysisScreen Nomenclature</h2>
+    <h3>Sample</h3>
+    <p>A <span class="action">Sample</span> is an item of data (technically a CcpNmr Analysis object) containing information about the physical NMR sample, e.g. pH, ionic strength etc. The Samples contained in your project are listed in the sidebar under <span class="action">Samples</span>.</p>
+    <h4>Links</h4>
+    <p>A Sample can contain (and thus be linked to) <span class="action">Sample Components</span> in your project. Sample Components can be added to a Sample manually by double-clicking <span class="action">New SampleComponenet</span> in the sidebar. However, usually for large sets of screening data, you will import your data with an Excel or NEF file and these links will be established automatically.</p>
+    <p>A Sample can also be linked to a <span class="action">Spectrum</span>, indicating that the Spectrum was recorded on that Sample. You can manually associate a Spectrum with a Sample by going to the <span class="action">Spectrum Properties</span> pop-up (double-click on the <span class="action">Spectrum</span> in the sidebar) and in the <span class="action">General</span> tab selecting a <span class="action">Sample</span> from the drop-down menu (note that the Sample already has to exist - you cannot create a new one on the fly in the <span class="action">Spectrum Properties</span> pop-up). Again, the link between a <span class="action">Sample</span> and a <span class="action">Spectrum</span> is usually established automatically when importing your screening data with an Excel or NEF file.</p>
+
+    <h3>Sample Component</h3>
+    <p>A <span class="action">Sample Component</span> is an item of data (technically a CcpNmr Analysis object) containing information about the <span class="action">Substance</span> in the physical NMR sample (e.g. concentration). The Sample Components contained in your project are listed in the sidebar under <span class="action">SampleComponents</span>, nested beneath <span class="action">Samples</span>.</p>
+    <h4>Links</h4>
+    <p>A Sample Component must always have a corresponding <span class="action">Substance</span> in your project. Either you can create the Substance first (double-click <span class="action">New Substance</span> in the sidebar) and then use this to create your Sample Component (select <span class="action">From Substances</span> in the <span class="action">New Sample Component</span> pop-up and then select the Substance from the <span class="action">Current Substances</span> drop-down menu). Alternatively, you can create your <span class="action">Sample Component</span> (select <span class="action">New</span> in the <span class="action">New Sample Component</span> pop-up) and the program will automatically create the linked Substance for you. When importing your screening data via an Excel or NEF file, these links are established automatically.</p>
+
+    <h3>Substance</h3>
+    <p>A <span class="action">Substance</span> is an item of data (technically a CcpNmr Analysis object) containing information about a molecule, (e.g. a small molecule and its general properties such as: SMILES, molecular weight etc.). The Substances contained in your project are listed in the sidebar under <span class="action">Substances</span>.</p>
+    <h4>Links</h4>
+    <p>A Substance can be linked to a <span class="action">Sample Component</span>. Note that while a Sample Component MUST have a link to a Substance, a Substance does not have to be linked to Sample Component. The link between the two is established when you create a new SampleComponent and either create the Substance at the same time, or use a pre-existing Substance. When importing your screening data via an Excel or NEF file, these links are established automatically.</p>
+    <p>A Substance can also be linked to a <span class="action">Spectrum</span> in the form of a <span class="action">Reference Spectrum</span>. You can set a Reference Spectrum by going to the <span class="action">Substance Properties</span> pop-up (double-click on a <span class="action">Substance</span> in the sidebar) and then in the <span class="action">Advanced</span> section you can select a <span class="action">Reference Spectrum</span> from the drop-down menu. Typically, each Substance in a set of screening data will be linked to either a <span class="action">Reference Singleton Spectrum</span> or a <span class="action">Reference Mixture Spectrum</span>. When importing your screening data via an Excel or NEF file, these links are established automatically.</p>
+
+    <h3>SpectrumGroup</h3>
+    <p>A <span class="action">Spectrum Group</span> is a container (technically a CcpNmr Analysis object) to collect together several <span class="action">Spectra</span>. You can create a Spectrum Group by selecting one or more Spectra in the sidebar, right-clicking and selecting <span class="action">Make Spectrum Group from selected</span>. Alternatively, double-click on <span class="action">New SpectrumGroup</span> in the sidebar and then move the spectra of your choice into the <span class="action">Included</span> box by either dragging them over, or double-clicking them.</p>
+    <p>For screening data we generally recommend grouping your Reference, Control, Target and Displacer Spectra into distinct SpectrumGroups. Usually this is done automatically when importing your screening data via an Excel or NEF file.</p>
+    <p>Note that you can open Spectra in SpectrumDisplays either by dragging them from the <span class="action">Spectra</span> section of the sidebar or the <span class="action">SpectrumGroups</span> section. If you drag a SpectrumGroup (rather than the individual spectra within the gorup), all spectra will open like a single spectrum (with a single button in the Spectrum Toolbar). The contour colour used in this case is the <span class="action">Group Contour Colour</span> specified in the <span class="action">General</span> tab of the <span class="action">Edit Spectrum Group</span> pop-up (opened by double-clicking on a Spectrum Group in the sidebar). </p>
+    <h4>Links</h4>
+    <p>A Spectrum Group is linked to the <span class="action">Spectra</span> contained within it. This link is established when the Spectrum Group is created.</p>
+
+    <h3>Control (spectrum)</h3>
+    <p>A sample containing one or multiple Substances prior the addition of a biological target (or the spectrum recorded on such a sample). Typically, we would expect such spectra to be recorded each time a screen is conducted. For a large screen containing multiple samples, there will be multiple Control Samples and Spectra.</p>
+    <h4>Links</h4>
+    <p>The Control <span class="action">Spectra</span> are linked to Control <span class="action">Samples</span> and they are grouped into the Control <span class="action">Spectrum Group</span>. These links and groups are usually established automatically when importing your screening data with an Excel or NEF file.</p>
+
+    <h3>Target (spectrum)</h3>
+    <p>A sample containing one or multiple Substances plus a biological target (or the spectrum recorded on such a sample). For a large screen containing multiple samples, there will be multiple Target Samples and Spectra.</p>
+    <h4>Links</h4>
+    <p>The Target <span class="action">Spectra</span> are linked to Target <span class="action">Samples</span> and they are grouped into the Target <span class="action">Spectrum Group</span>. These links and groups are usually established automatically when importing your screening data with an Excel or NEF file.</p>
+
+    <h3>Displacer (spectrum)</h3>
+    <p>A sample containing one or multiple substances, a biological target plus a molecule known to bind the biological target (or the spectrum recorded on such a sample). For a large screen containing multiple samples, there will be multiple Displacer Samples and Spectra.</p>
+    <p>Displacers are also commonly referred to as Competitors. Typically, it is expected that the displacer/competitor compound binds the biological target molecule more strongly than any of the substances used in the screen. It is usually used to assess whether a substance that binds has done so at the site of interest. The use of Displacers is optional.</p>
+    <h4>Links</h4>
+    <p>The Displacer <span class="action">Spectra</span> are linked to Displacer <span class="action">Samples</span> and they are grouped into the Displacer <span class="action">Spectrum Group</span>. These links and groups are usually established automatically when importing your screening data with an Excel or NEF file.</p>
+
+    <h3>Reference Mixture Spectrum</h3>
+    <p>A spectrum recorded on a sample containing multiple Substances. This is often a spectrum that was originally used as a Control Spectrum in a previous screen. Its peaks and their annotations are used as a template to identify Substances in future screens (which is usually more accurate than using Reference Singletons). For a large screen containing multiple samples, there will be multiple Reference Mixtures whic</p>
+    <h4>Links</h4>
+    <p>The Reference Mixture spectrum will be the <span class="action">Reference Spectrum</span> for all the <span class="action">Substances</span> contained in the sample it was recorded on. Multiple Reference Mixture spectra are usually grouped into a Reference or ReferenceMixtures <span class="action">Spectrum Group</span>. These links are usually established automatically when importing your screening data with an Excel or NEF file. If you are creating a new NEF file, these links may need to be set up first.</p>
+
+    <h3>Reference Singleton</h3>
+    <p>A spectrum recorded on only one Substance. Its peaks and their annotations can be used as a template to identify Substances in future screens but usually more accurate than using Reference Mixtures.</p>
+    <h4>Links</h4>
+        <p>The Reference Singleton spectrum will be the <span class="action">Reference Spectrum</span> for the corresponding <span class="action">Substance</span> contained in the sample it was recorded on. Multiple Reference Singleton spectra are usually grouped into a Reference or ReferenceSingletons <span class="action">Spectrum Group</span>. These links are usually established automatically when importing your screening data with an Excel or NEF file.</p>
+
+    <h3>Binding Substance</h3>
+    <p>The Substance linked to a set of spectra (reference) whose peaks have been matched to the spectral peaks (Control - Target)  denoting a binding event.</p>
+
+    <h3>Peak Match</h3>
+    <p>The virtual link between equivalent peaks in Reference, Control and Target Spectra (possibly also Displacer Spectra, if being used) in a Screening Dataset.</p>
+</div>
+</body>
+</html>

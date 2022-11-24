@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-24 12:54:30 +0100 (Mon, October 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-24 11:29:10 +0000 (Thu, November 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -124,10 +124,11 @@ class MessageDialog(QtWidgets.QMessageBox):
     """
 
     def __init__(self, title, basicText, message, icon=Information, iconPath=None, parent=None, scrollableMessage=False):
-        QtWidgets.QMessageBox.__init__(self, None)
+        super().__init__(parent)
 
         # set modality to take control
         self.setWindowModality(QtCore.Qt.ApplicationModal)
+        self.setWindowFlags(self.windowFlags() | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowStaysOnTopHint)
 
         self._parent = parent
         self.setWindowTitle(title)
@@ -144,7 +145,7 @@ class MessageDialog(QtWidgets.QMessageBox):
         # self.setFont(messageFont)  #GWV:  Does not seem to do anything
         # self.setMinimumSize(QtCore.QSize(300, 100))  #GWV:  Does not seem to do anything
         # self.resize(300, 100)  #GWV:  Does not seem to do anything
-        # Adapted from best solution so far from: http://apocalyptech.com/linux/qt/qmessagebox/
+        # Adapted from the best solution so far from: http://apocalyptech.com/linux/qt/qmessagebox/
         layout = self.layout()
 
         # set the fonts for the labels (pushButtons are set later)
@@ -153,8 +154,7 @@ class MessageDialog(QtWidgets.QMessageBox):
 
         maxTextWidth = 50
         widgetBasic = None
-        item = layout.itemAtPosition(0, 2)  # grid position of basic text item
-        if item:
+        if item := layout.itemAtPosition(0, 2):
             widgetBasic = item.widget()
             setWidgetFont(widgetBasic, bold=True)
 
@@ -164,8 +164,7 @@ class MessageDialog(QtWidgets.QMessageBox):
                 maxTextWidth = max(maxTextWidth, tWidth)
 
         widgetMessage = None
-        item = layout.itemAtPosition(1, 2)  # grid position of informative text item
-        if item:
+        if item := layout.itemAtPosition(1, 2):
             widgetMessage = item.widget()
 
             # get the bounding rectangle for each line of informativeText
@@ -256,16 +255,28 @@ class MessageDialog(QtWidgets.QMessageBox):
         for child in self.findChildren(QtWidgets.QPushButton):
             setWidgetFont(child, )
 
-        # must be the first event outside of the __init__ otherwise frameGeometries are not valid
+        # must be the first event outside the __init__ otherwise frameGeometries are not valid
         super(MessageDialog, self).resizeEvent(ev)
 
-        activeWindow = QtWidgets.QApplication.activeWindow()
-        if activeWindow:
+        if activeWindow := QtWidgets.QApplication.activeWindow():
             point = activeWindow.rect().center()
             global_point = activeWindow.mapToGlobal(point)
             self.move(global_point
                       - self.frameGeometry().center()
                       + self.frameGeometry().topLeft())
+
+    def runFunc(self, func):
+        from functools import partial
+
+        QtCore.QTimer.singleShot(0, partial(self._runFunc, func))
+        self.exec_()
+        return self._funcResult
+
+    def _runFunc(self, func):
+        """Run the function and quit
+        """
+        self._funcResult = func()
+        self.close()
 
 
 def showInfo(title, message, parent=None, iconPath=None):
@@ -352,6 +363,7 @@ def showWarning(title, message, parent=None, iconPath=None, scrollableMessage=Fa
     dialog.exec_()
     return
 
+
 def showNYI(parent=None):
     text = 'Not yet implemented'
     dialog = MessageDialog(title=text, basicText=text, message='Sorry!', icon=Warning, iconPath=None, parent=parent,
@@ -361,6 +373,7 @@ def showNYI(parent=None):
     dialog.raise_()
     dialog.exec_()
     return
+
 
 def showOkCancelWarning(title, message, parent=None, iconPath=None):
     dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent)
@@ -566,6 +579,29 @@ def progressManager(parent, title=None, progressMax=100):
         sleep(0.1)
 
         yield _prog  # yield control to the main process
+
+    finally:
+        thisProg.update()
+        QtWidgets.QApplication.processEvents()  # hopefully it will redraw the popup
+        thisProg.close()
+
+        if win := (_prog.newWindow or parent):
+            # return correct focus control to the parent
+            QtWidgets.QApplication.setActiveWindow(win)
+
+
+@contextmanager
+def busyDialog(parent, title=None, progressMax=100):
+    thisProg = progressPopup(parent=parent, title=title, progressMax=progressMax)
+
+    _prog = _progressStore()
+    try:
+        thisProg.progress_simulation()
+        thisProg.update()
+        QtWidgets.QApplication.processEvents()  # still doesn't catch all the paint events
+        sleep(0.1)
+
+        yield thisProg  # yield control to the main process
 
     finally:
         thisProg.update()

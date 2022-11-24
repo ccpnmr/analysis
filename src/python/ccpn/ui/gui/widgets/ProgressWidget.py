@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:42 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-24 11:29:10 +0000 (Thu, November 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -49,6 +49,7 @@ class ProgressDialog(QtWidgets.QProgressDialog):
 
         # give full control to the dialog
         self.setWindowModality(QtCore.Qt.ApplicationModal)
+        self.setWindowFlags(self.windowFlags() | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowStaysOnTopHint)
 
     def setText(self, text):
         self._label = Label(self, text=text, margins=(8, 16, 8, 8))
@@ -191,6 +192,35 @@ class ProgressTextBar(tqdm):
         self.close()
 
 
+#=========================================================================================
+# Busy progress
+#=========================================================================================
+
+class BusyDialog(ProgressDialog):
+    """A progress-dialog that pops up immediately without a cancel button or progress-bar
+    """
+
+    def __init__(self, parent, hideBar=False, hideCancelButton=False, *args, **kwds):
+        """Initialise teh dialog
+        """
+        # show the dialog immediately
+        kwds.pop('delay', 0)
+        super().__init__(parent, delay=0, *args, **kwds)
+
+        # hide the progress-bar
+        if hideBar and (ch := self.findChildren(QtWidgets.QProgressBar)):
+            for cc in ch:
+                cc.setVisible(False)
+
+        # hide the cancel-button
+        if hideCancelButton:
+            self.setCancelButton(None)
+
+
+#=========================================================================================
+# Testing
+#=========================================================================================
+
 def main():
     # import time
     # from .Application import Application
@@ -219,6 +249,8 @@ def main():
 
     from ccpn.ui.gui.widgets.Application import newTestApplication
     from ccpn.framework.Application import getApplication
+    from ccpn.core.lib.ContextManagers import progressHandler, busyHandler
+    from time import sleep
 
     # create a new test application
     app = newTestApplication(interface='Gui')
@@ -226,9 +258,12 @@ def main():
     mainWindow = application.ui.mainWindow
 
     # add a module
-    _module = ProgressDialog(parent=mainWindow)
-    mainWindow.moduleArea.addModule(_module)
+    # _module = ProgressDialog(parent=mainWindow)
+    # mainWindow.moduleArea.addModule(_module)
 
+    with busyHandler():
+        for _ in range(10):
+            sleep(1)
     # show the mainWindow
     app.start()
 

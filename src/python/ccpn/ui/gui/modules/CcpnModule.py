@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-17 17:51:55 +0000 (Thu, November 17, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-11-24 11:29:10 +0000 (Thu, November 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1426,6 +1426,7 @@ class CcpnModuleLabel(DockLabel):
 
 
 INVALIDROWCOLOUR = QtGui.QColor('lightpink')
+WARNINGROWCOLOUR = QtGui.QColor('palegoldenrod')
 
 EXTRA_CHARACTERS_ALLOWED = [' ',  # extra characters allowed when renaming a Module (except spectrumDisplays)
                             '_',

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-23 12:32:57 +0000 (Wed, November 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-24 13:05:56 +0000 (Thu, November 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -230,6 +230,10 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
                 model.df = df
 
             self.resizeColumnsToContents()
+            maxLen = str(len(df))
+            indexHeader = self.verticalHeader()
+            px = indexHeader.fontMetrics().boundingRect(maxLen).width()+5
+            indexHeader.setMinimumWidth(px)
             if resize:
                 # resize if required
                 self.resizeRowsToContents()
@@ -322,7 +326,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         # only look at visible section
         _header.setResizeContentsPrecision(5)
         _header.setDefaultAlignment(QtCore.Qt.AlignLeft)
-        _header.setFixedWidth(10)  # gives enough of a handle to resize if required
+        _header.setMinimumWidth(25)  # gives enough of a handle to resize if required
         _header.setVisible(showVerticalHeader)
         _header.setHighlightSections(self.font().bold())
 
@@ -400,6 +404,13 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     @_df.setter
     def _df(self, value):
         self.model().df = value
+
+    @property
+    def _displayedDf(self):
+        """Return the Pandas-dataFrame in exactly the same way as it is displayed: sorted and filtered.
+        """
+        return self.model().displayedDf
+
 
     def isEditable(self):
         """Return True if the default state of the table is editable

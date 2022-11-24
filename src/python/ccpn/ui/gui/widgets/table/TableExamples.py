@@ -80,6 +80,7 @@ def customPandasTable():
     table = CustomDataFrameTable(None, dataFrame=df, columns=_columns
                                  ,selectionCallback=_selectionCallback)
 
+
     # Add to a layout if not given a grid and a parent layout to TableABC
     _buildLayout(_testApp, table)
 

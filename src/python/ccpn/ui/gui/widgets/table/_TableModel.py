@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-21 12:50:49 +0000 (Mon, November 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-11-24 13:05:56 +0000 (Thu, November 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -172,6 +172,32 @@ class _TableModel(QtCore.QAbstractTableModel):
             return self._df.iloc[self._filterIndex]
         else:
             return self._df
+
+    @property
+    def displayedDf(self):
+        """Return the visible dataFrame as displayed, sorted and filtered
+        """
+        from ccpn.util.OrderedSet import OrderedSet
+        df = self._df
+        table = self._view
+        rows, cols = df.shape[0], df.shape[1]
+
+        if df.empty:
+            return df
+
+        colList = [col for ii, col, in enumerate(list(df.columns)) if
+                   not table.horizontalHeader().isSectionHidden(ii)]
+
+        if self._filterIndex is None:
+            rowList = [self._sortIndex[row] for row in range(rows)]
+        else:
+            #  map to sorted indexes
+            rowList = list(OrderedSet(self._sortIndex[row] for row in range(rows)) & OrderedSet(
+                self._sortIndex[ii] for ii in self._filterIndex))
+
+        df = df[colList]
+        df = df[:].iloc[rowList]
+        return df
 
     def setToolTips(self, orientation, values):
         """Set the tooltips for the horizontal/vertical headers.
@@ -442,6 +468,12 @@ class _TableModel(QtCore.QAbstractTableModel):
             try:
                 # quickest way to get the column header
                 return self._df.columns[col]
+            except Exception:
+                return None
+        elif role == DISPLAY_ROLE and orientation == QtCore.Qt.Vertical:
+            try:
+                # quickest way to get the column header
+                return col+1
             except Exception:
                 return None
 

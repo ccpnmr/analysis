@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-23 13:37:03 +0000 (Wed, November 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-25 12:41:43 +0000 (Fri, November 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -295,6 +295,9 @@ class RestraintAnalysisTableModule(CcpnModule):
         self._RATwidget = ModuleSettingsWidget(parent=self.settingsWidget, mainWindow=self.mainWindow,
                                                settingsDict=settingsDict,
                                                grid=(0, 0))
+
+        # add spacer to the settings-widget so that the right-hand-side stays aligned
+        Spacer(self.settingsWidget, 5, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed, grid=(0, 1))
 
         self._collectionPulldown = self._RATwidget.getWidget(_COLLECTION)
         self._collectionButton = self._RATwidget.getWidget(_COLLECTIONBUTTON)

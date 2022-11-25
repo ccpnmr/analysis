@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-09 09:47:27 +0000 (Wed, November 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-25 13:53:35 +0000 (Fri, November 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -569,6 +569,7 @@ class ValidateSpectraPopup(CcpnDialog):
         self._spectrumFrame.addSpacer(5, 10, grid=(specRow, 0))
         specRow += 1
 
+
         # set up a scroll area
         self.spectrumScrollArea = ScrollArea(self._spectrumFrame, setLayout=True, grid=(specRow, 0), gridSpan=(1, _colSpan))
         self.spectrumScrollArea.setWidgetResizable(True)
@@ -590,13 +591,52 @@ class ValidateSpectraPopup(CcpnDialog):
             scrollRow += 1
             self.spectrumData[sp] = _row
 
+
+        self._spectrumFrame.addSpacer(5, 10, grid=(specRow, 0))
+        specRow += 1
+
+        # Path manipulations
+        self.pathFrame = Frame(self._spectrumFrame, setLayout=True, showBorder=False, fShape='noFrame',
+                                 grid=(specRow, 0), gridSpan=(1, _colSpan),
+                                 vAlign='top', hAlign='left')
+        specRow += 1
+        Label(self.pathFrame, text='Edit/Modify Paths', vAlign='t', grid=(0, 0), bold=True)
+        self.searchCheckBox = CheckBox(self.pathFrame, grid=(0,1), hAligh='left', callback=self._searchCheckboxCallback)
+
+
+        #
+        self.searchFrame = Frame(self._spectrumFrame, setLayout=True, showBorder=False, fShape='noFrame',
+                                 grid=(specRow, 0), gridSpan=(1, _colSpan),
+                                 vAlign='top', hAlign='left')
+        self.searchFrame.hide()
+        specRow += 1
+
+        Label(self.searchFrame, text='Path', grid=(0,0), hAlign='right')
+        self.makeAbsoluteButton = Button(self.searchFrame, text='Make absolute', tipText='Expand any redirections into an absolute path',
+                                                               grid=(0, 1), gridSpan=(1,1), callback = self._makeAbsoluteCallback, hPolicy='minimal'
+                                                               )
+        self.makeRelativeButton = Button(self.searchFrame, text='Make relative', tipText='Reduce an absolute path into a relative path using redirections',
+                                                               grid=(0,2), gridSpan=(1,1), callback = self._makeRelativeCallback
+                                                               )
+
+        minWidth = 250
+        self.searchLabel = Label(self.searchFrame, text='Search', grid=(2,0), hAlign='right')
+        self.seachLine = LineEdit(self.searchFrame, grid=(2,1), gridSpan=(1,2), minimumWidth=minWidth)
+
+        self.replaceLabel = Label(self.searchFrame, text='Replace with', grid=(2,3))
+        # self.replaceLabel.setMinimumWidth(minWidth)
+        self.replaceLine = LineEdit(self.searchFrame, grid=(2,4), minimumWidth=minWidth)
+        self.replaceButton = Button(self.searchFrame, text='Go', grid=(2,5), callback=self._replaceButtonCallback)
+
+
+        self._spectrumFrame.addSpacer(5, 10, grid=(specRow, 0))
+        specRow += 1
+
         # finalise the spectrumScrollArea
         Spacer(self.spectrumScrollAreaWidgetContents, 2, 2,
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(scrollRow, 1), gridSpan=(1, 1))
 
-        self._spectrumFrame.addSpacer(5, 10, grid=(specRow, 0))
-        specRow += 1
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -613,18 +653,9 @@ class ValidateSpectraPopup(CcpnDialog):
 
         # add exit buttons
         self.applyButtons = ButtonList(self,
-                                       texts=['Make absolute paths',
-                                              'Make relative paths',
-                                              'Close'
-                                              ],
-                                       callbacks=[self._makeAbsoluteCallback,
-                                                  self._makeRelativeCallback,
-                                                  self._closeButton
-                                                  ],
-                                       tipTexts=['Expand any redirections into an absolute path',
-                                                 'Reduce an absolute path into a relative path using redirections',
-                                                 'Close the popup'
-                                                 ],
+                                       texts=['Close' ],
+                                       callbacks=[self._closeButton ],
+                                       tipTexts=['Close the popup' ],
                                        direction='h',
                                        hAlign='r', grid=(row, 0), gridSpan=(1, _colSpan))
 
@@ -649,6 +680,34 @@ class ValidateSpectraPopup(CcpnDialog):
             row.setPath(_path)
             row.setText(_path)
             row.validate()
+
+    def _searchCheckboxCallback(self):
+        """Callback when clicking search checkbox
+        """
+        show = self.searchCheckBox.get()
+        if show:
+            self.searchFrame.show()
+        else:
+            self.searchFrame.hide()
+
+    def _replaceButtonCallback(self):
+        """Callback when pressing the go button on Search and replace
+        """
+        searchText = self.seachLine.get()
+        replaceText = self.replaceLine.get()
+        if len(searchText) == 0 or len(replaceText) == 0:
+            return
+
+        for sp, row in self.spectrumData.items():
+
+            _path = row.getText()
+            newPath = _path.replace(searchText, replaceText, 1)
+            if newPath != _path:
+                # we replace some text, update and validate the widgets
+                row.setText(newPath)
+                row.validate()
+                if row.isValid:
+                    row.setPath(newPath)
 
 
     # def exec_(self):

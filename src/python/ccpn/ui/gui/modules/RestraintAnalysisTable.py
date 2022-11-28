@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-25 12:41:43 +0000 (Fri, November 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-28 16:09:00 +0000 (Mon, November 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -142,7 +142,7 @@ class RestraintAnalysisTableModule(CcpnModule):
 
     activePulldownClass = None  # e.g., can make the table respond to current peakList
 
-    def __init__(self, mainWindow=None, name='Restraint Analysis Table',
+    def __init__(self, mainWindow=None, name='Restraint Analysis Inspector',
                  peakList=None, selectFirstItem=False):
         super().__init__(mainWindow=mainWindow, name=name)
 
@@ -489,7 +489,7 @@ class RestraintAnalysisTableModule(CcpnModule):
             vTables = list(OrderedSet(vTables))
 
         if len(selectableObjects) > 1:
-            MessageDialog.showWarning('Restraint Analysis Table', 'Please only drop one collection')
+            MessageDialog.showWarning('Restraint Analysis Inspector', 'Please only drop one collection')
             return
 
         if selectableObjects:
@@ -553,7 +553,7 @@ class RestraintAnalysisTableModule(CcpnModule):
         if not (collection := self.project.getByPid(value) if isinstance(value, str) else value):
             return
         if not isinstance(collection, Collection):
-            MessageDialog.showWarning('Restraint Analysis Table', f'Object is not a collection {collection}')
+            MessageDialog.showWarning('Restraint Analysis Inspector', f'Object is not a collection {collection}')
             return
 
         # extract the linked objects in the collection
@@ -805,7 +805,7 @@ class RestraintAnalysisTableModule(CcpnModule):
 
 class RestraintAnalysisTableWidget(GuiTable):
     """
-    Class to present a Restraint Analysis Table
+    Class to present a Restraint Analysis Inspector
     """
     # signal emitted when the manually changing the pulldown
     aboutToUpdate = QtCore.pyqtSignal(str)

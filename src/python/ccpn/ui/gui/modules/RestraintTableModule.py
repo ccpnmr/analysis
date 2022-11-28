@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-10 13:37:21 +0000 (Thu, November 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-28 16:09:00 +0000 (Mon, November 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -67,7 +67,7 @@ class RestraintTableModule(CcpnModule):
     _allowRename = True
 
     # we are subclassing this Module, hence some more arguments to the init
-    def __init__(self, mainWindow=None, name=f'{RestraintTable.className} Module',
+    def __init__(self, mainWindow=None, name=f'{RestraintTable.className}',
                  restraintTable=None, selectFirstItem=True):
         """
         Initialise the Module widgets

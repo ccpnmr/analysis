@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-24 16:15:05 +0000 (Thu, November 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-28 16:09:00 +0000 (Mon, November 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -70,7 +70,7 @@ class ViolationTableModule(CcpnModule):
     activePulldownClass = KlassTable
     _includeInLastSeen = False
 
-    def __init__(self, mainWindow=None, name=f'{KlassTable.className} Module',
+    def __init__(self, mainWindow=None, name=f'{KlassTable.className}',
                  table=None, selectFirstItem=False):
         """Initialise the Module widgets
         """

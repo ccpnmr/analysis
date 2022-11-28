@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-24 11:29:10 +0000 (Thu, November 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-28 16:07:47 +0000 (Mon, November 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1107,7 +1107,9 @@ class ProgressCancelled(Exception):
 
 
 @contextmanager
-def progressHandler(title='Progress', text='busy...', minimum=0, maximum=100, delay=1000, closeDelay=250, autoClose=True):
+def progressHandler(title='Progress', text='busy...', minimum=0, maximum=100,
+                    delay=1000, closeDelay=250,
+                    autoClose=True, hideCancelButton=False):
     """A context manager to wrap a method in a progress dialog defined by the current gui state.
     """
     from ccpn.framework.Application import getApplication
@@ -1123,7 +1125,9 @@ def progressHandler(title='Progress', text='busy...', minimum=0, maximum=100, de
                            title=title, text=text,
                            minimum=minimum, maximum=maximum,
                            delay=delay, closeDelay=closeDelay,
-                           autoClose=autoClose)
+                           autoClose=autoClose,
+                           hideCancelButton=hideCancelButton,
+                           )
 
         # transfer control to the calling function
         yield progress
@@ -1134,7 +1138,9 @@ def progressHandler(title='Progress', text='busy...', minimum=0, maximum=100, de
 
 
 @contextmanager
-def busyHandler(title='Progress', text='busy...', minimum=0, maximum=100, delay=1000, closeDelay=250, autoClose=True):
+def busyHandler(title='Progress', text='busy...', minimum=0, maximum=100,
+                delay=1000, closeDelay=250,
+                autoClose=True, hideCancelButton=True):
     """A context manager to wrap a method in a busy dialog defined by the current gui state.
     """
     from ccpn.framework.Application import getApplication

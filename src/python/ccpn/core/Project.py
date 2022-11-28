@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-14 12:38:45 +0000 (Mon, November 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-28 16:07:47 +0000 (Mon, November 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -382,6 +382,10 @@ class Project(AbstractWrapperObject):
         self._id = wrappedData.name
         self._resetIds()
 
+        # tuple to hold children that explicitly need finalising after atomic operations
+        self._finaliseChildren = []
+        self._childActions = []
+
         # Set up notification machinery
         # Active notifiers - saved for later cleanup. CORE APPLICATION ONLY
         self._activeNotifiers = []
@@ -562,6 +566,50 @@ class Project(AbstractWrapperObject):
     def _close(self):
         self.close()
 
+    def _closeApiObjects(self):
+        """Close and purge all api-objects
+        WARNING: project is irrecoverable after this
+        """
+        from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationEchoBlocking, apiNotificationBlanking
+        from contextlib import suppress
+        from ccpn.core.lib.ContextManagers import progressHandler, ProgressCancelled
+
+        status = self._getAPIObjectsStatus(completeScan=True, onlyInvalids=False)
+        df = status.data.sort_values('hierarchy', ascending=False)
+
+        with undoStackBlocking() as _:
+            with notificationEchoBlocking():
+                with apiNotificationBlanking():
+
+                    count = len(df)
+                    pDiv = (count // 100) + 1
+                    totalCopies = int(count / pDiv)
+
+                    with progressHandler(title='busy', maximum=totalCopies,
+                                         text='Cleaning-up Project', autoClose=True, hideCancelButton=True) as progress:
+                        try:
+                            for cc, (ii, ob) in enumerate(df.iterrows()):
+
+                                if cc % pDiv == 0:
+                                    # update the progress-bar - 100 steps at the most
+                                    progress.setValue(int(cc / pDiv))
+
+                                with suppress(Exception):
+                                    apiObj = ob['object']
+                                    apiObj.delete()
+
+                        except ProgressCancelled:
+                            getLogger().debug('progress cancelled')
+
+                        except Exception as es:
+                            # not cancel button
+                            getLogger().warning(f'error closing project: {es}')
+
+                        else:
+                            progress.finalise()
+                            # set closing conditions here, or call progress.close() if autoClose not set
+                            progress.waitForEvents()
+
     def close(self):
         """Clean up the wrapper project previous to deleting or replacing
         Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)
@@ -571,6 +619,9 @@ class Project(AbstractWrapperObject):
         # close any spectra
         for sp in self.spectra:
             sp._close()
+
+        # purge all ap-Objects
+        self._closeApiObjects()
 
         # Remove undo stack:
         self._resetUndo(maxWaypoints=0)
@@ -1345,7 +1396,7 @@ class Project(AbstractWrapperObject):
                 )
         dataUrl.url = Implementation.Url(path=str(path.as_posix()))
 
-    def _getAPIObjectsStatus(self, completeScan=False, includeDefaultChildren=False):
+    def _getAPIObjectsStatus(self, completeScan=False, onlyInvalids=True, includeDefaultChildren=False):
         """
         Scan all API objects and check their validity.
 
@@ -1362,7 +1413,7 @@ class Project(AbstractWrapperObject):
         from ccpn.core._implementation.APIStatus import APIStatus
 
         root = self._apiNmrProject.root
-        apiStatus = APIStatus(apiObj=root, completeScan=completeScan, includeDefaultChildren=includeDefaultChildren)
+        apiStatus = APIStatus(apiObj=root, onlyInvalids=onlyInvalids, completeScan=completeScan, includeDefaultChildren=includeDefaultChildren)
         return apiStatus
 
     def _update(self):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-24 11:29:10 +0000 (Thu, November 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-28 16:07:48 +0000 (Mon, November 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets.Label import Label
 class ProgressDialog(QtWidgets.QProgressDialog):
 
     def __init__(self, parent, title='Progress Dialog', text='busy...', minimum=0, maximum=100,
-                 delay=1000, closeDelay=250, autoClose=True):
+                 delay=1000, closeDelay=250, autoClose=True, hideCancelButton=False):
         super().__init__(parent=parent)
 
         self.setWindowTitle(title)
@@ -50,6 +50,10 @@ class ProgressDialog(QtWidgets.QProgressDialog):
         # give full control to the dialog
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+
+        # hide the cancel-button
+        if hideCancelButton:
+            self.setCancelButton(None)
 
     def setText(self, text):
         self._label = Label(self, text=text, margins=(8, 16, 8, 8))
@@ -137,7 +141,9 @@ class ProgressWidget(QtWidgets.QProgressBar, Base):
 
 class ProgressTextBar(tqdm):
 
-    def __init__(self, parent, title='Progress Dialog', text='busy...', minimum=0, maximum=100, delay=1000, closeDelay=250, autoClose=True):
+    def __init__(self, parent, title='Progress Dialog', text='busy...', minimum=0, maximum=100,
+                 delay=1000, closeDelay=250,
+                 autoClose=True, hideCancelButton=True):
         super().__init__(initial=minimum, total=maximum - minimum, delay=delay / 1000,
                          ncols=120, miniters=(maximum - minimum) / 100)
         # for compatibility with ProgressDialog above - perform no operation
@@ -200,8 +206,8 @@ class BusyDialog(ProgressDialog):
     """A progress-dialog that pops up immediately without a cancel button or progress-bar
     """
 
-    def __init__(self, parent, hideBar=False, hideCancelButton=False, *args, **kwds):
-        """Initialise teh dialog
+    def __init__(self, parent, hideBar=False, NOhideCancelButton=False, *args, **kwds):
+        """Initialise the dialog
         """
         # show the dialog immediately
         kwds.pop('delay', 0)
@@ -212,9 +218,9 @@ class BusyDialog(ProgressDialog):
             for cc in ch:
                 cc.setVisible(False)
 
-        # hide the cancel-button
-        if hideCancelButton:
-            self.setCancelButton(None)
+        # # hide the cancel-button
+        # if hideCancelButton:
+        #     self.setCancelButton(None)
 
 
 #=========================================================================================

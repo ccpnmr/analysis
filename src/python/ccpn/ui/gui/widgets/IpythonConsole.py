@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-28 15:41:43 +0000 (Mon, November 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-28 16:28:09 +0000 (Mon, November 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,13 +50,9 @@ class SilentKernel(InProcessKernel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def execute_request(self, stream, ident, parent):
-        """handle an execute_request"""
-        _parent = parent.copy()
-        if 'content' in _parent:
-            if 'silent' in _parent.get('content', {}):
-                _parent['content']['silent'] = True
-        return super(SilentKernel, self).execute_request(stream, ident, _parent)
+    def _abort_queues(self):
+        """ Re-implementation  to avoid logging extra warning from the Kernel"""
+        return
 
 class _ProcessKernelManager(QtInProcessKernelManager):
     def start_kernel(self, **kwds):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-16 15:46:17 +0000 (Wed, November 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-28 15:41:43 +0000 (Mon, November 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,31 @@ from qtconsole.rich_jupyter_widget import RichJupyterWidget
 from qtconsole.inprocess import QtInProcessKernelManager
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import isWindowsOS
+from ipykernel.inprocess.ipkernel import InProcessKernel
 
+class SilentKernel(InProcessKernel):
+    """
+    Re-implementation  of the InProcessKernel to silent the annoying RuntimeWarning
+    introduced by the Ipykernel.
+
+        -->  "RuntimeWarning:
+        -->  Enable tracemalloc to get the object allocation traceback"
+
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def execute_request(self, stream, ident, parent):
+        """handle an execute_request"""
+        _parent = parent.copy()
+        if 'content' in _parent:
+            if 'silent' in _parent.get('content', {}):
+                _parent['content']['silent'] = True
+        return super(SilentKernel, self).execute_request(stream, ident, _parent)
+
+class _ProcessKernelManager(QtInProcessKernelManager):
+    def start_kernel(self, **kwds):
+        self.kernel = SilentKernel(parent=self, session=self.session)
 
 class IpythonConsole(Widget):
     focusedIn = QtCore.pyqtSignal(QtGui.QFocusEvent)
@@ -61,7 +85,7 @@ class IpythonConsole(Widget):
         with warnings.catch_warnings():
             # temporarily suppress the warnings from the incompatible pydevd - not sure how else to solve this :|
             warnings.simplefilter('ignore')
-            km = QtInProcessKernelManager()
+            km = _ProcessKernelManager()
 
         km.start_kernel()
         km.kernel.gui = 'qt4'
@@ -71,6 +95,7 @@ class IpythonConsole(Widget):
         self.setStyleSheet(self.mainWindow.styleSheet())
 
         self.ipythonWidget.kernel_manager = km
+
         self.setMinimumHeight(100)
         self.textEditor = TextEditor(self)
         self.textEditor.setReadOnly(True)

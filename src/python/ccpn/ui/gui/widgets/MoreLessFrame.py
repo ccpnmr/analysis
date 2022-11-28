@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-22 18:56:31 +0000 (Tue, November 22, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-11-28 21:09:45 +0000 (Mon, November 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -64,7 +64,8 @@ class MoreLessFrame(Frame):
         self._openButton.setFixedSize(self.PIXMAPWIDTH + 3, self.PIXMAPWIDTH + 3)
         self._openButton.setPixmap(self._minusIcon.pixmap(self.PIXMAPWIDTH, self.PIXMAPWIDTH))
 
-        self._label = Label(self, text=name or '', grid=(row, 1))
+        bold = kwds.get('bold', False)
+        self._label = Label(self, text=name or '', grid=(row, 1), bold=bold)
         self._label.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Fixed)
         # self._labelHeight = self._label.sizeHint().height()
         # self._label.setFixedHeight(self._labelHeight)

@@ -53,7 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-22 13:54:16 +0000 (Tue, November 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-28 21:09:45 +0000 (Mon, November 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -758,12 +758,13 @@ class Spectrum(AbstractWrapperObject):
     def dataFormat(self, value):
         self._openFile(path=self.filePath, dataFormat=value, checkParameters=True)
 
-    def _openFile(self, path: str, dataFormat, checkParameters=True):
+    def _openFile(self, path: str, dataFormat, checkParameters=True) -> bool:
         """Open the spectrum as defined by path, creating a dataSource object
         :param path: a path to the spectrum; may contain redirections (e.g. $DATA)
         :param dataFormat: a dataFormat defined by one of the SpectrumDataSource types
+        :return True if opened succesfully
 
-        CCPNMRINTERNAL: also used in nef loader
+        CCPNMRINTERNAL: also used in nef loader; ValidateSpectraPopup
         """
         if path is None:
             raise ValueError(f'Undefined path')
@@ -773,6 +774,7 @@ class Spectrum(AbstractWrapperObject):
 
         if (newDataSource := self._getDataSource(dataStore=newDataStore, checkParameters=checkParameters)) is None:
             getLogger().warning('Spectrum._openFile: unable to open "%s"' % path)
+            return False
         else:
             # we defined a new file
             self._close()
@@ -781,6 +783,7 @@ class Spectrum(AbstractWrapperObject):
             self._spectrumTraits.dataStore = newDataStore
             self._dataStore._saveInternal()
             self._saveObject()
+            return True
 
     @logCommand(get='self')
     def reload(self, path: str = None):

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-16 15:46:17 +0000 (Wed, November 16, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-11-29 18:06:02 +0000 (Tue, November 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -521,7 +521,7 @@ class Gui(Ui):
             self.mainWindow._checkForBadSpectra(newProject)
 
         except (RuntimeError, ApiError) as es:
-            MessageDialog.showError('Error loading Project:', f'{es}', parent=self)
+            MessageDialog.showError('Error loading Project:', f'{es}', parent=self.mainWindow)
 
             # Try to restore the state
             newProject = None

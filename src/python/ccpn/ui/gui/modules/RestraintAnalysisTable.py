@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-28 16:09:00 +0000 (Mon, November 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-29 16:18:40 +0000 (Tue, November 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -118,6 +118,7 @@ _RESTRAINTTABLES = 'RestraintTables'
 _VIOLATIONTABLES = 'ViolationTables'
 _RESTRAINTTABLE = 'restraintTable'
 _VIOLATIONRESULT = 'violationResult'
+_DEFAULTMEANTHRESHOLD = 0.0
 
 DEFAULT_COLOR = QtGui.QColor('black')
 
@@ -250,7 +251,7 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                                      'maximum'      : 1.0,
                                                                      'decimals'     : 2,
                                                                      'step'         : 0.05,
-                                                                     'value'        : 0.3,
+                                                                     'value'        : _DEFAULTMEANTHRESHOLD,
                                                                      'minimumWidths': (180, 100, 100)},
                                                         }),
                                     ('autoExpand', {'label'   : 'Auto-expand Groups',
@@ -363,6 +364,8 @@ class RestraintAnalysisTableModule(CcpnModule):
         with self.restraintAnalysisTable.pLwidget.blockWidgetSignals(blockUpdates=False):
             self.restraintAnalysisTable._selectPeakList(peakList)
 
+        self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
+
         # give the widgets time to refresh
         QtCore.QTimer.singleShot(0, self.restraintAnalysisTable._updateTable)
 
@@ -409,6 +412,8 @@ class RestraintAnalysisTableModule(CcpnModule):
             restraintTables = [rList for rList in restraintTables if rList is not None and isinstance(rList, RestraintTable)]
 
         self._updateCollectionButton(True)
+        self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
+
         self.restraintAnalysisTable.updateRestraintTables(restraintTables)
 
     def _updateOutputTables(self, *args):
@@ -422,6 +427,8 @@ class RestraintAnalysisTableModule(CcpnModule):
             outputTables = list(filter(None, outputTables))
 
         self._updateCollectionButton(True)
+        self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
+
         self.restraintAnalysisTable.updateOutputTables(outputTables)
 
     def _updateRestraintViolationTables(self, *args):
@@ -442,6 +449,8 @@ class RestraintAnalysisTableModule(CcpnModule):
             outputTables = list(filter(None, outputTables))
 
         self._updateCollectionButton(True)
+        self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
+
         self.restraintAnalysisTable.updateRestraintViolationTables(restraintTables, outputTables)
 
     def _updateAutoExpand(self, expand):
@@ -511,7 +520,9 @@ class RestraintAnalysisTableModule(CcpnModule):
                 newVTables = OrderedSet(ll) | {vt.pid for vt in vTables if vt.getMetadata(_VIOLATIONRESULT)}
                 self._outputTable.modifyListWidgetTexts(list(newVTables))
 
+            self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
             self._updateRestraintViolationTables()
+
             self.restraintAnalysisTable._updateTable()
 
     def _handleDroppedItems(self, pids, objType, pulldown):
@@ -546,7 +557,10 @@ class RestraintAnalysisTableModule(CcpnModule):
             # clear options - 'select' chosen from the pulldown
             self._resetPulldowns()
             self._clearFilters()
-            self.restraintAnalysisTable._updateTable()
+            self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
+
+            # give the widgets time to refresh
+            QtCore.QTimer.singleShot(0, self.restraintAnalysisTable._updateTable)
             return
 
         # check the items in the dropped collection
@@ -605,6 +619,7 @@ class RestraintAnalysisTableModule(CcpnModule):
                     self.restraintAnalysisTable.pLwidget.setIndex(0)
                 self._applyPeakListFilter()
                 self._updateCollectionButton(False)
+                self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
 
                 # give the widgets time to refresh
                 QtCore.QTimer.singleShot(0, self.restraintAnalysisTable._updateTable)
@@ -613,8 +628,10 @@ class RestraintAnalysisTableModule(CcpnModule):
             self._resetPulldowns()
             self._clearFilters()
             self._updateCollectionButton(False)
+            self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
 
-            self.restraintAnalysisTable._updateTable()
+            # give the widgets time to refresh
+            QtCore.QTimer.singleShot(0, self.restraintAnalysisTable._updateTable)
 
     def _changePeakList(self, pid):
         """Update the settings-widget depending on the peak selection
@@ -648,6 +665,7 @@ class RestraintAnalysisTableModule(CcpnModule):
         with self._outputTable.blockWidgetSignals():
             self._outputTable.clearList()
         self._applyPeakListFilter()
+        self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
 
         self._updateCollectionButton(True)
 
@@ -795,6 +813,8 @@ class RestraintAnalysisTableModule(CcpnModule):
             self._clearFilters()
 
             self._updateCollectionButton(True)
+            self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
+
             self.restraintAnalysisTable._updateTable()
 
     def _updateCollectionButton(self, value):
@@ -829,7 +849,14 @@ class RestraintAnalysisTableWidget(GuiTable):
 
     PRIMARYCOLUMN = '_object'  # column holding active objects (pids for this table)
     # not the cleanest way for the minute
-    defaultHidden = ['Min_1', 'Min_2', 'Min_3', 'Min_4', 'Min_5',
+    defaultHidden = ['#',
+                     'Restraint Pid_1', 'Restraint Pid_2', 'Restraint Pid_3', 'Restraint Pid_4', 'Restraint Pid_5',
+                     'Restraint Pid_6', 'Restraint Pid_7', 'Restraint Pid_8', 'Restraint Pid_9',
+                     'Target Value_1', 'Target Value_2', 'Target Value_3', 'Target Value_4', 'Target Value_5',
+                     'Target Value_6', 'Target Value_7', 'Target Value_8', 'Target Value_9',
+                     'Lower Limit_1', 'Lower Limit_2', 'Lower Limit_3', 'Lower Limit_4', 'Lower Limit_5',
+                     'Lower Limit_6', 'Lower Limit_7', 'Lower Limit_8', 'Lower Limit_9',
+                     'Min_1', 'Min_2', 'Min_3', 'Min_4', 'Min_5',
                      'Min_6', 'Min_7', 'Min_8', 'Min_9',
                      'Max_1', 'Max_2', 'Max_3', 'Max_4', 'Max_5',
                      'Max_6', 'Max_7', 'Max_8', 'Max_9',
@@ -837,6 +864,8 @@ class RestraintAnalysisTableWidget(GuiTable):
                      'Mean_6', 'Mean_7', 'Mean_8', 'Mean_9',
                      'STD_1', 'STD_2', 'STD_3', 'STD_4', 'STD_5',
                      'STD_6', 'STD_7', 'STD_8', 'STD_9',
+                     'Count > 0.5_1', 'Count > 0.5_2', 'Count > 0.5_3', 'Count > 0.5_4', 'Count > 0.5_5',
+                     'Count > 0.5_6', 'Count > 0.5_7', 'Count > 0.5_8', 'Count > 0.5_9',
                      ]
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, peakList=None, multiSelect=True,
@@ -864,7 +893,7 @@ class RestraintAnalysisTableWidget(GuiTable):
         self._outputTables = []
 
         self._autoExpand = False
-        self._meanLowerLimit = 0.0
+        self._meanLowerLimit = _DEFAULTMEANTHRESHOLD
 
         # Initialise the scroll widget and common settings
         self._initTableCommonWidgets(parent, **kwds)
@@ -1481,7 +1510,8 @@ class RestraintAnalysisTableWidget(GuiTable):
                 # # purge all rows that contain all means == 0, the fastest method
                 # _table = _table[np.count_nonzero(_table[zeroCols].values, axis=1) > 0]
                 # process all row that have means > 0.3, keep only rows that contain at least one valid mean
-                _table = _table[(_table[zeroCols] >= self._meanLowerLimit).sum(axis=1) > 0]
+                if zeroCols and self._meanLowerLimit:
+                    _table = _table[(_table[zeroCols] >= self._meanLowerLimit).sum(axis=1) > 0]
 
             else:
                 # only show the restraints
@@ -1522,6 +1552,15 @@ class RestraintAnalysisTableWidget(GuiTable):
         _dataFrame._objects = _objects
 
         return _dataFrame
+
+    def setHiddenColumns(self, texts, update=True):
+        """
+        set a list of columns headers to be hidden from the table.
+        """
+        ll = [x for x in texts if x in self.columnTexts and x not in self._internalColumns]
+        # self._hiddenColumns = ll  # why?
+        if update:
+            self.showColumns(self._dataFrameObject)
 
     def _close(self):
         """Clean-up on closing

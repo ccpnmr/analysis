@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-29 16:53:35 +0000 (Tue, November 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-29 16:55:21 +0000 (Tue, November 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -7393,19 +7393,18 @@ class CcpnNefReader(CcpnNefContent):
                 # skip if not in the import list
                 continue
 
-            name = parameters.pop('name', None)
-            comment = parameters.pop('comment', None)
-            parameters.pop('uniqueId', None)  # remove from parameters, although shouldn't be there
-            obj = creatorFunc(name=name)
-            result.append(obj)
+            if (name := parameters.pop('name', None)):
+                comment = parameters.pop('comment', None)
+                parameters.pop('uniqueId', None)  # remove from parameters, although it shouldn't be there
+                obj = creatorFunc(name=name)
+                result.append(obj)
 
-            if comment:
-                obj.comment = comment
-            itms = row.get('items')
-            if itms:
-                itms = json.loads(itms)
-                _itms = [project.getByPid(itm) for itm in itms]
-                obj.items = list(set(obj.items) | set(filter(None, _itms)))
+                if comment:
+                    obj.comment = comment
+                if (itms := row.get('items')):
+                    itms = json.loads(itms)
+                    _itms = [project.getByPid(itm) for itm in itms]
+                    obj.items = list(set(obj.items) | set(filter(None, _itms)))
 
         return result
 

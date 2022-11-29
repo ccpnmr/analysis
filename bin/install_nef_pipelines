@@ -19,7 +19,7 @@ export CCPNMR_TOP_DIR
 
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
 CONDA_PYTHON3="${CONDA}"/bin/python3
-MAJMINVER=$(${CONDA_PYTHON3} -c 'import sys; print(str(sys.version_info[0])+"."+str(sys.version_info[1]))')
-NEF="${CONDA}"/lib/python${MAJMINVER}/site-packages/nef_pipelines/main.py
 
-"${CONDA_PYTHON3}" -W ignore "${NEF}" "$@"
+"${CONDA_PYTHON3}" -m pip uninstall nef_pipelines
+"${CONDA_PYTHON3}" -m pip cache purge
+"${CONDA_PYTHON3}" -m pip install nef_pipelines

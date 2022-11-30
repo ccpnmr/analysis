@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:10 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:05 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 import numpy as np
 from functools import partial
 import pyqtgraph as pg
@@ -53,10 +54,8 @@ from ccpn.AnalysisAssign.modules.NmrAtomAssigner import BACKBONEATOMS
 from ccpn.util.isotopes import name2IsotopeCode
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, _stoppableProgressBar, progressManager
 
+
 CCPCODES = sorted(CCP_CODES)
-
-
-
 
 Hydrogen = 'Hydrogen'
 Heavy = 'Heavy'
@@ -67,142 +66,140 @@ SideChain = 'SideChain'
 All = 'All'
 H_ISOTOPECODES = ['1H', '2H', '3H']
 
-CurveColours4LightDisplay = \
-                     {'C': '#2b2a07', ## BB
-                      'CA': '#0c37f7',## BB
-                      'CB': '#f70505',## BB
-                      'CD': '#424242',
-                      'CD1': '#693737',
-                      'CD2': '#CD5C5C',
-                      'CE': '#A52A2A',
-                      'CE1': '#B22222',
-                      'CE2': '#800000',
-                      'CE3': '#8B0000',
-                      'CG': '#FF0000',
-                      'CG1': '#FA8072',
-                      'CG2': '#FF6347',
-                      'CH2': '#E9967A',
-                      'CZ': '#FF7F50',
-                      'CZ2': '#FF4500',
-                      'CZ3': '#FFA07A',
-                      'H': '#290f04',
-                      'HA': '#23a634', ## BB
-                      'HA2': '#8B4513',
-                      'HA3': '#F4A460',
-                      'HB': '#802382', ## BB
-                      'HB*': '#FF8C00',
-                      'HB2': '#DEB887',
-                      'HB3': '#D2B48C',
-                      'HD1': '#FFA500',
-                      'HD1*': '#B8860B',
-                      'HD2': '#DAA520',
-                      'HD2*': '#BDB76B',
-                      'HD21': '#808000',
-                      'HD22': '#6B8E23',
-                      'HD3': '#9ACD32',
-                      'HE': '#556B2F',
-                      'HE*': '#228B22',
-                      'HE1': '#32CD32',
-                      'HE2': '#006400',
-                      'HE21': '#008000',
-                      'HE22': '#2E8B57',
-                      'HE3': '#3CB371',
-                      'HG': '#66CDAA',
-                      'HG1': '#20B2AA',
-                      'HG1*': '#48D1CC',
-                      'HG12': '#2F4F4F',
-                      'HG13': '#008080',
-                      'HG2': '#008B8B',
-                      'HG2*': '#00CED1',
-                      'HG3': '#5F9EA0',
-                      'HH': '#00BFFF',
-                      'HH11': '#4682B4',
-                      'HH12': '#1E90FF',
-                      'HH2': '#6495ED',
-                      'HH21': '#4169E1',
-                      'HH22': '#191970',
-                      'HZ': '#000080',
-                      'HZ*': '#00008B',
-                      'HZ2': '#0000CD',
-                      'HZ3': '#0000FF',
-                      'N': '#167311', ## BB
-                      'ND1': '#483D8B',
-                      'ND2': '#7B68EE',
-                      'NE': '#9370DB',
-                      'NE1': '#663399',
-                      'NE2': '#8A2BE2',
-                      'NH1': '#4B0082',
-                      'NH2': '#9932CC',
-                      'NZ': '#9400D3',
-                      }
+CurveColours4LightDisplay = {'C'   : '#2b2a07',  ## BB
+                             'CA'  : '#0c37f7',  ## BB
+                             'CB'  : '#f70505',  ## BB
+                             'CD'  : '#424242',
+                             'CD1' : '#693737',
+                             'CD2' : '#CD5C5C',
+                             'CE'  : '#A52A2A',
+                             'CE1' : '#B22222',
+                             'CE2' : '#800000',
+                             'CE3' : '#8B0000',
+                             'CG'  : '#FF0000',
+                             'CG1' : '#FA8072',
+                             'CG2' : '#FF6347',
+                             'CH2' : '#E9967A',
+                             'CZ'  : '#FF7F50',
+                             'CZ2' : '#FF4500',
+                             'CZ3' : '#FFA07A',
+                             'H'   : '#290f04',
+                             'HA'  : '#23a634',  ## BB
+                             'HA2' : '#8B4513',
+                             'HA3' : '#F4A460',
+                             'HB'  : '#802382',  ## BB
+                             'HB*' : '#FF8C00',
+                             'HB2' : '#DEB887',
+                             'HB3' : '#D2B48C',
+                             'HD1' : '#FFA500',
+                             'HD1*': '#B8860B',
+                             'HD2' : '#DAA520',
+                             'HD2*': '#BDB76B',
+                             'HD21': '#808000',
+                             'HD22': '#6B8E23',
+                             'HD3' : '#9ACD32',
+                             'HE'  : '#556B2F',
+                             'HE*' : '#228B22',
+                             'HE1' : '#32CD32',
+                             'HE2' : '#006400',
+                             'HE21': '#008000',
+                             'HE22': '#2E8B57',
+                             'HE3' : '#3CB371',
+                             'HG'  : '#66CDAA',
+                             'HG1' : '#20B2AA',
+                             'HG1*': '#48D1CC',
+                             'HG12': '#2F4F4F',
+                             'HG13': '#008080',
+                             'HG2' : '#008B8B',
+                             'HG2*': '#00CED1',
+                             'HG3' : '#5F9EA0',
+                             'HH'  : '#00BFFF',
+                             'HH11': '#4682B4',
+                             'HH12': '#1E90FF',
+                             'HH2' : '#6495ED',
+                             'HH21': '#4169E1',
+                             'HH22': '#191970',
+                             'HZ'  : '#000080',
+                             'HZ*' : '#00008B',
+                             'HZ2' : '#0000CD',
+                             'HZ3' : '#0000FF',
+                             'N'   : '#167311',  ## BB
+                             'ND1' : '#483D8B',
+                             'ND2' : '#7B68EE',
+                             'NE'  : '#9370DB',
+                             'NE1' : '#663399',
+                             'NE2' : '#8A2BE2',
+                             'NH1' : '#4B0082',
+                             'NH2' : '#9932CC',
+                             'NZ'  : '#9400D3',
+                             }
 
-CurveColours4DarkDisplay = {'C': '#b0f7ee',## BB
-                       'CA': '#a6c8f5',## BB
-                       'CB': '#a1f598',## BB
-                       'CD': '#d5f2f7',
-                       'CD1': '#8fadb3',
-                       'CD2': '#DCDCDC',
-                       'CE': '#F5F5F5',
-                       'CE1': '#FFFFFF',
-                       'CE2': '#F08080',
-                       'CE3': '#CD5C5C',
-                       'CG': '#FF0000',
-                       'CG1': '#FA8072',
-                       'CG2': '#FF6347',
-                       'CH2': '#E9967A',
-                       'CZ': '#FF7F50',
-                       'CZ2': '#FF4500',
-                       'CZ3': '#FFA07A',
-                       'H': '#e8e4e3', ##BB
-                       'HA': '#a5abf2',##BB
-                       'HA2': '#8B4513',
-                       'HA3': '#F4A460',
-                       'HB': '#fae769',##BB
-                       'HB*': '#FF8C00',
-                       'HB2': '#DEB887',
-                       'HB3': '#D2B48C',
-                       'HD1': '#FFDEAD',
-                       'HD1*': '#FFA500',
-                       'HD2': '#B8860B',
-                       'HD2*': '#DAA520',
-                       'HD21': '#FFD700',
-                       'HD22': '#F0E68C',
-                       'HD3': '#BDB76B',
-                       'HE': '#808000',
-                       'HE*': '#FFFF00',
-                       'HE1': '#6B8E23',
-                       'HE2': '#9ACD32',
-                       'HE21': '#556B2F',
-                       'HE22': '#ADFF2F',
-                       'HE3': '#7FFF00',
-                       'HG': '#7CFC00',
-                       'HG1': '#98FB98',
-                       'HG1*': '#90EE90',
-                       'HG12': '#228B22',
-                       'HG13': '#32CD32',
-                       'HG2': '#008000',
-                       'HG2*': '#00FF00',
-                       'HG3': '#2E8B57',
-                       'HH': '#3CB371',
-                       'HH11': '#00FF7F',
-                       'HH12': '#00FA9A',
-                       'HH2': '#66CDAA',
-                       'HH21': '#7FFFD4',
-                       'HH22': '#40E0D0',
-                       'HZ': '#20B2AA',
-                       'HZ*': '#48D1CC',
-                       'HZ2': '#008080',
-                       'HZ3': '#008B8B',
-                       'N': '#9ca899',##BB
-                       'ND1': '#00CED1',
-                       'ND2': '#5F9EA0',
-                       'NE': '#00BFFF',
-                       'NE1': '#87CEEB',
-                       'NE2': '#87CEFA',
-                       'NH1': '#4682B4',
-                       'NH2': '#1E90FF',
-                       'NZ': '#6495ED', }
-
+CurveColours4DarkDisplay = {'C'   : '#b0f7ee',  ## BB
+                            'CA'  : '#a6c8f5',  ## BB
+                            'CB'  : '#a1f598',  ## BB
+                            'CD'  : '#d5f2f7',
+                            'CD1' : '#8fadb3',
+                            'CD2' : '#DCDCDC',
+                            'CE'  : '#F5F5F5',
+                            'CE1' : '#FFFFFF',
+                            'CE2' : '#F08080',
+                            'CE3' : '#CD5C5C',
+                            'CG'  : '#FF0000',
+                            'CG1' : '#FA8072',
+                            'CG2' : '#FF6347',
+                            'CH2' : '#E9967A',
+                            'CZ'  : '#FF7F50',
+                            'CZ2' : '#FF4500',
+                            'CZ3' : '#FFA07A',
+                            'H'   : '#e8e4e3',  ##BB
+                            'HA'  : '#a5abf2',  ##BB
+                            'HA2' : '#8B4513',
+                            'HA3' : '#F4A460',
+                            'HB'  : '#fae769',  ##BB
+                            'HB*' : '#FF8C00',
+                            'HB2' : '#DEB887',
+                            'HB3' : '#D2B48C',
+                            'HD1' : '#FFDEAD',
+                            'HD1*': '#FFA500',
+                            'HD2' : '#B8860B',
+                            'HD2*': '#DAA520',
+                            'HD21': '#FFD700',
+                            'HD22': '#F0E68C',
+                            'HD3' : '#BDB76B',
+                            'HE'  : '#808000',
+                            'HE*' : '#FFFF00',
+                            'HE1' : '#6B8E23',
+                            'HE2' : '#9ACD32',
+                            'HE21': '#556B2F',
+                            'HE22': '#ADFF2F',
+                            'HE3' : '#7FFF00',
+                            'HG'  : '#7CFC00',
+                            'HG1' : '#98FB98',
+                            'HG1*': '#90EE90',
+                            'HG12': '#228B22',
+                            'HG13': '#32CD32',
+                            'HG2' : '#008000',
+                            'HG2*': '#00FF00',
+                            'HG3' : '#2E8B57',
+                            'HH'  : '#3CB371',
+                            'HH11': '#00FF7F',
+                            'HH12': '#00FA9A',
+                            'HH2' : '#66CDAA',
+                            'HH21': '#7FFFD4',
+                            'HH22': '#40E0D0',
+                            'HZ'  : '#20B2AA',
+                            'HZ*' : '#48D1CC',
+                            'HZ2' : '#008080',
+                            'HZ3' : '#008B8B',
+                            'N'   : '#9ca899',  ##BB
+                            'ND1' : '#00CED1',
+                            'ND2' : '#5F9EA0',
+                            'NE'  : '#00BFFF',
+                            'NE1' : '#87CEEB',
+                            'NE2' : '#87CEFA',
+                            'NH1' : '#4682B4',
+                            'NH2' : '#1E90FF',
+                            'NZ'  : '#6495ED', }
 
 
 class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else the drop events are not processed
@@ -211,7 +208,6 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
     maxSettingsState = 2
     settingsPosition = 'top'
     className = 'ReferenceChemicalShifts'
-
 
     def __init__(self, mainWindow, name='Reference Chemical Shifts', ):
         super().__init__(mainWindow=mainWindow, name=name)
@@ -231,7 +227,6 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.backgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
         self.gridFont = getFont()
 
-
         self._RCwidgetFrame = Frame(self.mainWidget, setLayout=True,
                                     grid=(0, 0), gridSpan=(1, 1),
                                     hPolicy='ignored'
@@ -241,21 +236,21 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
                                grid=(0, 0), gridSpan=(1, 1),
                                hAlign='l', margins=(5, 5, 5, 5))
         self._TBFrame = Frame(self._RCwidgetFrame, setLayout=True,
-                               grid=(1, 0), gridSpan=(1, 1),
-                               hAlign='l', margins=(5, 5, 5, 5))
+                              grid=(1, 0), gridSpan=(1, 1),
+                              hAlign='l', margins=(5, 5, 5, 5))
 
         self._RCwidget.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
         col = 0
         self.residueTypeLabel = Label(self._RCwidget, "Residue Type:", grid=(0, col))
-        col +=1
+        col += 1
         self.residueTypePulldown = PulldownList(self._RCwidget, index=1, callback=self._updateModule, hAlign='l', grid=(0, col))
-        ccpnCodes = [All]+CCPCODES
+        ccpnCodes = [All] + CCPCODES
         self.residueTypePulldown.setData(ccpnCodes)
         col += 1
         self.atomTypeLabel = Label(self._RCwidget, 'Atom Type:', grid=(0, col))
         col += 1
         self.atomTypeRadioButtons = RadioButtons(self._RCwidget, texts=[Hydrogen, Heavy],
-                                                    callback=self._updateModule, selectedInd=1, grid=(0, col))
+                                                 callback=self._updateModule, selectedInd=1, grid=(0, col))
         col += 1
         DividerLabel(self._RCwidget, hAlign='l', grid=(0, col))
 
@@ -269,10 +264,10 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         col += 1
 
         self.zoomAllButton = Button(self._RCwidget, icon=Icon('icons/zoom-full'), tipText='Reset zoom',
-                                    callback=self._zoomAllCallback, hAlign='l',grid=(0, col))
-        self.zoomAllButton.setFixedSize(25,25)
+                                    callback=self._zoomAllCallback, hAlign='l', grid=(0, col))
+        self.zoomAllButton.setFixedSize(25, 25)
 
-        self.toolBar = ToolBar(self._TBFrame,  grid=(0, 0))
+        self.toolBar = ToolBar(self._TBFrame, grid=(0, 0))
         self.maxDimensionLines = 7
 
         self.plotWidget = pg.PlotWidget(background=self.backgroundColour)
@@ -285,16 +280,16 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         # crosshair
         # create in advance line based on spectral dimensions up to maxDimensionLines (7)
 
-        for i in range(1,self.maxDimensionLines):
+        for i in range(1, self.maxDimensionLines):
             line = pg.InfiniteLine(angle=90, label='', movable=False, pen=self.gridPen,
-                                   labelOpts={'color':self.currentColour,
-                                           'position':0.1,
-                                           'anchors':[0, 0.5],
-                                           'border':self.currentColour,
-                                            # 'fill':self.currentColour
-                                            },
-                                    name=str(i))
-            self.plotWidget.addItem(line,  ignoreBounds=True,)
+                                   labelOpts={'color'   : self.currentColour,
+                                              'position': 0.1,
+                                              'anchors' : [0, 0.5],
+                                              'border'  : self.currentColour,
+                                              # 'fill':self.currentColour
+                                              },
+                                   name=str(i))
+            self.plotWidget.addItem(line, ignoreBounds=True, )
             self.lines.append(line)
             line.hide()
         self.viewBox = self.plotWidget.plotItem.vb
@@ -312,7 +307,6 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.GLSignals = GLNotifier(parent=self, strip=None)
         with progressManager(self, f'Loading all available reference spectra. Please wait...'):
             self._updateModule()
-
 
     def _toggleByAtom(self):
         """Toggle spectra if the atom name is in Backbone atoms.
@@ -347,7 +341,7 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
     def mousePosNotifierCallback(self, *args):
         """Set the vertical line based on current cursor position """
         self._hideLines()
-        axisCodeDict =  self.current.mouseMovedDict.get(0, {'':[]})
+        axisCodeDict = self.current.mouseMovedDict.get(0, {'': []})
         positions = {}
         atomType = self.atomTypeRadioButtons.get()
         for isotName, glCursorPositions in axisCodeDict.items():
@@ -356,22 +350,19 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
             if atomType == Hydrogen and isotName not in H_ISOTOPECODES:
                 continue
             for glCursorPosition in glCursorPositions:
-                positions.update({glCursorPosition:isotName})
+                positions.update({glCursorPosition: isotName})
 
-        if len(positions)<1:
+        if len(positions) < 1:
             return
         lines = self.lines[:len(positions)]
-
-
 
         for line, (position, isoName) in zip(lines, positions.items()):
             line.setPos(position)
             line.label.setText(f'{isoName}: {str(round(position, 3))}')
             line.show()
 
-
     def _getFirstLine(self):
-        if len(self.lines)>0:
+        if len(self.lines) > 0:
             return self.lines[0]
 
     def _hideLines(self):
@@ -390,26 +381,25 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         x = mousePoint.x()
         # y = mousePoint.y()
         line.setPos(x)
-        line.label.setText(str(round(x,3)))
+        line.label.setText(str(round(x, 3)))
         atomPosDict = defaultdict(list)
         isotopeCodePosDict = defaultdict(list)
         ## find the item under the cursor position
         for item in self.viewBox.addedItems:
-            if hasattr(item,'getData') and hasattr(item, 'atomName'):
-                xData,yData = item.getData()
+            if hasattr(item, 'getData') and hasattr(item, 'atomName'):
+                xData, yData = item.getData()
                 xDataMin, xDataMax = np.min(xData), np.max(xData)
                 if (x > xDataMin) & (x < xDataMax):
                     atomPosDict[item.atomName].append(x)
                     isotope = name2IsotopeCode(item.atomName)
                     isotopeCodePosDict[isotope].append(x)
 
-        mouseMovedDict = {0:isotopeCodePosDict,
-                          1:atomPosDict}
+        mouseMovedDict = {0: isotopeCodePosDict,
+                          1: atomPosDict}
 
         self.current.mouseMovedDict = mouseMovedDict
         self.GLSignals._emitMouseMoved(source=None, coords=None, mouseMovedDict=mouseMovedDict,
                                        mainWindow=self.mainWindow)
-
 
     def clearPlot(self):
         """ Clear plot but keep infinite lines"""
@@ -420,7 +410,6 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         for ch in self.viewBox.childGroup.childItems():
             if not isinstance(ch, pg.InfiniteLine):
                 self.viewBox.removeItem(ch)
-
 
     def _setupPlot(self):
 
@@ -468,14 +457,14 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
 
         return dataSets
 
-    def _addBAseline(self, atomType, offset, ccpCode ):
+    def _addBAseline(self, atomType, offset, ccpCode):
         maxBaseline = 20 if atomType == Hydrogen else 300
         xBaseline = np.arange(0, maxBaseline)
         yBaseline = np.array([offset] * len(xBaseline))
         baselinePlot = self.plotWidget.plot(xBaseline, yBaseline, name=ccpCode, pen=self.gridPen)
         return baselinePlot
 
-    def _showAllResidues(self, offset=0.175 ):
+    def _showAllResidues(self, offset=0.175):
         """
         """
         self.clearPlot()
@@ -493,24 +482,24 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
             baselinePlot = self._addBAseline(atomType, inititialOffset, ccpCode)
             for atomName, dataSet in dataSets.items():
                 xs = dataSet[0]
-                ys = dataSet[1]+inititialOffset
+                ys = dataSet[1] + inititialOffset
                 color = dataSet[2]
                 plotPen = pg.functions.mkPen(color, width=2, style=QtCore.Qt.SolidLine)
                 plot = self.plotWidget.plot(xs, ys, pen=plotPen, name=atomName)
                 plot.atomName = atomName
-                anchor=(-0.3,0.5) # try to don't overlap labels
-                textItem = pg.TextItem(atomName, color=color, anchor=anchor, angle=0 )
+                anchor = (-0.3, 0.5)  # try to don't overlap labels
+                textItem = pg.TextItem(atomName, color=color, anchor=anchor, angle=0)
                 labelY = max(ys)
-                labelposXs = xs[ys==labelY]
+                labelposXs = xs[ys == labelY]
                 labelX = labelposXs[0]
-                textItem.setPos(labelX, labelY+(np.random.random()*0.01))
+                textItem.setPos(labelX, labelY + (np.random.random() * 0.01))
                 textItems.append(textItem)
                 textItem.atomName = atomName
                 resCurves.append(plot)
-                self.plots.update({atomName:plot})
+                self.plots.update({atomName: plot})
                 self.plotWidget.addItem(textItem)
 
-            ccpCodeTextItem = pg.TextItem(ccpCode, color=self.gridColour, angle=0, anchor=(-0.1, 0.5) )
+            ccpCodeTextItem = pg.TextItem(ccpCode, color=self.gridColour, angle=0, anchor=(-0.1, 0.5))
             ccpCodeTextItem.setPos(0, inititialOffset)
             self.plotWidget.addItem(ccpCodeTextItem)
 
@@ -538,7 +527,7 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.viewBox._updatingRange = True
 
         ccpCode = self.residueTypePulldown.currentText()
-        if ccpCode==All:
+        if ccpCode == All:
             self._showAllResidues()
             return
         atomType = self.atomTypeRadioButtons.get()
@@ -559,15 +548,15 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
             plotPen = pg.functions.mkPen(color, width=2, style=QtCore.Qt.SolidLine)
             plot = self.plotWidget.plot(xs, ys, pen=plotPen, name=atomName)
             plot.atomName = atomName
-            anchor=(-0.3,0.5) # try to don't overlap labels
+            anchor = (-0.3, 0.5)  # try to don't overlap labels
             textItem = pg.TextItem(atomName, color=color, anchor=anchor, angle=0, border='w', )
             labelY = max(ys)
-            labelposXs = xs[ys==labelY]
+            labelposXs = xs[ys == labelY]
             labelX = labelposXs[0]
-            textItem.setPos(labelX, labelY+(np.random.random()*0.01))
+            textItem.setPos(labelX, labelY + (np.random.random() * 0.01))
             textItem.atomName = atomName
 
-            self.plots.update({atomName:plot})
+            self.plots.update({atomName: plot})
             action = Action(self, text=atomName, callback=partial(self.toolbarActionCallback, plot, textItem),
                             checked=True, shortcut=None, checkable=True)
             action.setObjectName(atomName)
@@ -612,3 +601,11 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         if plot:
             plot.setVisible(checked)
             textItem.setVisible(checked)
+
+    def _closeModule(self):
+        """Clean up notifiers for closing
+        """
+        if self.mousePosNotifier:
+            self.mousePosNotifier.unRegister()
+
+        super()._closeModule()

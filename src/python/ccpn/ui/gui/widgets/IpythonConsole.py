@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-28 12:54:44 +0000 (Fri, January 28, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:08 +0000 (Wed, November 30, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,7 +36,27 @@ from qtconsole.rich_jupyter_widget import RichJupyterWidget
 from qtconsole.inprocess import QtInProcessKernelManager
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import isWindowsOS
+from ipykernel.inprocess.ipkernel import InProcessKernel
 
+class SilentKernel(InProcessKernel):
+    """
+    Re-implementation  of the InProcessKernel to silent the annoying RuntimeWarning
+    introduced by the Ipykernel.
+
+        -->  "RuntimeWarning:
+        -->  Enable tracemalloc to get the object allocation traceback"
+
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def _abort_queues(self):
+        """ Re-implementation  to avoid logging extra warning from the Kernel"""
+        return
+
+class _ProcessKernelManager(QtInProcessKernelManager):
+    def start_kernel(self, **kwds):
+        self.kernel = SilentKernel(parent=self, session=self.session)
 
 class IpythonConsole(Widget):
     focusedIn = QtCore.pyqtSignal(QtGui.QFocusEvent)
@@ -61,7 +81,7 @@ class IpythonConsole(Widget):
         with warnings.catch_warnings():
             # temporarily suppress the warnings from the incompatible pydevd - not sure how else to solve this :|
             warnings.simplefilter('ignore')
-            km = QtInProcessKernelManager()
+            km = _ProcessKernelManager()
 
         km.start_kernel()
         km.kernel.gui = 'qt4'
@@ -71,6 +91,7 @@ class IpythonConsole(Widget):
         self.setStyleSheet(self.mainWindow.styleSheet())
 
         self.ipythonWidget.kernel_manager = km
+
         self.setMinimumHeight(100)
         self.textEditor = TextEditor(self)
         self.textEditor.setReadOnly(True)
@@ -149,8 +170,10 @@ class IpythonConsole(Widget):
         """
         # CCPN INTERNAL - called in constructor of PythonConsoleModule.
         """
+        from IPython import get_ipython
         self.ipythonWidget.kernel_client.stop_channels()
         self.ipythonWidget.kernel_client = None
+        get_ipython().run_line_magic('reset', '-sf') # clear the global variable
 
     def _showHistory(self):
         """

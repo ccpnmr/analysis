@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:30 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:07 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2552,6 +2552,15 @@ class GuiTable(TableWidget, Base):
     def _close(self):
         self._clearTableNotifiers()
         self.unsetCurrent()
+        self._clearItems()
+        if self.application:
+            self.application.cleanGarbageCollector()
+
+    def _clearItems(self):
+        """Force deleting these items to be garbage-collected on closing"""
+        for i in self.items:
+            del i
+        self.items = []
 
     def _clearTableNotifiers(self):
         """Clean up the notifiers

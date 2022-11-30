@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:29 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:06 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -98,11 +98,14 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     def __init__(self, parent=None, windowTitle='', setLayout=False,
                  orientation=HORIZONTAL, size=None, minimumSize=None, **kwds):
 
+        # error-flag to disable exec_ if there is an error during initialising
+        self.errorFlag = False
+
         super().__init__(parent)
         Base._init(self, setLayout=setLayout, **kwds)
 
         if orientation not in ORIENTATIONLIST:
-            raise TypeError('orientation not in {}'.format(ORIENTATIONLIST))
+            raise TypeError(f'orientation not in {ORIENTATIONLIST}')
 
         self.setWindowTitle(windowTitle)
         self.setContentsMargins(*self.DEFAULTMARGINS)
@@ -113,13 +116,13 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         try:
             self._size = QtCore.QSize(*size) if size else None
         except Exception as es:
-            raise TypeError('bad size {}'.format(size))
+            raise TypeError(f'bad size {size}')
 
         # get the initial size as a QSize
         try:
             self._minimumSize = QtCore.QSize(*minimumSize) if minimumSize else None
         except Exception as es:
-            raise TypeError('bad minimumSize {}'.format(size))
+            raise TypeError(f'bad minimumSize {size}')
 
         # set up the mainWidget area
         self.mainWidget = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
@@ -421,7 +424,11 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         pass
 
     def exec_(self) -> int:
-        result = super().exec_()
+        """Execute the dialog
+        """
+        # call the super-class if there are no errors during initialising
+        # return an error-state here other than None?
+        result = None if self.errorFlag else super().exec_()
 
         # clean-up the notifiers
         self._cleanupDialog()
@@ -518,18 +525,21 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
 
         return True
 
-    def accept(self):
-        super(CcpnDialogMainWidget, self).accept()
+    def accept(self) -> None:
+        result = super(CcpnDialogMainWidget, self).accept()
 
         # store the state of any required widgets
         self.storeWidgetState()
+        return result
 
     def reject(self) -> None:
-        super(CcpnDialogMainWidget, self).reject()
+        result = super(CcpnDialogMainWidget, self).reject()
 
         if self.storeStateOnReject:
             # store the state of any required widgets
             self.storeWidgetState()
+
+        return result
 
     def _cleanupDialog(self):
         """Clean-up any extra widgets/data before closing

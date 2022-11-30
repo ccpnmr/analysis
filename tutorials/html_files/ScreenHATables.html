@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AnalysisScreen Hit Analysis Tables</title>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a
+        href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://forums.ccpn.ac.uk"><img
+        src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
+<br>
+<div class="headerBar">AnalysisScreen Hit Analysis Tables</div>
+<div class="tutorial">
+
+    <h2>AnalysisScreen Hit Analysis Tables</h2>
+    <p>The <span class="action">Hit Analysis</span> module contains three main types of tables. Depending on which <span class="action">View</span> has been selected, you will see different tables.</p>
+
+    <h3 id="substances">Substances Table</h3>
+    <p>This table is shown in the upper part of the Hit Analysis module when the <span class="action">View</span> is set to <span class="action">Substances</span>. The table shows one row per Substance (compound) which is part of your screening dataset. The <span class="action">Substance Binding</span> and <span class="action">Displacer Scores</span> are calculated based on the <span class="action">Total Score</span> selection in the <span class="action">Calculation</span> tab of the <span class="action">Settings</span>. You can set this to be the <span class="action">minimum, maximum, standard deviation, mean</span> or <span class="action">sum</span> of the scores observed for all the peaks in that Substance (note that for a 19F screen you typically only have one peak per Substance, so changing this setting won't have any effect). In the <span class="action">Matching</span> tab of the <span class="action">Settings</span> you can similarly set how the <span class="action">Substance Matching Score</span> is calculated by changing the <span class="action">Total Score</span> to <span class="action">min, max</span> or <span class="action">mean</span>.</p>
+    <p>When you click on a row in the Substances Table, the lower table (a <a href="#peakBindingScore">Peak Binding Scores table</a>) will show one row for each peak in the Substance. By default, when you select (click on) a row in the Substances table, the top row of the Peak Binding Scores table will also be selected. This will trigger a linked SpectrumDisplay to navigate to that peak (see our page on <a href="ScreenHALinkedSpectrumDisplay.html">Hit Analysis Linked SpectrumDisplays</a> for more information on this). If each Substance only contains one peak (as is often the case for 19F screens), you can simply move down the rows in the Substances Table to view each Substance peak in your linked SpectrumDisplay in turn.</p>
+    <p>Any item(s) selected in the Substances Table will also be selected in the plot (see our page on <a href="ScreenHAPlots.html">Hit Analysis Plots</a> for more information on plots).</p>
+
+    <h3 id="samples">Samples Table</h3>
+    <p>This table is shown in the upper part of the Hit Analysis module when the <span class="action">View</span> is set to <span class="action">Samples</span>. The table shows one row per Sample in your screening dataset. The <span class="action">Sample Binding</span> and <span class="action">Displacer Scores</span> are calculated based on the <span class="action">Total Score</span> selection in the <span class="action">Calculation</span> tab of the <span class="action">Settings</span>. You can set this to be the <span class="action">minimum, maximum, standard deviation, mean</span> or <span class="action">sum</span> of the scores observed for all the peaks in that Sample. In the <span class="action">Matching</span> tab of the <span class="action">Settings</span> you can similarly set how the <span class="action">Sample Matching Score</span> is calculated by changing the <span class="action">Total Score</span> to <span class="action">min, max</span> or <span class="action">mean</span>.</p>
+    <p>When you click on a row in the Sample Table, the lower table (a <a href="#peakBindingScore">Peak Binding Scores table</a>) will show one row for each peak in the Sample. By default, when you select (click on) a row in the Sample table, the top row of the Peak Binding Scores table will also be selected. This will trigger a linked SpectrumDisplay to navigate to that peak (see our page on <a href="ScreenHALinkedSpectrumDisplay.html">Hit Analysis Linked SpectrumDisplays</a> for more information on this).</p>
+    <p>Any item(s) selected in the Samples Table will also be selected in the plot.</p>
+
+    <h3 id="peakBindingScore">Peak Binding Scores Table</h3>
+    <p>This table is shown in the lower part of the Hit Analysis module when the <span class="action">View</span> is set to <span class="action">Substances</span> or <span class="action">Samples</span> and it is the only table shown when the <span class="action">View</span> is set to <span class="action">Matches Only</span>. In <span class="action">Matches Only</span> view, the table shows one row per Peak Match in your screening dataset. In <span class="action">Substances/Samples</span> view, the table shows one row per Peak Match in the selected Substances/Samples.</p>
+    <p>The <span class="action">Peak Binding</span> and <span class="action">Displacer Scores</span> are calculated based on the <span class="action">Engine</span> and <span class="action">Displacer Engine</span> selected in the <span class="action">Calculation</span> tab of the <span class="action">Settings</span>. See our page on <a href="ScreenHAScores.html">Hit Analysis Scores</a> for more information on these options.</p>
+    <p>Clicking on a row in the Peak Binding Table will trigger a linked SpectrumDisplay to navigate to that set of matched peaks (see our page on <a href="ScreenHALinkedSpectrumDisplay.html">Hit Analysis Linked SpectrumDisplays</a> for more information on this).</p>
+
+    <h3>Updating Tables</h3>
+    <p>When you make changes to any of your Settings, the peak positions, <a href="ScreenHAPeakMatches.html">Peak Matches</a> or you apply <a href="ScreenHAFiltering.html">Filters</a>, the tables will need to update to reflect these changes. In the <span class="action">Settings</span> panel the <span class="action">Appearance</span> tab allows you to choose whether you want to auto-update your tables when changes are made to Settings, Peaks or anything affecting the Matching Score or not. Sometimes, auto-update can slow things down because the software is constantly having to recalculate things and you are better off updating manually. Any changes that are not automatically applied will cause the <span class="action">Update</span> button to turn orange. Once you have clicked it to trigger an update, it turns green again. Changes to Filters always need to be applied manually by pressing the <span class="action">Update</span>  button (and the <span class="action">Filter</span> button also needs to be on).</p>
+
+</div>
+</body>
+</html>

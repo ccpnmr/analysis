@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:07 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:03 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import json
 import operator
 import os
+import sys
 from collections import OrderedDict
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
@@ -55,6 +56,7 @@ from ccpn.ui._implementation.Strip import Strip
 from ccpn.util.Logging import getLogger
 
 
+DEBUG = False
 SingularOnly = 'singularOnly'
 Remove = 'remove'
 PCAcomponents = 'pcaComponents'
@@ -120,7 +122,7 @@ class Current:
 
     _parentClass = None  # For now, setting to Framework generates cyclic imports
 
-    #: Name of plural link to instances of class
+    #: Name of plural-link to instances of class
     _pluralLinkName = None
 
     #: List of child classes.
@@ -156,10 +158,10 @@ class Current:
     def __init__(self, project):
         # initialise non-=auto fields
         self._project = project
-        self._pid = '%s:current' % self.shortClassName
+        self._pid = f'{self.shortClassName}:current'
 
         for field in _fields:
-            setattr(self, '_' + field, [])
+            setattr(self, f'_{field}', [])
 
         # The notifiers the Current instance sets to be updated on project changes
         self._notifiers = None
@@ -204,20 +206,25 @@ class Current:
         If you need a graphics object (e.g. a module) you must make and register a bound method
         on the module.
         """
-
         self._notifies[field].append(notify)
+        if DEBUG:
+            sys.stderr.write(f'>>> registerNotify {field} - {notify}\n')
         return notify
 
     def unRegisterNotify(self, notify, field):
         """Remove notifier for field"""
         try:
             callbacks = self._notifies[field]
-        except:
+            if DEBUG:
+                sys.stderr.write(f'>>> unRegisterNotify {field}\n')
+        except Exception:
             KeyError('field "%s" not found; unable to unRegister from current' % field)
 
         try:
             callbacks.remove(notify)
-        except:
+            if DEBUG:
+                sys.stderr.write(f'>>> unRegisterNotify {notify}\n')
+        except Exception:
             IndexError('callback not found; unable to unRegister from current')
 
     def increaseBlanking(self):
@@ -252,7 +259,7 @@ class Current:
                 ll.append((ss, getattr(self, ss)))
 
         maxlen = max((len(tt[0]) for tt in ll))
-        fmt = 'current.%-' + str(maxlen) + 's : %s'
+        fmt = f'current.%-{str(maxlen)}s : %s'
         # fmt = "current.%%-%s : %%s" % maxlen
         return '\n'.join(fmt % tt for tt in ll)
 
@@ -283,10 +290,7 @@ class Current:
             if not _currentClasses[cls].get('singularOnly'):
                 ss = noCap(cls._pluralLinkName)
                 objs = getattr(self, ss)
-                pids = []
-                for obj in objs:
-                    if obj is not None:
-                        pids.append(obj.pid)
+                pids = [obj.pid for obj in objs if obj is not None]
                 ll.append((ss, pids))
 
         # for field in sorted(_currentExtraFields.keys()):
@@ -313,21 +317,22 @@ class Current:
             for attName, values in sortedState.items():
                 if values is None:
                     continue
-                if attName in singularClasses:
-                    if isinstance(values, str):
-                        obj = self.project.getByPid(values)
-                        setattr(self, attName, obj)
-                if attName in pluralClasses:
-                    if isinstance(values, (list, tuple)):
-                        objs = [self.project.getByPid(value) for value in values]
-                        for value in values:
-                            if isinstance(value, str):
-                                obj = self.project.getByPid(value)
-                                if obj is not None:
-                                    objs.append(obj)
-                        setattr(self, attName, objs)
+                if attName in singularClasses and isinstance(values, str):
+                    obj = self.project.getByPid(values)
+                    setattr(self, attName, obj)
+                if attName in pluralClasses and isinstance(values, (list, tuple)):
+                    objs = [self.project.getByPid(value) for value in values]
+                    for value in values:
+                        if isinstance(value, str):
+                            obj = self.project.getByPid(value)
+                            if obj is not None:
+                                objs.append(obj)
+                    setattr(self, attName, objs)
+            if DEBUG:
+                sys.stderr.write(f'>>> _restoreFromState {pluralClasses} {singularClasses}\n')
+
         except Exception as e:
-            getLogger().debug('Impossible to restore current. %s' % e)
+            getLogger().debug(f'Impossible to restore current. {e}')
 
     @classmethod
     def _addClassField(cls, param):
@@ -348,30 +353,23 @@ class Current:
             enforceType = param
 
         # getter function for _field; getField(obj) returns obj._field:
-        getField = operator.attrgetter('_' + plural)
+        getField = operator.attrgetter(f'_{plural}')
 
         # getFieldItem(obj) returns obj[field]
         getFieldItem = operator.itemgetter(plural)
 
         def setField(self, value, plural=plural, enforceType=enforceType):
             # setField(obj, value) sets obj._field = value and calls notifiers
-
-            if len(set(value)) != len(value):
+            if len(od := OrderedDict.fromkeys(value)) != len(value):
                 # ejb - remove duplicates here
-                tempList = []
-                for inL in value:
-                    if inL not in tempList:
-                        tempList.append(inL)
-                value = tempList
-                set(value)
-                # raise ValueError( "Current %s contains duplicates: %s" % (plural, value))
+                value = list(od)
 
-            attributeName = '_' + plural
+            attributeName = f'_{plural}'
             oldValue = getattr(self, attributeName)
 
             if value != oldValue:
                 if enforceType and any(x for x in value if not isinstance(x, enforceType)):
-                    raise ValueError("Current values for %s must be of type %s" % (plural, enforceType))
+                    raise ValueError(f"Current values for {plural} must be of type {enforceType}")
                 setattr(self, attributeName, value)
 
                 # Trigger the notifiers
@@ -379,6 +377,9 @@ class Current:
                     funcs = getFieldItem(self._notifies) or ()  # getFieldItem(obj) returns obj[field]
                     for func in funcs:
                         func(value)
+
+            if DEBUG:
+                sys.stderr.write(f'>>> setField current {plural}\n')
 
         # define singular properties
         def getter(self):
@@ -392,7 +393,7 @@ class Current:
         def setter(self, value):
             setField(self, [value])
 
-        setattr(cls, singular, property(getter, setter, None, "Current %s" % singular))
+        setattr(cls, singular, property(getter, setter, None, f"Current {singular}"))
 
         if not singularOnly:
             # define the plural properties
@@ -403,18 +404,18 @@ class Current:
             def setter(self, value):
                 setField(self, list(value))
 
-            setattr(cls, plural, property(getter, setter, None, "Current %s" % plural))
+            setattr(cls, plural, property(getter, setter, None, f"Current {plural}"))
 
-            # define the add'Field' method
+            # define the add<Field> method
             def adder(self, value):
                 # """Add %s to current.%s""" % (singular, plural)
                 values = getField(self)
                 if value not in values:
                     setField(self, values + [value])
 
-            setattr(cls, 'add' + singular[0].upper() + singular[1:], adder)
+            setattr(cls, f'add{singular[0].upper()}{singular[1:]}', adder)
 
-            # define the remove'Field' method
+            # define the remove<Field> method
             def remover(self, value):
                 # """Remove %s from current.%s""" % (singular, plural)
                 values = getField(self)
@@ -422,14 +423,14 @@ class Current:
                     values.remove(value)
                 setField(self, values)
 
-            setattr(cls, 'remove' + singular[0].upper() + singular[1:], remover)
+            setattr(cls, f'remove{singular[0].upper()}{singular[1:]}', remover)
 
-            # define the clear'Field' method
+            # define the clear<Field> method
             def clearer(self):
-                """Clear current.%s""" % plural
+                f"""Clear current.{plural}"""
                 setField(self, [])
 
-            setattr(cls, 'clear' + plural[0].upper() + plural[1:], clearer)
+            setattr(cls, f'clear{plural[0].upper()}{plural[1:]}', clearer)
 
         # if not isinstance(param, str):
         #     # param is a class - Add notifiers for deleted objects
@@ -457,13 +458,16 @@ class Current:
         self.decreaseBlanking()
 
     def _registerNotifiers(self):
-        """Registers the notifiers to cleanup current.fieldName on deletion of an object
+        """Registers the notifiers to clean-up current.fieldName on deletion of an object
         """
         from ccpn.core.lib.Notifiers import Notifier  ## needs to be local to avoid circular imports
 
         self._notifiers = []
+        if DEBUG:
+            sys.stderr.write('>>> _registerNotifiers\n')
+
         for cls in _currentClasses:
-            fieldName = '_' + cls._pluralLinkName
+            fieldName = f'_{cls._pluralLinkName}'
             ntf = Notifier(self.project, triggers=[Notifier.DELETE], targetName=cls.className,
                            callback=self._cleanUp, debug=False, fieldName=fieldName)  # fieldName is passed on to the callback function
             self._notifiers.append(ntf)
@@ -472,6 +476,9 @@ class Current:
         """Unregisters the notifiers
         CCPNINTERNAL: used in Framework._closeProject
         """
+        if DEBUG:
+            sys.stderr.write('>>> _unregisterNotifiers\n')
+
         for ntf in self._notifiers:
             ntf.unRegister()
 
@@ -480,8 +487,12 @@ class Current:
             path = os.path.join(statePath, self.className)
             with open(path, "w") as file:
                 json.dump(self.state, file, sort_keys=False, indent=2, )
+
+            if DEBUG:
+                sys.stderr.write('>>> _dumpStateToFile\n')
+
         except Exception as e:
-            getLogger().debug('Impossible to create a Current File.', e)
+            getLogger().debug(f'Impossible to create a Current File: {e}')
 
     def _createStateFile(self, statePath):
         path = os.path.join(statePath, self.className)
@@ -494,15 +505,16 @@ class Current:
         """restore current from the default File in the project directory
         """
         try:
-            path = self._createStateFile(statePath)
-            if path:
+            if path := self._createStateFile(statePath):
                 with open(path) as fp:
-                    state = json.load(fp)
-                    if state:
+                    if state := json.load(fp):
                         self._restoreFromState(state)
 
+            if DEBUG:
+                sys.stderr.write('>>> _restoreStateFromFile\n')
+
         except Exception as e:
-            getLogger().debug('No state found. %s' % e)
+            getLogger().debug(f'No state found: {e}')
 
 
 # Add fields to current

@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 11:07:41 +0100 (Thu, October 07, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:07 +0000 (Wed, November 30, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -65,6 +65,13 @@ class ColumnClass:
         else:
             self._columns = columnToAdd
 
+    def setColumns(self, columns):
+        """
+        :param columns:  list of Column objects
+        :return:  None
+        """
+        self._columns = columns
+
     @property
     def numColumns(self):
         if self._columns:
@@ -108,7 +115,9 @@ class Column:
     def __init__(self, headerText, getValue, getEditValue=None, setEditValue=None,
                  editClass=None, editArgs=None, editKw=None, tipText=None,
                  getColor=None, getIcon=None, stretch=False, format=None,
-                 editDecimals=None, editStep=None, alignment=QtCore.Qt.AlignLeft):
+                 editDecimals=None, editStep=None, rawDataHeading=None,
+                 isHidden = False, isInternal = False, columnWidth=None,
+                 alignment=QtCore.Qt.AlignLeft, **kwargs):
         # editDecimals=None, editStep=None, alignment=QtCore.Qt.AlignLeft,
         # orderFunc=None):
 
@@ -124,17 +133,35 @@ class Column:
         self.editDecimals = editDecimals
         self.editStep = editStep
         self.defaultIcon = None
+        self.rawDataHeading = rawDataHeading
+        if isinstance(getValue, str) and rawDataHeading is None:
+            self.rawDataHeading = getValue
+        self.isHidden = isHidden
+        self.isInternal = isInternal
+        self.columnWidth = columnWidth
         #self.alignment = ALIGN_OPTS.get(alignment, alignment) | Qt.AlignVCenter
         # Alignment combinations broken in PyQt4 v1.1.1
         # Use better default than top left
         self.alignment = QtCore.Qt.AlignCenter
         # self.orderFunc = orderFunc
+        self.heading = kwargs.get('heading', self.headerText)
+
 
         self.getIcon = getIcon or self._defaultIcon
         self.getColor = getColor or self._defaultColor
         self.tipText = tipText
 
         self._checkTextAttrs()
+
+    @property
+    def heading(self):
+        """back-compatibility only """
+        return self.headerText
+
+    @heading.setter
+    def heading(self, heading):
+        """back-compatibility only """
+        self.headerText = heading
 
     def orderFunc(self, objA, objB):
         return (universalSortKey(self.getValue(objA)) < universalSortKey(self.getValue(objB)))

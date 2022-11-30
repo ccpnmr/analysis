@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:26 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:04 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,7 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 import sys
 import typing
 import re
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 
 from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
@@ -145,19 +145,18 @@ class Gui(Ui):
         # On the Mac (at least) it does not matter what you set the applicationName to be,
         # it will come out as the executable you are running (e.g. "python3")
 
-        # # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+        QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
         QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
-        # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, True)
-        # viewportFormat = QtGui.QSurfaceFormat()
-        # viewportFormat.setSwapInterval(0)  #disable VSync
-        # viewportFormat.setSwapBehavior(QtGui.QSurfaceFormat.SingleBuffer)
-        # QtGui.QSurfaceFormat().setDefaultFormat(viewportFormat)
-        # # self._CcpnGLWidget.setFormat(viewportFormat)
-        # # viewportFormat = self._CcpnGLWidget.format()
 
-        # styles = QtWidgets.QStyleFactory()
-        # myStyle = _MyAppProxyStyle(styles.create('fusion'))
-        # QtWidgets.QApplication.setStyle(myStyle)
+        # NOTE:ED - this is essential for multi-window applications
+        QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, True)
+
+        # fm = QtGui.QSurfaceFormat()
+        # fm.setSamples(4)
+        # # NOTE:ED - Do not do this, they cause QT to exhibit strange behaviour
+        # # fm.setSwapInterval(0)  # disable VSync
+        # # fm.setSwapBehavior(QtGui.QSurfaceFormat.DoubleBuffer)
+        # QtGui.QSurfaceFormat.setDefaultFormat(fm)
 
         self.qtApp = Application(self.application.applicationName,
                                  self.application.applicationVersion,
@@ -522,7 +521,7 @@ class Gui(Ui):
             self.mainWindow._checkForBadSpectra(newProject)
 
         except (RuntimeError, ApiError) as es:
-            MessageDialog.showError('Error loading Project:', f'{es}', parent=self)
+            MessageDialog.showError('Error loading Project:', f'{es}', parent=self.mainWindow)
 
             # Try to restore the state
             newProject = None
@@ -572,6 +571,7 @@ class Gui(Ui):
             self.mainWindow.deleteAllNotifiers()
             self.mainWindow._closeMainWindowModules()
             self.mainWindow._closeExtraWindowModules()
+            self.mainWindow._stopPythonConsole()
             self.mainWindow.sideBar.clearSideBar()
             self.mainWindow.sideBar.deleteLater()
             self.mainWindow.deleteLater()

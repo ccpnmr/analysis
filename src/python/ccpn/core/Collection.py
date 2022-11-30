@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-10 22:59:54 +0000 (Thu, February 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:02 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,7 @@ from ccpn.core._implementation.CollectionList import CO_COMMENT, CO_ISDELETED, \
 from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
 from ccpn.util.decorators import logCommand
 from ccpn.util.OrderedSet import OrderedSet
+from ccpn.util.Common import consume
 
 
 CollectionParameters = namedtuple('CollectionParameters', f'{CO_UNIQUEID} {CO_ISDELETED} {CO_NAME} {CO_ITEMS} {CO_COMMENT} ')
@@ -77,9 +78,9 @@ class _searchCollections():
         if search:
             # add extra wildcard searches to the leading/trailing edges
             if not search.endswith('*') and not disableLeadingTrailingSearch:
-                search = search + '*'
+                search = f'{search}*'
             if not search.startswith('*') and not disableLeadingTrailingSearch:
-                search = '*' + search
+                search = f'*{search}'
             self._search = search
         self._maxDepth = depth
 
@@ -220,7 +221,7 @@ class Collection(V3CoreObjectABC):
 
     _parentClass = Project
 
-    #: Name of plural link to instances of class
+    #: Name of plural-link to instances of class
     _pluralLinkName = 'collections'
 
     #: List of child classes.
@@ -255,7 +256,7 @@ class Collection(V3CoreObjectABC):
 
             # hiding the Nones handles the undo/redo behaviour for items
             return tuple(filter(None, map(_getByPid, _itms or ())))
-        except:
+        except Exception:
             return ()
 
     @items.setter
@@ -336,8 +337,7 @@ class Collection(V3CoreObjectABC):
 
         if items:
             _currentItms = self.items
-            _exists = tuple(filter(lambda itm: itm in _currentItms, items))
-            if _exists:
+            if _exists := tuple(filter(lambda itm: itm in _currentItms, items)):
                 # check already exists
                 if len(_exists) > 1:
                     raise ValueError(f'items {_exists} already in collection {self}')
@@ -360,12 +360,9 @@ class Collection(V3CoreObjectABC):
 
         :param items: single object or list of core objects, as objects or pid strings.
         """
-        items = _checkItems(self.project, items)
-
-        if items:
+        if items := _checkItems(self.project, items):
             _currentItms = list(self.items)
-            _exists = tuple(filter(lambda itm: itm not in _currentItms, items))
-            if _exists:
+            if _exists := tuple(filter(lambda itm: itm not in _currentItms, items)):
                 if len(_exists) > 1:
                     raise ValueError(f'items {_exists} not in collection {self}')
                 else:
@@ -386,7 +383,7 @@ class Collection(V3CoreObjectABC):
         ObjectTypes is a list of core objects expressed as object classes or short/long classnames.
         If objectTypes is not specified then all objects will be returned.
 
-        For example, class Note can be specified as Note, 'Note', 'NO', 'note' or 'no'.
+        Class Note can be specified as Note, 'Note', 'NO', 'note' or 'no'.
         caseSensitive is False by default, if caseSensitive is True, objectTypes as class names must be specified exactly.
 
         ObjectTypes can be a single item or tuple/list, or None to return all items.
@@ -426,7 +423,6 @@ class Collection(V3CoreObjectABC):
         :param depth: optional int >= 0
         :return: tuple of core items.
         """
-
         # check that the parameters are the correct, compatible types
         if (recursive is not None and depth is not None):
             raise ValueError('Please specify either recursive or depth')
@@ -468,7 +464,7 @@ class Collection(V3CoreObjectABC):
                 _allObjectTypes = self.project._className2Class
                 _allList = self.project._className2ClassList
 
-                # case sensitive search - check against all defined core objects in project
+                # case-sensitive search - check against all defined core objects in project
                 _objectTypes = list(filter(lambda itm: (itm in _allList), objectTypes))
 
                 if len(_objectTypes) != len(objectTypes):
@@ -482,7 +478,7 @@ class Collection(V3CoreObjectABC):
                 _allObjectTypes = self.project._classNameLower2Class
                 _allList = self.project._classNameLower2ClassList
 
-                # case insensitive search - change all to lowercase
+                # case-insensitive search - change all to lowercase
                 _objectTypes = list(filter(lambda itm: (itm.lower() if isinstance(itm, str) else itm) in _allList, objectTypes))
 
                 if len(_objectTypes) != len(objectTypes):
@@ -500,8 +496,8 @@ class Collection(V3CoreObjectABC):
                                      caseSensitive=caseSensitive,
                                      disableLeadingTrailingSearch=disableLeadingTrailingSearch,
                                      depth=depth or (1 if recursive == False else 0))
-        for _ in recurse:
-            pass
+        # process the iterator
+        consume(recurse)
 
         # return the filtered list
         return recurse.items if recurse else ()
@@ -511,8 +507,9 @@ class Collection(V3CoreObjectABC):
         """
         # create a search iterator
         recurse = _searchCycles(self, depth=depth)
-        for _ in recurse:
-            pass
+
+        # process the iterator
+        consume(recurse)
 
         # return the list of cycles
         return recurse._cycles if recurse else ()
@@ -535,7 +532,6 @@ def _newCollection(project: Project, collectionList, _uniqueId: Optional[int] = 
     :param _uniqueId: _unique int identifier
     :return: a new Collection instance.
     """
-
     result = Collection(project, collectionList, _uniqueId=_uniqueId)
     if result is None:
         raise RuntimeError(f'{collectionList.__class__.__name__}._newCollection: unable to generate new Collection item')
@@ -557,7 +553,7 @@ def _getByTuple(collectionList,
 
     newRow = (None,
               None,
-              str(name),
+              name,
               str([itm.pid for itm in items]) if items else None,
               comment,)
     newRow = CollectionParameters(*newRow)
@@ -571,9 +567,8 @@ def _getCollection(project: Project, name: str) -> Optional[Collection]:
     if not (name and isinstance(name, str)):
         raise ValueError('name must be of type str')
 
-    dd = project._pid2Obj.get(Collection.className)
-    if dd:
-        key = '{}'.format(name)
+    if dd := project._pid2Obj.get(Collection.className):
+        key = f'{name}'
         return dd.get(key)
     else:
         return None
@@ -593,8 +588,7 @@ def _fetchCollection(project: Project, name: Optional[str] = None) -> Collection
     if name and (result := _getCollection(project, name)):
         return result
 
-    else:
-        with undoBlock():
-            result = project.newCollection(name=name)
+    with undoBlock():
+        result = project.newCollection(name=name)
 
     return result

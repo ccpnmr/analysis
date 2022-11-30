@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:07 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -82,18 +82,19 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         super().__init__(parent)
 
-        # GST add antiAliasing, no perceptible speed impact on my mac (intel iris graphics!)
+        # GST add antiAliasing, no perceptible speed impact on my Mac (intel iris graphics!)
         # samples = 4 is good enough but 8 also works well in terms of speed...
         try:
+            self.setUpdateBehavior(QtWidgets.QOpenGLWidget.PartialUpdate)
             fmt = QtGui.QSurfaceFormat()
             fmt.setSamples(antiAlias)
             self.setFormat(fmt)
 
             samples = self.format().samples()  # GST a use for the walrus
             if samples != antiAlias:
-                getLogger().warning('hardware changed antialias level, expected %i got %i...' % (samples, antiAlias))
+                getLogger().warning(f'hardware changed anti-alias level, expected {samples} got {antiAlias}...')
         except Exception as es:
-            getLogger().warning('error during anti aliasing setup %s, anti aliasing disabled...' % str(es))
+            getLogger().warning(f'error during anti-aliasing setup {str(es)}, anti-aliasing disabled...')
 
         # flag to display paintGL but keep an empty screen
         self._blankDisplay = False
@@ -198,7 +199,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             self.setMinimumWidth(STRIP_MINIMUMWIDTH)
 
     def getSmallFont(self, transparent=False):
-        # GST tried this, it wrong sometimes, also sometimes its a float?
+        # GST tried this, it wrong sometimes, also sometimes it's a float?
         scale = self.viewports.devicePixelRatio
         size = self.globalGL.glSmallFontSize
 
@@ -270,16 +271,19 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             self.application._decreaseNotificationBlocking()
             self.project.unblankNotification()
 
-    def _round_sig(self, x, sig=6, small_value=1.0e-9):
+    @staticmethod
+    def _round_sig(x, sig=6, small_value=1.0e-9):
         try:
             return 0 if x == 0 else round(x, sig - int(math.floor(math.log10(max(abs(x), abs(small_value))))) - 1)
         except ValueError as es:
             return 0
 
-    def between(self, val, l, r):
+    @staticmethod
+    def between(val, l, r):
         return (l - val) * (r - val) <= 0
 
-    def _floatFormat(self, f=0.0, prec=3):
+    @staticmethod
+    def _floatFormat(f=0.0, prec=3):
         """return a float string, remove trailing zeros after decimal
         """
         return (('%.' + str(prec) + 'f') % f).rstrip('0').rstrip('.')
@@ -288,28 +292,22 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         """return an integer string
         """
         return self._floatFormat(ii, 1)
-        # return '%i' % ii
 
-    def _eFormat(self, f=0.0, prec=4):
+    @staticmethod
+    def _eFormat(f=0.0, prec=4):
         """return an exponential with trailing zeroes removed
         """
         s = '%.*e' % (prec, f)
-        if 'e' in s:
-            mantissa, exp = s.split('e')
-            mantissa = mantissa.rstrip('0')
-            if mantissa.endswith('.'):
-                mantissa += '0'
-            exp = exp.lstrip('0+')
-            if exp:
-                if exp.startswith('-'):
-                    return '%se%d' % (mantissa, int(exp))
-                else:
-                    return '%se+%d' % (mantissa, int(exp))
-            else:
-                return '%s' % mantissa
-
-        else:
+        if 'e' not in s:
             return ''
+        mantissa, exp = s.split('e')
+        mantissa = mantissa.rstrip('0')
+        if mantissa.endswith('.'):
+            mantissa += '0'
+        if exp := exp.lstrip('0+'):
+            return '%se%d' % (mantissa, int(exp)) if exp.startswith('-') else '%se+%d' % (mantissa, int(exp))
+        else:
+            return f'{mantissa}'
 
     def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0,
                    _includeDiagonal=False, _diagonalList=None, _includeAxis=True):
@@ -535,7 +533,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
                         offset = GLDefs.AXISDRAWOFFSET if self.AXIS_INSIDE else (1 - GLDefs.AXISDRAWOFFSET)
                         if ax == 0:
-                            # add the x axis line
+                            # add the x-axis line
                             indexList += (index, index + 1)
                             vertexList += (0.0, offset, 1.0, offset)
                             colorList += (r, g, b, 1.0, r, g, b, 1.0)
@@ -543,14 +541,14 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                             index += 2
 
                         elif ax == 1:
-                            # add the y axis line
+                            # add the y-axis line
                             indexList += (index, index + 1)
                             vertexList += (1.0 - offset, 0.0, 1.0 - offset, 1.0)
                             colorList += (r, g, b, 1.0, r, g, b, 1.0)
                             gridGLList.numVertices += 2
                             index += 2
 
-                # copy the arrays the the GLstore
+                # copy the arrays to the GL-store
                 gridGLList.vertices = np.array(vertexList, dtype=np.float32)
                 gridGLList.indices = np.array(indexList, dtype=np.uint32)
                 gridGLList.colors = np.array(colorList, dtype=np.float32)
@@ -827,7 +825,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
 
-        self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
+        self._axisScale[:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
         currentShader.setAxisScale(self._axisScale)
 
         # draw the text to the screen
@@ -874,11 +872,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.axisR = 1.0
         self.axisT = 1.0
         self.axisB = -1.0
-        self.storedZooms = []
-        self._currentZoom = 0
+
         self._zoomHistory = [None] * ZOOMHISTORYSTORE
         self._zoomHistoryCurrent = 0
         self._zoomHistoryHead = 0
+        self._zoomHistoryTail = 0
         self._zoomTimerLast = time.time()
 
         self.base = None
@@ -1974,36 +1972,34 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if update:
             self.update()
 
-    def _storeZoomHistory(self):
+    def _storeZoomHistory(self, force=False):
         """Store the current axis state to the zoom history
         """
         currentAxis = (self.axisL, self.axisR, self.axisB, self.axisT)
+        zC = self._zoomHistoryCurrent % len(self._zoomHistory)
 
         # store the current value if current zoom has not been set
-        if self._zoomHistory[self._zoomHistoryHead] is None:
-            self._zoomHistory[self._zoomHistoryHead] = currentAxis
+        if self._zoomHistory[zC] is None:
+            self._zoomHistory[zC] = currentAxis
 
-        if self._widthsChangedEnough(currentAxis, self._zoomHistory[self._zoomHistoryHead], tol=1e-8):
+        if self._widthsChangedEnough(currentAxis, self._zoomHistory[zC], tol=1e-8) or force:
+            currentTime = time.time()
+            if currentTime - self._zoomTimerLast < ZOOMTIMERDELAY:
 
-            for stored in self.storedZooms:
-                if not self._widthsChangedEnough(currentAxis, self._zoomHistory[self._zoomHistoryHead], tol=1e-8):
-                    break
+                # still on the current zoom item - write new value
+                self._zoomHistory[zC] = currentAxis
+
             else:
-                currentTime = time.time()
-                if currentTime - self._zoomTimerLast < ZOOMTIMERDELAY:
+                # increment the head of the zoom history
+                self._zoomHistoryCurrent += 1
+                zC = self._zoomHistoryCurrent % len(self._zoomHistory)
+                self._zoomHistory[zC] = currentAxis
+                self._zoomHistoryHead = self._zoomHistoryCurrent
+                if (self._zoomHistoryHead - self._zoomHistoryTail) >= len(self._zoomHistory):
+                    self._zoomHistoryTail = self._zoomHistoryHead - len(self._zoomHistory) + 1
 
-                    # still on the current zoom item - write new value
-                    self._zoomHistory[self._zoomHistoryHead] = currentAxis
-
-                else:
-
-                    # increment the head of the zoom history
-                    self._zoomHistoryHead = (self._zoomHistoryHead + 1) % len(self._zoomHistory)
-                    self._zoomHistory[self._zoomHistoryHead] = currentAxis
-                    self._zoomHistoryCurrent = self._zoomHistoryHead
-
-                # reset the timer so you have to wait another 5 seconds
-                self._zoomTimerLast = currentTime
+            # reset the timer, so you have to wait another 5 seconds
+            self._zoomTimerLast = currentTime
 
     def getCurrentCursorCoordinate(self):
 
@@ -2176,9 +2172,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             mouseMovedDict = self.current.mouseMovedDict
         except:
             # initialise a new mouse moved dict
-            mouseMovedDict = {MOUSEDICTSTRIP          : None,
-                              AXIS_MATCHATOMTYPE      : {},
-                              AXIS_FULLATOMNAME       : {},
+            mouseMovedDict = {MOUSEDICTSTRIP    : None,
+                              AXIS_MATCHATOMTYPE: {},
+                              AXIS_FULLATOMNAME : {},
                               }
 
         xPos = yPos = 0
@@ -2199,20 +2195,20 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             ats.append(pos)
             atcs.append(pos)
 
-        if self._matchingIsotopeCodes:
-            for n, (atomType, axis) in enumerate(zip(self.spectrumDisplay.isotopeCodes, self.spectrumDisplay.axes)):
-                ats = atTypes.setdefault(atomType, [])
-                atcs = atCodes.setdefault(axis.code, [])
-                if n == 0:
-                    xPos = pos = cursorCoordinate[1]
-                elif n == 1:
-                    yPos = pos = cursorCoordinate[0]
-                else:
-                    # can ignore the rest
-                    break
-
-                ats.append(pos)
-                atcs.append(pos)
+        # if self._matchingIsotopeCodes:
+        #     for n, (atomType, axis) in enumerate(zip(self.spectrumDisplay.isotopeCodes, self.spectrumDisplay.axes)):
+        #         ats = atTypes.setdefault(atomType, [])
+        #         atcs = atCodes.setdefault(axis.code, [])
+        #         if n == 0:
+        #             xPos = pos = cursorCoordinate[1]
+        #         elif n == 1:
+        #             yPos = pos = cursorCoordinate[0]
+        #         else:
+        #             # can ignore the rest
+        #             break
+        #
+        #         ats.append(pos)
+        #         atcs.append(pos)
 
         self.current.cursorPosition = (xPos, yPos)
         self.current.mouseMovedDict = mouseMovedDict
@@ -2457,9 +2453,20 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         for specView in tuple(self._spectrumSettings.keys()):
             if specView not in self._ordering:
-                # print('>>>_updateVisibleSpectrumViews delete', specView, id(specView))
-                # print('>>>', [id(spec) for spec in self._ordering])
-                del self._spectrumSettings[specView]
+                getLogger().debug(f'>>>_updateVisibleSpectrumViews GLAxis     1D   delete {specView} {id(specView)}')
+                getLogger().debug(f'>>> _ordering {[id(spec) for spec in self._ordering]}')
+                if specView in self._spectrumSettings:
+                    del self._spectrumSettings[specView]
+                if specView in self._contourList:
+                    self._contourList[specView]._delete()
+                    del self._contourList[specView]
+                if specView in self._visibleOrdering:
+                    self._visibleOrdering.remove(specView)
+                for k in self._visibleOrderingDict:
+                    sp, _dd = k
+                    if sp == specView:
+                        self._visibleOrderingDict.remove(k)
+                        break
 
         # make a list of the visible and not-deleted spectrumViews
         # visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isDisplayed]
@@ -2703,7 +2710,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         self.update()
 
-    def _buildSingleWildCard(self, _axisCodes):
+    @staticmethod
+    def _buildSingleWildCard(_axisCodes):
         """Buld the axisCode appending wildcard as required
         """
         _code = ''

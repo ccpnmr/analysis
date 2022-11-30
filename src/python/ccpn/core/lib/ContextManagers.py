@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:05 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:03 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,20 +28,17 @@ __date__ = "$Date: 2018-12-20 15:44:34 +0000 (Thu, December 20, 2018) $"
 
 import decorator
 import inspect
-import traceback
-from contextlib import contextmanager, nullcontext
-from collections.abc import Iterable
-from functools import partial
-from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtGui import QPainter
-from ccpn.core.lib import Util as coreUtil
 from inspect import signature, Parameter
+import traceback
+import signal
+import pandas as pd
+from functools import partial
+from PyQt5.QtGui import QPainter
+from contextlib import contextmanager, nullcontext, suppress
+from collections.abc import Iterable
+from ccpn.core.lib import Util as coreUtil
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getApplication
-import time
-import signal
-import sys
-import pandas as pd
 
 
 @contextmanager
@@ -51,7 +48,7 @@ def echoCommand(obj, funcName, *params, values=None, defaults=None,
 
     try:
         project = obj._project
-    except:
+    except Exception:
         project = obj.project
 
     parameterString = coreUtil.commandParameterString(*params, values=values, defaults=defaults)
@@ -87,7 +84,7 @@ def echoCommand(obj, funcName, *params, values=None, defaults=None,
 
     if not project.application._echoBlocking:
         project.application.ui.echoCommands(commands)
-    getLogger().debug2('_enterEchoCommand: command=%s' % commands[0])
+    getLogger().debug2(f'_enterEchoCommand: command={commands[0]}')
 
     try:
         # transfer control to the calling function
@@ -147,7 +144,7 @@ def undoBlockWithSideBar(application=None):
         if undo is not None:
             undo.decreaseWaypointBlocking()
 
-        getLogger().debug2('_exitUndoBlock: echoBlocking=%s' % application._echoBlocking)
+        getLogger().debug2(f'_exitUndoBlock: echoBlocking={application._echoBlocking}')
 
 
 @contextmanager
@@ -189,7 +186,7 @@ def undoBlockWithoutSideBar(application=None):
         if undo is not None:
             undo.decreaseWaypointBlocking()
 
-        getLogger().debug2('_enterUndoBlockWithoutSideBar: echoBlocking=%s' % application._echoBlocking)
+        getLogger().debug2(f'_enterUndoBlockWithoutSideBar: echoBlocking={application._echoBlocking}')
 
 
 undoBlock = undoBlockWithSideBar
@@ -408,7 +405,7 @@ def logCommandManager(prefix, funcName, *args, **kwds):
     blocking = application._echoBlocking
 
     if blocking == 0 and application.ui is not None:
-        if not prefix[-1] == '.':
+        if prefix[-1] != '.':
             prefix += '.'
 
         msg = prefix + funcName + '('
@@ -746,7 +743,7 @@ def _storeNewObjectCurrent(result, thisAddUndoItem):
 
 def _storeDeleteObjectCurrent(self, thisAddUndoItem):
     if hasattr(self, CURRENT_ATTRIBUTE_NAME):
-        try:
+        with suppress(Exception):
             storeObj = _ObjectStore(self)
 
             # store the current state - check because item already removed from current?
@@ -756,11 +753,6 @@ def _storeDeleteObjectCurrent(self, thisAddUndoItem):
             thisAddUndoItem(undo=storeObj._restoreCurrentSelectedObject,
                             redo=storeObj._storeCurrentSelectedObject
                             )
-        except:
-            # ignore objects that do not have project.current
-            # currently should only be the original chemicalShift that has been
-            # disabled because renamed to _ChemicalShift
-            pass
 
 
 def newObject(klass):
@@ -784,7 +776,7 @@ def newObject(klass):
                     return None
 
                 if not isinstance(result, klass):
-                    raise RuntimeError('Expected an object of class %s, obtained %s' % (klass, result.__class__))
+                    raise RuntimeError(f'Expected an object of class {klass}, obtained {result.__class__}')
 
                 # retrieve list of created api objects from the result
                 apiObjectsCreated = result._getApiObjectTree()
@@ -1108,8 +1100,16 @@ def renameObjectNoBlanking(self):
     self._finaliseAction('rename')
 
 
+class ProgressCancelled(Exception):
+    """Exception to catch cancelled progress/busy dialogs
+    """
+    pass
+
+
 @contextmanager
-def progressHandler(text='busy...', minimum=0, maximum=100, delay=1000, closeDelay=250, autoClose=True):
+def progressHandler(title='Progress', text='busy...', minimum=0, maximum=100,
+                    delay=1000, closeDelay=250,
+                    autoClose=True, hideCancelButton=False):
     """A context manager to wrap a method in a progress dialog defined by the current gui state.
     """
     from ccpn.framework.Application import getApplication
@@ -1121,10 +1121,42 @@ def progressHandler(text='busy...', minimum=0, maximum=100, delay=1000, closeDel
 
     try:
         # get the dialog handler from the gui state - use subclass
-        progress = handler(mainWindow, text=text,
+        progress = handler(mainWindow,
+                           title=title, text=text,
                            minimum=minimum, maximum=maximum,
                            delay=delay, closeDelay=closeDelay,
-                           autoClose=autoClose)
+                           autoClose=autoClose,
+                           hideCancelButton=hideCancelButton,
+                           )
+
+        # transfer control to the calling function
+        yield progress
+
+    except Exception as es:
+        if isinstance(es, RuntimeError):
+            raise es
+
+
+@contextmanager
+def busyHandler(title='Progress', text='busy...', minimum=0, maximum=100,
+                delay=1000, closeDelay=250,
+                autoClose=True, hideCancelButton=True):
+    """A context manager to wrap a method in a busy dialog defined by the current gui state.
+    """
+    from ccpn.framework.Application import getApplication
+    from ccpn.ui.gui.widgets.ProgressWidget import BusyDialog
+
+    application = getApplication()
+    mainWindow = application.ui.mainWindow
+
+    try:
+        # get the dialog handler from the gui state - use subclass
+        progress = BusyDialog(mainWindow,
+                              title=title, text=text,
+                              hideBar=True, hideCancelButton=True,
+                              minimum=minimum, maximum=maximum,
+                              delay=delay, closeDelay=closeDelay,
+                              autoClose=autoClose)
 
         # transfer control to the calling function
         yield progress
@@ -1205,7 +1237,7 @@ def ccpNmrV3CoreSetter(doNotify=True, **actionKwds):
     return theDecorator
 
 
-def ccpNmrV3CoreUndoBlock(action='change'):
+def ccpNmrV3CoreUndoBlock(action='change', **actionKwds):
     """A decorator wrap the property setters method in an undo block and triggering the
     action notification; default is 'change' but occasionally may use 'rename'
     """
@@ -1223,14 +1255,14 @@ def ccpNmrV3CoreUndoBlock(action='change'):
                 # must be done like this as the undo functions are not known
                 with undoStackBlocking(application=application) as addUndoItem:
                     # incorporate the change notifier to simulate the decorator
-                    addUndoItem(undo=partial(self._finaliseAction, action))
+                    addUndoItem(undo=partial(self._finaliseAction, action, **actionKwds))
                     addUndoItem(undo=application.project.unblankNotification,
                                 redo=application.project.blankNotification)
 
                 try:
                     # call the wrapped function
                     result = func(*args, **kwds)
-                except Exception as es:
+                except Exception:
                     raise
 
                 finally:
@@ -1238,9 +1270,9 @@ def ccpNmrV3CoreUndoBlock(action='change'):
                         # incorporate the change notifier to simulate the decorator
                         addUndoItem(undo=application.project.blankNotification,
                                     redo=application.project.unblankNotification)
-                        addUndoItem(redo=partial(self._finaliseAction, action))
+                        addUndoItem(redo=partial(self._finaliseAction, action, **actionKwds))
 
-        self._finaliseAction(action)
+        self._finaliseAction(action, **actionKwds)
 
         return result
 

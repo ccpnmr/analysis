@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:26 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:04 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -75,7 +75,7 @@ class GuiBase(object):
         self._menuSpec = None
 
     def _setupMenus(self):
-        """Setup the menu specification.
+        """Set up the menu specification.
 
         The menus are specified by a list of lists (actually, an iterable of iterables, but the term
         ‘list’ will be used here to mean any iterable).  Framework provides 7 menus: Project, Spectrum,
@@ -215,7 +215,7 @@ class GuiBase(object):
             ("Data Table", partial(self.showDataTable, selectFirstItem=True), [('shortcut', 'dt')]),
             ("Violation Table", partial(self.showViolationTable, selectFirstItem=True), [('shortcut', 'vt')]),
             (),
-            ("Restraint Analysis Table", partial(self.showRestraintAnalysisTable, selectFirstItem=True), [('shortcut', 'at')]),
+            ("Restraint Analysis Inspector", partial(self.showRestraintAnalysisTable, selectFirstItem=True), [('shortcut', 'at')]),
             ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
             # ("Chemical Shift Mapping (Alpha)", self.showChemicalShiftMappingBeta),
             ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no'),
@@ -230,7 +230,7 @@ class GuiBase(object):
                                             ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
                                             (),
                                             ("Set Zoom...", self._setZoomPopup, [('shortcut', 'sz')]),
-                                            ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
+                                            # ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
                                             (),
                                             ("New SpectrumDisplay with New Strip, Same Axes", self.copyStrip, []),
                                             (" .. with X-Y Axes Flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
@@ -270,6 +270,7 @@ class GuiBase(object):
             ("Make Strip Plot...", self.makeStripPlotPopup, [('shortcut', 'sp')]),
 
             (),
+            ("Pseudo Spectrum to SpectrumGroup...", self.showPseudoSpectrumPopup),
             ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
             (),
             ("Print to File...", self.showPrintSpectrumDisplayPopup, [('shortcut', '⌃p')]),
@@ -662,7 +663,6 @@ class GuiBase(object):
         """Displays html files in program QT viewer or using native webbrowser
         depending on useNativeWebbrowser option in preferences
         """
-        mainWindow = self.ui.mainWindow
         useNative = self.preferences.general.useNativeWebbrowser
 
         if useNative:
@@ -677,21 +677,21 @@ class GuiBase(object):
                 pass
             elif urlPath.startswith('file://'):
                 urlPath = urlPath[len('file://'):]
-                if isWindowsOS():
-                    urlPath = urlPath.replace(os.sep, posixpath.sep)
-                else:
-                    urlPath = 'file://' + urlPath
+                urlPath = urlPath.replace(os.sep, posixpath.sep) if isWindowsOS() else f'file://{urlPath}'
+
+            elif isWindowsOS():
+                urlPath = urlPath.replace(os.sep, posixpath.sep)
             else:
-                if isWindowsOS():
-                    urlPath = urlPath.replace(os.sep, posixpath.sep)
-                else:
-                    urlPath = 'file://' + urlPath
+                urlPath = f'file://{urlPath}'
 
             webbrowser.open(urlPath)
             # self._systemOpen(path)
 
         else:
-            mainWindow.newHtmlModule(urlPath=urlPath, position='top', relativeTo=mainWindow.moduleArea)
+            # mainWindow = self.ui.mainWindow
+            #
+            # mainWindow.newHtmlModule(urlPath=urlPath, position='top', relativeTo=mainWindow.moduleArea)
+            getLogger().debug('non-native newHtmlModule has been removed')
 
     def _addApplicationMenuSpec(self, spec, position=-3):
         """Add an entirely new menu at specified position"""
@@ -704,7 +704,7 @@ class GuiBase(object):
                 spec[1].insert(position, menuItem)
                 return
 
-        raise Exception('No menu with name %s' % menuName)
+        raise ValueError(f'No menu with name {menuName}')
 
     def _addApplicationMenuItems(self, menuName, menuItems, position):
         """Add a new items to an existing menu starting at specified position"""
@@ -727,25 +727,24 @@ class GuiBase(object):
 
         topActionDict = {}
         for topMenu in menuChildren:
-            mainActionDict = {}
-            for mainAction in topMenu.actions():
-                mainActionDict[mainAction.text()] = mainAction
+            mainActionDict = {mainAction.text(): mainAction for mainAction in topMenu.actions()}
+
             topActionDict[topMenu.title()] = mainActionDict
 
         openModuleKeys = set(mainWindow.moduleArea.modules.keys())
         for key, topActionText, mainActionText in (('SEQUENCE', 'Molecules', 'Show Sequence'),
                                                    ('PYTHON CONSOLE', 'View', 'Python Console')):
             if key in openModuleKeys:
-                mainActionDict = topActionDict.get(topActionText)  # should always exist but play safe
-                if mainActionDict:
-                    mainAction = mainActionDict.get(mainActionText)
-                    if mainAction:
+                if mainActionDict := topActionDict.get(topActionText):
+                    if mainAction := mainActionDict.get(mainActionText):
                         mainAction.setChecked(True)
 
-    def _testShortcuts0(self):
+    @staticmethod
+    def _testShortcuts0():
         print('>>> Testing shortcuts0')
 
-    def _testShortcuts1(self):
+    @staticmethod
+    def _testShortcuts1():
         print('>>> Testing shortcuts1')
 
     # GWV 22022/1/24: Copied from Ui
@@ -774,10 +773,7 @@ def _getOpenLayoutPath(mainWindow):
     dialog = LayoutsFileDialog(parent=mainWindow, acceptMode='open', fileFilter=fType)
     dialog._show()
     path = dialog.selectedFile()
-    if not path:
-        return None
-    if path:
-        return path
+    return path or None
 
 
 def _getSaveLayoutPath(mainWindow):

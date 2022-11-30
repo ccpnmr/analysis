@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-31 18:50:34 +0000 (Mon, October 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:08 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,8 +30,7 @@ import numpy as np
 import pandas as pd
 from PyQt5 import QtWidgets, QtCore, QtGui
 from dataclasses import dataclass
-from contextlib import contextmanager
-from functools import partial
+from contextlib import contextmanager, suppress
 import typing
 
 from ccpn.ui.gui.guiSettings import getColours
@@ -188,8 +187,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         self.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
         setWidgetFont(self, name=TABLEFONT)
-
-        height = getFontHeight(name=TABLEFONT, size='MEDIUM')
+        height = getFontHeight(name=TABLEFONT)
         self._setHeaderWidgets(height, showHorizontalHeader, showVerticalHeader)
         self.setMinimumSize(2 * height, 2 * height + self.horizontalScrollBar().height())
 
@@ -232,6 +230,10 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
                 model.df = df
 
             self.resizeColumnsToContents()
+            maxLen = str(len(df))
+            indexHeader = self.verticalHeader()
+            px = indexHeader.fontMetrics().boundingRect(maxLen).width()+5
+            indexHeader.setMinimumWidth(px)
             if resize:
                 # resize if required
                 self.resizeRowsToContents()
@@ -289,8 +291,8 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
             self.moduleParent.mainWidget._dropEventCallback = self._processDroppedItems
 
         self._droppedNotifier = GuiNotifier(self,
-                                           [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                           self._processDroppedItems)
+                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                            self._processDroppedItems)
 
         # add a widget handler to give a clean corner widget for the scroll area
         self._cornerDisplay = ScrollBarVisibilityWatcher(self)
@@ -316,7 +318,6 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         _header.setHighlightSections(self.font().bold())
         _header.setVisible(showHorizontalHeader)
         setWidgetFont(_header, name=TABLEFONT)
-        setWidgetFont(self.verticalHeader(), name=TABLEFONT)
 
         # set the verticalHeader information
         _header = self.verticalHeader()
@@ -325,15 +326,17 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         # only look at visible section
         _header.setResizeContentsPrecision(5)
         _header.setDefaultAlignment(QtCore.Qt.AlignLeft)
-        _header.setFixedWidth(10)  # gives enough of a handle to resize if required
+        _header.setMinimumWidth(25)  # gives enough of a handle to resize if required
         _header.setVisible(showVerticalHeader)
         _header.setHighlightSections(self.font().bold())
 
         setWidgetFont(_header, name=TABLEFONT)
         if self._rowHeightScale:
+            # set the fixed row-height
             _header.setSectionResizeMode(QtWidgets.QHeaderView.Fixed)
             _height *= self._rowHeightScale
         else:
+            # otherwise user-changeable
             _header.setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
 
         _header.setDefaultSectionSize(_height)
@@ -353,7 +356,8 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
 
         if model._sortIndex and model._oldSortIndex:
             # get the pre-sorted mapping
-            if rows := {model._oldSortIndex[itm.row()] for itm in selection if itm.row() in model._oldSortIndex}:
+            itmRows = {itm.row() for itm in selection}
+            if rows := [model._oldSortIndex[rr] for rr in itmRows if 0 <= rr < len(model._oldSortIndex)]:
                 # block so no signals emitted
                 self.blockSignals(True)
                 selModel.blockSignals(True)
@@ -380,6 +384,12 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         if self._droppedNotifier:
             self._droppedNotifier.unRegister()
             self._droppedNotifier = None
+        # remove signals from header/table
+        if header := self.horizontalHeader():
+            with suppress(Exception):
+                header.customContextMenuRequested.disconnect(self._raiseHeaderContextMenu)
+        with suppress(Exception):
+            self.customContextMenuRequested.disconnect(self._raiseTableContextMenu)
 
     #=========================================================================================
     # Properties
@@ -394,6 +404,13 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     @_df.setter
     def _df(self, value):
         self.model().df = value
+
+    @property
+    def _displayedDf(self):
+        """Return the Pandas-dataFrame in exactly the same way as it is displayed: sorted and filtered.
+        """
+        return self.model().displayedDf
+
 
     def isEditable(self):
         """Return True if the default state of the table is editable
@@ -551,6 +568,16 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes())
         df = self._df
         return df.iloc[list(sRows)]
+
+    def selectFirstRow(self, doCallback=True):
+        from ccpn.core.lib.ContextManagers import nullContext
+        context = nullContext if doCallback else self._blockTableSignals
+        model = self.model()
+        rowIndex = model.index(0, 0) #First Row!
+        with context('selectFirstRow'):
+            selectionModel = self.selectionModel()
+            selectionModel.clearSelection()
+            selectionModel.select(rowIndex, selectionModel.Select | selectionModel.Rows)
 
     def selectRowsByValues(self, values, headerName, scrollToSelection=True, doCallback=True):
         """
@@ -758,9 +785,9 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         # need to get values from padding
         header = self.horizontalHeader()
         width = -2  # left/right borders
-        for nn in range(header.count()):
-            if not header.isSectionHidden(nn) and header.sectionViewportPosition(nn) >= 0:
-                width += (self.columnWidth(nn) + 1)  # cell border on right-hand-side
+        # +1 for cell border on right-hand-side
+        width += sum((self.columnWidth(nn) + 1) for nn in range(header.count())
+                     if not header.isSectionHidden(nn) and header.sectionViewportPosition(nn) >= 0)
 
         self.setFixedWidth(width)
 
@@ -848,11 +875,11 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     def setTableMenu(self) -> Menu:
         """Set up the context menu for the main table
         """
-        menu = Menu('', self, isFloatWidget=True)
+        self._thisTableMenu = menu = Menu('', self, isFloatWidget=True)
         setWidgetFont(menu, )
 
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(partial(self._raiseTableContextMenu, menu))
+        self.customContextMenuRequested.connect(self._raiseTableContextMenu)
 
         self.addTableMenuOptions(menu)
 
@@ -875,11 +902,12 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         # Subclass to add extra options
         pass
 
-    def _raiseTableContextMenu(self, menu, pos):
+    def _raiseTableContextMenu(self, pos):
         """Create a new menu and popup at cursor position
         """
-        if not menu:
-            raise ValueError('menu is not defined')
+        if not (menu := self._thisTableMenu):
+            getLogger().warning('menu is not defined')
+            return
 
         # call the class setup
         self.setTableMenuOptions(menu)
@@ -900,12 +928,12 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     def setHeaderMenu(self) -> Menu:
         """Set up the context menu for the table header
         """
-        menu = Menu('', self, isFloatWidget=True)
+        self._thisTableHeaderMenu = menu = Menu('', self, isFloatWidget=True)
         setWidgetFont(menu, )
 
         headers = self.horizontalHeader()
         headers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        headers.customContextMenuRequested.connect(partial(self._raiseHeaderContextMenu, menu))
+        headers.customContextMenuRequested.connect(self._raiseHeaderContextMenu)
 
         self.addHeaderMenuOptions(menu)
 
@@ -923,11 +951,12 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         # Subclass to add extra options
         pass
 
-    def _raiseHeaderContextMenu(self, menu, pos):
+    def _raiseHeaderContextMenu(self, pos):
         """Raise the menu on the header
         """
-        if not menu:
-            raise ValueError('menu is not defined')
+        if not (menu := self._thisTableHeaderMenu):
+            getLogger().warning('header-menu is not defined')
+            return
         if self._df is None or self._df.empty:
             return
 

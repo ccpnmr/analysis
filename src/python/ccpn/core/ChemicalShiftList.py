@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:03 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:02 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -103,6 +103,10 @@ class _ChemicalShiftListFrame(DataFrameABC):
     # functionality can be moved from main class below to here at some point as required
     # - currently not using undo/redo ability of superclass
     pass
+
+
+# register the class with DataFrameABC for json loading/saving
+_ChemicalShiftListFrame.register()
 
 
 from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
@@ -656,6 +660,18 @@ class ChemicalShiftList(AbstractWrapperObject):
 
             # remove the deleted shifts, not needed after restore
             _data = _data[_data[CS_ISDELETED] == False]
+            oldLen = len(_data)
+
+            # drop any duplicates and merge back in the Nones which must be kept
+            _data.reset_index(drop=True, inplace=True)
+            _noDupes = _data.drop_duplicates(CS_NMRATOM).merge(_data[_data[CS_NMRATOM].isnull()], how='outer')
+            _noDupes.sort_values(CS_UNIQUEID, inplace=True, )
+            if len(_noDupes) != oldLen:
+                # log a warning and update the dataFrame
+                getLogger().warning(f'Duplicate nmrAtoms have been removed from {chemicalShiftList}')
+                getLogger().debug(f'>>> Dropped rows\n{list(_data.drop(_noDupes.index)[CS_UNIQUEID])}')
+                _data = _noDupes
+
             if CS_STATIC not in _data.columns:
                 # add new static column if not defined
                 _data.insert(CS_COLUMNS.index(CS_STATIC), CS_STATIC, False)

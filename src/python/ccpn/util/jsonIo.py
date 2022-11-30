@@ -13,12 +13,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-04 17:15:20 +0100 (Mon, July 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:09 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import json
 import numpy
 import pandas
+import contextlib
 from collections import OrderedDict
 
 
@@ -63,22 +64,21 @@ class _CcpnMultiEncoder(json.JSONEncoder):
 
         # Sentinel - reset if we find a supported type
         typ = None
+        data = None
 
-        # from ccpn.util.StructureData import EnsembleData
+        # stop circular imports
         from ccpn.core._implementation.DataFrameABC import DataFrameABC
 
         if isinstance(obj, OrderedDict):
             typ = 'OrderedDict'
             data = list(obj.items())
 
-        # elif EnsembleData is not None and isinstance(obj, EnsembleData):
-        #     # Works like pandas.DataFrame (see comments there), but instantiates subclass.
-        #     typ = 'ccpn.EnsembleData'
-        #     data = obj.to_json(orient='split')
-
         elif isinstance(obj, DataFrameABC):
             # Works like pandas.DataFrame (see comments there), but instantiates subclass.
-            typ = 'ccpn.TableFrame'
+            if not (typ := DataFrameABC.jsonType(obj)):
+                # in-case of any undefined/unregistered subclasses
+                typ = DataFrameABC.registeredDefaultJsonType
+
             data = obj.to_json(orient='split')
 
         elif isinstance(obj, pandas.DataFrame):
@@ -105,15 +105,13 @@ class _CcpnMultiEncoder(json.JSONEncoder):
             data = obj.tolist()
 
         else:
-            try:
+            with contextlib.suppress(ImportError):
                 # Put here to avoid circular imports
                 from ccpn.util.Tensor import Tensor
 
                 if isinstance(obj, Tensor):
                     typ = 'ccpncore.Tensor'
                     data = obj._toDict()
-            except ImportError:
-                pass
 
         # We are done.
         if typ is None:
@@ -131,29 +129,19 @@ def _ccpnObjectPairHook(pairs):
         tag2, data = pairs[1]
         if tag1 == '__type__' and tag2 == '__data__':
 
-            from ccpn.util.StructureData import EnsembleData
-            from ccpn.core.DataTable import TableFrame
-            from ccpn.core.ViolationTable import ViolationFrame
-            from ccpn.core._implementation.CollectionList import _CollectionFrame
-
-            # from ccpn.core.ChemicalShiftList import _ChemicalShiftListFrame  # not used yet
-
-            _dataFrameTypes = {'ccpn.EnsembleData'  : EnsembleData,
-                               'ccpn.TableFrame'    : TableFrame,
-                               'ccpn.ViolationFrame': ViolationFrame,
-                               'ccpn._CollectionFrame': _CollectionFrame,
-                               # 'ccpn._ChemicalShiftListFrame': _ChemicalShiftListFrame,  # not used yet
-                               }
+            from ccpn.core._implementation.DataFrameABC import DataFrameABC
 
             if typ == 'OrderedDict':
                 return OrderedDict(data)
 
-            elif typ in _dataFrameTypes:
-
+            elif typ in DataFrameABC.registeredJsonTypes():
+                # check for registered subclasses of DataFrameABC
                 result = None
                 try:
                     result = pandas.read_json(data, orient='split')
-                    result = _dataFrameTypes[typ](result)
+                    if klass := DataFrameABC.fromJsonType(typ):
+                        # SHOULD always be a defined json-type
+                        result = klass(result)
                 finally:
                     return result
 
@@ -186,5 +174,5 @@ def _ccpnObjectPairHook(pairs):
 
                 return Tensor._fromDict(data)
 
-    # default option, std json behaviouor
+    # default option, std json behaviour
     return dict(pairs)

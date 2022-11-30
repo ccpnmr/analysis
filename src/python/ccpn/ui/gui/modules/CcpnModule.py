@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 16:20:49 +0100 (Thu, October 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:05 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -547,9 +547,10 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                     if isinstance(i, Container):
                         self._container = i
 
-        if self._includeInLastSeen:
+        if self._includeInLastSeen and self.area:
             self.area._seenModuleStates[self.className] = {MODULENAME: self._defaultName, WIDGETSTATE: self._getLastSeenWidgetsState()}
 
+        self.mainWindow.application.cleanGarbageCollector()
         try:
             super().close()
         except Exception:
@@ -1425,6 +1426,7 @@ class CcpnModuleLabel(DockLabel):
 
 
 INVALIDROWCOLOUR = QtGui.QColor('lightpink')
+WARNINGROWCOLOUR = QtGui.QColor('palegoldenrod')
 
 EXTRA_CHARACTERS_ALLOWED = [' ',  # extra characters allowed when renaming a Module (except spectrumDisplays)
                             '_',

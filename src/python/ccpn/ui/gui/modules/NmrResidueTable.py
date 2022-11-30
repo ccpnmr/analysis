@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-31 18:50:34 +0000 (Mon, October 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:05 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -75,6 +75,7 @@ class NmrResidueTableModule(CcpnModule):
     includeNmrChains = False
     includeSpectrumTable = False
     activePulldownClass = NmrChain
+    activePulldownInitialState = False
 
     className = 'NmrResidueTableModule'
     _allowRename = True
@@ -109,7 +110,7 @@ class NmrResidueTableModule(CcpnModule):
                                                  includeNmrChains=self.includeNmrChains,
                                                  includeSpectrumTable=self.includeSpectrumTable,
                                                  activePulldownClass=self.activePulldownClass,
-                                                 activePulldownInitialState=False,
+                                                 activePulldownInitialState=self.activePulldownInitialState,
                                                  grid=(0, 0))
 
         # add the frame containing the pulldown and table

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 16:20:49 +0100 (Thu, October 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:07 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -23,13 +23,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import contextlib
+
 from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtCore import pyqtSlot
-from ccpn.core.Spectrum import Spectrum
 from pyqtgraph.dockarea.Dock import Dock
 from pyqtgraph.dockarea.DockArea import DockArea, DockDrop
 from pyqtgraph.dockarea.Container import Container
-from ccpn.util.Logging import getLogger
+
+from ccpn.core.Spectrum import Spectrum
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule, MODULENAME, WIDGETSTATE
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -40,7 +42,6 @@ from ccpn.ui.gui.widgets.Font import Font, getFontHeight, getFont
 from ccpn.ui.gui.widgets.MainWindow import MainWindow
 from ccpn.ui.gui.lib.GuiWindow import GuiWindow
 from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
-from ccpn.util.Colour import hexToRgb
 from ccpn.ui.gui.lib.mouseEvents import SELECT
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
@@ -48,8 +49,10 @@ from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.table.TableABC import TableABC
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.framework.Application import getApplication
+from ccpn.util.Colour import hexToRgb
 from ccpn.util.Common import incrementName
 from ccpn.util.Path import aPath
+from ccpn.util.Logging import getLogger
 
 
 ModuleArea = DockArea
@@ -106,7 +109,7 @@ class TempAreaWindow(GuiWindow, MainWindow):
                 if not strip.isDeleted:
                     strip.refreshDevicePixelRatio()
 
-            # NOTE:ED - set pixelratio for extra axes
+            # NOTE:ED - set pixel-ratio for extra axes
             if hasattr(spectrumDisplay, '_rightGLAxis'):
                 spectrumDisplay._rightGLAxis.refreshDevicePixelRatio()
             if hasattr(spectrumDisplay, '_bottomGLAxis'):
@@ -144,15 +147,14 @@ class CcpnModuleArea(ModuleArea, DropBase):
         if self.application:
             self.preferences = self.application.preferences
 
-
         self.moveModule = self.moveDock
         self.setContentsMargins(0, 0, 0, 0)
         self.currentModuleNames = []
         self._modulesNames = {}
         self._ccpnModules = []
         self._modules = {}  # don't use self.docks, is not updated when removing docks
-        self._openedSpectrumDisplays = [] # keep track of the order of opened spectrumDisplays
-        self._seenModuleStates = {} # {className: {moduleName:'', state:widgetsState}}
+        self._openedSpectrumDisplays = []  # keep track of the order of opened spectrumDisplays
+        self._seenModuleStates = {}  # {className: {moduleName:'', state:widgetsState}}
         # self.setAcceptDrops(True) GWV not needed; handled by DropBase init
 
         self.textLabel = DropAreaLabel
@@ -214,7 +216,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
         try:
             getattr(widget, 'maximised')
             return True
-        except:
+        except Exception:
             return False
 
     def findMaximisedDock(self, event):
@@ -231,10 +233,8 @@ class CcpnModuleArea(ModuleArea, DropBase):
         if maximisedModule is not None:
             source = event.source()
             sourceParentModule = None
-            try:
+            with contextlib.suppress(Exception):
                 sourceParentModule = source._findModule()
-            except:
-                pass
 
             if sourceParentModule is not maximisedModule:
                 maximisedModule.handleDragToMaximisedModule(event)
@@ -247,12 +247,11 @@ class CcpnModuleArea(ModuleArea, DropBase):
         if DropBase.PIDS in data and isinstance(data['event'].source(), (SideBar, SideBarSearchListView)):
             DockArea.dragEnterEvent(self, *args)
             event.accept()
+        elif isinstance(data['source'], MODULEAREA_IGNORELIST):
+            event.ignore()
         else:
-            if isinstance(data['source'], MODULEAREA_IGNORELIST):
-                event.ignore()
-            else:
-                DockDrop.dragEnterEvent(self, *args)
-                event.accept()
+            DockDrop.dragEnterEvent(self, *args)
+            event.accept()
 
     def dragLeaveEvent(self, *args):
         event = args[0]
@@ -300,19 +299,15 @@ class CcpnModuleArea(ModuleArea, DropBase):
             # means all modules are pop-out, so paint the label in the main module area
             self._paint(ev)
 
-        elif all([m.isHidden() for m in self.ccpnModules]):
+        elif all(m.isHidden() for m in self.ccpnModules):
             # means all modules are hidden
             self._paint(ev)
-
-
-
 
     def _isNameAvailable(self, name):
         """
         Check if the name is not already taken
         """
         return name not in self.modules.keys()
-
 
     def _incrementModuleName(self, name, splitter):
         """ fetch an incremented name if not already taken. """
@@ -507,7 +502,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
         """
         True if any module is being renamed
         """
-        return len(self._getModulesOnActiveNameEditing())>0
+        return len(self._getModulesOnActiveNameEditing()) > 0
 
     def _finaliseAllNameEditing(self):
         for module in self._getModulesOnActiveNameEditing():
@@ -575,7 +570,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
                     areaState = ('area', self.childState(a.topContainer, docksOnly), {'geo': geo, 'id': id(a)})
                     state['floats'].append(areaState)
         except Exception as e:
-            getLogger().warning('Impossible to save layout. %s' % e)
+            getLogger().warning(f'Impossible to save layout. {e}')
         return state
 
     def childState(self, obj, docksOnly=False):
@@ -600,7 +595,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
                                 childList = self.childState(widg, docksOnly)
                                 childs.append(childList)
                     except Exception as es:
-                        getLogger().warning('Error accessing widget: %s - %s - %s' % (str(es), widg, obj))
+                        getLogger().warning(f'Error accessing widget: {str(es)} - {widg} - {obj}')
 
                 return (obj.type(), childs, obj.saveState())
 

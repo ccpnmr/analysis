@@ -12,7 +12,6 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CallbackTimer import CallbackTimer
 from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
-from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.CompoundView import CompoundView
@@ -42,8 +41,6 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.VerticalLabel import  VerticalLabel
-from ccpn.ui.gui.widgets.WebBrowser import WebBrowser
-from ccpn.ui.gui.widgets.WebView import WebViewPopup
 from ccpn.ui.gui.widgets.Widget import Widget
 
 '''

@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:09 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:04 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ __date__ = "$Date: 2018-05-17 10:28:43 +0000 (Thu, May 17, 2018) $"
 #=========================================================================================
 
 from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode, PICK
 from ccpn.util.Logging import getLogger
 from functools import partial
 
@@ -76,8 +77,7 @@ def _createMenu(strip, items):
 
     for i in items:
         try:
-            ff = getattr(menu, i.typeItem)
-            if ff:
+            if ff := getattr(menu, i.typeItem):
                 action = ff(i.name, **vars(i))
                 if i.stripMethodName:
                     if hasattr(strip, i.stripMethodName):
@@ -88,20 +88,19 @@ def _createMenu(strip, items):
                         strip._spectrumUtilActions[i.stripMethodName] = action
 
         except Exception as e:
-            getLogger().warning('_createMenu error: %s' % str(e))
+            getLogger().warning(f'_createMenu error: {str(e)}')
     return menu
 
 
-def _addMenuItems(widget, menu, items):
+def _addMenuItems(widget, menu, items, overwrite=False):
     """Add items to an existing menu
     """
     for i in items:
         try:
-            ff = getattr(menu, i.typeItem)
-            if ff:
+            if ff := getattr(menu, i.typeItem):
                 action = ff(i.name, **vars(i))
                 if i.stripMethodName:
-                    if hasattr(widget, i.stripMethodName):
+                    if hasattr(widget, i.stripMethodName) and not overwrite:
                         # check whether items already in widget
                         raise RuntimeError(f'Strip already contains action {i.stripMethodName}')
                     setattr(widget, i.stripMethodName, action)
@@ -109,7 +108,7 @@ def _addMenuItems(widget, menu, items):
                         widget._spectrumUtilActions[i.stripMethodName] = action
 
         except Exception as e:
-            getLogger().warning('_addMenuItems error: %s' % str(e))
+            getLogger().warning(f'_addMenuItems error: {str(e)}')
 
 
 ##############################  Common default  menu items ##############################
@@ -254,9 +253,20 @@ def _toggleVerticalTraceItem(strip):
 
 
 def _phasingConsoleItem(strip):
-    return _SCMitem(name='Enter Phasing Console',
-                    typeItem=ItemTypes.get(ITEM), icon='icons/phase-console', toolTip='Enter Phasing Console',
+    return _SCMitem(name='Enter Phasing-Console',
+                    typeItem=ItemTypes.get(ITEM), icon='icons/phase-console', toolTip='Enter Phasing-Console',
                     shortcut='PC', callback=strip.spectrumDisplay.togglePhaseConsole)
+
+
+def _mouseModeItem(strip):
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
+    return _SCMitem(name='Peak-Picking Mouse Mode',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Mouse mode for peak-picking using single mouse-click',
+                    checkable=True, checked=(getCurrentMouseMode() == PICK),
+                    stripMethodName='mouseModeAction',
+                    shortcut='MM', callback=_app.mainWindow.switchMouseMode)
 
 
 def _marksItem(strip):
@@ -303,7 +313,7 @@ def _separator():
 def _newStripPlotItem(strip):
     return _SCMitem(name='New Spectrum Display with same Axes',
                     typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip',
-                    callback=strip.copyStrip)
+                    callback=partial(strip.copyStrip, usePosition=True))
 
 
 def _newStripPlotXYItem(strip):
@@ -311,7 +321,7 @@ def _newStripPlotXYItem(strip):
                     typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip\n'
                                                           'with the X-Y axes flipped',
                     shortcut='xy',
-                    callback=strip.flipXYAxis)
+                    callback=partial(strip.flipXYAxis, usePosition=True))
 
 
 def _newStripPlotXZItem(strip):
@@ -319,7 +329,7 @@ def _newStripPlotXZItem(strip):
                     typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip\n'
                                                           'with the X-Z axes flipped',
                     shortcut='xz',
-                    callback=strip.flipXZAxis)
+                    callback=partial(strip.flipXZAxis, usePosition=True))
 
 
 def _newStripPlotYZItem(strip):
@@ -327,7 +337,7 @@ def _newStripPlotYZItem(strip):
                     typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip\n'
                                                           'with the Y-Z axes flipped',
                     shortcut='yz',
-                    callback=strip.flipYZAxis)
+                    callback=partial(strip.flipYZAxis, usePosition=True))
 
 
 def _newStripPlotFAItem(strip):
@@ -337,7 +347,7 @@ def _newStripPlotFAItem(strip):
     return _SCMitem(name='New Spectrum Display with Axes flipped...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip',
                     shortcut='fa',
-                    callback=app.showFlipArbitraryAxisPopup)
+                    callback=partial(app.showFlipArbitraryAxisPopup, usePosition=True))
 
 
 ##############################  Common Integral menu items ##############################
@@ -492,6 +502,7 @@ def _newMultipletItem():
                     typeItem=ItemTypes.get(ITEM), toolTip='Add New Multiplet', shortcut='AM',
                     callback=_app.mainWindow.addMultiplet)
 
+
 def _newCollectionItem():
     from ccpn.framework.Application import getApplication
 
@@ -600,14 +611,14 @@ def _markAxesMenuItem2(strip):
 
 
 def _markCursorXPosItem(strip):
-    return _SCMitem(name='Mark %s' % strip.axisCodes[0],
-                    typeItem=ItemTypes.get(ITEM), toolTip='Mark %s axiscode' % strip.axisCodes[0],
+    return _SCMitem(name=f'Mark {strip.axisCodes[0]}',
+                    typeItem=ItemTypes.get(ITEM), toolTip=f'Mark {strip.axisCodes[0]} axiscode',
                     callback=partial(strip.markAxisIndices, indices=(0,)))
 
 
 def _markCursorYPosItem(strip):
-    return _SCMitem(name='Mark %s' % strip.axisCodes[1],
-                    typeItem=ItemTypes.get(ITEM), toolTip='Mark %s axiscode' % strip.axisCodes[1],
+    return _SCMitem(name=f'Mark {strip.axisCodes[1]}',
+                    typeItem=ItemTypes.get(ITEM), toolTip=f'Mark {strip.axisCodes[1]} axiscode',
                     callback=partial(strip.markAxisIndices, indices=(1,)))
 
 
@@ -641,15 +652,15 @@ def _copyAllAxisRangeFromStripMenuItem(strip):
 
 
 def _copyXAxisCodeRangeFromStripMenuItem(strip):
-    return _SCMitem(name='Copy Axis Range to %s from:' % strip.axisCodes[0],
-                    typeItem=ItemTypes.get(MENU), toolTip='Copy axis range to %s from selected strip' % strip.axisCodes[0],
+    return _SCMitem(name=f'Copy Axis Range to {strip.axisCodes[0]} from:',
+                    typeItem=ItemTypes.get(MENU), toolTip=f'Copy axis range to {strip.axisCodes[0]} from selected strip',
                     stripMethodName='matchXAxisCodeToMenu',
                     callback=None)
 
 
 def _copyYAxisCodeRangeFromStripMenuItem(strip):
-    return _SCMitem(name='Copy Axis Range to %s from:' % strip.axisCodes[1],
-                    typeItem=ItemTypes.get(MENU), toolTip='Copy axis range to %s from selected strip' % strip.axisCodes[1],
+    return _SCMitem(name=f'Copy Axis Range to {strip.axisCodes[1]} from:',
+                    typeItem=ItemTypes.get(MENU), toolTip=f'Copy axis range to {strip.axisCodes[1]} from selected strip',
                     stripMethodName='matchYAxisCodeToMenu',
                     callback=None)
 
@@ -681,15 +692,15 @@ def _copyAllAxisRangeFromStripMenuItem2(strip):
 
 
 def _copyXAxisCodeRangeFromStripMenuItem2(strip):
-    return _SCMitem(name='Copy Axis Range to %s from:' % strip.axisCodes[0],
-                    typeItem=ItemTypes.get(MENU), toolTip='Copy axis range to %s from selected strip' % strip.axisCodes[0],
+    return _SCMitem(name=f'Copy Axis Range to {strip.axisCodes[0]} from:',
+                    typeItem=ItemTypes.get(MENU), toolTip=f'Copy axis range to {strip.axisCodes[0]} from selected strip',
                     stripMethodName='matchXAxisCodeToMenu2',
                     callback=None)
 
 
 def _copyYAxisCodeRangeFromStripMenuItem2(strip):
-    return _SCMitem(name='Copy Axis Range to %s from:' % strip.axisCodes[1],
-                    typeItem=ItemTypes.get(MENU), toolTip='Copy axis range to %s from selected strip' % strip.axisCodes[1],
+    return _SCMitem(name=f'Copy Axis Range to {strip.axisCodes[1]} from:',
+                    typeItem=ItemTypes.get(MENU), toolTip=f'Copy axis range to {strip.axisCodes[1]} from selected strip',
                     stripMethodName='matchYAxisCodeToMenu2',
                     callback=None)
 
@@ -766,9 +777,16 @@ def _setPivotItem(strip):
 
 
 def _exitPhasingConsoleItem(strip):
-    return _SCMitem(name='Exit Phasing Console',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Exit phasing console',
+    return _SCMitem(name='Exit Phasing-Console',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Exit phasing-console',
                     shortcut='PC', callback=strip.spectrumDisplay.togglePhaseConsole, icon='icons/phase-console', )
+
+
+def _exitMouseModeItem(strip):
+    return _SCMitem(name='Peak-Picking Mouse Mode',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Mouse mode for peak-picking using single mouse-click',
+                    checkable=True, checked=(getCurrentMouseMode() == PICK),
+                    shortcut='MM', callback=strip.spectrumDisplay.toggleMouseMode)
 
 
 def _stackSpectraDefaultItem(strip):
@@ -803,6 +821,8 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         _calibrateY(guiStrip1d),
         _stackSpectraDefaultItem(guiStrip1d),
         _phasingConsoleItem(guiStrip1d),
+        _separator(),
+        _mouseModeItem(guiStrip1d),
         _separator(),
 
         _marksItem(guiStrip1d),
@@ -846,12 +866,12 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         ]
     items = [itm for itm in items if itm is not None]
     # attach to the _copyAxesMenu submenu
-    _addMenuItems(guiStrip1d, guiStrip1d._copyAxesMenu, items)
+    _addMenuItems(guiStrip1d, guiStrip1d._copyAxesMenu, items, overwrite=True)
 
     # _selectedPeaksMenu submenu - add to Strip._selectedPeaksMenu
     items = _getNdPeakMenuItems(menuId='Main')
     # attach to the _selectedPeaksMenu submenu
-    _addMenuItems(guiStrip1d, guiStrip1d._selectedPeaksMenu, items)
+    _addMenuItems(guiStrip1d, guiStrip1d._selectedPeaksMenu, items, overwrite=True)
 
     return menu
 
@@ -970,6 +990,8 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _toggleVerticalTraceItem(guiStripNd),
         _phasingConsoleItem(guiStripNd),
         _separator(),
+        _mouseModeItem(guiStripNd),
+        _separator(),
 
         _marksItem(guiStripNd),
         _markAxesMenuItem(guiStripNd),
@@ -1018,7 +1040,7 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         ]
     items = [itm for itm in items if itm is not None]
     # attach to the _copyAxesMenu submenu
-    _addMenuItems(guiStripNd, guiStripNd._copyAxesMenu, items)
+    _addMenuItems(guiStripNd, guiStripNd._copyAxesMenu, items, overwrite=True)
 
     # _flipAxesMenu submenu - add to Strip._flipAxesMenu
     items = [
@@ -1030,12 +1052,12 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         ]
     items = [itm for itm in items if itm is not None]
     # attach to the _flipAxesMenu submenu
-    _addMenuItems(guiStripNd, guiStripNd._flipAxesMenu, items)
+    _addMenuItems(guiStripNd, guiStripNd._flipAxesMenu, items, overwrite=True)
 
     # _selectedPeaksMenu submenu - add to Strip._selectedPeaksMenu
     items = _getNdPeakMenuItems(menuId='Main')
     # attach to the _selectedPeaksMenu submenu
-    _addMenuItems(guiStripNd, guiStripNd._selectedPeaksMenu, items)
+    _addMenuItems(guiStripNd, guiStripNd._selectedPeaksMenu, items, overwrite=True)
 
     return menu
 
@@ -1159,7 +1181,7 @@ def _getSpectrumDisplayMenu(guiStripNd) -> Menu:
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import MAINVIEW, BOTTOMAXIS, RIGHTAXIS, AXISCORNER
 
 
-def _addCopyMenuItems(guiStrip, viewPort, thisMenu, is1D):
+def _addCopyMenuItems(guiStrip, viewPort, thisMenu, is1D, overwrite=False):
     items = copyAttribs = matchAttribs = ()
     if viewPort in (MAINVIEW, AXISCORNER):
         items = (_copyAllAxisRangeFromStripMenuItem2(guiStrip),
@@ -1186,27 +1208,25 @@ def _addCopyMenuItems(guiStrip, viewPort, thisMenu, is1D):
                              )
         items = items + (_separator(),)
 
-    _addMenuItems(guiStrip, thisMenu, items)
+    _addMenuItems(guiStrip, thisMenu, items, overwrite=overwrite)
 
     if viewPort in (MAINVIEW, AXISCORNER):
         copyAttribs = ((guiStrip.copyAllAxisFromMenu2, 'All'),
                        (guiStrip.copyXAxisFromMenu2, 'X'),
                        (guiStrip.copyYAxisFromMenu2, 'Y'),
                        )
-        matchAttribs = ((guiStrip.matchXAxisCodeToMenu2, 0),
-                        (guiStrip.matchYAxisCodeToMenu2, 1),
-                        ) if not is1D else ()
+        matchAttribs = () if is1D else ((guiStrip.matchXAxisCodeToMenu2, 0),
+                                        (guiStrip.matchYAxisCodeToMenu2, 1))
+
     elif viewPort == BOTTOMAXIS:
         copyAttribs = ((guiStrip.copyAllAxisFromMenu2, 'All'),
                        (guiStrip.copyXAxisFromMenu2, 'X'),
                        )
-        matchAttribs = ((guiStrip.matchXAxisCodeToMenu2, 0),
-                        ) if not is1D else ()
+        matchAttribs = () if is1D else ((guiStrip.matchXAxisCodeToMenu2, 0),)
     elif viewPort == RIGHTAXIS:
         copyAttribs = ((guiStrip.copyAllAxisFromMenu2, 'All'),
                        (guiStrip.copyYAxisFromMenu2, 'Y'),
                        )
-        matchAttribs = ((guiStrip.matchYAxisCodeToMenu2, 1),
-                        ) if not is1D else ()
+        matchAttribs = () if is1D else ((guiStrip.matchYAxisCodeToMenu2, 1),)
 
     return copyAttribs, matchAttribs

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:29 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:06 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -49,6 +49,7 @@ from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumGroupPulldown, P
 from ccpn.ui.gui.widgets.HLine import HLine, LabeledHLine
 from ccpn.framework.lib.experimentAnalysis.FollowPeakInSeries import AVAILABLEFOLLOWPEAKS
 
+
 INPLACE = 'In Place'
 FOLLOW = 'Follow'
 LAST = 'Last Created'
@@ -60,9 +61,10 @@ USEEXISTINGPEAKS = 'Use Existing Peaks'
 def showWarningPopup():
     showWarning('Under implementation!', 'This popup is not active yet.')
 
+
 class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
     def __init__(self, parent=None, mainWindow=None, title='Series Peak Collection', **kwds):
-        super().__init__(parent, setLayout=True,  size=(200, 350), minimumSize=None, windowTitle=title, **kwds)
+        super().__init__(parent, setLayout=True, size=(200, 350), minimumSize=None, windowTitle=title, **kwds)
 
         if mainWindow:
             self.mainWindow = mainWindow
@@ -90,15 +92,15 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
     def setWidgets(self):
         row = 0
         self.spectrumGroupCW = SpectrumGroupPulldown(self.mainWidget, mainWindow=self.mainWindow,
-                                                             labelText='SpectrumGroup', grid=(row, 0),
-                                                             gridSpan = (1,2))
-                                                             # fixedWidths=self._fixedWidthsCW)
+                                                     labelText='SpectrumGroup', grid=(row, 0),
+                                                     gridSpan=(1, 2))
+        # fixedWidths=self._fixedWidthsCW)
         row += 1
         self.sourcePeakListCW = PeakListPulldown(self.mainWidget,
-                                                              mainWindow=self.mainWindow,
-                                                              labelText='Source PeakList',grid=(row, 0),
-                                                              gridSpan=(1, 2))
-                                                              # fixedWidths=self._fixedWidthsCW)
+                                                 mainWindow=self.mainWindow,
+                                                 labelText='Source PeakList', grid=(row, 0),
+                                                 gridSpan=(1, 2))
+        # fixedWidths=self._fixedWidthsCW)
         row += 1
         self.collectionNameCW = cw.EntryCompoundWidget(self.mainWidget, labelText='Collection Name', grid=(row, 0),
                                                        gridSpan=(1, 2))
@@ -112,11 +114,11 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         row += 1
         subRow = 0
         ## follow Peaks options
-        self.followRadioButton = RadioButton(self.mainWidget, text='Follow Peaks', callback=self._toggleFrames,grid=(row, 0))
+        self.followRadioButton = RadioButton(self.mainWidget, text='Follow Peaks', callback=self._toggleFrames, grid=(row, 0))
         row += 1
         self._followFrame = Frame(self.mainWidget, setLayout=True, grid=(row, 0), gridSpan=(2, 2))
         self.followPeakOptionstLabel = Label(self._followFrame, text='Select Mode', grid=(subRow, 0))
-        self.followPeakOptionsRB = RadioButtons(self._followFrame, texts=[USEEXISTINGPEAKS], # texts=[FINDPEAKS, USEEXISTINGPEAKS],
+        self.followPeakOptionsRB = RadioButtons(self._followFrame, texts=[USEEXISTINGPEAKS],  # texts=[FINDPEAKS, USEEXISTINGPEAKS],
                                                 selectedInd=0, grid=(subRow, 1))
         subRow += 1
         engines = list(AVAILABLEFOLLOWPEAKS.keys())
@@ -128,7 +130,7 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         subRow += 1
         row += subRow
 
-        HLine(self.mainWidget,  grid=(row, 0), gridSpan=(1, 2))
+        HLine(self.mainWidget, grid=(row, 0), gridSpan=(1, 2))
 
         ## Common for both options
         row += 1
@@ -194,7 +196,6 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         self._populateSourcePeakListPullDown()
         self._populateSpectrumGroupPullDown()
 
-
     def _okClicked(self):
 
         if not self.spectrumGroup:
@@ -209,23 +210,22 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         with undoBlockWithoutSideBar():
             if self.copyInPlace:
                 self._topCollection = self.spectrumGroup.copyAndCollectPeaksInSeries(self.sourcePeakList,
-                                             refit=refit,
-                                             useSliceColour=useSliceColour,
-                                             newTargetPeakList=self._isNewTargetPeakListNeeded,
-                                             topCollectionName=self.collectionName
-                                             )
+                                                                                     refit=refit,
+                                                                                     useSliceColour=useSliceColour,
+                                                                                     newTargetPeakList=self._isNewTargetPeakListNeeded,
+                                                                                     topCollectionName=self.collectionName
+                                                                                     )
             else:
                 self._topCollection = self.spectrumGroup.followAndCollectPeaksInSeries(self.sourcePeakList,
-                                             engine=self._followMethod,
-                                             newTargetPeakList=self._isNewTargetPeakListNeeded,
-                                             pickPeaks=self._isFindPeaksNeeded,
-                                             copyAssignment=self._copyAssignments,
-                                             useSliceColour=useSliceColour,
-                                             topCollectionName=self.collectionName
-                                                 )
+                                                                                       engine=self._followMethod,
+                                                                                       newTargetPeakList=self._isNewTargetPeakListNeeded,
+                                                                                       pickPeaks=self._isFindPeaksNeeded,
+                                                                                       copyAssignment=self._copyAssignments,
+                                                                                       useSliceColour=useSliceColour,
+                                                                                       topCollectionName=self.collectionName
+                                                                                       )
 
         self.accept()
-
 
     def _populateSourcePeakListPullDown(self):
         """Populate the pulldown with the list of spectra in the project
@@ -241,10 +241,24 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
             return
         pass
 
+    def _cleanupDialog(self):
+        """Clean up notifiers for closing
+        """
+        if self.spectrumGroupCW:
+            self.spectrumGroupCW.unRegister()
+        if self.sourcePeakListCW:
+            self.sourcePeakListCW.unRegister()
+
+    def accept(self) -> None:
+        self._cleanupDialog()
+        return super().accept()
+
+    def reject(self) -> None:
+        self._cleanupDialog()
+        return super().reject()
 
 
-
-if __name__ == '__main__':
+def main():
     from ccpn.ui.gui.widgets.Application import TestApplication
 
     app = TestApplication()
@@ -254,3 +268,6 @@ if __name__ == '__main__':
     popup.raise_()
     app.start()
 
+
+if __name__ == '__main__':
+    main()

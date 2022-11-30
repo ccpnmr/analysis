@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-31 18:50:33 +0000 (Mon, October 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:03 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,12 +31,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import json
 import os
 import sys
-import re
 import subprocess
 import platform
 
 import faulthandler
-
 
 try:
     # set the soft limits for the maximum number of open files
@@ -58,7 +56,7 @@ try:
         resource.setrlimit(resource.RLIMIT_NOFILE, (2048, hard))
 
 except Exception:
-    sys.stderr.write(f'Error setting maximum number of files that can be open')
+    sys.stderr.write('Error setting maximum number of files that can be open')
 
 faulthandler.enable()
 
@@ -100,15 +98,17 @@ from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
 from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS, loadTipsSetup
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
+from ccpn.ui.gui import Layout
 
 from ccpn.util import Logging
 from ccpn.util.Path import Path, aPath, fetchDir
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui import Layout
 from ccpn.util.decorators import logCommand
 
+
+logger = getLogger()
 
 #-----------------------------------------------------------------------------------------
 # how frequently to check if license dialog has closed when waiting to show the tip of the day
@@ -174,7 +174,10 @@ class Framework(NotifierBase, GuiBase):
         self.useFileLogger = not self.args.nologging
 
         # map to 0-3, with 0 no debug
-        _level = ([self.args.debug, self.args.debug2, self.args.debug3, True].index(True) + 1) % 4
+        _level = ([self.args.debug,
+                   self.args.debug2,
+                   self.args.debug3 or self.args.debug3_backup_thread,
+                   True].index(True) + 1) % 4
         self.setDebug(_level)
 
         self.preferences = Preferences(application=self)
@@ -411,11 +414,11 @@ class Framework(NotifierBase, GuiBase):
             return
 
         self._experimentClassifications = project.getExperimentClassifications()
-        self._updateAutoBackup()
+        # self._updateAutoBackup()
 
         sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
         self.ui.startUi()
-        self._cleanup()
+        # self._cleanup()
 
     def _cleanup(self):
         """Cleanup at the end of program execution; i.e. once the command loop
@@ -429,26 +432,31 @@ class Framework(NotifierBase, GuiBase):
 
     def _updateAutoBackup(self):
         # CCPNINTERNAL: also called from preferences popup
+        raise NotImplementedError('AutoBackup is not available in the current release')
+
         if self.preferences.general.autoBackupEnabled:
             self._setAutoBackupTime(self.preferences.general.autoBackupFrequency)
         else:
             self._setAutoBackupTime(None)
 
     def _setAutoBackupTime(self, time):
+        raise NotImplementedError('AutoBackup is not available in the current release')
+
         if self._backupTimerQ is None:
             from queue import Queue
 
             self._backupTimerQ = Queue(maxsize=1)
+
         if self._backupTimerQ.full():
-            self._backupTimerQ.get()
-        if isinstance(time, (float, int)):
-            self._backupTimerQ.put(time * 60)
-        else:
-            self._backupTimerQ.put(time)
+            while not self._backupTimerQ.empty():
+                self._backupTimerQ.get()
+
         if self._autoBackupThread is None:
-            self._autoBackupThread = AutoBackup(q=self._backupTimerQ,
+            self._autoBackupThread = AutoBackup(backupFrequencyQueue=self._backupTimerQ,
                                                 backupFunction=self._backupProject)
             self._autoBackupThread.start()
+
+        self._backupTimerQ.put(time)
 
     def _backupProject(self):
         try:
@@ -492,7 +500,7 @@ class Framework(NotifierBase, GuiBase):
         newProject._initialiseProject()
 
         if newProject._isUpgradedFromV2:
-            getLogger().debug(f'initialising v2 noise and contour levels')
+            getLogger().debug('initialising v2 noise and contour levels')
             for spectrum in newProject.spectra:
                 # calculate the new noise level
                 spectrum.noiseLevel = spectrum.estimateNoise()
@@ -569,6 +577,13 @@ class Framework(NotifierBase, GuiBase):
             self.preferences.general.language = language
         # translator.setDebug(True)
         sys.stderr.write('==> Language set to "%s"\n' % translator._language)
+
+
+    def cleanGarbageCollector(self):
+        """ Force the garbageCollector to clean. See more at
+        https://docs.python.org/3/library/gc.html"""
+        import gc
+        gc.collect()
 
     #-----------------------------------------------------------------------------------------
 
@@ -948,6 +963,8 @@ class Framework(NotifierBase, GuiBase):
             self._project = None
             del (_project)
 
+        self.cleanGarbageCollector()
+
     #-----------------------------------------------------------------------------------------
     # Data loaders
     #-----------------------------------------------------------------------------------------
@@ -1118,9 +1135,12 @@ class Framework(NotifierBase, GuiBase):
         """Load html file path into a HtmlModule
         CCPNINTERNAL: called from HtmlDataLoader
         """
-        mainWindow = self.mainWindow
-        path = aPath(path)
-        mainWindow.newHtmlModule(urlPath=str(path), position='top', relativeTo=mainWindow.moduleArea)
+        # mainWindow = self.mainWindow
+        # path = aPath(path)
+        # mainWindow.newHtmlModule(urlPath=str(path), position='top', relativeTo=mainWindow.moduleArea)
+
+        # non-native webview is currently disabled
+        self._showHtmlFile('', str(path))
         return []
 
     def _cloneSpectraToProjectDir(self):
@@ -1175,14 +1195,26 @@ class Framework(NotifierBase, GuiBase):
         :return Project instance (either newly created or the existing)
         CCPNINTERNAL: called from NefDataLoader.load()
         """
-        if dataLoader.createNewProject:
+        from ccpn.core.Project import DEFAULT_CHEMICALSHIFTLIST
+
+        if _newProject := dataLoader.createNewProject:
             project = self._newProject(dataLoader.nefImporter.getName())
         else:
             project = self.project
 
         # TODO: find a different solution for this
         with rebuildSidebar(application=self):
+            if _newProject and (ch := project.getChemicalShiftList(DEFAULT_CHEMICALSHIFTLIST)):
+                # remove the existing chemical-shift-list, should not be done lightly
+                ch._delete()
+
+            # import the nef-file
             dataLoader._importIntoProject(project=project)
+
+            if not project.chemicalShiftLists:
+                # create a new default of none added by the import
+                project.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
+
         return project
 
     def _exportNEF(self):
@@ -1445,6 +1477,16 @@ class Framework(NotifierBase, GuiBase):
             popup.exec_()
             return popup
 
+    def showPseudoSpectrumPopup(self):
+        if not self.project.spectra:
+            getLogger().warning('Project has no Spectra. Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
+            MessageDialog.showWarning('Project contains no spectra.', 'Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
+        else:
+            from ccpn.ui.gui.popups.PseudoToSpectrumGroupPopup import PseudoToSpectrumGroupPopup
+
+            popup = PseudoToSpectrumGroupPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup.exec_()
+
     def showProjectionPopup(self):
         if not self.project.spectra:
             getLogger().warning('Project has no Spectra. Make Projection Popup cannot be displayed')
@@ -1520,7 +1562,7 @@ class Framework(NotifierBase, GuiBase):
         if not self.project.peakLists:
             txt = 'Project has no PeakList\'s. Peak Lists cannot be copied'
             getLogger().warning(txt)
-            MessageDialog.showWarning(txt)
+            MessageDialog.showWarning('Cannot perform a copy',txt)
             return
         else:
             from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
@@ -1875,7 +1917,7 @@ class Framework(NotifierBase, GuiBase):
                                    position: str = 'bottom',
                                    relativeTo: CcpnModule = None,
                                    peakList=None, selectFirstItem=False):
-        """Displays restraint analysis table.
+        """Displays restraint analysis Inspector.
         """
         from ccpn.ui.gui.modules.RestraintAnalysisTable import RestraintAnalysisTableModule
 
@@ -1939,21 +1981,26 @@ class Framework(NotifierBase, GuiBase):
         else:
             getLogger().warning('No strip selected')
 
-    def showFlipArbitraryAxisPopup(self):
-        if self.current.strip is not None:
+    def showFlipArbitraryAxisPopup(self, usePosition=False):
+        if (strp := self.current.strip) is None:
+            getLogger().warning('No strip selected')
 
-            if self.current.strip.spectrumDisplay.is1D:
-                getLogger().warning('Function not permitted on 1D spectra')
-            else:
-
-                from ccpn.ui.gui.popups.CopyStripFlippedAxesPopup import CopyStripFlippedSpectraPopup
-
-                popup = CopyStripFlippedSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
-                                                     strip=self.current.strip, label=self.current.strip.id)
-                popup.exec_()
+        elif self.current.strip.spectrumDisplay.is1D:
+            getLogger().warning('Function not permitted on 1D spectra')
 
         else:
-            getLogger().warning('No strip selected')
+            from ccpn.ui.gui.popups.CopyStripFlippedAxesPopup import CopyStripFlippedSpectraPopup
+
+            try:
+                mDict = usePosition and self.current.mouseMovedDict[1]
+                positions = [poss[0] if (poss := mDict.get(ax)) else None
+                             for ax in strp.axisCodes] if usePosition else None
+                popup = CopyStripFlippedSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+                                                     strip=strp, label=strp.id,
+                                                     positions=positions)
+                popup.exec_()
+            except Exception as es:
+                getLogger().warning(f'Cannot show popup: {es}')
 
     def showReorderPeakListAxesPopup(self):
         """

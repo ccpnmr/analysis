@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:14 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:09 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -86,10 +86,7 @@ class UpdateScheduler:
 
     @property
     def isActive(self):
-        if self._timer:
-            return self._timer.isActive()
-
-        return False
+        return self._timer.isActive() if self._timer else False
 
     @property
     def isBusy(self):
@@ -425,7 +422,7 @@ class Worker(QtCore.QRunnable):
     def __init__(self, fn, *args, **kwargs):
         super(Worker, self).__init__()
 
-        print(f'  MAKE NEW WORKER')
+        print('  MAKE NEW WORKER')
         # Store constructor arguments (re-used for processing)
         self.fn = fn
         self.args = args
@@ -444,7 +441,7 @@ class Worker(QtCore.QRunnable):
         # Retrieve args/kwargs here; and fire processing using them
         try:
             result = self.fn(*self.args, **self.kwargs)
-        except:
+        except Exception:
             traceback.print_exc()
             exctype, value = sys.exc_info()[:2]
             self.signals.error.emit((exctype, value, traceback.format_exc()))
@@ -502,7 +499,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @staticmethod
     def execute_this_fn(progress_callback):
-        for n in range(0, 5):
+        for n in range(5):
             time.sleep(1)
             progress_callback.emit(int(n * 100 / 4))
 
@@ -537,7 +534,7 @@ def main():
     app.exec_()
 
     QtCore.QThreadPool.globalInstance().waitForDone()
-    print(f'KILLED :|')
+    print('KILLED :|')
 
 
 if __name__ == '__main__':

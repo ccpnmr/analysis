@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:13 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:08 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -82,7 +82,7 @@ class MagnetisationTransferTable(TableABC):
         self._columnDefs = ColumnClass(_cols)
 
         for ii, (colType, options) in enumerate(colDefs):
-            # define the edit widget for the 'merit' column
+            # define the edit widget for each column
             col = self._columnDefs.columns[ii]
             col.editClass = _SmallPulldown
             col.editKw = {'texts': options}
@@ -106,8 +106,7 @@ class MagnetisationTransferTable(TableABC):
     def getMagnetisationTransfers(self):
         """Get the magnetisation-transfers from the table.
         """
-        magTransfers = tuple(MagnetisationTransferTuple(*row) for row in self._df.itertuples(index=False))
-        return magTransfers
+        return tuple(MagnetisationTransferTuple(*row) for row in self._df.itertuples(index=False))
 
     def populateTable(self, magnetisationTransfers=None, editable=True):
         """Populate the table from the current spectrum.
@@ -158,7 +157,7 @@ class MagnetisationTransferTable(TableABC):
     def setTableMenu(self):
         """Set up the context menu for the main table.
         """
-        menu = Menu('', self, isFloatWidget=True)
+        self._thisTableMenu = menu = Menu('', self, isFloatWidget=True)
         setWidgetFont(menu, )
 
         # no options from the super-class are required
@@ -167,7 +166,9 @@ class MagnetisationTransferTable(TableABC):
                          ]
 
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(partial(self._raiseTableContextMenu, menu))
+        self.customContextMenuRequested.connect(self._raiseTableContextMenu)
+
+        return menu
 
     def _newTransfer(self):
         """Add new magnetisation-transfer to the table.
@@ -182,10 +183,7 @@ class MagnetisationTransferTable(TableABC):
         """Remove the selected magnetisation-transfer from the table.
         """
         model = self.selectionModel()
-        # selects all the items in the row - may need to check selectionMode
-        selection = model and model.selectedRows()
-
-        if selection:
+        if selection := (model and model.selectedRows()):
             _sortIndex = self.model()._sortIndex
             for idx in selection:
                 row = _sortIndex[idx.row()]
@@ -274,13 +272,11 @@ class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
             widget.closeOnLineEditClick = False
 
             self.customWidget = widget
-
             return widget
 
-        else:
-            self.customWidget = None
+        self.customWidget = None
 
-            return super().createEditor(parentWidget, itemStyle, index)
+        return super().createEditor(parentWidget, itemStyle, index)
 
     def setEditorData(self, widget, index) -> None:
         """Populate the editor widget when the cell is edited.
@@ -299,7 +295,7 @@ class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
             if hasattr(widget, 'selectValue'):
                 widget.selectValue(*value)
             else:
-                raise Exception(f'Widget {widget} does not expose a set method; required for table editing')
+                raise RuntimeError(f'Widget {widget} does not expose a set method; required for table editing')
 
         else:
             super().setEditorData(widget, index)
@@ -314,9 +310,8 @@ class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
         if self.customWidget:
             if hasattr(widget, 'get'):
                 value = widget.get()
-
             else:
-                raise Exception(f'Widget {widget} does not expose a get method; required for table editing')
+                raise RuntimeError(f'Widget {widget} does not expose a get method; required for table editing')
 
             try:
                 model = index.model()

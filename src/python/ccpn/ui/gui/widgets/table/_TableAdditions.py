@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:14 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:08 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -273,14 +273,14 @@ class _TableHeaderColumns(_TableHeaderABC):
         """
         try:
             return list(self._df.columns)
-        except:
+        except Exception:
             return []
 
     def showColumns(self, df):
         # show the columns in the list
         hiddenColumns = self.getHiddenColumns()
 
-        for i, colName in enumerate(self.columnTexts):
+        for colName in self.columnTexts:
             # always hide the internal columns
             if colName in (hiddenColumns + self._internalColumns):
                 self._hideColumn(colName)
@@ -450,7 +450,7 @@ class _TableExport(_TableMenuABC):
         else:
             try:
                 self._findExportFormats(str(path) + filterType, sheet_name)
-            except:
+            except Exception:
                 MessageDialog.showWarning('Could not export', 'Format file not supported or not provided.'
                                                               '\nUse one of %s' % ', '.join(formatTypes))
                 getLogger().warning('Format file not supported')
@@ -460,9 +460,7 @@ class _TableExport(_TableMenuABC):
         self.saveDialog = TablesFileDialog(parent=None, acceptMode='save', selectFile='ccpnTable.xlsx',
                                            fileFilter=".xlsx;; .csv;; .tsv;; .json ")
         self.saveDialog._show()
-        path = self.saveDialog.selectedFile()
-        if path:
-            sheet_name = 'Table'
+        if path := self.saveDialog.selectedFile():
             if dataFrame is not None and not dataFrame.empty:
 
                 if colList:
@@ -472,6 +470,7 @@ class _TableExport(_TableMenuABC):
 
                 ft = self.saveDialog.selectedNameFilter()
 
+                sheet_name = 'Table'
                 self._findExportFormats(path, dataFrame, sheet_name=sheet_name, filterType=ft, columns=colList)
 
 
@@ -665,7 +664,7 @@ class _TableSearch(_TableMenuABC):
 
             model.beginResetModel()
             if model._filterIndex is not None:
-                model._filterIndex = sorted(set(model._filterIndex) & set(model._sortIndex.index(ii) for ii in rows))
+                model._filterIndex = sorted(set(model._filterIndex) & {model._sortIndex.index(ii) for ii in rows})
             else:
                 model._filterIndex = sorted(model._sortIndex.index(ii) for ii in rows)
 

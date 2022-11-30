@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:12 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:06 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -91,12 +91,21 @@ FONTPREFS = 'font{}'
 def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays, userWorkingPath=None):
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
+    pref = self.application.preferences
+
+    # remember the previous autoBackup settings
+    # lastBackup = (pref.general.autoBackupEnabled, pref.general.autoBackupFrequency)
+
     # update the preferences, but keep in place
-    self.application.preferences.clear()
-    self.application.preferences.update(newPrefs)
+    pref.clear()
+    pref.update(newPrefs)
 
     # application preferences updated so re-save
     self.application._savePreferences()
+
+    # if (pref.general.autoBackupEnabled, pref.general.autoBackupFrequency) != lastBackup:
+    #     # update the autoBackup with the new settings
+    #     self.application._updateAutoBackup()
 
     # update the current userWorkingPath in the active file dialogs
     if userWorkingPath:
@@ -462,9 +471,12 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.autoBackupFrequencyLabel = _makeLabel(parent, text="Backup frequency (mins)", grid=(row, 0))
-        self.autoBackupFrequencyData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', min=10, decimals=0, step=10)
+        self.autoBackupFrequencyData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', min=1, decimals=0, step=10)
         self.autoBackupFrequencyData.setMinimumWidth(LineEditsMinimumWidth)
         self.autoBackupFrequencyData.valueChanged.connect(self._queueSetAutoBackupFrequency)
+        self.autoBackupEnabledBox.setChecked(False)
+        self.autoBackupEnabledBox.setEnabled(False)
+        self.autoBackupFrequencyData.setEnabled(False)
 
         #====== Paths ======
         row += 1
@@ -752,7 +764,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """
         prefGen = self.preferences.general
         prefApp = self.preferences.appearance
-        
+
         self.useNativeFileBox.setChecked(prefGen.useNative)
         self.useNativeMenus.setChecked(prefGen.useNativeMenus)
         self.useNativeWebBox.setChecked(prefGen.useNativeWebbrowser)
@@ -801,10 +813,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
                 name, size, _, _, _, _, _, _, _, _, type = fontList
             else:
                 name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
-        except:
+        except Exception:
             name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
 
-        fontName = '{}, {}pt, {}'.format(name, size, type) if type else '{}, {}pt'.format(name, size, )
+        fontName = f'{name}, {size}pt, {type}' if type else f'{name}, {size}pt'
         widget._fontString = fontString
         widget.setText(fontName)
 
@@ -814,8 +826,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.languageBox.setCurrentIndex(self.languageBox.findText(self.preferences.general.language))
         self.autoSaveLayoutOnQuitBox.setChecked(self.preferences.general.autoSaveLayoutOnQuit)
         self.restoreLayoutOnOpeningBox.setChecked(self.preferences.general.restoreLayoutOnOpening)
-        self.autoBackupEnabledBox.setChecked(self.preferences.general.autoBackupEnabled)
-        self.autoBackupFrequencyData.setValue(self.preferences.general.autoBackupFrequency)
+        # self.autoBackupEnabledBox.setChecked(self.preferences.general.autoBackupEnabled)
+        # self.autoBackupFrequencyData.setValue(self.preferences.general.autoBackupFrequency)
 
         self.userWorkingPathData.setText(self.preferences.general.userWorkingPath)
         self.useProjectPathBox.setChecked(self.preferences.general.useProjectPath)
@@ -838,7 +850,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         # set the enabled state of some settings boxes
         self._enableProxyButtons()
-        self._enableAutoBackupFrequency()
+        # self._enableAutoBackupFrequency()
         self._enableUserWorkingPath()
 
     def _populateSpectrumTab(self):
@@ -1531,7 +1543,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             return True
 
         except Exception as e:
-            getLogger().warning('Testing External program: Failed.' + str(e))
+            getLogger().warning(f'Testing External program: Failed.{str(e)}')
             return False
 
     @queueStateChange(_verifyPopupApply)
@@ -1555,7 +1567,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.userDataPathText.setText(directory[0])
 
     def _enableUserDataPath(self):
-        "callback upon changing autoSetDataPathBox"
+        """callback upon changing autoSetDataPathBox"""
         value = self.autoSetDataPathBox.get()
         self.userDataPathText.enableWidget(not value)
 
@@ -1742,8 +1754,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         elif option == 'autoSetDataPath':
             self._enableUserDataPath()
 
-        elif option == 'autoBackupEnabled':
-            self._enableAutoBackupFrequency()
+        # elif option == 'autoBackupEnabled':
+        #     self._enableAutoBackupFrequency()
 
         elif option == 'aliasEnabled':
             _enabled = self.aliasEnabledData.get()
@@ -1756,9 +1768,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     def _toggleGeneralOptions(self, option, checked):
         self.preferences.general[option] = checked
-
-        if option == 'autoBackupEnabled':
-            self.application._updateAutoBackup()
 
     @queueStateChange(_verifyPopupApply)
     def _queueToggleAppearanceOptions(self, option, checked):
@@ -1819,15 +1828,15 @@ class PreferencesPopup(CcpnDialogMainWidget):
             dialog = ExecutablesFileDialog(parent=self, acceptMode='select', directory=str(value))
             dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
             dialog._show()
-            file = dialog.selectedFile()
-            if file:
+            if file := dialog.selectedFile():
                 extPath.setText(file)
 
-        except Exception as es:
+        except Exception:
             raise RuntimeError(f'{external} does not contain the correct widgets')
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetAutoBackupFrequency(self, _value):
+        raise NotImplementedError('AutoBackup is not available in the current release')
         textFromValue = self.autoBackupFrequencyData.textFromValue
         value = self.autoBackupFrequencyData.get()
         prefValue = textFromValue(self.preferences.general.autoBackupFrequency)
@@ -1835,10 +1844,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
             return partial(self._setAutoBackupFrequency, value)
 
     def _setAutoBackupFrequency(self, value):
+        raise NotImplementedError('AutoBackup is not available in the current release')
         self.preferences.general.autoBackupFrequency = value
-        self.application._updateAutoBackup()
 
     def _enableAutoBackupFrequency(self):
+        raise NotImplementedError('AutoBackup is not available in the current release')
         value = self.autoBackupEnabledBox.get()
         self.autoBackupFrequencyData.enableWidget(value)
 

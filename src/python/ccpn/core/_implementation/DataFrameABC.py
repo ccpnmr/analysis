@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:25 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:02 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -34,10 +34,10 @@ import typing
 import numpy
 import pandas as pd
 import re
+from functools import partial
 from ccpn.util import Sorting
 from ccpn.util.ListFromString import listFromString
-from functools import partial
-from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlockWithoutSideBar, notificationBlanking
+from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlockWithoutSideBar
 
 
 # Pid.IDSEP - but we do not want to import from ccpn.core here
@@ -167,6 +167,107 @@ class DataFrameABC(pd.DataFrame):
 
     # Key is column name, value is (type, customSetterName) tuple
     _reservedColumns = collections.OrderedDict()
+
+    #=========================================================================================
+    # Subclass registration
+    #=========================================================================================
+
+    # A dict that contains the (className, class) mappings for restoring dataFrameABCs
+    _registeredClasses = collections.OrderedDict()
+    _registeredDefaultClassName = None
+    _JSON_PREFIX = 'ccpn.'
+
+    class _classproperty():
+        """Class to define getter for a class-property, similar to a class method.
+        """
+        def __init__(self, func):
+            self._func = func
+
+        def __get__(self, obj, objtype=None):
+            return self._func(objtype)
+
+
+    @staticmethod
+    def isRegistered(className) -> bool:
+        """Return True if className is registered.
+        """
+        if not isinstance(className, str):
+            raise TypeError(f'{className} must be of type str')
+        return className in DataFrameABC._registeredClasses
+
+    @staticmethod
+    def isRegisteredInstance(instance) -> bool:
+        """Return True if type of instance is a registered class.
+        """
+        if isinstance(instance, type):
+            raise TypeError(f'{instance} must be an instance of a class')
+        return instance.__class__.__name__ in DataFrameABC._registeredClasses
+
+    @classmethod
+    def register(cls, setDefault=False):
+        """Register the class.
+        """
+        className = cls.__name__
+        if cls.isRegistered(className):
+            raise RuntimeError(f'className {className!r} already registered')
+        cls._registeredClasses[className] = cls
+        if setDefault:
+            if name := DataFrameABC._registeredDefaultClassName:
+                raise RuntimeError(f'Default class {DataFrameABC._registeredClasses[name]} already set')
+
+            # define a default in-case of any unforeseen problems
+            DataFrameABC._registeredDefaultClassName = className
+
+    @_classproperty
+    def registeredDefaultClassName(self):
+        """Return the default registered className.
+        """
+        return DataFrameABC._registeredDefaultClassName
+
+    @classmethod
+    def registeredJsonTypes(cls) -> tuple:
+        """Return the json-types of the registered classes.
+        Json-types are strings of the form ccpn.<name>; name is the class-name of a registered class.
+        :return: tuple of str.
+        """
+        return tuple(f'{DataFrameABC._JSON_PREFIX}{typ}' for typ in DataFrameABC._registeredClasses)
+
+    @staticmethod
+    def _classNameToJsonType(className) -> str:
+        """Return json-type from given className.
+        A json-type is a string of the form ccpn.<className>.
+        """
+        return f'{DataFrameABC._JSON_PREFIX}{className}'
+
+    @_classproperty
+    def registeredDefaultJsonType(self):
+        """Return the json-type of the default registered class.
+        A json-type is a string of the form ccpn.<name>; name is the class-name of a registered class.
+        """
+        if DataFrameABC.registeredDefaultClassName:
+            return DataFrameABC._classNameToJsonType(DataFrameABC.registeredDefaultClassName)
+
+    @classmethod
+    def jsonType(cls, instance) -> typing.Optional[str]:
+        """Return the json-type of the given instance if is a registered class, otherwise None.
+        A json-type is a string of the form ccpn.<name>; name is the class-name of a registered class.
+        :return: str or None.
+        """
+        name = instance.__class__.__name__
+        if name in DataFrameABC._registeredClasses:
+            return DataFrameABC._classNameToJsonType(name)
+
+    @staticmethod
+    def fromJsonType(jsonType) -> typing.Optional[callable]:
+        """Return the registered class from the json-type, or None if not defined.
+        Json-types are strings of the form ccpn.<name>; name is the class-name of a registered class.
+        :return: registered class-type.
+        """
+        return next((klass for typ, klass in DataFrameABC._registeredClasses.items() if DataFrameABC._classNameToJsonType(typ) == jsonType), None)
+
+    #=========================================================================================
+    # Properties
+    #=========================================================================================
 
     @property
     def _containingObject(self) -> typing.Optional['DataTable']:
@@ -660,7 +761,7 @@ class DataFrameABC(pd.DataFrame):
 
                     self._finaliseParent('change')
 
-    def getByHeader(self, headerName:str, matchingValues:list):
+    def getByHeader(self, headerName: str, matchingValues: list):
         """
         Get a subset of this TableFrame if the given matchingValues are present in the given HeaderName column.
         :param headerName: str

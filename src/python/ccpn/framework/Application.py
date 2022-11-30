@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:03 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -97,6 +97,7 @@ class Arguments:
     debug = False
     debug2 = False
     debug3 = False
+    debug3_backup_thread = False
     skipUserPreferences = True
     projectPath = None
     _skipUpdates = False
@@ -105,7 +106,7 @@ class Arguments:
 
         # Dummy values; GWV: no idea as to what purpose
         for component in applicationNames:
-            setattr(self, 'include' + component, None)
+            setattr(self, f'include{component}', None)
 
         self.projectPath = projectPath
         for tag, val in kwds.items():
@@ -122,13 +123,8 @@ def defineProgramArguments():
     # for component in componentNames:
     #   parser.add_argument('--'+component.lower(), dest='include'+component, action='store_true',
     #                                               help='Show %s component' % component.lower())
-    parser.add_argument('--language',
-                        help=('Language for menus, etc.; valid options = (%s); default=%s' %
-                              ('|'.join(languages), defaultLanguage)))
-    parser.add_argument('--interface',
-                        help=('User interface, to use; one of  = (%s); default=%s' %
-                              ('|'.join(interfaces), defaultInterface)),
-                        default=defaultInterface)
+    parser.add_argument('--language', help=f"Language for menus, etc.; valid options = ({'|'.join(languages)}); default={defaultLanguage}")
+    parser.add_argument('--interface', help=f"User interface, to use; one of  = ({'|'.join(interfaces)}); default={defaultInterface}", default=defaultInterface)
     parser.add_argument('--skip-user-preferences', dest='skipUserPreferences', action='store_true',
                         help='Skip loading user preferences')
     parser.add_argument('--dark', dest='darkColourScheme', action='store_true',
@@ -140,6 +136,7 @@ def defineProgramArguments():
     parser.add_argument('--debug1', dest='debug', action='store_true', help='Set logging level to debug1 (=debug)')
     parser.add_argument('--debug2', dest='debug2', action='store_true', help='Set logging level to debug2')
     parser.add_argument('--debug3', dest='debug3', action='store_true', help='Set logging level to debug3')
+    parser.add_argument('--debug3-backup-thread', dest='debug3_backup_thread', action='store_true', help='Display logging for the backup thread when debug3 is enabled')
 
     # Ccpn logging options - traceback can sometimes be masked in undo/redo
     # --disable-<option>-exception removes the try:except to allow full traceback to occur

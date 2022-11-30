@@ -1,18 +1,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-26 12:13:45 +0100 (Fri, June 26, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:06 +0000 (Wed, November 30, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,11 +35,10 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 def _getAtomCodes(spectrum):
     """CCPN internal. Used in Spectrum Popup. Gets all the experiment type names to set the pulldown widgets
     """
-    axisCodes = []
-    for isotopeCode in spectrum.isotopeCodes:
-        axisCodes.append(''.join([char for char in isotopeCode if not char.isdigit()] if isotopeCode else '*'))
-    atomCodes = tuple(sorted(axisCodes))
-    return atomCodes
+    axisCodes = [''.join([char for char in isotopeCode if not char.isdigit()] if isotopeCode else '*')
+                 for isotopeCode in spectrum.isotopeCodes]
+
+    return tuple(sorted(axisCodes))
 
 
 def _getExperimentTypes(project, spectrum):
@@ -49,14 +49,14 @@ def _getExperimentTypes(project, spectrum):
 
 
 class ExperimentTypePopup(CcpnDialogMainWidget):
-
+    """Popup to handle the experiment-types for all spectra
+    """
     USESCROLLWIDGET = True
     FIXEDWIDTH = True
 
     def __init__(self, parent=None, mainWindow=None, title: str = 'Experiment Type Selection', **kwds):
-
-        from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
-
+        """Initialise the popup
+        """
         super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow
@@ -68,31 +68,44 @@ class ExperimentTypePopup(CcpnDialogMainWidget):
         self._parent = parent
         spectra = self.project.spectra
         self.experimentTypes = self.project._experimentTypeMap
-        self.spPulldowns = []
 
+        self._setWidgets(spectra)
+
+        self.setCloseButton(callback=self.accept)
+        self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
+        self.__postInit__()
+
+        self.setMinimumHeight(300)
+        self.setFixedWidth(self.sizeHint().width() + 24)
+
+    def _setWidgets(self, spectra):
+        """Set up the widgets
+        """
+        from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
+
+        self.spPulldowns = []
         for spectrumIndex, spectrum in enumerate(spectra):
             atomCodes = _getAtomCodes(spectrum)
             itemFilter = _getExperimentTypes(spectrum.project, spectrum)
 
             # add the widgets
-            spLabel = Label(self.mainWidget, text=spectrum.pid, grid=(spectrumIndex, 0))
+            _spLabel = Label(self.mainWidget, text=spectrum.pid, grid=(spectrumIndex, 0))
             spPulldown = FilteringPulldownList(self.mainWidget, grid=(spectrumIndex, 1),
-                                                    callback=partial(self._setExperimentType, spectrum, atomCodes),)
+                                               callback=partial(self._setExperimentType, spectrum, atomCodes), )
 
             if itemFilter:
                 # populate pullDown with filtered experimentTypes
-                pulldownItems = list(itemFilter.keys())
-                spPulldown.setData(texts=pulldownItems)
-
+                pulldownItems = [''] + list(itemFilter.keys())
             else:
                 # populate pullDown with all experimentTypes
-                pulldownItems = list(vv for vals in self.experimentTypes[spectrum.dimensionCount].values() for vv in vals.keys())
-                spPulldown.setData(texts=pulldownItems)
+                pulldownItems = [''] + [vv for vals in self.experimentTypes[spectrum.dimensionCount].values() for vv in vals.keys()]
+
+            spPulldown.setData(texts=pulldownItems)
 
             spPulldown.lineEdit().editingFinished.connect(partial(self.editedExpTypeChecker, spPulldown, pulldownItems))
             self.spPulldowns.append(spPulldown)
 
-            spButton = Button(self.mainWidget, grid=(spectrumIndex, 2),
+            _spButton = Button(self.mainWidget, grid=(spectrumIndex, 2),
                               callback=partial(self.raiseExperimentFilterPopup,
                                                spectrum, spectrumIndex, atomCodes),
                               hPolicy='fixed', icon='icons/applications-system')
@@ -106,23 +119,13 @@ class ExperimentTypePopup(CcpnDialogMainWidget):
             # to compare RefExperiment names and synonyms
             # or (too ugly for words) to have a third attribute in parallel with
             # spectrum.experimentName and spectrum.experimentType
+            if (text := spectrum.experimentType):
+                # reference-experiment is set
+                key = spectrum.synonym or text
+                key = priorityNameRemapping.get(key, key)
 
-            text = spectrum.experimentName
-            if text not in pulldownItems:
-                text = spectrum.experimentType
-            # apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
-            # text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
-            text = priorityNameRemapping.get(text, text)
-            spPulldown.setCurrentIndex(spPulldown.findText(text))
-
-        self.setCloseButton(callback=self.accept)
-        self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
-        self.__postInit__()
-
-        # self.setWindowTitle(title)
-        # self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.MinimumExpanding)
-        self.setMinimumHeight(200)
-        self.setFixedWidth(self.sizeHint().width()+24)
+                if (idx := spPulldown.findText(key)) > 0:
+                    spPulldown.setCurrentIndex(idx)
 
     def _setExperimentType(self, spectrum, atomCodes, item):
         expType = self.experimentTypes[spectrum.dimensionCount].get(atomCodes).get(item)
@@ -140,12 +143,11 @@ class ExperimentTypePopup(CcpnDialogMainWidget):
                 spectrum.experimentType = expType
 
     def editedExpTypeChecker(self, pulldown, items):
-        if not pulldown.currentText() in items:
-            if pulldown.currentText():
-                msg = ' (ExpTypeNotFound!)'
-                if not msg in pulldown.currentText():
-                    pulldown.lineEdit().setText(pulldown.currentText() + msg)
-                    pulldown.lineEdit().selectAll()
+        if pulldown.currentText() not in items and pulldown.currentText():
+            msg = ' (ExpTypeNotFound!)'
+            if msg not in pulldown.currentText():
+                pulldown.lineEdit().setText(pulldown.currentText() + msg)
+                pulldown.lineEdit().selectAll()
 
     def keyPressEvent(self, KeyEvent):
         if KeyEvent.key() == QtCore.Qt.Key_Return:

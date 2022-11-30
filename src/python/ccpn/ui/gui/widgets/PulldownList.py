@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-31 18:50:34 +0000 (Mon, October 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:08 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -60,8 +60,8 @@ class PulldownList(QtWidgets.QComboBox, Base):
         :param callback:
         :param index:
         :param backgroundText: a transparent text that will disappear as soon as you click to type.
-                                the place holder or the transparent "backgroundText" will work only if the pulldown is editable.
-                                Otherwise use HeaderText and enabled = False if you need only a title inside the pulldown
+                                the place-holder or the transparent "backgroundText" will work only if the pulldown is editable.
+                                Otherwise, use HeaderText and enabled = False if you need only a title inside the pulldown
         :param headerText: text of first item of the pullDown. E.g. '-- Select Item --'
         :param headerEnabled: True to be selectable, False to disable and be grayed out
         :param editable: If True: allows for editing the value
@@ -92,10 +92,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         self._list.setMinimumSize(self.sizeHint())
 
         self.setEditable(editable)
-        if iconSize:
-            self._iconSize = iconSize
-        else:
-            self._iconSize = getFontHeight() or 16
+        self._iconSize = iconSize or getFontHeight() or 16
         self.setIconSize(QtCore.QSize(self._iconSize, self._iconSize))
 
         self.setData(texts, objects, index, icons,
@@ -172,6 +169,25 @@ class PulldownList(QtWidgets.QComboBox, Base):
 
         if index is not None:
             self.setCurrentIndex(index)
+
+    def paintEvent(self, e: QtGui.QPaintEvent) -> None:
+        """Set the colour of the selected pulldown-text
+        """
+        try:
+            if (model := self.model()):
+                palette = self.palette()
+                if (item := model.item(self.currentIndex())) is not None and item.text():
+                    # use the palette to change the colour of the selection text - may not match for other themes
+                    palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, item.foreground().color())
+                else:
+                    palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, QtGui.QColor('black'))
+
+                self.setPalette(palette)
+        except Exception:
+            pass
+
+        finally:
+            super(PulldownList, self).paintEvent(e)
 
     def set(self, item):
 
@@ -337,8 +353,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         """ Disable items from pulldown (not selectable, not clickable). And if given, changes the colour """
         for text in texts:
             if text is not None and self.getItemIndex(text) is not None:
-                item = self.model().item(self.getItemIndex(text))
-                if item:
+                if item := self.model().item(self.getItemIndex(text)):
                     item.setEnabled(False)
                     if colour is not None:
                         item.setForeground(QtGui.QColor(colour))
@@ -350,8 +365,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
     def setToolTips(self, toolTips):
         if len(self.texts) == len(toolTips):
             for text, toolTip in zip(self.texts, toolTips):
-                item = self.model().item(self.getItemIndex(text))
-                if item:
+                if item := self.model().item(self.getItemIndex(text)):
                     item.setToolTip(toolTip)
 
     def _callback(self, index):
@@ -395,7 +409,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
             self.addItem(icon=QtGui.QIcon(pix), text=item[1])
         try:
             self.select(selectColour)
-        except:
+        except Exception:
             self.select(random.choice(self.texts))
 
     def _getSaveState(self):

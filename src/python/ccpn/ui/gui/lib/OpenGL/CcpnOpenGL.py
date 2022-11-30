@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:27 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:04 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -183,16 +183,16 @@ class CcpnGLWidget(QOpenGLWidget):
         # GST add antiAliasing, no perceptible speed impact on my mac (intel iris graphics!)
         # samples = 4 is good enough but 8 also works well in terms of speed...
         try:
+            self.setUpdateBehavior(QtWidgets.QOpenGLWidget.PartialUpdate)
             fmt = QSurfaceFormat()
             fmt.setSamples(antiAlias)
             self.setFormat(fmt)
-            self.setUpdateBehavior(QtWidgets.QOpenGLWidget.PartialUpdate)
 
             samples = self.format().samples()  # GST a use for the walrus
             if samples != antiAlias:
                 getLogger().warning('hardware changed antialias level, expected %i got %i...' % (samples, antiAlias))
         except Exception as es:
-            getLogger().warning('error during anti aliasing setup %s, anti aliasing disabled...' % str(es))
+            getLogger().warning(f'error during anti aliasing setup {str(es)}, anti aliasing disabled...')
 
         # flag to display paintGL but keep an empty screen
         self._blankDisplay = False
@@ -217,7 +217,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._preferences = self.application.preferences.general
         self.globalGL = None
 
-        self.stripIDLabel = stripIDLabel if stripIDLabel else ''
+        self.stripIDLabel = stripIDLabel or ''
 
         self.setMouseTracking(True)  # generate mouse events when button not pressed
 
@@ -230,7 +230,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # set a minimum size so that the strips resize nicely
         self.setMinimumSize(self.AXIS_MARGINRIGHT + 10, self.AXIS_MARGINBOTTOM + 10)
 
-        # initialise the pyqtsignal notifier
+        # initialise the pyqt-signal notifier
         self.GLSignals = GLNotifier(parent=self, strip=strip)
 
         self.lastPixelRatio = None
@@ -292,11 +292,11 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisR = 1.0
         self.axisT = 1.0
         self.axisB = -1.0
-        self.storedZooms = []
-        self._currentZoom = 0
+
         self._zoomHistory = [None] * ZOOMHISTORYSTORE
         self._zoomHistoryCurrent = 0
         self._zoomHistoryHead = 0
+        self._zoomHistoryTail = 0
         self._zoomTimerLast = time.time()
 
         self.base = None
@@ -723,6 +723,9 @@ class CcpnGLWidget(QOpenGLWidget):
         # must be set here to catch the change of screen - possibly when unplugging a monitor
         self.refreshDevicePixelRatio()
         self.w, self.h = w, h
+
+        if not self.glReady:
+            return
 
         self._rescaleAllZoom()
 
@@ -1542,73 +1545,68 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._rescaleAllAxes()
 
-    def _storeZoomHistory(self):
+    def _storeZoomHistory(self, force=False):
         """Store the current axis state to the zoom history
         """
         currentAxis = (self.axisL, self.axisR, self.axisB, self.axisT)
+        zC = self._zoomHistoryCurrent % len(self._zoomHistory)
 
         # store the current value if current zoom has not been set
-        if self._zoomHistory[self._zoomHistoryHead] is None:
-            self._zoomHistory[self._zoomHistoryHead] = currentAxis
+        if self._zoomHistory[zC] is None:
+            self._zoomHistory[zC] = currentAxis
 
-        if self._widthsChangedEnough(currentAxis, self._zoomHistory[self._zoomHistoryHead], tol=1e-8):
+        if self._widthsChangedEnough(currentAxis, self._zoomHistory[zC], tol=1e-8) or force:
+            currentTime = time.time()
+            if currentTime - self._zoomTimerLast < ZOOMTIMERDELAY:
 
-            for stored in self.storedZooms:
-                if not self._widthsChangedEnough(currentAxis, self._zoomHistory[self._zoomHistoryHead], tol=1e-8):
-                    break
+                # still on the current zoom item - write new value
+                self._zoomHistory[zC] = currentAxis
+
             else:
-                currentTime = time.time()
-                if currentTime - self._zoomTimerLast < ZOOMTIMERDELAY:
+                # increment the head of the zoom history
+                self._zoomHistoryCurrent += 1
+                zC = self._zoomHistoryCurrent % len(self._zoomHistory)
+                self._zoomHistory[zC] = currentAxis
+                self._zoomHistoryHead = self._zoomHistoryCurrent
+                if (self._zoomHistoryHead - self._zoomHistoryTail) >= len(self._zoomHistory):
+                    self._zoomHistoryTail = self._zoomHistoryHead - len(self._zoomHistory) + 1
 
-                    # still on the current zoom item - write new value
-                    self._zoomHistory[self._zoomHistoryHead] = currentAxis
-
-                else:
-
-                    # increment the head of the zoom history
-                    self._zoomHistoryHead = (self._zoomHistoryHead + 1) % len(self._zoomHistory)
-                    self._zoomHistory[self._zoomHistoryHead] = currentAxis
-                    self._zoomHistoryCurrent = self._zoomHistoryHead
-
-                # reset the timer so you have to wait another 5 seconds
-                self._zoomTimerLast = currentTime
+            # reset the timer, so you have to wait another 5 seconds
+            self._zoomTimerLast = currentTime
 
     def previousZoom(self):
         """Move to the previous stored zoom
         """
-        previousZoomPtr = (self._zoomHistoryCurrent - 1) % len(self._zoomHistory)
+        if self._zoomHistoryCurrent > self._zoomHistoryTail:
+            self._zoomHistoryCurrent -= 1
 
-        if self._zoomHistoryHead != previousZoomPtr and self._zoomHistory[previousZoomPtr] is not None:
-            self._zoomHistoryCurrent = previousZoomPtr
-
-        restoredZooms = self._zoomHistory[self._zoomHistoryCurrent]
-        self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
-                                                         restoredZooms[3]
-
-        # use this because it rescales all the symbols
-        self._rescaleXAxis()
+            restoredZooms = self._zoomHistory[self._zoomHistoryCurrent % len(self._zoomHistory)]
+            if restoredZooms:
+                # only update if a zoom as been stored
+                self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
+                                                                 restoredZooms[3]
+                # use this because it rescales all the symbols
+                self._rescaleXAxis()
 
     def nextZoom(self):
         """Move to the next stored zoom
         """
-        if self._zoomHistoryHead != self._zoomHistoryCurrent:
-            self._zoomHistoryCurrent = (self._zoomHistoryCurrent + 1) % len(self._zoomHistory)
+        if self._zoomHistoryCurrent < self._zoomHistoryHead:
+            self._zoomHistoryCurrent += 1
 
-        restoredZooms = self._zoomHistory[self._zoomHistoryCurrent]
-        self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
-                                                         restoredZooms[3]
-
-        # use this because it rescales all the symbols
-        self._rescaleXAxis()
+            restoredZooms = self._zoomHistory[self._zoomHistoryCurrent % len(self._zoomHistory)]
+            if restoredZooms:
+                # only update if a zoom as been stored
+                self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
+                                                                 restoredZooms[3]
+                # use this because it rescales all the symbols
+                self._rescaleXAxis()
 
     def storeZoom(self):
         """Store the current axis values to the zoom stack
         Sets this to the top of the stack, removing everything after
         """
-        if self._currentZoom < ZOOMMAXSTORE:
-            self._currentZoom += 1
-        self.storedZooms = self.storedZooms[:self._currentZoom - 1]
-        self.storedZooms.append((self.axisL, self.axisR, self.axisB, self.axisT))
+        self._storeZoomHistory(force=True)
 
     @property
     def zoomState(self):
@@ -1618,23 +1616,16 @@ class CcpnGLWidget(QOpenGLWidget):
         """Restore zoom to the last stored zoom
         zoomState = (axisL, axisR, axisB, axisT)
         """
-        if zoomState and len(zoomState) == 4:
-            self.storedZooms.append(zoomState)
+        if self._zoomHistoryCurrent < self._zoomHistoryHead:
+            self._zoomHistoryCurrent = self._zoomHistoryHead
 
-        if self.storedZooms:
-            # get the top of the stack
-            self._currentZoom = len(self.storedZooms)
-            restoredZooms = self.storedZooms[self._currentZoom - 1]
-            self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
-                                                             restoredZooms[3]
-        else:
-            self._resetAxisRange()
-
-        self._zoomHistoryCurrent = self._zoomHistoryHead
-        self._storeZoomHistory()
-
-        # use this because it rescales all the symbols
-        self._rescaleXAxis()
+            restoredZooms = self._zoomHistory[self._zoomHistoryCurrent % len(self._zoomHistory)]
+            if restoredZooms:
+                # only update if a zoom as been stored
+                self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], \
+                                                                 restoredZooms[3]
+                # use this because it rescales all the symbols
+                self._rescaleXAxis()
 
     def resetZoom(self):
         self._resetAxisRange()
@@ -6193,7 +6184,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # This is the correct future style for cursorPosition handling
         self.current.cursorPosition = (xPosition, yPosition)
 
-        if getCurrentMouseMode() == PICK:
+        if getCurrentMouseMode() == PICK and leftMouse(event):
             if self._validRegionPick:
                 self._pickAtMousePosition(event)
 

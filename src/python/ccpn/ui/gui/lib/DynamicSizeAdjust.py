@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:09 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:04 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,10 +36,11 @@ _INITIAL_STEP = 1024
 _MAX_ITERATIONS = 50
 
 
-def dynamicSizeAdjust(widget, sizeFunction: callable = None, step: int = _INITIAL_STEP,
-                      adjustWidth: bool = True, adjustHeight: bool = False,
+def dynamicSizeAdjust(widget, sizeFunction: callable = None, completedFunction: callable = None,
+                      step: int = _INITIAL_STEP, adjustWidth: bool = True, adjustHeight: bool = False,
                       _steps: QtCore.QSize = None, _lastSteps: QtCore.QSize = None, _lastsizes: QtCore.QSize = None,
-                      _maxIterations: int = _MAX_ITERATIONS):
+                      _maxIterations: int = _MAX_ITERATIONS
+                      ):
     """Iterator to adjust the size of the widget to a target-size.
 
         The size of the widget is altered geometrically every frame until the target-size is reached,
@@ -54,9 +55,10 @@ def dynamicSizeAdjust(widget, sizeFunction: callable = None, step: int = _INITIA
 
         To start the size operation, call as follows:
 
-        >>> QtCore.QTimer.singleShot(0, partial(dynamicSizeAdjust, widget, sizeFunction, adjustWidth=True, adjustHeight=False))
+        >>> QtCore.QTimer.singleShot(0, partial(dynamicSizeAdjust, widget, sizeFunction, completedFunction, adjustWidth=True, adjustHeight=False))
 
     :param callable sizeFunction: function to return the target-size, match-size
+    :param callable completedFunction: function called when the resize has stopped
     :param int step: step to change widget size
     :param bool adjustWidth: adjust the width
     :param bool adjustHeight: adjust the height
@@ -75,11 +77,16 @@ def dynamicSizeAdjust(widget, sizeFunction: callable = None, step: int = _INITIA
         raise TypeError(f'{widget.__class__.__name__}.dynamicSizeAdjust: adjustWidth must be True/False')
     if not isinstance(adjustHeight, bool):
         raise TypeError(f'{widget.__class__.__name__}.dynamicSizeAdjust: adjustHeight must be True/False')
+    if completedFunction and not callable(completedFunction):
+        raise TypeError(f'{widget.__class__.__name__}.dynamicSizeAdjust: completedFunction is not callable')
 
     try:
         if not (_maxIterations := _maxIterations - 1):
             # exit if max iterations reached
-            getLogger().debug(f'dynamicSizeAdjust failed - maximum iterations reached')
+            getLogger().debug('dynamicSizeAdjust failed - maximum iterations reached')
+            if completedFunction:
+                # call the completedFunction if needed
+                completedFunction()
             return
 
         # set the step-sizes for the first iteration
@@ -92,14 +99,17 @@ def dynamicSizeAdjust(widget, sizeFunction: callable = None, step: int = _INITIA
 
             if (_lastSteps == _steps) and (_lastsizes == size):
                 # stop if widget isn't resizing correctly
+                if completedFunction:
+                    # call the completedFunction if needed
+                    completedFunction()
                 return
 
             _lastSteps, _lastsizes = _steps, size
             thisStepW, thisStepH = _steps.width(), _steps.height()
-            while adjustWidth and thisStepW > 1 and abs(size.width() - target.width()) < thisStepW:
+            while adjustWidth and thisStepW >= 1 and abs(size.width() - target.width()) < thisStepW:
                 # iteratively change step-size until less than distance to target-width
                 thisStepW = thisStepW // 2
-            while adjustHeight and thisStepH > 1 and abs(size.height() - target.height()) < thisStepH:
+            while adjustHeight and thisStepH >= 1 and abs(size.height() - target.height()) < thisStepH:
                 # iteratively change step-size until less than distance to target-height
                 thisStepH = thisStepH // 2
 
@@ -113,8 +123,17 @@ def dynamicSizeAdjust(widget, sizeFunction: callable = None, step: int = _INITIA
                 widget.resize(widget.width() + adjustW, widget.height() + adjustH)
 
                 # create another single-shot - waits until gui is up-to-date before firing
-                QtCore.QTimer.singleShot(0, partial(dynamicSizeAdjust, widget, sizeFunction, step, adjustWidth, adjustHeight,
-                                                    _steps, _lastSteps, _lastsizes, _maxIterations))
+                QtCore.QTimer.singleShot(0, partial(dynamicSizeAdjust, widget=widget,
+                                                    sizeFunction=sizeFunction, completedFunction=completedFunction,
+                                                    step=step, adjustWidth=adjustWidth, adjustHeight=adjustHeight,
+                                                    _steps=_steps, _lastSteps=_lastSteps, _lastsizes=_lastsizes,
+                                                    _maxIterations=_maxIterations,
+                                                    ))
+                return
+
+        if completedFunction:
+            # resizing has finished, call the completedFunction if needed
+            completedFunction()
 
     except Exception as es:
         getLogger().debug2(f'dynamicSizeAdjust failed {es}')

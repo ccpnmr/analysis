@@ -9,12 +9,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-01 12:18:01 +0100 (Mon, August 01, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:02 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-10 11:42:40 +0000 (Mon, April 10, 2017) $"
 
 from datetime import datetime
 from typing import Sequence, Tuple, Optional
-
+import pandas as pd
 from ccpn.core.Project import Project
 from ccpn.core.PseudoDimension import PseudoDimension
 from ccpn.core.Spectrum import Spectrum
@@ -432,8 +432,25 @@ class Sample(AbstractWrapperObject):
         spectra = []
         for substance in self.getSubstances():
             if substance is not None:
-                spectra += substance.referenceSpectra
+                referenceSpectra = substance.referenceSpectra
+                if len(referenceSpectra)==0:
+                    spectrum = self.project.getByPid('SP:' + str(substance.name)) #hack
+                    if spectrum is not None:
+                        spectra.append(spectrum)
+                else:
+                    spectra.extend(referenceSpectra)
         return sorted(set(spectra), key=spectra.index)
+
+    def getLinkedSubstanceAsDataFrame(self, ):
+        df = pd.DataFrame()
+        for ix, sc in enumerate(self.sampleComponents, start=1):
+            su = sc.substance
+            if su is not None:
+                df.loc[ix, f'{su.className}'] = su.name
+                for header, values in su.getAsDict().items():
+                    if isinstance(values, (int, float, str)):
+                        df.loc[ix, f'{header}'] = values
+        return df
 
     #===========================================================================================
     # new<Object> and other methods

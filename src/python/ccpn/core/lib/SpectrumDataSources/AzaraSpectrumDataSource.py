@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:05 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:03 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -41,6 +41,8 @@ from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
 
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
+import ccpn.core.lib.SpectrumLib as specLib
+
 from ccpn.framework.constants import NO_SUFFIX, ANY_SUFFIX
 from ccpn.util.traits.CcpNmrTraits import CPath
 
@@ -238,6 +240,8 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
                     if not self.sampledValues:
                         self.sampledValues[:] = [None] * self.dimensionCount
                     self.sampledValues[dim] = [float(x) for x in data[1:]]
+
+                    self.dimensionTypes[dim] = specLib.DIMENSION_TIME
 
                     if not self.isotopeCodes:
                         self.isotopeCodes[:] = [None] * self.dimensionCount

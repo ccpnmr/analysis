@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:28 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:06 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -471,13 +471,15 @@ class FitPlotPanel(GuiPanel):
 
     def toggleRawData(self, setVisible=True):
         """Show/Hide the raw data from the plot Widget """
-        self.rawDataScatterPlot.setVisible(setVisible)
-        self.toggleRawDataLabels(setVisible)
+        if self.rawDataScatterPlot is not None:
+            self.rawDataScatterPlot.setVisible(setVisible)
+            self.toggleRawDataLabels(setVisible)
 
 
     def toggleFittedData(self, setVisible=True):
         """Show/Hide the fitted data from the plot Widget """
-        self.fittedCurve.setVisible(setVisible)
+        if self.fittedCurve is not None:
+            self.fittedCurve.setVisible(setVisible)
 
     def close(self):
         self._selectCurrentCONotifier.unRegister()

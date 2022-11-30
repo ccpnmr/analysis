@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:28 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:05 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,24 +26,25 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import os
 from PyQt5 import QtWidgets
+from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.RestraintTable import RestraintTable
+from ccpn.core.Restraint import Restraint
+from ccpn.core.lib.CallBack import CallBack
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Column import ColumnClass
-from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import RestraintTablePulldown
-from ccpn.core.RestraintTable import RestraintTable
-from ccpn.core.Restraint import Restraint
-from ccpn.core.lib.CallBack import CallBack
-from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Button import Button
-import ccpn.ui.gui.modules.PyMolUtil as pyMolUtil
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.util.Path import Path, aPath, fetchDir, joinPath
+import ccpn.ui.gui.modules.PyMolUtil as pyMolUtil
+from ccpn.ui.gui.lib.alignWidgets import alignWidgets
+from ccpn.util.Path import fetchDir, joinPath
+from ccpn.util.Logging import getLogger
+
 
 logger = getLogger()
 ALL = '<all>'
@@ -66,7 +67,7 @@ class RestraintTableModule(CcpnModule):
     _allowRename = True
 
     # we are subclassing this Module, hence some more arguments to the init
-    def __init__(self, mainWindow=None, name=f'{RestraintTable.className} Module',
+    def __init__(self, mainWindow=None, name=f'{RestraintTable.className}',
                  restraintTable=None, selectFirstItem=True):
         """
         Initialise the Module widgets
@@ -93,6 +94,7 @@ class RestraintTableModule(CcpnModule):
                                    includeSpectrumTable=self.includeSpectrumTable,
                                    includeSequentialStrips=False,
                                    grid=(0, 0))
+        alignWidgets(self._RTwidget)
 
         # main window
         self.restraintTable = GuiRestraintTable(parent=self.mainWidget,

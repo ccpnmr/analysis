@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 16:20:49 +0100 (Thu, October 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:05 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -70,7 +70,7 @@ class DataTableModule(CcpnModule):
     activePulldownClass = KlassTable
     _includeInLastSeen = False
 
-    def __init__(self, mainWindow=None, name=f'{KlassTable.className} Module',
+    def __init__(self, mainWindow=None, name=f'{KlassTable.className}',
                  table=None, selectFirstItem=False):
         """Initialise the Module widgets
         """
@@ -164,6 +164,7 @@ class DataTableModule(CcpnModule):
         self._metadata.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         self._metadata._enableSelectionCallback = False
         self._metadata._enableActionCallback = False
+        self._metadata.setEditable(False)
 
         row += 1
         Spacer(_topWidget, 5, 5,

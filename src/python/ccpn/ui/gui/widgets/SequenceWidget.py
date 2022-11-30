@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:13 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:08 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -358,7 +358,7 @@ class SequenceWidget():
                         thisChain = residues[0].chain
 
                         if (chLabel := self.chainLabels.get(thisChain)):
-                            for ii, res in enumerate(residues):
+                            for res in residues:
                                 guiResidue = chLabel.residueDict.get(res.sequenceCode)
                                 guiResidue._setStyleAssigned()
 
@@ -368,6 +368,9 @@ class SequenceWidget():
                         #             guiResidue = chainLabel.residueDict.get(res.sequenceCode)
                         #             guiResidue._setStyleAssigned()
                         #         break
+
+                        if self.moduleParent and thisChain:
+                            self.moduleParent._setCurrentOnLinkedNmrChain(thisChain.nmrChain)
 
     def populateFromSequenceGraphs(self):
         """

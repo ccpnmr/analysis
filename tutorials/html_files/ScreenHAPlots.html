@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AnalysisScreen Hit Analysis Plots</title>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a
+        href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://forums.ccpn.ac.uk"><img
+        src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
+<br>
+<div class="headerBar">AnalysisScreen Hit Analysis Plots</div>
+<div class="tutorial">
+
+    <h2>AnalysisScreen Hit Analysis Plots</h2>
+    <h3>Interactive Scores Plots</h3>
+    <p>The <span class="action">Scores Plot</span> is a flexible interactive plotting area where you can select which columns from your <span class="action">Substances Table</span> to plot against one another. Use the <span class="action">Select X-axis</span> and <span class="action">Select Y-axis</span> drop-down menus to select the variables to plot on each axis. If you are inspecting the <span class="action">Samples Table</span>, then only the values for the selected samples will be plotted.</p>
+    <h4>Selections and Regions of Interest (ROI)</h4>
+    <p>You can select individual data points on the plot by clicking on them. Hold down <span class="action">Ctrl</span> (<span class="action">Cmd</span> on a Mac) to multi-select several data points. You can also select all data points in an area of the plot by holding down <span class="action">Ctrl/Cmd</span> and dragging the mouse over the area (as you would to select peaks in a spectrum). The first data point to be selected will also be selected in the Peak Binding Scores table, meaning that a linked SpectrumDisplay will move to that set of peaks. Selecting individual data points one after another, is, therefore, a way to inspect the associated peaks one after another.</p>
+    <p>If you select an area with <span class="action">Ctrl/Cmd + drag</span> and the <span class="action">Link ROI with selection box</span> is ticked in the <span class="action">Appearance</span> box of the <span class="action">Settings panel</span> (which it is by default), you will then see the <span class="action">Region of Interest</span> box. You can resize this box using the (diamond shaped) corner handles or move it using the (square) side handles. Alternatively, you can  set the ROI box size by entering values in the <span class="action">Appearance</span> tab of the <span class="action">Settings</span>.</p>
+    <p>Right-clicking on a data point in the plot gives you various options including <span class="action">ROI</span> which will toggle the Region of Interest between being visible and invisible, and <span class="action">Select within ROI</span> to select all the data points within the Region of Interest. </p>
+    <p>Once you have selected data points in a plot you can use the right-hand mouse menu to <span class="action">Flag selected items</span> or create a new dataset containing only those data points with <span class="action">New from selected</span>. For information on setting flags, see our <a href="ScreenHAFlags.html">Hit Analysis Flags page</a>, and for more information on screening datasets, including subsets, see our <a href="ScreenScreeningDataset.html">Screening Datasets page</a>.</p>
+    <h4>Plot Appearance</h4>
+    <p>In the <span class="action">Settings</span> panel the <span class="action">Appearance</span> tab lets you select the <span class="action">Scatter point colour, size</span> and <span class="action">symbol</span>.</p>
+    <p>When the mouse hovers over the plot, the mouse position will be indicated by default. If you hover over a data point, the PID of the Substance this belongs to is also shown. To switch off showing this text, right-click on the plot and select <span class="action">Toggle Mouse Text</span>.</p>
+
+    <h3>Other Plots - Total Binding Scores</h3>
+    <p>Clicking on the <span class="action">Total Binding Scores</span> button brings up a box plot in a new window to show the distribution of Binding Scores across the dataset.</p>
+
+    <h3>Other Plots - Reference vs Target Delta shifts</h3>
+    <p>Clicking on the <span class="action">Reference vs Target Delta shifts</span> button brings up a plot in a new window showing the distribution of chemical shift changes between Reference and Target peaks in the dataset. This can be helpful in identifying systematic offsets which indicate that the data should be re-referenced.</p>
+
+    <h3>Other Plots - Control vs Target Delta shifts</h3>
+    <p>Clicking on the <span class="action">Control vs Target Delta shifts</span> button brings up a plot in a new window showing the distribution of chemical shift changes between Control and Target peaks in the dataset. This can be helpful in identifying systematic offsets which indicate that the data should be re-referenced.</p>
+
+    <h3>Other Plots - Total Binding Scores vs Chemical Shifts</h3>
+    <p>Clicking on the <span class="action">Total Binding Scores vs Chemical Shifts</span> button brings up a contour plot in a new window showing the distribution of Binding Scores as a function of chemical shift. This is can be helpful in identifying whether hits are clustered around particular chemical shift values which may be indicative of particular chemical groups.</p>
+
+    <h3>Other Plots - Molecular Viewer</h3>
+    <p>If your project contains SMILES strings for your Substances, then the <span class="action">Molecular Viewer</span> pane will show the structure of the currently selected Substance.</p>
+
+</div>
+</body>
+</html>

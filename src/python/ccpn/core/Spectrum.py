@@ -10,7 +10,7 @@ Per-axis values are given in the order data are stored in the spectrum file
 
 The axisCodes are used as an alternative axis identifier. These are unique strings that typically
 reflect the isotope on the relevant axis.
-By default upon loading a new spectrum, the axisCodes are derived from the isotopeCodes that define
+By default, upon loading a new spectrum, the axisCodes are derived from the isotopeCodes that define
 the experimental data for each dimension.
 They can match the dimension identifiers in the reference experiment templates, linking a dimension
 to the correct reference experiment dimension.
@@ -37,6 +37,8 @@ getByDimension(), setByDimension(), getByAxisCode(), setByAxisCode()
 See doc strings of these methods for detailed documentation
 
 """
+from __future__ import annotations  # pycharm still highlights as errors
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -51,7 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:04 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:02 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -66,47 +68,36 @@ from typing import Sequence, Tuple, Optional, Union, List
 from functools import partial
 from itertools import permutations
 import numpy
-
+import pandas as pd
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.SpectrumTraits import SpectrumTraits
 from ccpn.core._implementation.SpectrumData import SliceData, PlaneData, RegionData
-
 from ccpn.core.Project import Project
 from ccpn.core.lib import Pid
-
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection, getDefaultSpectrumColours
 from ccpn.core.lib.SpectrumLib import _includeInDimensionalCopy, _includeInCopy, _includeInCopyList, \
     checkSpectrumPropertyValue, _setDefaultAxisOrdering
-
 from ccpn.core.lib.ContextManagers import \
-    newObject, deleteObject, ccpNmrV3CoreSimple, \
+    newObject, deleteObject, ccpNmrV3CoreUndoBlock, \
     undoStackBlocking, renameObject, undoBlock, notificationBlanking, \
-    ccpNmrV3CoreSetter, inactivity, undoBlockWithoutSideBar
-
+    ccpNmrV3CoreSetter, inactivity, undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.core.lib.DataStore import DataStore, DataStoreTrait
-
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import \
     getDataFormats, getSpectrumDataSource, checkPathForSpectrumFormats, DataSourceTrait
 from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
 from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
-
 from ccpn.core.lib.Cache import cached
-
 from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerTrait
-
-from ccpn.util.traits.CcpNmrJson import CcpNmrJson, jsonHandler
-from ccpn.util.traits.CcpNmrTraits import Int, Float, Instance, Any
 from ccpn.core.lib.SpectrumLib import SpectrumDimensionTrait
-
+from ccpn.core.lib.AxisCodeLib import getAxisCodeMatch
 from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY, CCPN_SPECTRA_DIRECTORY
 from ccpn.framework.Application import getApplication
-
+from ccpn.util.traits.CcpNmrJson import CcpNmrJson, jsonHandler
+from ccpn.util.traits.CcpNmrTraits import Int, Float, Instance, Any
 from ccpn.util.Constants import SCALETOLERANCE
 from ccpn.util.Common import isIterable, _getObjectsByPids
-from ccpn.core.lib.AxisCodeLib import getAxisCodeMatch
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand, singleton
 from ccpn.util.Path import Path, aPath
@@ -115,7 +106,9 @@ from ccpn.util.Path import Path, aPath
 # defined here too as imported from Spectrum throughout the code base
 MAXALIASINGRANGE = specLib.MAXALIASINGRANGE
 _SCALECHANGED = 'scaleChanged'
+_ALLCHANGED = 'allChanged'
 _UPDATECHEMICALSHIFTS = 'updateChemicalShifts'
+_IGNORECHILDREN = 'ignoreChildren'
 
 #=========================================================================================
 # Spectrum class
@@ -305,26 +298,25 @@ class Spectrum(AbstractWrapperObject):
         return self._spectrumTraits.peakPicker
 
     @peakPicker.setter
-    def peakPicker(self, peakPicker):
+    def peakPicker(self, pkPicker):
         """Set the current peakPicker or deassign when None
         """
-        if peakPicker and peakPicker.spectrum != self:
-            raise ValueError(f'Invalid peakPicker: already linked to {peakPicker.spectrum}')
+        if pkPicker and pkPicker.spectrum != self:
+            raise ValueError(f'Invalid peakPicker: already linked to {pkPicker.spectrum}')
 
-        if peakPicker:
+        if pkPicker:
             with undoBlockWithoutSideBar():
                 # set the current peakPicker
-                self._spectrumTraits.peakPicker = peakPicker
+                self._spectrumTraits.peakPicker = pkPicker
                 # automatically store in the spectrum CCPN internal store
-                peakPicker._storeAttributes()
-                getLogger().debug('Setting peakPicker to %s' % peakPicker)
-        else:
+                pkPicker._storeAttributes()
+                getLogger().debug(f'Setting peakPicker to {pkPicker}')
+        elif self._spectrumTraits.peakPicker is not None:
+            # clear the current peakPicker
             with undoBlockWithoutSideBar():
-                # clear the current peakPicker
-                if self._spectrumTraits.peakPicker is not None:
-                    self._spectrumTraits.peakPicker._detachFromSpectrum()
-                    self._spectrumTraits.peakPicker = None
-                    getLogger().debug('Clearing current peakPicker')
+                self._spectrumTraits.peakPicker._detachFromSpectrum()
+                self._spectrumTraits.peakPicker = None
+                getLogger().debug('Clearing current peakPicker')
 
     #-----------------------------------------------------------------------------------------
     # Spectrum properties
@@ -531,32 +523,29 @@ class Spectrum(AbstractWrapperObject):
         """
         value = self._wrappedData.scale
         if value is None:
-            getLogger().warning('Scaling {} changed from None to 1.0'.format(self))
+            getLogger().warning(f'Scaling {self} changed from None to 1.0')
             value = 1.0
         if -SCALETOLERANCE < value < SCALETOLERANCE:
-            getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+            getLogger().warning(f'Scaling {self} by minimum tolerance (±{SCALETOLERANCE})')
 
         return value
 
     @scale.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter(scaleChanged=True, dancing=True)
+    @ccpNmrV3CoreSetter(scaleChanged=True)
     def scale(self, value: Union[float, int, None]):
         if value is None:
-            getLogger().warning('Scaling {} changed from None to 1.0'.format(self))
+            getLogger().warning(f'Scaling {self} changed from None to 1.0')
             value = 1.0
 
         if not isinstance(value, (float, int)):
-            raise TypeError('Spectrum.scale {} must be a float or integer'.format(self))
+            raise TypeError(f'Spectrum.scale {self} must be a float or integer')
 
         if value is not None and -SCALETOLERANCE < value < SCALETOLERANCE:
             # Display a warning, but allow to be set
-            getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+            getLogger().warning(f'Scaling {self} by minimum tolerance (±{SCALETOLERANCE})')
 
-        if value is None:
-            self._wrappedData.scale = None
-        else:
-            self._wrappedData.scale = float(value)
+        self._wrappedData.scale = None if value is None else float(value)
 
         if self.dimensionCount == 1 and self._intensities is not None:
             # some 1D data were read before; update the intensities as the scale has changed
@@ -642,6 +631,7 @@ class Spectrum(AbstractWrapperObject):
 
     @experimentType.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreUndoBlock(updateExperimentType=True)
     def experimentType(self, value: str):
         from ccpn.core.lib.SpectrumLib import _setApiExpTransfers, _setApiRefExperiment, _clearLinkToRefExp
 
@@ -1112,7 +1102,7 @@ class Spectrum(AbstractWrapperObject):
 
     @referenceExperimentDimensions.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
+    @ccpNmrV3CoreSetter(updateReferenceExperimentDimensions=True)
     @checkSpectrumPropertyValue(iterable=True, unique=True, allowNone=True, types=(str,))
     def referenceExperimentDimensions(self, values: Sequence):
         apiDataSource = self._wrappedData
@@ -1132,16 +1122,16 @@ class Spectrum(AbstractWrapperObject):
         for ii, (dataDim, val) in enumerate(zip(apiDataSource.sortedDataDims(), values)):
             expDim = dataDim.expDim
             if expDim is None and val is not None:
-                raise ValueError('Cannot set referenceExperimentDimension %s in dimension %s' % (val, ii + 1))
+                raise ValueError(f'Cannot set referenceExperimentDimension {val} in dimension {ii + 1}')
+
+            _update = {'expDimToRefExpDim': val}
+            _ccpnInt = expDim.ccpnInternalData
+            if _ccpnInt is None:
+                expDim.ccpnInternalData = _update
             else:
-                _update = {'expDimToRefExpDim': val}
-                _ccpnInt = expDim.ccpnInternalData
-                if _ccpnInt is None:
-                    expDim.ccpnInternalData = _update
-                else:
-                    _expDimCID = expDim.ccpnInternalData.copy()
-                    _ccpnInt.update(_update)
-                    expDim.ccpnInternalData = _ccpnInt
+                _expDimCID = expDim.ccpnInternalData.copy()
+                _ccpnInt.update(_update)
+                expDim.ccpnInternalData = _ccpnInt
 
     def getAvailableReferenceExperimentDimensions(self, _experimentType=None) -> tuple:
         """Return list of available reference experiment dimensions based on spectrum isotopeCodes
@@ -1156,19 +1146,15 @@ class Spectrum(AbstractWrapperObject):
 
         # match against the current reference experiment or passed in value
         apiExperiment = self._wrappedData.experiment
-        apiRefExperiment = _refExperiment or apiExperiment.refExperiment
-
-        if apiRefExperiment:
+        if apiRefExperiment := (_refExperiment or apiExperiment.refExperiment):
             # get the permutations of the axisCodes and nucleusCodes
             axisCodePerms = permutations(apiRefExperiment.axisCodes)
             nucleusPerms = permutations(apiRefExperiment.nucleusCodes)
 
             # return only those that match the current nucleusCodes (from isotopeCodes)
-            result = tuple(ac for ac, nc in zip(axisCodePerms, nucleusPerms) if nCodes == nc)
-            return result
+            return tuple(ac for ac, nc in zip(axisCodePerms, nucleusPerms) if nCodes == nc)
 
-        else:
-            return ()
+        return ()
 
     @property
     @_includeInDimensionalCopy
@@ -1266,6 +1252,7 @@ class Spectrum(AbstractWrapperObject):
 
     @assignmentTolerances.setter
     @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(float, int))
+    @ccpNmrV3CoreUndoBlock(ignoreChildren=True)
     def assignmentTolerances(self, value):
         self._setDimensionalAttributes('assignmentTolerance', value)
 
@@ -1368,21 +1355,18 @@ class Spectrum(AbstractWrapperObject):
 
         result = []
         apiExperiment = self._wrappedData.experiment
-        apiRefExperiment = apiExperiment.refExperiment
-
-        if apiRefExperiment:
+        if apiRefExperiment := apiExperiment.refExperiment:
             # We should use the refExperiment - if present
             magnetisationTransferDict = apiRefExperiment.magnetisationTransferDict()
             mainExpDimRefs = [dim._expDimRef for dim in self.spectrumReferences]
             refExpDimRefs = [x if x is None else x.refExpDimRef for x in mainExpDimRefs]
             for ii, rxdr in enumerate(refExpDimRefs):
-                dim1 = ii + 1
                 if rxdr is not None:
+                    dim1 = ii + 1
                     for jj in range(dim1, len(refExpDimRefs)):
                         rxdr2 = refExpDimRefs[jj]
                         if rxdr2 is not None:
-                            tt = magnetisationTransferDict.get(frozenset((rxdr, rxdr2)))
-                            if tt:
+                            if tt := magnetisationTransferDict.get(frozenset((rxdr, rxdr2))):
                                 result.append(MagnetisationTransferTuple(dim1, jj + 1, tt[0], tt[1]))
 
         else:
@@ -1391,15 +1375,13 @@ class Spectrum(AbstractWrapperObject):
             for apiExpTransfer in apiExperiment.expTransfers:
                 item = [x.expDim.dim for x in apiExpTransfer.expDimRefs]
                 item.sort()
-                item.append(apiExpTransfer.transferType)
-                item.append(not (apiExpTransfer.isDirect))
+                item.extend((apiExpTransfer.transferType, not (apiExpTransfer.isDirect)))
                 ll.append(item)
-            for item in sorted(ll):
-                result.append(MagnetisationTransferTuple(*item))
-
+            result.extend(MagnetisationTransferTuple(*item) for item in sorted(ll))
         #
         return tuple(result)
 
+    @ccpNmrV3CoreUndoBlock(updateMagnetisationTransfers=True)
     def _setMagnetisationTransfers(self, value: Tuple[MagnetisationTransferTuple, ...]):
         """Setter for magnetisation transfers
 
@@ -1409,7 +1391,6 @@ class Spectrum(AbstractWrapperObject):
         does this function set the magnetisation transfers, and the corresponding values are
         ignored if the experimentType is later set
         """
-
         apiExperiment = self._wrappedData.experiment
         apiRefExperiment = apiExperiment.refExperiment
         if apiRefExperiment is None:
@@ -1420,11 +1401,9 @@ class Spectrum(AbstractWrapperObject):
                 try:
                     dim1, dim2, transferType, isIndirect = tt
                     expDimRefs = (mainExpDimRefs[dim1 - 1], mainExpDimRefs[dim2 - 1])
-                except:
-                    raise ValueError(
-                            "Attempt to set incorrect magnetisationTransfer value %s in spectrum %s"
-                            % (tt, self.pid)
-                            )
+                except Exception:
+                    raise ValueError(f"Attempt to set incorrect magnetisationTransfer value {tt} in spectrum {self.pid}")
+
                 apiExperiment.newExpTransfer(expDimRefs=expDimRefs, transferType=transferType,
                                              isDirect=(not isIndirect))
         else:
@@ -1449,12 +1428,13 @@ class Spectrum(AbstractWrapperObject):
         return self._intensities
 
     @intensities.setter
+    @ccpNmrV3CoreSetter(allChanged=True)
     def intensities(self, value: numpy.array):
         self._intensities = value
 
-        # NOTE:ED - temporary hack for showing straight the result of intensities change
-        for spectrumView in self.spectrumViews:
-            spectrumView.refreshData()
+        # # NOTE:ED - temporary hack for immediately showing the result of intensities change
+        # for spectrumView in self.spectrumViews:
+        #     spectrumView.refreshData()
 
     @property
     def positions(self) -> numpy.array:
@@ -1470,13 +1450,13 @@ class Spectrum(AbstractWrapperObject):
         return self._positions
 
     @positions.setter
-    @ccpNmrV3CoreSetter()  # scaleChanged=True)
+    @ccpNmrV3CoreSetter(allChanged=True)
     def positions(self, value):
         self._positions = value
 
-        # NOTE:ED - temporary hack for showing straight the result of intensities change
-        for spectrumView in self.spectrumViews:
-            spectrumView.refreshData()
+        # # NOTE:ED - temporary hack for immediately showing the result of intensities change
+        # for spectrumView in self.spectrumViews:
+        #     spectrumView.refreshData()
 
     @property
     @_includeInCopy
@@ -1484,10 +1464,7 @@ class Spectrum(AbstractWrapperObject):
         """Return whether the folded spectrum contours are to be displayed
         """
         result = self._getInternalParameter(self._DISPLAYFOLDEDCONTOURS)
-        if result is None:
-            # default to True
-            return True
-        return result
+        return True if result is None else result
 
     @displayFoldedContours.setter
     def displayFoldedContours(self, value):
@@ -1506,10 +1483,7 @@ class Spectrum(AbstractWrapperObject):
         if items is not None:
             series = ()
             for sg in self.spectrumGroups:
-                if sg.pid in items:
-                    series += (items[sg.pid],)
-                else:
-                    series += (None,)
+                series += (items[sg.pid], ) if sg.pid in items else (None, )
             return series
 
     @_seriesItems.setter
@@ -1531,7 +1505,7 @@ class Spectrum(AbstractWrapperObject):
             raise ValueError('Number of items does not match number of spectrumGroups')
 
         if isinstance(items, tuple):
-            diffItems = set(type(item) for item in items)
+            diffItems = {type(item) for item in items}
             if len(diffItems) > 2 or (len(diffItems) == 2 and type(None) not in diffItems):
                 raise ValueError('Items must be of the same type (or None)')
 
@@ -1558,9 +1532,9 @@ class Spectrum(AbstractWrapperObject):
 
         spectrumGroup = self.project.getByPid(spectrumGroup) if isinstance(spectrumGroup, str) else spectrumGroup
         if not isinstance(spectrumGroup, SpectrumGroup):
-            raise TypeError('%s is not a spectrumGroup' % str(spectrumGroup))
+            raise TypeError(f'{str(spectrumGroup)} is not a spectrumGroup')
         if self not in spectrumGroup.spectra:
-            raise ValueError('Spectrum %s does not belong to spectrumGroup %s' % (str(self), str(spectrumGroup)))
+            raise ValueError(f'Spectrum {str(self)} does not belong to spectrumGroup {str(spectrumGroup)}')
 
         seriesItems = self._getInternalParameter(self._SERIESITEMS)
         if seriesItems and spectrumGroup.pid in seriesItems:
@@ -1577,7 +1551,7 @@ class Spectrum(AbstractWrapperObject):
         if not isinstance(spectrumGroup, SpectrumGroup):
             raise TypeError('%s is not a spectrumGroup', spectrumGroup)
         if self not in spectrumGroup.spectra:
-            raise ValueError('Spectrum %s does not belong to spectrumGroup %s' % (str(self), str(spectrumGroup)))
+            raise ValueError(f'Spectrum {str(self)} does not belong to spectrumGroup {str(spectrumGroup)}')
 
         seriesItems = self._getInternalParameter(self._SERIESITEMS)
 
@@ -1591,7 +1565,7 @@ class Spectrum(AbstractWrapperObject):
         """rename the keys in the seriesItems to reflect the updated spectrumGroup name
         """
         seriesItems = self._getInternalParameter(self._SERIESITEMS)
-        if oldPid in (seriesItems if seriesItems else ()):
+        if oldPid in (seriesItems or ()):
             # insert new items with the new pid
             oldItems = seriesItems[oldPid]
             del seriesItems[oldPid]
@@ -1792,7 +1766,7 @@ class Spectrum(AbstractWrapperObject):
         # find the map of newAxisCodeOrder to self.axisCodes; eg. 'H' to 'Hn'
         axisCodeMap = getAxisCodeMatch(axisCodes, self.axisCodes)
         if len(axisCodeMap) == 0:
-            raise ValueError('axisCodes %r contains an invalid element' % axisCodes)
+            raise ValueError(f'axisCodes {axisCodes} contains an invalid element')
         return [axisCodeMap[a] for a in axisCodes]
 
     def orderByAxisCodes(self, iterable, axisCodes: Sequence[str] = None, exactMatch: bool = False) -> list:
@@ -1828,7 +1802,7 @@ class Spectrum(AbstractWrapperObject):
 
         # we now should have valid axisCodes
         for ac in axisCodes:
-            if not ac in self.axisCodes:
+            if ac not in self.axisCodes:
                 raise ValueError('%s.orderByAxisCodes: invalid axisCode "%s" in %r' %
                                  (self.className, ac, axisCodes))
 
@@ -1836,9 +1810,7 @@ class Spectrum(AbstractWrapperObject):
         mapping = dict([(ac, dim) for dimIndx, ac, dim in self.dimensionTriples])
         # get the dimensions in axisCode order
         dimensions = [mapping[ac] for ac in axisCodes]
-        # get the values of iterable in axisCode==dimensions order
-        values = _orderByDimensions(iterable, dimensions=dimensions, dimensionCount=self.dimensionCount)
-        return values
+        return _orderByDimensions(iterable, dimensions=dimensions, dimensionCount=self.dimensionCount)
 
     def getByAxisCodes(self, parameterName: str, axisCodes: Sequence[str] = None,
                        exactMatch: bool = False) -> list:
@@ -1959,6 +1931,32 @@ class Spectrum(AbstractWrapperObject):
         except ValueError as es:
             raise ValueError('%s.setByDimensions: %s' % (self.__class__.__name__, str(es)))
 
+        return newValues
+
+    def getByIsotopeCodes(self, parameterName: str, isotopeCodes: Sequence[str] = None) -> dict:
+        """
+        A way of getting spectrum properties given a list of isotopeCodes.
+        :param parameterName: a str denoting a Spectrum dimensional attribute
+        :param isotopeCodes: a tuple or list of isotopeCodes
+        :return: a dict, key the isotopeCode, list of values result of the parameterName
+
+        example get the axisCodes for a 13C-NOESY spectrum:
+        >>> self.getByIsotopeCodes('axisCodes', ['1H', '13C'])
+        >>> {'1H': ['H1', 'H2'], '13C':['C'] }
+
+        """
+        from ccpn.core.lib.SpectrumLib import _getParameterValues
+        from collections import defaultdict
+        dd = defaultdict(list)
+        for ic, dim in zip(self.isotopeCodes, self.dimensions):
+            dd[ic].append(dim)
+        newValues = {}
+        for isotopeCode in isotopeCodes:
+            dimensions = dd.get(isotopeCode, [])
+            values = _getParameterValues(self, parameterName,
+                                         dimensions=dimensions,
+                                         dimensionCount=self.dimensionCount)
+            newValues[isotopeCode] = values
         return newValues
 
     def _setDefaultContourValues(self, base=None, multiplier=1.41, count=10):
@@ -2196,6 +2194,11 @@ class Spectrum(AbstractWrapperObject):
             raise es
 
         self.dataSource.setSliceData(data=data, position=position, sliceDim=sliceDim)
+
+    def getAllRegionData(self):
+        """ Get  all region data. """
+        ppmRegions = dict(zip(self.axisCodes, self.spectrumLimits))
+        return self.getRegion(**ppmRegions)
 
     @logCommand(get='self')
     def extractSliceToFile(self, axisCode, position, path=None, dataFormat='Hdf5'):
@@ -2746,6 +2749,97 @@ class Spectrum(AbstractWrapperObject):
             raise RuntimeError('Not valid path for %s ' % self)
         return self.dataSource.allPoints()
 
+    def _getPseudoDimension(self) -> int:
+        """Convenience routine: get the pseudoDimension;
+        so far defined as a single time dimension; to be changed later?
+        :return dimension or 0 if not found
+        """
+        # For now:
+        PSEUDO_AXIS_TYPE = specLib.DIMENSION_TIME
+
+        # we first establish what the "Pseudo" dimension is; there should only one:
+        _tCodes = [(dim, ac) for dimIndex, ac, dim in self.dimensionTriples if self.dimensionTypes[dimIndex] == PSEUDO_AXIS_TYPE]
+        if len(_tCodes) != 1:
+            getLogger().debug(f'There should be exactly one pseudo/time dimension; instead they are: {_tCodes}')
+            return 0
+        pseudoDimension = _tCodes[0][0]
+        return pseudoDimension
+
+    def pseudoToSpectrumGroup(self, pathTemplate=None, spectrumGroup=None) -> ['SpectrumGroup', None]:
+        """
+        Convert a pseudo nD spectrum, as indicated by the existence of exactly one time-domain dimension,
+        to a series of lower-dimensionality spectra (typically planes, but no tlimited to that).
+
+        :param pathTemplate: a NmrPipe-like path template; e.g. '~/data/mySpectrum_%003d' (autogenerated when None)
+        :param spectrumGroup: optional spectrumGroup to which the lower-dimensionality spectra are added
+                              (auto generated when None)
+        :return: SpectrumGroup instance with all lower-dimensionality spectra or None on error
+        """
+        from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
+        from ccpn.core.SpectrumGroup import SpectrumGroup
+
+        if spectrumGroup is not None and not isinstance(spectrumGroup, SpectrumGroup):
+            raise ValueError(f'Invalid spectrumGroup ({spectrumGroup}, type {type(spectrumGroup)}); expected SpectrumGroup instance')
+
+        if pathTemplate is None:
+            pathTemplate = str(self.path.parent / f'{self.name}_%003d')
+
+        if not self.hasValidPath():
+            getLogger().error(f'Spectrum {self} does not have a valid path to (binary) data defined')
+            return None
+
+        # we get the "Pseudo" dimension; there should only one:
+        if (pseudoDimension := self._getPseudoDimension()) == 0:
+            raise RuntimeError(f'There should be exactly one pseudo/time dimension; instead they are: {self.dimensionTypes}')
+        # dims and positions are 1-based; python lists/tuples are zero-based; hence pseudoDimensionIndex
+        pseudoDimensionIndex = pseudoDimension - 1
+
+        # Find the number of points along the Time dimension
+        pseudoDimensionSize = self.pointCounts[pseudoDimensionIndex]
+        # get the frequency dimensions; ie. all dimensions that are not Time dimension(s)
+        freqDims = [dim for dim in self.dimensions if dim != pseudoDimension]
+        # and the corresponding axis codes using build-in functionality of the Spectrum class
+        freqAxisCodes = self.getByDimensions('axisCodes', freqDims)
+
+        # Anything could define the series values of a spectrumGroup
+        # Assume that the series values are defined by the spectralWidth/dwellTime
+        # This is likely incorrect, but can be corrected later if need be.
+        seriesValue = 0.0
+        seriesIncrement = 1.0 / self.spectralWidths[pseudoDimensionIndex]
+
+        # For now: we need this to silence some of the output
+        with notificationEchoBlocking():
+
+            # For now: we want all of this to be one "undo" operation
+            with undoBlock():
+
+                # check if we need to create a SpectrumGroup instance
+                if spectrumGroup is None:
+                    spectrumGroup = self.project.newSpectrumGroup(name=self.name, seriesUnit='s')
+
+                position = [1] * self.dimensionCount  # dims and positions are 1-based
+
+                # loop over the points in the time dimension (1-based)
+                for timePoint in range(1, pseudoDimensionSize + 1):
+                    # set the position of the plane we are now doing
+                    position[pseudoDimensionIndex] = timePoint
+
+                    # info(f'==> extracting {freqAxisCodes} plane at {position}' )
+
+                    path = aPath(pathTemplate % (timePoint,))
+                    sp = self._extractToFile(axisCodes=freqAxisCodes, position=position, path=path,
+                                             dataFormat=Hdf5SpectrumDataSource.dataFormat, tag='fromPseudo')
+                    spectrumGroup.addSpectrum(sp, seriesValue)
+
+                    seriesValue += seriesIncrement
+
+                # TODO: reinstate after inclusion of GWV branch SpectrumDataSource modifications
+                # _values = self.dataSource.sampledValues[pseudoDimensionIndex]
+                # if _values is not None and len(_values) == len(spectrumGroup.spectra):
+                #     spectrumGroup.series = _values
+
+        return spectrumGroup
+
     #-----------------------------------------------------------------------------------------
     # Implementation properties and functions
     #-----------------------------------------------------------------------------------------
@@ -2756,6 +2850,23 @@ class Spectrum(AbstractWrapperObject):
         CCPN Internal
         """
         return self._wrappedData.serial
+
+    def getAsDataFrame(self):
+        """ Write all the spectrum properties per dimension in a dataFrame.
+         This is useful when comparing multiple spectra by their properties. """
+        df = pd.DataFrame()
+        for _attr in dir(self):
+            try:
+                if not _attr.startswith(('_', '__')):
+                    vv = getattr(self, _attr)
+                    if isinstance(vv, (list, tuple)) and len(vv) == self.dimensionCount: # skip non-dimensional properties
+                        if isinstance(vv[0], (str, float, int)): #skip objects
+                            for dim in self.dimensionIndices:
+                                df.loc[0, f'{_attr}_{str(dim)}'] = vv[dim] # write to df.
+            except Exception as e:
+                getLogger().debug3(f'Error in creating spectrumAsDataFrame. Attr: {_attr}. Error:{e}')
+        return df
+
 
     def _getDataSourceFromPath(self, path, dataFormat=None, checkParameters=True) -> tuple:
         """Return a (dataStore, dataSource) tuple if path points  a file compatible
@@ -2902,7 +3013,7 @@ class Spectrum(AbstractWrapperObject):
         # Assure at least one peakList
         if len(spectrum.peakLists) == 0:
             spectrum.newPeakList()
-            getLogger().warning('%s had no peakList; created one' % spectrum)
+            getLogger().warning(f'{spectrum} had no peakList; created one')
 
         # This will fix any spurious settings on the aliasing (also in update_3_0_4 code)
         _aIndices = spectrum.aliasingIndices
@@ -2975,20 +3086,16 @@ class Spectrum(AbstractWrapperObject):
         if not super()._finaliseAction(action, **actionKwds):
             return
 
-        # get the changed attribute states - defined in the ccpNmrV3CoreSetter arguments
-        scaleChanged = actionKwds.get(_SCALECHANGED, False)
-        updateShifts = actionKwds.get(_UPDATECHEMICALSHIFTS, False)
-
-        if action == 'create':
-            # No need; done by _newSpectrum
-            # self._saveSpectrumMetaData()
-            pass
+        # if action == 'create':
+        #     # No need; done by _newSpectrum
+        #     # self._saveSpectrumMetaData()
+        #     pass
 
         if action == 'delete':
             self._deleteSpectrumMetaData()
 
         # notify peak/integral/multiplet list
-        if action in ['create', 'delete']:
+        if action in {'create', 'delete'}:
             for peakList in self.peakLists:
                 peakList._finaliseAction(action)
             for multipletList in self.multipletLists:
@@ -2996,17 +3103,26 @@ class Spectrum(AbstractWrapperObject):
             for integralList in self.integralLists:
                 integralList._finaliseAction(action)
 
-        # propagate the rename-action to associated spectrumViews
-        elif action in ['change']:
+        # propagate the rename-action to associated spectrumViews/children
+        elif action == 'change':
+            # get the changed attribute states - defined in the ccpNmrV3CoreSetter arguments
+            scaleChanged = actionKwds.get(_SCALECHANGED, False)
+            allChanged = actionKwds.get(_ALLCHANGED, False)
+
             for specView in self.spectrumViews:
                 if specView:
                     # force a rebuild of the contours/etc.
-                    specView.buildContoursOnly = scaleChanged
+                    if scaleChanged:
+                        specView.buildContoursOnly = scaleChanged
+                    elif allChanged:
+                        specView.buildContours = allChanged
                     # other changes may need to be recognised here
                     specView._finaliseAction(action)
 
-            if scaleChanged:
+            if actionKwds.get(_IGNORECHILDREN, False):  # here or before specView?
+                return
 
+            if scaleChanged or allChanged:
                 # notify peaks/multiplets/integrals that the scale has changed
                 for peakList in self.peakLists:
                     for peak in peakList.peaks:
@@ -3026,7 +3142,7 @@ class Spectrum(AbstractWrapperObject):
                 for integralList in self.integralLists:
                     integralList._finaliseAction(action)
 
-            if self.chemicalShiftList and updateShifts:
+            if self.chemicalShiftList and actionKwds.get(_UPDATECHEMICALSHIFTS, False):
                 # notify the chemical-shifts to recalculate
                 self.chemicalShiftList.recalculatePeakShifts()
 
@@ -3594,7 +3710,7 @@ def _extractRegionToFile(spectrum, dimensions, position, dataStore, name=None) -
     with dataSource.openNewFile(path=dataStore.aPath()) as output:
         # loop over all requested slices
         for position, aliased in inputFile._selectedPointsIterator(sliceTuples=sliceTuples,
-                                                               excludeDimensions=[readSliceDim]):
+                                                                   excludeDimensions=[readSliceDim]):
             data = inputFile.getSliceData(position=position, sliceDim=readSliceDim)
 
             # map the input position to the output position and write the data

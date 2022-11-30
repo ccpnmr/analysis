@@ -16,7 +16,10 @@ done
 
 CCPNMR_TOP_DIR="${_pathlink}"
 export CCPNMR_TOP_DIR
-NEFIO="${CCPNMR_TOP_DIR}"/src/python/ccpn/util/nef/Nef.py
 
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
-"${CONDA}"/bin/python -W ignore "${NEFIO}" $*
+CONDA_PYTHON3="${CONDA}"/bin/python3
+MAJMINVER=$(${CONDA_PYTHON3} -c 'import sys; print(str(sys.version_info[0])+"."+str(sys.version_info[1]))')
+NEF="${CONDA}"/lib/python${MAJMINVER}/site-packages/nef_pipelines/main.py
+
+"${CONDA_PYTHON3}" -W ignore "${NEF}" "$@"

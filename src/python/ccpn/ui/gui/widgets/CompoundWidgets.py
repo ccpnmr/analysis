@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 16:20:49 +0100 (Thu, October 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:07 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -220,6 +220,19 @@ class ListCompoundWidget(CompoundBaseWidget):
         for i in ll:
             if isinstance(i, str):
                 self.listWidget.addItem(i)
+
+    def modifyTexts(self, texts):
+        """Modify the pulldown texts, retaining the current selection
+        """
+        with self.blockWidgetSignals():
+            self.pulldownList.clear()
+            self.pulldownList.setData(texts=texts)
+
+    def modifyListWidgetTexts(self, texts):
+        """Modify the listWidget texts, with signal-blocking
+        """
+        with self.blockWidgetSignals():
+            self.setTexts(texts)
 
     def getTexts(self):
         """Convenience: Return list of texts in listWidget"""
@@ -971,7 +984,7 @@ class ButtonCompoundWidget(CompoundBaseWidget):
     def __init__(self, parent=None, mainWindow=None,
                  showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
-                 labelText='', text='', toggle=None, icon=None, callback=None,
+                 labelText='', text='', toggle=None, icon=None, callback=None, buttonAlignment=None,
                  compoundKwds=None,
                  **kwds):
         """
@@ -982,7 +995,7 @@ class ButtonCompoundWidget(CompoundBaseWidget):
         :param minimumWidths: tuple of two values specifying the minimum width of the Label and button widget, respectively
         :param maximumWidths: tuple of two values specifying the maximum width of the Label and button widget, respectively
         :param labelText: Text for the Label
-        :param text: (optional) text for the Checkbox
+        :param text: (optional) text for the Button
         :param callback: (optional) callback for the button
         :param toggle: (optional) initial state of the button
         :param kwds: (optional) keyword, value pairs for the gridding of Frame
@@ -1005,7 +1018,22 @@ class ButtonCompoundWidget(CompoundBaseWidget):
         self.button = Button(parent=self, **buttonKwds)
         self.button.setObjectName(labelText)
         self.setObjectName(labelText)
-        self._addWidget(self.button)
+        if buttonAlignment:
+            # create a temporary frame and move the button inside
+            fr = Frame(self, setLayout=True)
+            self._addWidget(fr)
+            if buttonAlignment == 'left':
+                fr.layout().addWidget(self.button, 0, 0)
+                Spacer(fr, 5, 5, hPolicy='expanding', vPolicy='minimum', grid=(0, 1), gridSpan=(1, 1))
+            elif buttonAlignment == 'right':
+                Spacer(fr, 5, 5, hPolicy='expanding', vPolicy='minimum', grid=(0, 0), gridSpan=(1, 1))
+                fr.layout().addWidget(self.button, 0, 1)
+            else:  # centre
+                Spacer(fr, 5, 5, hPolicy='expanding', vPolicy='minimum', grid=(0, 0), gridSpan=(1, 1))
+                fr.layout().addWidget(self.button, 0, 1)
+                Spacer(fr, 5, 5, hPolicy='expanding', vPolicy='minimum', grid=(0, 2), gridSpan=(1, 1))
+        else:
+            self._addWidget(self.button)
 
         if minimumWidths is not None:
             self.setMinimumWidths(minimumWidths)
@@ -1087,6 +1115,14 @@ class LabelCompoundWidget(CompoundBaseWidget):
 
         if fixedWidths is not None:
             self.setFixedWidths(fixedWidths)
+
+    def getText(self):
+        """Convenience: Return text of label"""
+        return self.label2.get()
+
+    def setText(self, text):
+        """Convenience: set text of label"""
+        self.label2.set(text)
 
     def _getSaveState(self):
         return self.label2.get()

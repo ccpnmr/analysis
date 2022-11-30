@@ -20,6 +20,7 @@ setStripLabelText(text:str):  set the text of the stripLabel
 getStripLabelText() -> str:  get the text of the stripLabel
 showStripLabel(doShow:bool):  show/hide the stripLabel
 """
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -29,12 +30,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-08-07 15:37:24 +0100 (Sun, August 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:04 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -47,10 +48,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtWidgets
 import numpy
+import contextlib
 
 from ccpn.core.PeakList import PeakList
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, undoStackBlocking
+from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu
 from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu, \
     _getNdIntegralMenu, _getNdMultipletMenu, _getNdAxisMenu
@@ -64,7 +66,7 @@ from ccpn.ui.gui.widgets.PlaneToolbar import StripHeaderWidget, PlaneAxisWidget,
 from ccpn.util.Colour import colorSchemeTable
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
-from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT
+from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT, AXIS_FULLATOMNAME
 
 
 class GuiStripNd(GuiStrip):
@@ -119,7 +121,6 @@ class GuiStripNd(GuiStrip):
                           :param selectedRegion:<List>  of <List> of coordinates to test
                           :return <Tuple>:(<Peak>, ...)
     """
-    # TODO:ED: complete the above; also port to GuiStrip1d
 
     #-----------------------------------------------------------------------------------------
 
@@ -237,7 +238,7 @@ class GuiStripNd(GuiStrip):
         self._frameGuide._resizeFrames()
 
     def _printWidgets(self, wid, level=0):
-        try:
+        with contextlib.suppress(Exception):
             print('  ' * level, '>>>', wid)
             layout = wid.layout()
 
@@ -245,11 +246,9 @@ class GuiStripNd(GuiStrip):
                 wid = layout.itemAt(ww).widget()
                 self._printWidgets(wid, level + 1)
                 wid.setMinimumWidth(10)
-        except Exception as es:
-            pass
 
     def showExportDialog(self):
-        """show the export strip to file dialog
+        """Show the export strip to file dialog.
         """
         from ccpn.ui.gui.popups.ExportStripToFile import ExportStripToFilePopup
 
@@ -261,88 +260,102 @@ class GuiStripNd(GuiStrip):
         self.exportPdf.exec_()
 
     @logCommand(get='self')
-    def copyStrip(self):
+    def copyStrip(self, usePosition=False):
+        """Copy the strip into new SpectrumDisplay.
+        :param usePosition: True/False use the current mouse-position or the centre of the source strip
+        :return: A new SpectrumDisplay instance
         """
-        Copy the strip into new SpectrumDisplay
-        """
-        # with undoBlockWithoutSideBar():
         with undoStackBlocking() as _:  # Do not add to undo/redo stack
             # create a new spectrum display
             newDisplay = self.mainWindow.newSpectrumDisplay(self.spectra[0], axisCodes=self.axisOrder)
             for spectrum in self.spectra:
                 newDisplay.displaySpectrum(spectrum)
 
-            # newDisplay.autoRange()
-            copyStripAxisPositionsAndWidths(self, newDisplay.strips[0])
+            try:
+                mDict = usePosition and self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+                positions = [poss[0] if (poss := mDict.get(ax)) else None
+                             for ax in self.axisCodes] if usePosition else None
+                copyStripAxisPositionsAndWidths(self, newDisplay.strips[0], positions=positions)
+            except Exception as es:
+                getLogger().warning(f'{self.__class__.__name__}.copyStrip: {es}')
 
-    def _flipAxes(self, axisOrderIndices):
-        """Create a new SpectrumDisplay with the axes flipped to the new axisOrder
+    def _flipAxes(self, axisOrderIndices, positions=None):
+        """Create a new SpectrumDisplay with the axes flipped to the new axisOrder.
+        If position is None, the centre of the new spectrumDisplay will be the centre of the source strip.
+        Otherwise, positions specifies the centre of the new spectrumDisplay.
+        Widths will be taken from the source strip.
         :param axisOrderIndices: a list/tuple of the indices of the new axis-order;
                                  e.g. (1,0) for YXZ order, or (2,0,1) for ZXY, etc.
-        :return a Spectrum display instance
+        :param positions: True/False use the current mouse-position or the centre of the source strip
+        :return: a Spectrum display instance
         """
         axisCodes = [self.axisCodes[idx] for idx in axisOrderIndices]
         _la = len(axisCodes)
         if _la < self.spectrumDisplay.dimensionCount:
             axisCodes.extend(self.axisCodes[_la:])
 
-        with undoStackBlocking() as _tmp:  # Do not add to undo/redo stack
+        with undoStackBlocking() as _:  # Do not add to undo/redo stack
             # create a new spectrum display with the new axis order
-            newDisplay = self.mainWindow.newSpectrumDisplay(self.spectra[0],
-                                                            axisCodes=axisCodes)
+            newDisplay = self.mainWindow.newSpectrumDisplay(self.spectra[0], axisCodes=axisCodes)
             for spectrum in self.spectra[1:]:
                 newDisplay.displaySpectrum(spectrum)
-            copyStripAxisPositionsAndWidths(self, newDisplay.strips[0])
+            copyStripAxisPositionsAndWidths(self, newDisplay.strips[0], positions=positions)
 
         return newDisplay
 
     @logCommand(get='self')
-    def flipXYAxis(self):
-        """Flip the X and Y axes
-        :return A new SpectrumDisplay instance
+    def flipXYAxis(self, usePosition=False):
+        """Flip the X and Y axes.
+        :param usePosition: True/False use the current mouse-position or the centre of the source strip
+        :return: A new SpectrumDisplay instance
         """
         if self.spectrumDisplay.dimensionCount < 2:
-            getLogger().warning('flipXYaxis: Too few dimensions for XY flip')
+            getLogger().warning(f'{self.__class__.__name__}.flipXYaxis: Too few dimensions for XY flip')
             return
 
         try:
-            display = self._flipAxes(axisOrderIndices=(1,0))
-        except (RuntimeError, ValueError) as es:
-            getLogger().warning('flipXYaxis: %s' % es)
-
-        return display
+            mDict = usePosition and self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+            positions = [poss[0] if (poss := mDict.get(ax)) else None
+                         for ax in self.axisCodes] if usePosition else None
+            return self._flipAxes(axisOrderIndices=(1, 0), positions=positions)
+        except Exception as es:
+            getLogger().warning(f'{self.__class__.__name__}.flipXYaxis: {es}')
 
     @logCommand(get='self')
-    def flipXZAxis(self):
-        """Flip the X and Z axes
-        :return A new SpectrumDisplay instance
+    def flipXZAxis(self, usePosition=False):
+        """Flip the X and Z axes.
+        :param usePosition: True/False use the current mouse-position or the centre of the source strip
+        :return: A new SpectrumDisplay instance
         """
         if self.spectrumDisplay.dimensionCount < 3:
-            getLogger().warning('flipXZaxis: Too few dimensions for XZ flip')
+            getLogger().warning(f'{self.__class__.__name__}.flipXZaxis: Too few dimensions for XZ flip')
             return
 
         try:
-            display = self._flipAxes(axisOrderIndices=(2,1,0))
-        except (RuntimeError, ValueError) as es:
-            getLogger().warning('flipXZaxis: %s' % es)
-
-        return display
+            mDict = usePosition and self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+            positions = [poss[0] if (poss := mDict.get(ax)) else None
+                         for ax in self.axisCodes] if usePosition else None
+            return self._flipAxes(axisOrderIndices=(2, 1, 0), positions=positions)
+        except Exception as es:
+            getLogger().warning(f'{self.__class__.__name__}.flipXZaxis: {es}')
 
     @logCommand(get='self')
-    def flipYZAxis(self):
-        """Flip the Y and Z axes
-        :return A new SpectrumDisplay instance
+    def flipYZAxis(self, usePosition=False):
+        """Flip the Y and Z axes.
+        :param usePosition: True/False use the current mouse-position or the centre of the source strip
+        :return: A new SpectrumDisplay instance
         """
         if self.spectrumDisplay.dimensionCount < 3:
-            getLogger().warning('flipYZaxis: Too few dimensions for YZ flip')
+            getLogger().warning(f'{self.__class__.__name__}.flipYZaxis: Too few dimensions for YZ flip')
             return
 
         try:
-            display = self._flipAxes(axisOrderIndices=(0,2,1))
-        except (RuntimeError, ValueError) as es:
-            getLogger().warning('flipYZaxis: %s' % es)
-
-        return display
+            mDict = usePosition and self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+            positions = [poss[0] if (poss := mDict.get(ax)) else None
+                         for ax in self.axisCodes] if usePosition else None
+            return self._flipAxes(axisOrderIndices=(0, 2, 1), positions=positions)
+        except Exception as es:
+            getLogger().warning(f'{self.__class__.__name__}.flipYZaxis: {es}')
 
     @logCommand(get='self')
     def extractVisiblePlanes(self, openInSpectrumDisplay=True) -> list:
@@ -543,15 +556,15 @@ class GuiStripNd(GuiStrip):
 
         # for Z,A,.. axis: update the PlaneSelectorWidget values; BUT "unit" argument is ignored (GWV)
         if stripAxisIndex >= 2:
-            planeAxisBar = self.planeAxisBars[stripAxisIndex-2]
+            planeAxisBar = self.planeAxisBars[stripAxisIndex - 2]
             planeAxisBar.setPlaneValues(_axis._incrementByUnit,
                                         _axis._minLimitByUnit,
                                         _axis._maxLimitByUnit,
                                         _axis._positionByUnit,
-                                        unit = _axis.unit)
+                                        unit=_axis.unit)
 
-    def _changePlane(self, stripAxisIndex: int, planeIncrement:int, planeCount = None,
-                           refresh:bool = True
+    def _changePlane(self, stripAxisIndex: int, planeIncrement: int, planeCount=None,
+                     refresh: bool = True
                      ):
         """Change the position of plane-axis defined by stripAxisIndex by increment (in points)
         :param stripAxisIndex: an index, defining an Z, A, ... plane; i.e. >= 2
@@ -571,8 +584,8 @@ class GuiStripNd(GuiStrip):
         _axis = self.axes[stripAxisIndex]
 
         _displayedNdSpectra = [ds for ds in self._displayedSpectra
-                                  if ds.spectrum.dimensionCount > 2]
-        if len(_displayedNdSpectra) == 0:
+                               if ds.spectrum.dimensionCount > 2]
+        if not _displayedNdSpectra:
             return
 
         if planeCount is not None:
@@ -613,7 +626,7 @@ class GuiStripNd(GuiStrip):
 
         self._setAxisPositionAndWidth(stripAxisIndex=stripAxisIndex,
                                       position=newPosition, width=width,
-                                      refresh = refresh
+                                      refresh=refresh
                                       )
 
     # GWV 6/1/2022: replaced by _setAxisPositionAndWidth() and _changePlane()

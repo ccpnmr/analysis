@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-08-08 19:58:03 +0100 (Mon, August 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:06 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -258,9 +258,17 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
             value = attrGetter(self.edits[attr])
 
             if getFunction: # and self.EDITMODE:
-                oldValue = getFunction(self.obj, attr, None)
+                oldValue = self._getValue(attr, getFunction, None)
                 if (value or None) != (oldValue or None):
                     return partial(self._setValue, attr, setFunction, value)
+
+    def _getValue(self, attr, getFunction, default):
+        """Function for getting the attribute, called by _queueSetValue
+
+        This can be subclassed to modify reading from the object
+        as maybe required in a new object
+        """
+        return getFunction(self.obj, attr, default)
 
     def _setValue(self, attr, setFunction, value):
         """Function for setting the attribute, called by _applyAllChanges

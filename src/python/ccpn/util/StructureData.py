@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:42 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:09 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -38,6 +38,7 @@ from ccpn.util.ListFromString import listFromString
 # from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, notificationBlanking
 from ccpn.core._implementation.DataFrameABC import DataFrameABC, fitToDataType
 
+
 # Pid.IDSEP - but we do not want to import from ccpn.core here
 IDSEP = '.'
 NaN = math.nan
@@ -47,7 +48,7 @@ class EnsembleData(DataFrameABC):
     """
     Structure Ensemble data - as a Pandas DataFrame
 
-    The structure ensemble is based on a Pandas DataFrame.  All of the functionality of DataFrames
+    The structure ensemble is based on a Pandas DataFrame.  All the functionality of DataFrames
     is available, but we have added a number of convenience methods for working with the data.
 
     In general, there are three things you may want to do with an ensemble:
@@ -278,9 +279,8 @@ class EnsembleData(DataFrameABC):
             s = s & self._funcSelector(func)
         if elements is not None:
             s = s & self._stringSelector(elements, 'element')
-        if inverse:
-            return ~s
-        return s
+
+        return ~s if inverse else s
 
     def _sequenceIdsSelector(self, expression: typing.Union[str, int, typing.Iterable]) -> pd.Series:
         """Select column sequenceId based on 'expression'
@@ -378,7 +378,7 @@ class EnsembleData(DataFrameABC):
 
         ensemble = cls()
 
-        ensemble['index'] = [ii for ii in range(1, dfs.shape[0] + 1)]
+        ensemble['index'] = list(range(1, dfs.shape[0] + 1))
         ensemble['modelNumber'] = dfs['model']
         ensemble['chainCode'] = dfs['chainID']
         ensemble['sequenceId'] = dfs['resSeq']
@@ -408,7 +408,6 @@ class EnsembleData(DataFrameABC):
     # Property type checking
     #=========================================================================================
 
-
     def _modelNumberConversion(self, force: bool = False):
         """Convert modelNumber series to valid data, changing value *in place*
         and update containingObject - or raise an error
@@ -418,9 +417,9 @@ class EnsembleData(DataFrameABC):
         ll = fitToDataType(self[key], int, force=force)
         if force:
             ll = [(x if (x and x > 0) else None) for x in ll]
-        else:
-            if any((x is not None and x < 1) for x in ll):
-                raise ValueError("Model numbers must be integers >= 1 or None")
+        elif any((x is not None and x < 1) for x in ll):
+            raise ValueError("Model numbers must be integers >= 1 or None")
+
         if None in ll:
             pd.DataFrame.__setitem__(self, key, pd.Series(ll, self.index, dtype=object))
         else:
@@ -477,9 +476,9 @@ class EnsembleData(DataFrameABC):
         ll = fitToDataType(self[key], float, force=force)
         if force:
             ll = [(x if 0 <= x <= 1 else NaN) for x in ll]
-        else:
-            if any((x < 0 or x > 1) for x in ll):
-                raise ValueError("Occupancies must be in the range 0 <= x <= 1")
+        elif any((x < 0 or x > 1) for x in ll):
+            raise ValueError("Occupancies must be in the range 0 <= x <= 1")
+
         pd.DataFrame.__setitem__(self, key, pd.Series(ll, self.index, dtype=float))
 
     # Custom string representation
@@ -520,19 +519,13 @@ def pdb2df(filename: str) -> pd.DataFrame:
             if l.startswith('MODEL'):
                 if len(pdbString) > 0:
                     df = _pdbStringToDf(pdbString, modelNumber)
-                    if dfs is None:
-                        dfs = df
-                    else:
-                        dfs = dfs.append(df)
+                    dfs = df if dfs is None else dfs.append(df)
                     pdbString = []
                 modelNumber = l.split()[1]
             elif l.startswith('ATOM'):
                 pdbString.append(l)
         df = _pdbStringToDf(pdbString, modelNumber)
-        if dfs is None:
-            dfs = df
-        else:
-            dfs = dfs.append(df)
+        dfs = df if dfs is None else dfs.append(df)
     dfs['idx'] = numpy.arange(dfs.shape[0]) + 1
     dfs.set_index('idx', inplace=True)
     return dfs
@@ -580,3 +573,7 @@ def averageStructure(ensemble: EnsembleData) -> EnsembleData:
     df = df.reset_index()
 
     return df
+
+
+# register the class with DataFrameABC for json loading/saving
+EnsembleData.register()

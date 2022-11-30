@@ -214,11 +214,17 @@ class SpectrumDimensionAttributes(object):
         """A property derived from aliasingLimits.
         Number of times the spectralWidth are folded.
         :returns tuple(minFoldingIndex, maxFoldingIndex)
+        NB: minFoldingIndex <= 0
+            maxFoldingIndex >= 0
         """
         aLimits = self.aliasingLimits
         sLimits = sorted(self.spectrumLimits)
         minIndex = round( (aLimits[0]-sLimits[0]) / self.spectralWidth)
+        if minIndex > 0:
+            minIndex *= -1
         maxIndex = round( (aLimits[1]-sLimits[1]) / self.spectralWidth)
+        if maxIndex < 0:
+            maxIndex *= -1
         return (minIndex, maxIndex)
 
     @aliasingIndexes.setter
@@ -491,10 +497,10 @@ class SpectrumDimensionAttributes(object):
 
     @assignmentTolerance.setter
     def assignmentTolerance(self, value):
-        # has to be >= than 0.0
+        # has to be > than 0.0
         if value is not None:
             value = max(value, 0.0)
-        self._dataDimRef.assignmentTolerance = value
+        self._dataDimRef.assignmentTolerance = value or None
 
     @property
     def defaultAssignmentTolerance(self) -> float:

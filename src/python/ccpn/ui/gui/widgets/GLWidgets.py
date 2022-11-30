@@ -1,6 +1,7 @@
 """
 Module Documentation here
 """
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -10,12 +11,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:07 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,10 +28,11 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 
 import numpy as np
-from itertools import zip_longest
+from itertools import zip_longest, product
 
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.core.lib.peakUtils import movePeak
+from ccpn.core.lib.SpectrumLib import CoherenceOrder
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs, GL
 from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode, PICK
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLVertexArray, GLRENDERMODE_DRAW, \
@@ -78,7 +80,6 @@ class GuiNdWidget(CcpnGLWidget):
                     for peak in peakList.peaks:
                         try:
                             if len(peak.axisCodes) > 2 and zPositions is not None:
-
                                 zAxis = spectrumIndices[2]
 
                                 if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
@@ -92,12 +93,11 @@ class GuiNdWidget(CcpnGLWidget):
                                         peaks.append(peak)
                                         if firstOnly:
                                             return peaks
-                            else:
-                                if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
-                                        and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
-                                    peaks.append(peak)
-                                    if firstOnly:
-                                        return peaks if peak in self.current.peaks else []
+                            elif (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
+                                  and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
+                                peaks.append(peak)
+                                if firstOnly:
+                                    return peaks if peak in self.current.peaks else []
 
                         except Exception:
                             # NOTE:ED - skip for now
@@ -135,7 +135,6 @@ class GuiNdWidget(CcpnGLWidget):
                             continue
 
                         if len(multiplet.axisCodes) > 2 and zPositions is not None:
-
                             zAxis = spectrumIndices[2]
 
                             if (xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1]
@@ -149,12 +148,11 @@ class GuiNdWidget(CcpnGLWidget):
                                     multiplets.append(multiplet)
                                     if firstOnly:
                                         return multiplets
-                        else:
-                            if (xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1]
-                                    and yPositions[0] < float(multiplet.position[yAxis]) < yPositions[1]):
-                                multiplets.append(multiplet)
-                                if firstOnly:
-                                    return multiplets if multiplet in self.current.multiplets else []
+                        elif (xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1]
+                              and yPositions[0] < float(multiplet.position[yAxis]) < yPositions[1]):
+                            multiplets.append(multiplet)
+                            if firstOnly:
+                                return multiplets if multiplet in self.current.multiplets else []
 
         return multiplets
 
@@ -177,7 +175,23 @@ class GuiNdWidget(CcpnGLWidget):
 
         for specView in tuple(self._spectrumSettings.keys()):
             if specView not in self._ordering:
-                del self._spectrumSettings[specView]
+                getLogger().debug(f'>>>_updateVisibleSpectrumViews GLWidgets  nD   delete {specView} {id(specView)}')
+                getLogger().debug(f'>>> _ordering {[id(spec) for spec in self._ordering]}')
+                if specView in self._spectrumSettings:
+                    del self._spectrumSettings[specView]
+                if specView in self._contourList:
+                    self._contourList[specView]._delete()
+                    del self._contourList[specView]
+                if specView in self._visibleOrdering:
+                    self._visibleOrdering.remove(specView)
+                for k in self._visibleOrderingDict:
+                    sp, _dd = k
+                    if sp == specView:
+                        self._visibleOrderingDict.remove(k)
+                        break
+                self._GLPeaks._delete()
+                self._GLIntegrals._delete()
+                self._GLMultiplets._delete()
 
                 # delete the 1d string relating to the spectrumView
                 self._spectrumLabelling.removeString(specView)
@@ -326,7 +340,7 @@ class GuiNdWidget(CcpnGLWidget):
                                   self.axisT, -1.0, 1.0)
         _shader.setPTexMatrix(self._uPMatrix)
 
-        self._axisScale[0:4] = [self.pixelX, self.pixelY, 0.0, 1.0]
+        self._axisScale[:4] = [self.pixelX, self.pixelY, 0.0, 1.0]
         _shader.setAxisScale(self._axisScale)
         _shader.setStackOffset(np.array((0.0, 0.0), dtype=np.float32))
 
@@ -372,38 +386,35 @@ class GuiNdWidget(CcpnGLWidget):
                 alias = specSettings[GLDefs.SPECTRUM_ALIASINGINDEX]
                 folding = specSettings[GLDefs.SPECTRUM_FOLDINGMODE]
 
-                for ii in range(alias[0][0], alias[0][1] + 1, 1):
-                    for jj in range(alias[1][0], alias[1][1] + 1, 1):
+                for ii, jj in product(range(alias[0][0], alias[0][1] + 1), range(alias[1][0], alias[1][1] + 1)):
+                    foldX = foldY = 1.0
+                    foldXOffset = foldYOffset = 0
+                    if folding[0] == 'mirror':
+                        foldX = pow(-1, ii)
+                        foldXOffset = -dxAF if foldX < 0 else 0
+                    if folding[1] == 'mirror':
+                        foldY = pow(-1, jj)
+                        foldYOffset = -dyAF if foldY < 0 else 0
 
-                        foldX = foldY = 1.0
-                        foldXOffset = foldYOffset = 0
-                        if folding[0] == 'mirror':
-                            foldX = pow(-1, ii)
-                            foldXOffset = -dxAF if foldX < 0 else 0
-                        if folding[1] == 'mirror':
-                            foldY = pow(-1, jj)
-                            foldYOffset = -dyAF if foldY < 0 else 0
+                    self._axisScale[:4] = [foldX * self.pixelX / xScale, foldY * self.pixelY / yScale, 0.0, 1.0]
 
-                        self._axisScale[0:4] = [foldX * self.pixelX / xScale,
-                                                foldY * self.pixelY / yScale,
-                                                0.0, 1.0]
-                        _shader.setAxisScale(self._axisScale)
+                    _shader.setAxisScale(self._axisScale)
 
-                        specMatrix[0:16] = [xScale * foldX, 0.0, 0.0, 0.0,
-                                            0.0, yScale * foldY, 0.0, 0.0,
-                                            0.0, 0.0, 1.0, 0.0,
-                                            fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0]
+                    specMatrix[:16] = [xScale * foldX, 0.0, 0.0, 0.0,
+                                       0.0, yScale * foldY, 0.0, 0.0,
+                                       0.0, 0.0, 1.0, 0.0,
+                                       fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0]
 
-                        # flipping in the same GL region -  xScale = -xScale
-                        #                                   offset = fx0-dxAF
-                        # circular -    offset = fx0 + dxAF*alias, alias = min->max
-                        _shader.setMVMatrix(specMatrix)
-                        _shader.setAliasPosition(ii, jj)
+                    # flipping in the same GL region -  xScale = -xScale
+                    #                                   offset = fx0-dxAF
+                    # circular -    offset = fx0 + dxAF*alias, alias = min->max
+                    _shader.setMVMatrix(specMatrix)
+                    _shader.setAliasPosition(ii, jj)
 
-                        if self._peakLabelsEnabled:
-                            self._GLPeaks.drawLabels(specView)
-                        if self._multipletLabelsEnabled:
-                            self._GLMultiplets.drawLabels(specView)
+                    if self._peakLabelsEnabled:
+                        self._GLPeaks.drawLabels(specView)
+                    if self._multipletLabelsEnabled:
+                        self._GLMultiplets.drawLabels(specView)
 
     def drawAliasedSymbols(self):
         """Draw all the symbols that require aliasing to multiple regions
@@ -456,31 +467,29 @@ class GuiNdWidget(CcpnGLWidget):
                 alias = specSettings[GLDefs.SPECTRUM_ALIASINGINDEX]
                 folding = specSettings[GLDefs.SPECTRUM_FOLDINGMODE]
 
-                for ii in range(alias[0][0], alias[0][1] + 1, 1):
-                    for jj in range(alias[1][0], alias[1][1] + 1, 1):
+                for ii, jj in product(range(alias[0][0], alias[0][1] + 1), range(alias[1][0], alias[1][1] + 1)):
+                    foldX = foldY = 1.0
+                    foldXOffset = foldYOffset = 0
+                    if folding[0] == 'mirror':
+                        foldX = pow(-1, ii)
+                        foldXOffset = -dxAF if foldX < 0 else 0
+                    if folding[1] == 'mirror':
+                        foldY = pow(-1, jj)
+                        foldYOffset = -dyAF if foldY < 0 else 0
 
-                        foldX = foldY = 1.0
-                        foldXOffset = foldYOffset = 0
-                        if folding[0] == 'mirror':
-                            foldX = pow(-1, ii)
-                            foldXOffset = -dxAF if foldX < 0 else 0
-                        if folding[1] == 'mirror':
-                            foldY = pow(-1, jj)
-                            foldYOffset = -dyAF if foldY < 0 else 0
+                    specMatrix[:16] = [xScale * foldX, 0.0, 0.0, 0.0,
+                                       0.0, yScale * foldY, 0.0, 0.0,
+                                       0.0, 0.0, 1.0, 0.0,
+                                       fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0]
 
-                        specMatrix[0:16] = [xScale * foldX, 0.0, 0.0, 0.0,
-                                            0.0, yScale * foldY, 0.0, 0.0,
-                                            0.0, 0.0, 1.0, 0.0,
-                                            fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0]
+                    # flipping in the same GL region -  xScale = -xScale
+                    #                                   offset = fx0-dxAF
+                    # circular -    offset = fx0 + dxAF*alias, alias = min->max
+                    _shader.setMVMatrix(specMatrix)
+                    _shader.setAliasPosition(ii, jj)
 
-                        # flipping in the same GL region -  xScale = -xScale
-                        #                                   offset = fx0-dxAF
-                        # circular -    offset = fx0 + dxAF*alias, alias = min->max
-                        _shader.setMVMatrix(specMatrix)
-                        _shader.setAliasPosition(ii, jj)
-
-                        self._GLPeaks.drawSymbols(specView)
-                        self._GLMultiplets.drawSymbols(specView)
+                    self._GLPeaks.drawSymbols(specView)
+                    self._GLMultiplets.drawSymbols(specView)
 
         GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
 
@@ -498,8 +507,6 @@ class GuiNdWidget(CcpnGLWidget):
         # set transform to identity - ensures only the pMatrix is applied
         currentShader.setMVMatrix(self._IMatrix)
 
-        # build the bounding boxes
-        index = 0
         drawList = self.boundingBoxes
 
         # NOTE:ED - shouldn't need to build this every time :|
@@ -507,6 +514,8 @@ class GuiNdWidget(CcpnGLWidget):
 
         # if self._preferences.showSpectrumBorder:
         if self.strip.spectrumBordersVisible:
+            # build the bounding boxes
+            index = 0
             for spectrumView in self._ordering:
 
                 if spectrumView.isDeleted:
@@ -522,7 +531,7 @@ class GuiNdWidget(CcpnGLWidget):
 
                     try:
                         _posColour = spectrumView.posColours[0]
-                        col = (*_posColour[0:3], 0.5)
+                        col = *_posColour[:3], 0.5
                     except Exception as es:
                         col = (0.9, 0.1, 0.2, 0.5)
 
@@ -601,30 +610,28 @@ class GuiNdWidget(CcpnGLWidget):
 
                     specMatrix = np.array(specSettings[GLDefs.SPECTRUM_MATRIX], dtype=np.float32)
 
-                    for ii in range(alias[0][0], alias[0][1] + 1, 1):
-                        for jj in range(alias[1][0], alias[1][1] + 1, 1):
+                    for ii, jj in product(range(alias[0][0], alias[0][1] + 1), range(alias[1][0], alias[1][1] + 1)):
+                        foldX = foldY = 1.0
+                        foldXOffset = foldYOffset = 0
+                        if folding[0] == 'mirror':
+                            foldX = pow(-1, ii)
+                            foldXOffset = -dxAF if foldX < 0 else 0
 
-                            foldX = foldY = 1.0
-                            foldXOffset = foldYOffset = 0
-                            if folding[0] == 'mirror':
-                                foldX = pow(-1, ii)
-                                foldXOffset = -dxAF if foldX < 0 else 0
+                        if folding[1] == 'mirror':
+                            foldY = pow(-1, jj)
+                            foldYOffset = -dyAF if foldY < 0 else 0
 
-                            if folding[1] == 'mirror':
-                                foldY = pow(-1, jj)
-                                foldYOffset = -dyAF if foldY < 0 else 0
+                        specMatrix[:16] = [xScale * foldX, 0.0, 0.0, 0.0,
+                                           0.0, yScale * foldY, 0.0, 0.0,
+                                           0.0, 0.0, 1.0, 0.0,
+                                           fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0]
 
-                            specMatrix[0:16] = [xScale * foldX, 0.0, 0.0, 0.0,
-                                                0.0, yScale * foldY, 0.0, 0.0,
-                                                0.0, 0.0, 1.0, 0.0,
-                                                fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0]
+                        # flipping in the same GL region -  xScale = -xScale
+                        #                                   offset = fxMax-dxAF
+                        # circular -    offset = fxMax + dxAF*alias, alias = min->max
+                        currentShader.setMVMatrix(specMatrix)
 
-                            # flipping in the same GL region -  xScale = -xScale
-                            #                                   offset = fxMax-dxAF
-                            # circular -    offset = fxMax + dxAF*alias, alias = min->max
-                            currentShader.setMVMatrix(specMatrix)
-
-                            self._contourList[spectrumView].drawIndexVBO()
+                        self._contourList[spectrumView].drawIndexVBO()
 
                 else:
                     # set the scaling/offset for a single spectrum GL contour
@@ -636,7 +643,8 @@ class GuiNdWidget(CcpnGLWidget):
         # reset lineWidth
         GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
 
-    def _drawDiagonalLineV2(self, x0, x1, y0, y1):
+    @staticmethod
+    def _drawDiagonalLineV2(x0, x1, y0, y1):
         """Generate a simple diagonal mapped to (0..1/0..1)
         """
         yy0 = float(x0 - y0) / (y1 - y0)
@@ -687,25 +695,35 @@ class GuiNdWidget(CcpnGLWidget):
                 specSettings = self._spectrumSettings[spectrumView]
                 pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
 
+                xco = yco = 1.0
                 if not diagonalCount:
                     # add lines to drawList
                     if self._matchingIsotopeCodes:
-                        mTypes = spectrumView.spectrum.measurementTypes
+                        # mTypes = spectrumView.spectrum.measurementTypes
+                        mTypes = [CoherenceOrder[co] for co in spectrumView.spectrum.coherenceOrders]
                         xaxisType = mTypes[pIndex[0]]
                         yaxisType = mTypes[pIndex[1]]
 
+                        # # extra multiple-quantum diagonals
+                        # if xaxisType == 'MQShift' and yaxisType == 'Shift':
+                        #     self._addDiagonalLine(drawList, x0, x1, 2 * y0, 2 * y1, col)
+                        # elif xaxisType == 'Shift' and yaxisType == 'MQShift':
+                        #     self._addDiagonalLine(drawList, 2 * x0, 2 * x1, y0, y1, col)
+
                         # extra multiple-quantum diagonals
-                        if xaxisType == 'MQShift' and yaxisType == 'Shift':
-                            self._addDiagonalLine(drawList, x0, x1, 2 * y0, 2 * y1, col)
-                        elif xaxisType == 'Shift' and yaxisType == 'MQShift':
-                            self._addDiagonalLine(drawList, 2 * x0, 2 * x1, y0, y1, col)
+                        if 0 < yaxisType.value < xaxisType.value:
+                            yco = xaxisType.value / yaxisType.value
+                            self._addDiagonalLine(drawList, x0, x1, yco * y0, yco * y1, col)
+                        elif 0 < xaxisType.value < yaxisType.value:
+                            xco = yaxisType.value / xaxisType.value
+                            self._addDiagonalLine(drawList, xco * x0, xco * x1, y0, y1, col)
+
                         else:
                             # add the standard diagonal
                             self._addDiagonalLine(drawList, x0, x1, y0, y1, col)
                     diagonalCount += 1
 
-                spinningRate = spectrumView.spectrum.spinningRate
-                if spinningRate:
+                if spinningRate := spectrumView.spectrum.spinningRate:
                     sFreqs = spectrumView.spectrum.spectrometerFrequencies
                     spinningRate /= sFreqs[pIndex[0]]  # might need to pick the correct axis here
 
@@ -715,7 +733,10 @@ class GuiNdWidget(CcpnGLWidget):
                     for n in range(nmin, nmax + 1):
                         if n:
                             # add lines to drawList
-                            self._addDiagonalLine(drawListSideBands, x0 + n * spinningRate, x1 + n * spinningRate, y0, y1, col)
+                            if xco > yco:
+                                self._addDiagonalLine(drawListSideBands, (xco * x0) + n * spinningRate, (xco * x1) + n * spinningRate, yco * y0, yco * y1, col)
+                            else:
+                                self._addDiagonalLine(drawListSideBands, xco * x0, xco * x1, (yco * y0) + n * spinningRate, (yco * y1) + n * spinningRate, col)
 
         drawList.defineIndexVBO()
         drawListSideBands.defineIndexVBO()
@@ -730,13 +751,13 @@ class GuiNdWidget(CcpnGLWidget):
             if specView.isDeleted:
                 continue
 
-            spec = specView.spectrum
-
             # inside the paint event, so sometimes specView may not exist
             if specView in self._spectrumSettings:
                 pIndex = self._spectrumSettings[specView][GLDefs.SPECTRUM_POINTINDEX]
 
                 if pIndex and None not in pIndex:
+                    spec = specView.spectrum
+
                     if spec.isotopeCodes[pIndex[0]] == spec.isotopeCodes[pIndex[1]]:
                         self._matchingIsotopeCodes = True
 
@@ -813,13 +834,13 @@ class GuiNdWidget(CcpnGLWidget):
         self._rangeXDefined = True
         self._rangeYDefined = True
 
-        # create modelview matrix for the spectrum to be drawn
+        # create model-view matrix for the spectrum to be drawn
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
 
-        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX][0:16] = [xScale, 0.0, 0.0, 0.0,
-                                                                              0.0, yScale, 0.0, 0.0,
-                                                                              0.0, 0.0, 1.0, 0.0,
-                                                                              fxMax, fyMax, 0.0, 1.0]
+        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX][:16] = [xScale, 0.0, 0.0, 0.0,
+                                                                             0.0, yScale, 0.0, 0.0,
+                                                                             0.0, 0.0, 1.0, 0.0,
+                                                                             fxMax, fyMax, 0.0, 1.0]
         # setup information for the horizontal/vertical traces
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XLIMITS] = (fxMin, fxMax)
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YLIMITS] = (fyMin, fyMax)
@@ -860,113 +881,207 @@ class GuiNdWidget(CcpnGLWidget):
     def buildCursors(self):
         """Build and draw the cursors/doubleCursors
         """
-        if not self._disableCursorUpdate and self._crosshairVisible:
+        if self._disableCursorUpdate or not self._crosshairVisible:
+            return
 
-            # get the next cursor drawList
-            self._advanceGLCursor()
-            drawList = self._glCursorQueue[self._glCursorHead]
-            vertices = []
-            indices = []
-            index = 0
+        # get the next cursor drawList
+        self._advanceGLCursor()
+        drawList = self._glCursorQueue[self._glCursorHead]
+        vertices = []
+        indices = []
+        index = 0
 
-            # map the cursor to the ratio coordinates - double cursor is flipped about the line x=y
+        # map the cursor to the ratio coordinates - double cursor is flipped about the line x=y, or depends on SQ-DQ-TQ status
+        cursorCoordinate = self.getCurrentCursorCoordinate()
+        newCoords = self._scaleAxisToRatio(cursorCoordinate[:2])
+        # doubleCoords = self._scaleAxisToRatio(self.getCurrentDoubleCursorCoordinates()[0:2])
 
-            cursorCoordinate = self.getCurrentCursorCoordinate()
+        if getCurrentMouseMode() == PICK and self.underMouse():
 
-            newCoords = self._scaleAxisToRatio(cursorCoordinate[0:2])
-            # doubleCoords = self._scaleAxisToRatio(self.getCurrentDoubleCursorCoordinates()[0:2])
+            x = self.deltaX * 8
+            y = self.deltaY * 8
 
-            if getCurrentMouseMode() == PICK and self.underMouse():
+            vertices = [newCoords[0] - x, newCoords[1] - y,
+                        newCoords[0] + x, newCoords[1] - y,
+                        newCoords[0] + x, newCoords[1] - y,
+                        newCoords[0] + x, newCoords[1] + y,
+                        newCoords[0] + x, newCoords[1] + y,
+                        newCoords[0] - x, newCoords[1] + y,
+                        newCoords[0] - x, newCoords[1] + y,
+                        newCoords[0] - x, newCoords[1] - y
+                        ]
+            indices = [0, 1, 2, 3, 4, 5, 6, 7]
+            col = self.mousePickColour
+            index = 8
 
-                x = self.deltaX * 8
-                y = self.deltaY * 8
+        else:
+            col = self.foreground
 
-                vertices = [newCoords[0] - x, newCoords[1] - y,
-                            newCoords[0] + x, newCoords[1] - y,
-                            newCoords[0] + x, newCoords[1] - y,
-                            newCoords[0] + x, newCoords[1] + y,
-                            newCoords[0] + x, newCoords[1] + y,
-                            newCoords[0] - x, newCoords[1] + y,
-                            newCoords[0] - x, newCoords[1] + y,
-                            newCoords[0] - x, newCoords[1] - y
-                            ]
-                indices = [0, 1, 2, 3, 4, 5, 6, 7]
-                col = self.mousePickColour
-                index = 8
+        # dx = dy = 1.0
+        # if self._firstVisible:
+        #     idx = self._firstVisible.dimensionIndices
+        #     spec = self._firstVisible.spectrum
+        #
+        #     mTypes = [CoherenceOrder[co] for co in spec.coherenceOrders]
+        #     xaxisType = mTypes[idx[0]]
+        #     yaxisType = mTypes[idx[1]]
+        #     dx = max(dx, xaxisType.value)
+        #     dy = max(dy, yaxisType.value)
+
+        if not self.spectrumDisplay.phasingFrame.isVisible() and (coords := self.current.mouseMovedDict):
+            # NOTE:ED - new bit
+            xaxisType = yaxisType = 1
+            if self._firstVisible:
+                idx = self._firstVisible.dimensionIndices
+                spec = self._firstVisible.spectrum
+
+                mTypes = [CoherenceOrder[co] for co in spec.coherenceOrders]
+                xaxisType = mTypes[idx[0]]
+                yaxisType = mTypes[idx[1]]
+
+            # read values from isotopeCode or axisCode
+            if self.underMouse() and self._matchingIsotopeCodes and \
+                    ((0 < xaxisType.value < yaxisType.value < 3) or (0 < yaxisType.value < xaxisType.value < 3)):
+                xPosList = [cursorCoordinate[0]]
+                yPosList = [cursorCoordinate[1]]
+
+            elif self._preferences.matchAxisCode == 0:  # default - match atom type
+                atomTypes = self.spectrumDisplay.isotopeCodes
+                xPosList = list(coords[AXIS_MATCHATOMTYPE].get(atomTypes[0], []))
+                yPosList = list(coords[AXIS_MATCHATOMTYPE].get(atomTypes[1], []))
 
             else:
-                col = self.foreground
+                atCodes = self._orderedAxes
+                xPosList = list(coords[AXIS_FULLATOMNAME].get(atCodes[0].code, []))
+                yPosList = list(coords[AXIS_FULLATOMNAME].get(atCodes[1].code, []))
 
-            phasingFrame = self.spectrumDisplay.phasingFrame
-            if not phasingFrame.isVisible():
-                if (coords := self.current.mouseMovedDict):
+            foundX = []
+            foundY = []
+            # if dx > 1:
+            #     dx /= len(xPosList)
+            #     xPosList = [sum(xPosList)]
+            # if dy > 1:
+            #     dy /= len(yPosList)
+            #     yPosList = [sum(yPosList)]
 
-                    # read values from isotopeCode or axisCode
-                    if self._preferences.matchAxisCode == 0:  # default - match atom type
-                        atomTypes = self.spectrumDisplay.isotopeCodes
-                        xPosList = coords[AXIS_MATCHATOMTYPE].get(atomTypes[0], [])
-                        yPosList = coords[AXIS_MATCHATOMTYPE].get(atomTypes[1], [])
-                    else:
-                        atCodes = self._orderedAxes
-                        xPosList = coords[AXIS_FULLATOMNAME].get(atCodes[0].code, [])
-                        yPosList = coords[AXIS_FULLATOMNAME].get(atCodes[1].code, [])
+            if not self._updateVTrace and newCoords[0] is not None:
+                for pos in xPosList:
+                    x, _y = self._scaleAxisToRatio([pos, 0])
+                    if all(abs(x - val) > self.deltaX for val in foundX):
+                        # store the found value so that overlaying lines are not drawn - OpenGL uses an XOR draw mode
+                        foundX.append(x)
+                        vertices.extend([x, 1.0, x, 0.0])
+                        indices.extend([index, index + 1])
+                        index += 2
 
-                    foundX = []
-                    foundY = []
-                    if not self._updateVTrace and newCoords[0] is not None:
-                        for pos in xPosList:
-                            x, _y = self._scaleAxisToRatio([pos, 0])
-                            if all(abs(x - val) > self.deltaX for val in foundX):
+                    # if self._matchingIsotopeCodes:
+                    #     # draw the cursor reflected about the x=y line (need to check gammaRatio)
+                    #     _x, y = self._scaleAxisToRatio([0, pos])
+                    #     if all(abs(y - val) > self.deltaY for val in foundY):
+                    #         foundY.append(y)
+                    #         vertices.extend([0.0, y, 1.0, y])
+                    #         indices.extend([index, index + 1])
+                    #         index += 2
 
-                                # store the found value so that overlaying lines are not drawn - OpenGL uses an XOR draw mode
-                                foundX.append(x)
-                                vertices.extend([x, 1.0, x, 0.0])
-                                indices.extend([index, index + 1])
-                                index += 2
+            if not self._updateHTrace and newCoords[1] is not None:
+                for pos in yPosList:
+                    _x, y = self._scaleAxisToRatio([0, pos])
+                    if all(abs(y - val) > self.deltaY for val in foundY):
+                        foundY.append(y)
+                        vertices.extend([0.0, y, 1.0, y])
+                        indices.extend([index, index + 1])
+                        index += 2
 
-                            if self._matchingIsotopeCodes:
-                                # draw the cursor reflected about the x=y line (need to check gammaRatio)
-                                _x, y = self._scaleAxisToRatio([0, pos])
-                                if all(abs(y - val) > self.deltaY for val in foundY):
-                                    foundY.append(y)
-                                    vertices.extend([0.0, y, 1.0, y])
-                                    indices.extend([index, index + 1])
-                                    index += 2
+                    # if self._matchingIsotopeCodes:
+                    #     # draw the cursor reflected about the x=y line (need to check gammaRatio)
+                    #     x, _y = self._scaleAxisToRatio([pos, 0])
+                    #     if all(abs(x - val) > self.deltaX for val in foundX):
+                    #         foundX.append(x)
+                    #         vertices.extend([x, 1.0, x, 0.0])
+                    #         indices.extend([index, index + 1])
+                    #         index += 2
 
-                    if not self._updateHTrace and newCoords[1] is not None:
-                        for pos in yPosList:
-                            _x, y = self._scaleAxisToRatio([0, pos])
-                            if all(abs(y - val) > self.deltaY for val in foundY):
-                                foundY.append(y)
-                                vertices.extend([0.0, y, 1.0, y])
-                                indices.extend([index, index + 1])
-                                index += 2
+                    # mTypes = [CoherenceOrder[co] for co in spectrumView.spectrum.coherenceOrders]
+                    # xaxisType = mTypes[pIndex[0]]
+                    # yaxisType = mTypes[pIndex[1]]
 
-                            if self._matchingIsotopeCodes:
-                                # draw the cursor reflected about the x=y line (need to check gammaRatio)
-                                x, _y = self._scaleAxisToRatio([pos, 0])
-                                if all(abs(x - val) > self.deltaX for val in foundX):
-                                    foundX.append(x)
-                                    vertices.extend([x, 1.0, x, 0.0])
-                                    indices.extend([index, index + 1])
-                                    index += 2
+            # if self._firstVisible and self._matchingIsotopeCodes and len(yPosList) == 2:
+            #     idx = self._firstVisible.dimensionIndices
+            #     spec = self._firstVisible.spectrum
+            #
+            #     mTypes = [CoherenceOrder[co] for co in spec.coherenceOrders]
+            #     xaxisType = mTypes[idx[0]]
+            #     yaxisType = mTypes[idx[1]]
+            #
+            #     # extra multiple-quantum axes
+            #     if 0 < yaxisType.value < xaxisType.value:
+            #         x, _y = self._scaleAxisToRatio([sum(yPosList), 0])
+            #         if all(abs(x - val) > self.deltaX for val in foundX):
+            #             foundX.append(x)
+            #             vertices.extend([x, 1.0, x, 0.0])
+            #             indices.extend([index, index + 1])
+            #             index += 2
+            #
+            #     elif 0 < xaxisType.value < yaxisType.value:
+            #         _x, y = self._scaleAxisToRatio([0, sum(xPosList)])
+            #         if all(abs(y - val) > self.deltaY for val in foundY):
+            #             foundY.append(y)
+            #             vertices.extend([0.0, y, 1.0, y])
+            #             indices.extend([index, index + 1])
+            #             index += 2
 
-            drawList.vertices = np.array(vertices, dtype=np.float32)
-            drawList.indices = np.array(indices, dtype=np.int32)
-            drawList.numVertices = len(vertices) // 2
-            drawList.colors = np.array(col * drawList.numVertices, dtype=np.float32)
+            # NOTE:ED - new bit
+            if self._firstVisible and self._matchingIsotopeCodes:
+                # idx = self._firstVisible.dimensionIndices
+                # spec = self._firstVisible.spectrum
+                #
+                # mTypes = [CoherenceOrder[co] for co in spec.coherenceOrders]
+                # xaxisType = mTypes[idx[0]]
+                # yaxisType = mTypes[idx[1]]
 
-            # build and draw the VBO
-            drawList.defineIndexVBO()
+                # extra zero/double-quantum axes
+                if (0 < xaxisType.value < yaxisType.value < 3):
+                    if len(xPosList) == 1 and len(yPosList) == 1:
+                        xPosList.append(yPosList[0])
+                    if len(xPosList) == 2:
+                        # y is the double-quantum axis
+                        xx = xPosList[1] - xPosList[0]
+                        x, _y = self._scaleAxisToRatio([xx, 0])
+                        if all(abs(x - val) > self.deltaX for val in foundX):
+                            foundX.append(x)
+                            vertices.extend([x, 1.0, x, 0.0])
+                            indices.extend([index, index + 1])
+                            index += 2
+
+                elif (0 < yaxisType.value < xaxisType.value < 3):
+                    if len(xPosList) == 1 and len(yPosList) == 1:
+                        yPosList.insert(0, xPosList[0])
+                    if len(yPosList) == 2:
+                        # x is the double-quantum axis
+                        yy = yPosList[0] - yPosList[1]
+                        _x, y = self._scaleAxisToRatio([0, yy])
+                        if all(abs(y - val) > self.deltaY for val in foundY):
+                            foundY.append(y)
+                            vertices.extend([0.0, y, 1.0, y])
+                            indices.extend([index, index + 1])
+                            index += 2
+
+        drawList.vertices = np.array(vertices, dtype=np.float32)
+        drawList.indices = np.array(indices, dtype=np.int32)
+        drawList.numVertices = len(vertices) // 2
+        drawList.colors = np.array(col * drawList.numVertices, dtype=np.float32)
+
+        # build and draw the VBO
+        drawList.defineIndexVBO()
 
     def _updateMouseDict(self, cursorCoordinate):
         try:
             mouseMovedDict = self.current.mouseMovedDict
-        except:
+        except Exception:
             # initialise a new mouse moved dict
-            mouseMovedDict = {MOUSEDICTSTRIP          : self.strip,
-                              AXIS_MATCHATOMTYPE      : {},
-                              AXIS_FULLATOMNAME       : {},
+            mouseMovedDict = {MOUSEDICTSTRIP    : self.strip,
+                              AXIS_MATCHATOMTYPE: {},
+                              AXIS_FULLATOMNAME : {},
                               }
 
         xPos = yPos = 0
@@ -988,21 +1103,42 @@ class GuiNdWidget(CcpnGLWidget):
             ats.append(pos)
             atcs.append(pos)
 
-        if self._matchingIsotopeCodes:
-            # add a copy to show the reflected ppm values
-            for n, (atomType, axis) in enumerate(zip(self.spectrumDisplay.isotopeCodes, self._orderedAxes)):
-                ats = atTypes.setdefault(atomType, [])
-                atcs = atCodes.setdefault(axis.code, [])
-                if n == 0:
-                    xPos = pos = cursorCoordinate[1]
-                elif n == 1:
-                    yPos = pos = cursorCoordinate[0]
-                else:
-                    # can ignore the rest
-                    break
+        # if self._matchingIsotopeCodes:
+        #     # add a copy to show the reflected ppm values
+        #     for n, (atomType, axis) in enumerate(zip(self.spectrumDisplay.isotopeCodes, self._orderedAxes)):
+        #         ats = atTypes.setdefault(atomType, [])
+        #         atcs = atCodes.setdefault(axis.code, [])
+        #         if n == 0:
+        #             xPos = pos = cursorCoordinate[1]
+        #         elif n == 1:
+        #             yPos = pos = cursorCoordinate[0]
+        #         else:
+        #             # can ignore the rest
+        #             break
+        #
+        #         ats.append(pos)
+        #         atcs.append(pos)
 
-                ats.append(pos)
-                atcs.append(pos)
+        # if self._firstVisible and self._matchingIsotopeCodes:
+        #     idx = self._firstVisible.dimensionIndices
+        #     spec = self._firstVisible.spectrum
+        #
+        #     mTypes = [CoherenceOrder[co] for co in spec.coherenceOrders]
+        #     xaxisType = mTypes[idx[0]]
+        #     yaxisType = mTypes[idx[1]]
+        #
+        #     # add a copy to show the reflected ppm values
+        #     for n, (atomType, axis) in enumerate(zip(self.spectrumDisplay.isotopeCodes, self._orderedAxes)):
+        #         ats = atTypes.setdefault(atomType, [])
+        #         atcs = atCodes.setdefault(axis.code, [])
+        #         if n == 0 and 0 < xaxisType.value < xaxisType.value:
+        #             # x-axis and y-axis is DQ or more
+        #             ats.append(xPos-yPos)
+        #             atcs.append(xPos-yPos)
+        #         elif n == 1 and 0 < xaxisType.value < yaxisType.value:
+        #             # y-axis and x-axis is DQ or more
+        #             ats.append(yPos-xPos)
+        #             atcs.append(yPos-xPos)
 
         self.current.cursorPosition = (xPos, yPos)
         self.current.mouseMovedDict = mouseMovedDict
@@ -1040,13 +1176,13 @@ class GuiNdWidget(CcpnGLWidget):
             dyAF = fyMax - fyMin
             yScale = dy * dyAF / self._spectrumValues[1].pointCount
 
-            # create modelview matrix for the spectrum to be drawn
+            # create model-view matrix for the spectrum to be drawn
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
 
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX][0:16] = [xScale, 0.0, 0.0, 0.0,
-                                                                                  0.0, yScale, 0.0, 0.0,
-                                                                                  0.0, 0.0, 1.0, 0.0,
-                                                                                  fxMax, fyMax, 0.0, 1.0]
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX][:16] = [xScale, 0.0, 0.0, 0.0,
+                                                                                 0.0, yScale, 0.0, 0.0,
+                                                                                 0.0, 0.0, 1.0, 0.0,
+                                                                                 fxMax, fyMax, 0.0, 1.0]
             # setup information for the horizontal/vertical traces
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XLIMITS] = (fxMin, fxMax)
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YLIMITS] = (fyMin, fyMax)
@@ -1095,7 +1231,6 @@ class Gui1dWidget(CcpnGLWidget):
                 if spectrumView.isDisplayed and peakListView.isDisplayed:
 
                     peakList = peakListView.peakList
-
                     for peak in peakList.peaks:
                         try:
                             if (xPositions[0] < float(peak.position[0]) < xPositions[1]
@@ -1121,8 +1256,8 @@ class Gui1dWidget(CcpnGLWidget):
             for reg in self._GLIntegrals._GLSymbols.values():
                 if not reg.integralListView.isDisplayed or not reg.spectrumView.isDisplayed:
                     continue
-                integralPressed = self.mousePressIn1DArea(reg._regions)
-                if integralPressed:
+
+                if integralPressed := self.mousePressIn1DArea(reg._regions):
                     for ilp in integralPressed:
                         obj = ilp[0]._object
                         integrals.append(obj)
@@ -1176,7 +1311,7 @@ class Gui1dWidget(CcpnGLWidget):
 
             x = spectrumView.spectrum.positions
             colour = spectrumView._getColour(self.SPECTRUMPOSCOLOUR, '#aaaaaa')
-            colR = int(colour.strip('# ')[0:2], 16) / 255.0
+            colR = int(colour.strip('# ')[:2], 16) / 255.0
             colG = int(colour.strip('# ')[2:4], 16) / 255.0
             colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
@@ -1228,7 +1363,7 @@ class Gui1dWidget(CcpnGLWidget):
     def _updatePhasingColour(self):
         for trace in self._staticHTraces:
             colour = trace.spectrumView._getColour(self.SPECTRUMPOSCOLOUR, '#aaaaaa')
-            colR = int(colour.strip('# ')[0:2], 16) / 255.0
+            colR = int(colour.strip('# ')[:2], 16) / 255.0
             colG = int(colour.strip('# ')[2:4], 16) / 255.0
             colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
@@ -1296,17 +1431,28 @@ class Gui1dWidget(CcpnGLWidget):
     def _updateVisibleSpectrumViews(self):
         """Update the list of visible spectrumViews when change occurs
         """
-
         # make the list of ordered spectrumViews
-        self._ordering = self.strip.getSpectrumViews()
-
-        self._ordering = [specView for specView in self._ordering]
+        self._ordering = list(self.strip.getSpectrumViews())
 
         for specView in tuple(self._spectrumSettings.keys()):
             if specView not in self._ordering:
-                # print('>>>_updateVisibleSpectrumViews delete', specView, id(specView))
-                # print('>>>', [id(spec) for spec in self._ordering])
-                del self._spectrumSettings[specView]
+                getLogger().debug(f'>>>_updateVisibleSpectrumViews GLWidgets  1D   delete {specView} {id(specView)}')
+                getLogger().debug(f'>>> _ordering {[id(spec) for spec in self._ordering]}')
+                if specView in self._spectrumSettings:
+                    del self._spectrumSettings[specView]
+                if specView in self._contourList:
+                    self._contourList[specView]._delete()
+                    del self._contourList[specView]
+                if specView in self._visibleOrdering:
+                    self._visibleOrdering.remove(specView)
+                for k in self._visibleOrderingDict:
+                    sp, _dd = k
+                    if sp == specView:
+                        self._visibleOrderingDict.remove(k)
+                        break
+                self._GLPeaks._delete()
+                self._GLIntegrals._delete()
+                self._GLMultiplets._delete()
 
                 # delete the 1d string relating to the spectrumView
                 self._spectrumLabelling.removeString(specView)
@@ -1336,10 +1482,7 @@ class Gui1dWidget(CcpnGLWidget):
 
         # check that the mappings are okay
         for ii, ind in enumerate(indices[:2]):
-            if ind is not None:
-                lastStartCoordinate[ii] = peak.position[ind]
-            else:
-                lastStartCoordinate[ii] = peak.height
+            lastStartCoordinate[ii] = peak.height if ind is None else peak.position[ind]
 
     def _movePeak(self, peak, deltaPosition):
         """Move the peak to new position
@@ -1365,7 +1508,7 @@ class Gui1dWidget(CcpnGLWidget):
                                   self.axisT, -1.0, 1.0)
         _shader.setPTexMatrix(self._uPMatrix)
 
-        self._axisScale[0:4] = [self.pixelX, self.pixelY, 0.0, 1.0]
+        self._axisScale[:4] = [self.pixelX, self.pixelY, 0.0, 1.0]
         _shader.setAxisScale(self._axisScale)
         _shader.setStackOffset(np.array((0.0, 0.0), dtype=np.float32))
 
@@ -1394,7 +1537,7 @@ class Gui1dWidget(CcpnGLWidget):
                 alias = specSettings[GLDefs.SPECTRUM_ALIASINGINDEX]
                 folding = specSettings[GLDefs.SPECTRUM_FOLDINGMODE]
 
-                for ii in range(alias[0][0], alias[0][1] + 1, 1):
+                for ii in range(alias[0][0], alias[0][1] + 1):
 
                     foldX = 1.0
                     foldXOffset = 0
@@ -1459,7 +1602,7 @@ class Gui1dWidget(CcpnGLWidget):
                 alias = specSettings[GLDefs.SPECTRUM_ALIASINGINDEX]
                 folding = specSettings[GLDefs.SPECTRUM_FOLDINGMODE]
 
-                for ii in range(alias[0][0], alias[0][1] + 1, 1):
+                for ii in range(alias[0][0], alias[0][1] + 1):
 
                     foldX = 1.0
                     foldXOffset = 0
@@ -1548,6 +1691,8 @@ class Gui1dWidget(CcpnGLWidget):
 
     def drawSpectra(self):
         if self.strip.isDeleted:
+            return
+        if self.strip._isPhasingOn and not self.showSpectraOnPhasing:
             return
 
         currentShader = self.globalGL._shaderProgram1
@@ -1643,35 +1788,28 @@ class Gui1dWidget(CcpnGLWidget):
         #     return
 
         self._spectrumSettings[spectrumView] = {}
-
         self._spectrumValues = spectrumView.getVisibleState()
 
+        dx = dy = -1.0
         # set defaults for undefined spectra
         if not self._spectrumValues[0].pointCount:
-            dx = -1.0 if self.INVERTXAXIS else -1.0
             fxMax, fxMin = 1.0, -1.0
             fxFoldMax, fxFoldMin = 1.0, -1.0
             dxAF = fxMax - fxMin
             xScale = dx * dxAF
 
-            dy = -1.0 if self.INVERTYAXIS else -1.0
             fyMax, fyMin = 1.0, -1.0
             fyFoldMax, fyFoldMin = 1.0, -1.0
             dyAF = fyMax - fyMin
             yScale = dy * dyAF
             xAliasingIndex = (0, 0)
-            yAliasingIndex = (0, 0)
             xFoldingMode = yFoldingMode = None
 
             self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * dxAF)
             self._maxXRange = max(self._maxXRange, dxAF)
             self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * dyAF)
-            self._maxYRange = max(self._maxYRange, dyAF)
-
         else:
 
-            # get the bounding box of the spectra
-            dx = -1.0 if self.INVERTXAXIS else -1.0  # self.sign(self.axisR - self.axisL)
             fxMax, fxMin = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
             xAliasingIndex = self._spectrumValues[0].aliasingIndex
             xFoldingMode = self._spectrumValues[0].foldingMode
@@ -1684,14 +1822,11 @@ class Gui1dWidget(CcpnGLWidget):
             dxAF = fxFoldMax - fxFoldMin  # fxMax - fxMin
             xScale = dx * dxAF / self._spectrumValues[0].pointCount
 
-            dy = -1.0 if self.INVERTYAXIS else -1.0  # dy = self.sign(self.axisT - self.axisB)
-
             if spectrumView.spectrum.intensities is not None and spectrumView.spectrum.intensities.size != 0:
                 fyMax = float(np.max(spectrumView.spectrum.intensities))
                 fyMin = float(np.min(spectrumView.spectrum.intensities))
             else:
                 fyMax, fyMin = 0.0, 0.0
-            yAliasingIndex = (0, 0)
             yFoldingMode = None
 
             # check tolerances
@@ -1706,30 +1841,29 @@ class Gui1dWidget(CcpnGLWidget):
             self._maxXRange = max(self._maxXRange, dxAF)
             # self._minYRange = min(self._minYRange, 3.0 * dyAF / self.SPECTRUMYZOOM)
             self._minYRange = min(self._minYRange, self._intensityLimit)
-            self._maxYRange = max(self._maxYRange, dyAF)
-
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX] = np.zeros((16,), dtype=np.float32)
 
             # if self._stackingMode:
             stX = stackCount * self._stackingValue[0]
             stY = stackCount * self._stackingValue[1]
             # stackCount += 1
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,
-                                                                                         0.0, 1.0, 0.0, 0.0,
-                                                                                         0.0, 0.0, 1.0, 0.0,
-                                                                                         stX, stY, 0.0, 1.0]
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX][:16] = [1.0, 0.0, 0.0, 0.0,
+                                                                                        0.0, 1.0, 0.0, 0.0,
+                                                                                        0.0, 0.0, 1.0, 0.0,
+                                                                                        stX, stY, 0.0, 1.0]
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIXOFFSET] = np.array((stX, stY), dtype=np.float32)
 
+        self._maxYRange = max(self._maxYRange, dyAF)
+
+        yAliasingIndex = (0, 0)
         self._rangeXDefined = True
         self._rangeYDefined = True
 
-        # create modelview matrix for the spectrum to be drawn
+        # create model-view matrix for the spectrum to be drawn
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
 
-        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX][0:16] = [xScale, 0.0, 0.0, 0.0,
-                                                                              0.0, yScale, 0.0, 0.0,
-                                                                              0.0, 0.0, 1.0, 0.0,
-                                                                              fxMax, fyMax, 0.0, 1.0]
+        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX][:16] = [xScale, 0.0, 0.0, 0.0, 0.0, yScale, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, fxMax, fyMax, 0.0, 1.0]
+
         # setup information for the horizontal/vertical traces
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XLIMITS] = (fxMin, fxMax)
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YLIMITS] = (fyMin, fyMax)
@@ -1757,98 +1891,93 @@ class Gui1dWidget(CcpnGLWidget):
     def buildCursors(self):
         """Build and draw the cursors/doubleCursors
         """
-        if not self._disableCursorUpdate and self._crosshairVisible:
+        if self._disableCursorUpdate or not self._crosshairVisible:
+            return
 
-            # get the next cursor drawList
-            self._advanceGLCursor()
-            drawList = self._glCursorQueue[self._glCursorHead]
-            vertices = []
-            indices = []
-            index = 0
+        # get the next cursor drawList
+        self._advanceGLCursor()
+        drawList = self._glCursorQueue[self._glCursorHead]
+        vertices = []
+        indices = []
+        index = 0
 
-            # map the cursor to the ratio coordinates - double cursor is flipped about the line x=y
+        # map the cursor to the ratio coordinates - double cursor is flipped about the line x=y
+        cursorCoordinate = self.getCurrentCursorCoordinate()
+        newCoords = self._scaleAxisToRatio(cursorCoordinate[:2])
+        # doubleCoords = self._scaleAxisToRatio(self.getCurrentDoubleCursorCoordinates()[0:2])
 
-            cursorCoordinate = self.getCurrentCursorCoordinate()
+        if getCurrentMouseMode() == PICK and self.underMouse():
 
-            newCoords = self._scaleAxisToRatio(cursorCoordinate[0:2])
-            # doubleCoords = self._scaleAxisToRatio(self.getCurrentDoubleCursorCoordinates()[0:2])
+            x = self.deltaX * 8
+            y = self.deltaY * 8
 
-            if getCurrentMouseMode() == PICK and self.underMouse():
+            vertices = [newCoords[0] - x, newCoords[1] - y,
+                        newCoords[0] + x, newCoords[1] - y,
+                        newCoords[0] + x, newCoords[1] - y,
+                        newCoords[0] + x, newCoords[1] + y,
+                        newCoords[0] + x, newCoords[1] + y,
+                        newCoords[0] - x, newCoords[1] + y,
+                        newCoords[0] - x, newCoords[1] + y,
+                        newCoords[0] - x, newCoords[1] - y
+                        ]
+            indices = [0, 1, 2, 3, 4, 5, 6, 7]
+            col = self.mousePickColour
+            index = 8
 
-                x = self.deltaX * 8
-                y = self.deltaY * 8
+        else:
+            col = self.foreground
 
-                vertices = [newCoords[0] - x, newCoords[1] - y,
-                            newCoords[0] + x, newCoords[1] - y,
-                            newCoords[0] + x, newCoords[1] - y,
-                            newCoords[0] + x, newCoords[1] + y,
-                            newCoords[0] + x, newCoords[1] + y,
-                            newCoords[0] - x, newCoords[1] + y,
-                            newCoords[0] - x, newCoords[1] + y,
-                            newCoords[0] - x, newCoords[1] - y
-                            ]
-                indices = [0, 1, 2, 3, 4, 5, 6, 7]
-                col = self.mousePickColour
-                index = 8
+        if not self.spectrumDisplay.phasingFrame.isVisible() and (coords := self.current.mouseMovedDict):
+            # read values from isotopeCode or axisCode
+            if self._preferences.matchAxisCode == 0:  # default - match atom type
 
+                # add extra 'isotopeCode' so that 1D appears correctly
+                atomTypes = self.spectrumDisplay.isotopeCodes + ('intensity',)
+
+                xPosList = coords[AXIS_MATCHATOMTYPE].get(atomTypes[0], [])
+                yPosList = coords[AXIS_MATCHATOMTYPE].get(atomTypes[1], [])
             else:
-                col = self.foreground
+                atCodes = self._orderedAxes
+                xPosList = coords[AXIS_FULLATOMNAME].get(atCodes[0].code, [])
+                yPosList = coords[AXIS_FULLATOMNAME].get(atCodes[1].code, [])
 
-            phasingFrame = self.spectrumDisplay.phasingFrame
-            if not phasingFrame.isVisible():
-                if (coords := self.current.mouseMovedDict):
+            foundX = []
+            foundY = []
+            if not self._updateVTrace and newCoords[0] is not None:
+                for pos in xPosList:
+                    x, _y = self._scaleAxisToRatio([pos, 0])
+                    if all(abs(x - val) > self.deltaX for val in foundX):
+                        # store the found value so that overlaying lines are not drawn - OpenGL uses an XOR draw mode
+                        foundX.append(x)
+                        vertices.extend([x, 1.0, x, 0.0])
+                        indices.extend([index, index + 1])
+                        index += 2
 
-                    # read values from isotopeCode or axisCode
-                    if self._preferences.matchAxisCode == 0:  # default - match atom type
+            if not self._updateHTrace and newCoords[1] is not None:
+                for pos in yPosList:
+                    _x, y = self._scaleAxisToRatio([0, pos])
+                    if all(abs(y - val) > self.deltaY for val in foundY):
+                        foundY.append(y)
+                        vertices.extend([0.0, y, 1.0, y])
+                        indices.extend([index, index + 1])
+                        index += 2
 
-                        # add extra 'isotopeCode' so that 1D appears correctly
-                        atomTypes = self.spectrumDisplay.isotopeCodes + ('intensity',)
+        drawList.vertices = np.array(vertices, dtype=np.float32)
+        drawList.indices = np.array(indices, dtype=np.int32)
+        drawList.numVertices = len(vertices) // 2
+        drawList.colors = np.array(col * drawList.numVertices, dtype=np.float32)
 
-                        xPosList = coords[AXIS_MATCHATOMTYPE].get(atomTypes[0], [])
-                        yPosList = coords[AXIS_MATCHATOMTYPE].get(atomTypes[1], [])
-                    else:
-                        atCodes = self._orderedAxes
-                        xPosList = coords[AXIS_FULLATOMNAME].get(atCodes[0].code, [])
-                        yPosList = coords[AXIS_FULLATOMNAME].get(atCodes[1].code, [])
-
-                    foundX = []
-                    foundY = []
-                    if not self._updateVTrace and newCoords[0] is not None:
-                        for pos in xPosList:
-                            x, _y = self._scaleAxisToRatio([pos, 0])
-                            if all(abs(x - val) > self.deltaX for val in foundX):
-
-                                # store the found value so that overlaying lines are not drawn - OpenGL uses an XOR draw mode
-                                foundX.append(x)
-                                vertices.extend([x, 1.0, x, 0.0])
-                                indices.extend([index, index + 1])
-                                index += 2
-
-                    if not self._updateHTrace and newCoords[1] is not None:
-                        for pos in yPosList:
-                            _x, y = self._scaleAxisToRatio([0, pos])
-                            if all(abs(y - val) > self.deltaY for val in foundY):
-                                foundY.append(y)
-                                vertices.extend([0.0, y, 1.0, y])
-                                indices.extend([index, index + 1])
-                                index += 2
-
-            drawList.vertices = np.array(vertices, dtype=np.float32)
-            drawList.indices = np.array(indices, dtype=np.int32)
-            drawList.numVertices = len(vertices) // 2
-            drawList.colors = np.array(col * drawList.numVertices, dtype=np.float32)
-
-            # build and draw the VBO
-            drawList.defineIndexVBO()
+        # build and draw the VBO
+        drawList.defineIndexVBO()
 
     def _updateMouseDict(self, cursorCoordinate):
         try:
             mouseMovedDict = self.current.mouseMovedDict
         except:
             # initialise a new mouse moved dict
-            mouseMovedDict = {MOUSEDICTSTRIP          : self.strip,
-                              AXIS_MATCHATOMTYPE      : {},
-                              AXIS_FULLATOMNAME       : {},
+            mouseMovedDict = {MOUSEDICTSTRIP    : self.strip,
+                              AXIS_MATCHATOMTYPE: {},
+                              AXIS_FULLATOMNAME : {},
                               }
 
         xPos = yPos = 0
@@ -1910,13 +2039,13 @@ class Gui1dWidget(CcpnGLWidget):
             dyAF = fyMax - fyMin
             yScale = dy * dyAF / 1.0
 
-            # create modelview matrix for the spectrum to be drawn
+            # create model-view matrix for the spectrum to be drawn
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
 
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX][0:16] = [xScale, 0.0, 0.0, 0.0,
-                                                                                  0.0, yScale, 0.0, 0.0,
-                                                                                  0.0, 0.0, 1.0, 0.0,
-                                                                                  fxMax, fyMax, 0.0, 1.0]
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX][:16] = [xScale, 0.0, 0.0, 0.0,
+                                                                                 0.0, yScale, 0.0, 0.0,
+                                                                                 0.0, 0.0, 1.0, 0.0,
+                                                                                 fxMax, fyMax, 0.0, 1.0]
             # setup information for the horizontal/vertical traces
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XLIMITS] = (fxMin, fxMax)
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YLIMITS] = (fyMin, fyMax)

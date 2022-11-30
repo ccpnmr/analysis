@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:28 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:05 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,10 +30,11 @@ import numpy as np
 import pandas as pd
 import random
 
-from functools import partial
-from PyQt5 import QtWidgets
+from functools import partial, reduce
+from PyQt5 import QtWidgets, QtGui, QtCore
 from collections import OrderedDict
 from itertools import zip_longest
+from operator import add
 
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.core.Peak import Peak
@@ -41,26 +42,31 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.Restraint import Restraint
 from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.ViolationTable import ViolationTable
+from ccpn.core.StructureData import StructureData
+from ccpn.core.Collection import Collection
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.DataFrameObject import DataFrameObject
+from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
+import ccpn.ui.gui.modules.PyMolUtil as pyMolUtil
+from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown, CollectionPulldown, SELECT
 from ccpn.ui.gui.widgets.GuiTable import GuiTable, _getValueByHeader
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.CompoundWidgets import DoubleSpinBoxCompoundWidget
+from ccpn.ui.gui.widgets.CompoundWidgets import DoubleSpinBoxCompoundWidget, ButtonCompoundWidget
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.TableSorting import MultiColumnTableWidgetItem
 from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget, \
-    RestraintTableSelectionWidget, SpectrumDisplaySelectionWidget, ViolationTableSelectionWidget
-from ccpn.util.Logging import getLogger
-from ccpn.util.Common import makeIterableList
-import ccpn.ui.gui.modules.PyMolUtil as pyMolUtil
+    RestraintTableSelectionWidget, SpectrumDisplaySelectionWidget, ViolationTableSelectionWidget, SelectToAdd
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.util.Common import flattenLists
+from ccpn.ui.gui.widgets.HLine import HLine
+from ccpn.ui.gui.lib.alignWidgets import alignWidgets
+from ccpn.util.Logging import getLogger
+from ccpn.util.Common import makeIterableList, flattenLists
 from ccpn.util.Path import Path, aPath, fetchDir, joinPath
+from ccpn.util.OrderedSet import OrderedSet
 
 
 logger = getLogger()
@@ -104,11 +110,17 @@ _OLDHEADERS = {'RestraintPid': HeaderRestraint,
 
 ALL = '<Use all>'
 PymolScriptName = 'Restraint_Pymol_Template.py'
+
+_COLLECTION = 'Collection'
+_COLLECTIONBUTTON = 'CollectionButton'
 _SPECTRUMDISPLAYS = 'SpectrumDisplays'
 _RESTRAINTTABLES = 'RestraintTables'
 _VIOLATIONTABLES = 'ViolationTables'
 _RESTRAINTTABLE = 'restraintTable'
 _VIOLATIONRESULT = 'violationResult'
+_DEFAULTMEANTHRESHOLD = 0.0
+
+DEFAULT_COLOR = QtGui.QColor('black')
 
 
 class RestraintAnalysisTableModule(CcpnModule):
@@ -131,7 +143,7 @@ class RestraintAnalysisTableModule(CcpnModule):
 
     activePulldownClass = None  # e.g., can make the table respond to current peakList
 
-    def __init__(self, mainWindow=None, name='Restraint Analysis Table',
+    def __init__(self, mainWindow=None, name='Restraint Analysis Inspector',
                  peakList=None, selectFirstItem=False):
         super().__init__(mainWindow=mainWindow, name=name)
 
@@ -160,6 +172,36 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                                       'defaults'     : [],
                                                                       'objectName'   : 'SpectrumDisplaysSelection',
                                                                       'minimumWidths': (180, 100, 100)},
+                                                         }),
+                                    ('_divider', {'label': '',
+                                                  'type' : HLine,
+                                                  'kwds' : {'gridSpan'  : (1, 2),
+                                                            'height'    : 15,
+                                                            'objectName': '_divider'},
+                                                  }),
+
+                                    (_COLLECTION, {'label'   : '',
+                                                   'tipText' : '',
+                                                   'callBack': self._collectionPulldownCallback,
+                                                   'enabled' : True,
+                                                   '_init'   : None,
+                                                   'type'    : CollectionPulldown,
+                                                   'kwds'    : {'showSelectName': True,
+                                                                'objectName'    : 'CollectionSelect',
+                                                                'minimumWidths' : (180, 100, 100)},
+                                                   }),
+                                    (_COLLECTIONBUTTON, {'label'   : '',
+                                                         'tipText' : 'Refresh the module from the first peakList in the collection',
+                                                         'callBack': self._collectionPulldownReset,
+                                                         'enabled' : True,
+                                                         '_init'   : None,
+                                                         'type'    : ButtonCompoundWidget,
+                                                         'kwds'    : {'text'           : ' Refresh ',
+                                                                      'buttonAlignment': 'right',
+                                                                      'objectName'     : 'CollectionSelect',
+                                                                      'icon'           : Icon('icons/redo'),
+                                                                      'enabled'        : False,
+                                                                      'minimumWidths'  : (180, 100, 100)},
                                                          }),
                                     (_RESTRAINTTABLES, {'label'   : '',
                                                         'tipText' : '',
@@ -209,7 +251,7 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                                      'maximum'      : 1.0,
                                                                      'decimals'     : 2,
                                                                      'step'         : 0.05,
-                                                                     'value'        : 0.3,
+                                                                     'value'        : _DEFAULTMEANTHRESHOLD,
                                                                      'minimumWidths': (180, 100, 100)},
                                                         }),
                                     ('autoExpand', {'label'   : 'Auto-expand Groups',
@@ -255,6 +297,11 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                settingsDict=settingsDict,
                                                grid=(0, 0))
 
+        # add spacer to the settings-widget so that the right-hand-side stays aligned
+        Spacer(self.settingsWidget, 5, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed, grid=(0, 1))
+
+        self._collectionPulldown = self._RATwidget.getWidget(_COLLECTION)
+        self._collectionButton = self._RATwidget.getWidget(_COLLECTIONBUTTON)
         self._displayListWidget = self._RATwidget.getWidget(_SPECTRUMDISPLAYS)
         self._restraintTable = self._RATwidget.getWidget(_RESTRAINTTABLES)
         self._restraintTable.listWidget.changed.connect(self._updateRestraintTables)
@@ -271,12 +318,33 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                                    setLayout=True,
                                                                    grid=(0, 0))
 
+        alignWidgets(self._RATwidget)
+
         if peakList is not None:
             self.selectPeakList(peakList)
         elif selectFirstItem:
             self.restraintAnalysisTable.pLwidget.selectFirstItem()
 
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
+
+        # set the dropped callback through mainWidget
+        self.mainWidget._dropEventCallback = self._processDroppedItems
+        self.settingsWidget.setAcceptDrops(True)
+        self.settingsWidget._dropEventCallback = self._processDroppedItems
+
+        # dicts for the filters on the lists and modulePulldown - referenced by peakLists in the collection
+        self._restraintTableFilter = {}
+        self._outputTableFilter = {}
+        self._modulePulldownFilter = []  # may not need this one?
+        self._thisPeakList = None
+
+        self._restraintTable.setPreSelect(self._applyRestraintTableFilter)
+        self._outputTable.setPreSelect(self._applyViolationTableFilter)
+
+        self.restraintAnalysisTable.aboutToUpdate.connect(self._changePeakList)
+        self.restraintAnalysisTable.pLwidget.pulldownList.popupAboutToBeShown.connect(self._applyPeakListFilter)
+
+        self._registerNotifiers()
 
     @property
     def _dataFrame(self):
@@ -293,10 +361,24 @@ class RestraintAnalysisTableModule(CcpnModule):
         """
         Manually select a peakList from the pullDown
         """
-        self.restraintAnalysisTable._selectPeakList(peakList)
+        with self.restraintAnalysisTable.pLwidget.blockWidgetSignals(blockUpdates=False):
+            self.restraintAnalysisTable._selectPeakList(peakList)
+
+        self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
+
+        # give the widgets time to refresh
+        QtCore.QTimer.singleShot(0, self.restraintAnalysisTable._updateTable)
 
     def _closeModule(self):
-        """Re-implementation of closeModule function from CcpnModule to unregister notification """
+        """Re-implementation of closeModule function from CcpnModule to unregister notification
+        """
+        self._unRegisterNotifiers()
+        if self._displayListWidget:
+            self._displayListWidget._close()
+        if self._restraintTable:
+            self._restraintTable._close()
+        if self._outputTable:
+            self._outputTable._close()
         if self._RATwidget:
             self._RATwidget.close()
         if self.restraintAnalysisTable:
@@ -329,6 +411,9 @@ class RestraintAnalysisTableModule(CcpnModule):
             restraintTables = [self.project.getByPid(rList) for rList in restraintTables]
             restraintTables = [rList for rList in restraintTables if rList is not None and isinstance(rList, RestraintTable)]
 
+        self._updateCollectionButton(True)
+        self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
+
         self.restraintAnalysisTable.updateRestraintTables(restraintTables)
 
     def _updateOutputTables(self, *args):
@@ -336,12 +421,37 @@ class RestraintAnalysisTableModule(CcpnModule):
         """
         outputTables = self._outputTable.getTexts()
         if ALL in outputTables:
-            outputTables = self.project.violationTables
+            outputTables = [vt for vt in self.project.violationTables if vt.getMetadata(_VIOLATIONRESULT)]
         else:
             outputTables = [self.project.getByPid(rList) for rList in outputTables]
             outputTables = list(filter(None, outputTables))
 
+        self._updateCollectionButton(True)
+        self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
+
         self.restraintAnalysisTable.updateOutputTables(outputTables)
+
+    def _updateRestraintViolationTables(self, *args):
+        """Update the selected restraintTables/outputTables
+        """
+        restraintTables = self._restraintTable.getTexts()
+        if ALL in restraintTables:
+            restraintTables = self.project.restraintTables
+        else:
+            restraintTables = [self.project.getByPid(rList) for rList in restraintTables]
+            restraintTables = [rList for rList in restraintTables if rList is not None and isinstance(rList, RestraintTable)]
+
+        outputTables = self._outputTable.getTexts()
+        if ALL in outputTables:
+            outputTables = [vt for vt in self.project.violationTables if vt.getMetadata(_VIOLATIONRESULT)]
+        else:
+            outputTables = [self.project.getByPid(rList) for rList in outputTables]
+            outputTables = list(filter(None, outputTables))
+
+        self._updateCollectionButton(True)
+        self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
+
+        self.restraintAnalysisTable.updateRestraintViolationTables(restraintTables, outputTables)
 
     def _updateAutoExpand(self, expand):
         # index = self._expandSelector.getIndex()
@@ -350,11 +460,376 @@ class RestraintAnalysisTableModule(CcpnModule):
     def _updateMeanLowerLimit(self, value):
         self.restraintAnalysisTable.updateMeanLowerLimit(value)
 
+    def _registerNotifiers(self):
+        """Register notifiers for the module
+        """
+        self._collectionNotifier = self.setNotifier(self.project, [Notifier.CHANGE],
+                                                    targetName=Collection.__name__,
+                                                    callback=self._updateCollectionNotify,
+                                                    onceOnly=True)
+
+    def _unRegisterNotifiers(self):
+        """Register notifiers for the module
+        """
+        if self._collectionPulldown:
+            self._collectionPulldown.unRegister()
+        if self._collectionNotifier:
+            self._collectionNotifier.unRegister()
+
+    #=========================================================================================
+    # Process dropped items
+    #=========================================================================================
+
+    def _processDroppedItems(self, data):
+        """CallBack for Drop events
+        """
+        # if self._tableWidget and data:
+        pids = data.get('pids', [])
+
+        objs = [self.project.getByPid(pid) for pid in pids]
+        selectableObjects = [obj for obj in objs if isinstance(obj, Collection)]
+        rTables = [obj for obj in objs if isinstance(obj, RestraintTable)]
+        vTables = [obj for obj in objs if isinstance(obj, ViolationTable)]
+        if (sData := [obj for obj in objs if isinstance(obj, StructureData)]):
+            for sd in sData:
+                rTables.extend(sd.restraintTables)
+                vTables.extend(sd.violationTables)
+            rTables = list(OrderedSet(rTables))
+            vTables = list(OrderedSet(vTables))
+
+        if len(selectableObjects) > 1:
+            MessageDialog.showWarning('Restraint Analysis Inspector', 'Please only drop one collection')
+            return
+
+        if selectableObjects:
+            # select the collection from the pulldown - manually update table
+            with self._collectionPulldown.blockWidgetSignals(blockUpdates=False):
+                self._collectionPulldown.select(selectableObjects[0].pid)
+
+            # give the widgets time to refresh
+            QtCore.QTimer.singleShot(0, partial(self._collectionPulldownCallback, selectableObjects[0].pid))
+
+        elif (rTables or vTables):
+
+            if rTables:
+                ll = self._restraintTable.getTexts()
+                newRTables = OrderedSet(ll) | {rt.pid for rt in rTables}
+                self._restraintTable.modifyListWidgetTexts(list(newRTables))
+            if vTables:
+                ll = self._outputTable.getTexts()
+                newVTables = OrderedSet(ll) | {vt.pid for vt in vTables if vt.getMetadata(_VIOLATIONRESULT)}
+                self._outputTable.modifyListWidgetTexts(list(newVTables))
+
+            self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
+            self._updateRestraintViolationTables()
+
+            self.restraintAnalysisTable._updateTable()
+
+    def _handleDroppedItems(self, pids, objType, pulldown):
+        """handle dropping pids onto the table
+        :param pids: the selected objects pids
+        :param objType: the instance of the obj to handle, e.g. PeakList
+        :param pulldown: the pulldown of the module wich updates the table
+        :return: Actions: Select the dropped item on the table or/and open a new modules if multiple drops.
+        If multiple different obj instances, then asks first.
+        """
+        from ccpn.ui.gui.lib.MenuActions import _openItemObject
+        from ccpn.ui.gui.widgets.MessageDialog import showYesNo
+
+        objs = [self.project.getByPid(pid) for pid in pids]
+
+        selectableObjects = [obj for obj in objs if isinstance(obj, objType)]
+        others = [obj for obj in objs if not isinstance(obj, objType)]
+        if selectableObjects:
+            _openItemObject(self.mainWindow, selectableObjects[1:])
+            pulldown.select(selectableObjects[0].pid)
+
+        elif othersClassNames := list({obj.className for obj in others if hasattr(obj, 'className')}):
+            title, msg = ('Dropped wrong item.', f"Do you want to open the {''.join(othersClassNames)} in a new module?") if len(othersClassNames) == 1 else ('Dropped wrong items.', 'Do you want to open items in new modules?')
+
+            if showYesNo(title, msg):
+                _openItemObject(self.mainWindow, others)
+
+    def _collectionPulldownCallback(self, value=None):
+        """Handle manual collection pulldown selection
+        """
+        if value == SELECT and self._collectionPulldown.getIndex() == 0:
+            # clear options - 'select' chosen from the pulldown
+            self._resetPulldowns()
+            self._clearFilters()
+            self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
+
+            # give the widgets time to refresh
+            QtCore.QTimer.singleShot(0, self.restraintAnalysisTable._updateTable)
+            return
+
+        # check the items in the dropped collection
+        if not (collection := self.project.getByPid(value) if isinstance(value, str) else value):
+            return
+        if not isinstance(collection, Collection):
+            MessageDialog.showWarning('Restraint Analysis Inspector', f'Object is not a collection {collection}')
+            return
+
+        # extract the linked objects in the collection
+        objs = self.project.getObjectsByPids(collection.items, (PeakList, RestraintTable, ViolationTable, StructureData))
+        plList = [obj for obj in objs if isinstance(obj, PeakList)]
+        rTables = [obj for obj in objs if isinstance(obj, RestraintTable)]
+        vTables = [obj for obj in objs if isinstance(obj, ViolationTable)]
+        if (sData := [obj for obj in objs if isinstance(obj, StructureData)]):
+            for sd in sData:
+                rTables.extend(sd.restraintTables)
+                vTables.extend(sd.violationTables)
+            rTables = list(OrderedSet(rTables))
+            vTables = list(OrderedSet(vTables))
+
+        def validPKLs(rtl):
+            return {pk.peakList for rst in rtl.restraints for pk in rst.peaks}
+
+        if plList:
+            for pl in plList:
+                self._restraintTableFilter[pl] = validRTL = [rtl for rtl in rTables if pl in validPKLs(rtl)]
+                self._outputTableFilter[pl] = validVTL = [vtl for vtl in vTables if vtl._restraintTableLink in validRTL]
+            self._modulePulldownFilter = plList
+
+            # set up the texts in the restraint-tables listWidget
+            with self._restraintTable.blockWidgetSignals(blockUpdates=False):
+                if validRTL := self._restraintTableFilter.get(plList[0]):
+                    self._restraintTable.setTexts([obj.pid for obj in validRTL])
+                else:
+                    self._restraintTable.clearList()
+
+            # set up the texts in the validation-tables listWidget
+            with self._outputTable.blockWidgetSignals(blockUpdates=False):
+                if validVTL := self._outputTableFilter.get(plList[0]):
+                    self._outputTable.setTexts([obj.pid for obj in validVTL])
+                else:
+                    self._outputTable.clearList()
+
+            self._updateRestraintViolationTables()
+            if len(plList) == 1:
+                # select the first-peakList
+                self._thisPeakList = plList[0]
+
+                self.selectPeakList(plList[0])
+                self._applyPeakListFilter()
+            else:
+                self._thisPeakList = None
+
+                with self.restraintAnalysisTable.blockWidgetSignals(blockUpdates=False):
+                    self.restraintAnalysisTable.pLwidget.setIndex(0)
+                self._applyPeakListFilter()
+                self._updateCollectionButton(False)
+                self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
+
+                # give the widgets time to refresh
+                QtCore.QTimer.singleShot(0, self.restraintAnalysisTable._updateTable)
+
+        else:
+            self._resetPulldowns()
+            self._clearFilters()
+            self._updateCollectionButton(False)
+            self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
+
+            # give the widgets time to refresh
+            QtCore.QTimer.singleShot(0, self.restraintAnalysisTable._updateTable)
+
+    def _changePeakList(self, pid):
+        """Update the settings-widget depending on the peak selection
+        """
+        if not self.collectionSelected:
+            return
+
+        getLogger().debug(f'>>> peaklist has changed to  {pid}')
+        if (pkList := self.project.getByPid(pid)):
+            if pkList in self._modulePulldownFilter:
+                self._thisPeakList = pkList
+
+                # set up the texts in the restraint-tables listWidget
+                with self._restraintTable.blockWidgetSignals():
+                    if validRTL := self._restraintTableFilter.get(pkList):
+                        self._restraintTable.setTexts([obj.pid for obj in validRTL])
+                    else:
+                        self._restraintTable.clearList()
+
+                # set up the texts in the validation-tables listWidget
+                with self._outputTable.blockWidgetSignals():
+                    if validVTL := self._outputTableFilter.get(pkList):
+                        self._outputTable.setTexts([obj.pid for obj in validVTL])
+                    else:
+                        self._outputTable.clearList()
+                return
+
+        self._thisPeakList = None
+        with self._restraintTable.blockWidgetSignals():
+            self._restraintTable.clearList()
+        with self._outputTable.blockWidgetSignals():
+            self._outputTable.clearList()
+        self._applyPeakListFilter()
+        self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
+
+        self._updateCollectionButton(True)
+
+    def _resetPulldowns(self):
+        self._thisPeakList = None
+        with self.restraintAnalysisTable.pLwidget.blockWidgetSignals():
+            self.restraintAnalysisTable.pLwidget.setIndex(0)
+        with self._restraintTable.blockWidgetSignals():
+            self._restraintTable.clearList()
+        with self._outputTable.blockWidgetSignals():
+            self._outputTable.clearList()
+        self._applyPeakListFilter()
+
+    def _clearFilters(self):
+        # clear the pulldown filters
+        self._restraintTableFilter = {}
+        self._outputTableFilter = {}
+        self._modulePulldownFilter = []
+
+    def _collectionPulldownReset(self):
+        """Reset the options from the current collection
+        """
+        value = self._collectionPulldown.getText()
+        self._collectionPulldownCallback(value)
+
+    @property
+    def collectionSelected(self) -> bool:
+        """Return True if a collection has been selected in the settings
+        """
+        return self._collectionPulldown.getIndex() > 0
+
+    def _applyRestraintTableFilter(self, *args):
+        """Filter the restraint-table pulldown when about to show
+        """
+        table = self._restraintTable
+        combo = table.pulldownList
+        filt = self._restraintTableFilter.get(self._thisPeakList) or []
+        objs = self.project.restraintTables
+
+        filtAll = reduce(add, self._restraintTableFilter.values(), [])
+        filtOther = list(OrderedSet(filtAll) - set(filt))
+
+        ll = [SelectToAdd] + table.standardListItems
+        if self.collectionSelected:
+            objs = filt + filtOther + list(OrderedSet(objs) - set(filtAll))
+
+        table.modifyTexts(ll + [obj.pid for obj in objs])
+        if filt:
+            self._setPulldownColours(combo, [obj.pid for obj in filt], QtGui.QColor('green'))
+        if filtOther:
+            self._setPulldownColours(combo, [obj.pid for obj in filtOther], QtGui.QColor('blue'))
+        self._setPulldownTextColour(combo)
+
+    def _applyViolationTableFilter(self, *args):
+        """Filter the violation-table pulldown when about to show
+        """
+        table = self._outputTable
+        combo = table.pulldownList
+        filt = self._outputTableFilter.get(self._thisPeakList) or []
+        objs = [vt for vt in self.project.violationTables if vt.getMetadata(_VIOLATIONRESULT)]
+
+        filtAll = reduce(add, self._outputTableFilter.values(), [])
+        filtOther = list(OrderedSet(filtAll) - set(filt))
+
+        ll = [SelectToAdd] + table.standardListItems
+        if self.collectionSelected:
+            objs = filt + list(OrderedSet(objs) - set(filt))
+
+        table.modifyTexts(ll + [obj.pid for obj in objs])
+        if filt:
+            self._setPulldownColours(combo, [obj.pid for obj in filt], QtGui.QColor('green'))
+        if filtOther:
+            self._setPulldownColours(combo, [obj.pid for obj in filtOther], QtGui.QColor('blue'))
+        self._setPulldownTextColour(combo)
+
+    def _applyPeakListFilter(self):
+        """Filter the peakList pulldown when about to show
+        """
+        combo = self.restraintAnalysisTable.pLwidget.pulldownList
+
+        filt = [self._thisPeakList] if self._thisPeakList else []
+        filtAll = self._modulePulldownFilter
+        filtOther = list(OrderedSet(filtAll) - set(filt))
+
+        # NOTE:ED - re-order the list?
+        self._resetPulldownColours(combo)
+        if filt:
+            self._setPulldownColours(combo, [obj.pid for obj in filt], QtGui.QColor('green'))
+        if filtOther:
+            self._setPulldownColours(combo, [obj.pid for obj in filtOther], QtGui.QColor('blue'))
+        self._setPulldownTextColour(combo)
+
+    def _setPulldownColours(self, combo, pids, color=None):
+        """Colour the pulldown items if they belong to the supplied list
+        """
+        color = color or QtGui.QColor('blue')
+
+        model = combo.model()
+        _inds = [ii for ii, val in enumerate(combo.texts) if val in pids]
+        for ind in range(len(combo.texts)):
+            itm = model.item(ind)
+            if ind in _inds:
+                itm.setForeground(color)
+            # itm.setForeground(color if ind in _inds else DEFAULT_COLOR)
+        self._setPulldownTextColour(combo)
+
+    def _resetPulldownColours(self, combo, color=None):
+        """Colour the pulldown items if they belong to the supplied list
+        """
+        color = color or DEFAULT_COLOR
+
+        model = combo.model()
+        for ind in range(len(combo.texts)):
+            itm = model.item(ind)
+            itm.setForeground(color)
+        self._setPulldownTextColour(combo)
+
+    @staticmethod
+    def _setPulldownTextColour(combo):
+        """Set the colour of the selected pulldown-text
+        """
+        if (model := combo.model()):
+            palette = combo.palette()
+            if (item := model.item(combo.currentIndex())) is not None and item.text():
+                # use the palette to change the colour of the selection text - may not match for other themes
+                palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, item.foreground().color())
+            else:
+                palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, QtGui.QColor('black'))
+
+            combo.setPalette(palette)
+
+    #=========================================================================================
+    # Handle notifiers
+    #=========================================================================================
+
+    def _updateCollectionNotify(self, data):
+        """Handle notifier for changed, deleted collection
+        """
+        trigger = data[Notifier.TRIGGER]
+        obj = data[Notifier.OBJECT]
+
+        if obj and obj.pid == self._collectionPulldown.getText() and trigger == Notifier.CHANGE:
+            getLogger().info(f'Collection {obj.pid} in {self} needs refreshing')
+            self._resetPulldowns()
+            self._clearFilters()
+
+            self._updateCollectionButton(True)
+            self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(), self._autoExpandCheckBox.get())
+
+            self.restraintAnalysisTable._updateTable()
+
+    def _updateCollectionButton(self, value):
+        """Enable/disable the collection button as required
+        """
+        self._collectionButton.button.setEnabled(value and self.collectionSelected)
+
 
 class RestraintAnalysisTableWidget(GuiTable):
     """
-    Class to present a Restraint Analysis Table
+    Class to present a Restraint Analysis Inspector
     """
+    # signal emitted when the manually changing the pulldown
+    aboutToUpdate = QtCore.pyqtSignal(str)
+
     className = 'RestraintAnalysisTable'
     attributeName = 'peakLists'
 
@@ -374,7 +849,14 @@ class RestraintAnalysisTableWidget(GuiTable):
 
     PRIMARYCOLUMN = '_object'  # column holding active objects (pids for this table)
     # not the cleanest way for the minute
-    defaultHidden = ['Min_1', 'Min_2', 'Min_3', 'Min_4', 'Min_5',
+    defaultHidden = ['#',
+                     'Restraint Pid_1', 'Restraint Pid_2', 'Restraint Pid_3', 'Restraint Pid_4', 'Restraint Pid_5',
+                     'Restraint Pid_6', 'Restraint Pid_7', 'Restraint Pid_8', 'Restraint Pid_9',
+                     'Target Value_1', 'Target Value_2', 'Target Value_3', 'Target Value_4', 'Target Value_5',
+                     'Target Value_6', 'Target Value_7', 'Target Value_8', 'Target Value_9',
+                     'Lower Limit_1', 'Lower Limit_2', 'Lower Limit_3', 'Lower Limit_4', 'Lower Limit_5',
+                     'Lower Limit_6', 'Lower Limit_7', 'Lower Limit_8', 'Lower Limit_9',
+                     'Min_1', 'Min_2', 'Min_3', 'Min_4', 'Min_5',
                      'Min_6', 'Min_7', 'Min_8', 'Min_9',
                      'Max_1', 'Max_2', 'Max_3', 'Max_4', 'Max_5',
                      'Max_6', 'Max_7', 'Max_8', 'Max_9',
@@ -382,6 +864,8 @@ class RestraintAnalysisTableWidget(GuiTable):
                      'Mean_6', 'Mean_7', 'Mean_8', 'Mean_9',
                      'STD_1', 'STD_2', 'STD_3', 'STD_4', 'STD_5',
                      'STD_6', 'STD_7', 'STD_8', 'STD_9',
+                     'Count > 0.5_1', 'Count > 0.5_2', 'Count > 0.5_3', 'Count > 0.5_4', 'Count > 0.5_5',
+                     'Count > 0.5_6', 'Count > 0.5_7', 'Count > 0.5_8', 'Count > 0.5_9',
                      ]
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, peakList=None, multiSelect=True,
@@ -409,7 +893,7 @@ class RestraintAnalysisTableWidget(GuiTable):
         self._outputTables = []
 
         self._autoExpand = False
-        self._meanLowerLimit = 0.0
+        self._meanLowerLimit = _DEFAULTMEANTHRESHOLD
 
         # Initialise the scroll widget and common settings
         self._initTableCommonWidgets(parent, **kwds)
@@ -512,6 +996,13 @@ class RestraintAnalysisTableWidget(GuiTable):
         self._outputTables = outputTables
         self._updateTable()
 
+    def updateRestraintViolationTables(self, restraintTables, outputTables):
+        """Update all tables and re-populate
+        """
+        # must be done prior to the peakListPulldown callback
+        self._restraintTables = restraintTables
+        self._outputTables = outputTables
+
     def _updateTable(self, useSelectedPeakList=True, peaks=None, peakList=None):
         """Display the restraints on the table for the selected PeakList.
         Obviously, If the restraint has not been previously deleted
@@ -519,6 +1010,25 @@ class RestraintAnalysisTableWidget(GuiTable):
         self._selectedPeakList = self.project.getByPid(self.pLwidget.getText())
         self._groups = None
         self.hide()
+
+        # get the correct restraintTables/violationTables from the settings
+        rTables = self.moduleParent._restraintTable.getTexts()
+        if ALL in rTables:
+            rTables = self.project.restraintTables
+        else:
+            rTables = [self.project.getByPid(rList) for rList in rTables]
+            rTables = [rList for rList in rTables if rList is not None and isinstance(rList, RestraintTable)]
+
+        vTables = self.moduleParent._outputTable.getTexts()
+        if ALL in vTables:
+            vTables = [vt for vt in self.project.violationTables if vt.getMetadata(_VIOLATIONRESULT)]
+        else:
+            vTables = [self.project.getByPid(rList) for rList in vTables]
+            vTables = list(filter(None, vTables))
+        self.moduleParent._updateCollectionButton(True)
+
+        self._restraintTables = rTables
+        self._outputTables = vTables
 
         if useSelectedPeakList:
             if self._selectedPeakList:
@@ -563,18 +1073,15 @@ class RestraintAnalysisTableWidget(GuiTable):
         return self.pLwidget.getText()
 
     def _actionCallback(self, data, *args):
-        """If current strip contains the double clicked peak will navigateToPositionInStrip
+        """If current strip contains the double-clicked peak will navigateToPositionInStrip
         """
         from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
 
-        # multiselection table will return a list of objects
-        objs = data[CallBack.OBJECT]
-        if not objs:
+        # multi-selection table will return a list of objects
+        if not (objs := data[CallBack.OBJECT]):
             return
-        if isinstance(objs, (tuple, list)):
-            peak = objs[0]
-        else:
-            peak = objs
+
+        peak = objs[0] if isinstance(objs, (tuple, list)) else objs
 
         if self.current.strip is not None:
             validPeakListViews = [pp.peakList for pp in self.current.strip.peakListViews if isinstance(pp.peakList, PeakList)]
@@ -592,8 +1099,7 @@ class RestraintAnalysisTableWidget(GuiTable):
             logger.warning('Impossible to navigate to peak position. Set a current strip first')
 
     def _selectionCallback(self, data, *args):
-        """
-        set as current the selected peaks on the table
+        """Set as current the selected peaks on the table
         """
         peaks = data[CallBack.OBJECT]
         if peaks is None:
@@ -601,10 +1107,14 @@ class RestraintAnalysisTableWidget(GuiTable):
             self.current.clearRestraints()
         else:
             self.current.peaks = peaks
-            self.current.restraints = list(set(res for pk in peaks
-                                               for res in pk.restraints if res and res.restraintTable in self._restraintTables))
+            self.current.restraints = list({res for pk in peaks for res in pk.restraints
+                                            if res and res.restraintTable in self._restraintTables})
 
     def _pulldownPLcallback(self, data):
+        if self.pLwidget.underMouse():
+            # tell the parent to clear its lists
+            self.aboutToUpdate.emit(self.pLwidget.getText())
+
         self._updateTable()
 
     def _processDroppedItems(self, data):
@@ -869,9 +1379,8 @@ class RestraintAnalysisTableWidget(GuiTable):
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
 
-        # print('Create violation dataFrames')
-
         def _getContributions(restraint):
+            # create a table of the cross-links for speed - does not update!
             return [' - '.join(sorted(ri)) for rc in restraint.restraintContributions
                     for ri in rc.restraintItems]
 
@@ -894,18 +1403,18 @@ class RestraintAnalysisTableWidget(GuiTable):
                         # pkRes[pk].setdefault(resList, set()).add(res)
 
             # get the maximum number of restraintItems from each restraint list
-            counts = [np.array([sum([
-                len(contribs[res]) for res in (pkRestraints.get(pk.serial) or ()) if res and res.restraintTable == rList
-                ])
-                for pk in pks])
-                for rList in resLists]
+            counts = [np.array([sum(len(contribs[res]) for res in (pkRestraints.get(pk.serial) or ()) if res and res.restraintTable == rList
+                                    )
+                                for pk in pks])
+                      for rList in resLists]
             maxCount = np.max(counts, axis=0)
             # print(f' max counts {list(maxCount)}')
             # maxCount += 1
 
             # allPks = pd.DataFrame([(pk.serial, pk, None)  for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['Peak', '_object', 'Expand'])
-            allPkSerials = pd.DataFrame([pk.serial for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['PeakSerial', ])
-            index = pd.DataFrame([ii for ii in range(1, len(allPkSerials) + 1)], columns=['index', ])
+            allPkSerials = pd.DataFrame([pk.serial for pk, count in zip(pks, maxCount) for _ in range(count)], columns=['PeakSerial', ])
+            index = pd.DataFrame(list(range(1, len(allPkSerials) + 1)), columns=['index',])
+
             allPks = pd.DataFrame([(pk.serial, pk.pid, self._downIcon) for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['PeakSerial', '_object', 'Expand'])
 
             # make matching length tables for each of the restraintTables for each peak so the rows match up in the table
@@ -961,11 +1470,20 @@ class RestraintAnalysisTableWidget(GuiTable):
 
                     if resList in violationResults:
                         _left = dfs[resList]
-                        _right = violationResults[resList]
+                        # remove any duplicated violations - these add bad rows
+                        _right = violationResults[resList].drop_duplicates([f'{HeaderRestraint}_{ii + 1}', f'Atoms_{ii + 1}'])
                         if (f'{HeaderRestraint}_{ii + 1}' in _left.columns and f'Atoms_{ii + 1}' in _left.columns) and \
                                 (f'{HeaderRestraint}_{ii + 1}' in _right.columns and f'Atoms_{ii + 1}' in _right.columns):
                             _new = pd.merge(_left, _right, on=[f'{HeaderRestraint}_{ii + 1}', f'Atoms_{ii + 1}'], how='left').drop(columns=['PeakSerial']).fillna(0.0)
                             _out.append(_new)
+
+                            # check to duplicates
+                            # s1 = [(v[2], v[3]) for v in _left.itertuples()]
+                            # s2 = [(v[1], v[2]) for v in _right.itertuples()]
+                            # print([(rr, s, s1.count(s)) for rr, s in enumerate(s1) if s1.count(s) > 1])
+                            # print([(rr, s, s2.count(s)) for rr, s in enumerate(s2) if s2.count(s) > 1])
+                            # _right.drop_duplicates([col1, col2])
+
                             zeroCols.append(f'{HeaderMean}_{ii + 1}')
 
                         for _colID in (HeaderRestraint, HeaderAtoms,
@@ -989,10 +1507,11 @@ class RestraintAnalysisTableWidget(GuiTable):
                 # concatenate the final dataFrame
                 # _table = pd.concat([index, allPks, *_out.values()], axis=1)
                 _table = pd.concat(_out, axis=1)
-                # # purge all rows that contain all means == 0, fastest method
+                # # purge all rows that contain all means == 0, the fastest method
                 # _table = _table[np.count_nonzero(_table[zeroCols].values, axis=1) > 0]
                 # process all row that have means > 0.3, keep only rows that contain at least one valid mean
-                _table = _table[(_table[zeroCols] >= self._meanLowerLimit).sum(axis=1) > 0]
+                if zeroCols and self._meanLowerLimit:
+                    _table = _table[(_table[zeroCols] >= self._meanLowerLimit).sum(axis=1) > 0]
 
             else:
                 # only show the restraints
@@ -1015,7 +1534,7 @@ class RestraintAnalysisTableWidget(GuiTable):
 
         else:
             # make a table that only has peaks
-            index = pd.DataFrame([ii for ii in range(1, len(pks) + 1)], columns=['index'])
+            index = pd.DataFrame(list(range(1, len(pks) + 1)), columns=['index'])
             allPks = pd.DataFrame([(pk.serial, pk.pid, self._downIcon) for pk in pks], columns=['PeakSerial', '_object', 'Expand'])
 
             _table = pd.concat([index, allPks], axis=1)
@@ -1029,10 +1548,19 @@ class RestraintAnalysisTableWidget(GuiTable):
                                      table=table,
                                      )
         # extract the row objects from the dataFrame
-        _objects = [row for row in _dataFrame.dataFrame.itertuples()]
+        _objects = list(_dataFrame.dataFrame.itertuples())
         _dataFrame._objects = _objects
 
         return _dataFrame
+
+    def setHiddenColumns(self, texts, update=True):
+        """
+        set a list of columns headers to be hidden from the table.
+        """
+        ll = [x for x in texts if x in self.columnTexts and x not in self._internalColumns]
+        # self._hiddenColumns = ll  # why?
+        if update:
+            self.showColumns(self._dataFrameObject)
 
     def _close(self):
         """Clean-up on closing
@@ -1113,7 +1641,7 @@ class RestraintAnalysisTableWidget(GuiTable):
         lastRow = _order[row]
         _expand = self._autoExpand if expandState is None else expandState
 
-        for i in range(0, rows):
+        for i in range(rows):
 
             nextRow = _order[i + 1] if i < (rows - 1) else None  # catch the last group, otherwise need try/except
 
@@ -1161,7 +1689,7 @@ class RestraintAnalysisTableWidget(GuiTable):
         for rs in restraints:
             if rs.restraintTable.structureData.moleculeFilePath:
                 pdbPath = rs.restraintTable.structureData.moleculeFilePath
-                getLogger().info('Using pdb file %s for displaying violation on Molecular viewer.' % pdbPath)
+                getLogger().info(f'Using pdb file {pdbPath} for displaying violation on Molecular viewer.')
                 break
         ## run Pymol
         pymolScriptPath = joinPath(self.moduleParent.pymolScriptsPath, PymolScriptName)

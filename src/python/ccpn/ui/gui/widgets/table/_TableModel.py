@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:30 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:09 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,8 +29,8 @@ __date__ = "$Date: 2022-09-08 17:27:34 +0100 (Thu, September 08, 2022) $"
 import numpy as np
 import pandas as pd
 from PyQt5 import QtCore, QtGui
-from operator import or_
-from functools import reduce
+# from operator import or_
+# from functools import reduce
 
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
@@ -87,7 +87,7 @@ class _TableModel(QtCore.QAbstractTableModel):
     """A simple table-model to view pandas DataFrames
     """
 
-    _defaultForegroundColour = QtGui.QColor(getColours()[GUITABLE_ITEM_FOREGROUND])
+    _defaultForegroundColour = None
     _CHECKROWS = 5
     _MINCHARS = 4
     _MAXCHARS = 100
@@ -117,14 +117,16 @@ class _TableModel(QtCore.QAbstractTableModel):
             fontMetric = QtGui.QFontMetricsF(view.font())
             bbox = fontMetric.boundingRect
 
-            # get an estimate for an average character width
+            # get an estimate for an average character width/height - must be floats for estimate-column-widths
             self._chrWidth = 1 + bbox('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789').width() / 36
-            self._chrHeight = bbox('A').height() + 8
+            self._chrHeight = bbox('A').height() + 6
 
-        # initialise sorting
+        # set default colours
+        self._defaultForegroundColour = QtGui.QColor(getColours()[GUITABLE_ITEM_FOREGROUND])
+
+        # initialise sorting/filtering
         self._sortColumn = 0
         self._sortOrder = QtCore.Qt.AscendingOrder
-        # NOTE:ED - could I use another self._filterIndex here? so _df doesn't need to be changed
         self._filterIndex = None
 
         # create a pixmap for the editable icon (currently a pencil)
@@ -171,6 +173,32 @@ class _TableModel(QtCore.QAbstractTableModel):
         else:
             return self._df
 
+    @property
+    def displayedDf(self):
+        """Return the visible dataFrame as displayed, sorted and filtered
+        """
+        from ccpn.util.OrderedSet import OrderedSet
+        df = self._df
+        table = self._view
+        rows, cols = df.shape[0], df.shape[1]
+
+        if df.empty:
+            return df
+
+        colList = [col for ii, col, in enumerate(list(df.columns)) if
+                   not table.horizontalHeader().isSectionHidden(ii)]
+
+        if self._filterIndex is None:
+            rowList = [self._sortIndex[row] for row in range(rows)]
+        else:
+            #  map to sorted indexes
+            rowList = list(OrderedSet(self._sortIndex[row] for row in range(rows)) & OrderedSet(
+                self._sortIndex[ii] for ii in self._filterIndex))
+
+        df = df[colList]
+        df = df[:].iloc[rowList]
+        return df
+
     def setToolTips(self, orientation, values):
         """Set the tooltips for the horizontal/vertical headers.
 
@@ -202,8 +230,13 @@ class _TableModel(QtCore.QAbstractTableModel):
             # notify that the table is about to be changed
             self.layoutAboutToBeChanged.emit()
 
+            # keep sorted
             self._df.loc[row] = newRow  # dependent on the index
+            self._df.sort_index(inplace=True)
             iLoc = self._df.index.get_loc(row)
+
+            # update the sorted list
+            self._sortIndex[:] = [(val if val < iLoc else val + 1) for val in self._sortIndex]
 
             # sLoc = self._sortIndex[iLoc]  # signals?
             # self.beginInsertRows(QtCore.QModelIndex(), sLoc, sLoc)
@@ -294,11 +327,18 @@ class _TableModel(QtCore.QAbstractTableModel):
 
         else:
             if self._view.isSortingEnabled():
-                # notify rows are going to be inserted - remove from filtered?
                 sortedLoc = self._sortIndex.index(iLoc)
                 self.beginRemoveRows(QtCore.QModelIndex(), sortedLoc, sortedLoc)
 
+                # remove the row from the dataFrame
                 self._df.drop([row], inplace=True)
+
+                if self._filterIndex is not None:
+                    # remove from the filtered list - undo?
+                    filt = self._sortIndex.index(iLoc)
+                    self._filterIndex[:] = [(val if val < filt else val - 1) for val in self._filterIndex if val != filt]
+
+                # remove from the sorted list
                 self._sortIndex[:] = [(val if val < iLoc else val - 1) for val in self._sortIndex if val != iLoc]
 
             else:
@@ -329,7 +369,7 @@ class _TableModel(QtCore.QAbstractTableModel):
         """
         if index.isValid():
             # get the source cell
-            fRow = self._filterIndex[index.row()] if self._filterIndex is not None else index.row()
+            fRow = self._filterIndex[index.row()] if self._filterIndex is not None and 0 <= index.row() < len(self._filterIndex) else index.row()
             row, col = self._sortIndex[fRow], index.column()
 
             if role == DISPLAY_ROLE:
@@ -422,18 +462,24 @@ class _TableModel(QtCore.QAbstractTableModel):
         return False
 
     def headerData(self, col, orientation, role=None):
-        """Return the column headers
+        """Return the information for the row/column headers
         """
         if role == DISPLAY_ROLE and orientation == QtCore.Qt.Horizontal:
             try:
-                # quickest way to get the column
+                # quickest way to get the column header
                 return self._df.columns[col]
+            except Exception:
+                return None
+        elif role == DISPLAY_ROLE and orientation == QtCore.Qt.Vertical:
+            try:
+                # quickest way to get the column header
+                return col+1
             except Exception:
                 return None
 
         elif role == TOOLTIP_ROLE and orientation == QtCore.Qt.Horizontal:
             try:
-                # quickest way to get the column
+                # quickest way to get the column tooltip
                 return self._headerToolTips[orientation][col]
             except Exception:
                 return None
@@ -442,7 +488,12 @@ class _TableModel(QtCore.QAbstractTableModel):
             # process the heights/widths of the headers
             if orientation == QtCore.Qt.Horizontal:
                 try:
-                    # get the estimated width of the column, also for the last visible column
+                    # # get the estimated width of the column, also for the last visible column\
+                    if (self._view._columnDefs and self._view._columnDefs._columns):
+                        colObj = self._view._columnDefs._columns[col]
+                        width = colObj.columnWidth
+                        if width is not None:
+                            return QtCore.QSize(width, int(self._chrHeight))
                     width = self._estimateColumnWidth(col)
 
                     header = self._view.horizontalHeader()
@@ -461,6 +512,9 @@ class _TableModel(QtCore.QAbstractTableModel):
                 except Exception:
                     # return the default QSize
                     return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))
+
+            # return the default QSize for vertical header
+            return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))
 
         elif role == ICON_ROLE and self._isColumnEditable(col) and self.showEditIcon:
             # return the pixmap
@@ -590,18 +644,19 @@ class _TableModel(QtCore.QAbstractTableModel):
         """Return whether the column number is editable.
         """
         try:
-            # return True if the column contains an edit function
+            # return True if the column contains an edit function and table is editable
             # NOTE:ED - need to remove _dataFrameObject, move options to TableABC? BUT Column class is still good
-            return self._view._dataFrameObject.setEditValues[col] is not None
+            return self._defaultEditable and self._view._dataFrameObject.setEditValues[col] is not None
         except Exception:
             return self._defaultEditable
 
     def resetFilter(self):
         """Reset the table to unsorted
         """
-        self.beginResetModel()
-        self._filterIndex = None
-        self.endResetModel()
+        if self._filterIndex:
+            self.beginResetModel()
+            self._filterIndex = None
+            self.endResetModel()
 
 
 #=========================================================================================
@@ -677,6 +732,7 @@ class _TableObjectModel(_TableModel):
 
             if (func := self.setAttribRole.get(role)):
                 func(colDef, obj, value)
+                self.dataChanged.emit(index, index)
 
                 self._view.viewport().update()  # repaint the view
                 return True

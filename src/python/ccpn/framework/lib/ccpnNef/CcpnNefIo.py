@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-31 18:50:33 +0000 (Mon, October 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:03 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -4837,16 +4837,20 @@ class CcpnNefReader(CcpnNefContent):
                                                 'atom_name'))
             element = row.get('element')
             isotope = row.get('isotope_number')
-            if element:
-                if isotope:
+            if element not in DEFAULT_ISOTOPE_DICT:
+                # Unknown / wrong element definition (Q instead of H is not valid)
+                isotopeCode = None
+            else:
+                if element is not None:
+                    if isotope:
+                        isotopeCode = '%s%s' % (isotope, element.title())
+                    else:
+                        isotopeCode = DEFAULT_ISOTOPE_DICT.get(element.upper())
+                elif isotope:
+                    element = name2ElementSymbol(tt[3])
                     isotopeCode = '%s%s' % (isotope, element.title())
                 else:
-                    isotopeCode = DEFAULT_ISOTOPE_DICT.get(element.upper())
-            elif isotope:
-                element = name2ElementSymbol(tt[3])
-                isotopeCode = '%s%s' % (isotope, element.title())
-            else:
-                isotopeCode = None
+                    isotopeCode = None
 
             try:
                 if (nmrResidue := self.produceNmrResidue(*tt[:3])) and \
@@ -5127,7 +5131,20 @@ class CcpnNefReader(CcpnNefContent):
                     item = (defaultChainCode,) + item[1:]
                 idStrings.append(Pid.IDSEP.join(('' if x is None else str(x)) for x in item))
             try:
+                # create the contribution
                 contribution.addRestraintItem(idStrings, string2ItemMap)
+
+                # NOTE:ED - check with Eliza - create the required nmrAtoms/atoms
+                for atm in idStrings:
+                    if atm:
+                        chn, seq, res, atmType = atm.split(Pid.IDSEP)
+                        nmrChain = self.project.fetchNmrChain(chn)
+                        if res:
+                            nmrResidue = nmrChain.fetchNmrResidue(seq, res)
+                        else:
+                            nmrResidue = nmrChain.fetchNmrResidue(seq)
+                        nmrResidue.fetchNmrAtom(atmType)
+
             except ValueError:
                 self.warning("Cannot Add restraintItem %s. Identical to previous. Skipping" % idStrings, loop)
 
@@ -7362,7 +7379,7 @@ class CcpnNefReader(CcpnNefContent):
         # ccpn_collections contains nothing except for the ccpn_collection loop
         loopName = 'ccpn_collection'
         loop = saveFrame[loopName]
-        creatorFunc = project.newCollection
+        creatorFunc = project.fetchCollection
 
         result = []
         mapping = nef2CcpnMap.get(loopName) or {}
@@ -7376,15 +7393,18 @@ class CcpnNefReader(CcpnNefContent):
                 # skip if not in the import list
                 continue
 
-            parameters.pop('uniqueId', None)  # remove from parameters, although shouldn't be there
-            obj = creatorFunc(**parameters)
-            result.append(obj)
+            if (name := parameters.pop('name', None)):
+                comment = parameters.pop('comment', None)
+                parameters.pop('uniqueId', None)  # remove from parameters, although it shouldn't be there
+                obj = creatorFunc(name=name)
+                result.append(obj)
 
-            itms = row.get('items')
-            if itms:
-                itms = json.loads(itms)
-                _itms = [project.getByPid(itm) for itm in itms]
-                obj.items = list(filter(None, _itms))
+                if comment:
+                    obj.comment = comment
+                if (itms := row.get('items')):
+                    itms = json.loads(itms)
+                    _itms = [project.getByPid(itm) for itm in itms]
+                    obj.items = list(set(obj.items) | set(filter(None, _itms)))
 
         return result
 

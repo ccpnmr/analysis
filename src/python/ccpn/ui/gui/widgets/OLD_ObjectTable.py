@@ -121,7 +121,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:13 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:08 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1505,7 +1505,7 @@ class ObjectTableFilter(Widget):
         self.table.setObjects(selected)
 
 
-class Column:
+class OLD_Column:
 
     def __init__(self, heading, getValue, getEditValue=None, setEditValue=None,
                  editClass=None, editArgs=None, editKw=None, tipText=None,
@@ -1630,37 +1630,37 @@ if __name__ == '__main__':
 
     popup = CcpnDialog(windowTitle='Test Table', setLayout=True)
 
-    cString = Column(heading='Str',
-                     getValue=lambda i: mockObj.exampleStr,
-                     setEditValue=lambda mockObj, value: mockObj.editStr(mockObj, value),
-                     getColor=lambda i: mockObj.y,
-                     )
+    cString = OLD_Column(heading='Str',
+                         getValue=lambda i: mockObj.exampleStr,
+                         setEditValue=lambda mockObj, value: mockObj.editStr(mockObj, value),
+                         getColor=lambda i: mockObj.y,
+                         )
 
-    cFloat = Column(heading='Float',
-                    getValue=lambda i: mockObj.exampleFloat,
-                    setEditValue=lambda mockObj, value: mockObj.editFloat(mockObj, value),
-                    editDecimals=3, editStep=0.1,
-                    getColor=lambda i: mockObj.r,
-                    )
-    cBool = Column(heading='Bool',
-                   getValue=lambda i: mockObj.exampleBool,
-                   setEditValue=lambda mockObj, value: mockObj.editBool(mockObj, value),
-                   getColor=lambda i: mockObj.b,
-                   )
-
-    cPulldown = Column(heading='Pulldown',
-                       getValue=lambda i: mockObj.exampleList,
-                       setEditValue=lambda mockObj, value: mockObj.editPulldown(mockObj, value),
+    cFloat = OLD_Column(heading='Float',
+                        getValue=lambda i: mockObj.exampleFloat,
+                        setEditValue=lambda mockObj, value: mockObj.editFloat(mockObj, value),
+                        editDecimals=3, editStep=0.1,
+                        getColor=lambda i: mockObj.r,
+                        )
+    cBool = OLD_Column(heading='Bool',
+                       getValue=lambda i: mockObj.exampleBool,
+                       setEditValue=lambda mockObj, value: mockObj.editBool(mockObj, value),
+                       getColor=lambda i: mockObj.b,
                        )
-    cIcon = Column(heading='Icon',
-                   getValue=None,
-                   getIcon=lambda i: mockObj.icon,
-                   )
-    cFlags = Column(heading='Flags',
-                    getValue=lambda i: mockObj.flagsList,
-                    setEditValue=lambda mockObj, value: mockObj.editFlags(mockObj, value),
-                    getColor=lambda i: mockObj.color,
-                    )
+
+    cPulldown = OLD_Column(heading='Pulldown',
+                           getValue=lambda i: mockObj.exampleList,
+                           setEditValue=lambda mockObj, value: mockObj.editPulldown(mockObj, value),
+                           )
+    cIcon = OLD_Column(heading='Icon',
+                       getValue=None,
+                       getIcon=lambda i: mockObj.icon,
+                       )
+    cFlags = OLD_Column(heading='Flags',
+                        getValue=lambda i: mockObj.flagsList,
+                        setEditValue=lambda mockObj, value: mockObj.editFlags(mockObj, value),
+                        getColor=lambda i: mockObj.color,
+                        )
 
     table = ObjectTable(parent=popup, columns=[cString, cFloat, cBool, cPulldown, cIcon, cFlags], objects=None, grid=(0, 0))
     table.setObjects([mockObj] * 5)

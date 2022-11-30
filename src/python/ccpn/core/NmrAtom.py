@@ -9,12 +9,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:37 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:02 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -614,16 +614,17 @@ class NmrAtom(AbstractWrapperObject):
                 sum2 += value * vw
                 N += weight
 
-        if N > 0.0:
-            mean = sum1 / N
-            mean2 = sum2 / N
-            sigma2 = abs(mean2 - (mean * mean))
-            sigma = math.sqrt(sigma2)
-
-        else:
+        if N <= 0.0:
+            # no contributions
             return None, None
 
-        return mean, sigma if len(peakDims) > 1 else None
+        mean = sum1 / N
+        mean2 = sum2 / N
+        sigma2 = abs(mean2 - (mean * mean))
+        sigma = math.sqrt(sigma2)
+
+        # valueError (sigma) undefined for single contributions
+        return mean, (sigma if len(peakDims) > 1 else None)
 
     #=========================================================================================
     # new<Object> and other methods
@@ -652,9 +653,11 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None, com
     resonanceGroup = self._wrappedData
 
     if not isinstance(name, (str, type(None))):
-        raise TypeError('Name {} must be of type string (or None)'.format(name))
+        raise TypeError(f'Name {name} must be of type string (or None)')
+    if not isinstance(comment, (str, type(None))):
+        raise TypeError(f'Comment {comment} must be of type string (or None)')
 
-    if name is None or len(name) == 0:
+    if not name:
         # generate (temporary) default name, to be changed later after we created the object
         _name = NmrAtom._uniqueName(self.project)
 
@@ -663,7 +666,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None, com
         _name = name
         previous = self.getNmrAtom(_name.translate(Pid.remapSeparators))
         if previous is not None:
-            raise ValueError('newNmrAtom: name "%s" clashes with %s' % (name, previous))
+            raise ValueError(f'newNmrAtom: name {_name!r} clashes with {previous}')
 
     # Create the api object
     # Always create first with unknown isotopeCode
@@ -676,7 +679,8 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None, com
     # Check/set isotopeCode; it has to be set after the creation to avoid API errors.
     result._setIsotopeCode(isotopeCode)
 
-    if comment is not None and len(comment) > 0:
+    if comment:
+        # set the comment if defined
         result.comment = comment
 
     # Set additional optional attributes supplied as kwds arguments

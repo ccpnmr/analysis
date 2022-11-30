@@ -1,10 +1,6 @@
 """
 Module Documentation here
 """
-
-import contextlib
-
-
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -19,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 16:20:50 +0100 (Thu, October 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:08 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import contextlib
 from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
@@ -559,19 +556,19 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
     def _aspectRatioChangedInDisplay(self, aDict):
         """Respond to an external change in the aspect ratio of a strip
         """
-        if aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._spectrumDisplay:
-            _aspectRatios = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLASPECTRATIOS]
-            if not _aspectRatios:
-                return
+        if aDict[GLNotifier.GLSPECTRUMDISPLAY] != self._spectrumDisplay:
+            return
+        if not (_aspectRatios := aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLASPECTRATIOS]):
+            return
 
-            self.blockSignals(True)
+        self.blockSignals(True)
 
-            for aspect in _aspectRatios.keys():
+        for aspect in _aspectRatios.keys():
+            if aspect in self.aspectScreen and aspect in self.aspectData:
                 aspectValue = _aspectRatios[aspect]
-                if aspect in self.aspectScreen and aspect in self.aspectData:
-                    self.aspectScreen[aspect].setText(self.aspectData[aspect].textFromValue(aspectValue))
+                self.aspectScreen[aspect].setText(self.aspectData[aspect].textFromValue(aspectValue))
 
-            self.blockSignals(False)
+        self.blockSignals(False)
 
     @pyqtSlot()
     def _symbolsChanged(self):
@@ -652,7 +649,7 @@ class _commonSettings():
 
     # separated from settings widgets below, but only one seems to use it now
 
-    def _getSpectraFromDisplays(self, displays):
+    def _getSpectraFromDisplays(self, displays, data=None):
         """Get the list of active spectra from the spectrumDisplays
         """
         if not self.application or not displays or len(displays) > 1:
@@ -672,11 +669,16 @@ class _commonSettings():
             if dp.strips:
                 for sv in dp.strips[0].spectrumViews:
 
-                    if not sv.isDeleted:
-                        if sv.spectrum not in validSpectrumViews:
-                            validSpectrumViews[sv.spectrum] = sv.isDisplayed
-                        else:
-                            validSpectrumViews[sv.spectrum] = validSpectrumViews[sv.spectrum] or sv.isDisplayed
+                    if sv.isDeleted:
+                        continue
+                    if data and data[Notifier.OBJECT] == sv and data[Notifier.TRIGGER] == Notifier.DELETE:
+                        # ignore spectrumView if it about to be deleted - should re-introduce the flag :|
+                        continue
+
+                    if sv.spectrum not in validSpectrumViews:
+                        validSpectrumViews[sv.spectrum] = sv.isDisplayed
+                    else:
+                        validSpectrumViews[sv.spectrum] = validSpectrumViews[sv.spectrum] or sv.isDisplayed
 
         if not validSpectrumViews:
             return 0, None, None, None
@@ -693,8 +695,7 @@ class _commonSettings():
         # get list of unique axisCodes
         visibleAxisCodes = {}
         spectrumIndices = {}
-        for spectrum, visible in validSpectrumViews.items():
-
+        for spectrum in validSpectrumViews:
             indices = getAxisCodeMatchIndices(spectrum.axisCodes, activeDisplay.axisCodes)
             spectrumIndices[spectrum] = indices
             for ii, axis in enumerate(spectrum.axisCodes):
@@ -819,7 +820,7 @@ class _commonSettings():
         if removeTopWidget:
             del widget
 
-    def _fillSpectrumFrame(self, displays):
+    def _fillSpectrumFrame(self, displays, data=None):
         """Populate then spectrumFrame with the selectable spectra
         """
         if self._spectraWidget:
@@ -831,7 +832,7 @@ class _commonSettings():
                                      grid=(2, 1), gridSpan=(self._spectraRows, 2), vAlign='top', hAlign='left')
 
         # calculate the maximum number of axes
-        self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays(displays)
+        self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays(displays, data)
         if not self.maxLen:
             return
 
@@ -1198,6 +1199,8 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
             self._spectrumViewNotifier.unRegister()
         if self.includeNmrChainPullSelection:
             self.ncWidget.unRegister()
+        if self.includeSpectrumTable:
+            self.spectrumDisplayPulldown.unRegister()
 
     def _spectrumViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
@@ -1205,7 +1208,7 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         if self.includeSpectrumTable:
             # self._fillSpectrumFrame(self.displaysWidget._getDisplays())
             gid = self.spectrumDisplayPulldown.getText()
-            self._fillSpectrumFrame([self.application.getByGid(gid)])
+            self._fillSpectrumFrame([self.application.getByGid(gid)], data)
 
     def _spectrumViewVisibleChanged(self):
         """Respond to a visibleChanged in one of the spectrumViews
@@ -1229,9 +1232,9 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
     def _cleanupWidget(self):
         """Cleanup the notifiers that are left behind after the widget is closed
         """
+        self._unRegisterNotifiers()
         if self.displaysWidget:
             self.displaysWidget._close()
-        self._unRegisterNotifiers()
 
     def _selectionPulldownCallback(self, item):
         """Notifier Callback for selecting NmrChain
@@ -1243,7 +1246,8 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
 
 
 class _SpectrumRow(Frame):
-    """Class to make a spectrum row"""
+    """Class to make a spectrum row
+    """
 
     def __init__(self, parent, application, spectrum, spectrumDisplay, row=0, startCol=0, visible=True, **kwds):
         super().__init__(parent, **kwds)
@@ -1272,7 +1276,7 @@ class _SpectrumRow(Frame):
                     fixedWidths=(None, _height * 4),
                     labelText=axisCode,
                     value=spectrum.assignmentTolerances[ii],
-                    decimals=decimals, step=step, range=(step, None),
+                    decimals=decimals, step=step, minimum=step
                     )
             ds.setObjectName(str(spectrum.pid + axisCode))
             self.spinBoxes.append(ds)
@@ -1315,21 +1319,16 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
             self.application = mainWindow.application
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
-            displayText = [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
+            # displayText = [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
         else:
-            self.application = None
-            self.project = None
-            self.current = None
-            displayText = []
+            self.application = self.project = self.current = None
+            # displayText = []
 
         self.callback = callback
-        self.returnCallback = returnCallback if returnCallback else self.doCallback
+        self.returnCallback = returnCallback or self.doCallback
         self.applyCallback = applyCallback
         self.widgetsDict = {}
 
-        # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
-        # underpinning the addNotifier call does not allow for it either
-        row = 0
         # texts = [ALL] + defaultListItem.pid if defaultListItem else ([ALL] + displayText)
         # self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=[ALL], displayText=[])
         # row += 1
@@ -1337,26 +1336,29 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
 
         self.checkBoxes = {}
         if settingsDict:
-            optionTexts = []
-            for item, data in settingsDict.items():
-                optionTexts += [data['label']]
+            optionTexts = [data['label'] for item, data in settingsDict.items()]
             _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
             colwidth = maxDim.width()
 
-            for item, data in settingsDict.items():
-                row += 1
-
+            for row, (item, data) in enumerate(settingsDict.items(), start=1):
                 if 'type' in data:
                     widgetType = data['type']
                     kws = {}
-                    if 'callBack' in data:  # this avoid a crash if the widget init doesn't have a callback/mainWindow arg
-                        kws.update({'callback': data['callBack']})
-                    kws.update({'mainWindow': self.mainWindow})
-                    if 'kwds' in data:
-                        kws.update(data['kwds'])
-                        newItem = widgetType(self, grid=(row, 0), **kws, )
+                    if widgetType == HLine:
+                        # hack for a divider
+                        if 'kwds' in data:
+                            kws.update(data['kwds'])
+                        newItem = widgetType(self, grid=(row, 0), colour=getColours()[DIVIDER], **kws,)
+
                     else:
-                        newItem = widgetType(self, self.mainWindow, grid=(row, 0), **kws)
+                        if 'callBack' in data:  # this avoids a crash if the widget init doesn't have a callback/mainWindow arg
+                            kws['callback'] = data['callBack']
+                        kws['mainWindow'] = self.mainWindow
+                        if 'kwds' in data:
+                            kws.update(data['kwds'])
+                            newItem = widgetType(self, grid=(row, 0), **kws, )
+                        else:
+                            newItem = widgetType(self, self.mainWindow, grid=(row, 0), **kws)
 
                 else:
                     newItem = CheckBoxCompoundWidget(
@@ -1376,13 +1378,13 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
                     newItem.setEnabled(data['enabled'])
                 self.widgetsDict[item] = newItem
 
+                # need to check this - is confusing mix of widgets
                 self.checkBoxes[item] = {'widget'    : newItem,
                                          'item'      : item,
                                          'signalFunc': None
                                          }
                 if 'postInit' in data:
-                    func = data['postInit']
-                    if func:
+                    if func := data['postInit']:
                         func(newItem)
 
                 # if data['_init']:
@@ -1582,7 +1584,7 @@ class ObjectSelectionWidget(ListCompoundWidget):
         ll = [SelectToAdd] + self.standardListItems
         pulldownObjs = [None] * len(ll)
         if self.project:
-            objects = [obj for obj in getattr(self.project, self.KLASS._pluralLinkName, [])]
+            objects = list(getattr(self.project, self.KLASS._pluralLinkName, []))
             ll += [obj.pid for obj in objects]
             pulldownObjs += objects
         self.pulldownList.setData(texts=ll, )  # objects=pulldownObjs)

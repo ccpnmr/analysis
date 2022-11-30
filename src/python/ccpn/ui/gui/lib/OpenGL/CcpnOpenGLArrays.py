@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:09 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-11-30 11:22:05 +0000 (Wed, November 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -126,6 +126,18 @@ class GLVertexArray():
         """
         self.vertices = np.array([], dtype=np.float32)
         self.numVertices = 0
+
+    def _delete(self):
+        """Clean up everything for deletion
+        """
+        del self.indices
+        del self.vertices
+        del self.colors
+        del self.texcoords
+        del self.attribs
+        del self.offsets
+        del self.pids
+        self._GLContext = None
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # indexed VBOs (vertex buffer objects)

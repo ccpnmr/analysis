@@ -31,6 +31,7 @@ import os
 import io
 import numpy as np
 import math
+import glob
 from PyQt5 import QtGui
 from PyQt5.QtCore import QStandardPaths
 from PyQt5.QtGui import QFontDatabase
@@ -85,6 +86,8 @@ from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPNG
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.util.Report import Report
 from ccpn.util.Constants import SCALE_PERCENT, SCALE_UNIT_CM, SCALE_UNIT_INCH, SCALE_INCH_UNIT, SCALE_CM_UNIT, SCALING_MODES
+from ccpn.util.Common import isLinux, isMacOS, isWindowsOS
+from ccpn.util.Path import aPath
 
 
 PLOTLEFT = 'plotLeft'
@@ -249,24 +252,32 @@ class GLExporter():
         self._addDrawingToStory()
 
     def _getFontPaths(self):
-        font_paths = QStandardPaths.standardLocations(QStandardPaths.FontsLocation)
+        font_paths = set(QStandardPaths.standardLocations(QStandardPaths.FontsLocation))
+
+        if isWindowsOS():
+            font_paths = list(font_paths | {"C:/Windows/Fonts"})
+        elif isMacOS():
+            font_paths = list(font_paths | {"/System/Library/Fonts"})
+        elif isLinux():
+            font_paths = list(font_paths | {"~/.fonts", "~/.local/share/fonts", "/usr/local/share/fonts", "/usr/share/fonts"})
 
         unloadable = []
         familyPath = {}
 
         db = QFontDatabase()
         for fpath in font_paths:  # go through all font paths
-            for filename in os.listdir(fpath):  # go through all files at each path
-                path = os.path.join(fpath, filename)
+            if aPath(fpath).is_dir():
+                for filename in glob.glob(f'{fpath}/**/*.ttf', recursive=True):  # go through all files at each path
+                    path = os.path.join(fpath, filename)
 
-                idx = db.addApplicationFont(path)  # add font path
-                if idx < 0:
-                    unloadable.append(path)  # font wasn't loaded if idx is -1
-                else:
-                    names = db.applicationFontFamilies(idx)  # load back font family name
-                    for n in names:
-                        _paths = familyPath.setdefault(n, set())
-                        _paths.add(path)
+                    idx = db.addApplicationFont(path)  # add font path
+                    if idx < 0:
+                        unloadable.append(path)  # font wasn't loaded if idx is -1
+                    else:
+                        names = db.applicationFontFamilies(idx)  # load back font family name
+                        for n in names:
+                            _paths = familyPath.setdefault(n, set())
+                            _paths.add(path)
 
         return unloadable, familyPath
 

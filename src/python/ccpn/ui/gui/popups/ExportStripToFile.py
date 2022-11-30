@@ -35,6 +35,7 @@ from PyQt5.QtGui import QFontDatabase
 from dataclasses import dataclass
 from functools import partial
 from typing import Optional
+import glob
 
 from ccpn.core.lib.ContextManagers import catchExceptions, queueStateChange
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER, BORDERFOCUS
@@ -73,8 +74,9 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString, hexToRgbRatio, colourNameNoSpace
 from ccpn.util.Constants import SCALING_MODES, POSINFINITY
+from ccpn.util.Common import isLinux, isMacOS, isWindowsOS
+from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
-
 
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLAXISLABELS, GLAXISMARKS, \
 #     GLMARKLABELS, GLMARKLINES, GLREGIONS, GLOTHERLINES, GLSPECTRUMLABELS, GLSTRIPLABELLING, GLTRACES, \
@@ -1488,26 +1490,34 @@ class ExportStripToFilePopup(ExportDialogABC):
         super().keyPressEvent(a0)
 
     def _getFontPaths(self):
-        font_paths = QStandardPaths.standardLocations(QStandardPaths.FontsLocation)
+        font_paths = set(QStandardPaths.standardLocations(QStandardPaths.FontsLocation))
+
+        if isWindowsOS():
+            font_paths = list(font_paths | {"C:/Windows/Fonts"})
+        elif isMacOS():
+            font_paths = list(font_paths | {"/System/Library/Fonts"})
+        elif isLinux():
+            font_paths = list(font_paths | {"~/.fonts", "~/.local/share/fonts", "/usr/local/share/fonts", "/usr/share/fonts"})
 
         unloadable = []
         familyPath = {}
 
         db = QFontDatabase()
         for fpath in font_paths:  # go through all font paths
-            for filename in os.listdir(fpath):  # go through all files at each path
-                path = os.path.join(fpath, filename)
-                if not path.endswith('.ttf') or path.startswith('.'):
-                    continue
+            if aPath(fpath).is_dir():
+                for filename in glob.glob(f'{fpath}/**/*.ttf', recursive=True):  # go through all files at each path
+                    path = os.path.join(fpath, filename)
+                    if not path.endswith('.ttf') or path.startswith('.'):
+                        continue
 
-                idx = db.addApplicationFont(path)  # add font path
-                if idx < 0:
-                    unloadable.append(path)  # font wasn't loaded if idx is -1
-                else:
-                    names = db.applicationFontFamilies(idx)  # load back font family name
-                    for n in names:
-                        _paths = familyPath.setdefault(n, set())
-                        _paths.add(path)
+                    idx = db.addApplicationFont(path)  # add font path
+                    if idx < 0:
+                        unloadable.append(path)  # font wasn't loaded if idx is -1
+                    else:
+                        names = db.applicationFontFamilies(idx)  # load back font family name
+                        for n in names:
+                            _paths = familyPath.setdefault(n, set())
+                            _paths.add(path)
 
         return unloadable, familyPath
 

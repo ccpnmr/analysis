@@ -16,10 +16,11 @@ set /a "_count=0"
 
 call "%CCPNMR_TOP_DIR%\bat\paths"
 
-set MAJMINVER=$("%CONDA%\python.exe" -c 'import sys; print(str(sys.version_info[0])+"."+str(sys.version_info[1]))')
-set MODULE=lib\python%MAJMINVER%\site-packages\nef_pipelines\main.py
-set ENTRY_MODULE=%CCPNMR_TOP_DIR%\%MODULE%
-"%CONDA%\python.exe" -i -O -W ignore "%ENTRY_MODULE%" %*
+for /f %%a in ('%CONDA%\python.exe -c "import sys; print(str(sys.version_info[0])+'.'+str(sys.version_info[1]))"') do set "MAJMINVER=%%a"
+set MODULE=Lib\site-packages\nef_pipelines\main.py
+set ENTRY_MODULE=%CONDA%\%MODULE%
+
+"%CONDA%\python.exe" -W ignore "%ENTRY_MODULE%" %*
 endlocal
 
 exit /b

@@ -488,12 +488,16 @@ class _TableModel(QtCore.QAbstractTableModel):
             # process the heights/widths of the headers
             if orientation == QtCore.Qt.Horizontal:
                 try:
-                    # # get the estimated width of the column, also for the last visible column\
+                    txt = str(self.headerData(col, orientation, role=DISPLAY_ROLE))
+                    height = len(txt.split('\n')) * int(self._chrHeight)
+
+                    # get the estimated width of the column, also for the last visible column\
                     if (self._view._columnDefs and self._view._columnDefs._columns):
                         colObj = self._view._columnDefs._columns[col]
                         width = colObj.columnWidth
                         if width is not None:
-                            return QtCore.QSize(width, int(self._chrHeight))
+                            return QtCore.QSize(width, height)
+
                     width = self._estimateColumnWidth(col)
 
                     header = self._view.horizontalHeader()
@@ -502,12 +506,13 @@ class _TableModel(QtCore.QAbstractTableModel):
                         lastCol = visibleCols[-1]
                         if col == lastCol and self._view is not None:
                             # stretch the last column to fit the table - sum the previous columns
+                            # I think setStretchLastSection automatically does this
                             colWidths = sum(self._estimateColumnWidth(cc) for cc in visibleCols[:-1])
                             viewWidth = self._view.viewport().size().width()
                             width = max(width, viewWidth - colWidths)
 
                     # return the size
-                    return QtCore.QSize(width, int(self._chrHeight))
+                    return QtCore.QSize(width, height)
 
                 except Exception:
                     # return the default QSize

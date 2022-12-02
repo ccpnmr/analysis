@@ -4,18 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-12-02 14:43:49 +0000 (Fri, December 02, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -47,7 +48,7 @@ TextAlignment = {
 class LineEdit(QtWidgets.QLineEdit, Base):
 
     def __init__(self, parent, text='', textAlignment='c', backgroundText=None,
-                 minimumWidth=100, textColor=None, editable=True, **kwds):
+                 textColor=None, editable=True, **kwds):
         """
 
         :param parent:
@@ -73,7 +74,10 @@ class LineEdit(QtWidgets.QLineEdit, Base):
             self.setPlaceholderText(str(self.backgroundText))
 
         self.setAlignment(TextAlignment[textAlignment])
-        self.setMinimumWidth(minimumWidth)
+
+        if 'minimumWidth' in kwds:
+            self.setMinimumWidth(kwds['minimumWidth'])
+
         self.setStyleSheet('LineEdit { padding: 3px 3px 3px 3px; }')
 
         if not editable:

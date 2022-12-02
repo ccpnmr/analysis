@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-02 12:02:59 +0000 (Fri, December 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-02 16:33:39 +0000 (Fri, December 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1040,15 +1040,15 @@ class GLExporter():
         if _data.colourGroups:
             self._appendGroup(drawing=self._mainPlot, colourGroups=_data.colourGroups, name=groupName)
 
-    # @staticmethod
-    # def addLine(colourPath, line):
-    #     """Append a line to the colourGoup if not too close
-    #     """
-    #     # NOTE:ED - rounding errors, or duplicated points
-    #     for x0, y0, x1, y1 in zip_longest(line, line[2:]):
-    #         pass
-    #
-    #     colourPath.append([round(ll, 1) for ll in line])
+    @staticmethod
+    def addLine(colourPath, line):
+        """Append a line to the colourGoup if not too close
+        """
+        # NOTE:ED - would be quicker if done on the whole list at the end
+        rnd = np.append(np.round(line, 2).reshape([len(line) // 2, 2]), [[None, None]], axis=0)
+        ll = [pp for p0, p1 in zip(rnd, rnd[1:]) if not np.array_equal(p0, p1) for pp in p0]
+        if len(ll) > 2:
+            colourPath.append(ll)
 
     def _addSpectrumContours(self):
         """
@@ -1075,8 +1075,8 @@ class GLExporter():
                             data.colourGroups[colourPath] = {PDFLINES      : [],
                                                              PDFSTROKEWIDTH: 0.5 * self.baseThickness * self.contourThickness,
                                                              PDFSTROKECOLOR: colour, PDFSTROKELINECAP: 1}
-                        data.colourGroups[colourPath][PDFLINES].append(newLine)
-                        # self.addLine(data.colourGroups[colourPath][PDFLINES], newLine)
+                        # data.colourGroups[colourPath][PDFLINES].append(newLine)
+                        self.addLine(data.colourGroups[colourPath][PDFLINES], newLine)
 
             else:
                 # drawVertexColor
@@ -1256,8 +1256,8 @@ class GLExporter():
                             if newLine := self.lineVisible(self._parent, newLine, x=_x, y=_y, width=_width, height=_height):
                                 if colourPath not in colourGroups:
                                     colourGroups[colourPath] = {PDFLINES: [], PDFFILLCOLOR: colour, PDFSTROKE: None, PDFSTROKECOLOR: None}
-                                colourGroups[colourPath][PDFLINES].append(newLine)
-                                # self.addLine(colourGroups[colourPath][PDFLINES], newLine)
+                                # colourGroups[colourPath][PDFLINES].append(newLine)
+                                self.addLine(colourGroups[colourPath][PDFLINES], newLine)
 
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralListsAreaFill')
 
@@ -1587,8 +1587,8 @@ class GLExporter():
                                                     PDFSTROKECOLOR    : colour,
                                                     PDFSTROKELINECAP  : 1, PDFCLOSEPATH: False,
                                                     PDFSTROKEDASHARRAY: GLLINE_STYLES_ARRAY[infLine.lineStyle]}
-                    colourGroups[colourPath][PDFLINES].append(newLine)
-                    # self.addLine(colourGroups[colourPath][PDFLINES], newLine)
+                    # colourGroups[colourPath][PDFLINES].append(newLine)
+                    self.addLine(colourGroups[colourPath][PDFLINES], newLine)
 
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='infiniteLines')
 
@@ -1978,7 +1978,7 @@ class GLExporter():
         """
         Output a PNG file for the GL widget.
         """
-        from reportlab.graphics.renderPM import renderScaledDrawing, PMCanvas, draw
+        from reportlab.graphics.renderPM import PMCanvas, draw
 
         with catchExceptions(errorStringTemplate='Error writing PNG file: "%s"', printTraceBack=False):
             dpi = self.params[GLEXPORTDPI]
@@ -2003,8 +2003,7 @@ class GLExporter():
 
                 # draw into the common canvas
                 # originally used renderPM.drawToFile
-                d = renderScaledDrawing(plt)
-                draw(d, c, 0, 0, showBoundary=False)
+                draw(plt, c, 0, 0, showBoundary=False)
 
                 # update the co-ordinates for the next plot
                 if rows:
@@ -2016,7 +2015,7 @@ class GLExporter():
         """
         Output an SVG file for the GL widget.
         """
-        from reportlab.graphics.renderSVG import renderScaledDrawing, SVGCanvas, draw
+        from reportlab.graphics.renderSVG import SVGCanvas, draw
 
         with catchExceptions(errorStringTemplate='Error writing SVG file: "%s"', printTraceBack=False):
 
@@ -2039,8 +2038,7 @@ class GLExporter():
 
                 # draw into the common canvas
                 # originally used renderSVG.drawToFile
-                d = renderScaledDrawing(plt)
-                draw(d, c, 0, 0, showBoundary=False)
+                draw(plt, c, 0, 0, showBoundary=False)
 
                 # update the co-ordinates for the next plot
                 if rows:
@@ -2059,7 +2057,7 @@ class GLExporter():
         """
         Output a PS file for the GL widget.
         """
-        from reportlab.graphics.renderPS import renderScaledDrawing, PSCanvas, draw
+        from reportlab.graphics.renderPS import PSCanvas, draw
 
         with catchExceptions(errorStringTemplate='Error writing PS file: "%s"', printTraceBack=False):
 
@@ -2082,8 +2080,7 @@ class GLExporter():
 
                 # draw into the common canvas
                 # originally used renderPS.drawToFile
-                d = renderScaledDrawing(plt)
-                draw(d, c, 0, 0, showBoundary=False)
+                draw(plt, c, 0, 0, showBoundary=False)
 
                 # update the co-ordinates for the next plot
                 if rows:
@@ -2127,10 +2124,11 @@ class GLExporter():
                     cc[PDFSTROKECOLOR] = None
 
             if newLine := self.lineVisible(self._parent, newLine, x=_x, y=_y, width=_width, height=_height):
-                colourGroups[colourPath][PDFLINES].append(newLine)
-                # self.addLine(colourGroups[colourPath][PDFLINES], newLine)
+                # colourGroups[colourPath][PDFLINES].append(newLine)
+                self.addLine(colourGroups[colourPath][PDFLINES], newLine)
 
-    def _colourID(self, name, colour):
+    @staticmethod
+    def _colourID(name, colour):
         return f'spectrumView{name}{colour.red}{colour.green}{colour.blue}{colour.alpha}'
 
     def _appendIndexLineGroup(self, indArray, colourGroups, plotDim, name, mat=None,
@@ -2202,8 +2200,8 @@ class GLExporter():
                     cc[PDFSTROKECOLOR] = None
 
             if newLine := self.lineVisible(self._parent, newLine, x=_x, y=_y, width=_width, height=_height):
-                colourGroups[colourPath][PDFLINES].append(newLine)
-                # self.addLine(colourGroups[colourPath][PDFLINES], newLine)
+                # colourGroups[colourPath][PDFLINES].append(newLine)
+                self.addLine(colourGroups[colourPath][PDFLINES], newLine)
 
         # override so that each element is a new group
         if splitGroups:
@@ -2262,20 +2260,28 @@ class GLExporter():
 
             newColour = {k: colourItem[k] for k in wanted_keys if k in colourItem}
 
-            pl = Path(**newColour)  #  strokeWidth=colourItem[PDFSTROKEWIDTH], strokeColor=colourItem[PDFSTROKECOLOR], strokeLineCap=colourItem[PDFSTROKELINECAP])
             for ll in colourItem[PDFLINES]:
-                if len(ll) == 4:
-                    pl.moveTo(ll[0], ll[1])
-                    pl.lineTo(ll[2], ll[3])
-                elif len(ll) > 4:
-                    pl.moveTo(ll[0], ll[1])
-                    for vv in range(2, len(ll), 2):
-                        with contextlib.suppress(Exception):
+                try:
+                    pl = Path(**newColour)  #  strokeWidth=colourItem[PDFSTROKEWIDTH], strokeColor=colourItem[PDFSTROKECOLOR], strokeLineCap=colourItem[PDFSTROKELINECAP])
+                    if len(ll) == 4:
+                        pl.moveTo(ll[0], ll[1])
+                        pl.lineTo(ll[2], ll[3])
+                    elif len(ll) > 4:
+                        pl.moveTo(ll[0], ll[1])
+                        for vv in range(2, len(ll), 2):
                             pl.lineTo(ll[vv], ll[vv + 1])
+                        if PDFCLOSEPATH not in colourItem or colourItem[PDFCLOSEPATH] == True:
+                            pl.closePath()
+                    else:
+                        # discard any paths that are too short
+                        continue
 
-                    if PDFCLOSEPATH not in colourItem or colourItem[PDFCLOSEPATH] == True:
-                        pl.closePath()
-            gr.add(pl)
+                except Exception:
+                    pass
+                else:
+                    # add to the group if path contains at least 1 valid line
+                    gr.add(pl)
+
         drawing.add(gr, name=name)
 
     def between(self, val, l, r):

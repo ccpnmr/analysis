@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-05 17:38:46 +0100 (Tue, October 05, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-12-05 12:46:21 +0000 (Mon, December 05, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -61,13 +61,13 @@ class HighlightBox(Widget):
         self._parent = parent
 
         if style not in self.styles:
-            raise ValueError(f'HighlightBox.style must be one of {[val for val in self.styles.keys()]}')
+            raise ValueError(f'HighlightBox.style must be one of {list(self.styles.keys())}')
         if not isinstance(colour, (str, QtGui.QColor)):
-            raise ValueError(f'HighlightBox.colour must be of type str or QtGui.QColor')
+            raise ValueError('HighlightBox.colour must be of type str or QtGui.QColor')
         if not (isinstance(lineWidth, int) and lineWidth >= 0):
-            raise ValueError(f'HighlightBox.lineWidth must be an int >= 0')
+            raise ValueError('HighlightBox.lineWidth must be an int >= 0')
         if not isinstance(showBorder, bool):
-            raise ValueError(f'HighlightBox.showBorder must be True/False')
+            raise ValueError('HighlightBox.showBorder must be True/False')
 
         self.style = style
         self.colour = colour
@@ -85,7 +85,16 @@ class HighlightBox(Widget):
 
     @showBorder.setter
     def showBorder(self, value):
-        self._showBorder = (True if value else False)
+        self._showBorder = bool(value)
+        self.update()
+
+    def setColour(self, colour):
+        """Set the highlight colour
+        """
+        if not isinstance(colour, (str, QtGui.QColor)):
+            raise ValueError('HighlightBox.setColour must be of type str or QtGui.QColor')
+
+        self.colour = colour
         self.update()
 
     def paintEvent(self, e):
@@ -102,7 +111,7 @@ class HighlightBox(Widget):
                 style = self.styles[self.style]
                 try:
                     pen = QtGui.QPen(self.colour, self.lineWidth, style)
-                except:
+                except Exception:
                     pen = QtGui.QPen(QtGui.QColor(self.colour), self.lineWidth, style)
 
                 qp.setPen(pen)

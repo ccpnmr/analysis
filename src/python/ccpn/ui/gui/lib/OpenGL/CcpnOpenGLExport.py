@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-02 16:33:39 +0000 (Fri, December 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-05 12:46:21 +0000 (Mon, December 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -678,17 +678,39 @@ class GLExporter():
                 for ii, ddAxis in enumerate(_dd.axes):
                     if _dd.minMaxMode == 0:
                         self.strip.setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
+
+                        if self.params[GLSTRIPDIRECTION] == 'Y':
+                            self.strip.spectrumDisplay._rightGLAxis._setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
+                        else:
+                            self.strip.spectrumDisplay._bottomGLAxis._setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
                     else:
                         self.strip.setAxisPosition(ii, ddAxis['Centre'], rescale=False, update=False)
                         self.strip.setAxisWidth(ii, ddAxis['Width'], rescale=False, update=False)
+
+                        if self.params[GLSTRIPDIRECTION] == 'Y':
+                            self.strip.spectrumDisplay._rightGLAxis._setAxisPosition(ii, ddAxis['Centre'], rescale=False, update=False)
+                            self.strip.spectrumDisplay._rightGLAxis._setAxisWidth(ii, ddAxis['Width'], rescale=False, update=False)
+                        else:
+                            self.strip.spectrumDisplay._bottomGLAxis._setAxisPosition(ii, ddAxis['Centre'], rescale=False, update=False)
+                            self.strip.spectrumDisplay._bottomGLAxis._setAxisWidth(ii, ddAxis['Width'], rescale=False, update=False)
 
                 self._axisL = self.strip._CcpnGLWidget.axisL
                 self._axisR = self.strip._CcpnGLWidget.axisR
                 self._axisT = self.strip._CcpnGLWidget.axisT
                 self._axisB = self.strip._CcpnGLWidget.axisB
+
                 self.strip._CcpnGLWidget._rescaleAllAxes(update=False)
                 self.strip._CcpnGLWidget._buildGL()
                 self.strip._CcpnGLWidget.buildAxisLabels()
+
+                if self.params[GLSTRIPDIRECTION] == 'Y':
+                    self.strip.spectrumDisplay._rightGLAxis._rescaleAllAxes(update=False)
+                    self.strip.spectrumDisplay._rightGLAxis._buildGL()
+                    self.strip.spectrumDisplay._rightGLAxis.buildAxisLabels()
+                else:
+                    self.strip.spectrumDisplay._bottomGLAxis._rescaleAllAxes(update=False)
+                    self.strip.spectrumDisplay._bottomGLAxis._buildGL()
+                    self.strip.spectrumDisplay._bottomGLAxis.buildAxisLabels()
 
             else:
                 self._axisL = self.strip._CcpnGLWidget.axisL
@@ -772,6 +794,21 @@ class GLExporter():
                 self.strip._CcpnGLWidget._rescaleAllZoom()
                 self.strip._CcpnGLWidget._buildGL()
                 self.strip._CcpnGLWidget.buildAxisLabels()
+
+                if self.params[GLSTRIPDIRECTION] == 'Y':
+                    # reset the strip to the original values
+                    sdr = self.strip.spectrumDisplay._rightGLAxis
+                    sdr.axisL, sdr.axisR, sdr.axisT, sdr.axisB = self._oldValues
+                    sdr._rescaleAllZoom()
+                    sdr._buildGL()
+                    sdr.buildAxisLabels()
+                else:
+                    # reset the strip to the original values
+                    sdb = self.strip.spectrumDisplay._bottomGLAxis
+                    sdb.axisL, sdb.axisR, sdb.axisT, sdb.axisB = self._oldValues
+                    sdb._rescaleAllZoom()
+                    sdb._buildGL()
+                    sdb.buildAxisLabels()
 
     def _addGridLines(self):
         """

@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-28 16:09:00 +0000 (Mon, November 28, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-12-05 15:38:11 +0000 (Mon, December 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1198,7 +1198,8 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.core.Project import DEFAULT_CHEMICALSHIFTLIST
 
         if _newProject := dataLoader.createNewProject:
-            project = self._newProject(dataLoader.nefImporter.getName())
+            name = Project._checkName(dataLoader.nefImporter.getName(), correctName=True)
+            project = self._newProject(name=name)
         else:
             project = self.project
 

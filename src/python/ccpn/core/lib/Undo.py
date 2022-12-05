@@ -14,12 +14,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-05 19:53:17 +0000 (Mon, December 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -150,6 +150,7 @@ class Undo(deque):
         self._blocked = False  # Block/unblock switch - internal use only
         self._undoItemBlockingLevel = 0  # Blocking level - modify with increase/decreaseBlocking only
         self._waypointBlockingLevel = 0  # Waypoint blocking - modify with increase/decreaseWaypointBlocking/ only
+        self._storageBlockingLevel = 0  # Waypoint blocking - modify with increase/decreaseWaypointBlocking/ only
         self._newItemCount = 0  # the number of new items that have been added since the last new waypoint
         self._itemAtLastSave = None
         self._lastEventMarkClean = True
@@ -222,6 +223,19 @@ class Undo(deque):
         if self._undoItemBlockingLevel > 0:
             self._undoItemBlockingLevel -= 1
 
+    def increaseStorageBlocking(self):
+        """Set one more level of storage-blocking"""
+        self._storageBlockingLevel += 1
+
+    def decreaseStorageBlocking(self):
+        """Reduce level of storage-blocking - when level reaches zero, undo is unblocked"""
+        if self._storageBlockingLevel > 0:
+            self._storageBlockingLevel -= 1
+
+    @property
+    def storageBlockingLevel(self):
+        return self._storageBlockingLevel
+
     @property
     def undoList(self):
         try:
@@ -237,7 +251,7 @@ class Undo(deque):
                          [(undoFunc[0].__name__, undoFunc[1].__name__) for undoFunc in self],
                          [undoFunc[0].__name__ for undoFunc in self],
                          [undoFunc[1].__name__ for undoFunc in self])
-        except:
+        except Exception:
             undoState = (self.maxWaypoints,
                          self.maxOperations,
                          self.nextIndex,

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-05 15:56:52 +0000 (Mon, December 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-05 16:24:19 +0000 (Mon, December 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1124,10 +1124,9 @@ class ExportStripToFilePopup(ExportDialogABC):
         self._setRangeState(self.strip.id, _updateQueue=False)
 
         validStripIds = [strip.id for strip in self.spectrumDisplay.strips] if self.spectrumDisplay else [self.strip.id]
-        ll = ['-- Strips to print --',
-              *validStripIds,
-              '-- Other strips --']
-        ll.extend([strip.id for strip in self.strips if strip.id not in ll])
+        ll = ['-- Strips to print --', *validStripIds]
+        if otherStrips := [strip.id for strip in self.strips if strip.id not in ll]:
+            ll.extend(['-- Other strips --', *otherStrips])
 
         self._stripLists.addItems(ll)
 
@@ -1314,7 +1313,7 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         if 'SpectrumDisplay' in selected:
             self.spectrumDisplay = self.objects[selected][0]
-            self.strip = self._selectedStrip
+            self.strip = self.spectrumDisplay.strips[0]  # self._selectedStrip
             self.setSave(self.spectrumDisplay.id + exportExtension)
 
             # set the values for the other strips in the spectrum-display
@@ -1334,7 +1333,12 @@ class ExportStripToFilePopup(ExportDialogABC):
             self._axisSpinboxes[0][-1].setColour(getColours()[BORDERFOCUS])
             self._axisSpinboxes[1][-1].setColour(getColours()[BORDERFOCUS])
 
+        self._currentStrip = self.strip.id
         self._populateRange()
+
+        # fill the scaling widgets
+        self._populateScaling()
+
         selectedList = self.treeView.getCheckStateItems()
         self._populateTreeView(selectedList)
 

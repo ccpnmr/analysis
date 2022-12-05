@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-29 16:55:21 +0000 (Tue, November 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-05 17:27:12 +0000 (Mon, December 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2351,6 +2351,12 @@ class CcpnNefReader(CcpnNefContent):
             ll.append(saveFrame)
         #
         return result
+
+        # these should be mandatory
+        # save_nef_nmr_meta_data
+        # save_nef_molecular_system
+        # save_nef_sequence
+        # save_nef_chemical_shift_list
 
     def _mergeSaveFramesInOrder(self, od1: OD, od2: OD) -> OD:
         result = OD(((x, []) for x in saveFrameReadingOrder))

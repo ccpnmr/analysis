@@ -15,11 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 12:05:55 +0000 (Mon, November 07, 2022) $"
-__dateModified__ = "$dateModified: 2022-11-07 10:03:56 +0000 (Mon, November 07, 2022) $"
-__dateModified__ = "$dateModified: 2022-11-06 18:24:24 +0000 (Sun, November 06, 2022) $"
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-29 18:06:02 +0000 (Tue, November 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-05 15:37:50 +0000 (Mon, December 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -718,9 +714,10 @@ class Gui(Ui):
         # We'll ask framework who will pass it back as ui._loadData calls
         objs = self.application._loadData(dataLoaders)
         if len(objs) == 0:
-            txt = f'No objects were loaded from {paths}'
+            _pp = ','.join(f'"{p}"' for p in paths)
+            txt = f'No objects were loaded from {_pp}'
             getLogger().warning(txt)
-            MessageDialog.showError('Load Data', txt, parent=self)
+            MessageDialog.showError('Load Data', txt, parent=self.mainWindow)
 
         return objs
 

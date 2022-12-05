@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-25 13:53:35 +0000 (Fri, November 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-05 15:37:50 +0000 (Mon, December 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ from ccpn.util.Logging import getLogger
 
 from ccpn.framework.Application import getApplication
 
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.FileDialog import SpectrumFileDialog

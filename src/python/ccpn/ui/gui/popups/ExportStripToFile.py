@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:29 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-05 16:27:11 +0000 (Mon, December 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -77,6 +77,7 @@ from ccpn.util.Constants import SCALING_MODES, POSINFINITY
 from ccpn.util.Common import isLinux, isMacOS, isWindowsOS
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
+
 
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLAXISLABELS, GLAXISMARKS, \
 #     GLMARKLABELS, GLMARKLINES, GLREGIONS, GLOTHERLINES, GLSPECTRUMLABELS, GLSTRIPLABELLING, GLTRACES, \
@@ -140,6 +141,10 @@ DEFAULTSPACING = (3, 3)
 TABMARGINS = (1, 10, 10, 1)  # l, t, r, b
 ZEROMARGINS = (0, 0, 0, 0)  # l, t, r, b
 
+PulldownFill = '--'
+DEFAULT_COLOR = QtGui.QColor('black')
+PRINT_COLOR = QtGui.QColor('mediumseagreen')
+
 
 @dataclass
 class _StripData:
@@ -177,7 +182,7 @@ class _StripData:
                 dd = self.axes[ii]
                 region = self.strip.getAxisRegion(ii)
                 dd[STRIPMIN], dd[STRIPMAX] = min(region), max(region)
-                dd[STRIPAXISINVERTED] = True if (region[0] > region[1]) else False  # probably not needed - use setAxisRegion
+                dd[STRIPAXISINVERTED] = region[0] > region[1]
                 dd[STRIPCENTRE] = self.strip.getAxisPosition(ii)
                 dd[STRIPWIDTH] = self.strip.getAxisWidth(ii)
 
@@ -263,22 +268,21 @@ class _StripListWidget(ListWidget):
         self._selectedStripIds = [val.text() for val in _selection]
 
         _opt = self._clickedStripId and self._clickedStripId in self._selectedStripIds
-        self._copyOption.setEnabled(True if _opt else False)
+        self._copyOption.setEnabled(bool(_opt))
         self._copyOption.setText(f'Copy {self._clickedStripId if _opt else "-"}')
 
         _opt = self._firstCopy and self._clickedStripId and self._clickedStripId in self._selectedStripIds
-        self._pasteOption.setEnabled(True if _opt else False)
+        self._pasteOption.setEnabled(bool(_opt))
         self._pasteOption.setText(f'Paste to {self._clickedStripId if _opt else "-"}')
 
         self._pasteAllOption.setEnabled(self._firstCopy and len(_selection) > 1)
 
         # raise the copy/paste menu
-        if event.button() == QtCore.Qt.RightButton:
-            if self.contextMenu:
-                option = self.raiseContextMenu(event)  # returns the menu action clicked
-                if option == self._copyOption:
-                    # enable the paste buttons if the copy has been used at least once
-                    self._firstCopy = True
+        if event.button() == QtCore.Qt.RightButton and self.contextMenu:
+            option = self.raiseContextMenu(event)  # returns the menu action clicked
+            if option == self._copyOption:
+                # enable the paste buttons if the copy has been used at least once
+                self._firstCopy = True
 
 
 class ExportStripToFilePopup(ExportDialogABC):
@@ -492,7 +496,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self._axisLabels = []
         for ii, txt in enumerate(STRIPBUTTONS):
             _label = Label(self._rangeRight, grid=(_rangeRow, ii), text=txt, hAlign='left')
-            _label.setVisible(False if ii > 0 else True)
+            _label.setVisible(ii <= 0)
             self._axisLabels.append(_label)
         _rangeRow += 1
 
@@ -503,7 +507,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         for ii, axis in enumerate(axes):
             _label = Label(self._rangeRight, text=axis, grid=(_rangeRow, 0), hAlign='left')
 
-            # add a box for the selected row
+            # add a box for the selected row - change colour depending on strip-direction? need to be linked
             _colourBox = HighlightBox(self._rangeRight, grid=(_rangeRow, 0), gridSpan=(1, 6), colour=focusColour, lineWidth=1, showBorder=False)
             _colourBox.setFixedHeight(_label.height() + 4)
 
@@ -525,7 +529,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             # store the widgets for the callbacks...
             self._axisSpinboxes.append(_widgets)
 
-        # buttons for setting the spinboxes from strip
+        # buttons for setting the spin-boxes from strip
         _texts = ['Set Print Region', 'Set Min', 'Set Max', 'Set Centre', 'Set Width']
         _tipTexts = ['Set all values for the print region from the selected strip.\nValues are set for the selected row',
                      'Set the minimum value for the print region from the selected strip.\nValue is set for the selected row.\n'
@@ -557,7 +561,9 @@ class ExportStripToFilePopup(ExportDialogABC):
                                                              self._pasteRangeCallback,
                                                              self._pasteRangeAllCallback)
                                             )
-        self._rangeLeft.setFixedSize(130, 180)
+        # self._rangeLeft.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+        self._rangeLeft.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self._stripLists.setFixedHeight(8 * getFontHeight())
 
         _rangeFrame.getLayout().setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         self._rangeRight.getLayout().setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
@@ -627,7 +633,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         # self._fontPulldown.setCallback(partial(self._setPulldownTextColour, self._fontPulldown))
 
     def _initialiseStripList(self):
-        """Setup the lists containing strips.spectrumDisplays before populating
+        """Set up the lists containing strips.spectrumDisplays before populating
         """
         self.objects = None
         self._currentStrip = None
@@ -649,18 +655,13 @@ class ExportStripToFilePopup(ExportDialogABC):
                 _data._initialise()
 
             # define the contents for the object pulldown
-            if len(self.strips) > 1:
-                specDisplays = set()
-                if self.includeSpectrumDisplays:
+            if len(self.strips) > 1 and self.includeSpectrumDisplays:
+                # get the list of spectrumDisplays containing the strips
+                specDisplays = {strip.spectrumDisplay for strip in self.strips if len(strip.spectrumDisplay.strips) > 1}
 
-                    # get the list of spectrumDisplays containing the strips
-                    for strip in self.strips:
-                        if len(strip.spectrumDisplay.strips) > 1:
-                            specDisplays.add(strip.spectrumDisplay)
-
-                    # add to the pulldown objects
-                    for spec in specDisplays:
-                        self.objects['SpectrumDisplay: %s' % spec.id] = (spec, spec.pid)
+                # add to the pulldown objects
+                for spec in specDisplays:
+                    self.objects[f'SpectrumDisplay: {spec.id}'] = (spec, spec.pid)
 
     def _setStripRegion(self, *args):
         try:
@@ -672,13 +673,28 @@ class ExportStripToFilePopup(ExportDialogABC):
             ddAxis[STRIPMIN], ddAxis[STRIPMAX] = min(region), max(region)
             ddAxis[STRIPCENTRE] = dd.strip.getAxisPosition(ii)
             ddAxis[STRIPWIDTH] = dd.strip.getAxisWidth(ii)
-        except Exception as es:
+
+        except Exception:
             getLogger().debug2('Error updating _setStripRegion')
         else:
             self._setRangeState(self._currentStrip)
             self._focusButton(self._currentAxis, STRIPMIN if dd.minMaxMode == 0 else STRIPCENTRE)
 
-    def _setStripMinValue(self, ddAxis, value):
+            # set the values for the other strips in the spectrum-display
+            if (sd := dd.strip.spectrumDisplay) and ((sd.stripArrangement == 'Y' and ii == 1) or
+                                                     (sd.stripArrangement == 'X' and ii == 0)):
+                for strip in sd.strips:
+                    if strip == self._currentStrip:
+                        continue
+
+                    ddAxis = self._stripDict.get(strip.id).axes[ii]
+                    ddAxis[STRIPMIN], ddAxis[STRIPMAX] = min(region), max(region)
+                    ddAxis[STRIPCENTRE] = dd.strip.getAxisPosition(ii)
+                    ddAxis[STRIPWIDTH] = dd.strip.getAxisWidth(ii)
+                    self._setRangeState(strip, updateCurrent=False)
+
+    @staticmethod
+    def _setStripMinValue(ddAxis, value):
         """Set the minimum value
         Update the row values and set the spinbox constraints"""
         _value = min(value, ddAxis[STRIPMAX])
@@ -691,23 +707,82 @@ class ExportStripToFilePopup(ExportDialogABC):
         # value has not been clipped to STRIPMAX value
         return _value == value
 
-    def _setStripMin(self, *args):
-        try:
-            dd = self._stripDict.get(self._currentStrip)
-            ddAxis = dd.axes[self._currentAxis]
-            region = dd.strip.getAxisRegion(self._currentAxis)
-            okay = self._setStripMinValue(ddAxis, min(region))
+    def _stripRegion(self, strip, funcName=None):
+        dd = self._stripDict.get(strip)
+        ddAxis = dd.axes[self._currentAxis]
+        result = None
+        if funcName and (func := getattr(dd.strip, funcName, None)):
+            result = func(self._currentAxis)
+        return dd, ddAxis, result
 
-        except Exception as es:
+    def _validStripSetter(self, funcName, focusButton):
+
+        # small object to facilitate passing data to/from iterator
+        @dataclass
+        class _setterReturn:
+            dd = None
+            ddAxis = None
+            value = None
+            okay: bool = False
+
+
+        try:
+            result = _setterReturn()
+            result.dd, result.ddAxis, result.value = self._stripRegion(self._currentStrip, funcName)
+            yield result
+
+        except Exception:
             getLogger().debug2('Error updating _setStripMin')
         else:
             self._setRangeState(self._currentStrip)
-            self._focusButton(self._currentAxis, STRIPMIN)
-            if not okay:
+            if not result.okay:
                 # flash a quick warning to show that the value has been clipped to the max value
                 self._axisSpinboxes[self._currentAxis][STRIPBUTTONS.index(STRIPMIN)]._flashError()
 
-    def _setStripMaxValue(self, ddAxis, value):
+            # set the values for the other strips in the spectrum-display
+            if (sd := result.dd.strip.spectrumDisplay) and ((sd.stripArrangement == 'Y' and self._currentAxis == 1) or
+                                                            (sd.stripArrangement == 'X' and self._currentAxis == 0)):
+                for strip in sd.strips:
+                    if strip == self._currentStrip:
+                        continue
+
+                    result.dd, result.ddAxis, _ = self._stripRegion(strip.id)
+                    yield result
+                    self._setRangeState(strip, updateCurrent=False)
+
+            self._focusButton(self._currentAxis, focusButton)
+
+    def _setStripMin(self, *args):
+
+        for stripSet in self._validStripSetter('getAxisRegion', STRIPMIN):
+            stripSet.okay = self._setStripMinValue(stripSet.ddAxis, min(stripSet.value))
+
+        # return
+        # try:
+        #     ddAxis, region = self._stripRegion(self._currentStrip, 'getAxisRegion')
+        #     okay = self._setStripMinValue(ddAxis, min(region))
+        #
+        # except Exception:
+        #     getLogger().debug2('Error updating _setStripMin')
+        # else:
+        #     self._setRangeState(self._currentStrip)
+        #     self._focusButton(self._currentAxis, STRIPMIN)
+        #     if not okay:
+        #         # flash a quick warning to show that the value has been clipped to the max value
+        #         self._axisSpinboxes[self._currentAxis][STRIPBUTTONS.index(STRIPMIN)]._flashError()
+        #
+        #     # set the values for the other strips in the spectrum-display
+        #     if (sd := self.spectrumDisplay) and (sd.stripArrangement == 'Y' and self._currentAxis == 1) or (sd.stripArrangement == 'X' and self._currentAxis == 0):
+        #         for strip in sd.strips:
+        #             if strip == self._currentStrip:
+        #                 continue
+        #
+        #             ddAxis, _ = self._stripRegion(strip.id)
+        #             self._setStripMinValue(ddAxis, min(region))
+        #             self._setRangeState(strip, updateCurrent=False)
+
+    @staticmethod
+    def _setStripMaxValue(ddAxis, value):
         """Set the maximum value
         Update the row values and set the spinbox constraints"""
         _value = max(value, ddAxis[STRIPMIN])
@@ -721,22 +796,36 @@ class ExportStripToFilePopup(ExportDialogABC):
         return _value == value
 
     def _setStripMax(self, *args):
-        try:
-            dd = self._stripDict.get(self._currentStrip)
-            ddAxis = dd.axes[self._currentAxis]
-            region = dd.strip.getAxisRegion(self._currentAxis)
-            okay = self._setStripMaxValue(ddAxis, max(region))
 
-        except Exception as es:
-            getLogger().debug2('Error updating _setStripMax')
-        else:
-            self._setRangeState(self._currentStrip)
-            self._focusButton(self._currentAxis, STRIPMAX)
-            if not okay:
-                # flash a quick warning to show that the value has been clipped to the min value
-                self._axisSpinboxes[self._currentAxis][STRIPBUTTONS.index(STRIPMAX)]._flashError()
+        for stripSet in self._validStripSetter('getAxisRegion', STRIPMAX):
+            stripSet.okay = self._setStripMaxValue(stripSet.ddAxis, max(stripSet.value))
 
-    def _setStripCentreValue(self, ddAxis, centre):
+        # return
+        # try:
+        #     ddAxis, region = self._stripRegion(self._currentStrip, 'getAxisRegion')
+        #     okay = self._setStripMaxValue(ddAxis, max(region))
+        #
+        # except Exception as es:
+        #     getLogger().debug2('Error updating _setStripMax')
+        # else:
+        #     self._setRangeState(self._currentStrip)
+        #     self._focusButton(self._currentAxis, STRIPMAX)
+        #     if not okay:
+        #         # flash a quick warning to show that the value has been clipped to the min value
+        #         self._axisSpinboxes[self._currentAxis][STRIPBUTTONS.index(STRIPMAX)]._flashError()
+        #
+        #     # set the values for the other strips in the spectrum-display
+        #     if (sd := self.spectrumDisplay) and (sd.stripArrangement == 'Y' and self._currentAxis == 1) or (sd.stripArrangement == 'X' and self._currentAxis == 0):
+        #         for strip in sd.strips:
+        #             if strip == self._currentStrip:
+        #                 continue
+        #
+        #             ddAxis, _ = self._stripRegion(strip.id)
+        #             self._setStripMaxValue(ddAxis, max(region))
+        #             self._setRangeState(strip, updateCurrent=False)
+
+    @staticmethod
+    def _setStripCentreValue(ddAxis, centre):
         """Set the centre value
         Update the row values and set the spinbox constraints"""
         ddAxis[STRIPCENTRE] = centre
@@ -746,19 +835,32 @@ class ExportStripToFilePopup(ExportDialogABC):
         ddAxis[STRIPMAX] = centre + diff
 
     def _setStripCentre(self, *args):
-        try:
-            dd = self._stripDict.get(self._currentStrip)
-            ddAxis = dd.axes[self._currentAxis]
-            centre = dd.strip.getAxisPosition(self._currentAxis)
-            self._setStripCentreValue(ddAxis, centre)
+        for stripSet in self._validStripSetter('getAxisPosition', STRIPCENTRE):
+            stripSet.okay = self._setStripCentreValue(stripSet.ddAxis, stripSet.value)
 
-        except Exception as es:
-            getLogger().debug2('Error updating _setStripCentre')
-        else:
-            self._setRangeState(self._currentStrip)
-            self._focusButton(self._currentAxis, STRIPCENTRE)
+        # return
+        # try:
+        #     ddAxis, centre = self._stripRegion(self._currentStrip, 'getAxisPosition')
+        #     self._setStripCentreValue(ddAxis, centre)
+        #
+        # except Exception:
+        #     getLogger().debug2('Error updating _setStripCentre')
+        # else:
+        #     self._setRangeState(self._currentStrip)
+        #     self._focusButton(self._currentAxis, STRIPCENTRE)
+        #
+        #     # set the values for the other strips in the spectrum-display
+        #     if (sd := self.spectrumDisplay) and (sd.stripArrangement == 'Y' and self._currentAxis == 1) or (sd.stripArrangement == 'X' and self._currentAxis == 0):
+        #         for strip in sd.strips:
+        #             if strip == self._currentStrip:
+        #                 continue
+        #
+        #             ddAxis, _ = self._stripRegion(strip.id)
+        #             self._setStripCentreValue(ddAxis, centre)
+        #             self._setRangeState(strip, updateCurrent=False)
 
-    def _setStripWidthValue(self, ddAxis, width):
+    @staticmethod
+    def _setStripWidthValue(ddAxis, width):
         """Set the width value
         Update the row values and set the spinbox constraints"""
         ddAxis[STRIPWIDTH] = width
@@ -768,39 +870,74 @@ class ExportStripToFilePopup(ExportDialogABC):
         ddAxis[STRIPMAX] = centre + abs(width / 2.0)
 
     def _setStripWidth(self, *args):
-        try:
-            dd = self._stripDict.get(self._currentStrip)
-            ddAxis = dd.axes[self._currentAxis]
-            width = dd.strip.getAxisWidth(self._currentAxis)
-            self._setStripWidthValue(ddAxis, width)
+        for stripSet in self._validStripSetter('getAxisWidth', STRIPWIDTH):
+            stripSet.okay = self._setStripCentreValue(stripSet.ddAxis, stripSet.value)
 
-        except Exception as es:
-            getLogger().debug2('Error updating _setStripWidth')
-        else:
-            self._setRangeState(self._currentStrip)
-            self._focusButton(self._currentAxis, STRIPWIDTH)
+        # return
+        # try:
+        #     ddAxis, width = self._stripRegion(self._currentStrip, 'getAxisWidth')
+        #     self._setStripWidthValue(ddAxis, width)
+        #
+        # except Exception as es:
+        #     getLogger().debug2('Error updating _setStripWidth')
+        # else:
+        #     self._setRangeState(self._currentStrip)
+        #     self._focusButton(self._currentAxis, STRIPWIDTH)
+        #
+        #     # set the values for the other strips in the spectrum-display
+        #     if (sd := self.spectrumDisplay) and (sd.stripArrangement == 'Y' and self._currentAxis == 1) or (sd.stripArrangement == 'X' and self._currentAxis == 0):
+        #         for strip in sd.strips:
+        #             if strip == self._currentStrip:
+        #                 continue
+        #
+        #             ddAxis, _ = self._stripRegion(strip.id)
+        #             self._setStripWidthValue(ddAxis, width)
+        #             self._setRangeState(strip, updateCurrent=False)
 
     def _setSpinbox(self, row, button, value):
         """Set the value in the storage dict from the spinbox change
         """
+        buttonDict = {STRIPMIN   : (self._setStripMinValue, 'getAxisRegion'),
+                      STRIPMAX   : (self._setStripMaxValue, 'getAxisRegion'),
+                      STRIPCENTRE: (self._setStripCentreValue, 'getAxisPosition'),
+                      STRIPWIDTH : (self._setStripWidthValue, 'getAxisWidth')
+                      }
+
         self._setSpinboxAxis(row)
-        try:
-            _dd = self._stripDict.get(self._currentStrip)
+        if (found := buttonDict.get(button)):
+            func, funcName = found
+            for stripSet in self._validStripSetter(funcName, button):
+                stripSet.okay = func(stripSet.ddAxis, value)
 
-            if button == STRIPMIN:
-                self._setStripMinValue(_dd.axes[row], value)
-            elif button == STRIPMAX:
-                self._setStripMaxValue(_dd.axes[row], value)
-            elif button == STRIPCENTRE:
-                self._setStripCentreValue(_dd.axes[row], value)
-            else:
-                self._setStripWidthValue(_dd.axes[row], value)
-
-        except Exception as es:
-            getLogger().debug2('Error updating _setSpinbox')
-        else:
-            self._setRangeState(self._currentStrip)
-            self._focusButton(row, button)
+        # return
+        # #
+        # self._setSpinboxAxis(row)
+        # try:
+        #     _dd = self._stripDict.get(self._currentStrip)
+        #
+        #     buttonDict = {STRIPMIN: self._setStripMinValue,
+        #                   STRIPMAX: self._setStripMaxValue,
+        #                   STRIPCENTRE: self._setStripCentreValue,
+        #                   STRIPWIDTH: self._setStripWidthValue
+        #         }
+        #     if (func := buttonDict.get(button)):
+        #         func(_dd.axes[row], value)
+        #
+        # except Exception:
+        #     getLogger().debug2('Error updating _setSpinbox')
+        # else:
+        #     self._setRangeState(self._currentStrip)
+        #     self._focusButton(row, button)
+        #
+        #     # set the values for the other strips in the spectrum-display
+        #     if (sd := self.spectrumDisplay) and (sd.stripArrangement == 'Y' and self._currentAxis == 1) or (sd.stripArrangement == 'X' and self._currentAxis == 0):
+        #         for strip in sd.strips:
+        #             if strip == self._currentStrip:
+        #                 continue
+        #
+        #             ddAxis, _ = self._stripRegion(strip.id)
+        #             func(ddAxis, value)
+        #             self._setRangeState(strip, updateCurrent=False)
 
     def _setSpinboxAxis(self, row):
         """Change the current selected row of spinboxes"""
@@ -828,6 +965,16 @@ class ExportStripToFilePopup(ExportDialogABC):
             getLogger().debug2('Error updating _useOverrideCallback')
         else:
             self._setRangeState(self._currentStrip)
+
+            # set the values for the other strips in the spectrum-display
+            if (sd := _dd.strip.spectrumDisplay):
+                for strip in sd.strips:
+                    if strip == self._currentStrip:
+                        continue
+
+                    ddAxis = self._stripDict.get(strip.id)
+                    ddAxis.useRegion = value
+                    self._setRangeState(strip, updateCurrent=False)
 
     def _setModeCallback(self):
         """User has changed minMax/centreWidth mode
@@ -889,7 +1036,7 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         self.objectPulldown.setLabelText(pulldownLabel)
         if self.objects:
-            self.objectPulldown.pulldownList.setData(sorted([ky for ky in self.objects.keys()]))
+            self.objectPulldown.pulldownList.setData(sorted(list(self.objects.keys())))
         # set the page types
         self.pageSize.set(self.printSettings.pageSize)
         self.pageOrientation.set(self.printSettings.pageOrientation, silent=True)
@@ -900,23 +1047,19 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.foregroundColour = self.printSettings.foregroundColour
         self.backgroundColour = self.printSettings.backgroundColour
 
-        if self.foregroundColour in spectrumColourKeys:
-            self.foregroundColourBox.setCurrentText(spectrumColours[self.foregroundColour])
-        else:
+        if self.foregroundColour not in spectrumColourKeys:
             # add new colour to the pulldowns if not defined
             addNewColourString(self.foregroundColour)
             fillColourPulldown(self.foregroundColourBox, allowAuto=False, includeGradients=False)
             fillColourPulldown(self.backgroundColourBox, allowAuto=False, includeGradients=False)
-            self.foregroundColourBox.setCurrentText(spectrumColours[self.foregroundColour])
+        self.foregroundColourBox.setCurrentText(spectrumColours[self.foregroundColour])
 
-        if self.backgroundColour in spectrumColourKeys:
-            self.backgroundColourBox.setCurrentText(spectrumColours[self.backgroundColour])
-        else:
+        if self.backgroundColour not in spectrumColourKeys:
             # add new colour to the pulldowns if not defined
             addNewColourString(self.backgroundColour)
             fillColourPulldown(self.foregroundColourBox, allowAuto=False, includeGradients=False)
             fillColourPulldown(self.backgroundColourBox, allowAuto=False, includeGradients=False)
-            self.backgroundColourBox.setCurrentText(spectrumColours[self.backgroundColour])
+        self.backgroundColourBox.setCurrentText(spectrumColours[self.backgroundColour])
 
         self.baseThicknessBox.setValue(self.printSettings.baseThickness)
         self.stripPaddingBox.setValue(self.printSettings.stripPadding)
@@ -926,12 +1069,11 @@ class ExportStripToFilePopup(ExportDialogABC):
         if self.current and self.current.strip:
             self.objectPulldown.select(self.current.strip.id)
             self.strip = self.current.strip
+        elif self.strips:
+            self.objectPulldown.select(self.strips[0].id)
+            self.strip = self.strips[0]
         else:
-            if self.strips:
-                self.objectPulldown.select(self.strips[0].id)
-                self.strip = self.strips[0]
-            else:
-                self.strip = None
+            self.strip = None
         self.spectrumDisplay = None
 
         # fill the range widgets from the strips
@@ -952,34 +1094,67 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         self.setSave(self.objectPulldown.getText() + exportExtension)
 
+    @staticmethod
+    def _resetPulldownColours(combo):
+        model = combo.model()
+        for ii in range(len(combo.getTexts())):
+            idx = model.index(ii)
+            itm = combo.itemFromIndex(idx)
+            if itm.text().startswith(PulldownFill):
+                itm.setFlags(itm.flags() & ~QtCore.Qt.ItemIsEnabled)
+
+    @staticmethod
+    def _setListColours(combo, validStripIds):
+        model = combo.model()
+        for ind in range(len(combo.getTexts())):
+            idx = model.index(ind)
+            itm = combo.itemFromIndex(idx)
+            if PulldownFill not in itm.text():
+                itm.setForeground(PRINT_COLOR if itm.text() in validStripIds else DEFAULT_COLOR)
+
     def _populateRange(self):
         """Populate the list/spinboxes in range widget
         """
         self._rangeLeft.setVisible(self.spectrumDisplay is not None)
-        if self.strip:
-            self._setRangeState(self.strip.id, _updateQueue=False)
 
         self._stripLists.clear()
-        self._stripLists.addItems(list(strip.id for strip in self.strips))
-        self._stripLists.select(self._currentStrip)
+        if not self.strip:
+            return
 
-    def _setRangeState(self, strip, setButton=None, setRow=None, _updateQueue=True):
+        self._setRangeState(self.strip.id, _updateQueue=False)
+
+        validStripIds = [strip.id for strip in self.spectrumDisplay.strips] if self.spectrumDisplay else [self.strip.id]
+        ll = ['-- Strips to print --', *validStripIds]
+        if otherStrips := [strip.id for strip in self.strips if strip.id not in ll]:
+            ll.extend(['-- Other strips --', *otherStrips])
+
+        self._stripLists.addItems(ll)
+
+        # set the correct colours
+        self._resetPulldownColours(self._stripLists)
+        # self._setListColours(self._stripLists, validStripIds)  # probably not necessary with the group division
+
+        self._stripLists.select(self._currentStrip)
+        # self._stripLists.setCurrentRow(1)
+
+    def _setRangeState(self, strip, setButton=None, setRow=None, updateCurrent=True, _updateQueue=True):
         try:
             stripId = strip.text()
-        except Exception as es:
+        except Exception:
             stripId = strip
         finally:
             self._rangeRight.setVisible(False)
 
             with self.blockWidgetSignals(self._rangeRight):
-                # set the current Id for updating range dict
-                self._currentStrip = stripId
 
-                # remove constraints so spinboxes can be updated
+                if updateCurrent:
+                    # set the current-id for updating range dict
+                    self._currentStrip = stripId
+
+                # remove constraints so spin-boxes can be updated
                 self._setSpinboxConstraints(stripId, state=False)
 
-                _dd = self._stripDict.get(stripId, None)
-                if _dd:
+                if _dd := self._stripDict.get(stripId, None):
                     self._useRegion.set(_dd.useRegion)
                     self._rangeRadio.setIndex(_dd.minMaxMode)
 
@@ -1008,6 +1183,19 @@ class ExportStripToFilePopup(ExportDialogABC):
 
                     # self._rangeRadio.setEnabled(_dd.useRegion)
                     self._setRangeButtons.setEnabled(_dd.useRegion)
+
+                    # set the colours for the highlight boxes
+                    if (sd := _dd.strip.spectrumDisplay) and len(sd.strips) > 1:
+                        if sd.stripArrangement == 'Y':
+                            self._axisSpinboxes[0][-1].setColour(getColours()[BORDERFOCUS])
+                            self._axisSpinboxes[1][-1].setColour('orange')
+                        else:
+                            self._axisSpinboxes[0][-1].setColour('orange')
+                            self._axisSpinboxes[1][-1].setColour(getColours()[BORDERFOCUS])
+
+                    else:
+                        self._axisSpinboxes[0][-1].setColour(getColours()[BORDERFOCUS])
+                        self._axisSpinboxes[1][-1].setColour(getColours()[BORDERFOCUS])
 
                 # re-enable constraints
                 self._setSpinboxConstraints(stripId)
@@ -1055,7 +1243,8 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         self._setPulldownTextColour(self._fontPulldown)
 
-    def _setPulldownTextColour(self, combo, value=None):
+    @staticmethod
+    def _setPulldownTextColour(combo, value=None):
         """Set the colour of the pulldown text
         """
         ind = combo.currentIndex()
@@ -1080,8 +1269,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         """Set the min/max/width constraints for the spinboxes associated with the stripId
         """
         try:
-            _dd = self._stripDict.get(stripId, None)
-            if _dd:
+            if _dd := self._stripDict.get(stripId, None):
                 for ii in range(len(STRIPAXES)):
                     axis = _dd.axes[ii]
                     # set min.max constraints for buttons
@@ -1111,8 +1299,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             _val.fromDict(v)
             self._localStripDict[k] = _val
 
-        _val = ExportStripToFilePopup._storedState.get(self._SAVECURRENTSTRIP, None)
-        if _val:
+        if _val := ExportStripToFilePopup._storedState.get(self._SAVECURRENTSTRIP, None):
             self._currentStrip = _val
         self._currentAxis = ExportStripToFilePopup._storedState.get(self._SAVECURRENTAXIS, 0)
 
@@ -1126,8 +1313,16 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         if 'SpectrumDisplay' in selected:
             self.spectrumDisplay = self.objects[selected][0]
-            self.strip = self._selectedStrip
+            self.strip = self.spectrumDisplay.strips[0]  # self._selectedStrip
             self.setSave(self.spectrumDisplay.id + exportExtension)
+
+            # set the values for the other strips in the spectrum-display
+            if self.spectrumDisplay.stripArrangement == 'Y':
+                self._axisSpinboxes[0][-1].setColour(getColours()[BORDERFOCUS])
+                self._axisSpinboxes[1][-1].setColour('orange')
+            else:
+                self._axisSpinboxes[0][-1].setColour('orange')
+                self._axisSpinboxes[1][-1].setColour(getColours()[BORDERFOCUS])
 
         else:
             self.spectrumDisplay = None
@@ -1135,7 +1330,15 @@ class ExportStripToFilePopup(ExportDialogABC):
 
             self.setSave(self.strip.id + exportExtension)
 
+            self._axisSpinboxes[0][-1].setColour(getColours()[BORDERFOCUS])
+            self._axisSpinboxes[1][-1].setColour(getColours()[BORDERFOCUS])
+
+        self._currentStrip = self.strip.id
         self._populateRange()
+
+        # fill the scaling widgets
+        self._populateScaling()
+
         selectedList = self.treeView.getCheckStateItems()
         self._populateTreeView(selectedList)
 
@@ -1143,14 +1346,14 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.treeView.clear()
 
         printItems = []
-        if self.strip:
+        if strip := (self.spectrumDisplay.strips[0] if self.spectrumDisplay else self.strip):
             # add Spectra to the treeView
-            if self.strip.spectrumViews:
+            if strip.spectrumViews:
                 item = QtWidgets.QTreeWidgetItem(self.treeView)
                 item.setText(0, OPTIONSPECTRA)
                 item.setFlags(int(item.flags()) | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
 
-                for specView in self.strip.spectrumViews:
+                for specView in strip.spectrumViews:
                     child = QtWidgets.QTreeWidgetItem(item)
                     child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
                     child.setData(1, 0, specView.spectrum)
@@ -1161,10 +1364,10 @@ class ExportStripToFilePopup(ExportDialogABC):
             peakLists = []
             integralLists = []
             multipletLists = []
-            for specView in self.strip.spectrumViews:
-                validPeakListViews = [pp for pp in specView.peakListViews]
-                validIntegralListViews = [pp for pp in specView.integralListViews]
-                validMultipletListViews = [pp for pp in specView.multipletListViews]
+            for specView in strip.spectrumViews:
+                validPeakListViews = list(specView.peakListViews)
+                validIntegralListViews = list(specView.integralListViews)
+                validMultipletListViews = list(specView.multipletListViews)
                 peakLists.extend(validPeakListViews)
                 integralLists.extend(validIntegralListViews)
                 multipletLists.extend(validMultipletListViews)
@@ -1218,7 +1421,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             # populate the treeview with the currently selected peak/integral/multiplet lists
             self.treeView._uncheckAll()
             pidList = []
-            for specView in self.strip.spectrumViews:
+            for specView in strip.spectrumViews:
                 validPeakListViews = [pp.peakList.pid for pp in specView.peakListViews
                                       if pp.isDisplayed
                                       and specView.isDisplayed]
@@ -1350,7 +1553,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                       }
             selectedList = self.treeView.getSelectedItems()
             for itemName in self.fullList:
-                params[itemName] = True if itemName in selectedList else False
+                params[itemName] = itemName in selectedList
 
             return params
 
@@ -1360,28 +1563,25 @@ class ExportStripToFilePopup(ExportDialogABC):
         :param params: dict - user defined parameters for export
         """
 
-        if params:
-            filename = params[GLFILENAME]
-            glWidget = params[GLWIDGET]
-            prType = params[GLPRINTTYPE]
+        if not params:
+            return
+        filename = params[GLFILENAME]
+        glWidget = params[GLWIDGET]
+        prType = params[GLPRINTTYPE]
 
-            with catchExceptions(errorStringTemplate='Error writing file; "%s"', printTraceBack=False):
-                if prType == EXPORTPDF:
-                    pdfExport = glWidget.exportToPDF(filename, params)
-                    if pdfExport:
-                        pdfExport.writePDFFile()
-                elif prType == EXPORTSVG:
-                    svgExport = glWidget.exportToSVG(filename, params)
-                    if svgExport:
-                        svgExport.writeSVGFile()
-                elif prType == EXPORTPNG:
-                    pngExport = glWidget.exportToPNG(filename, params)
-                    if pngExport:
-                        pngExport.writePNGFile()
-                elif prType == EXPORTPS:
-                    pngExport = glWidget.exportToPS(filename, params)
-                    if pngExport:
-                        pngExport.writePSFile()
+        with catchExceptions(errorStringTemplate='Error writing file; "%s"', printTraceBack=False):
+            if prType == EXPORTPDF:
+                if pdfExport := glWidget.exportToPDF(filename, params):
+                    pdfExport.writePDFFile()
+            elif prType == EXPORTSVG:
+                if svgExport := glWidget.exportToSVG(filename, params):
+                    svgExport.writeSVGFile()
+            elif prType == EXPORTPNG:
+                if pngExport := glWidget.exportToPNG(filename, params):
+                    pngExport.writePNGFile()
+            elif prType == EXPORTPS:
+                if pngExport := glWidget.exportToPS(filename, params):
+                    pngExport.writePSFile()
 
     def actionButtons(self):
         self.setOkButton(callback=self._saveAndCloseDialog, text='Save and Close',
@@ -1447,7 +1647,7 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         Return True unless any errors occurred
         """
-        allChanges = True if self._changes else False
+        allChanges = bool(self._changes)
         if not allChanges:
             return True
 
@@ -1554,7 +1754,7 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         clickedId = self._stripLists._clickedStripId
         selectedIds = self._stripLists._selectedStripIds
-        if clickedId and clickedId and selectedIds:
+        if clickedId and selectedIds:
             for stripId in selectedIds:
                 if stripId in self._stripDict:
                     self._stripDict[stripId].fromDict(self._copyRangeValue)
@@ -1573,7 +1773,7 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         applyState = True
         revertState = False
-        allChanges = True if self._changes else False
+        allChanges = bool(self._changes)
 
         return changeState(self, allChanges, applyState, revertState, None, None, self._revertButton, self._currentNumApplies)
 
@@ -1615,8 +1815,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         """Popup a dialog and set the colour in the pulldowns
         """
         dialog = ColourDialog(self)
-        newColour = dialog.getColor()
-        if newColour:
+        if newColour := dialog.getColor():
             addNewColour(newColour)
             fillColourPulldown(self.foregroundColourBox, allowAuto=False, includeGradients=False)
             fillColourPulldown(self.backgroundColourBox, allowAuto=False, includeGradients=False)
@@ -1694,9 +1893,9 @@ class ExportStripToFilePopup(ExportDialogABC):
 
     def _setScalingVisible(self):
         _ind = self._scalingModeIndex
-        self.scalingPercentage.setVisible(False if _ind else True)
-        self.scalingUnits.setVisible(True if _ind else False)
-        self.scalingAxis.setVisible(True if _ind else False)
+        self.scalingPercentage.setVisible(not _ind)
+        self.scalingUnits.setVisible(bool(_ind))
+        self.scalingAxis.setVisible(bool(_ind))
 
     @queueStateChange(_verifyPopupApply)
     def _queueScalingModeCallback(self, _value):

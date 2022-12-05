@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:07 +0000 (Wed, November 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-05 16:27:11 +0000 (Mon, December 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2763,6 +2763,65 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 _axisWildCards.append(_code)
 
         self._visibleOrderingAxisCodes = _axisWildCards
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def _setAxisPosition(self, axisIndex, position, rescale=True, update=True):
+        if axisIndex == 0:
+            diff = (self.axisR - self.axisL) / 2.0
+            self.axisL = position - diff
+            self.axisR = position + diff
+
+            if rescale:
+                self._rescaleXAxis(rescale=rescale, update=update)
+
+        elif axisIndex == 1:
+            diff = (self.axisT - self.axisB) / 2.0
+            self.axisB = position - diff
+            self.axisT = position + diff
+
+            if rescale:
+                self._rescaleYAxis(rescale=rescale, update=update)
+
+    def _setAxisWidth(self, axisIndex, width, rescale=True, update=True):
+        if axisIndex == 0:
+            diff = self.sign(self.axisR - self.axisL) * abs(width) / 2.0
+            mid = (self.axisR + self.axisL) / 2.0
+            self.axisL = mid - diff
+            self.axisR = mid + diff
+
+            self._scaleToXAxis(rescale=rescale, update=update)
+
+        elif axisIndex == 1:
+            diff = self.sign(self.axisT - self.axisB) * abs(width) / 2.0
+            mid = (self.axisT + self.axisB) / 2.0
+            self.axisB = mid - diff
+            self.axisT = mid + diff
+
+            self._scaleToYAxis(rescale=rescale, update=update)
+
+    def _setAxisRegion(self, axisIndex, region, rescale=True, update=True):
+        if axisIndex == 0:
+            if self.INVERTXAXIS:
+                self.axisL = max(region)
+                self.axisR = min(region)
+            else:
+                self.axisL = min(region)
+                self.axisR = max(region)
+
+            if rescale:
+                self._rescaleXAxis(rescale=rescale, update=update)
+
+        elif axisIndex == 1:
+            if self.INVERTXAXIS:
+                self.axisB = max(region)
+                self.axisT = min(region)
+            else:
+                self.axisB = min(region)
+                self.axisT = max(region)
+
+            if rescale:
+                self._rescaleYAxis(rescale=rescale, update=update)
 
 
 class GuiNdWidgetAxis(Gui1dWidgetAxis):

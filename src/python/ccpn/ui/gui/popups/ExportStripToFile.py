@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-05 12:46:21 +0000 (Mon, December 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-05 12:53:33 +0000 (Mon, December 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -674,7 +674,8 @@ class ExportStripToFilePopup(ExportDialogABC):
             self._focusButton(self._currentAxis, STRIPMIN if dd.minMaxMode == 0 else STRIPCENTRE)
 
             # set the values for the other strips in the spectrum-display
-            if (sd := self.spectrumDisplay) and (sd.stripArrangement == 'Y' and ii == 1) or (sd.stripArrangement == 'X' and ii == 0):
+            if (sd := self.spectrumDisplay) and ((sd.stripArrangement == 'Y' and ii == 1) or
+                                                 (sd.stripArrangement == 'X' and ii == 0)):
                 for strip in sd.strips:
                     if strip == self._currentStrip:
                         continue
@@ -730,7 +731,8 @@ class ExportStripToFilePopup(ExportDialogABC):
                 self._axisSpinboxes[self._currentAxis][STRIPBUTTONS.index(STRIPMIN)]._flashError()
 
             # set the values for the other strips in the spectrum-display
-            if (sd := self.spectrumDisplay) and (sd.stripArrangement == 'Y' and self._currentAxis == 1) or (sd.stripArrangement == 'X' and self._currentAxis == 0):
+            if (sd := self.spectrumDisplay) and ((sd.stripArrangement == 'Y' and self._currentAxis == 1) or
+                                                 (sd.stripArrangement == 'X' and self._currentAxis == 0)):
                 for strip in sd.strips:
                     if strip == self._currentStrip:
                         continue

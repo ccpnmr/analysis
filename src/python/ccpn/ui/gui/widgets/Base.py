@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-14 16:07:56 +0100 (Wed, September 14, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-12-06 14:34:13 +0000 (Tue, December 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -244,6 +244,14 @@ class Base(DropBase, SignalBlocking):
               hPolicy=None, vPolicy=None,
               margins=(0, 0, 0, 0), spacing=(2, 2),
 
+              minimumHeight=None,
+              maximumHeight=None,
+              fixedHeight=None,
+
+              minimumWidth=None,
+              maximumWidth=None,
+              fixedWidth=None,
+
               # keywords for adding to parent
               grid=(None, None), gridSpan=(1, 1), stretch=(0, 0),
               hAlign=None, vAlign=None,
@@ -256,21 +264,28 @@ class Base(DropBase, SignalBlocking):
               focusPolicy=None,
               objectName=None,
               ignoreStyleSheet=False,
+
               **kwargs
               ):
         """
 
-        :param tipText:  add tiptext to widget
-        :param grid:     insert widget at (row,col) of parent layout (if available)
-        :param hidden:   hide widget upon creation
-        :param gridSpan: extend widget over (rows,cols); default (1,1)
-        :param stretch:  stretch factor (row,col) of widget; default (0, 0)
-        :param hAlign:   horizontal alignment: (l, left, r, right, c, center, centre)
-        :param vAlign:   vertical alignment: (t, top, b, bottom, c, center, centre)
-        :param hPolicy:  horizontal policy of widget: (fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored)
-        :param vPolicy:  vertical policy of widget: ( fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored)
-        :param bgColor:  background RGB colour tuple; depreciated: use styleSheet routines instead
-        :param fgColor:  foreground RGB colour tuple; depreciated: use styleSheet routines instead
+        :param tipText:       add tiptext to widget
+        :param grid:          insert widget at (row,col) of parent layout (if available)
+        :param hidden:        hide widget upon creation
+        :param gridSpan:      extend widget over (rows,cols); default (1,1)
+        :param stretch:       stretch factor (row,col) of widget; default (0, 0)
+        :param hAlign:        horizontal alignment: (l, left, r, right, c, center, centre)
+        :param vAlign:        vertical alignment: (t, top, b, bottom, c, center, centre)
+        :param hPolicy:       horizontal policy of widget: (fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored)
+        :param vPolicy:       vertical policy of widget: ( fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored)
+        :param minimumHeight: set minimum height
+        :param maximumHeight: set maximum height
+        :param fixedHeight:   set fixed height
+        :param minimumWidth:  set minimum width
+        :param maximumWidth:  set maximum width
+        :param fixedWidth:    set fixed width
+        :param bgColor:       background RGB colour tuple; depreciated: use styleSheet routines instead
+        :param fgColor:       foreground RGB colour tuple; depreciated: use styleSheet routines instead
         :param isFloatWidget: indicates widget to be floating
         """
 
@@ -332,6 +347,24 @@ class Base(DropBase, SignalBlocking):
             self.setObjectName(objectName)
 
         setWidgetFont(self, )
+
+        if len([_v for _v in (minimumHeight, maximumHeight, fixedHeight) if _v is not None]) > 1:
+            raise ValueError(f'only one of (minimumHeight, maximumHeight, fixedHeight) can be defined')
+        if maximumHeight:
+            self.setMaximumHeight(maximumHeight)
+        if minimumHeight:
+            self.setMinimumHeight(minimumHeight)
+        if fixedHeight:
+            self.fixedHeight(maximumHeight)
+
+        if len([_v for _v in (minimumWidth, maximumWidth, fixedWidth) if _v is not None]) > 1:
+            raise ValueError(f'only one of (minimumWidth, maximumWidth, fixedWidth) can be defined')
+        if maximumWidth:
+            self.setMaximumWidth(maximumWidth)
+        if minimumWidth:
+            self.setMinimumWidth(minimumWidth)
+        if fixedWidth:
+            self.fixedWidth(maximumWidth)
 
         # connect destruction of widget to onDestroyed method,
         # which subsequently can be subclassed

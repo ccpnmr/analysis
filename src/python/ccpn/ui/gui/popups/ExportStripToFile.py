@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-05 16:27:11 +0000 (Mon, December 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-06 18:40:16 +0000 (Tue, December 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -143,7 +143,9 @@ ZEROMARGINS = (0, 0, 0, 0)  # l, t, r, b
 
 PulldownFill = '--'
 DEFAULT_COLOR = QtGui.QColor('black')
-PRINT_COLOR = QtGui.QColor('mediumseagreen')
+PRINT_COLOR = QtGui.QColor('orange')
+SELECTAXIS_COLOR = QtGui.QColor('orange')
+SELECTAXIS_COLOR2 = QtGui.QColor('mediumseagreen')
 
 
 @dataclass
@@ -1115,7 +1117,7 @@ class ExportStripToFilePopup(ExportDialogABC):
     def _populateRange(self):
         """Populate the list/spinboxes in range widget
         """
-        self._rangeLeft.setVisible(self.spectrumDisplay is not None)
+        self._rangeLeft.setVisible(True)  # self.spectrumDisplay is not None)
 
         self._stripLists.clear()
         if not self.strip:
@@ -1123,16 +1125,26 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         self._setRangeState(self.strip.id, _updateQueue=False)
 
-        validStripIds = [strip.id for strip in self.spectrumDisplay.strips] if self.spectrumDisplay else [self.strip.id]
+        if self.spectrumDisplay:
+            validStripIds = [strip.id for strip in self.spectrumDisplay.strips]
+            otherStrips = []
+        else:
+            validStripIds = [self.strip.id]
+            otherStrips = [strip.id for strip in self.strip.spectrumDisplay.strips if strip != self.strip]
+        stripGroup = validStripIds + otherStrips
+
+        # validStripIds = [strip.id for strip in self.spectrumDisplay.strips] if self.spectrumDisplay else [self.strip.id]
         ll = ['-- Strips to print --', *validStripIds]
-        if otherStrips := [strip.id for strip in self.strips if strip.id not in ll]:
+        otherStrips.extend([strip.id for strip in self.strips if strip.id not in ll and strip.id not in otherStrips])
+        if otherStrips:
             ll.extend(['-- Other strips --', *otherStrips])
 
         self._stripLists.addItems(ll)
 
         # set the correct colours
         self._resetPulldownColours(self._stripLists)
-        # self._setListColours(self._stripLists, validStripIds)  # probably not necessary with the group division
+        if len(stripGroup) > 1:
+            self._setListColours(self._stripLists, stripGroup)  # probably not necessary with the group division
 
         self._stripLists.select(self._currentStrip)
         # self._stripLists.setCurrentRow(1)
@@ -1188,9 +1200,9 @@ class ExportStripToFilePopup(ExportDialogABC):
                     if (sd := _dd.strip.spectrumDisplay) and len(sd.strips) > 1:
                         if sd.stripArrangement == 'Y':
                             self._axisSpinboxes[0][-1].setColour(getColours()[BORDERFOCUS])
-                            self._axisSpinboxes[1][-1].setColour('orange')
+                            self._axisSpinboxes[1][-1].setColour(SELECTAXIS_COLOR if self.strip in sd.strips else SELECTAXIS_COLOR2)
                         else:
-                            self._axisSpinboxes[0][-1].setColour('orange')
+                            self._axisSpinboxes[0][-1].setColour(SELECTAXIS_COLOR if self.strip in sd.strips else SELECTAXIS_COLOR2)
                             self._axisSpinboxes[1][-1].setColour(getColours()[BORDERFOCUS])
 
                     else:

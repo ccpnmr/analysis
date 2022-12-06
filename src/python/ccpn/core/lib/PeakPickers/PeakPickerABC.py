@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:03 +0000 (Wed, November 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-06 18:40:15 +0000 (Tue, December 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -342,14 +342,18 @@ class PeakPickerABC(CcpNmrJson):
         from ccpn.core.lib.peakUtils import peakParabolicInterpolation
         from ccpn.core.lib.ContextManagers import progressHandler
 
-        count = len(peaks)
+        newPeaks = self._checkValidPositions(peakList, peaks)
+        count = len(newPeaks)
         pDiv = (count // 100) + 1
         totalCopies = int(count / pDiv)
         with progressHandler(text=f'Creating peaks in {peakList.pid}', maximum=totalCopies, autoClose=False) as progress:
 
             try:
                 corePeaks = []
-                for cc, pk in enumerate(peaks):
+                # test to minimise the number of calls to _storeCurrent
+                self.spectrum.project._undo.increaseStorageBlocking()
+
+                for cc, (pk, pointPositions) in enumerate(newPeaks):
 
                     if cc % pDiv == 0:
                         # update the progress-bar - 100 steps at the most
@@ -360,23 +364,28 @@ class PeakPickerABC(CcpNmrJson):
                         raise RuntimeError('Cancel')
 
                     if len(pk.points) != self.dimensionCount:
-                        raise RuntimeError('%s: invalid dimensionality of points attribute' % pk)
-                    # correct the peak.points for "offset" (the slice-positions taken) and ordering (i.e. inverse)
-                    pointPositions = [float(p) + float(self.sliceTuples[idx][0]) for idx, p in enumerate(pk.points[::-1])]
+                        raise RuntimeError(f'{pk}: invalid dimensionality of points attribute')
 
-                    # check whether a peak already exists at pointPositions in the peakList
-                    if self._validatePointPeak(pointPositions, peakList):
+                    # # correct the peak.points for "offset" (the slice-positions taken) and ordering (i.e. inverse)
+                    # pointPositions = [float(p) + float(self.sliceTuples[idx][0]) for idx, p in enumerate(pk.points[::-1])]
+                    #
+                    # # check whether a peak already exists at pointPositions in the peakList
+                    # if self._validatePointPeak(pointPositions, peakList):
 
-                        if pk.height is None:
-                            # height was not defined; get the interpolated value from the data
-                            pk.height = self.spectrum.dataSource.getPointValue(pointPositions)
+                    if pk.height is None:
+                        # height was not defined; get the interpolated value from the data
+                        pk.height = self.spectrum.dataSource.getPointValue(pointPositions)
 
-                        if (self.positiveThreshold and pk.height > self.positiveThreshold) or \
-                                (self.negativeThreshold and pk.height < self.negativeThreshold):
-                            cPeak = peakList.newPeak(pointPositions=pointPositions, height=pk.height, volume=pk.volume, pointLineWidths=pk.lineWidths)
-                            if self.autoFit:
-                                peakParabolicInterpolation(cPeak, update=True)
-                            corePeaks.append(cPeak)
+                    if cc == len(newPeaks) - 1:
+                        # clear the flag on the last iteration, so only stores update to current once
+                        self.spectrum.project._undo.decreaseStorageBlocking()
+
+                    if (self.positiveThreshold and pk.height > self.positiveThreshold) or \
+                            (self.negativeThreshold and pk.height < self.negativeThreshold):
+                        cPeak = peakList.newPeak(pointPositions=pointPositions, height=pk.height, volume=pk.volume, pointLineWidths=pk.lineWidths)
+                        if self.autoFit:
+                            peakParabolicInterpolation(cPeak, update=True)
+                        corePeaks.append(cPeak)
 
             except Exception as es:
                 if 'Cancel' not in str(es):
@@ -392,6 +401,20 @@ class PeakPickerABC(CcpNmrJson):
                 progress.waitForEvents()
 
         return corePeaks
+
+    def _checkValidPositions(self, peakList, peaks):
+        pointToPeak = OrderedDict((str([int(pp) for pp in pk.pointPositions]), (None, None)) for pk in peakList.peaks if None not in pk.pointPositions)
+        pointCounts = self.spectrum.pointCounts
+        newStart = len(pointToPeak)
+        for pk in peaks:
+            # correct the peak.points for "offset" (the slice-positions taken) and ordering (i.e. inverse)
+            pointPositions = [float(p) + float(self.sliceTuples[idx][0]) for idx, p in enumerate(pk.points[::-1])]
+            hashPositions = str([int((pos - 1) % pCount) + 1 for pos, pCount in zip(pointPositions, pointCounts)])  # API position starts at 1
+
+            if hashPositions not in pointToPeak:
+                pointToPeak[hashPositions] = (pk, pointPositions)
+
+        return list(pointToPeak.values())[newStart:]
 
     def _validatePointPeak(self, pointPositions, peakList):
         """

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:03 +0000 (Wed, November 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-06 18:40:15 +0000 (Tue, December 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -789,7 +789,9 @@ def newObject(klass):
                                                 objsToBeUnDeleted=apiObjectsCreated)
                             )
 
-                _storeNewObjectCurrent(result, addUndoItem)
+                if application.project._undo.storageBlockingLevel < 1:
+                    # only add current if required
+                    _storeNewObjectCurrent(result, addUndoItem)
 
         result._finaliseAction('create')
 

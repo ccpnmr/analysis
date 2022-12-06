@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-05 12:46:21 +0000 (Mon, December 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-06 18:36:20 +0000 (Tue, December 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1946,7 +1946,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if update:
             self.update()
 
-    def _rescaleXAxis(self, update=True):
+    def _rescaleXAxis(self, rescale=True, update=True):
         self._testAxisLimits()
         self.rescale(rescaleStaticHTraces=False)
 
@@ -1959,7 +1959,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if update:
             self.update()
 
-    def _rescaleYAxis(self, update=True):
+    def _rescaleYAxis(self, rescale=True, update=True):
         self._testAxisLimits()
         self.rescale(rescaleStaticVTraces=False)
 
@@ -2247,7 +2247,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
     def sign(self, x):
         return 1.0 if x >= 0 else -1.0
 
-    def _scaleToXAxis(self, rescale=True):
+    def _scaleToXAxis(self, rescale=True, update=True):
 
         _useFirstDefault = getattr(self.spectrumDisplay, '_useFirstDefault', False)
         if (self._aspectRatioMode or _useFirstDefault):  # and self._axisType != GLDefs.BOTTOMAXIS:
@@ -2272,9 +2272,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             self.axisT = mby - ratio * self.sign(mby - self.axisT)
 
         if rescale:
-            self._rescaleAllAxes()
+            self._rescaleAllAxes(update=True)
 
-    def _scaleToYAxis(self, rescale=True):
+    def _scaleToYAxis(self, rescale=True, update=True):
 
         _useFirstDefault = getattr(self.spectrumDisplay, '_useFirstDefault', False)
         if (self._aspectRatioMode or _useFirstDefault):  # and self._axisType != GLDefs.RIGHTAXIS:
@@ -2299,7 +2299,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             self.axisR = mbx - ratio * self.sign(mbx - self.axisR)
 
         if rescale:
-            self._rescaleAllAxes()
+            self._rescaleAllAxes(update=True)
 
     def _getValidAspectRatio(self, axisCode):
         if self.spectrumDisplay and self.spectrumDisplay.strips and len(self.spectrumDisplay.strips) > 0:

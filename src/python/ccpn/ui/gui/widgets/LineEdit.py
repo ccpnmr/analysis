@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-02 14:43:49 +0000 (Fri, December 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-06 14:35:01 +0000 (Tue, December 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.ValidatorBase import ValidatorBase
+
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 # from ccpn.ui.gui.guiSettings import helveticaItalic12
 # from ccpn.framework.Translation import translator
@@ -75,8 +77,8 @@ class LineEdit(QtWidgets.QLineEdit, Base):
 
         self.setAlignment(TextAlignment[textAlignment])
 
-        if 'minimumWidth' in kwds:
-            self.setMinimumWidth(kwds['minimumWidth'])
+        # if 'minimumWidth' in kwds:
+        #     self.setMinimumWidth(kwds['minimumWidth'])
 
         self.setStyleSheet('LineEdit { padding: 3px 3px 3px 3px; }')
 
@@ -175,6 +177,21 @@ class FloatLineEdit(LineEdit):
         """
         return self.set(value)
 
+
+class ValidatedLineEdit(LineEdit, ValidatorBase):
+    """A class that implements a validated LineEdit
+    """
+    WIDGET_VALUE_FUNCTION = LineEdit.get
+
+    def __init__(self, parent, validatorCallback, **kwds):
+        """
+        :param parent: parent widget
+        :param validatorCallback: a function def validatorCallback(value) -> bool
+                                  which is called upon changes to the value of the Widget.
+                                  It should return True/False.
+        """
+        LineEdit.__init__(self, parent=parent, **kwds)
+        ValidatorBase.__init__(self, widget=self, validatorCallback=validatorCallback)
 
 
 class PasswordEdit(LineEdit):

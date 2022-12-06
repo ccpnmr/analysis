@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-04 17:38:24 +0100 (Tue, October 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-12-06 17:44:26 +0000 (Tue, December 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2016-11-15 21:37:50 +0000 (Tue, 15 Nov 2016) $"
 #=========================================================================================
 
 from itertools import product
+from PyQt5 import QtGui
 
 from ccpn.ui.gui.widgets.Font import Font, DEFAULTFONT, \
     DEFAULTFONTSIZE, DEFAULTFONTNAME, CONSOLEFONT, SIDEBARFONT, \
@@ -233,7 +234,18 @@ BORDERNOFOCUS = 'BORDER_NOFOCUS'
 BORDERFOCUS = 'BORDER_FOCUS'
 TOOLTIP_BACKGROUND = 'TOOLTIP_BACKGROUND'
 
+#----------------------------------------------------------------------------------------------
 # Colours
+#----------------------------------------------------------------------------------------------
+
+# A gradient of colours "green" to "red", but adjusted for colour-blind people as well
+# from: https://www.visualisingdata.com/2019/08/five-ways-to-design-for-red-green-colour-blindness/
+COLOUR_BLIND_DARKGREEN = QtGui.QColor('#009297')
+COLOUR_BLIND_LIGHTGREEN = QtGui.QColor('#57C4AD')
+COLOUR_BLIND_MEDIUM = QtGui.QColor('#E6E1BC')
+COLOUR_BLIND_ORANGE = QtGui.QColor('#EDA247')
+COLOUR_BLIND_RED = QtGui.QColor('#DB4325')
+
 TEXT_COLOUR = '#555D85'
 TEXT_COLOUR_WARNING = '#E06523'
 SOFT_DIVIDER_COLOUR = '#888DA5'

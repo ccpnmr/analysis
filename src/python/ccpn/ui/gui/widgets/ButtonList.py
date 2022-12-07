@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-11 15:42:50 +0000 (Fri, November 11, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-12-07 18:23:27 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -121,11 +121,11 @@ class ButtonBoxList(QtWidgets.QDialogButtonBox, Base, ButtonListMixin):
         self.buttonNames = {}
 
         if commands:
-            print("qtgui.ButtonList.commands is deprecated; use .callbacks")
+            getLogger().warning("qtgui.ButtonList.commands is deprecated; use .callbacks")
             callbacks = commands
 
         if images:
-            print("qtgui.ButtonList.images is deprecated; use .icons")
+            getLogger().warning("qtgui.ButtonList.images is deprecated; use .icons")
             icons = images
 
         if texts is None:
@@ -214,11 +214,11 @@ class ButtonList(Widget, ButtonListMixin):
         self.buttonNames = {}
 
         if commands:
-            print("qtgui.ButtonList.commands is deprecated; use .callbacks")
+            getLogger().warning("qtgui.ButtonList.commands is deprecated; use .callbacks")
             callbacks = commands
 
         if images:
-            print("qtgui.ButtonList.images is deprecated; use .icons")
+            getLogger().warning("qtgui.ButtonList.images is deprecated; use .icons")
             icons = images
 
         if texts is None:

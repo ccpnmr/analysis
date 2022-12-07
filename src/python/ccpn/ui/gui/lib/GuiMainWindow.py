@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-07 12:05:55 +0000 (Mon, November 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 18:23:26 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -534,7 +534,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         badSpectra = [str(spectrum.pid) for spectrum in project.spectra if not spectrum.hasValidPath()]
 
         if badSpectra:
-            text = 'Use menu "Spectrum --> Validate paths..." Or "VP" shortcut to correct.\n'
+            text = 'Use menu "Spectrum --> Validate paths..." Or "VP" shortcut to correct\n\n'
             text += 'Please inspect file path(s) for:\n'
             for sp in badSpectra:  # these can be >1000 lines message. Added in a scrollable area.
                 text += '%s\n' % str(sp)

@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-07 17:10:02 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 18:23:26 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1274,7 +1274,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         _iniTxt = f'{self.dataFormat} spectrum, path "{_p}"'
 
         if _p is None:
-            txt = f'{_iniTxt}: undefined path'
+            txt = f'{_iniTxt}: undefined'
             return self._returnFalse(txt)
 
         if not self.checkSuffix(_p):
@@ -1282,11 +1282,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
             return self._returnFalse(txt)
 
         if not self.hasValidPath():
-            txt = f'{_iniTxt}: invalid path'
+            txt = f'{_iniTxt}: does not exist'
             return self._returnFalse(txt)
 
         if not self.allowDirectory and self.path.is_dir():
-            txt = f'{_iniTxt}: path is directory and not valid'
+            txt = f'{_iniTxt}: is directory and not valid'
             return self._returnFalse(txt)
 
         # checking opening file and reading parameters

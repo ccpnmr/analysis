@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-07 10:57:15 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 18:23:26 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,8 +36,13 @@ from ccpn.util.Path import aPath, Path
 from ccpn.util.Logging import getLogger
 
 from ccpn.framework.Application import getApplication
-
 from ccpn.framework.constants import UNDEFINED_STRING
+
+from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+EMPTY = EmptySpectrumDataSource.dataFormat
+
+from ccpn.core.lib.SpectrumLib import getSpectrumDataSource
 
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList, ButtonBoxList
@@ -57,9 +62,6 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning, showOkCancel
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 
-from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
-from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
-EMPTY = EmptySpectrumDataSource.dataFormat
 
 # from ccpn.ui.gui.lib.GuiPath import VALIDROWCOLOUR, ACCEPTROWCOLOUR, REJECTROWCOLOUR, INVALIDROWCOLOUR
 from ccpn.ui.gui.guiSettings import COLOUR_BLIND_LIGHTGREEN, COLOUR_BLIND_MEDIUM, COLOUR_BLIND_DARKGREEN, \
@@ -349,9 +351,10 @@ class SpectrumPathRow(PathRowABC):
     SELECT_COLLUMN = 0
     LABEL_COLLUMN = 1
     DATAFORMAT_COLLUMN = 2
-    DATA_COLLUMN = 3
-    BUTTON_COLLUMN = 4
-    RELOAD_COLLUMN = 5
+    DATA_COLLUMN = 4
+    BUTTON_COLLUMN = 5
+    RELOAD_COLLUMN = 3
+    REVERT_COLLUMN = 6
 
     AUTODETECT = '> Auto-detect <'
 
@@ -366,12 +369,15 @@ class SpectrumPathRow(PathRowABC):
         :param addExtraButtons: flag to add the extra buttons
         """
 
-
         self._addExtraButtons = addExtraButtons
         self.selectButton = None
         self.reloadButtonWidget = None
         self.dataFormatWidget = None
+        self.revertButtonWidget = None
+
         self.initialDataFormat = spectrum.dataFormat
+        self.dataStore = None
+        self.dataSource = None
 
         super(SpectrumPathRow, self).__init__(parentWidget=parentWidget, rowIndex=rowIndex, labelText=labelText,
                                               obj=spectrum, enabled=enabled, callback=callback
@@ -384,21 +390,34 @@ class SpectrumPathRow(PathRowABC):
         dataFormat = self.dataFormat  # This will get the value from the dataFormatWidget (if defined)
                                       # or from the spectrum otherwise
 
-        # Empty dataFormat: special treatment; value can be empty. If it is not empty, check if path exists
-        if dataFormat == EMPTY:
-            if len(value) == 0:
-                return True
-            else:
-                _path = DataStore.newFromPath(value)
-                return _path.exists()
-
-        # Not an EMPTY dataFormat: should have a path
-        if len(value) == 0:
-                return False
-
         # Check if path is valid for dataFormat.
-        dataStore, dataSource = self.spectrum._getDataSourceFromPath(path=value, dataFormat=dataFormat)
-        isValid = dataStore is not None and dataSource is not None
+        self.dataStore, self.dataSource = getSpectrumDataSource(path=value, dataFormat=dataFormat)
+        if dataFormat == EMPTY:
+            # Empty dataFormat: special treatment; value can be empty, in which case dataStore is '.'
+            # Check if it exists
+            isValid = self.dataStore.exists()
+        else:
+            isValid = self.dataStore is not None and \
+                      self.dataSource is not None and self.dataSource.isValid
+
+        return isValid
+
+    def validatorCallback(self, value) -> bool:
+        """Callback for the WidgetValidator instance and validate method;
+        """
+        if not self.initDone:
+            return True
+
+        isValid = super().validatorCallback(value)  # This will call checkValid above
+
+        # add a tooltip text describing possible errors
+        self.dataWidget.setToolTip('')
+        if not isValid:
+            if self.dataStore is not None and not self.dataStore.exists():
+                self.dataWidget.setToolTip(f'Path "{self.dataStore.path} does not exist')
+            elif self.dataSource is not None and self.dataSource.isNotValid:
+                self.dataWidget.setToolTip(f'{self.dataSource.errorString}')
+
         return isValid
 
     def _addRowWidgets(self, parentWidget, rowIndex):
@@ -419,6 +438,10 @@ class SpectrumPathRow(PathRowABC):
                                              grid=(rowIndex, self.RELOAD_COLLUMN),
                                              hPolicy='fixed',
                                              callback=self._reopenCallback)
+            self.revertButtonWidget = Button(parent=parentWidget, icon='icons/revert', tipText='Revert dataFormat and path to original values',
+                                             grid=(rowIndex, self.REVERT_COLLUMN),
+                                             hPolicy='fixed',
+                                             callback=self._revertCallback)
 
         super()._addRowWidgets(parentWidget=parentWidget, rowIndex=rowIndex)
         self.initDone = True  # Statement does not chnage anything as the super class has already reverted it;
@@ -432,6 +455,8 @@ class SpectrumPathRow(PathRowABC):
             self.selectButton.setVisible(visible)
         if self.reloadButtonWidget is not None:
             self.reloadButtonWidget.setVisible(visible)
+        if self.revertButtonWidget is not None:
+            self.revertButtonWidget.setVisible(visible)
         if self.dataFormatWidget is not None:
             self.dataFormatWidget.setVisible(visible)
 
@@ -443,6 +468,8 @@ class SpectrumPathRow(PathRowABC):
             self.selectButton.setEnabled(enable)
         if self.reloadButtonWidget is not None:
             self.reloadButtonWidget.setEnabled(enable)
+        if self.revertButtonWidget is not None:
+            self.revertButtonWidget.setEnabled(enable)
         if self.dataFormatWidget is not None:
             self.dataFormatWidget.setEnabled(enable)
 
@@ -520,10 +547,10 @@ class SpectrumPathRow(PathRowABC):
         :return a (dataStore, dataSource) tuple
         """
         self.dataFormat = dataFormat
-        dataStore, dataSource = self.spectrum._getDataSourceFromPath(path=path, dataFormat=dataFormat)
+        dataStore, dataSource = getSpectrumDataSource(path=path, dataFormat=dataFormat)
 
         # check if we found something valid; if so, change the dataFormat
-        if dataStore is not None and dataSource is not None:
+        if dataStore is not None and dataSource is not None and dataSource.isValid:
             self.dataFormat = dataStore.dataFormat
 
         return dataStore, dataSource
@@ -544,7 +571,22 @@ class SpectrumPathRow(PathRowABC):
         if not ok:
             return
 
-        self._reopen(path=_path, dataFormat=None)
+        dataStore, dataSource = self._reopen(path=_path, dataFormat=None)
+
+        if dataSource is None:
+            showWarning(f'Auto-detect dataFormat for {self.obj.name}',
+                        f'Failed to detect valid dataFormat'
+            )
+
+        elif dataSource is not None and not dataSource.isValid:
+            showWarning(f'Auto-detect dataFormat for {self.obj.name}',
+                        f'{dataSource.errorString}'
+            )
+
+    def _revertCallback(self):
+        """Callback when pressing revert/undo
+        """
+        self.revert()
 
     def getPath(self) -> str:
         """Get the filePath from spectrum
@@ -773,7 +815,7 @@ class ValidateSpectraPopup(CcpnDialog):
 
         # populate the widget with a list of spectrum buttons and filepath buttons
         scrollRow = 0
-        _colSpan = 5
+        _colSpan = 6
 
         # Label(self.scrollFrame, text='Spectra', bold=True,
         #       grid=(scrollRow, SpectrumPathRow.LABEL_COLLUMN), hAlign='left')
@@ -805,21 +847,19 @@ class ValidateSpectraPopup(CcpnDialog):
         _lWidth = 120
 
         _l = Label(frame, text='DataFormat(s)', grid=(mlRow,0), hAlign='left')
-        # _l.setFixedWidth(_lWidth)
 
         _b = Button(frame, text='Auto-detect', icon='icons/redo', grid=(mlRow,1),
                     callback=self._reopenAllCallback,
                     tipText='Re-open all path(s), determining and setting dataFormat',
                     hAlign='left', hPolicy='minimal', minimumWidth=150)
-        # _b.setMinimumWidth(150)
         mlRow += 1
 
         _l = Label(frame, text='Path(s)', grid=(mlRow,0),
                    hAlign='left', hPolicy='minimal')
-        # _l.setFixedWidth(_lWidth)
 
         _b = ButtonList(frame,
                         texts=['Make absolute', 'Make relative', 'Revert'],
+                        # icons=[None, None, 'icons/revert'],  # looks ugly
                         callbacks=[self._makeAbsoluteCallback,
                                    self._makeRelativeCallback,
                                    self._revertButtonCallback,
@@ -854,7 +894,6 @@ class ValidateSpectraPopup(CcpnDialog):
         self.seachLine.setClearButtonEnabled(True)
 
         self.replaceLabel = Label(_sFrame, text='Replace with', grid=(sRow,2))
-        # self.replaceLabel.setMinimumWidth(minWidth)
         self.replaceLine = ValidatedLineEdit(_sFrame, grid=(sRow,3), minimumWidth=minWidth,
                                              backgroundText='> Enter text <',
                                              validatorCallback=self._validateReplaceCallback
@@ -863,7 +902,7 @@ class ValidateSpectraPopup(CcpnDialog):
 
         self.directoryButton = Button(_sFrame, grid=(sRow,4), callback=self._getDirectoryCallback,
                                       icon='icons/directory')
-        # self.directoryButton.setMinimumWidth(50)
+
         self.goButton = Button(_sFrame, text='Go', grid=(sRow,5), callback=self._goButtonCallback, minimumWidth=50)
         sRow += 1
         #-------- End search and replace
@@ -1030,6 +1069,9 @@ class ValidateSpectraPopup(CcpnDialog):
             row.reloadButtonWidget.setEnabled(True)
         else:
             row.reloadButtonWidget.setEnabled(False)
+
+        # set state of the revert button
+        row.revertButtonWidget.setEnabled(row.hasChanged)
 
         self._showRow(row)
 

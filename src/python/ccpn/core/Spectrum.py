@@ -53,7 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-06 18:40:15 +0000 (Tue, December 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 11:26:45 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -3517,8 +3517,6 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     # Quietly update some essentials
     with inactivity():
         # Link to default (i.e. first) chemicalShiftList, make sure it is always there
-        if not project.chemicalShiftLists:
-            project.newChemicalShiftList(name=f'defaultFrom{name.capitalize()}')
         spectrum.chemicalShiftList = project.chemicalShiftLists[0]
         # Assure at least one peakList
         if len(spectrum.peakLists) == 0:

@@ -2,6 +2,8 @@
 This module defines the code for creating the credits
 """
 
+
+import contextlib
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -18,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 14:23:16 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 11:42:31 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -71,48 +73,40 @@ def printCreditsText(fp, programName, version):
     """Initial text to terminal """
     from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
 
-    lines = []  # ejb
-    lines.append("%s, version: %s" % (programName, version))
-    lines.append("")
-    # lines.append("%s" % __copyright__[0:__copyright__.index('-')] + '- 2016')
-    lines.append("%s" % __copyright__)
-    lines.append("")
-    lines.append("CCPN licence. See %s. Not to be distributed without prior consent!" % ccpnLicenceUrl)
-    lines.append("")
+    lines = [f"{programName}, "
+             f"version: {version}",
+             "",
+             f"{__copyright__}",
+             "",
+             f"CCPN licence. See {ccpnLicenceUrl}. Not to be distributed without prior consent!",
+             ""]
 
-    try:
+    # lines.append("%s" % __copyright__[0:__copyright__.index('-')] + '- 2016')
+
+    with contextlib.suppress(Exception):
         prefix = "Active Developers:   "
         if isinstance(authors, str):
-            lines.append("%s%s" % (prefix, authors))
+            lines.append(f"{prefix}{authors}")
         elif isinstance(authors, (list, tuple)):
             authorList = _strList(authors, maxlen=60)
-            lines.append("%s%s" % (prefix, authorList[0]))
-            for crLine in authorList[1:]:
-                lines.append("%s%s" % (' ' * len(prefix), crLine))
-    except:
-        pass
-
+            lines.append(f"{prefix}{authorList[0]}")
+            lines.extend(f"{' ' * len(prefix)}{crLine}" for crLine in authorList[1:])
     lines.append("")
-    try:
+    with contextlib.suppress(Exception):
         if isinstance(__reference__, str):
-            lines.append("Please cite:  %s" % __reference__)
-        else:
-            if isinstance(__reference__, tuple):
-                lines.append("Please cite:  %s" % __reference__[0])
-                for refLine in __reference__[1:]:
-                    lines.append("              %s" % refLine)
-    except:
-        pass
-
-    lines.append("")
-    lines.append("DISCLAIMER:   This program is offered 'as-is'. Under no circumstances will the authors, CCPN,")
-    lines.append("              the Department of Molecular and Cell Biology, or the University of Leicester be")
-    lines.append("              liable of any damage, loss of data, loss of revenue or any other undesired")
-    lines.append("              consequences originating from the usage of this software.")
+            lines.append(f"Please cite:  {__reference__}")
+        elif isinstance(__reference__, tuple):
+            lines.append(f"Please cite:  {__reference__[0]}")
+            lines.extend(f"              {refLine}" for refLine in __reference__[1:])
+    lines.extend(("",
+                  "DISCLAIMER:   This program is offered 'as-is'. Under no circumstances will the authors, CCPN,",
+                  "              the Department of Molecular and Cell Biology, or the University of Leicester be",
+                  "              liable of any damage, loss of data, loss of revenue or any other undesired",
+                  "              consequences originating from the usage of this software."))
 
     # print with aligning '|'s
     maxlen = max(map(len, lines))
     fp.write('\n%s\n' % ('=' * (maxlen + 8)))
     for line in lines:
-        fp.write('|   %s ' % line + ' ' * (maxlen - len(line)) + '  |\n')
+        fp.write(f'|   {line} ' + ' ' * (maxlen - len(line)) + '  |\n')
     fp.write('%s\n' % ('=' * (maxlen + 8)))

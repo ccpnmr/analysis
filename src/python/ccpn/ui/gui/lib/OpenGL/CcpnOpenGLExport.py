@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-07 13:26:16 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 15:17:13 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -437,11 +437,17 @@ class GLExporter():
         _parentW = self._parent.w
 
         # more scale here :|
-        if strip and not axesOnly:
-            if (sc := self._updateScalesX[strip.id]) > 0.1:
+        if axesOnly:
+            if (sc := self._updateScalesX.get('axis', 0.0)) > 0.01:
                 # hard-limit so there are no division-by-zeroes
                 _parentW = int(_parentW * sc)
-            if (sc := self._updateScalesY[strip.id]) > 0.1:
+            if (sc := self._updateScalesY.get('axis', 0.0)) > 0.01:
+                _parentH = int(_parentH * sc)
+        else:
+            if (sc := self._updateScalesX.get(strip.id, 0.0)) > 0.01:
+                # hard-limit so there are no division-by-zeroes
+                _parentW = int(_parentW * sc)
+            if (sc := self._updateScalesY.get(strip.id, 0.0)) > 0.01:
                 _parentH = int(_parentH * sc)
 
         if not self.rAxis and not self.bAxis:

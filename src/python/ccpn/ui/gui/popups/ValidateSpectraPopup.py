@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-07 18:23:26 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 21:32:04 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -101,10 +101,12 @@ class PathRowABC(object):
         self.obj = obj
         self.enabled = enabled
         self._callback = callback  # callback for this row upon change of value /validate()
-        # if defined called as: callback(self)
+                                   # is defined called as: callback(self)
 
         self.rowIndex = None  # Undefined; set by _addRowWidgets
+
         self.isValid = True
+        self.errorString = ''  # To be set by checkValid method
         self.hasWarning = False
         self.validator = None  # validator instance of type self.validatorClass
 
@@ -180,11 +182,7 @@ class PathRowABC(object):
         choices = dialog.selectedFiles()
         if choices is not None and len(choices) > 0 and len(choices[0]) > 0:
             newPath = choices[0]
-            # We sometimes get silly results back; just checking here
-            if not self.checkValid(newPath):
-                showWarning("Invalid File", f'"{newPath}" is not compatible with {self.obj}')
-            else:
-                self.setText(newPath)
+            self.setText(newPath)
 
     def setEnabled(self, enable):
         """Enable or disable the row
@@ -392,13 +390,24 @@ class SpectrumPathRow(PathRowABC):
 
         # Check if path is valid for dataFormat.
         self.dataStore, self.dataSource = getSpectrumDataSource(path=value, dataFormat=dataFormat)
+        self.errorString = ''
         if dataFormat == EMPTY:
             # Empty dataFormat: special treatment; value can be empty, in which case dataStore is '.'
             # Check if it exists
-            isValid = self.dataStore.exists()
+            if not (isValid := self.dataStore.exists()):
+                self.errorString = f'Path "{value}" does not exist'
+
         else:
-            isValid = self.dataStore is not None and \
-                      self.dataSource is not None and self.dataSource.isValid
+            if self.dataSource is None:
+                self.errorString = f'Path "{value}" does not define a valid SpectrumDataSource type'
+                isValid = False
+
+            elif self.dataSource.isNotValid or not self.dataSource.checkParameters(self.spectrum):
+                self.errorString = self.dataSource.errorString
+                isValid = False
+
+            else:
+                isValid = True
 
         return isValid
 
@@ -411,12 +420,10 @@ class SpectrumPathRow(PathRowABC):
         isValid = super().validatorCallback(value)  # This will call checkValid above
 
         # add a tooltip text describing possible errors
-        self.dataWidget.setToolTip('')
-        if not isValid:
-            if self.dataStore is not None and not self.dataStore.exists():
-                self.dataWidget.setToolTip(f'Path "{self.dataStore.path} does not exist')
-            elif self.dataSource is not None and self.dataSource.isNotValid:
-                self.dataWidget.setToolTip(f'{self.dataSource.errorString}')
+        if isValid:
+            self.dataWidget.setToolTip('')
+        else:
+            self.dataWidget.setToolTip(f'{self.errorString}')
 
         return isValid
 
@@ -601,7 +608,7 @@ class SpectrumPathRow(PathRowABC):
         # For speed reasons, we check if it any different from before, or was not valid to start with
         if self.hasChanged:
             try:
-                self.obj._openFile(path=path, dataFormat=self.dataFormat)
+                self.spectrum._openFile(path=path, dataFormat=self.dataFormat)
             except Exception as es:
                 getLogger().debug2(f'ignoring filePath, dataFormat error {es}')
 
@@ -1004,26 +1011,26 @@ class ValidateSpectraPopup(CcpnDialog):
         """:return True if row should be shown
         """
         doShow = False
-        hasChanged = row.hasChanged
-        isValid = row.isValid
-        hasWarning = row.hasWarning
-        dataFormat = row.dataFormat
+        # hasChanged = row.hasChanged
+        # isValid = row.isValid
+        # hasWarning = row.hasWarning
+        # dataFormat = row.dataFormat
 
         if hasattr(self, 'showValid') and self.showValid is not None:  # just checking that the widget exist
             # (not the case on initialisation!)
             doShow = False
             ind = self.showValid.getIndex()
-            if ind == buttons.index(CHANGED_SPECTRA) and hasChanged:  # show only changed
+            if ind == buttons.index(CHANGED_SPECTRA) and row.hasChanged:  # show only changed
                 doShow = True
-            elif ind == buttons.index(WARNING_SPECTRA) and hasWarning:  # show only warning
+            elif ind == buttons.index(WARNING_SPECTRA) and row.hasWarning:  # show only warning
                 doShow = True
             elif ind == buttons.index(SELECTED_SPECTRA) and row.isSelected:  # show Empty spectra
                 doShow = True
-            elif ind == buttons.index(EMPTY_SPECTRA) and dataFormat == EMPTY:  # show Empty spectra
+            elif ind == buttons.index(EMPTY_SPECTRA) and row.dataFormat == EMPTY:  # show Empty spectra
                 doShow = True
-            elif ind == buttons.index(VALID_SPECTRA) and isValid and not hasWarning:  # show only valid
+            elif ind == buttons.index(VALID_SPECTRA) and row.isValid and not row.hasWarning:  # show only valid
                 doShow = True
-            elif ind == buttons.index(INVALID_SPECTRA) and not isValid and not hasWarning:  # show only invalid
+            elif ind == buttons.index(INVALID_SPECTRA) and row.isNotValid and not row.hasWarning:  # show only invalid
                 doShow = True
             elif ind == buttons.index(ALL_SPECTRA):  # show all
                 doShow = True
@@ -1088,15 +1095,14 @@ class ValidateSpectraPopup(CcpnDialog):
                     row.validate()
 
     def _revertButtonCallback(self):
-        """Revert to initial settings
+        """Revert selected rows to initial settings
         """
         for spectrum, row in self._selectedRows:
             row.revert()
 
     def _cancelButtonCallback(self):
-        """Cancel; revert to initial settings and close popup
+        """Cancel, i.e. no update and close popup
         """
-        self._revertButtonCallback()
         self.accept()
 
     def _closeButtonCallback(self):

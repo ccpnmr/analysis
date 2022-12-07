@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-10 13:36:25 +0000 (Thu, November 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 21:32:03 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,7 @@ from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumData
 from ccpn.framework.constants import NO_SUFFIX, ANY_SUFFIX
 
 
-def _makeBrukerFileNames(dimensionCount) -> list:
+def _makeBrukerFileNames(dimensionCount) -> tuple:
     """helper function to constucts all possible bruker filenames for dimensionCount
     :return list with the names
     """
@@ -290,7 +290,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         """
         return (None if self.dataFile is None else self._brukerRoot.parent)
 
-    def setPath(self, path, substituteSuffix=False):
+    def setPath(self, path, checkSuffix=False):
         """Parse and set path, assure there is the directory with acqus and pdata dirs
         set the _brukerRoot and _pdataDir attributes to point to the relevant directories
 
@@ -359,7 +359,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 self.shouldBeValid = False
                 return None
 
-        return super().setPath(self._binaryData, substituteSuffix=False)
+        return super().setPath(self._binaryData, checkSuffix=False)
 
     def checkValid(self) -> bool:
         """check if valid format corresponding to dataFormat by:
@@ -377,8 +377,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         self.isValid = False
         self.errorString = 'Checking validity'
 
-        if not self.shouldBeValid:
-            errorMsg = f'Path "{self._path}" did not define a valid Bruker file'
+        if self._path is None or not self._path.exists():
+            errorMsg = f'Path "{self._path}" does not exist'
             return self._returnFalse(errorMsg)
 
         # checking Bruker topdir
@@ -423,6 +423,10 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
 
         if not self._binaryData.exists():
             errorMsg = f'Bruker "{self._binaryData}" binary data not found'
+            return self._returnFalse(errorMsg)
+
+        if not self.shouldBeValid:
+            errorMsg = f'Path "{self._path}" did not define a valid Bruker file'
             return self._returnFalse(errorMsg)
 
         self.isValid = True

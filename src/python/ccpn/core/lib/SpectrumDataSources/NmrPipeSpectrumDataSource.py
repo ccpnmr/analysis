@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-08 09:00:52 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 21:32:03 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -365,7 +365,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
         return path, offset
 
-    def setPath(self, path, substituteSuffix=False):
+    def setPath(self, path, checkSuffix=False):
         """define valid path to a (binary) data file, if needed appends or substitutes
         the suffix (if defined).
 
@@ -373,7 +373,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         """
         if path is None:
             self.dataFile = None  # A reset essentially
-            return self
+            return super().setPath(None)
 
         _path = aPath(path)
         # check directories
@@ -390,7 +390,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                 # did not find a "001" file
                 return None
 
-        return super().setPath(path=_path, substituteSuffix=substituteSuffix)
+        return super().setPath(path=_path, checkSuffix=checkSuffix)
 
     def getAllFilePaths(self) -> list:
         """

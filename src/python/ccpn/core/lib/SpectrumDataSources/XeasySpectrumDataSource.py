@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-08 09:00:52 +0000 (Tue, November 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 21:32:04 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -101,8 +101,8 @@ class XeasySpectrumDataSource(SpectrumDataSourceABC):
         "Path of the parameter file"
         return self.path.with_suffix('.param')
 
-    def setPath(self, path, substituteSuffix=False):
-        """Set the path, optionally change .par in .spc suffix and do some checks by calling the super class
+    def setPath(self, path, checkSuffix=False):
+        """Set the path, optionally change suffix and do some checks by calling the super class
         Return self or None on error
         """
         if path is None:
@@ -127,7 +127,7 @@ class XeasySpectrumDataSource(SpectrumDataSourceABC):
                 self.shouldBeValid = False
                 return None
 
-        return super().setPath(self._binaryFile, substituteSuffix=substituteSuffix)
+        return super().setPath(self._binaryFile, checkSuffix=False)
 
     def readParameters(self):
         """Read the parameters from the Xeasy parameter file
@@ -198,8 +198,8 @@ class XeasySpectrumDataSource(SpectrumDataSourceABC):
         self.isValid = False
         self.errorString = 'Checking validity'
 
-        if not self.shouldBeValid:
-            errorMsg = f'Path "{self._path}" did not define a valid Xeasy file'
+        if self._path is None or not self._path.exists():
+            errorMsg = f'Path "{self._path}" does not exist'
             return self._returnFalse(errorMsg)
 
         # checking parameter file
@@ -234,6 +234,10 @@ class XeasySpectrumDataSource(SpectrumDataSourceABC):
 
         if not self._binaryFile.is_file():
             errorMsg = f'Xeasy binary file "{self._binaryFile}" is not a file'
+            return self._returnFalse(errorMsg)
+
+        if not self.shouldBeValid:
+            errorMsg = f'Path "{self._path}" did not define a valid Xeasy file'
             return self._returnFalse(errorMsg)
 
         self.isValid = True

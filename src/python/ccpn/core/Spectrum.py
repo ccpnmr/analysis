@@ -53,7 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-07 17:10:02 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 21:32:03 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -775,12 +775,10 @@ class Spectrum(AbstractWrapperObject):
             getLogger().warning('Spectrum._openFile: unable to open "%s"' % path)
             return False
 
-        if checkParameters:
-            try:
-                self._checkParameters(newDataSource)
-            except RuntimeError as es:
-                getLogger().warning(f'{es}')
-                return False
+        # optionally check the parameters
+        if checkParameters and not newDataSource.checkParameters(self):
+            getLogger().warning(f'{newDataSource.errorString}')
+            return False
 
         # we defined a new file
         self._close()
@@ -2966,7 +2964,7 @@ class Spectrum(AbstractWrapperObject):
         _tmp, dataSource = specLib.getSpectrumDataSource(path=_path, dataFormat=_dataFormat)
         if dataSource is None:
             raise RuntimeError(f'Error for path "{_path}": undefined dataFormat')
-        elif dataSource is not None and dataSource.isNotValid:
+        if dataSource.isNotValid:
             raise RuntimeError(f'{dataSource.errorString}')
 
         # Special case, empty spectrum
@@ -2985,21 +2983,16 @@ class Spectrum(AbstractWrapperObject):
         dataSource.spectrum = self
         return dataSource
 
-    def _checkParameters(self, dataSource):
-        """Check parameters of dataSource against self
-        raise RuntimeError on any errors found
-        """
-        # check some fundamental parameters
-        if dataSource.dimensionCount != self.dimensionCount:
-            raise RuntimeError(f'Incompatible dimensionCount; spectrum: {self.dimensionCount}, dataSource: {dataSource.dimensionCount}')
-
-        for idx, np in enumerate(self.pointCounts):
-            if dataSource.pointCounts[idx] != np:
-                raise RuntimeError(f'Incompatible pointCounts; spectrum: {self.pointCounts}, dataSource: {dataSource.pointCounts}')
-
-        for isC_spectrum, isC_dataSource in zip(self.isComplex, dataSource.isComplex):
-            if isC_spectrum != isC_dataSource:
-                raise RuntimeError(f'Incompatible isComplex definitions; spectrum: {self.isComplex}, dataSource: {dataSource.isComplex}')
+    # def _checkParameters(self, dataSource):
+    #     """Check parameters of dataSource against self
+    #     raise RuntimeError on any errors found
+    #     """
+    #     # check some fundamental parameters
+    #     if self.dataSource is None:
+    #         raise RuntimeError(f'No valid dataSource defined; cannot check parameters')
+    #
+    #     if not self.dataSource.checkParameters(self):
+    #         raise RuntimeError(f' spectrum {self.name}: {self.dataSource.errorString}')
 
     def _getPeakPicker(self):
         """Check whether a peakPicker class has been saved with this spectrum.

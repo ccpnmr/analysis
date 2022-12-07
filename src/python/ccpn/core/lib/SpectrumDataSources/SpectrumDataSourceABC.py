@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-07 18:23:26 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 21:32:03 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -683,7 +683,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             return True
         return False
 
-    def setPath(self, path, substituteSuffix=False):
+    def setPath(self, path, checkSuffix=False):
         """define valid path to a (binary) data file, if needed appends or substitutes
         the suffix (if defined).
 
@@ -694,11 +694,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
             return self
 
         _p = aPath(path)
-        if not (validSuffix := self.checkSuffix(path)):
-            if substituteSuffix:
-                _p = _p.with_suffix(self.suffixes[0])
-            else:
-                _p = _p + self.suffixes[0]
+        validSuffix = self.checkSuffix(path)
+
+        if not validSuffix and checkSuffix:
+            _p = _p.with_suffix(self.suffixes[0])
+
         self.dataFile = str(_p)
         return self
 
@@ -778,7 +778,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self._copyParametersFromSpectrum(spectrum)
         self._assureProperDimensionality()
         if spectrum.filePath is not None and includePath:
-            self.setPath(spectrum.filePath, substituteSuffix=True)
+            self.setPath(spectrum.filePath, checkSuffix=True)
         self.spectrum = spectrum
         return self
 
@@ -813,7 +813,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self.copyParametersFrom(dataSource)
         self._assureProperDimensionality()
         if dataSource.path is not None:
-            self.setPath(dataSource.path, substituteSuffix=True)
+            self.setPath(dataSource.path, checkSuffix=True)
         return self
 
     def copyParametersTo(self, target):
@@ -1270,7 +1270,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # checking path
         _p = self.path
-
         _iniTxt = f'{self.dataFormat} spectrum, path "{_p}"'
 
         if _p is None:
@@ -1305,6 +1304,31 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         self.isValid = True
         self.errorString =''
+        return True
+
+    def checkParameters(self, spectrum) -> bool:
+        """Check parameters of self to establish if it matches with spectrum
+        :param spectrum: a Spectrum instance
+        :return True if matches
+        """
+        _p = self.path
+        _iniTxt = f'{self.dataFormat} spectrum, path "{_p}"'
+
+        # check some fundamental parameters
+        if self.dimensionCount != spectrum.dimensionCount:
+            txt = f'{_iniTxt}: Incompatible dimensionCounts (spectrum: {spectrum.dimensionCount}, dataSource: {self.dimensionCount})'
+            return self._returnFalse(txt)
+
+        for np_spectrum, np_dataSource in zip(spectrum.pointCounts, self.pointCounts):
+            if np_spectrum != np_dataSource:
+                txt = f'{_iniTxt}: Incompatible pointCounts (spectrum: {spectrum.pointCounts}, dataSource: {self.pointCounts})'
+                return self._returnFalse(txt)
+
+        for isC_spectrum, isC_dataSource in zip(spectrum.isComplex, self.isComplex):
+            if isC_spectrum != isC_dataSource:
+                txt = f'{_iniTxt}: Incompatible isComplex definitions (spectrum: {self.isComplex}, dataSource: {dataSource.isComplex})'
+                return self._returnFalse(txt)
+
         return True
 
     @classmethod
@@ -1421,7 +1445,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             ds.writeSliceData(data)
         """
         if path is not None:
-            self.setPath(path, substituteSuffix=True)
+            self.setPath(path, checkSuffix=True)
 
         if mode is None:
             mode = self.defaultOpenWriteMode

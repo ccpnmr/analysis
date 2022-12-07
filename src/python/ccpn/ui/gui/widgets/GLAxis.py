@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-06 18:36:20 +0000 (Tue, December 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 16:00:54 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2813,7 +2813,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 self._rescaleXAxis(rescale=rescale, update=update)
 
         elif axisIndex == 1:
-            if self.INVERTXAXIS:
+            if self.INVERTYAXIS:
                 self.axisB = max(region)
                 self.axisT = min(region)
             else:

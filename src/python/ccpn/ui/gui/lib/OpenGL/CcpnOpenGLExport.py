@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-07 15:42:18 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 16:00:54 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -865,7 +865,7 @@ class GLExporter():
         if self.params[GLAXISLABELS] or self.params[GLAXISUNITS] or self.params[GLAXISTITLES]: self._addGridLabels()
 
     def _resetStripAxes(self):
-        with contextlib.suppress(Exception):
+        try:
             if self._updateAxes:
                 # reset the strip to the original values
                 self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR, self.strip._CcpnGLWidget.axisT, self.strip._CcpnGLWidget.axisB = self._oldValues
@@ -874,6 +874,8 @@ class GLExporter():
                 self.strip._CcpnGLWidget._rescaleAllZoom()
                 self.strip._CcpnGLWidget._buildGL()
                 self.strip._CcpnGLWidget.buildAxisLabels()
+        except Exception as es:
+            getLogger().debug('There was an issue resetting the strip')
 
     def _resetStripRightBottomAxes(self):
         with contextlib.suppress(Exception):

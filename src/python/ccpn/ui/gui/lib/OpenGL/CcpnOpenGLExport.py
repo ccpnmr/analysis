@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-07 15:17:13 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 15:42:18 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -738,6 +738,7 @@ class GLExporter():
 
         # set the range for the display
         self._oldValues = (self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR, self.strip._CcpnGLWidget.axisT, self.strip._CcpnGLWidget.axisB)
+        self._oldSize = (self.strip._CcpnGLWidget.w, self.strip._CcpnGLWidget.h)
         try:
             self._updateAxes = False
             _dd = self.params[GLSTRIPREGIONS][self.strip.id]
@@ -768,6 +769,9 @@ class GLExporter():
                 self._axisR = self.strip._CcpnGLWidget.axisR
                 self._axisT = self.strip._CcpnGLWidget.axisT
                 self._axisB = self.strip._CcpnGLWidget.axisB
+
+                self.strip._CcpnGLWidget.w *= self._updateScalesX.get(self.strip.id, 1.0)
+                self.strip._CcpnGLWidget.h *= self._updateScalesY.get(self.strip.id, 1.0)
 
                 self.strip._CcpnGLWidget._rescaleAllAxes(update=False)
                 self.strip._CcpnGLWidget._buildGL()
@@ -865,6 +869,8 @@ class GLExporter():
             if self._updateAxes:
                 # reset the strip to the original values
                 self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR, self.strip._CcpnGLWidget.axisT, self.strip._CcpnGLWidget.axisB = self._oldValues
+                self.strip._CcpnGLWidget.w,self.strip._CcpnGLWidget.h = self._oldSize
+
                 self.strip._CcpnGLWidget._rescaleAllZoom()
                 self.strip._CcpnGLWidget._buildGL()
                 self.strip._CcpnGLWidget.buildAxisLabels()

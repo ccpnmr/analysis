@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-22 15:44:33 +0000 (Tue, November 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 17:10:02 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -139,7 +139,7 @@ MB = 1024 * 1024
 def getDataFormats() -> OrderedDict:
     """Get spectrum datasource formats
 
-    :return: a dictonary of (format-identifier-strings, SpectrumDataSource classes) as (key, value) pairs
+    :return: a dictionary of (format-identifier-strings, SpectrumDataSource classes) as (key, value) pairs
     """
     # The following imports are just to assure that all the classes have been imported
     # It is local to prevent circular imports
@@ -156,38 +156,53 @@ def getDataFormats() -> OrderedDict:
     return SpectrumDataSourceABC._spectrumDataFormats
 
 
-def getSpectrumDataSource(path, dataFormat):
-    """Get a SpectrumDataSource instance of type dataFormat for path
-    :param path: a Path instance
-    :param dataFormat: a valid dataFormat indentifier
-    :return The SpectrumDataSource instance or None if incorrect
+def getDataSourceClass(dataFormat):
+    """Get a dataSource class from the dataFormat string;
+    Implements the name mapping issue; e.g. the 'NmrView'
+    :param dataFormat: a (valid) dataFormat string
+    :return a class corresponding to dataFormat, or None if invalid
     """
-    dataFormats = getDataFormats()
-
     # Test for optional mapping of the dataFormat name (e.g. for the 'NmrView') issue
     dataFormatDict = SpectrumDataSourceABC._dataFormatDict
-    _dataFormat = dataFormatDict.get(dataFormat)
-    #
-    if _dataFormat is None or (cls := dataFormats.get(_dataFormat)) is None:
-        raise ValueError('getSpectrumDataSource: invalid format "%s"; must be one of %s' %
-                         (dataFormat, [k for k in dataFormats.keys()])
-                         )
-    instance = cls(path=path)
-    if not instance.isValid:
+    dataFormat = dataFormatDict.get(dataFormat, None)
+    if dataFormat is None:
         return None
     else:
-        return instance
+        return getDataFormats()[dataFormat]
 
 
-def checkPathForSpectrumFormats(path):
-    """Check path if it corresponds to any spectrum data format
-    :return a SpectrumDataSource instance with parameters read or None if there was no match
-    """
-    for fmt, cls in getDataFormats().items():
-        instance = cls(path=path)
-        if instance.isValid:
-            return instance  # we found a valid format for path
-    return None
+# def getSpectrumDataSource(path, dataFormat):
+#     """Get a SpectrumDataSource instance of type dataFormat for path
+#     :param path: a Path instance
+#     :param dataFormat: a valid dataFormat indentifier
+#     :return The SpectrumDataSource instance or None if incorrect
+#     """
+#     dataFormats = getDataFormats()
+#
+#     # Test for optional mapping of the dataFormat name (e.g. for the 'NmrView') issue
+#     dataFormatDict = SpectrumDataSourceABC._dataFormatDict
+#     _dataFormat = dataFormatDict.get(dataFormat)
+#     #
+#     if _dataFormat is None or (cls := dataFormats.get(_dataFormat)) is None:
+#         raise ValueError('getSpectrumDataSource: invalid format "%s"; must be one of %s' %
+#                          (dataFormat, [k for k in dataFormats.keys()])
+#                          )
+#     instance = cls(path=path)
+#     if not instance.isValid:
+#         return None
+#     else:
+#         return instance
+
+
+# def checkPathForSpectrumFormats(path):
+#     """Check path if it corresponds to any spectrum data format
+#     :return a SpectrumDataSource instance with parameters read or None if there was no match
+#     """
+#     for fmt, cls in getDataFormats().items():
+#         instance = cls(path=path)
+#         if instance.isValid:
+#             return instance  # we found a valid format for path
+#     return None
 
 
 class SpectrumDataSourceABC(CcpNmrJson):
@@ -484,6 +499,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
     # Convenience properties and methods
     #=========================================================================================
+
+    @property
+    def isNotValid(self) -> bool:
+        """:return not self.isValid
+        """
+        return not self.isValid
 
     @classmethod
     def _documentClass(cls) -> str:

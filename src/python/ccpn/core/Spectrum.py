@@ -53,7 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-28 21:09:45 +0000 (Mon, November 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 17:10:02 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -85,8 +85,7 @@ from ccpn.core.lib.ContextManagers import \
     undoStackBlocking, renameObject, undoBlock, notificationBlanking, \
     ccpNmrV3CoreSetter, inactivity, undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.core.lib.DataStore import DataStore, DataStoreTrait
-from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import \
-    getDataFormats, getSpectrumDataSource, checkPathForSpectrumFormats, DataSourceTrait
+from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
 from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
 from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
 from ccpn.core.lib.Cache import cached
@@ -772,18 +771,25 @@ class Spectrum(AbstractWrapperObject):
         newDataStore = DataStore.newFromPath(path=path, dataFormat=dataFormat)
         newDataStore.spectrum = self
 
-        if (newDataSource := self._getDataSource(dataStore=newDataStore, checkParameters=checkParameters)) is None:
+        if (newDataSource := self._getDataSource(dataStore=newDataStore)) is None:
             getLogger().warning('Spectrum._openFile: unable to open "%s"' % path)
             return False
-        else:
-            # we defined a new file
-            self._close()
-            self._spectrumTraits.dataSource = newDataSource
-            self._saveSpectrumMetaData()
-            self._spectrumTraits.dataStore = newDataStore
-            self._dataStore._saveInternal()
-            self._saveObject()
-            return True
+
+        if checkParameters:
+            try:
+                self._checkParameters(newDataSource)
+            except RuntimeError as es:
+                getLogger().warning(f'{es}')
+                return False
+
+        # we defined a new file
+        self._close()
+        self._spectrumTraits.dataSource = newDataSource
+        self._saveSpectrumMetaData()
+        self._spectrumTraits.dataStore = newDataStore
+        self._dataStore._saveInternal()
+        self._saveObject()
+        return True
 
     @logCommand(get='self')
     def reload(self, path: str = None):
@@ -2918,35 +2924,34 @@ class Spectrum(AbstractWrapperObject):
         return df
 
 
-    def _getDataSourceFromPath(self, path, dataFormat=None, checkParameters=True) -> tuple:
-        """Return a (dataStore, dataSource) tuple if path points  a file compatible
-        with dataFormat, or (None, None) otherwise.
+    # def _getDataSourceFromPath(self, path, dataFormat=None, checkParameters=True) -> tuple:
+    #     """Return a (dataStore, dataSource) tuple if path points  a file compatible
+    #     with dataFormat, or (None, None) otherwise.
+    #
+    #     :param path: path to check, may contain redirections
+    #     :param dataFormat: dataFormat string (default to self.dataFormat if None)
+    #     :param checkParameters: Flag to invoke checking of parameters of dataSource to match those of the self
+    #     """
+    #     if dataFormat is None:
+    #         dataFormat = self.dataFormat
+    #
+    #     dataStore = DataStore.newFromPath(path=path, dataFormat=dataFormat)
+    #     if not dataStore.exists():
+    #         return (None, None)
+    #     dataStore.spectrum = self
+    #
+    #     try:
+    #         dataSource = self._getDataSource(dataStore, checkParameters=checkParameters)
+    #
+    #     except RuntimeError as es:
+    #         getLogger().debug('_getDataSourceFromPath: caught error: %s' % str(es))
+    #         return (None, None)
+    #
+    #     return (dataStore, dataSource)
 
-        :param path: path to check, may contain redirections
-        :param dataFormat: dataFormat string (default to self.dataFormat if None)
-        :param checkParameters: Flag to invoke checking of parameters of dataSource to match those of the self
-        """
-        if dataFormat is None:
-            dataFormat = self.dataFormat
-
-        dataStore = DataStore.newFromPath(path=path, dataFormat=dataFormat)
-        if not dataStore.exists():
-            return (None, None)
-        dataStore.spectrum = self
-
-        try:
-            dataSource = self._getDataSource(dataStore, checkParameters=checkParameters)
-
-        except RuntimeError as es:
-            getLogger().debug('_getDataSourceFromPath: caught error: %s' % str(es))
-            return (None, None)
-
-        return (dataStore, dataSource)
-
-    def _getDataSource(self, dataStore, checkParameters=True):
+    def _getDataSource(self, dataStore):
         """Check the validity and access the file defined by dataStore;
         :param dataStore: A dataStore instance, defining a path, dataFormat and optional buffering
-        :param checkParameters: flag to check essential parameters of the dataSource with the parameters of self (a Spectrum)
         :return SpectrumDataSource instance when path and/or dataFormat of the dataStore instance define something valid
         """
 
@@ -2955,62 +2960,46 @@ class Spectrum(AbstractWrapperObject):
         if not isinstance(dataStore, DataStore):
             raise ValueError(f'dataStore has invalid type; got: {dataStore}')
 
-        if dataStore.dataFormat == EmptySpectrumDataSource.dataFormat:
-            # Special case, empty spectrum
-            dataSource = EmptySpectrumDataSource()
-            dataSource.importFromSpectrum(self, includePath=False)
-            checkParameters = False
+        _path = dataStore.aPath()
+        _dataFormat = dataStore.dataFormat
 
-        elif dataStore.dataFormat is None:
-            # Special case, we do not (yet) know the dataFormat; this may occur due to Nef import
-            # Attempt to get a dataSource from path alone
-            _path = dataStore.aPath()
-            if not _path.exists():
-                raise RuntimeError(f'Spectrum._getDataSource: dataStore path "{_path}" does not exist')
+        _tmp, dataSource = specLib.getSpectrumDataSource(path=_path, dataFormat=_dataFormat)
+        if dataSource is None:
+            raise RuntimeError(f'Error for path "{_path}": undefined dataFormat')
+        elif dataSource is not None and dataSource.isNotValid:
+            raise RuntimeError(f'{dataSource.errorString}')
 
-            if (dataSource := checkPathForSpectrumFormats(_path)) is None:
-                raise RuntimeError(f'Spectrum._getDataSource: error for path "{_path}" with undefined dataFormat')
+        # Special case, empty spectrum
+        if dataSource.dataFormat == EmptySpectrumDataSource.dataFormat:
+           dataSource.importFromSpectrum(self, includePath=False)
 
-            # found a valid dataSource
+        # found a valid dataSource from an initial _dataFormat None; i.e. undefined;
+        # update the dataStore
+        if _dataFormat is None:
             dataStore.dataFormat = dataSource.dataFormat
             dataStore._saveInternal()
-
-        else:
-            # Regular case: We have a dataStore with a path and dataFormat
-
-            # Check the dataFormat
-            validFormats = tuple(getDataFormats().keys())
-            if not isinstance(dataStore.dataFormat, str) or dataStore.dataFormat not in validFormats:
-                raise ValueError('invalid dataFormat %r; should be one of %r' % (dataStore.dataFormat, validFormats))
-
-            _path = dataStore.aPath()
-            if not _path.exists():
-                raise RuntimeError(f'Spectrum._getDataSource: dataStore path "{_path}" does not exist')
-
-            if (dataSource := getSpectrumDataSource(_path, dataStore.dataFormat)) is None:
-                raise RuntimeError(f'Spectrum._getDataSource: error for path "{_path}" with dataFormat "{dataStore.dataFormat}"')
 
         if dataStore.useBuffer:
             dataSource.setBuffering(isBuffered=True, bufferIsTemporary=True)
 
-        if checkParameters:
-            # check some fundamental parameters
-            if dataSource.dimensionCount != self.dimensionCount:
-                raise RuntimeError('Spectrum._getDataSource: incompatible dimensionCount (%s) of "%s"' %
-                                   (dataSource.dimensionCount, dataStore.aPath()))
-
-            for idx, np in enumerate(self.pointCounts):
-                if dataSource.pointCounts[idx] != np:
-                    raise RuntimeError('Spectrum._getDataSource: incompatible pointsCount[%s] = %s of "%s"' %
-                                       (idx, dataSource.pointCounts[idx], dataStore.aPath()))
-
-            for isC_spectrum, isC_dataSource in zip(self.isComplex, dataSource.isComplex):
-                if isC_spectrum != isC_dataSource:
-                    raise RuntimeError('Spectrum._getDataSource: incompatible isComplex definitions; %s has %r ; %s has %r' %
-                                       (self, self.isComplex, dataSource, dataSource.isComplex))
-
         dataSource.spectrum = self
         return dataSource
+
+    def _checkParameters(self, dataSource):
+        """Check parameters of dataSource against self
+        raise RuntimeError on any errors found
+        """
+        # check some fundamental parameters
+        if dataSource.dimensionCount != self.dimensionCount:
+            raise RuntimeError(f'Incompatible dimensionCount; spectrum: {self.dimensionCount}, dataSource: {dataSource.dimensionCount}')
+
+        for idx, np in enumerate(self.pointCounts):
+            if dataSource.pointCounts[idx] != np:
+                raise RuntimeError(f'Incompatible pointCounts; spectrum: {self.pointCounts}, dataSource: {dataSource.pointCounts}')
+
+        for isC_spectrum, isC_dataSource in zip(self.isComplex, dataSource.isComplex):
+            if isC_spectrum != isC_dataSource:
+                raise RuntimeError(f'Incompatible isComplex definitions; spectrum: {self.isComplex}, dataSource: {dataSource.isComplex}')
 
     def _getPeakPicker(self):
         """Check whether a peakPicker class has been saved with this spectrum.
@@ -3678,20 +3667,19 @@ def _newSpectrum(project: Project, path: (str, Path), name: str = None) -> (Spec
 
     logger = getLogger()
 
-    dataStore = DataStore.newFromPath(path)
-    if not dataStore.exists():
+    dataStore, dataSource = specLib.getSpectrumDataSource(path, dataFormat=None)
+    if not dataStore is None and not dataStore.exists():
         dataStore.errorMessage()
         return None
 
-    _path = dataStore.aPath()
-
-    # Try to determine data format from the path and intialise a dataSource instance with parsed parameters
-    dataSource = checkPathForSpectrumFormats(path=_path)
     if dataSource is None:
-        logger.warning('Invalid spectrum path "%s"' % path)  # report the argument given
+        logger.error(f'Error for path "{path}" with undefined dataFormat')
         return None
-    dataSource.estimateNoise()
+    elif dataSource is not None and dataSource.isNotValid:
+        logger.error(f'{dataSource.errorString}')
+        return None
 
+    dataSource.estimateNoise()
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
 
     return spectrum

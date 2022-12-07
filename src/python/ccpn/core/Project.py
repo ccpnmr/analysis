@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-28 16:07:47 +0000 (Mon, November 28, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-12-07 17:10:02 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1682,18 +1682,6 @@ class Project(AbstractWrapperObject):
         from ccpn.core.Spectrum import _newSpectrum
 
         return _newSpectrum(self, path=path, name=name)
-
-    # @logCommand('project.')
-    # def createDummySpectrum(self, axisCodes: Sequence[str], name=None, chemicalShiftList=None):
-    #     """
-    #     Make dummy spectrum from isotopeCodes list - without data and with default parameters.
-    #
-    #     :param axisCodes:
-    #     :param name:
-    #     :param chemicalShiftList:
-    #     :return: a new Spectrum instance.
-    #     """
-    #     raise NotImplementedError('Use Project.newEmptySpectrum')
 
     @logCommand('project.')
     def newEmptySpectrum(self, isotopeCodes: Sequence[str], dimensionCount=None, name='emptySpectrum', path=None,

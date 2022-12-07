@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-10 13:35:48 +0000 (Thu, November 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 17:10:02 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,8 +32,7 @@ __date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC, NO_SUFFIX, ANY_SUFFIX
 from ccpn.core.Spectrum import _newSpectrumFromDataSource
-from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats, checkPathForSpectrumFormats, \
-      DataSourceTrait
+from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import DataSourceTrait
 from ccpn.core.lib.DataStore import DataStore, DataStoreTrait
 
 

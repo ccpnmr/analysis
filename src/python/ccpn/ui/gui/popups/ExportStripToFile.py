@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-07 16:13:26 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 16:38:17 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1280,6 +1280,11 @@ class ExportStripToFilePopup(ExportDialogABC):
     def _setSpinboxConstraints(self, stripId, state=True):
         """Set the min/max/width constraints for the spinboxes associated with the stripId
         """
+        from math import floor, log10
+
+        def fexp(f):
+            return int(floor(log10(abs(f)))) if f != 0 else 0
+
         try:
             if _dd := self._stripDict.get(stripId, None):
                 for ii in range(len(STRIPAXES)):
@@ -1289,6 +1294,13 @@ class ExportStripToFilePopup(ExportDialogABC):
                     self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMIN)].setMaximum(axis[STRIPMAX] if state else POSINFINITY)
                     self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMAX)].setMinimum(axis[STRIPMIN] if state else -POSINFINITY)
                     self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPWIDTH)].setMinimum(0.0)
+                    if state:
+                        dec = abs(axis[STRIPMAX] - axis[STRIPMIN])
+                        step = max(0.1, 10 ** fexp(dec * 0.01))
+                        self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMAX)].setSingleStep(step)
+                        self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMIN)].setSingleStep(step)
+                        self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPCENTRE)].setSingleStep(step)
+                        self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPWIDTH)].setSingleStep(step)
 
         except Exception as es:
             getLogger().debug2('Error updating _setSpinboxConstraints')

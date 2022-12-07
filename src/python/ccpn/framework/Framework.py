@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-28 16:09:00 +0000 (Mon, November 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 11:20:53 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1196,6 +1196,7 @@ class Framework(NotifierBase, GuiBase):
         CCPNINTERNAL: called from NefDataLoader.load()
         """
         from ccpn.core.Project import DEFAULT_CHEMICALSHIFTLIST
+        TOBEDELETED = '_toBeDeleted'
 
         if _newProject := dataLoader.createNewProject:
             project = self._newProject(dataLoader.nefImporter.getName())
@@ -1205,15 +1206,18 @@ class Framework(NotifierBase, GuiBase):
         # TODO: find a different solution for this
         with rebuildSidebar(application=self):
             if _newProject and (ch := project.getChemicalShiftList(DEFAULT_CHEMICALSHIFTLIST)):
-                # remove the existing chemical-shift-list, should not be done lightly
-                ch._delete()
+                # rename the existing chemical-shift-list, hopefully an unused name
+                ch.rename(TOBEDELETED)
 
             # import the nef-file
             dataLoader._importIntoProject(project=project)
 
-            if not project.chemicalShiftLists:
-                # create a new default of none added by the import
-                project.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
+            if _newProject and ch:
+                # rename chemical-shift-list back again, will add unique extension as required
+                ch.rename(DEFAULT_CHEMICALSHIFTLIST)
+                if len(project.chemicalShiftLists) > 1 and not ch.chemicalShifts:
+                    # if still empty and more added, then not needed
+                    ch._delete()
 
         return project
 

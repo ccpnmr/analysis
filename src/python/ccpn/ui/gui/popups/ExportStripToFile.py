@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-07 16:09:12 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 16:13:26 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1531,12 +1531,12 @@ class ExportStripToFilePopup(ExportDialogABC):
         # stripPadding = self.stripPaddingBox.getValue()
         # exportDpi = self.exportDpiBox.getValue()
 
-        fcolName = colourNameNoSpace(self.foregroundColourBox.getText())
-        if fcolName in spectrumColours.values():
-            fcolName = list(spectrumColours.keys())[list(spectrumColours.values()).index(fcolName)]
-        bcolName = colourNameNoSpace(self.backgroundColourBox.getText())
-        if bcolName in spectrumColours.values():
-            bcolName = list(spectrumColours.keys())[list(spectrumColours.values()).index(bcolName)]
+        # fcolName = colourNameNoSpace(self.foregroundColourBox.getText())
+        # if fcolName in spectrumColours.values():
+        #     fcolName = list(spectrumColours.keys())[list(spectrumColours.values()).index(fcolName)]
+        # bcolName = colourNameNoSpace(self.backgroundColourBox.getText())
+        # if bcolName in spectrumColours.values():
+        #     bcolName = list(spectrumColours.keys())[list(spectrumColours.values()).index(bcolName)]
 
         if strip:
             # return the parameters
@@ -1547,8 +1547,8 @@ class ExportStripToFilePopup(ExportDialogABC):
                       GLPRINTTYPE             : self.printType.get(),
                       GLPAGETYPE              : self.pageOrientation.get(),
                       GLPAGESIZE              : self.pageSize.get(),
-                      GLFOREGROUND            : hexToRgbRatio(fcolName),
-                      GLBACKGROUND            : hexToRgbRatio(bcolName),
+                      GLFOREGROUND            : hexToRgbRatio(self.foregroundColour),
+                      GLBACKGROUND            : hexToRgbRatio(self.backgroundColour),
                       GLBASETHICKNESS         : self.baseThicknessBox.getValue(),
                       # unique per spectrumDisplay - may differ from preferences
                       GLSYMBOLTHICKNESS       : strip.symbolThickness,
@@ -1852,8 +1852,8 @@ class ExportStripToFilePopup(ExportDialogABC):
             colName = colourNameNoSpace(self.foregroundColourBox.getText())
             if colName in spectrumColours.values():
                 colName = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+            self.foregroundColour = colName
             if colName != self.printSettings.foregroundColour:
-                self.foregroundColour = colName
                 return partial(self._setForeGroundColour, colName)
 
     def _setForeGroundColour(self, value):
@@ -1870,8 +1870,8 @@ class ExportStripToFilePopup(ExportDialogABC):
             colName = colourNameNoSpace(self.backgroundColourBox.getText())
             if colName in spectrumColours.values():
                 colName = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+            self.backgroundColour = colName
             if colName != self.printSettings.backgroundColour:
-                self.backgroundColour = colName
                 return partial(self._setBackgroundColour, colName)
 
     def _setBackgroundColour(self, value):

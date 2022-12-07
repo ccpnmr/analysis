@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-06 18:36:20 +0000 (Tue, December 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-07 13:26:16 +0000 (Wed, December 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -195,9 +195,11 @@ class GLExporter():
             # print the whole spectrumDisplay
             spectrumDisplay = self.params[GLSPECTRUMDISPLAY]
 
+            _ratios = self._getStripUpdateRatios(spectrumDisplay.orderedStrips)
+
             self._selectedStrip = self.strip
             self.numStrips = len(spectrumDisplay.strips)
-            self._buildPageDimensions(spectrumDisplay.strips)
+            self._buildPageDimensions(spectrumDisplay.strips , _ratios)
 
             for strNum, strip in enumerate(spectrumDisplay.orderedStrips):
                 self.stripNumber = strNum
@@ -218,9 +220,9 @@ class GLExporter():
             # self._parent still points to the last strip - check not to double up the last axis
             if self.params[GLSTRIPDIRECTION] == 'Y':
                 if self._parent and not self._parent._drawRightAxis:
-                    self._createStrip(spectrumDisplay.orderedStrips[0], spectrumDisplay._rightGLAxis, singleStrip=False, axesOnly=True)
+                    self._createStrip(strip, spectrumDisplay._rightGLAxis, singleStrip=False, axesOnly=True)
             elif self._parent and not self._parent._drawBottomAxis:
-                self._createStrip(spectrumDisplay.orderedStrips[0], spectrumDisplay._bottomGLAxis, singleStrip=False, axesOnly=True)
+                self._createStrip(strip, spectrumDisplay._bottomGLAxis, singleStrip=False, axesOnly=True)
 
             # reset after creating the other strips
             # NOTE:ED - need to store the previous values
@@ -231,9 +233,11 @@ class GLExporter():
             strip = self.params[GLSTRIP]
             spectrumDisplay = strip.spectrumDisplay
 
+            _ratios = self._getStripUpdateRatios([strip])
+
             self._selectedStrip = strip
             self.numStrips = 1
-            self._buildPageDimensions([strip])
+            self._buildPageDimensions([strip], _ratios)
 
             self.stripNumber = 0
             self._linkedAxisStrip = None
@@ -243,9 +247,9 @@ class GLExporter():
             self._linkedAxisStrip = strip
             if self.params[GLSTRIPDIRECTION] == 'Y':
                 if self._parent and not self._parent._drawRightAxis:
-                    self._createStrip(spectrumDisplay.orderedStrips[0], spectrumDisplay._rightGLAxis, singleStrip=True, axesOnly=True)
+                    self._createStrip(strip, spectrumDisplay._rightGLAxis, singleStrip=True, axesOnly=True)
             elif self._parent and not self._parent._drawBottomAxis:
-                self._createStrip(spectrumDisplay.orderedStrips[0], spectrumDisplay._bottomGLAxis, singleStrip=True, axesOnly=True)
+                self._createStrip(strip, spectrumDisplay._bottomGLAxis, singleStrip=True, axesOnly=True)
 
             # reset after creating the other strips
             self._resetStripRightBottomAxes()
@@ -260,7 +264,7 @@ class GLExporter():
         self.strip = strip
         self._parent = self.strip._CcpnGLWidget if _parent is None else _parent
 
-        self._buildPage(singleStrip=singleStrip)
+        self._buildPage(singleStrip=singleStrip, strip=strip, axesOnly=axesOnly)
         self._setStripAxes()
         self._modifyScaling()
         self._buildStrip(axesOnly=axesOnly)
@@ -360,25 +364,26 @@ class GLExporter():
         justFont = pdfmetrics.Font('Open Sans', faceName, 'WinAnsiEncoding')
         pdfmetrics.registerFont(justFont)
 
-    def _buildPageDimensions(self, strips):
+    def _buildPageDimensions(self, strips, ratios):
         """Calculate the scaling required for the whole page
         """
         st = strips[0]._CcpnGLWidget
+        xr, yr = ratios
         if self.params[GLSTRIPDIRECTION] == 'Y':
-            fh = st.height()
-            _widths = [st._CcpnGLWidget.width() for st in strips]
+            fh = st.height() * yr[st.strip.id]
+            _widths = [st._CcpnGLWidget.width()*xr[st.id] for st in strips]
             if self.numStrips > 1:
                 _widths.append((self.numStrips - 1) * self.params[GLSTRIPPADDING])
             if st and not st._drawRightAxis:
-                _widths.append(strips[0].spectrumDisplay._rightGLAxis.width())
+                _widths.append(strips[0].spectrumDisplay._rightGLAxis.width()*xr['axis'])
             fw = sum(_widths)
         else:
-            fw = st.width()
-            _heights = [st._CcpnGLWidget.height() for st in strips]
+            fw = st.width() * xr[st.strip.id]
+            _heights = [st._CcpnGLWidget.height()*yr[st.id] for st in strips]
             if self.numStrips > 1:
                 _heights.append((self.numStrips - 1) * self.params[GLSTRIPPADDING])
             if st and not st._drawBottomAxis:
-                _heights.append(self.strip.spectrumDisplay._bottomGLAxis.height())
+                _heights.append(self.strip.spectrumDisplay._bottomGLAxis.height()*yr['axis'])
             fh = sum(_heights)
 
         # dimensions of the strip list - should be ints
@@ -412,7 +417,7 @@ class GLExporter():
         # read the strip spacing from the params
         self._stripSpacing = self.params[GLSTRIPPADDING]  #* self._displayScale
 
-    def _buildPage(self, singleStrip=True):
+    def _buildPage(self, singleStrip=True, strip=None, axesOnly=False):
         """Build the main sections of the pdf file from a drawing object
         and add the drawing object to a reportlab document
         """
@@ -430,6 +435,14 @@ class GLExporter():
 
         _parentH = self._parent.h
         _parentW = self._parent.w
+
+        # more scale here :|
+        if strip and not axesOnly:
+            if (sc := self._updateScalesX[strip.id]) > 0.1:
+                # hard-limit so there are no division-by-zeroes
+                _parentW = int(_parentW * sc)
+            if (sc := self._updateScalesY[strip.id]) > 0.1:
+                _parentH = int(_parentH * sc)
 
         if not self.rAxis and not self.bAxis:
             # no axes visible
@@ -673,6 +686,47 @@ class GLExporter():
         gr.add(pl)
 
         thisPlot.add(gr, name='mainPlotBox')
+
+    def _getStripUpdateRatios(self, strips):
+        """Get the ratios for keeping the aspect if strips have _updateAxes set
+        """
+        self._updateScalesX = {}
+        self._updateScalesY = {}
+        for strip in strips:
+            self._updateAxes = False
+            _dd = self.params[GLSTRIPREGIONS][strip.id]
+            if _dd.useRegion:
+                # set the range for the display
+                yt, yb = _axisT, _axisB = round(strip._CcpnGLWidget.axisT, 2), round(strip._CcpnGLWidget.axisB, 2)
+                xl, xr = _axisL, _axisR = round(strip._CcpnGLWidget.axisL, 2), round(strip._CcpnGLWidget.axisR, 2)
+                for ii, ddAxis in enumerate(_dd.axes):
+                    # if _dd.minMaxMode == 0:
+                    if ii == 0:
+                        _axisL, _axisR = ddAxis['Min'], ddAxis['Max']
+                    else:
+                        _axisT, _axisB = ddAxis['Min'], ddAxis['Max']
+
+                    # elif ii == 0:
+                    #     _axisL, _axisR = ddAxis['Centre'] + ddAxis['Width'] / 2, ddAxis['Centre'] - ddAxis['Width'] / 2
+                    # else:
+                    #     _axisT, _axisB = ddAxis['Centre'] + ddAxis['Width'] / 2, ddAxis['Centre'] - ddAxis['Width'] / 2
+
+                self._updateScalesX[strip.id] = abs((_axisR - _axisL) / (xr - xl))
+                self._updateScalesY[strip.id] = abs((_axisT - _axisB) / (yt - yb))
+
+            else:
+                self._updateScalesX[strip.id] = 1.0
+                self._updateScalesY[strip.id] = 1.0
+
+        # repeat the last value depending on strip-direction
+        if self.params[GLSTRIPDIRECTION] == 'Y':
+            self._updateScalesX['axis'] = 1.0
+            self._updateScalesY['axis'] = self._updateScalesY[strip.id]
+        else:
+            self._updateScalesX['axis'] = self._updateScalesX[strip.id]
+            self._updateScalesY['axis'] = 1.0
+
+        return (self._updateScalesX, self._updateScalesY)
 
     def _setStripAxes(self):
 

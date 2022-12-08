@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-22 17:43:36 +0100 (Thu, September 22, 2022) $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2022-12-08 14:29:04 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ class SparkyDataLoader(DataLoaderABC):
     """The Sparky data-loader.
     """
     dataFormat = 'sparkyProject'
-    suffixes = ['.proj', '.save']  # a list of suffixes that get matched to path
+    suffixes = ['.proj', '.save', '.save1', '.save2', '.save3', '.save4', '.save5']  # a list of suffixes that get matched to path
     allowDirectory = False  # Can/Can't open a directory
     canCreateNewProject = True
     alwaysCreateNewProject = False

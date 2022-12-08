@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-16 15:46:17 +0000 (Wed, November 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-08 16:30:33 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -411,7 +411,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         #     self._sidebarSplitter.handle(i).setEnabled(False)
 
         # create a splitter to put the sidebar on the left
-        self._horizontalSplitter = Splitter(horizontal=True)
+        self._horizontalSplitter = Splitter(horizontal=True, mouseDoubleClickResize=False )
 
         self._horizontalSplitter.addWidget(self._sideBarFrame)
         self._horizontalSplitter.addWidget(self.moduleArea)

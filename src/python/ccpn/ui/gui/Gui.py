@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-05 15:37:50 +0000 (Mon, December 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-08 17:41:55 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -311,8 +311,11 @@ class Gui(Ui):
         if pathFilter is None:
             pathFilter =  tuple(getDataLoaders().keys())
 
-        _loaders = _checkPathForDataLoader(path=path, pathFilter=pathFilter)
+        _path = aPath(path)
+        if not _path.exists():
+            raise RuntimeError(f'Path "{path}" does not exist')
 
+        _loaders = _checkPathForDataLoader(path=path, pathFilter=pathFilter)
         dataLoader = None
         # log errors
         errMsg = None
@@ -546,15 +549,16 @@ class Gui(Ui):
             if (path := dialog.selectedFile()) is None:
                 return None
 
-        dataLoader, createNewProject, ignore = self._getDataLoader(path)
-        if ignore or dataLoader is None or not createNewProject:
-            return None
+        with catchExceptions(errorStringTemplate='Error loading project: %s'):
+            dataLoader, createNewProject, ignore = self._getDataLoader(path)
+            if ignore or dataLoader is None or not createNewProject:
+                return None
 
-        # load the project using the dataLoader;
-        # We'll ask framework, who will pass it back to ui._loadProject
-        if (objs := self.application._loadData([dataLoader])):
-            if len(objs) == 1:
-                return objs[0]
+            # load the project using the dataLoader;
+            # We'll ask framework, who will pass it back to ui._loadProject
+            if (objs := self.application._loadData([dataLoader])):
+                if len(objs) == 1:
+                    return objs[0]
 
         return None
 

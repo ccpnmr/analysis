@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-07 17:10:02 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-08 17:41:55 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -209,9 +209,9 @@ class DataLoaderABC(TraitBase):
     allowDirectory = False  # Can/Can't open a directory
     requireDirectory = False  # explicitly require a directory
     isSpectrumLoader = False    # Subclassed for SpectrumLoaders
-    loadFunction = (None, None) # A (function, attributeName) tuple;
+    loadFunction = (None, None) # A (function, identifier) tuple;
                                 # :param function(obj:(Application,Project), path:Path) -> List[newObj]
-                                # :param attributeName := 'project' or 'application'
+                                # :param identifier := 'project' or 'application'
 
     #=========================================================================================
     # end to be subclassed
@@ -220,6 +220,7 @@ class DataLoaderABC(TraitBase):
     # traits
     path = CPath().tag(info='a path to a file to be loaded')
     application = Any(default_value=None, allow_none=True)
+    # NB: project derived via a property from application
 
     # project related
     createNewProject = Bool(default_value=False).tag(info='flag to indicate if a new project will be created')
@@ -258,6 +259,7 @@ class DataLoaderABC(TraitBase):
         # local import to avoid cycles
         from ccpn.framework.Application import getApplication
         self.application = getApplication()
+        # NB: self.project derived via a property from application
 
         self.checkValid()
 
@@ -291,7 +293,7 @@ class DataLoaderABC(TraitBase):
 
     def checkValid(self) -> bool:
         """Check if self.path is valid.
-        Calls _checkPath which also calls _checkSuffix
+        Calls _checkPath and _checkSuffix
         sets self.isValid and self.errorString
         :returns True if ok or False otherwise
 
@@ -299,6 +301,9 @@ class DataLoaderABC(TraitBase):
         """
         self.isValid = False
         self.errorString = f'Validity of {self.path} has not been checked'
+
+        if not self._checkSuffix():
+            return False
 
         if not self._checkPath():
             return False
@@ -369,26 +374,23 @@ class DataLoaderABC(TraitBase):
         _path = self.path
         if not _path.exists():
             self.isValid = False
-            self.errorString = f'Path does not exists'
-            return False
-
-        if not self._checkSuffix():
+            self.errorString = f'Path "{_path}" does not exists'
             return False
 
         if _path.basename == '':
-            self.errorString = f'Invalid path'
+            self.errorString = f'Invalid path "{_path}"'
             self.isValid = False
             return False
 
         if _path.is_dir() and not self.allowDirectory:
             # path is a directory: cls does not allow
-            self.errorString = f'Invalid path; directory not allowed'
+            self.errorString = f'Invalid path "{_path}"; directory not allowed'
             self.isValid = False
             return False
 
         if not _path.is_dir() and self.requireDirectory:
             # path is a file, but cls requires a directory
-            self.errorString = f'Invalid path; directory required'
+            self.errorString = f'Invalid path "{_path}"; directory required'
             self.isValid = False
             return False
 

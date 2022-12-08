@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-29 18:06:02 +0000 (Tue, November 29, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-12-08 13:22:53 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -694,7 +694,7 @@ class Gui(Ui):
             if not _path.exists():
                 txt = f'"{path}" does not exist'
                 getLogger().warning(txt)
-                MessageDialog.showError('Load Data', txt, parent=self)
+                MessageDialog.showError('Load Data', txt, parent=self.mainWindow)
                 if len(paths) == 1:
                     return []
                 else:
@@ -707,7 +707,7 @@ class Gui(Ui):
             if dataLoader is None:
                 txt = f'Unable to load "{path}"'
                 getLogger().warning(txt)
-                MessageDialog.showError('Load Data', txt, parent=self)
+                MessageDialog.showError('Load Data', txt, parent=self.mainWindow)
                 if len(paths) == 1:
                     return []
                 else:
@@ -721,7 +721,7 @@ class Gui(Ui):
         if len(objs) == 0:
             txt = f'No objects were loaded from {paths}'
             getLogger().warning(txt)
-            MessageDialog.showError('Load Data', txt, parent=self)
+            MessageDialog.showError('Load Data', txt, parent=self.mainWindow)
 
         return objs
 

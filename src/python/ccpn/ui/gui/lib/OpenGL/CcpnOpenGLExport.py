@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-07 16:00:54 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-08 12:21:52 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -745,56 +745,61 @@ class GLExporter():
             self._updateAxes = _dd.useRegion
             if self._updateAxes:
                 for ii, ddAxis in enumerate(_dd.axes):
-                    if _dd.minMaxMode == 0:
-                        self.strip.setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
 
-                        if self.params[GLSTRIPDIRECTION] == 'Y':
-                            if not self.rAxis:
-                                self.strip.spectrumDisplay._rightGLAxis._setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
-                        elif not self.bAxis:
-                            self.strip.spectrumDisplay._bottomGLAxis._setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
-                    else:
-                        self.strip.setAxisPosition(ii, ddAxis['Centre'], rescale=False, update=False)
-                        self.strip.setAxisWidth(ii, ddAxis['Width'], rescale=False, update=False)
+                    # if _dd.minMaxMode == 0:
+                    self.strip.setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
 
-                        if self.params[GLSTRIPDIRECTION] == 'Y':
-                            if not self.rAxis:
-                                self.strip.spectrumDisplay._rightGLAxis._setAxisPosition(ii, ddAxis['Centre'], rescale=False, update=False)
-                                self.strip.spectrumDisplay._rightGLAxis._setAxisWidth(ii, ddAxis['Width'], rescale=False, update=False)
-                        elif not self.bAxis:
-                            self.strip.spectrumDisplay._bottomGLAxis._setAxisPosition(ii, ddAxis['Centre'], rescale=False, update=False)
-                            self.strip.spectrumDisplay._bottomGLAxis._setAxisWidth(ii, ddAxis['Width'], rescale=False, update=False)
+                    if self.params[GLSTRIPDIRECTION] == 'Y':
+                        if not self.rAxis:
+                            self.strip.spectrumDisplay._rightGLAxis._setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
+                    elif not self.bAxis:
+                        self.strip.spectrumDisplay._bottomGLAxis._setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
+                    # else:
+                    #     self.strip.setAxisPosition(ii, ddAxis['Centre'], rescale=False, update=False)
+                    #     self.strip.setAxisWidth(ii, ddAxis['Width'], rescale=False, update=False)
+                    #
+                    #     if self.params[GLSTRIPDIRECTION] == 'Y':
+                    #         if not self.rAxis:
+                    #             self.strip.spectrumDisplay._rightGLAxis._setAxisPosition(ii, ddAxis['Centre'], rescale=False, update=False)
+                    #             self.strip.spectrumDisplay._rightGLAxis._setAxisWidth(ii, ddAxis['Width'], rescale=False, update=False)
+                    #     elif not self.bAxis:
+                    #         self.strip.spectrumDisplay._bottomGLAxis._setAxisPosition(ii, ddAxis['Centre'], rescale=False, update=False)
+                    #         self.strip.spectrumDisplay._bottomGLAxis._setAxisWidth(ii, ddAxis['Width'], rescale=False, update=False)
 
-                self._axisL = self.strip._CcpnGLWidget.axisL
-                self._axisR = self.strip._CcpnGLWidget.axisR
-                self._axisT = self.strip._CcpnGLWidget.axisT
-                self._axisB = self.strip._CcpnGLWidget.axisB
+                self._setAxisValues()
 
+                # self.strip._CcpnGLWidget.w *= (self._updateScalesX.get(self.strip.id, 1.0) / self._updateScalesY.get(self.strip.id, 1.0))
                 self.strip._CcpnGLWidget.w *= self._updateScalesX.get(self.strip.id, 1.0)
                 self.strip._CcpnGLWidget.h *= self._updateScalesY.get(self.strip.id, 1.0)
 
-                self.strip._CcpnGLWidget._rescaleAllAxes(update=False)
-                self.strip._CcpnGLWidget._buildGL()
-                self.strip._CcpnGLWidget.buildAxisLabels()
-
+                self._rebuildGL(self.strip._CcpnGLWidget)
                 if self.params[GLSTRIPDIRECTION] == 'Y':
                     if not self.rAxis:
-                        self.strip.spectrumDisplay._rightGLAxis._rescaleAllAxes(update=False)
-                        self.strip.spectrumDisplay._rightGLAxis._buildGL()
-                        self.strip.spectrumDisplay._rightGLAxis.buildAxisLabels(refresh=True)
+                        self._rebuildGL(self.strip.spectrumDisplay._rightGLAxis)
                 elif not self.bAxis:
-                    self.strip.spectrumDisplay._bottomGLAxis._rescaleAllAxes(update=False)
-                    self.strip.spectrumDisplay._bottomGLAxis._buildGL()
-                    self.strip.spectrumDisplay._bottomGLAxis.buildAxisLabels(refresh=True)
+                    self._rebuildGL(self.strip.spectrumDisplay._bottomGLAxis)
 
             else:
-                self._axisL = self.strip._CcpnGLWidget.axisL
-                self._axisR = self.strip._CcpnGLWidget.axisR
-                self._axisT = self.strip._CcpnGLWidget.axisT
-                self._axisB = self.strip._CcpnGLWidget.axisB
+                self._setAxisValues()
 
         except Exception as es:
             getLogger().debug(f'_setStripAxes: problem creating page {es}')
+
+    @staticmethod
+    def _rebuildGL(GLWidget):
+        """Rebuild the GL-widget
+        """
+        GLWidget._rescaleAllAxes(update=False)
+        GLWidget._buildGL()
+        GLWidget.buildAxisLabels(refresh=True)
+
+    def _setAxisValues(self):
+        """Set the axis values from the strip
+        """
+        self._axisL = self.strip._CcpnGLWidget.axisL
+        self._axisR = self.strip._CcpnGLWidget.axisR
+        self._axisT = self.strip._CcpnGLWidget.axisT
+        self._axisB = self.strip._CcpnGLWidget.axisB
 
     def _buildStrip(self, axesOnly=False):
         # create an object that can be added to a report

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-07 16:38:17 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-08 12:21:52 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -74,7 +74,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString, hexToRgbRatio, colourNameNoSpace
 from ccpn.util.Constants import SCALING_MODES, POSINFINITY
-from ccpn.util.Common import isLinux, isMacOS, isWindowsOS
+from ccpn.util.Common import isLinux, isMacOS, isWindowsOS, consume
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
 
@@ -982,8 +982,10 @@ class ExportStripToFilePopup(ExportDialogABC):
         """User has changed minMax/centreWidth mode
         """
         try:
-            _dd = self._stripDict.get(self._currentStrip)
-            _dd.minMaxMode = self._rangeRadio.getIndex()
+            mode = self._rangeRadio.getIndex()
+            # change all to the same mode
+            for dd in self._stripDict.values():
+                dd.minMaxMode = mode
         except Exception as es:
             getLogger().debug2('Error updating _setModeCallback')
         else:
@@ -1006,6 +1008,12 @@ class ExportStripToFilePopup(ExportDialogABC):
         self._setScalingVisible()
         self._setUseFontVisible()
         self._setPulldownTextColour(self._fontPulldown)
+
+        # set the matching values for the connected strips from the initial strip
+        if (dd := self._stripDict.get(self._currentStrip)):
+            self._useOverrideCallback(dd.useRegion)
+            self._setStripMax()
+            self._setStripMin()
 
     def _populate(self):
         """Populate the widget
@@ -1176,6 +1184,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                         for ii in range(len(STRIPAXES)):
                             self._axisSpinboxes[ii][STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 0)
                         self._setRangeButtons.buttons[STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 0)
+
                     for btn in [STRIPCENTRE, STRIPWIDTH]:
                         self._axisLabels[STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 1)
                         for ii in range(len(STRIPAXES)):

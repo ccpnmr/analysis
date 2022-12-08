@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-25 17:13:26 +0100 (Tue, October 25, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-12-08 13:23:28 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -769,6 +769,15 @@ class Peak(AbstractWrapperObject):
 
         dimensionNmrAtoms[axis] = value
         self.dimensionNmrAtoms = dimensionNmrAtoms
+        # isotopeCode. if not defined, assign to the nmrAtoms from the spectrum isotopeCodes
+        for na in value:
+            if na.isotopeCode in [UnknownIsotopeCode, self._UNKNOWN_VALUE_STRING, None]:
+                try:
+                    isotopeCodes = self.spectrum.getByAxisCodes('isotopeCodes', [axisCode])
+                    if len(isotopeCodes)==1:
+                        na._setIsotopeCode(isotopeCodes[0])
+                except Exception as err:
+                    getLogger().debug2(f'Impossible to set isotopeCode to {na}. {err}')
 
     def getByAxisCodes(self, parameterName: str, axisCodes: Sequence[str] = None,
                        exactMatch: bool = False) -> list:

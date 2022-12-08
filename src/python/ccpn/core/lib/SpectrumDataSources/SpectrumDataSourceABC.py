@@ -6,7 +6,7 @@ of different flavours (e.g. Bruker, NmrPipe, Azara, Felix, Varian/Agilent, Hdf5 
 
 the core methods are:
 
-checkForValidFormat()       classmethod; check if valid format corresponding to dataFormat;
+checkValid()                check if valid corresponding to dataFormat;
                             returns True/False
 
 readParameters()            read paramters from spectral data format
@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-07 21:32:03 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-08 13:34:08 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -125,7 +125,7 @@ from ccpn.util.Logging import getLogger
 
 from ccpn.util.isotopes import findNucleiFromSpectrometerFrequencies, Nucleus
 from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, Bool, List, \
-    CString, CList
+    CString, CList, CPath
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 
 from ccpn.framework.constants import CCPNMR_PREFIX, NO_SUFFIX, ANY_SUFFIX
@@ -169,40 +169,6 @@ def getDataSourceClass(dataFormat):
         return None
     else:
         return getDataFormats()[dataFormat]
-
-
-# def getSpectrumDataSource(path, dataFormat):
-#     """Get a SpectrumDataSource instance of type dataFormat for path
-#     :param path: a Path instance
-#     :param dataFormat: a valid dataFormat indentifier
-#     :return The SpectrumDataSource instance or None if incorrect
-#     """
-#     dataFormats = getDataFormats()
-#
-#     # Test for optional mapping of the dataFormat name (e.g. for the 'NmrView') issue
-#     dataFormatDict = SpectrumDataSourceABC._dataFormatDict
-#     _dataFormat = dataFormatDict.get(dataFormat)
-#     #
-#     if _dataFormat is None or (cls := dataFormats.get(_dataFormat)) is None:
-#         raise ValueError('getSpectrumDataSource: invalid format "%s"; must be one of %s' %
-#                          (dataFormat, [k for k in dataFormats.keys()])
-#                          )
-#     instance = cls(path=path)
-#     if not instance.isValid:
-#         return None
-#     else:
-#         return instance
-
-
-# def checkPathForSpectrumFormats(path):
-#     """Check path if it corresponds to any spectrum data format
-#     :return a SpectrumDataSource instance with parameters read or None if there was no match
-#     """
-#     for fmt, cls in getDataFormats().items():
-#         instance = cls(path=path)
-#         if instance.isValid:
-#             return instance  # we found a valid format for path
-#     return None
 
 
 class SpectrumDataSourceABC(CcpNmrJson):
@@ -478,6 +444,27 @@ class SpectrumDataSourceABC(CcpNmrJson):
             )
 
     #=========================================================================================
+    # new implementation, using newFromPath method and validity testing later on
+    #=========================================================================================
+    isValid = Bool(default_value=False).tag(info='flag to indicate if path denotes a valid dataType')
+    shouldBeValid = Bool(default_value=False).tag(info='flag to indicate that path should denotes a valid dataType, but some elements are missing')
+    errorString = CString(default_value='').tag(info='error description for validity testing')
+
+    #=========================================================================================
+    # Attributes for more complicated dataFormats that have separate binaries and parameter
+    # files; e.g. Azara, Bruker, Xeasy
+    #=========================================================================================
+    _parameterFile = CPath(default_value=None, allow_none=True).tag(info =
+                                        'an attribute to store the (parsed) path to a parameter file'
+                                                                    )
+    _binaryFile = CPath(default_value=None, allow_none=True).tag(info =
+                                        'an attribute to store the path to a binary file; used during parsing'
+                                                                 )
+    _path = CPath(default_value=None, allow_none=True).tag(info =
+                                        'an attribute to store the initial path used to define binary/parameter files; used during parsing'
+                                                           )
+
+    #=========================================================================================
     # some default data
     #=========================================================================================
 
@@ -490,11 +477,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
         ('19F', {'spectralRange' : (250.0, 40.0),  'pointCount' : 512}),
         ]
     )
-
-    # new implementation, using newFromPath method and validity testing later on
-    isValid = Bool(default_value=False).tag(info='flag to indicate if path denotes a valid dataType')
-    shouldBeValid = Bool(default_value=False).tag(info='flag to indicate that path should denotes a valid dataType, but some elements are missing')
-    errorString = CString(default_value='').tag(info='error description for validity testing')
 
     #=========================================================================================
     # Convenience properties and methods
@@ -1258,6 +1240,58 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self.errorString = errMsg
         return False
 
+    def _checkValidExtra(self) -> bool:
+        """Helper code to avoid code duplication:
+        check the extra attributes _path, _binaryFile, and_parameterFile.
+        Used for Azara, Bruker, Xeasy
+        """
+        self.isValid = False
+        self.errorString = 'Checking validity'
+
+        _iniTxt = f'{self.dataFormat} spectrum, path "{self._path}"'
+        # checking original path and its suffix
+        if self._path is None or not self._path.exists():
+            errorMsg = f'{_iniTxt}: does not exist'
+            return self._returnFalse(errorMsg)
+
+        if not self.checkSuffix(self._path):
+            txt = f'{_iniTxt}: invalid suffix for {self.dataFormat}'
+            return self._returnFalse(txt)
+
+        # checking parameter file
+        if self._parameterFile is None:
+            errorMsg = f'{_iniTxt}: parameter file is undefined'
+            return self._returnFalse(errorMsg)
+
+        if not self._parameterFile.exists():
+            errorMsg = f'{_iniTxt}: parameter file does not exist'
+            return self._returnFalse(errorMsg)
+
+        if not self._parameterFile.is_file():
+            errorMsg = f'{_iniTxt}: parameter file is not a file'
+            return self._returnFalse(errorMsg)
+
+        if self._binaryFile is None:
+            errorMsg = f'{_iniTxt}: binary file is undefined'
+            return self._returnFalse(errorMsg)
+
+        if not self._binaryFile.exists():
+            errorMsg = f'{_iniTxt}: binary file does not exist'
+            return self._returnFalse(errorMsg)
+
+        if not self._binaryFile.is_file():
+            errorMsg = f'{_iniTxt}: binary file is not a file'
+            return self._returnFalse(errorMsg)
+
+        # if not self.shouldBeValid:
+        #     errorMsg = f'{_iniTxt}: should have defined a valid {self.dataFormat} file, but did not'
+        #     return self._returnFalse(errorMsg)
+
+        self.isValid = True
+        self.errorString = ''
+
+        return True
+
     def checkValid(self) -> bool:
         """check if valid format corresponding to dataFormat by:
         - checking suffix and existence of path
@@ -1326,7 +1360,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         for isC_spectrum, isC_dataSource in zip(spectrum.isComplex, self.isComplex):
             if isC_spectrum != isC_dataSource:
-                txt = f'{_iniTxt}: Incompatible isComplex definitions (spectrum: {self.isComplex}, dataSource: {dataSource.isComplex})'
+                txt = f'{_iniTxt}: Incompatible isComplex definitions (spectrum: {spectrum.isComplex}, dataSource: {self.isComplex})'
                 return self._returnFalse(txt)
 
         return True

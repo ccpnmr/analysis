@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-07 21:32:04 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-08 13:34:08 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -390,12 +390,22 @@ class SpectrumPathRow(PathRowABC):
 
         # Check if path is valid for dataFormat.
         self.dataStore, self.dataSource = getSpectrumDataSource(path=value, dataFormat=dataFormat)
+
         self.errorString = ''
+        self.hasWarning = False
+
         if dataFormat == EMPTY:
-            # Empty dataFormat: special treatment; value can be empty, in which case dataStore is '.'
-            # Check if it exists
-            if not (isValid := self.dataStore.exists()):
-                self.errorString = f'Path "{value}" does not exist'
+            # Empty dataFormat: special treatment;
+            if len(value) == 0:
+                # value can be empty, in which case dataStore is '.'
+                isValid = True
+            else:
+                # Check if value exists
+                if not (isValid := self.dataStore.exists()):
+                    self.errorString = f'Path "{value}" does not exist'
+                else:
+                    self.hasWarning = True
+                    self.errorString = f'Path "{value}" is ignored for Empty dataFormat'
 
         else:
             if self.dataSource is None:
@@ -417,15 +427,22 @@ class SpectrumPathRow(PathRowABC):
         if not self.initDone:
             return True
 
-        isValid = super().validatorCallback(value)  # This will call checkValid above
+        super().validatorCallback(value)  # This will call checkValid above
 
         # add a tooltip text describing possible errors
-        if isValid:
-            self.dataWidget.setToolTip('')
-        else:
+        if not self.isValid or self.hasWarning:
             self.dataWidget.setToolTip(f'{self.errorString}')
 
-        return isValid
+        elif self.isValid:
+            if self.hasChanged:
+                self.dataWidget.setToolTip('Path has changed and is valid')
+            else:
+                self.dataWidget.setToolTip('Path is valid')
+
+        else:
+            self.dataWidget.setToolTip('')
+
+        return self.isValid
 
     def _addRowWidgets(self, parentWidget, rowIndex):
         """Add widgets for the row to parentWidget
@@ -553,12 +570,11 @@ class SpectrumPathRow(PathRowABC):
         """Reopen path using dataFormat; examine for dataFormat if None
         :return a (dataStore, dataSource) tuple
         """
-        self.dataFormat = dataFormat
         dataStore, dataSource = getSpectrumDataSource(path=path, dataFormat=dataFormat)
 
         # check if we found something valid; if so, change the dataFormat
         if dataStore is not None and dataSource is not None and dataSource.isValid:
-            self.dataFormat = dataStore.dataFormat
+            self.dataFormat = dataSource.dataFormat
 
         return dataStore, dataSource
 
@@ -580,7 +596,12 @@ class SpectrumPathRow(PathRowABC):
 
         dataStore, dataSource = self._reopen(path=_path, dataFormat=None)
 
-        if dataSource is None:
+        if dataStore is not None and not dataStore.exists():
+            showWarning(f'Auto-detect dataFormat for {self.obj.name}',
+                        f'"{_path}" does not exist'
+            )
+
+        elif dataSource is None:
             showWarning(f'Auto-detect dataFormat for {self.obj.name}',
                         f'Failed to detect valid dataFormat'
             )
@@ -938,7 +959,8 @@ class ValidateSpectraPopup(CcpnDialog):
         """
         for sp, row in self._selectedRows:
             _path = row.getText()
-            row._reopen(path=_path)
+            if len(_path) > 0:
+                row._reopen(path=_path)
 
     def _getDirectoryCallback(self):
         """Callback when pressing directory button
@@ -1052,27 +1074,19 @@ class ValidateSpectraPopup(CcpnDialog):
 
         # Special case: set WARNING for the rows starting with $DATA if not correct
         if row.text.startswith(DataRedirection().identifier) \
-                and self.dataRow is not None and self.dataRow.isNotValid \
-                and row.isNotValid:
+                and self.dataRow is not None and self.dataRow.isNotValid:
+            row.isValid = False
             row.hasWarning = True
+            row.errorString = f'Path might be invalid because $DATA is not valid'
 
-        # special case: set WARNING for Empty dataformat
+        _lPath = (len(row.getText()) > 0)  # non empty path
         dataFormat = row.dataFormat
-        if dataFormat == EMPTY:
-            if row.isValid and len(row.getText()) > 0:
-                row.hasWarning = True
-                row.isValid = False
 
         row.colourRow()  # This needs to be here to function, but does not make sense as
                          # row.validateCallback should do this too !?
 
-        # Set state of reload button
-        _lPath = (len(row.getText()) > 0)
-        if _lPath and \
-            (row.dataFormat is None or \
-             not row.isValid or \
-             row.hasWarning
-            ):
+        # Set state of reload button: path>0, exists and auto-detect
+        if _lPath and row.dataStore.exists() and dataFormat is None:
             row.reloadButtonWidget.setEnabled(True)
         else:
             row.reloadButtonWidget.setEnabled(False)
@@ -1085,14 +1099,10 @@ class ValidateSpectraPopup(CcpnDialog):
     def _dataRowCallback(self, dataRow):
         """Callback from $DATA url to validate all the spectrum rows as $DATA may have changed.
         """
-        if dataRow.isValid:
-            # always update a valid dataRow
-            dataRow.update()
-
-            # Update the relevant SpectrumRows
-            for spectrum, row in self.spectrumData.items():
-                if row.text.startswith(DataRedirection().identifier):
-                    row.validate()
+        # Update the relevant SpectrumRows
+        for spectrum, row in self.spectrumData.items():
+            if row.text.startswith(DataRedirection().identifier):
+                row.validate()
 
     def _revertButtonCallback(self):
         """Revert selected rows to initial settings
@@ -1107,9 +1117,12 @@ class ValidateSpectraPopup(CcpnDialog):
 
     def _closeButtonCallback(self):
         """Apply and close popup.
-        SpectrumRows still need updating to spectum instances
+        DataRow and SpectrumRows still need updating
         """
+        self.dataRow.update()
+
         for spectrum, row in self.spectrumData.items():
             row.update()
+
         self.accept()
 

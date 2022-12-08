@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-07 21:32:03 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-08 13:34:08 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,7 @@ from itertools import permutations, combinations_with_replacement
 from ccpn.util.Path import Path, aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flatten
+from ccpn.util.traits.CcpNmrTraits import CPath
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 from ccpn.framework.constants import NO_SUFFIX, ANY_SUFFIX
@@ -81,6 +82,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
     allowDirectory = True  # Can supply a Bruker top directory or pdata directory
     openMethod = open
     defaultOpenReadMode = 'rb'
+
+    #=========================================================================================
 
     _processedDataFilesDict = dict([
         (1, '1r 1i'.split()),
@@ -180,12 +183,20 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 'ZGOPTNS'    : 'acquisition (zg) options',
                 }
 
+    #=========================================================================================
+
+    _brukerRoot = CPath(default_value=None, allow_none=True).tag(info =
+                                        'an attribute to store the path to the Bruker root directory; used during parsing'
+                                                                 )
+    _pdataDir = CPath(default_value=None, allow_none=True).tag(info =
+                                        'an attribute to store the path to the Bruker pdata directory; used during parsing'
+                                                           )
+
+    #=========================================================================================
+
     def __init__(self, path=None, spectrum=None, dimensionCount=None):
-        "Init local attributes"
-        self._path = None  # the initiating path from which _brukerRoot, _pdataDir and _binarydata are derived
-        self._brukerRoot = None
-        self._pdataDir = None
-        self._binaryData = None
+        """Init local attributes
+        """
 
         self.acqus = None  # list of parsed acqus files (per dimension)
         self.procs = None  # list of parsed proc files (per dimension)
@@ -208,7 +219,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         _binaryData = path.globList('[1-8][r,i]*')
         return len(_binaryData) > 0
 
-    def _getBinaryData(self):
+    def _getBinaryFile(self):
         """:returns binary-data file in self._pdataDir as a Path instance or None if none present
         """
         if self._pdataDir is None:
@@ -277,8 +288,18 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 return _path
         return None
 
+    def _findFistProcFile(self):
+        """Find the first proc file in self._pDataDir
+        :return Path to this file or None if it does not exist
+        """
+        if self._pdataDir is None or not self._pdataDir.exists():
+            return None
+        else:
+            return self._pdataDir /  self._procFiles[0]
+
     def nameFromPath(self):
         """Return a name derived from _brukerRoot and pdataDir
+        Subclassed to accommodate the special Bruker directory structure
         """
         return '%s-%s' % (self._brukerRoot.stem, self._pdataDir.stem)
 
@@ -301,7 +322,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
 
         self._pdataDir = None
         self._brukerRoot = None
-        self._binaryData = None
+        self._binaryFile = None
+        self._parameterFile = None
         self._path = None
 
         if path is None:
@@ -316,8 +338,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 # Bruker binary processed data file
                 self._brukerRoot = _path.parent.parent.parent
                 self._pdataDir = _path.parent
-                self._binaryData = _path
-                self._getDimensionality()
+                self._binaryFile = _path
+                self._parameterFile = self._findFistProcFile()
                 # We should have a valid Bruker file.
                 self.shouldBeValid = True
 
@@ -325,7 +347,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 # Bruker proc file
                 self._brukerRoot = _path.parent.parent.parent
                 self._pdataDir = _path.parent
-                self._binaryData = self._getBinaryData()
+                self._binaryFile = self._getBinaryFile()
+                self._parameterFile = self._findFistProcFile()
                 # We should have a valid Bruker file.
                 self.shouldBeValid = True
 
@@ -333,7 +356,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 # Bruker top directory
                 self._brukerRoot = _path
                 self._pdataDir = self._findFirstPdataDir()
-                self._binaryData = self._getBinaryData()
+                self._binaryFile = self._getBinaryFile()
+                self._parameterFile = self._findFistProcFile()
                 # We should have a valid Bruker file.
                 self.shouldBeValid = True
 
@@ -341,7 +365,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 # Bruker/pdata directory
                 self._brukerRoot = _path.parent
                 self._pdataDir = self._findFirstPdataDir()
-                self._binaryData = self._getBinaryData()
+                self._binaryFile = self._getBinaryFile()
+                self._parameterFile = self._findFistProcFile()
                 # We should have a valid Bruker file.
                 self.shouldBeValid = True
 
@@ -349,17 +374,20 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 # Bruker pdata 'proc'-directory
                 self._brukerRoot = _path.parent.parent
                 self._pdataDir = _path
-                self._binaryData = self._getBinaryData()
+                self._binaryFile = self._getBinaryFile()
+                self._parameterFile = self._findFistProcFile()
                 # We should have a valid Bruker file.
                 self.shouldBeValid = True
 
             else:
-                logger.debug2('"%s" does not define a valid path with Bruker data' % path)
                 # We do not have a valid Bruker file.
+                txt = f'"{path}" does not define a valid path with Bruker data'
+                logger.debug2(txt)
+                self.errorString = txt
                 self.shouldBeValid = False
                 return None
 
-        return super().setPath(self._binaryData, checkSuffix=False)
+        return super().setPath(self._binaryFile, checkSuffix=False)
 
     def checkValid(self) -> bool:
         """check if valid format corresponding to dataFormat by:
@@ -377,9 +405,9 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         self.isValid = False
         self.errorString = 'Checking validity'
 
-        if self._path is None or not self._path.exists():
-            errorMsg = f'Path "{self._path}" does not exist'
-            return self._returnFalse(errorMsg)
+        # if self._path is None or not self._path.exists():
+        #     errorMsg = f'Path "{self._path}" does not exist'
+        #     return self._returnFalse(errorMsg)
 
         # checking Bruker topdir
         if self._brukerRoot is None:
@@ -417,17 +445,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             errorMsg = f'Bruker pdata "{self._pdataDir}" has no proc* files'
             return self._returnFalse(errorMsg)
 
-        if self._binaryData is None:
-            errorMsg = f'Bruker "{self._pdataDir}" directory: no valid binary data defined'
-            return self._returnFalse(errorMsg)
-
-        if not self._binaryData.exists():
-            errorMsg = f'Bruker "{self._binaryData}" binary data not found'
-            return self._returnFalse(errorMsg)
-
-        if not self.shouldBeValid:
-            errorMsg = f'Path "{self._path}" did not define a valid Bruker file'
-            return self._returnFalse(errorMsg)
+        if not self._checkValidExtra():
+            return False
 
         self.isValid = True
         self.errorString = ''

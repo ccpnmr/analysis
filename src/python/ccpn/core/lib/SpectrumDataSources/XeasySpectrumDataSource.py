@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-07 21:32:04 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-08 13:34:08 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -83,17 +83,6 @@ class XeasySpectrumDataSource(SpectrumDataSourceABC):
     openMethod = open
     defaultOpenReadMode = 'rb'
 
-    #=========================================================================================
-
-    _parameterFile = CPath(default_value=None, allow_none=True).tag(info =
-                                        'an attribute to store the (parsed) path to the Xeasy parameter file'
-                                                                    )
-    _binaryFile = CPath(default_value=None, allow_none=True).tag(info =
-                                        'an attribute to store the path to the Xeasy binary file; used during parsing'
-                                                                 )
-    _path = CPath(default_value=None, allow_none=True).tag(info =
-                                        'an attribute to store the path used to define the Xeasy file; used during parsing'
-                                                           )
     #=========================================================================================
 
     @property
@@ -194,54 +183,9 @@ class XeasySpectrumDataSource(SpectrumDataSourceABC):
 
         :return: True if ok, False otherwise
         """
+        if not self._checkValidExtra():
+            return False
 
-        self.isValid = False
-        self.errorString = 'Checking validity'
-
-        if self._path is None or not self._path.exists():
-            errorMsg = f'Path "{self._path}" does not exist'
-            return self._returnFalse(errorMsg)
-
-        # checking parameter file
-        if self._parameterFile is None and self._binaryFile is not None:
-            errorMsg = f'Xeasy parameter file is undefined; did find binary file "{self._binaryFile}"'
-            return self._returnFalse(errorMsg)
-
-        if self._parameterFile is None:
-            errorMsg = f'Xeasy parameter file is undefined'
-            return self._returnFalse(errorMsg)
-
-        if not self._parameterFile.exists():
-            errorMsg = f'Xeasy parameter file "{self._parameterFile}" does not exist'
-            return self._returnFalse(errorMsg)
-
-        if not self._parameterFile.is_file():
-            errorMsg = f'Xeasy parameter file "{self._parameterFile}" is not a file'
-            return self._returnFalse(errorMsg)
-
-        # checking binary file
-        if self._binaryFile is None and self._parameterFile is not None:
-            errorMsg = f'Xeasy binary file is undefined; did find parameter file "{self._parameterFile}"'
-            return self._returnFalse(errorMsg)
-
-        if self._binaryFile is None:
-            errorMsg = f'Xeasy binary file is undefined'
-            return self._returnFalse(errorMsg)
-
-        if not self._binaryFile.exists():
-            errorMsg = f'Xeasy binary file "{self._binaryFile}" does not exist'
-            return self._returnFalse(errorMsg)
-
-        if not self._binaryFile.is_file():
-            errorMsg = f'Xeasy binary file "{self._binaryFile}" is not a file'
-            return self._returnFalse(errorMsg)
-
-        if not self.shouldBeValid:
-            errorMsg = f'Path "{self._path}" did not define a valid Xeasy file'
-            return self._returnFalse(errorMsg)
-
-        self.isValid = True
-        self.errorString = ''
         return super().checkValid()
 
     def getAllFilePaths(self) -> list:

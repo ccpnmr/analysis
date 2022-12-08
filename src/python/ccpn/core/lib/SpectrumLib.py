@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-07 17:10:02 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-08 13:34:08 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -330,7 +330,8 @@ from ccpn.framework.constants import NO_SUFFIX, ANY_SUFFIX
 
 @singleton
 class _spectrumDataSourceSuffixDict(dict):
-    """A class to contain a dict of (suffix, [SpectrumDataSource class]-list) (key, value) pairs
+    """A class to contain a dict of (suffix, [SpectrumDataSource class]-list)
+    (key, value) pairs; exclude EmptySpectrum
 
     NB: Only to be used internally
     """
@@ -338,15 +339,17 @@ class _spectrumDataSourceSuffixDict(dict):
     def __init__(self):
         # local import to avoid cycles
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+        from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
 
         super().__init__(self)
 
+        # Fill the dict
         for dataFormat, klass in getDataFormats().items():
-
-            suffixes =  [NO_SUFFIX, ANY_SUFFIX] if len(klass.suffixes) == 0 else klass.suffixes
-            for suffix in suffixes:
-                suffix = NO_SUFFIX if suffix is None else suffix
-                self[suffix].append(klass)
+            if dataFormat != EmptySpectrumDataSource.dataFormat:
+                suffixes =  [NO_SUFFIX, ANY_SUFFIX] if len(klass.suffixes) == 0 else klass.suffixes
+                for suffix in suffixes:
+                    suffix = NO_SUFFIX if suffix is None else suffix
+                    self[suffix].append(klass)
 
     def __getitem__(self, item):
         """Can't get subclassed defaultdict to work

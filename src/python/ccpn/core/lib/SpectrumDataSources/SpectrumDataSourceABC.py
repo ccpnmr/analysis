@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-08 13:34:08 +0000 (Thu, December 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-08 16:27:46 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1392,7 +1392,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
             raise FileNotFoundError('path "%s" does not exist' % _path)
 
         if newFile and not _path.parent.exists():
-            raise FileNotFoundError('parent of "%s" does not exist' % _path)
+            raise FileNotFoundError(f'parent path "{_path.parent}" does not exist')
+
         if newFile and _path.exists() and mode != self.defaultAppendMode:
             raise FileExistsError('path "%s" exists (mode=%s)' % (_path, mode))
 
@@ -1492,19 +1493,18 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         except Exception as es:
             self.closeFile()
-            txt = f'{self.__class__.__name__}.openNewFile: {es}'
+            txt = f'openNewFile: {es}'
             self.isValid = False
             self.errorString = txt
             getLogger().error(txt)
             raise es
 
-        finally:
-            getLogger().debug('%s.openNewFile: writing parameters and calling closeFile' %
-                              self.__class__.__name__)
-            self.isValid = True
-            self.errorString = ''
-            self.writeParameters()
-            self.closeFile()
+        getLogger().debug('%s.openNewFile: writing parameters and calling closeFile' %
+                          self.__class__.__name__)
+        self.isValid = True
+        self.errorString = ''
+        self.writeParameters()
+        self.closeFile()
 
     def closeFile(self):
         """Close the file and clear the cache

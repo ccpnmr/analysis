@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-12-08 16:31:21 +0000 (Thu, December 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-08 17:15:42 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -445,6 +445,7 @@ class Gui(Ui):
         """Create a new project instance with name.
         :return a Project instance or None
         """
+        oldMainWindowPos = self.mainWindow.pos()
         # if not self.project.isTemporary:
         if self.project and (self.project._undo is None or self.project._undo.isDirty()):
             message = f"Do you really want to create a new project (current project will be closed {' and any changes will be lost' if self.project.isModified else ''})?"
@@ -463,6 +464,7 @@ class Gui(Ui):
                 raise RuntimeError('Unable to create new project')
             newProject._mainWindow.show()
             QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
+            self.mainWindow.move(oldMainWindowPos)
 
             return newProject
 

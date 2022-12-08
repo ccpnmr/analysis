@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-06 14:34:13 +0000 (Tue, December 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-08 20:31:43 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -355,7 +355,7 @@ class Base(DropBase, SignalBlocking):
         if minimumHeight:
             self.setMinimumHeight(minimumHeight)
         if fixedHeight:
-            self.fixedHeight(maximumHeight)
+            self.setFixedHeight(fixedHeight)
 
         if len([_v for _v in (minimumWidth, maximumWidth, fixedWidth) if _v is not None]) > 1:
             raise ValueError(f'only one of (minimumWidth, maximumWidth, fixedWidth) can be defined')
@@ -364,7 +364,7 @@ class Base(DropBase, SignalBlocking):
         if minimumWidth:
             self.setMinimumWidth(minimumWidth)
         if fixedWidth:
-            self.fixedWidth(maximumWidth)
+            self.setFixedWidth(fixedWidth)
 
         # connect destruction of widget to onDestroyed method,
         # which subsequently can be subclassed

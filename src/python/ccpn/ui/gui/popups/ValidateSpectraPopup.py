@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-08 13:34:08 +0000 (Thu, December 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-08 20:31:43 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -89,7 +89,7 @@ class PathRowABC(object):
     def __init__(self, parentWidget, rowIndex, labelText, obj, enabled=True, callback=None):
         """
         :param parentWidget: widget for row to be inserted
-        :param labelText: text for the label
+        :param labelText: text for the label; ignored if None or zero length
         :param rowIndex: row index
         :param obj: object being displayed
         :param callback: func(self) is called when changing value of the dataWidget
@@ -148,10 +148,14 @@ class PathRowABC(object):
         :return self
         """
         self.rowIndex = rowIndex
-        self.labelWidget = Label(parentWidget, text=self.labelText, grid=(self.rowIndex, self.LABEL_COLLUMN),
-                                 hAlign='left',
-                                 hPolicy='minimum',
-                                 )
+        if self.labelText is not None and len(self.labelText) > 0:
+            self.labelWidget = Label(parentWidget, text=self.labelText, grid=(self.rowIndex, self.LABEL_COLLUMN),
+                                     hAlign='left',
+                                     hPolicy='minimum',
+                                     )
+        else:
+            self.labelWidget = None
+
         self.dataWidget = ValidatedLineEdit(parentWidget, textAlignment='left',
                                             backgroundText=UNDEFINED_STRING,
                                             grid=(self.rowIndex, self.DATA_COLLUMN),
@@ -189,8 +193,10 @@ class PathRowABC(object):
         """
         if self.dataWidget is None:
             raise RuntimeError('No row widgets defined')
+
         self.enabled = enable
-        self.labelWidget.setEnabled(self.enabled)
+        if self.labelWidget:
+            self.labelWidget.setEnabled(self.enabled)
         self.dataWidget.setEnabled(self.enabled)
         self.buttonWidget.setVisible(self.enabled)
 
@@ -198,27 +204,27 @@ class PathRowABC(object):
         """Set the labelWidget to text
         """
         if self.labelWidget is None:
-            raise RuntimeError('No row widgets defined')
+            raise RuntimeError('No label widget defined')
         self.labelWidget.setText(text)
 
     def getLabel(self, text) -> str:
         """:return the text of the labelWidget
         """
         if self.labelWidget is None:
-            raise RuntimeError('No row widgets defined')
+            raise RuntimeError('No label widget defined')
         return self.labelWidget.text()
 
     def getText(self) -> str:
         """:return the text of the dataWidget (i.e. the path)
         """
         if self.dataWidget is None:
-            raise RuntimeError('No row widgets defined')
+            raise RuntimeError('No data widget defined')
         return self.dataWidget.text()
 
     def setText(self, text):
         """Set the dataWidget to text"""
         if self.dataWidget is None:
-            raise RuntimeError('No row widgets defined')
+            raise RuntimeError('No data widget defined')
         self.dataWidget.setText(text)
 
     def setPath(self, path):
@@ -237,7 +243,7 @@ class PathRowABC(object):
         """Get the directory path to start the selection dialog;
         optionally can be subclassed
         """
-        dirPath = Path.home()
+        dirPath = Path.cwd()
         return str(dirPath)
 
     def update(self, path=None):
@@ -327,7 +333,9 @@ class PathRowABC(object):
     def setVisible(self, visible):
         """set visibility of row
         """
-        self.labelWidget.setVisible(visible)
+        if self.labelWidget:
+            self.labelWidget.setVisible(visible)
+
         self.dataWidget.setVisible(visible)
         self.buttonWidget.setVisible(visible)
 

@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-08 17:41:55 +0000 (Thu, December 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-08 20:31:43 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -209,9 +209,10 @@ class DataLoaderABC(TraitBase):
     allowDirectory = False  # Can/Can't open a directory
     requireDirectory = False  # explicitly require a directory
     isSpectrumLoader = False    # Subclassed for SpectrumLoaders
-    loadFunction = (None, None) # A (function, identifier) tuple;
-                                # :param function(obj:(Application,Project), path:Path) -> List[newObj]
-                                # :param identifier := 'project' or 'application'
+    loadFunction = (None, None) # A (function, attributeName) tuple;
+                                # :param attributeName:=('project','application') to get obj
+                                #                       as either self.project or self.application
+                                # :param function(obj:(Application,Project), path:Path) -> List[newObj1, ...]
 
     #=========================================================================================
     # end to be subclassed
@@ -323,9 +324,11 @@ class DataLoaderABC(TraitBase):
             raise RuntimeError(f'Error loading "{self.path}"; invalid loader')
 
         try:
-            func, attributeName = self.loadFunction
+            # get the object (either a project or application), to pass on
+            # to the loaderFunc
+            loaderFunc, attributeName = self.loadFunction
             obj = getattr(self, attributeName)
-            result = func(obj, self.path)
+            result = loaderFunc(obj, self.path)
 
         except (ValueError, RuntimeError) as es:
             raise RuntimeError(f'Error loading "{self.path}": {es}')

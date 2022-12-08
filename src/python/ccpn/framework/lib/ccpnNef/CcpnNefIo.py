@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-05 17:27:12 +0000 (Mon, December 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-08 12:23:44 +0000 (Thu, December 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -3883,6 +3883,7 @@ class CcpnNefReader(CcpnNefContent):
         data = [(k, val) for k, val in dataBlock.items()]
         for ii, (k, val) in enumerate(data):
             if val == saveFrame:
+                getLogger().debug('found {} {} --> {}'.format(saveFrame, k, val))
                 data[ii] = (newSaveFrameName, val)
                 # should only be one
                 break

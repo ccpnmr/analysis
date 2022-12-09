@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-08 13:34:08 +0000 (Thu, December 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-09 08:33:28 +0000 (Fri, December 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -326,55 +326,10 @@ def checkSpectrumPropertyValue(iterable: bool, unique: bool = False, allowNone: 
 #------------------------------------------------------------------------------------------------------
 # Routines dealing with getting data sources
 #------------------------------------------------------------------------------------------------------
-from ccpn.framework.constants import NO_SUFFIX, ANY_SUFFIX
-
-@singleton
-class _spectrumDataSourceSuffixDict(dict):
-    """A class to contain a dict of (suffix, [SpectrumDataSource class]-list)
-    (key, value) pairs; exclude EmptySpectrum
-
-    NB: Only to be used internally
-    """
-
-    def __init__(self):
-        # local import to avoid cycles
-        from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
-        from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
-
-        super().__init__(self)
-
-        # Fill the dict
-        for dataFormat, klass in getDataFormats().items():
-            if dataFormat != EmptySpectrumDataSource.dataFormat:
-                suffixes =  [NO_SUFFIX, ANY_SUFFIX] if len(klass.suffixes) == 0 else klass.suffixes
-                for suffix in suffixes:
-                    suffix = NO_SUFFIX if suffix is None else suffix
-                    self[suffix].append(klass)
-
-    def __getitem__(self, item):
-        """Can't get subclassed defaultdict to work
-        Always assure a list for item
-        """
-        if not item in self:
-            super().__setitem__(item, [])
-        return super().__getitem__(item)
-
-    def get(self, suffix) -> list:
-        """get a list of klasses for suffix;
-        map None or zero-length to NO_SUFFIX and
-        map non existing suffix to ANY_SUFFIX
-        """
-        if suffix is None or len(suffix) == 0:
-            return self[NO_SUFFIX]
-        elif suffix not in self:
-            return self[ANY_SUFFIX]
-        else:
-            return self[suffix]
-
 
 def getSpectrumDataSource(path, dataFormat):
     """Get a SpectrumDataSource instance of type dataFormat for path
-    :param path: a path as string or Path instance, optionally with redirect
+    :param path: a path as string or Path instance, optionally with redirect ($DATA, $INSIDE, $ALONGSIDE)
     :param dataFormat: a dataFormat identifier or None (denoting auto-detect)
     :return A (DataStore, SpectrumDataSource) tuple.
             The DataStore instance is None in case of zero-length path (except EmptySpectrum)
@@ -385,7 +340,7 @@ def getSpectrumDataSource(path, dataFormat):
     """
     # avoiding cyclic import
     from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import \
-        getDataSourceClass, getDataFormats
+        getDataSourceClass, getDataFormats, spectrumDataSourceSuffixDict
     from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
     from ccpn.core.lib.DataStore import DataStore
 
@@ -395,6 +350,7 @@ def getSpectrumDataSource(path, dataFormat):
     if len(path) == 0 and dataFormat != EmptySpectrumDataSource.dataFormat:
         return (None, None)
     dataStore = DataStore.newFromPath(path=path, dataFormat=dataFormat)
+    _path = dataStore.aPath()  # The path without optional redirections
 
     if dataFormat is not None:
         # Get the corresponding class
@@ -402,23 +358,23 @@ def getSpectrumDataSource(path, dataFormat):
             validFormats = tuple(getDataFormats().keys())
             raise ValueError(f'invalid dataFormat "{dataFormat}"; should be one of {validFormats}')
 
-        dataSource = klass(path=dataStore.aPath())
+        dataSource = klass(path=_path)
         dataStore.dataFormat = dataFormat
         return (dataStore, dataSource)
 
     else:
         dataSource = None
         # Auto detect dataFormat from path; limit options using suffix dict
-        _suffixDict = _spectrumDataSourceSuffixDict()
-        _suffix = dataStore.aPath().suffix
-        for klass in _suffixDict.get(_suffix):
-            dataSource = klass(path=dataStore.aPath())
-            if dataSource.isValid:
-                # we found a valid one
+        _suffixDict = spectrumDataSourceSuffixDict()
+        klasses = _suffixDict.get(_path.suffix)
+        for klass in klasses:
+            dataSource = klass(path=_path)
+            if dataSource.isValid or dataStore.shouldBeValid:
+                # we found a valid one, or one that should be valid (but had errors)
                 dataStore.dataFormat = klass.dataFormat
                 return (dataStore, dataSource)
-        # haven't found a valid class; either none matched, or isValid
-        # of the last one we tried is False
+        # haven't found a valid class; either none matched, or isValid/shouldBeValid of the
+        # last one we tried is False
         return (dataStore, dataSource)
 
 #------------------------------------------------------------------------------------------------------

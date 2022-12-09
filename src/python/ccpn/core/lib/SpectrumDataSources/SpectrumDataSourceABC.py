@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-08 16:27:46 +0000 (Thu, December 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-09 08:33:28 +0000 (Fri, December 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -122,6 +122,7 @@ from ccpn.core.lib.Cache import cached, Cache
 from ccpn.util.Common import isIterable
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
+from ccpn.util.decorators import singleton
 
 from ccpn.util.isotopes import findNucleiFromSpectrometerFrequencies, Nucleus
 from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, Bool, List, \
@@ -154,6 +155,53 @@ def getDataFormats() -> OrderedDict:
     from ccpn.core.lib.SpectrumDataSources.JcampSpectrumDataSource import JcampSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
     return SpectrumDataSourceABC._spectrumDataFormats
+
+
+@singleton
+class spectrumDataSourceSuffixDict(dict):
+    """A class to contain a dict of (suffix, [SpectrumDataSource class]-list)
+    (key, value) pairs; exclude EmptySpectrum
+
+    The get(suffix) returns a list of klasses for suffix; its maps None or zero-length to NO_SUFFIX
+    and any non-existing suffix in the dict to ANY_SUFFIX
+
+    NB: Only to be used internally
+    """
+
+    def __init__(self):
+        # local import to avoid cycles
+        # from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+        from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+
+        super().__init__(self)
+
+        # Fill the dict
+        for dataFormat, klass in getDataFormats().items():
+            if dataFormat != EmptySpectrumDataSource.dataFormat:
+                suffixes =  [NO_SUFFIX, ANY_SUFFIX] if len(klass.suffixes) == 0 else klass.suffixes
+                for suffix in suffixes:
+                    suffix = NO_SUFFIX if suffix is None else suffix
+                    self[suffix].append(klass)
+
+    def __getitem__(self, item):
+        """Can't get subclassed defaultdict to work
+        Always assure a list for item
+        """
+        if not item in self:
+            super().__setitem__(item, [])
+        return super().__getitem__(item)
+
+    def get(self, suffix) -> list:
+        """get a list of klasses for suffix;
+        map None or zero-length to NO_SUFFIX and
+        map non existing suffix to ANY_SUFFIX
+        """
+        if suffix is None or len(suffix) == 0:
+            return self[NO_SUFFIX]
+        elif suffix not in self:
+            return self[ANY_SUFFIX]
+        else:
+            return self[suffix]
 
 
 def getDataSourceClass(dataFormat):

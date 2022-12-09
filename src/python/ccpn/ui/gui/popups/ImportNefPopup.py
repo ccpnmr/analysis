@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-20 10:42:06 +0100 (Tue, September 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-09 19:09:29 +0000 (Fri, December 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -54,7 +54,7 @@ from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.VLine import VLine
-from ccpn.ui.gui.lib.Validators import LineEditValidator
+from ccpn.ui.gui.lib.Validators import LineEditValidator, LineEditValidatorWhiteSpace
 from ccpn.ui.gui.widgets.table.Table import Table
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS, TOOLTIP_BACKGROUND
 
@@ -63,7 +63,7 @@ from ccpn.framework.lib.ccpnNef.CcpnNefIo import DATANAME
 from ccpn.framework.lib.ccpnNef.CcpnNefCommon import nef2CcpnClassNames
 
 from ccpn.core.lib.ContextManagers import catchExceptions
-from ccpn.core.lib.Pid import Pid
+from ccpn.core.lib.Pid import Pid, IDSEP
 from ccpn.core.Project import Project
 from ccpn.core.StructureData import StructureData
 from ccpn.core.Collection import Collection
@@ -1018,6 +1018,8 @@ class NefDictFrame(Frame):
             Button(self.frameOptionsFrame, text=texts, tipText=tipText, callback=_autoRenameCallback,
                    grid=(row, 2), gridSpan=(1, 1))
 
+            _validator = LineEditValidatorWhiteSpace(parent=saveFrameData, allowSpace=False, allowEmpty=False, allowPeriod=True)
+            saveFrameData.setValidator(_validator)
             saveFrameData.returnPressed.connect(_renameCallback)
             row += 1
 
@@ -1274,23 +1276,46 @@ class NefDictFrame(Frame):
     def _renameInCollections(self, item, data, newName):
         """rename items in the collections for import
         """
+        import re
+
         itmName, sFrame, parentGroup, primaryHandler, ccpnClassName = data
 
+        exact = True
         if parentGroup in ['restraintTables', 'violationTables']:
             _itmStructureData = sFrame.get(DATANAME) or ''  # make sure isn't None
-            _itmPid = Pid._join(ccpnClassName, _itmStructureData, itmName) if ccpnClassName else itmName
-            _newPid = Pid._join(ccpnClassName, _itmStructureData, newName) if ccpnClassName else newName
+            _itmPids = [Pid._join(ccpnClassName, _itmStructureData, itmName) if ccpnClassName else itmName]
+            _newPids = [Pid._join(ccpnClassName, _itmStructureData, newName) if ccpnClassName else newName]
+        elif parentGroup in ['peakLists', 'integralLists', 'multipletLists']:
+            spec, _ = itmName.split(IDSEP)
+            newSpec, _ = newName.split(IDSEP)
+            _itmPids = [Pid._join(cn, spec) for cn in ['SP', 'PL', 'IL', 'ML']]
+            _newPids = [Pid._join(cn, newSpec) for cn in ['SP', 'PL', 'IL', 'ML']]
+            exact = False
+
         else:
-            _itmPid = Pid._join(ccpnClassName, itmName) if ccpnClassName else itmName
-            _newPid = Pid._join(ccpnClassName, newName) if ccpnClassName else newName
+            _itmPids = [Pid._join(ccpnClassName, itmName) if ccpnClassName else itmName]
+            _newPids = [Pid._join(ccpnClassName, newName) if ccpnClassName else newName]
 
         # remove from previous self._collections
-        for k, v in list(self._collections.items()):
-            if _itmPid in v:
-                v.remove(_itmPid)
-                v.append(_newPid)
-            if not v:
-                self._collections.pop(k)
+        for k, pids in list(self._collections.items()):
+            for itm, newItm in zip(_itmPids, _newPids):
+                if exact:
+                    # match the pid exactly
+                    if itm in pids:
+                        pids.insert(pids.index(itm), newItm)
+                        pids.remove(itm)
+
+                else:
+                    # should be a spectrum-based name
+                    for pid in list(pids):
+                        # match by pid, or pid.<n>
+                        if (newVal := re.sub(f'({itm})([.]\d+)$', f'{newItm}\g<2>', pid)) != pid:
+                            pids.insert(pids.index(pid), newVal)
+                            pids.remove(pid)
+
+                if not pids:
+                    # remove any empty collections
+                    self._collections.pop(k)
 
     def _renameValid(self, item=None, saveFrame=None):
         if not item:
@@ -2729,6 +2754,10 @@ class NefDictFrame(Frame):
                 self.setCentralWidget(_frame)
 
             # add methods for setting pulldown options
+            def setDefaultName(self, name):
+                self._pulldownWidget.lineEdit().setText(name)
+
+            # add methods for setting pulldown options
             def setPulldownData(self, texts):
                 self._pulldownWidget.setData(texts=texts)
 
@@ -2757,6 +2786,7 @@ class NefDictFrame(Frame):
                                    on_top=True)
         editPopup.setPulldownData(list(colNames))
         editPopup.setPulldownCallback(self._createNewCollection)
+        editPopup.setDefaultName(Collection._uniqueName(self.project))
 
         # get the desired position of the popup
         pos = QtGui.QCursor().pos()
@@ -2765,6 +2795,8 @@ class NefDictFrame(Frame):
 
         # show the editPopup near the mouse position
         editPopup.showAt(popupPos)
+        # set the focus to the pulldown-list
+        editPopup._pulldownWidget.setFocus()
 
     def _createNewCollection(self, pulldown, popup, selectionWidget):
         """Creat a new collection, or remove from collections

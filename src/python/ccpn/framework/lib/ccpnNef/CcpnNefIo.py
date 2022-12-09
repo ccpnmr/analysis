@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-08 12:23:44 +0000 (Thu, December 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-09 19:09:29 +0000 (Fri, December 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,6 @@ from ast import literal_eval
 
 from ccpn.core.lib import Pid
 from ccpn.core import _coreImportOrder
-from ccpn.core.Spectrum import Spectrum
 
 from ccpn.framework.lib.ccpnNef.CcpnNefCommon import nef2CcpnMap, saveFrameReadingOrder, _isALoop, \
     saveFrameWritingOrder, _parametersFromLoopRow, _traverse, _stripSpectrumName, _stripSpectrumSerial
@@ -137,7 +136,6 @@ REGEXPOSTFIXQUOTEDNUMBER = u'\`(\d+)\`$'
 # REGEXCHECKNMRATOM = u'^\?\@\d+$|^\w+\@\d+$'
 REGEXCHECKNMRATOM = u'^\?\@\d+$|^\w+\%?\*?\%?\@\d+$'
 
-
 NEFEXTENSION = '.nef'
 
 DEFAULTUPDATEPARAMETERS = ('comment',)
@@ -169,6 +167,7 @@ NAMETOOBJECTMAPPING = {'nef_chemical_shift_list'               : ChemicalShiftLi
                        'ccpn_dataset'                          : StructureData,
                        'ccpn_collections'                      : Collection,
                        'ccpn_notes'                            : Note,
+                       '_nef_spectrum'                         : Spectrum,
                        }
 
 DATANAME = 'ccpn_structuredata_name'
@@ -1067,7 +1066,7 @@ class CcpnNefWriter:
         # For the purposes of sorting, pads all numbers to an 8-chr fixed-width field, if prefix is the same, should then sort numerically
         val = tuple(re.sub(r'(\d+)', lambda gr: str(gr.group()).zfill(8), str(vv)) for vv in (shift.chainCode, shift.sequenceCode, shift.residueType, shift.atomName))
         if all(vv is None for vv in val):
-            val = (order, ) + tuple(re.sub(r'(\d+)', lambda gr: str(gr.group()).zfill(8), str(vv)) for vv in shift.pid._split())
+            val = (order,) + tuple(re.sub(r'(\d+)', lambda gr: str(gr.group()).zfill(8), str(vv)) for vv in shift.pid._split())
         else:
             val = (not order,) + val
 
@@ -1391,7 +1390,7 @@ class CcpnNefWriter:
         category = 'nef_nmr_spectrum'
         result = self._newNefSaveFrame(obj, category, name, includeLoops=False)  # NOTE:ED - was peakList
 
-        path = spectrum.path   # .filePath gives the path containing $DATA, etc.
+        path = spectrum.path  # .filePath gives the path containing $DATA, etc.
         if path:
             result['ccpn_spectrum_file_path'] = path
 
@@ -2279,7 +2278,7 @@ class CcpnNefReader(CcpnNefContent):
     verifiers = {}
     renames = {}
 
-    def __init__(self, application, specificationFile:str = None, mode:str = PARSER_MODE_STANDARD,
+    def __init__(self, application, specificationFile: str = None, mode: str = PARSER_MODE_STANDARD,
                  testing: bool = False):
 
         self.application = application
@@ -2572,7 +2571,9 @@ class CcpnNefReader(CcpnNefContent):
                         val = re.sub(_old, _new, '"' + val + '"')
                         val = val[1:-1]
 
-                    row[k] = val
+                    if row[k] != val:
+                        getLogger().debug(f'{"_searchReplaceDictLoop":25} found     {row[k]}')
+                        row[k] = val
 
     def _searchReplaceDict(self, project, saveFrame: StarIo.NmrSaveFrame,
                            searchFrameCode=None, replaceFrameCode=None,
@@ -3891,6 +3892,24 @@ class CcpnNefReader(CcpnNefContent):
         dataBlock.clear()
         dataBlock.update(newData)
 
+    def _renameDataBlockSpectra(self, project, dataBlock, category, oldSpectrum, spectrum):
+        """Rename all saveFrames matching the spectrum_name
+        """
+        data = [(k, sFrame) for k, sFrame in dataBlock.items()]
+        for ii, (k, sFrame) in enumerate(data):
+            _frameID = _saveFrameNameFromCategory(sFrame)
+            _framecode, _frameName, subName, prefix, postfix, _preSerial, _postSerial, _category = _frameID
+
+            if (subName == oldSpectrum):
+                newName = '_'.join([category, prefix + spectrum + postfix])
+                self._renameDataBlock(project, dataBlock, sFrame, newName)
+
+                # rename the spectra in the spectrum-groups
+                loopList = ('ccpn_group_spectrum')
+                replaceList = ('nmr_spectrum_id',)
+                self.searchReplace(project, dataBlock, True, None, oldSpectrum, spectrum, replace=True,
+                                   loopSearchList=loopList, rowSearchList=replaceList, attributeSearchList=(None,))
+
     def rename_saveframe(self, project: Project,
                          dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
                          saveFrame: StarIo.NmrSaveFrame,
@@ -4339,12 +4358,11 @@ class CcpnNefReader(CcpnNefContent):
                                 (f"'{oldPid}'", f"'{newPid}'"),
                                 (f"'{oldLongPid}'", f"'{newLongPid}'"),
                                 )
+
                     # replace the names in the collection.items
-                    loop = saveFrame.get('ccpn_collection')
-                    if loop:
+                    if (loop := saveFrame.get('ccpn_collection')):
                         for row in loop.data:
-                            _items = row.get('items')
-                            if _items and isinstance(_items, str):
+                            if (_items := row.get('items')):
                                 # must be wrapped in quotes to exclude subsets
                                 for _old, _new in _renames:
                                     _items = _items.replace(_old, _new)
@@ -4483,8 +4501,8 @@ class CcpnNefReader(CcpnNefContent):
             raise TypeError('Incorrect {}List definition; must be <spectrum>.<serial>'.format(_upperCaseName))
 
         _frameID = _saveFrameNameFromCategory(saveFrame)
-        if spectrum != _frameID.subname:
-            raise ValueError('{}List prefix cannot be changed; must be <spectrum>.<serial>'.format(_upperCaseName))
+        # if spectrum != _frameID.subname:
+        #     raise ValueError('{}List prefix cannot be changed; must be <spectrum>.<serial>'.format(_upperCaseName))
 
         frames = self._getSaveFramesInOrder(dataBlock)
         frameCats = frames.get(category) or []
@@ -4498,21 +4516,25 @@ class CcpnNefReader(CcpnNefContent):
                            frameSearchList=frameList, attributeSearchList=attList,
                            loopSearchList=loopList, rowSearchList=replaceList)
 
-        # rename the items in the additionalData saveFrame
-        _oldLongPid = Pid.Pid._join(f'{_upperCaseName}List', itemName)
-        _newLongPid = Pid.Pid._join(f'{_upperCaseName}List', newName)
+        # need to rename the matching-key in dataBlock
+        self._renameDataBlockSpectra(project, dataBlock, category, oldSpectrum, spectrum)
+        self._checkAllSpectrumRename(dataBlock, oldSpectrum, spectrum, category, project)
 
-        frameCats = frames.get('ccpn_additional_data') or []
-        frameList = [frame.name for frame in frameCats]
-        attList = ('None',)
-        loopList = [loopName.format(_lowerCaseName) for loopName in ('ccpn_internal_data',)]
-        replaceList = ('ccpn_object_pid',)
-        self.searchReplace(project, dataBlock, True, None, _oldLongPid, _newLongPid, replace=True, validFramesOnly=True,
-                           frameSearchList=frameList, attributeSearchList=attList,
-                           loopSearchList=loopList, rowSearchList=replaceList)
-
-        # search in additionalData for the pid and change
-        self._checkAdditionalDataCollections(_lowerCaseName, dataBlock, frames, itemName, newName, project)
+        # # rename the items in the additionalData saveFrame
+        # _oldLongPid = Pid.Pid._join(f'{_upperCaseName}List', itemName)
+        # _newLongPid = Pid.Pid._join(f'{_upperCaseName}List', newName)
+        #
+        # frameCats = frames.get('ccpn_additional_data') or []
+        # frameList = [frame.name for frame in frameCats]
+        # attList = ('None',)
+        # loopList = [loopName.format(_lowerCaseName) for loopName in ('ccpn_internal_data',)]
+        # replaceList = ('ccpn_object_pid',)
+        # self.searchReplace(project, dataBlock, True, None, _oldLongPid, _newLongPid, replace=True, validFramesOnly=True,
+        #                    frameSearchList=frameList, attributeSearchList=attList,
+        #                    loopSearchList=loopList, rowSearchList=replaceList)
+        #
+        # # search in additionalData for the pid and change
+        # self._checkAdditionalDataCollections(_lowerCaseName, dataBlock, frames, itemName, newName, project)
 
         return newName
 
@@ -4713,8 +4735,8 @@ class CcpnNefReader(CcpnNefContent):
             raise TypeError('Incorrect {}List definition; must be <spectrum>.<serial>'.format(_upperCaseName))
 
         _frameID = _saveFrameNameFromCategory(saveFrame)
-        if spectrum != _frameID.subname:
-            raise ValueError('{}List prefix cannot be changed; must be <spectrum>.<serial>'.format(_upperCaseName))
+        # if spectrum != _frameID.subname:
+        #     raise ValueError('{}List prefix cannot be changed; must be <spectrum>.<serial>'.format(_upperCaseName))
 
         frames = self._getSaveFramesInOrder(dataBlock)
         frameCats = frames.get(category) or []
@@ -4728,19 +4750,20 @@ class CcpnNefReader(CcpnNefContent):
 
         # if postSerial is not None:
         # may not be necessary
-        newFrameCode = '_'.join([category, prefix + subName + '`{}`'.format(newSerial)])
+        newFrameCode = '_'.join([category, prefix + spectrum + '`{}`'.format(newSerial)])
         # saveFrame.name = newFrameCode
         # saveFrame['sf_framecode'] = newFrameCode
 
         if saveFrame.get('ccpn_peaklist_serial') is not None:
             saveFrame['ccpn_peaklist_serial'] = newSerial
 
-        # replace the serial number in the nef_peak loop
-        frameList = (newFrameCode,)
-        loopList = ('nef_peak',)
-        replaceList = ('ccpn_peak_list_serial')
-        self.searchReplace(project, dataBlock, True, None, oldSerial, newSerial, replace=True,
-                           frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
+        if oldSerial != newSerial:
+            # replace the serial number in the nef_peak loop
+            frameList = (newFrameCode,)
+            loopList = ('nef_peak',)
+            replaceList = ('ccpn_peak_list_serial')
+            self.searchReplace(project, dataBlock, True, None, oldSerial, newSerial, replace=True,
+                               frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
 
         # # replace the spectrum/serial in the peak clusters
         # frameList = ('None',)
@@ -4749,26 +4772,66 @@ class CcpnNefReader(CcpnNefContent):
         # self.searchReplaceList(project, dataBlock, True, None, (subName, oldSerial), (subName, newSerial), replace=True,
         #                        frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
 
-        # need to rename the key in dataBlock
-        self._renameDataBlock(project, dataBlock, saveFrame, newFrameCode)
+        # need to rename the matching-key in dataBlock
+        self._renameDataBlockSpectra(project, dataBlock, category, oldSpectrum, spectrum)
+        self._checkAllSpectrumRename(dataBlock, oldSpectrum, spectrum, category, project)
 
-        # rename the items in the additionalData saveFrame
-        _oldLongPid = Pid.Pid._join(f'{_upperCaseName}List', itemName)
-        _newLongPid = Pid.Pid._join(f'{_upperCaseName}List', newName)
+        # # rename the items in the additionalData saveFrame
+        # _oldLongPid = Pid.Pid._join(f'{_upperCaseName}List', itemName)
+        # _newLongPid = Pid.Pid._join(f'{_upperCaseName}List', newName)
+        #
+        # frameCats = frames.get('ccpn_additional_data') or []
+        # frameList = [frame.name for frame in frameCats]
+        # attList = ('None',)
+        # loopList = [loopName.format(_lowerCaseName) for loopName in ('ccpn_internal_data',)]
+        # replaceList = ('ccpn_object_pid',)
+        # self.searchReplace(project, dataBlock, True, None, _oldLongPid, _newLongPid, replace=True, validFramesOnly=True,
+        #                    frameSearchList=frameList, attributeSearchList=attList,
+        #                    loopSearchList=loopList, rowSearchList=replaceList)
+        #
+        # # search in additionalData for the pid and change
+        # self._checkAdditionalDataCollections(category, dataBlock, frames, itemName, newName, project)
 
-        frameCats = frames.get('ccpn_additional_data') or []
-        frameList = [frame.name for frame in frameCats]
-        attList = ('None',)
-        loopList = [loopName.format(_lowerCaseName) for loopName in ('ccpn_internal_data',)]
-        replaceList = ('ccpn_object_pid',)
-        self.searchReplace(project, dataBlock, True, None, _oldLongPid, _newLongPid, replace=True, validFramesOnly=True,
+        return newName
+
+    def _checkAllSpectrumRename(self, dataBlock, oldSpectrum, spectrum, category, project):
+        """Rename everything that could be a spectrumName
+        """
+        from ccpn.framework.lib.ccpnNef.CcpnNefSearch import SearchBasic, SearchDeep
+
+        frames = self._getSaveFramesInOrder(dataBlock)
+
+        for pidPrefix, _lowerCaseName, category in (('SP', 'spectrum', '_nef_spectrum'),
+                                                    ('PL', 'peak_list', 'nef_nmr_spectrum'),
+                                                    ('IL', 'integral_list', 'integral'),
+                                                    ('ML', 'multiplet_list', 'multiplet'),
+                                                    ('Spectrum', 'spectrum', '_nef_spectrum'),
+                                                    ('PeakList', 'peak_list', 'nef_nmr_spectrum'),
+                                                    ('IntegralList', 'integral_list', 'integral'),
+                                                    ('MultipletList', 'multiplet_list', 'multiplet')):
+            # rename the items in the additionalData saveFrame
+            _oldPid = Pid.Pid._join(pidPrefix, oldSpectrum)
+            _newPid = Pid.Pid._join(pidPrefix, spectrum)
+
+            frameCats = frames.get('ccpn_additional_data') or []
+            frameList = [frame.name for frame in frameCats]
+            attList = ('None',)
+            loopList = [loopName.format(_lowerCaseName) for loopName in ('ccpn_internal_data',)]
+            replaceList = ('ccpn_object_pid',)
+            # self.searchReplace(project, dataBlock, True, None, _oldLongPid, _newLongPid, replace=True, validFramesOnly=True,
+            #                    frameSearchList=frameList, attributeSearchList=attList,
+            #                    loopSearchList=loopList, rowSearchList=replaceList)
+
+            search = SearchBasic(self.project, dataBlock, replace=True)
+            search.replace(_oldPid, _newPid,
                            frameSearchList=frameList, attributeSearchList=attList,
                            loopSearchList=loopList, rowSearchList=replaceList)
 
-        # search in additionalData for the pid and change
-        self._checkAdditionalDataCollections(category, dataBlock, frames, itemName, newName, project)
+            search = SearchDeep(self.project, dataBlock, replace=True)
+            search.replace(_oldPid, _newPid, )
 
-        return newName
+            # search in additionalData for the pid and change
+            # self._checkAdditionalDataCollections(category, dataBlock, frames, oldSpectrum, spectrum, project)
 
     def _checkAdditionalDataCollections(self, category, dataBlock, frames, itemName, newName, project):
         if category in NAMETOOBJECTMAPPING:
@@ -5488,18 +5551,17 @@ class CcpnNefReader(CcpnNefContent):
 
             # get dimension parameters
             if (_loop := saveFrame.get('nef_spectrum_dimension')) is not None:
-                nefDimensionParameters = self._parametersFromSpectrumDimensionLoop( _loop,
-                                                                                    mapping=nef2CcpnMap.get('nef_spectrum_dimension')
-                                                                                  )
+                nefDimensionParameters = self._parametersFromSpectrumDimensionLoop(_loop,
+                                                                                   mapping=nef2CcpnMap.get('nef_spectrum_dimension')
+                                                                                   )
                 _params.update(nefDimensionParameters)
                 # nef dimension parameters do not have the reference point as a parameter
                 # assume 1.0 as default; maybe overridden later by the ccpn dimension parameters
 
-
             if (_loop := saveFrame.get('ccpn_spectrum_dimension')) is not None:
-                ccpnDimensionParameters = self._parametersFromSpectrumDimensionLoop( _loop,
+                ccpnDimensionParameters = self._parametersFromSpectrumDimensionLoop(_loop,
                                                                                     mapping=nef2CcpnMap.get('ccpn_spectrum_dimension')
-                                                                                   )
+                                                                                    )
                 _params.update(ccpnDimensionParameters)
 
             _params['referencePoints'] = [1.0] * dimensionCount
@@ -5620,7 +5682,7 @@ class CcpnNefReader(CcpnNefContent):
         # Get peakList parameters
         peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame,
                                                                   mapping=nef2CcpnMap.get('ccpn_no_peak_list', {})
-                                                                 )
+                                                                  )
         # self._updateStringParameters(peakListParameters)
         peakListId = _stripSpectrumSerial(_name) or peakListParameters.get('serial') or 1
         # peakListParameters.pop('serial', None)
@@ -5628,9 +5690,9 @@ class CcpnNefReader(CcpnNefContent):
         peakList = None
         if (_loop := saveFrame.get('nef_peak')) is not None:
             peakList = self.load_nef_peak(spectrum=spectrum,
-                                          loop = _loop,
-                                          saveFrame = saveFrame,
-                                          peakListId = peakListId)
+                                          loop=_loop,
+                                          saveFrame=saveFrame,
+                                          peakListId=peakListId)
         return peakList
 
     def load_nef_nmr_spectrum(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
@@ -5641,6 +5703,7 @@ class CcpnNefReader(CcpnNefContent):
         peakList = self._load_peaks(saveFrame, spectrum)
 
         return peakList
+
     #
     importers['nef_nmr_spectrum'] = load_nef_nmr_spectrum
 
@@ -6396,12 +6459,12 @@ class CcpnNefReader(CcpnNefContent):
 
         # Get name map for per-dimension attributes
         multipleAttributes = {
-            'position'     : tuple('position_%s' % ii for ii in range(1, dimensionCount+1)),
-            'positionError': tuple('position_uncertainty_%s' % ii for ii in range(1, dimensionCount+1)),
-            'chainCodes'   : tuple('chain_code_%s' % ii for ii in range(1, dimensionCount+1)),
-            'sequenceCodes': tuple('sequence_code_%s' % ii for ii in range(1, dimensionCount+1)),
-            'residueTypes' : tuple('residue_name_%s' % ii for ii in range(1, dimensionCount+1)),
-            'atomNames'    : tuple('atom_name_%s' % ii for ii in range(1, dimensionCount+1)),
+            'position'     : tuple('position_%s' % ii for ii in range(1, dimensionCount + 1)),
+            'positionError': tuple('position_uncertainty_%s' % ii for ii in range(1, dimensionCount + 1)),
+            'chainCodes'   : tuple('chain_code_%s' % ii for ii in range(1, dimensionCount + 1)),
+            'sequenceCodes': tuple('sequence_code_%s' % ii for ii in range(1, dimensionCount + 1)),
+            'residueTypes' : tuple('residue_name_%s' % ii for ii in range(1, dimensionCount + 1)),
+            'atomNames'    : tuple('atom_name_%s' % ii for ii in range(1, dimensionCount + 1)),
             }
 
         # Peaks assignment can extend over multiple rows (?)
@@ -6886,6 +6949,7 @@ class CcpnNefReader(CcpnNefContent):
 
     def load_ccpn_sample(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         from ccpn.core.Sample import _newSample
+
         # NBNB TODO add crosslinks to spectrum (also for components)
 
         # Get ccpn-to-nef mapping for saveframe
@@ -6984,7 +7048,7 @@ class CcpnNefReader(CcpnNefContent):
             labelling = parameters.pop('labelling')
         else:
             labelling = None
-        previous = [_getSubstanceByName(project, name)] #get directly from API and avoid loops.
+        previous = [_getSubstanceByName(project, name)]  #get directly from API and avoid loops.
         sequence = saveFrame.get('sequence_string')
         if sequence and not previous:
             # We have a 'Molecule' type substance with a sequence and no previous occurrence

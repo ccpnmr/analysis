@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-12-08 13:22:53 +0000 (Thu, December 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-12-09 18:37:47 +0000 (Fri, December 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -54,8 +54,7 @@ class Menu(QtWidgets.QMenu, Base):
         self.isFloatWidget = isFloatWidget
 
         self.setToolTipsVisible(True)
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
-
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose, False)
 
     def addItem(self, text, shortcut=None, callback=None, checked=True, checkable=False, icon=None, toolTip=None, **kwargs):
         action = Action(self.getParent(), text, callback=callback, shortcut=shortcut,

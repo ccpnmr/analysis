@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-07 18:23:26 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-10 15:19:16 +0000 (Sat, December 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -581,7 +581,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         # try and open with the NefDataloader
         dataLoader = NefDataLoader(path)
-        if dataLoader.checkForValidFormat(path) is None:
+        if not dataLoader.isValid:
             txt = f"_getDataLoader: Loading '{path}' unsuccessful; unrecognised type, should be '{NefDataLoader.dataFormat}'"
             getLogger().debug(txt)
             return

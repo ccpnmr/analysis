@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-09 08:33:28 +0000 (Fri, December 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-10 15:19:16 +0000 (Sat, December 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -340,7 +340,7 @@ def getSpectrumDataSource(path, dataFormat):
     """
     # avoiding cyclic import
     from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import \
-        getDataSourceClass, getDataFormats, spectrumDataSourceSuffixDict
+        getDataSourceClass, getDataFormats, SpectrumDataSourceSuffixDict
     from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
     from ccpn.core.lib.DataStore import DataStore
 
@@ -365,7 +365,7 @@ def getSpectrumDataSource(path, dataFormat):
     else:
         dataSource = None
         # Auto detect dataFormat from path; limit options using suffix dict
-        _suffixDict = spectrumDataSourceSuffixDict()
+        _suffixDict = SpectrumDataSourceSuffixDict()
         klasses = _suffixDict.get(_path.suffix)
         for klass in klasses:
             dataSource = klass(path=_path)

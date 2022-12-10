@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-08 20:31:43 +0000 (Thu, December 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-10 15:19:16 +0000 (Sat, December 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -44,7 +44,7 @@ from ccpn.util.decorators import singleton
 
 
 #--------------------------------------------------------------------------------------------
-# Need to review lib/io/Formats.py and ioFormats.analyseUrl(path)
+#ToDo Need to review former lib/io/Formats.py and ioFormats.analyseUrl(path)
 #--------------------------------------------------------------------------------------------
 
 CCPNMRTGZCOMPRESSED = 'ccpNmrTgzCompressed'
@@ -89,26 +89,48 @@ def getSpectrumLoaders() -> dict:
     return dict( [(df, dl) for df, dl in _loaders.items() if dl.isSpectrumLoader])
 
 
-def _getSuffixDict() -> defaultdict[Any, list]:
-    """
-    :return dict of (suffix, [dataLoader class]-list) (key, value) pairs
+@singleton
+class DataLoaderSuffixDict(dict):
+    """A class to contain a dict of (suffix, [DataLoader class]-list)
+    (key, value) pairs;
+
+    The get(suffix) returns a list of klasses for suffix; its maps None or zero-length to NO_SUFFIX
+    and any non-existing suffix in the dict to ANY_SUFFIX
 
     NB: Only to be used internally
     """
-    _loadersDict = getDataLoaders()
 
-    # create an (suffix, [dataFormats]) dict
-    _suffixDict = defaultdict(list)
+    def __init__(self):
+        # local import to avoid cycles
 
-    for dType, dl in _loadersDict.items():
+        super().__init__(self)
 
-        suffixes =  [NO_SUFFIX, ANY_SUFFIX] if len(dl.suffixes) == 0 else dl.suffixes
-        for suffix in suffixes:
+        # Fill the dict
+        for dataFormat, klass in getDataLoaders().items():
+            suffixes =  [NO_SUFFIX, ANY_SUFFIX] if len(klass.suffixes) == 0 else klass.suffixes
+            for suffix in suffixes:
+                suffix = NO_SUFFIX if suffix is None else suffix
+                self[suffix].append(klass)
 
-            suffix = NO_SUFFIX if suffix is None else suffix
-            _suffixDict[suffix].append(dl)
+    def __getitem__(self, item):
+        """Can't get subclassed defaultdict to work
+        Always assure a list for item
+        """
+        if not item in self:
+            super().__setitem__(item, [])
+        return super().__getitem__(item)
 
-    return _suffixDict
+    def get(self, suffix) -> list:
+        """get a list of klasses for suffix;
+        map None or zero-length to NO_SUFFIX and
+        map non existing suffix to ANY_SUFFIX
+        """
+        if suffix is None or len(suffix) == 0:
+            return self[NO_SUFFIX]
+        elif suffix not in self:
+            return self[ANY_SUFFIX]
+        else:
+            return self[suffix]
 
 
 def _getPotentialDataLoaders(path) -> list:
@@ -121,34 +143,28 @@ def _getPotentialDataLoaders(path) -> list:
 
     if path is None:
         raise ValueError('Undefined path')
-    path = aPath(path)
+    _path = aPath(path)
 
-    # get the dict that maps the suffix to potential loaders
-    _suffixDict =  _getSuffixDict()
-    if len(path.suffixes) == 0:
-        # No suffix; return all loaders that are accept no-suffix
-        loaders = _suffixDict.get(NO_SUFFIX, [])
-    else:
-        # get the loaders for suffix; fall-back to those that accept any suffix
-        # in case there was none defined for suffix
-        loaders = _suffixDict.get(path.suffix,
-                                  _suffixDict.get(ANY_SUFFIX, []))
+    _suffixDict = DataLoaderSuffixDict()
+    loaders = _suffixDict.get(_path.suffix)
 
     # if it is a file: exclude loaders that require a directory
-    if path.is_file():
+    if _path.is_file():
         loaders = [ld for ld in loaders if not ld.requireDirectory]
 
     # if it is a directory: include loaders that do allow a directory
-    if path.is_dir():
+    if _path.is_dir():
         loaders = [ld for ld in loaders if ld.allowDirectory]
 
     return loaders
 
-def _checkPathForDataLoader(path, pathFilter=None) -> list:
-    """Check path if it corresponds to any defined data format.
-    Optionally exclude any dataLoader with types not in pathFilter (default: all dataFormats)
 
-    :param pathFilter: a tuple/list of dataFormat strings; expands to all dataFormat's if None
+def _checkPathForDataLoader(path, formatFilter=None) -> list:
+    """Check path if it corresponds to any defined data format.
+    Optionally only include only dataLoader with dataFormat in filter (default: all dataFormats; i.e.
+    no filtering).
+
+    :param formatFilter: a tuple/list of dataFormat strings of formats to select for
     :return a list of DataLoader instance(s) (either valid or invalid); last one is potential valid one
 
     CCPNINTERNAL: used in Gui._getDataLoader
@@ -156,31 +172,38 @@ def _checkPathForDataLoader(path, pathFilter=None) -> list:
     if not isinstance(path, (str, Path)):
         raise ValueError('checkPathForDataLoader: invalid path %r' % path)
 
-    if pathFilter is None:
-        pathFilter = list(getDataLoaders().keys())
+    if formatFilter is None or len(formatFilter) == 0:
+        # no filter, allow all by expanding
+        formatFilter = list(getDataLoaders().keys())
 
     _loaders = _getPotentialDataLoaders(path)
+
     result = []
     for cls in _loaders:
         instance = cls.newFromPath(path)
+        if len(_loaders) == 1:
+            # There is only one potential loader; it should be valid
+            instance.shouldBeValid = True
         result.append(instance)
+        # Check if we are done
         if instance.isValid or instance.shouldBeValid:
-            if instance.dataFormat in pathFilter:
-                break
+            if instance.dataFormat in formatFilter:
+                return result
             else:
                 instance.isValid = False
                 instance.shouldBeValid = False
-                instance.errorString = f'DataFormat "{instance.dataFormat}" for valid path "{instance.path}" not in filter'
+                instance.errorString = f'Valid path "{instance.path}": dataFormat "{instance.dataFormat}" not in formatFilter'
     return result
 
-def checkPathForDataLoader(path, pathFilter=None):
-    """Check path if it corresponds to any defined data format.
-    Optionally exclude any dataLoader with types not in pathFilter (default: all dataFormats)
 
-    :param pathFilter: a tuple/list of dataFormat strings; expands to all dataFormat if None
+def checkPathForDataLoader(path, formatFilter=None):
+    """Check path if it corresponds to any defined data format.
+    Optionally only include only dataLoader with dataFormat in filter (default: all dataFormats)
+
+    :param formatFilter: a tuple/list of dataFormat strings
     :return a DataLoader instance or None if there was no match
     """
-    _loaders = _checkPathForDataLoader(path=path, pathFilter=pathFilter)
+    _loaders = _checkPathForDataLoader(path=path, formatFilter=formatFilter)
     if len(_loaders) > 0 and _loaders[-1].isValid:
         # found a valid one; return that
         return _loaders[-1]

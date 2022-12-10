@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-08 17:41:55 +0000 (Thu, December 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-10 15:19:16 +0000 (Sat, December 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -287,14 +287,14 @@ class Gui(Ui):
 
         return (dataLoader, createNewProject, ignore)
 
-    def _getDataLoader(self, path, pathFilter=None):
+    def _getDataLoader(self, path, formatFilter=None):
         """Get dataLoader for path (or None if not present), optionally only testing for
         dataFormats defined in filter.
         Allows for reporting or checking through popups.
         Does not do the actual loading.
 
         :param path: the path to get a dataLoader for
-        :param pathFilter: a list/tuple of optional dataFormat strings; (defaults to all dataFormats)
+        :param formatFilter: a list/tuple of optional dataFormat strings; filter optional dataLoaders for this
         :returns a tuple (dataLoader, createNewProject, ignore)
 
         raises RuntimeError in case of failure to define a proper dataLoader
@@ -306,16 +306,12 @@ class Gui(Ui):
         from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
-        from ccpn.framework.lib.DataLoaders.DataLoaderABC import _getPotentialDataLoaders
-
-        if pathFilter is None:
-            pathFilter =  tuple(getDataLoaders().keys())
 
         _path = aPath(path)
         if not _path.exists():
             raise RuntimeError(f'Path "{path}" does not exist')
 
-        _loaders = _checkPathForDataLoader(path=path, pathFilter=pathFilter)
+        _loaders = _checkPathForDataLoader(path=path, formatFilter=formatFilter)
         dataLoader = None
         # log errors
         errMsg = None
@@ -326,7 +322,7 @@ class Gui(Ui):
 
         elif len(_loaders) > 0 and _loaders[-1].shouldBeValid:
             # found a one that should have been valid
-            errMsg = f'{_loaders[-1].dataFormat} loader reported: {_loaders[-1].errorString}'
+            errMsg = f'{_loaders[-1].dataFormat} loader reported:\n\n{_loaders[-1].errorString}'
 
         elif len(_loaders) == 0 or (len(_loaders) > 0 and not _loaders[-1].isValid):
             errMsg = f'No valid loader found for {path}; tried {[dl.dataFormat for dl in _loaders]}'
@@ -673,11 +669,11 @@ class Gui(Ui):
         return result
 
     # @logCommand('application.') # eventually decorated by  _loadData()
-    def loadData(self, *paths, pathFilter=None) -> list:
+    def loadData(self, *paths, formatFilter:(list,tuple)=None) -> list:
         """Loads data from paths; query if none supplied
         Optionally filter for dataFormat(s)
         :param *paths: argument list of path's (str or Path instances)
-        :param pathFilter: keyword argument: list/tuple of dataFormat strings
+        :param formatFilter: list/tuple of dataFormat strings
         :returns list of loaded objects
         """
         if len(paths) == 0:
@@ -698,7 +694,7 @@ class Gui(Ui):
                 continue
 
             try:
-                dataLoader, createNewProject, ignore = self._getDataLoader(path, pathFilter=pathFilter)
+                dataLoader, createNewProject, ignore = self._getDataLoader(path, formatFilter=formatFilter)
 
             except RuntimeError as es:
                 MessageDialog.showError(f'Loading "{_path}"',
@@ -745,7 +741,7 @@ class Gui(Ui):
         if not paths:
             return []
 
-        pathFilter = list(getSpectrumLoaders().keys())
+        formatFilter = list(getSpectrumLoaders().keys())
 
         spectrumLoaders = []
         count = 0
@@ -753,12 +749,11 @@ class Gui(Ui):
         for path in paths:
             _path = aPath(path)
             if _path.is_dir():
-                dirLoader = DirectoryDataLoader(path, recursive=False,
-                                                pathFilter=pathFilter)
+                dirLoader = DirectoryDataLoader(path, recursive=False, formatFilter=formatFilter)
                 spectrumLoaders.append(dirLoader)
                 count += len(dirLoader)
 
-            elif (sLoader := checkPathForDataLoader(path, pathFilter=pathFilter)) is not None:
+            elif (sLoader := checkPathForDataLoader(path, formatFilter=formatFilter)) is not None:
                 spectrumLoaders.append(sLoader)
                 count += 1
 

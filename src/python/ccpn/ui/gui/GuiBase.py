@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-28 16:09:00 +0000 (Mon, November 28, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-12-10 15:19:16 +0000 (Sat, December 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -404,14 +404,14 @@ class GuiBase(object):
         """
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
 
-        self.ui.loadData(pathFilter=(NefDataLoader.dataFormat,))
+        self.ui.loadData(formatFilter=(NefDataLoader.dataFormat,))
 
     def _loadNMRStarFileCallback(self):
         """menu callback; use ui.loadData to do the lifting
         """
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
 
-        self.ui.loadData(pathFilter=(StarDataLoader.dataFormat,))
+        self.ui.loadData(formatFilter=(StarDataLoader.dataFormat,))
 
     def _saveCallback(self):
         """The project save callback"""

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-05 15:38:11 +0000 (Mon, December 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-10 15:19:16 +0000 (Sat, December 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1032,11 +1032,11 @@ class Framework(NotifierBase, GuiBase):
         return objs
 
     # @logCommand('application.') # eventually decorated by  _loadData()
-    def loadData(self, *paths, pathFilter=None) -> list:
+    def loadData(self, *paths, formatFilter=None) -> list:
         """Loads data from paths.
         Optionally filter for dataFormat(s)
         :param *paths: argument list of path's (str or Path instances)
-        :param pathFilter: keyword argument: list/tuple of dataFormat strings
+        :param formatFilter: keyword argument: list/tuple of dataFormat strings
         :returns list of loaded objects
         """
         return self.ui.loadData(*paths)

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-10 15:19:16 +0000 (Sat, December 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-10 16:04:10 +0000 (Sat, December 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1218,7 +1218,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         if urls is None:
             return []
 
-        getLogger().info('Handling urls...')
+        getLogger().info('Handling urls ...')
 
         # dataLoaders: A list of (url, dataLoader, createsNewProject, ignore) tuples.
         # createsNewProject: to evaluate later call _loadProject; eg. for NEF

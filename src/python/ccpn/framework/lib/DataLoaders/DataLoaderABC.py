@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-10 15:19:16 +0000 (Sat, December 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-10 16:04:10 +0000 (Sat, December 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -193,6 +193,9 @@ def _checkPathForDataLoader(path, formatFilter=None) -> list:
                 instance.isValid = False
                 instance.shouldBeValid = False
                 instance.errorString = f'Valid path "{instance.path}": dataFormat "{instance.dataFormat}" not in formatFilter'
+
+    # we are only here if we haven't found any valid data loader
+    result.append(NotFoundDataLoader(path=path))
     return result
 
 
@@ -456,3 +459,17 @@ class DataLoaderABC(TraitBase):
     __repr__ = __str__
 
 
+class NotFoundDataLoader(DataLoaderABC):
+    """A class denoting the absence of any valid dataLoader
+    """
+    dataFormat = 'NotFound'
+    suffixes = [ANY_SUFFIX, NO_SUFFIX]
+    allowDirectory = True
+
+    def checkValid(self) -> bool:
+
+        if not super().checkValid():
+            return False
+        # Path was valid; set general other error message
+        self.isValid = False
+        self.errorString = f'{self.path}: unable to identify a valid dataLoader'

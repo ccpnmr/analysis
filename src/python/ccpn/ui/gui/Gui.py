@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-10 15:19:16 +0000 (Sat, December 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-10 16:04:10 +0000 (Sat, December 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -320,12 +320,12 @@ class Gui(Ui):
             # there is a valid one; use that
             dataLoader = _loaders[-1]
 
-        elif len(_loaders) > 0 and _loaders[-1].shouldBeValid:
-            # found a one that should have been valid
+        elif len(_loaders) > 0:
+            # We always get a loader back; report it here
             errMsg = f'{_loaders[-1].dataFormat} loader reported:\n\n{_loaders[-1].errorString}'
 
-        elif len(_loaders) == 0 or (len(_loaders) > 0 and not _loaders[-1].isValid):
-            errMsg = f'No valid loader found for {path}; tried {[dl.dataFormat for dl in _loaders]}'
+        else:
+            raise RuntimeError(f'Unknown error finding a loader for {path}')
 
         # raise error if needed
         if errMsg:

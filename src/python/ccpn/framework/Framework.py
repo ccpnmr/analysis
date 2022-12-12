@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-10 15:19:16 +0000 (Sat, December 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-12 09:03:47 +0000 (Mon, December 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ import os
 import sys
 import subprocess
 import platform
+import tempfile
 
 import faulthandler
 
@@ -88,7 +89,8 @@ from ccpn.framework.Preferences import Preferences
 from ccpn.framework.PathsAndUrls import \
     userCcpnMacroPath, \
     tipOfTheDayConfig, \
-    ccpnCodePath
+    ccpnCodePath, \
+    CCPN_DIRECTORY_SUFFIX
 
 from ccpn.ui.gui.Gui import Gui
 from ccpn.ui.gui.GuiBase import GuiBase
@@ -215,6 +217,10 @@ class Framework(NotifierBase, GuiBase):
         self._disableModuleException = getattr(self.args, 'disableModuleException', False)
         self._disableQueueException = getattr(self.args, 'disableQueueException', False)
         self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
+
+        # Create a temporary directory; Need to hold on to the original tempfile object, as otherwise
+        # gets garbage collected. Access path name by using the "name" attribute.
+        self._temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpNmr_')
 
         # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
@@ -376,12 +382,10 @@ class Framework(NotifierBase, GuiBase):
         """
         if self.args.interface == 'Gui':
             from ccpn.ui.gui.Gui import Gui
-
             ui = Gui(application=self)
 
         else:
             from ccpn.ui.Ui import NoUi
-
             ui = NoUi(application=self)
 
         return ui
@@ -396,21 +400,22 @@ class Framework(NotifierBase, GuiBase):
         #   logCommand has no self.project.application, and requires getApplication() instead
         #   There is NoUi instantiated yet, so temporarily added loadProject to Ui class called by loadProject below)
 
-        # Load / create project on start
+        # Load / create project on start; this also initiates the ui/gui (unfortunately), so it meed to
+        # be here before any other things can happen
         if (projectPath := self.args.projectPath) is not None:
             project = self.loadProject(projectPath)
         else:
             project = self._newProject()
 
+        # Needed in case project load failed
+        if not project:
+            sys.stderr.write('==> No project, aborting ...\n')
+            return
+
         if self.preferences.general.checkUpdatesAtStartup and not getattr(self.args, '_skipUpdates', False):
             self.ui._checkForUpdates()
 
         if not self.ui._checkRegistration():
-            return
-
-        # Needed in case project load failed
-        if not project:
-            sys.stderr.write('==> No project, aborting ...\n')
             return
 
         self._experimentClassifications = project.getExperimentClassifications()
@@ -427,17 +432,17 @@ class Framework(NotifierBase, GuiBase):
         self._setAutoBackupTime('kill')
 
     #-----------------------------------------------------------------------------------------
-    # Backup (TODO: need refactoring)
+    # Backup (TODO: need refactoring in AutoBackupManager)
     #-----------------------------------------------------------------------------------------
 
     def _updateAutoBackup(self):
         # CCPNINTERNAL: also called from preferences popup
         raise NotImplementedError('AutoBackup is not available in the current release')
 
-        if self.preferences.general.autoBackupEnabled:
-            self._setAutoBackupTime(self.preferences.general.autoBackupFrequency)
-        else:
-            self._setAutoBackupTime(None)
+        # if self.preferences.general.autoBackupEnabled:
+        #     self._setAutoBackupTime(self.preferences.general.autoBackupFrequency)
+        # else:
+        #     self._setAutoBackupTime(None)
 
     def _setAutoBackupTime(self, time):
         raise NotImplementedError('AutoBackup is not available in the current release')
@@ -871,21 +876,46 @@ class Framework(NotifierBase, GuiBase):
     # Project related methods
     #-----------------------------------------------------------------------------------------
 
+    def _getTemporaryPath(self, prefix, suffix=None) -> Path:
+        """Return a temporary path with prefix and optional suffix.
+        Use tempfile.NamedTemporyFile, but closing and deleting the file
+        instantly, while returning the generated path name as a Path instance.
+        :param prefix: prefix appended to the name
+        :param suffix: suffix of the name
+        """
+        dir = self._temporaryDirectory.name
+        with tempfile.NamedTemporaryFile(prefix=prefix, suffix=suffix, dir=dir) as tFile:
+            path = tFile.name
+        return Path(path)
+
     def _newProject(self, name: str = 'default') -> Project:
         """Create new, empty project with name
+        All projects created as temporary
         :return a Project instance
         """
         # local import to avoid cycles
         from ccpn.core.Project import _newProject
-        name = name or 'default'
 
+        if name is None:
+            raise ValueError(f'Undefined name for new project')
         if Project._checkName(name, correctName=False) is None:
             raise ValueError(f'Invalid project name "{name}"; check log/console for details')
+
+        # Get a path in the temporary directory
+        path = self._getTemporaryPath(prefix='default_', suffix=CCPN_DIRECTORY_SUFFIX)
+
+        # else:
+        #     path = (Path.cwd() / f'{name}').withSuffix(CCPN_DIRECTORY_SUFFIX)
+        #     _isTemporary = False
+
         # NB _closeProject includes a gui cleanup call
         self._closeProject()
-        newProject = _newProject(self, name=name)
-        self._initialiseProject(newProject)  # This also set the linkages
-        return newProject
+        result = _newProject(self, name=name, path=path, isTemporary=True)
+        self._initialiseProject(result)  # This also set the linkages
+
+        getLogger().debug(f'Opened project "{name}" at {result.path}')
+
+        return result
 
     # @logCommand('application.')  # decorated in ui class
     def newProject(self, name: str = 'default') -> Project:
@@ -963,6 +993,7 @@ class Framework(NotifierBase, GuiBase):
             self._project = None
             del (_project)
 
+        self._temporaryDirectory.cleanup()
         self.cleanGarbageCollector()
 
     #-----------------------------------------------------------------------------------------

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-07 17:10:02 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-12 09:03:47 +0000 (Mon, December 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -422,6 +422,9 @@ class Project(AbstractWrapperObject):
         # reference to the logger; defined in call to _initialiseProject())
         self._logger = None
 
+        # flag to indicate if the project is temporary, i.e., opened as a default project
+        self._isTemporary = False
+
         # reference to special v3 core lists without abstractWrapperObject
         self._collectionList = None
 
@@ -443,10 +446,11 @@ class Project(AbstractWrapperObject):
 
     @property
     def isTemporary(self):
-        """Return true if the project is temporary, i.e., not saved or updated.
+        """Return true if the project is temporary, i.e., opened as a default project
         """
-        apiProject = self._wrappedData.root
-        return hasattr(apiProject, '_temporaryDirectory')
+        # apiProject = self._wrappedData.root
+        # return hasattr(apiProject, '_temporaryDirectory')
+        return self._isTemporary
 
     @property
     def isModified(self):
@@ -758,6 +762,8 @@ class Project(AbstractWrapperObject):
 
             # add a new record
             self._saveHistory.addSaveRecord().save()
+
+            self._isTemporary = False
 
         return savedOk
 
@@ -2259,20 +2265,42 @@ def _loadProject(application, path: str) -> Project:
     return project
 
 
-def _newProject(application, name: str = 'default', path: str = None, overwrite=False) -> Project:
+def _setRepositoryPath(apiProject, name, path):
+    """
+    :param apiProject: Implemention project root instance
+    :param name: name of the repository
+    :param path: path of the repository
+    """
+    _repo = apiProject.findFirstRepository(name=name)
+    _repo.url = Implementation.Url(path=str(path))
+
+
+def _newProject(application, name:str, path:Path, isTemporary:bool = False) -> Project:
     """Make new project, putting underlying data storage (API project) at path
     :return Project instance
     """
-    # apiIo.newProject will create a temp path if path is None
-    if (apiProject := apiIo.newProject(name, path, overwriteExisting=overwrite, useFileLogger=True)) is None:
-        raise RuntimeError("New project could not be created (overlaps exiting project?) name:%s, path:%s, overwrite:"
-                           % (name, path, overwrite))
+    # # apiIo.newProject will create a temp path if path is None
+    # if (apiProject := apiIo.newProject(name, str(path), overwriteExisting=overwrite, useFileLogger=True)) is None:
+    #     raise RuntimeError(f'New project "{name}" could not be created (overlaps existing project?), path: {path}, overwrite: {overwrite}')
+
+    # Abstracted from from Api.py
+    apiProject = Implementation.MemopsRoot(name=name)
+
+    _setRepositoryPath(apiProject, 'userData', path)
+    # GWV: not sure why this one is needed, but just to be consistent with the old Api.py code
+    backupPath = path.with_stem(path.stem + '_backup')
+    _setRepositoryPath(apiProject, 'backup', backupPath)
+
+    apiProject._temporaryDirectory = None
+
+    apiIo._createLogger(apiProject, applicationName=application.applicationName, useFileLogger=True)
 
     apiNmrProject = apiProject.fetchNmrProject()
     apiNmrProject.initialiseData()
     apiNmrProject.initialiseGraphicsData()
     project = Project(apiNmrProject)
     project._isNew = True
+    project._isTemporary = isTemporary
     # NB: linkages are set in Framework._initialiseProject()
 
     project._objectVersion = application.applicationVersion

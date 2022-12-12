@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-10 16:04:10 +0000 (Sat, December 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-12 09:03:47 +0000 (Mon, December 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -436,8 +436,8 @@ class Gui(Ui):
     #-----------------------------------------------------------------------------------------
 
     @logCommand('application.')
-    def newProject(self, name:str = 'default') -> typing.Optional[Project]:
-        """Create a new project instance with name.
+    def newProject(self, name:str = 'default') -> (Project, None):
+        """Create a new project instance with name; create default project if name=None
         :return a Project instance or None
         """
         # if not self.project.isTemporary:
@@ -602,7 +602,7 @@ class Gui(Ui):
         # check the project name derived from path
         newName = newPath.basename
         if (_name := self.project._checkName(newName, correctName=True)) != newName:
-            newPath = newPath.parent / _name + CCPN_EXTENSION
+            newPath = (newPath.parent / _name).assureSuffix(CCPN_EXTENSION)
             MessageDialog.showInfo(title, f'Project name changed from "{newName}" to "{_name}"\nSee console/log for details', parent=self)
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
@@ -616,26 +616,29 @@ class Gui(Ui):
                         MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
                         return False
 
-            self.mainWindow._updateWindowTitle()
-            self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
-            self.mainWindow._fillRecentProjectsMenu() # Update the menu
+                self.mainWindow._updateWindowTitle()
+                self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
+                self.mainWindow._fillRecentProjectsMenu() # Update the menu
 
-            successMessage = 'Project successfully saved to "%s"' % self.project.path
-            MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
-            self.mainWindow.statusBar().showMessage(successMessage)
-            getLogger().info(successMessage)
+                successMessage = 'Project successfully saved to "%s"' % self.project.path
+                MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
+                self.mainWindow.statusBar().showMessage(successMessage)
+                getLogger().info(successMessage)
 
-            return True
+                return True
 
-        # PyCharm thinks the next statement is unreachable; not true as the with catchExceptions does yield
-        # and finish
-        return False
+            # PyCharm thinks the next statement is unreachable; not true (?) as the with
+            # catchExceptions does yield and finish
+            return False
 
     @logCommand('application.')
     def saveProject(self) -> bool:
         """Save project.
         :return True if successful
         """
+        if self.project.isTemporary:
+            return self.saveProjectAs()
+
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
             with MessageDialog.progressManager(self.mainWindow, f'Saving project ... '):
                 if not self.application._saveProject(newPath=None,

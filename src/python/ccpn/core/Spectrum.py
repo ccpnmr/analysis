@@ -53,7 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-07 21:32:03 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-12 09:57:12 +0000 (Mon, December 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -743,11 +743,24 @@ class Spectrum(AbstractWrapperObject):
         self._spectrumTraits.dataStore = _dataStore
         return self._dataStore.path
 
+    def _setdataFormat(self, dataFormat:str):
+        """Helper function to set the dataFormat of the dataStore object without
+        triggering any action (like opening the file)
+        CCPNMRINTERNAL: used in CcpnNefIo
+        """
+        if dataFormat is None or not isinstance(dataFormat, str) or \
+           not dataFormat in list(getDataFormats().keys()):
+            raise ValueError(f'Invalid dataFormat "{dataFormat}"')
+        if self._dataStore is None:
+            raise RuntimeError('dataStore not defined')
+
+        self._dataStore.dataFormat = dataFormat
+
     @property
     def dataFormat(self) -> str:
         """The spectrum data-format identifier (e.g. Hdf5, NMRPipe);
         Automatically determined upon creating newSpectrum from a path containing spectral data.
-        (change at your own peril!)
+        (change at your own peril! It will try to reopen the file with the new setting)
         """
         if self._dataStore is None:
             raise RuntimeError('dataStore not defined')
@@ -757,7 +770,7 @@ class Spectrum(AbstractWrapperObject):
     def dataFormat(self, value):
         self._openFile(path=self.filePath, dataFormat=value, checkParameters=True)
 
-    def _openFile(self, path: str, dataFormat, checkParameters=True) -> bool:
+    def _openFile(self, path:str, dataFormat:str, checkParameters:bool = True) -> bool:
         """Open the spectrum as defined by path, creating a dataSource object
         :param path: a path to the spectrum; may contain redirections (e.g. $DATA)
         :param dataFormat: a dataFormat defined by one of the SpectrumDataSource types
@@ -767,6 +780,10 @@ class Spectrum(AbstractWrapperObject):
         """
         if path is None:
             raise ValueError(f'Undefined path')
+
+        if dataFormat is None or not isinstance(dataFormat, str) or \
+           not dataFormat in list(getDataFormats().keys()):
+            raise ValueError(f'Invalid dataFormat "{dataFormat}"')
 
         newDataStore = DataStore.newFromPath(path=path, dataFormat=dataFormat)
         newDataStore.spectrum = self

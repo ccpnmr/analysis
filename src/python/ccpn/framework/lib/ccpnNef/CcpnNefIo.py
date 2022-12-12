@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-05 17:27:12 +0000 (Mon, December 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-12-12 09:32:51 +0000 (Mon, December 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -5509,8 +5509,8 @@ class CcpnNefReader(CcpnNefContent):
             if filePath is not None and dataFormat is None:
                 # see if we can derive a dataFormat from the filePath
                 _loaders = _getPotentialDataLoaders(filePath)
-                if len(_loaders) == 1:
-                    dataFormat = _loaders[0].dataFormat
+                if len(_loaders) == 1 and _loaders[0].isSpectrumLoader:
+                    dataFormat = _loaders[0].spectumDataSourceClass.dataFormat
 
             expName = _params.pop('experimentName', None)
             expType = _params.pop('experimentType', None)

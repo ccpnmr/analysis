@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-10 16:04:10 +0000 (Sat, December 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-12 09:32:51 +0000 (Mon, December 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -139,6 +139,7 @@ def _getPotentialDataLoaders(path) -> list:
     :return list of possible dataLoader classes based on suffix and path type (directory, file)
 
     NB: Only to be used internally
+    CCPNINTERNAL: used in  CcpnNefIo
     """
 
     if path is None:
@@ -149,11 +150,11 @@ def _getPotentialDataLoaders(path) -> list:
     loaders = _suffixDict.get(_path.suffix)
 
     # if it is a file: exclude loaders that require a directory
-    if _path.is_file():
+    if _path.is_file():  # also False if _path does not exist
         loaders = [ld for ld in loaders if not ld.requireDirectory]
 
     # if it is a directory: include loaders that do allow a directory
-    if _path.is_dir():
+    if _path.is_dir(): # also False if _path does not exist
         loaders = [ld for ld in loaders if ld.allowDirectory]
 
     return loaders

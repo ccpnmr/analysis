@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-24 16:56:32 +0000 (Thu, November 24, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-12-12 17:50:30 +0000 (Mon, December 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -59,6 +59,7 @@ CHECK_ROLE = QtCore.Qt.CheckStateRole
 ICON_ROLE = QtCore.Qt.DecorationRole
 SIZE_ROLE = QtCore.Qt.SizeHintRole
 ALIGNMENT_ROLE = QtCore.Qt.TextAlignmentRole
+FONT_ROLE = QtCore.Qt.FontRole
 NO_PROPS = QtCore.Qt.NoItemFlags
 CHECKABLE = QtCore.Qt.ItemIsUserCheckable
 ENABLED = QtCore.Qt.ItemIsEnabled
@@ -178,6 +179,7 @@ class _TableModel(QtCore.QAbstractTableModel):
         """Return the visible dataFrame as displayed, sorted and filtered
         """
         from ccpn.util.OrderedSet import OrderedSet
+
         df = self._df
         table = self._view
         rows, cols = df.shape[0], df.shape[1]
@@ -193,7 +195,7 @@ class _TableModel(QtCore.QAbstractTableModel):
         else:
             #  map to sorted indexes
             rowList = list(OrderedSet(self._sortIndex[row] for row in range(rows)) & OrderedSet(
-                self._sortIndex[ii] for ii in self._filterIndex))
+                    self._sortIndex[ii] for ii in self._filterIndex))
 
         df = df[colList]
         df = df[:].iloc[rowList]
@@ -422,16 +424,21 @@ class _TableModel(QtCore.QAbstractTableModel):
                 # return a dict of item-data?
                 return (row, col)
 
-                # if role == CHECK_ROLE and col == 0:
-                #     # need flags to include CHECKABLE and return QtCore.Qt.checked/unchecked/PartiallyChecked here
-                #     return CHECKED
+            elif role == FONT_ROLE:
+                if (colourDict := self._colour[row, col]):
+                    # get the font from the dict
+                    return colourDict.get(role)
 
-                # elif role == ICON_ROLE:
-                #     # return the pixmap - this works, transfer to _MultiHeader
-                #     return self._editableIcon
+            # if role == CHECK_ROLE and col == 0:
+            #     # need flags to include CHECKABLE and return QtCore.Qt.checked/unchecked/PartiallyChecked here
+            #     return CHECKED
 
-                # elif role == ALIGNMENT_ROLE:
-                #     pass
+            # elif role == ICON_ROLE:
+            #     # return the pixmap - this works, transfer to _MultiHeader
+            #     return self._editableIcon
+
+            # elif role == ALIGNMENT_ROLE:
+            #     pass
 
         return None
 
@@ -473,7 +480,7 @@ class _TableModel(QtCore.QAbstractTableModel):
         elif role == DISPLAY_ROLE and orientation == QtCore.Qt.Vertical:
             try:
                 # quickest way to get the column header
-                return col+1
+                return col + 1
             except Exception:
                 return None
 
@@ -595,6 +602,24 @@ class _TableModel(QtCore.QAbstractTableModel):
             colourDict[BACKGROUND_ROLE] = QtGui.QColor(colour)
         else:
             colourDict.pop(BACKGROUND_ROLE, None)
+
+    def setCellFont(self, row, column, font):
+        """Set the font for dataFrame cell at position (row, column).
+
+        :param row: row as integer
+        :param column: column as integer
+        :param font: font compatible with QtGui.QFont
+        :return:
+        """
+        if not (0 <= row < self.rowCount() and 0 <= column < self.columnCount()):
+            raise ValueError(f'({row}, {column}) must be less than ({self.rowCount()}, {self.columnCount()})')
+
+        if not (colourDict := self._colour[row, column]):
+            colourDict = self._colour[row, column] = {}
+        if font:
+            colourDict[FONT_ROLE] = font
+        else:
+            colourDict.pop(FONT_ROLE, None)
 
     @staticmethod
     def _universalSort(values):

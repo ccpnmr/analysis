@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-12-08 17:15:42 +0000 (Thu, December 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-12-12 17:50:30 +0000 (Mon, December 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,6 +50,7 @@ from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPo
 from ccpn.ui.gui.widgets.Application import Application
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets import FileDialog
+from ccpn.ui.gui.widgets.Font import getSystemFonts
 from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
 
 # This import initializes relative paths for QT style-sheets.  Do not remove! GWV ????
@@ -85,14 +86,18 @@ def _ccpnExceptionhook(ccpnType, value, tback):
 
     sys.__excepthook__(ccpnType, value, tback)
 
-sys.excepthook = _ccpnExceptionhook
-#-----------------------------------------------------------------------------------------
 
+sys.excepthook = _ccpnExceptionhook
+
+
+#-----------------------------------------------------------------------------------------
 
 
 def qtMessageHandler(*errors):
     for err in errors:
-        Logging.getLogger().warning('QT error: %s' % err)
+        Logging.getLogger().warning(f'QT error: {err}')
+
+
 # un/suppress messages
 QtCore.qInstallMessageHandler(qtMessageHandler)
 
@@ -100,6 +105,7 @@ QtCore.qInstallMessageHandler(qtMessageHandler)
 REMOVEDEBUG = r'\(\S+\.\w+:\d+\)$'
 
 MAXITEMLOGGING = 4
+
 
 class _MyAppProxyStyle(QtWidgets.QProxyStyle):
     """Class to handle resizing icons in menus
@@ -166,6 +172,9 @@ class Gui(Ui):
         styles = QtWidgets.QStyleFactory()
         myStyle = _MyAppProxyStyle(styles.create('fusion'))
         self.qtApp.setStyle(myStyle)
+
+        # read the current system-fonts
+        getSystemFonts()
 
         # # original - no patch for icon sizes
         # styles = QtWidgets.QStyleFactory()
@@ -267,8 +276,8 @@ class Gui(Ui):
         """
         choices = ('Import', 'New project', 'Cancel')
         choice = MessageDialog.showMulti('Load %s' % dataLoader.dataFormat,
-                           'How do you want to handle "%s":' % dataLoader.path,
-                           choices, parent=self.mainWindow)
+                                         'How do you want to handle "%s":' % dataLoader.path,
+                                         choices, parent=self.mainWindow)
 
         if choice == choices[0]:  # import
             dataLoader.createNewProject = False
@@ -307,7 +316,7 @@ class Gui(Ui):
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import _getPotentialDataLoaders
 
         if pathFilter is None:
-            pathFilter =  tuple(getDataLoaders().keys())
+            pathFilter = tuple(getDataLoaders().keys())
 
         _loaders = _checkPathForDataLoader(path=path, pathFilter=pathFilter)
         if len(_loaders) > 0 and _loaders[-1].isValid:
@@ -401,11 +410,11 @@ class Gui(Ui):
 
         elif dataLoader.isSpectrumLoader and dataLoader.existsInProject():
             ok = MessageDialog.showYesNoWarning('Loading Spectrum',
-                                                f'"{dataLoader.path}"\n' 
+                                                f'"{dataLoader.path}"\n'
                                                 f'already exists in the project\n'
                                                 '\n'
                                                 'do you want to load?'
-                               )
+                                                )
             if not ok:
                 ignore = True
 
@@ -413,22 +422,22 @@ class Gui(Ui):
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
             if dataLoader and not ignore:
                 title = 'New project from NmrStar' if createNewProject else \
-                        'Import from NmrStar'
+                    'Import from NmrStar'
                 dataLoader.getDataBlock()  # this will read and parse the file
                 popup = StarImporterPopup(dataLoader=dataLoader,
                                           parent=self.mainWindow,
-                                          size=(700,1000),
+                                          size=(700, 1000),
                                           title=title
                                           )
                 popup.exec_()
                 ignore = (popup.result == popup.CANCEL_PRESSED)
 
         elif dataLoader.dataFormat == DirectoryDataLoader.dataFormat and len(dataLoader) > MAXITEMLOGGING:
-            ok = MessageDialog.showYesNoWarning('Directory "%s"\n' %dataLoader.path,
+            ok = MessageDialog.showYesNoWarning('Directory "%s"\n' % dataLoader.path,
                                                 f'\n'
                                                 'CAUTION: You are trying to load %d items\n'
                                                 '\n'
-                                                'Do you want to continue?' % (len(dataLoader,))
+                                                'Do you want to continue?' % (len(dataLoader, ))
                                                 )
 
             if not ok:
@@ -441,7 +450,7 @@ class Gui(Ui):
     #-----------------------------------------------------------------------------------------
 
     @logCommand('application.')
-    def newProject(self, name:str = 'default') -> typing.Optional[Project]:
+    def newProject(self, name: str = 'default') -> typing.Optional[Project]:
         """Create a new project instance with name.
         :return a Project instance or None
         """
@@ -488,7 +497,7 @@ class Gui(Ui):
             # if not self.project.isTemporary:
             if self.project._undo is None or self.project._undo.isDirty():
                 message = f"Do you really want to open a new project (current project will be closed" \
-                              f"{' and any changes will be lost' if self.project.isModified else ''})?"
+                          f"{' and any changes will be lost' if self.project.isModified else ''})?"
 
                 if not (_ok := MessageDialog.showYesNo('Load Project', message, parent=self.mainWindow)):
                     return None
@@ -581,7 +590,7 @@ class Gui(Ui):
             self.mainWindow.deleteLater()
             self.mainWindow = None
 
-    def saveProjectAs(self, newPath=None, overwrite:bool=False) -> bool:
+    def saveProjectAs(self, newPath=None, overwrite: bool = False) -> bool:
         """Opens save Project to newPath.
         Optionally open file dialog.
         :param newPath: new path to save project (str | Path instance)
@@ -596,10 +605,10 @@ class Gui(Ui):
         newPath = aPath(newPath).assureSuffix(CCPN_EXTENSION)
         title = 'Project SaveAs'
 
-        if (  not overwrite and
-              newPath.exists() and
-             (newPath.is_file() or (newPath.is_dir() and len(newPath.listdir()) > 0))
-           ):
+        if (not overwrite and
+                newPath.exists() and
+                (newPath.is_file() or (newPath.is_dir() and len(newPath.listdir()) > 0))
+        ):
             # should not really need to check the second and third condition above, only
             # the Qt dialog stupidly insists a directory exists before you can select it
             # so if it exists but is empty then don't bother asking the question
@@ -626,7 +635,7 @@ class Gui(Ui):
 
             self.mainWindow._updateWindowTitle()
             self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
-            self.mainWindow._fillRecentProjectsMenu() # Update the menu
+            self.mainWindow._fillRecentProjectsMenu()  # Update the menu
 
             successMessage = 'Project successfully saved to "%s"' % self.project.path
             MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
@@ -776,6 +785,7 @@ class Gui(Ui):
             result = self.application._loadData(spectrumLoaders)
 
         return result
+
 
 #-----------------------------------------------------------------------------------------
 # Helper code

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-31 18:12:22 +0000 (Mon, October 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-12 17:50:30 +0000 (Mon, December 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -65,6 +65,7 @@ _TABLE_KWDS = ('parent', 'df',
                'selectionCallback', 'selectionCallbackEnabled',
                'actionCallback', 'actionCallbackEnabled',
                'enableExport', 'enableDelete', 'enableSearch', 'enableCopyCell',
+               'tableMenuEnabled',
                'ignoreStyleSheet',
                'mainWindow', 'moduleParent'
                )
@@ -116,6 +117,7 @@ class _ProjectTableABC(TableABC, Base):
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
                  actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
                  enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
+                 tableMenuEnabled=NOTHING,
                  # local parameters
                  ignoreStyleSheet=True,
                  mainWindow=None, moduleParent=None,
@@ -159,6 +161,7 @@ class _ProjectTableABC(TableABC, Base):
                          selectionCallback=selectionCallback, selectionCallbackEnabled=selectionCallbackEnabled,
                          actionCallback=actionCallback, actionCallbackEnabled=actionCallbackEnabled,
                          enableExport=enableExport, enableDelete=enableDelete, enableSearch=enableSearch, enableCopyCell=enableCopyCell,
+                         tableMenuEnabled=tableMenuEnabled,
                          )
         # Base messes up styleSheets defined in superclass
         baseKwds = {k: v for k, v in kwds.items() if k not in _TABLE_KWDS}

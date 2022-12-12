@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-08 12:21:52 +0000 (Thu, December 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-12 17:50:30 +0000 (Mon, December 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,19 +28,19 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 
 # import sys
-import os
+# import os
 import io
 import numpy as np
 import math
-import glob
+# import glob
 import contextlib
-from itertools import zip_longest
+# from itertools import zip_longest
 from dataclasses import dataclass
 from collections import OrderedDict
 from collections.abc import Iterable
 # from PyQt5 import QtGui
-from PyQt5.QtCore import QStandardPaths
-from PyQt5.QtGui import QFontDatabase
+# from PyQt5.QtCore import QStandardPaths
+# from PyQt5.QtGui import QFontDatabase
 # from PyQt5.QtWidgets import QApplication
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Flowable
 from reportlab.lib.styles import getSampleStyleSheet
@@ -58,6 +58,7 @@ from reportlab.platypus.tables import Table, TableStyle
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
+from ccpn.ui.gui.widgets.Font import getSystemFonts
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import viewportDimensions
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import SPECTRUM_STACKEDMATRIX, SPECTRUM_MATRIX, \
     GLLINE_STYLES_ARRAY, SPECTRUM_XLIMITS, SPECTRUM_AF, SPECTRUM_ALIASINGINDEX, SPECTRUM_FOLDINGMODE, \
@@ -199,7 +200,7 @@ class GLExporter():
 
             self._selectedStrip = self.strip
             self.numStrips = len(spectrumDisplay.strips)
-            self._buildPageDimensions(spectrumDisplay.strips , _ratios)
+            self._buildPageDimensions(spectrumDisplay.strips, _ratios)
 
             for strNum, strip in enumerate(spectrumDisplay.orderedStrips):
                 self.stripNumber = strNum
@@ -299,36 +300,6 @@ class GLExporter():
         self.stripWidths.append(report.width)
         self.stripHeights.append(report.height)
 
-    def _getFontPaths(self):
-        font_paths = set(QStandardPaths.standardLocations(QStandardPaths.FontsLocation))
-
-        if isWindowsOS():
-            font_paths = list(font_paths | {"C:/Windows/Fonts"})
-        elif isMacOS():
-            font_paths = list(font_paths | {"/System/Library/Fonts"})
-        elif isLinux():
-            font_paths = list(font_paths | {"~/.fonts", "~/.local/share/fonts", "/usr/local/share/fonts", "/usr/share/fonts"})
-
-        unloadable = []
-        familyPath = {}
-
-        db = QFontDatabase()
-        for fpath in font_paths:  # go through all font paths
-            if aPath(fpath).is_dir():
-                for filename in glob.glob(f'{fpath}/**/*.ttf', recursive=True):  # go through all files at each path
-                    path = os.path.join(fpath, filename)
-
-                    idx = db.addApplicationFont(path)  # add font path
-                    if idx < 0:
-                        unloadable.append(path)  # font wasn't loaded if idx is -1
-                    else:
-                        names = db.applicationFontFamilies(idx)  # load back font family name
-                        for n in names:
-                            _paths = familyPath.setdefault(n, set())
-                            _paths.add(path)
-
-        return unloadable, familyPath
-
     def _importFonts(self):
         from ccpn.framework.PathsAndUrls import fontsPath
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLFONT_SUBSTITUTE
@@ -341,8 +312,7 @@ class GLExporter():
         if self.params[GLUSEPRINTFONT]:
             _fontName, _fontSize = self.params[GLPRINTFONT]
 
-            unloadable, familyPath = self._getFontPaths()
-            _paths = familyPath.get(_fontName, [])
+            _paths = getSystemFonts().get(_fontName, [])
             for _path in _paths:
                 with contextlib.suppress(Exception):
                     pdfmetrics.registerFont(TTFont(_fontName, _path))
@@ -371,19 +341,19 @@ class GLExporter():
         xr, yr = ratios
         if self.params[GLSTRIPDIRECTION] == 'Y':
             fh = st.height() * yr[st.strip.id]
-            _widths = [st._CcpnGLWidget.width()*xr[st.id] for st in strips]
+            _widths = [st._CcpnGLWidget.width() * xr[st.id] for st in strips]
             if self.numStrips > 1:
                 _widths.append((self.numStrips - 1) * self.params[GLSTRIPPADDING])
             if st and not st._drawRightAxis:
-                _widths.append(strips[0].spectrumDisplay._rightGLAxis.width()*xr['axis'])
+                _widths.append(strips[0].spectrumDisplay._rightGLAxis.width() * xr['axis'])
             fw = sum(_widths)
         else:
             fw = st.width() * xr[st.strip.id]
-            _heights = [st._CcpnGLWidget.height()*yr[st.id] for st in strips]
+            _heights = [st._CcpnGLWidget.height() * yr[st.id] for st in strips]
             if self.numStrips > 1:
                 _heights.append((self.numStrips - 1) * self.params[GLSTRIPPADDING])
             if st and not st._drawBottomAxis:
-                _heights.append(self.strip.spectrumDisplay._bottomGLAxis.height()*yr['axis'])
+                _heights.append(self.strip.spectrumDisplay._bottomGLAxis.height() * yr['axis'])
             fh = sum(_heights)
 
         # dimensions of the strip list - should be ints
@@ -874,7 +844,7 @@ class GLExporter():
             if self._updateAxes:
                 # reset the strip to the original values
                 self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR, self.strip._CcpnGLWidget.axisT, self.strip._CcpnGLWidget.axisB = self._oldValues
-                self.strip._CcpnGLWidget.w,self.strip._CcpnGLWidget.h = self._oldSize
+                self.strip._CcpnGLWidget.w, self.strip._CcpnGLWidget.h = self._oldSize
 
                 self.strip._CcpnGLWidget._rescaleAllZoom()
                 self.strip._CcpnGLWidget._buildGL()
@@ -1910,17 +1880,19 @@ class GLExporter():
                         fontName=_fontName,
                         fillColor=colour)
 
-        if boxed:
+        with contextlib.suppress(KeyError):
+            # sometimes reportlab can't find the font :|
             bounds = newStr.getBounds()
-            # arbitrary scaling
-            dx = _fontSize * 0.11
-            dy = _fontSize * 0.125
-            colourGroups[colourPath].add(Rect(bounds[0] - dx, bounds[1] - dy,
-                                              (bounds[2] - bounds[0]) + 5 * dx, (bounds[3] - bounds[1]) + 2.0 * dy,
-                                              strokeColor=None,
-                                              fillColor=self.backgroundColour))
+            if boxed:
+                # arbitrary scaling
+                dx = _fontSize * 0.11
+                dy = _fontSize * 0.125
+                colourGroups[colourPath].add(Rect(bounds[0] - dx, bounds[1] - dy,
+                                                  (bounds[2] - bounds[0]) + 5 * dx, (bounds[3] - bounds[1]) + 2.0 * dy,
+                                                  strokeColor=None,
+                                                  fillColor=self.backgroundColour))
 
-        colourGroups[colourPath].add(newStr)
+            colourGroups[colourPath].add(newStr)
 
     def _addGridLabels(self):
         """

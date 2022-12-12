@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-08 12:21:52 +0000 (Thu, December 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-12 17:50:30 +0000 (Mon, December 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,22 +26,16 @@ __date__ = "$Date: 2017-07-06 15:51:11 +0000 (Thu, July 06, 2017) $"
 # Start of code
 #=========================================================================================
 
-import os
-import numpy as np
 from collections import OrderedDict as OD
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtCore import QStandardPaths
-from PyQt5.QtGui import QFontDatabase
 from dataclasses import dataclass
 from functools import partial
 from typing import Optional
-import glob
 
 from ccpn.core.lib.ContextManagers import catchExceptions, queueStateChange
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER, BORDERFOCUS
 from ccpn.ui.gui.popups.ExportDialog import ExportDialogABC
-from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
-# from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.popups.Dialog import _verifyPopupApply
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.Menu import Menu
@@ -57,8 +51,7 @@ from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
 from ccpn.ui.gui.widgets.HighlightBox import HighlightBox
-from ccpn.ui.gui.widgets.Font import DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR, getFontHeight
-# from ccpn.ui.gui.widgets.MessageDialog import progressManager
+from ccpn.ui.gui.widgets.Font import getFontHeight, getSystemFonts
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMULTIPLETLABELS, \
     GLMULTIPLETSYMBOLS, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLPAGETYPE, GLPAGESIZE, GLSELECTEDPIDS, \
@@ -74,14 +67,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString, hexToRgbRatio, colourNameNoSpace
 from ccpn.util.Constants import SCALING_MODES, POSINFINITY
-from ccpn.util.Common import isLinux, isMacOS, isWindowsOS, consume
-from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
-
-
-# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLAXISLABELS, GLAXISMARKS, \
-#     GLMARKLABELS, GLMARKLINES, GLREGIONS, GLOTHERLINES, GLSPECTRUMLABELS, GLSTRIPLABELLING, GLTRACES, \
-#     GLPLOTBORDER, GLAXISLINES, GLAXISTITLES, GLAXISUNITS, GLAXISMARKSINSIDE
 
 
 EXPORTEXT = 'EXT'
@@ -326,7 +312,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self._initialiseStripList()
 
         # load the available .ttf fonts - load everytime as user may move/add them
-        _, self.familyFonts = self._getFontPaths()
+        self.familyFonts = getSystemFonts()
 
         super().__init__(parent=parent, mainWindow=mainWindow, title=title,
                          fileMode=fileMode, acceptMode=acceptMode,
@@ -1728,38 +1714,6 @@ class ExportStripToFilePopup(ExportDialogABC):
         if a0.key() in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter]:
             return
         super().keyPressEvent(a0)
-
-    def _getFontPaths(self):
-        font_paths = set(QStandardPaths.standardLocations(QStandardPaths.FontsLocation))
-
-        if isWindowsOS():
-            font_paths = list(font_paths | {"C:/Windows/Fonts"})
-        elif isMacOS():
-            font_paths = list(font_paths | {"/System/Library/Fonts"})
-        elif isLinux():
-            font_paths = list(font_paths | {"~/.fonts", "~/.local/share/fonts", "/usr/local/share/fonts", "/usr/share/fonts"})
-
-        unloadable = []
-        familyPath = {}
-
-        db = QFontDatabase()
-        for fpath in font_paths:  # go through all font paths
-            if aPath(fpath).is_dir():
-                for filename in glob.glob(f'{fpath}/**/*.ttf', recursive=True):  # go through all files at each path
-                    path = os.path.join(fpath, filename)
-                    if not path.endswith('.ttf') or path.startswith('.'):
-                        continue
-
-                    idx = db.addApplicationFont(path)  # add font path
-                    if idx < 0:
-                        unloadable.append(path)  # font wasn't loaded if idx is -1
-                    else:
-                        names = db.applicationFontFamilies(idx)  # load back font family name
-                        for n in names:
-                            _paths = familyPath.setdefault(n, set())
-                            _paths.add(path)
-
-        return unloadable, familyPath
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # list widget copy/paste callBack

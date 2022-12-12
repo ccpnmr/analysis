@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-12 17:50:30 +0000 (Mon, December 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-12 19:01:07 +0000 (Mon, December 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -492,7 +492,7 @@ class Gui(Ui):
 
         oldProjectLoader = None
         oldProjectIsTemporary = True
-        oldMainWindowPos = self.mainWindow.pos()
+        oldMainWindowPos = self.mainWindow and self.mainWindow.pos()
         if self.project:
             # if not self.project.isTemporary:
             if self.project._undo is None or self.project._undo.isDirty():
@@ -531,7 +531,8 @@ class Gui(Ui):
 
             # if the new project contains invalid spectra then open the popup to see them
             self.mainWindow._checkForBadSpectra(newProject)
-            self.mainWindow.move(oldMainWindowPos)
+            if oldMainWindowPos:
+                self.mainWindow.move(oldMainWindowPos)
 
         except (RuntimeError, ApiError) as es:
             MessageDialog.showError('Error loading Project:', f'{es}', parent=self.mainWindow)

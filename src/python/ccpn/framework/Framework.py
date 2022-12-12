@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-12 12:33:12 +0000 (Mon, December 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-12 15:12:13 +0000 (Mon, December 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -877,7 +877,7 @@ class Framework(NotifierBase, GuiBase):
     #-----------------------------------------------------------------------------------------
 
     def _getTemporaryPath(self, prefix, suffix=None) -> Path:
-        """Return a temporary path with prefix and optional suffix.
+        """Return a temporary path in _temporaryDirectory with prefix and optional suffix.
         Use tempfile.NamedTemporyFile, but closing and deleting the file
         instantly, while returning the generated path name as a Path instance.
         :param prefix: prefix appended to the name
@@ -887,6 +887,16 @@ class Framework(NotifierBase, GuiBase):
         with tempfile.NamedTemporaryFile(prefix=prefix, suffix=suffix, dir=dir) as tFile:
             path = tFile.name
         return Path(path)
+
+    def _cleanTemporaryDirectory(self):
+        """Remove all files in the temporary path.
+        the cleanup() method of the _temporaryDirectory instance seems not to do the job
+        """
+        for _path in [Path(p) for p in Path(self._temporaryDirectory.name).glob('*')]:
+            if _path.is_dir():
+                _path.removeDir()
+            else:
+                _path.removeFile()
 
     def _newProject(self, name: str = 'default') -> Project:
         """Create new, empty project with name
@@ -903,10 +913,6 @@ class Framework(NotifierBase, GuiBase):
 
         # Get a path in the temporary directory
         path = self._getTemporaryPath(prefix=f'{name}_', suffix=CCPN_DIRECTORY_SUFFIX)
-
-        # else:
-        #     path = (Path.cwd() / f'{name}').withSuffix(CCPN_DIRECTORY_SUFFIX)
-        #     _isTemporary = False
 
         # NB _closeProject includes a gui cleanup call
         self._closeProject()
@@ -993,7 +999,7 @@ class Framework(NotifierBase, GuiBase):
             self._project = None
             del (_project)
 
-        self._temporaryDirectory.cleanup()
+        self._cleanTemporaryDirectory()
         self._cleanGarbageCollector()
 
     #-----------------------------------------------------------------------------------------

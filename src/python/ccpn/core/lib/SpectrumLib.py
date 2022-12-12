@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-10 15:19:16 +0000 (Sat, December 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-12 15:12:13 +0000 (Mon, December 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -369,7 +369,7 @@ def getSpectrumDataSource(path, dataFormat):
         klasses = _suffixDict.get(_path.suffix)
         for klass in klasses:
             dataSource = klass(path=_path)
-            if dataSource.isValid or dataStore.shouldBeValid:
+            if dataSource.isValid or dataSource.shouldBeValid:
                 # we found a valid one, or one that should be valid (but had errors)
                 dataStore.dataFormat = klass.dataFormat
                 return (dataStore, dataSource)

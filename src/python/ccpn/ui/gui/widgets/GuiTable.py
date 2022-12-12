@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-16 13:08:48 +0000 (Wed, November 16, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-12-12 12:33:12 +0000 (Mon, December 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2554,7 +2554,7 @@ class GuiTable(TableWidget, Base):
         self.unsetCurrent()
         self._clearItems()
         if self.application:
-            self.application.cleanGarbageCollector()
+            self.application._cleanGarbageCollector()
 
     def _clearItems(self):
         """Force deleting these items to be garbage-collected on closing"""

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-29 19:20:15 +0000 (Tue, November 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-13 15:23:20 +0000 (Tue, December 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -118,11 +118,11 @@ class CollectionList():
     @_data.setter
     def _data(self, data):
         if not isinstance(data, (_CollectionFrame, type(None))):
-            if isinstance(data, pd.DataFrame):
-                data = _CollectionFrame(data)
-                getLogger().debug(f'Data must be of type {_CollectionFrame}. The value pd.DataFrame was converted to {_CollectionFrame}.')
-            else:
+            if not isinstance(data, pd.DataFrame):
                 raise RuntimeError(f'Data must be of type {_CollectionFrame}, pd.DataFrame or None')
+
+            data = _CollectionFrame(data)
+            getLogger().debug(f'Data must be of type {_CollectionFrame}. The value pd.DataFrame was converted to {_CollectionFrame}.')
 
         self._project._collectionData = data
 
@@ -157,13 +157,13 @@ class CollectionList():
                 _shs = [sh for sh in self._collections if sh._uniqueId == uniqueId]
                 if _shs and len(_shs) == 1:
                     return _shs[0]
-                else:
-                    if _includeDeleted:
-                        _shs = [sh for sh in self._deletedCollections if sh._uniqueId == uniqueId]
-                        if _shs and len(_shs) == 1:
-                            return _shs[0]
 
-                    raise ValueError(f'{self.className}.getCollection: collection not found')
+                if _includeDeleted:
+                    _shs = [sh for sh in self._deletedCollections if sh._uniqueId == uniqueId]
+                    if _shs and len(_shs) == 1:
+                        return _shs[0]
+
+                raise ValueError(f'{self.className}.getCollection: collection not found')
 
     #=========================================================================================
     # Implementation functions
@@ -174,8 +174,8 @@ class CollectionList():
         """
         try:
             return self._data.loc[uniqueId]
-        except:
-            raise ValueError(f'{self.className}._getByUniqueId: uniqueId {uniqueId} not found')
+        except Exception:
+            raise ValueError(f'{self.className}._getByUniqueId: uniqueId {uniqueId} not found') from None
 
     def _getAttribute(self, uniqueId, name, attribType):
         """Get the named attribute from the collection with supplied uniqueId
@@ -184,49 +184,47 @@ class CollectionList():
         CCPN Internal - Pandas dataframe changes values after saving through api
         """
         row = self._getByUniqueId(uniqueId)
-        if name in row:
-            # get the value and cast to the correct type
-            _val = row[name]
-            return None if (_val is None or (_val != _val)) else attribType(_val)
-        else:
+        if name not in row:
             raise ValueError(f'{self.className}._getAttribute: attribute {name} not found in collection')
+
+        # get the value and cast to the correct type
+        _val = row[name]
+        return None if (_val is None or (_val != _val)) else attribType(_val)
 
     def _setAttribute(self, uniqueId, name, value):
         """Set the attribute of the collection with the supplied uniqueId
         """
         row = self._getByUniqueId(uniqueId)
-        if name in row:
-            try:
-                # use 'at' to put into single element as may be a list
-                self._data.at[uniqueId, name] = value
-            except:
-                raise ValueError(f'{self.className}._setAttribute: error setting attribute {name} in collection {self}')
-        else:
+        if name not in row:
             raise ValueError(f'{self.className}._setAttribute: attribute {name} not found in collection {self}')
+
+        try:
+            # use 'at' to put into single element as may be a list
+            self._data.at[uniqueId, name] = value
+        except Exception:
+            raise ValueError(f'{self.className}._setAttribute: error setting attribute {name} in collection {self}') from None
 
     def _getAttributes(self, uniqueId, startName, endName, attribTypes):
         """Get the named attributes from the collection with supplied uniqueId
         """
         row = self._getByUniqueId(uniqueId)
-        if startName in row and endName in row:
-            _val = row[startName:endName]
-            _val = tuple(None if (val is None or (val != val)) else attribType(val) for val, attribType in zip(_val, attribTypes))
-            return _val
-        else:
+        if startName not in row or endName not in row:
             raise ValueError(f'{self.className}._getAttributes: attribute {startName}|{endName} not found in collection')
+
+        _val = row[startName:endName]
+        return tuple(None if (val is None or (val != val)) else attribType(val) for val, attribType in zip(_val, attribTypes))
 
     def _setAttributes(self, uniqueId, startName, endName, value):
         """Set the attributes of the collection with the supplied uniqueId
         """
         row = self._getByUniqueId(uniqueId)
-        if startName in row and endName in row:
-            try:
-                self._data.loc[uniqueId, startName:endName] = value
-            except:
-                raise ValueError(f'{self.className}._setAttributes: error setting attribute {startName}|{endName} in collection {self}')
-
-        else:
+        if startName not in row or endName not in row:
             raise ValueError(f'{self.className}._setAttributes: attribute {startName}|{endName} not found in collection {self}')
+
+        try:
+            self._data.loc[uniqueId, startName:endName] = value
+        except Exception:
+            raise ValueError(f'{self.className}._setAttributes: error setting attribute {startName}|{endName} in collection {self}') from None
 
     def _undoRedoObjects(self, collections):
         """update to collections after undo/redo
@@ -393,9 +391,7 @@ class CollectionList():
             items = _checkItems(self._project, items)
             _checkDuplicates(items)
 
-        collection = self._newCollectionObject(data, name, items, comment)
-
-        return collection
+        return self._newCollectionObject(data, name, items, comment)
 
     @newV3Object()
     def _newCollectionObject(self, data=None, name: str = None, items: Union[str, Pid, None] = None, comment: str = None):

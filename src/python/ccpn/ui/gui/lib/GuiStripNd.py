@@ -35,7 +35,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-13 11:48:13 +0000 (Tue, December 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-13 15:51:51 +0000 (Tue, December 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -231,6 +231,25 @@ class GuiStripNd(GuiStrip):
             self.spectrumDisplay.zPlaneFrame.attachZPlaneWidgets(self)
 
         self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
+
+    def close(self):
+        """Clean up and close
+        """
+        try:
+            del self.viewStripMenu
+            del self._defaultMenu
+            del self._phasingMenu
+            del self._peakMenu
+            del self._integralMenu
+            del self._multipletMenu
+            del self._axisMenu
+            del self._contextMenus
+        except Exception:
+            getLogger().debug(f'there was a problem cleaning-up strip {self}')
+        else:
+            getLogger().debug(f'cleaning-up strip {self}')
+
+        super().close()
 
     def _resize(self):
         """Resize event to handle resizing of frames that overlay the OpenGL frame

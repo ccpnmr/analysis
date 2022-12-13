@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-05 12:14:15 +0100 (Tue, April 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-12-13 15:51:51 +0000 (Tue, December 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -172,6 +172,24 @@ class GuiStrip1d(GuiStrip):
         self.spectrumDisplay.phasingFrame.applyCallback = self._applyPhasing
         self.spectrumDisplay.phasingFrame.applyButton.setEnabled(True)
         self._noiseThresholdLines = set()
+
+    def close(self):
+        """Clean up and close
+        """
+        try:
+            del self._defaultMenu
+            del self._phasingMenu
+            del self._peakMenu
+            del self._integralMenu
+            del self._multipletMenu
+            del self._axisMenu
+            del self._contextMenus
+        except Exception:
+            getLogger().debug(f'there was a problem cleaning-up strip {self}')
+        else:
+            getLogger().debug(f'cleaning-up strip {self}')
+
+        super().close()
 
     @property
     def symbolType(self):

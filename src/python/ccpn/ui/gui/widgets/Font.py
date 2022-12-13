@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-12 17:50:30 +0000 (Mon, December 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-13 17:42:49 +0000 (Tue, December 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,11 +31,8 @@ import numpy as np
 import glob
 from PyQt5 import QtGui, QtCore
 from ccpn.framework.Application import getApplication
-# from ccpn.framework.PathsAndUrls import fontsPath
 from ccpn.util.decorators import singleton
 from ccpn.util.Logging import getLogger
-from ccpn.util.Common import isLinux, isMacOS, isWindowsOS
-from ccpn.util.Path import aPath
 
 
 DEFAULTFONT = 'defaultFont'
@@ -229,6 +226,10 @@ class _SystemFonts():
     def _getFontPaths(self):
         """Read the system fonts from the OS-specific paths
         """
+        # avoid circular imports :|
+        from ccpn.util.Common import isLinux, isMacOS, isWindowsOS
+        from ccpn.util.Path import aPath
+
         font_paths = set(QtCore.QStandardPaths.standardLocations(QtCore.QStandardPaths.FontsLocation))
 
         if isWindowsOS():

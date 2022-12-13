@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-29 19:21:10 +0000 (Tue, November 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-13 14:29:32 +0000 (Tue, December 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -108,7 +108,6 @@ class _ChemicalShiftListFrame(DataFrameABC):
 # register the class with DataFrameABC for json loading/saving
 _ChemicalShiftListFrame.register()
 
-
 from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
 from ccpn.core._implementation.updates.update_3_0_4 import _updateChemicalShiftList_3_0_4_to_3_1_0
 
@@ -143,7 +142,7 @@ class ChemicalShiftList(AbstractWrapperObject):
     def __init__(self, project: Project, wrappedData: Nmr.ShiftList):
         self._wrappedData = wrappedData
         self._project = project
-        defaultName = 'Shifts%s' % wrappedData.serial
+        defaultName = f'Shifts{wrappedData.serial}'
         self._setUniqueStringKey(defaultName)
 
         # internal lists to hold the current chemicalShifts and deletedChemicalShift
@@ -240,10 +239,11 @@ class ChemicalShiftList(AbstractWrapperObject):
     def autoChangeStatic(self, value: bool):
         self._wrappedData.autoChangeStatic = value
 
-    def _recalculatePeakShifts(self, nmrResidues, shifts):
+    @staticmethod
+    def _recalculatePeakShifts(nmrResidues, shifts):
         # update the assigned nmrAtom chemical shift values - notify the nmrResidues and chemicalShifts
         for sh in shifts:
-            sh._static = False if sh.chemicalShiftList.spectra else True
+            sh._static = not sh.chemicalShiftList.spectra
             sh._recalculateShiftValue()
         for nmr in nmrResidues:
             nmr._finaliseAction('change')
@@ -276,7 +276,7 @@ class ChemicalShiftList(AbstractWrapperObject):
 
         # add a spectrum/remove a spectrum
         _createSpectra = set(_spectra) - set(self.spectra)
-        _createCSL = set(spec.chemicalShiftList for spec in _createSpectra) - {None}
+        _createCSL = {spec.chemicalShiftList for spec in _createSpectra} - {None}
         _deleteSpectra = set(self.spectra) - set(_spectra)
         _createNmrAtoms = self._getNmrAtomsFromSpectra(_createSpectra)  # new nmrAtoms to add
         _deleteNmrAtoms = self._getNmrAtomsFromSpectra(_deleteSpectra)  # old nmrAtoms to update
@@ -284,18 +284,18 @@ class ChemicalShiftList(AbstractWrapperObject):
         _thisNmrAtoms = self._getNmrAtoms()  # current nmrAtoms referenced in shiftLift
 
         # nmrAtoms with peakCount = 0 -> these are okay
-        _oldNmrAtoms = set(nmr for nmr in _thisNmrAtoms if self not in [pk.chemicalShiftList for pk in nmr.assignedPeaks])
+        _oldNmrAtoms = {nmr for nmr in _thisNmrAtoms if self not in [pk.chemicalShiftList for pk in nmr.assignedPeaks]}
         _newNmrAtoms = _createNmrAtoms - _thisNmrAtoms  # _oldNmrAtoms <- this skips unassigned :|
 
         _nmrAtoms = _createNmrAtoms | _deleteNmrAtoms | _oldNmrAtoms  # do I need to do all these?
-        nmrResidues = set(nmr.nmrResidue for nmr in _nmrAtoms)
-        shifts = set(cs for nmrAt in _nmrAtoms for cs in nmrAt.chemicalShifts if cs and not cs.isDeleted)
+        nmrResidues = {nmr.nmrResidue for nmr in _nmrAtoms}
+        shifts = {cs for nmrAt in _nmrAtoms for cs in nmrAt.chemicalShifts if cs and not cs.isDeleted}
 
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(undo=partial(self._recalculatePeakShifts, nmrResidues, shifts))
 
-            self._wrappedData.experiments = set(x._wrappedData.experiment for x in _spectra)
+            self._wrappedData.experiments = {x._wrappedData.experiment for x in _spectra}
 
             # set the removed spectra to the default (first shiftList) in the project
             firstCSL = self.project.chemicalShiftLists[0]
@@ -303,9 +303,9 @@ class ChemicalShiftList(AbstractWrapperObject):
                 spec.chemicalShiftList = firstCSL
 
             # update the chemicalShiftLists that are now empty
-            self.static = False if self.spectra else True
+            self.static = not self.spectra
             for csl in _createCSL:
-                csl.static = False if csl.spectra else True
+                csl.static = not csl.spectra
                 if not csl.spectra:
                     for sh in csl.chemicalShifts:
                         sh._static = True
@@ -322,16 +322,17 @@ class ChemicalShiftList(AbstractWrapperObject):
         """
         self._recalculatePeakShifts(self._getNmrAtoms(), self.chemicalShifts)
 
-    def _getNmrAtomsFromSpectra(self, spectra):
+    @staticmethod
+    def _getNmrAtomsFromSpectra(spectra):
         """Get the list of nmrAtoms in the supplied spectra
         """
-        _newNmr = set(nmrAtom
-                      for spec in spectra
-                      for pList in spec.peakLists if not pList.isSimulated
-                      for pk in pList.peaks
-                      for aNmrAtoms in pk.assignedNmrAtoms
-                      for nmrAtom in aNmrAtoms
-                      ) - {None}
+        _newNmr = {nmrAtom
+                   for spec in spectra
+                   for pList in spec.peakLists if not pList.isSimulated
+                   for pk in pList.peaks
+                   for aNmrAtoms in pk.assignedNmrAtoms
+                   for nmrAtom in aNmrAtoms
+                   } - {None}
         return _newNmr
 
     def _getNmrAtoms(self):
@@ -340,7 +341,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         try:
             _data = self._wrappedData.data
             _oldNmrAtoms = _data[_data[CS_ISDELETED] == False][CS_NMRATOM]
-            _oldNmr = set(self.project.getByPid(nmr) for nmr in _oldNmrAtoms) - {None}  # remove any Nones
+            _oldNmr = {self.project.getByPid(nmr) for nmr in _oldNmrAtoms} - {None}
         except:
             # dataframe may not have been created yet
             _oldNmr = set()
@@ -408,13 +409,13 @@ class ChemicalShiftList(AbstractWrapperObject):
                 _shs = [sh for sh in self._shifts if sh._uniqueId == uniqueId]
                 if _shs and len(_shs) == 1:
                     return _shs[0]
-                else:
-                    if _includeDeleted:
-                        _shs = [sh for sh in self._deletedShifts if sh._uniqueId == uniqueId]
-                        if _shs and len(_shs) == 1:
-                            return _shs[0]
 
-                    raise ValueError(f'{self.className}.getChemicalShift: shift not found')
+                if _includeDeleted:
+                    _shs = [sh for sh in self._deletedShifts if sh._uniqueId == uniqueId]
+                    if _shs and len(_shs) == 1:
+                        return _shs[0]
+
+                raise ValueError(f'{self.className}.getChemicalShift: shift not found')
 
                 # # this is marginally quicker
                 # _s, _e = 0, len(self._shifts) - 1
@@ -487,8 +488,7 @@ class ChemicalShiftList(AbstractWrapperObject):
     def _getAllWrappedData(cls, parent: Project) -> List[Nmr.ShiftList]:
         """get wrappedData (ShiftLists) for all ShiftList children of parent Project
         """
-        return list(x for x in parent._apiNmrProject.sortedMeasurementLists()
-                    if x.className == 'ShiftList')
+        return [x for x in parent._apiNmrProject.sortedMeasurementLists() if x.className == 'ShiftList']
 
     @renameObject()
     @logCommand(get='self')
@@ -533,8 +533,8 @@ class ChemicalShiftList(AbstractWrapperObject):
         """
         try:
             _val = self._data.loc[uniqueId, startName:endName]
-            _val = tuple(None if (val is None or (val != val)) else attribType(val) for val, attribType in zip(_val, attribTypes))
-            return _val
+            return tuple(None if (val is None or (val != val)) else attribType(val) for val, attribType in zip(_val, attribTypes))
+
         except Exception as es:
             raise ValueError(f'{self.className}._getAttributes: error getting attributes {startName}|{endName} in {self}  -  {es}')
 
@@ -560,7 +560,8 @@ class ChemicalShiftList(AbstractWrapperObject):
         # keep the same deleted shift list
         self._deletedShifts[:] = deletedShifts
 
-    def _setDeleted(self, shift, state):
+    @staticmethod
+    def _setDeleted(shift, state):
         """Set the deleted state of the shift
         """
         shift._deleted = state
@@ -745,14 +746,12 @@ class ChemicalShiftList(AbstractWrapperObject):
         if data is not None and nmrAtom and nmrAtom.pid in list(data[CS_NMRATOM]):
             raise ValueError(f'{self.className}.newChemicalShift: nmrAtom {nmrAtom} already exists')
 
-        shift = self._newChemicalShiftObject(data=data,
-                                             value=value, valueError=valueError, figureOfMerit=figureOfMerit,
-                                             static=static,
-                                             nmrAtom=nmrAtom, chainCode=chainCode, sequenceCode=sequenceCode,
-                                             residueType=residueType, atomName=atomName,
-                                             comment=comment)
-
-        return shift
+        return self._newChemicalShiftObject(data=data,
+                                            value=value, valueError=valueError, figureOfMerit=figureOfMerit,
+                                            static=static,
+                                            nmrAtom=nmrAtom,
+                                            chainCode=chainCode, sequenceCode=sequenceCode, residueType=residueType, atomName=atomName,
+                                            comment=comment)
 
     @newV3Object()
     def _newChemicalShiftObject(self, data, value, valueError, figureOfMerit, static,
@@ -1001,11 +1000,10 @@ def _getChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
     dd = {'name'   : name, 'unit': unit, 'autoUpdate': autoUpdate, 'isSimulated': isSimulated,
           'details': comment}
     if spectra:
-        dd.update({'experiments': OrderedSet([spec._wrappedData.experiment for spec in spectra])})
+        dd['experiments'] = OrderedSet([spec._wrappedData.experiment for spec in spectra])
 
     apiChemicalShiftList = self._wrappedData.getShiftList(**dd)
-    result = self._data2Obj.get(apiChemicalShiftList)
-    return result
+    return self._data2Obj.get(apiChemicalShiftList)
 
 
 # Notifiers

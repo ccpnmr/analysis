@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-13 11:48:13 +0000 (Tue, December 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-13 12:25:14 +0000 (Tue, December 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1379,7 +1379,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                     child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
                     child.setData(1, 0, specView.spectrum)
                     child.setText(0, specView.spectrum.pid)
-                    child.setCheckState(0, QtCore.Qt.Checked if specView.isDisplayed else QtCore.Qt.Checked)
+                    child.setCheckState(0, QtCore.Qt.Unchecked if specView.isDisplayed else QtCore.Qt.Unchecked)
 
             # find peak/integral/multiplets attached to the spectrumViews
             peakLists = []
@@ -1404,7 +1404,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                     child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
                     child.setData(1, 0, pp.peakList)
                     child.setText(0, pp.peakList.pid)
-                    child.setCheckState(0, QtCore.Qt.Checked if pp.isDisplayed else QtCore.Qt.Checked)
+                    child.setCheckState(0, QtCore.Qt.Checked if pp.isDisplayed else QtCore.Qt.Unchecked)
 
                 printItems.extend((GLPEAKSYMBOLS,
                                    GLPEAKLABELS))
@@ -1419,7 +1419,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                     child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
                     child.setData(1, 0, pp.integralList)
                     child.setText(0, pp.integralList.pid)
-                    child.setCheckState(0, QtCore.Qt.Checked if pp.isDisplayed else QtCore.Qt.Checked)
+                    child.setCheckState(0, QtCore.Qt.Checked if pp.isDisplayed else QtCore.Qt.Unchecked)
 
                 printItems.extend((GLINTEGRALSYMBOLS,
                                    GLINTEGRALLABELS))
@@ -1434,7 +1434,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                     child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
                     child.setData(1, 0, pp.multipletList)
                     child.setText(0, pp.multipletList.pid)
-                    child.setCheckState(0, QtCore.Qt.Checked if pp.isDisplayed else QtCore.Qt.Checked)
+                    child.setCheckState(0, QtCore.Qt.Checked if pp.isDisplayed else QtCore.Qt.Unchecked)
 
                 printItems.extend((GLMULTIPLETSYMBOLS,
                                    GLMULTIPLETLABELS))
@@ -1478,16 +1478,19 @@ class ExportStripToFilePopup(ExportDialogABC):
         item.setExpanded(True)
 
         for child in self.treeView.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
+            _state = None
+
             itemName = child.text(0)
             if itemName in OPTIONLIST:
                 continue
             if itemName in selectList:
                 _state = selectList[itemName]
             else:
-                _prefState = self.printSettings.printOptions.get(itemName)
-                _state = _prefState if _prefState is not None else QtCore.Qt.Checked
+                _state = self.printSettings.printOptions.get(itemName)
+                # _state = _prefState if _prefState is not None else QtCore.Qt.Checked
 
-            child.setCheckState(0, _state)
+            if _state is not None:
+                child.setCheckState(0, _state)
 
     def _changePrintType(self):
         selected = self.printType.get()

@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 11:57:45 +0100 (Wed, June 29, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-12-13 17:41:27 +0000 (Tue, December 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,15 +31,13 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import numpy as np
 from collections import OrderedDict
 from PyQt5 import QtGui, QtCore
-from ccpn.ui.gui.widgets.Font import getFontHeight
-from ccpn.ui.gui.widgets.Icon import Icon
 
 
 def _ccpnHex(val):
     """Generate hex value with padded leading zeroes
     """
     val = '{0:#0{1}x}'.format(int(val), 4)
-    return '0x' + val[2:].upper()
+    return f'0x{val[2:].upper()}'
 
 
 def rgbaToHex(r, g, b, a=255):
@@ -93,9 +91,7 @@ def hexToRgba(hx, transparency=1.0):
 
 
 def hexToRgbaArray(array, transparency=1.0):
-    cc = []
-    for hx in array:
-        cc.append(hexToRgba(hx, transparency))
+    cc = [hexToRgba(hx, transparency) for hx in array]
     return np.array(cc)
 
 
@@ -191,12 +187,12 @@ def colourNameWithSpace(name):
     colName = name
     for noun in nounList:
         if noun in colName:
-            colName = colName.replace(noun, noun + ' ')
+            colName = colName.replace(noun, f'{noun} ')
 
     # check for nouns that also contain shorter nouns
     for noun in subsetNouns:
         if noun in colName:
-            colName = colName.replace(noun, noun + ' ')
+            colName = colName.replace(noun, f'{noun} ')
             break
 
     # return the new name without trailing spaces, too many spaces
@@ -226,7 +222,7 @@ def invertRGBLuma(r, g, b):
 
     # clip the colours
     rgbPrimeOut = np.clip(rgbPrimeOut, [0, 0, 0], [255, 255, 255])
-    return tuple([float(col) for col in rgbPrimeOut])
+    return tuple(float(col) for col in rgbPrimeOut)
 
 
 def invertRGBHue(r, g, b):
@@ -253,7 +249,7 @@ def invertRGBHue(r, g, b):
 
     # clip the colours
     rgbPrimeOut = np.clip(rgbPrimeOut, [0, 0, 0], [255, 255, 255])
-    return tuple([float(col) for col in rgbPrimeOut])
+    return tuple(float(col) for col in rgbPrimeOut)
 
 
 def _getRandomColours(numberOfColors):
@@ -263,8 +259,6 @@ def _getRandomColours(numberOfColors):
 
 
 ERRORCOLOUR = '#FF0000'
-
-
 
 # small set of colours
 shortSpectrumColours = OrderedDict([('#cb1400', 'red'),
@@ -759,7 +753,7 @@ class Colour(str):
         """ value can be name or #rrggbb or #rrggbbaa or (r, g, b) or (r, g, b, a) tuple/list """
         # print(value, 'color init')
         if not value:
-            raise Exception('not allowed blank colour')
+            raise ValueError('not allowed blank colour')
 
         if isinstance(value, str):
             value = value.lower()
@@ -767,17 +761,16 @@ class Colour(str):
             if value[0] != '#':
                 value = colourNameToHexDict[name]
 
-            assert len(value) in (7, 9), 'len(value) = %d, should be 7 or 9' % len(value)
+            assert len(value) in {7, 9}, 'len(value) = %d, should be 7 or 9' % len(value)
 
             r = int(value[1:3], 16)
             g = int(value[3:5], 16)
             b = int(value[5:7], 16)
             a = int(value[7:9], 16) if len(value) == 9 else 255
         else:
-            assert isinstance(value, list) or isinstance(value,
-                                                         tuple), 'value must be list or tuple if it is not a string, was %s' % (
-                value,)
-            assert len(value) in (3, 4), 'value=%s, len(value) = %d, should be 3 or 4' % (value, len(value))
+            assert isinstance(value, (list, tuple)), f'value must be list or tuple if it is not a string, was {value}'
+            assert len(value) in {3, 4}, 'value=%s, len(value) = %d, should be 3 or 4' % (value, len(value))
+
             r, g, b = value[:3]
             if len(value) == 4:
                 a = value[3]
@@ -827,7 +820,7 @@ def scaledRgba(value):
 
 def addNewColour(newColour):
     newIndex = str(len(spectrumColours.items()) + 1)
-    spectrumColours[newColour.name()] = 'Colour %s' % newIndex
+    spectrumColours[newColour.name()] = f'Colour {newIndex}'
 
 
 def isSpectrumColour(colourString):
@@ -843,7 +836,7 @@ def addNewColourString(colourString):
     # '#' is reserved for auto colour so shouldn't ever be added
     if colourString != '#' and colourString not in spectrumColours:
         newIndex = str(len(spectrumColours.items()) + 1)
-        spectrumColours[colourString] = 'Colour %s' % newIndex
+        spectrumColours[colourString] = f'Colour {newIndex}'
 
 
 def autoCorrectHexColour(colour, referenceHexColour='#ffffff', addNewColour=True):
@@ -867,21 +860,24 @@ def autoCorrectHexColour(colour, referenceHexColour='#ffffff', addNewColour=True
 
     return colour
 
+
 def name2Hex(name):
     return colourNameToHexDict.get(name, None)
+
 
 def getGradientBrushByArray(gradientName, yArray):
     """ USed to create a gradient in BarGraph"""
     if gradientName not in colorSchemeTable:
-        raise ValueError(f'Gradient not available. Use one of {colorSchemeTable.keys()}' )
+        raise ValueError(f'Gradient not available. Use one of {colorSchemeTable.keys()}')
     colourList = colorSchemeTable[gradientName]
     array = np.arange(0, len(colourList))
     z = (array - np.min(array)) / (np.max(array) - np.min(array))
     grad = QtGui.QLinearGradient(0, 0, 0, np.std(yArray))
     for colour, colourAt in zip(colourList, z):
         grad.setColorAt(colourAt, QtGui.QColor(colour))
-    brush = QtGui.QBrush(grad)
-    return brush
+
+    return QtGui.QBrush(grad)
+
 
 # def _setNewColour(colList, newCol:str):
 #
@@ -924,7 +920,7 @@ def fillColourPulldown(pulldown, allowAuto=False, allowNone=False, includeGradie
     # this has no signals blocked otherwise it doesn't paint, and should be signalBlocked elsewhere
     currText = pulldown.currentText()
 
-    ICON_SIZE = max(getFontHeight(size='MEDIUM') or 16, 16)
+    ICON_SIZE = max(pulldown.font().pointSize(), 18)  # seems to be constrained to the pulldown height
 
     pulldown.clear()
     if allowAuto:
@@ -1008,7 +1004,7 @@ def getSpectrumColour(colourName, defaultReturn=None):
         else:
             return defaultReturn
 
-    except:
+    except Exception:
         # colour not found in the list
         return defaultReturn
 
@@ -1029,6 +1025,7 @@ def findNearestHex(hexCol, colourHexList):
     rgbIn = hexToRgb(hexCol)
 
     lastCol = None
+    lastDiff = 0.0
     for col in colourHexList:
 
         rgbTest = hexToRgb(col)
@@ -1161,12 +1158,12 @@ def interpolateColourHex(hexColor1, hexColor2, value, alpha=1.0):
         return None
     value = np.clip(value, 0.0, 1.0)
 
-    r1 = int('0x' + hexColor1[1:3], 16)
-    g1 = int('0x' + hexColor1[3:5], 16)
-    b1 = int('0x' + hexColor1[5:7], 16)
-    r2 = int('0x' + hexColor2[1:3], 16)
-    g2 = int('0x' + hexColor2[3:5], 16)
-    b2 = int('0x' + hexColor2[5:7], 16)
+    r1 = int(f'0x{hexColor1[1:3]}', 16)
+    g1 = int(f'0x{hexColor1[3:5]}', 16)
+    b1 = int(f'0x{hexColor1[5:7]}', 16)
+    r2 = int(f'0x{hexColor2[1:3]}', 16)
+    g2 = int(f'0x{hexColor2[3:5]}', 16)
+    b2 = int(f'0x{hexColor2[5:7]}', 16)
     colour1 = (r1, g1, b1)
     colour2 = (r2, g2, b2)
 

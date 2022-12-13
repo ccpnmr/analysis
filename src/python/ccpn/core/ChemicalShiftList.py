@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-13 14:42:30 +0000 (Tue, December 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-13 14:44:13 +0000 (Tue, December 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -341,7 +341,7 @@ class ChemicalShiftList(AbstractWrapperObject):
             _data = self._wrappedData.data
             _oldNmrAtoms = _data[_data[CS_ISDELETED] == False][CS_NMRATOM]
             _oldNmr = {self.project.getByPid(nmr) for nmr in _oldNmrAtoms} - {None}
-        except:
+        except Exception:
             # dataframe may not have been created yet
             _oldNmr = set()
         return _oldNmr
@@ -353,7 +353,7 @@ class ChemicalShiftList(AbstractWrapperObject):
             _data = self._wrappedData.data
             _oldNmrAtoms = _data[_data[CS_ISDELETED] == False][CS_NMRATOM]
             _oldNmr = set(_oldNmrAtoms) - {None}  # remove any Nones
-        except:
+        except Exception:
             # dataframe may not have been created yet
             _oldNmr = set()
         return _oldNmr

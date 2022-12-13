@@ -182,7 +182,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         self._cellPaddingOffset = colours['_CELL_PADDING_OFFSET'] = cellPadding - focusBorderWidth
         try:
             col = QtGui.QColor(gridColour).name() if gridColour else colours[GUITABLE_GRIDLINES]
-        except:
+        except Exception:
             col = colours[GUITABLE_GRIDLINES]
         self.gridcolour = colours['_GRID_COLOR'] = col
         self._defaultStyleSheet = self.styleSheet % colours

@@ -35,7 +35,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-04 17:27:04 +0000 (Fri, November 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-13 11:48:13 +0000 (Tue, December 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -258,6 +258,9 @@ class GuiStripNd(GuiStrip):
                                                 selectedStrip=self.current.strip
                                                 )
         self.exportPdf.exec_()
+
+        # manually close the dialog :|
+        self.exportPdf.deleteLater()
 
     @logCommand(get='self')
     def copyStrip(self, usePosition=False):

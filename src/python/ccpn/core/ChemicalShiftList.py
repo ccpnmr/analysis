@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-13 14:29:32 +0000 (Tue, December 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-13 14:42:30 +0000 (Tue, December 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -326,14 +326,13 @@ class ChemicalShiftList(AbstractWrapperObject):
     def _getNmrAtomsFromSpectra(spectra):
         """Get the list of nmrAtoms in the supplied spectra
         """
-        _newNmr = {nmrAtom
-                   for spec in spectra
-                   for pList in spec.peakLists if not pList.isSimulated
-                   for pk in pList.peaks
-                   for aNmrAtoms in pk.assignedNmrAtoms
-                   for nmrAtom in aNmrAtoms
-                   } - {None}
-        return _newNmr
+        return {nmrAtom
+                for spec in spectra
+                for pList in spec.peakLists if not pList.isSimulated
+                for pk in pList.peaks
+                for aNmrAtoms in pk.assignedNmrAtoms
+                for nmrAtom in aNmrAtoms
+                } - {None}
 
     def _getNmrAtoms(self):
         """Get the list of nmrAtoms

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-01 19:12:18 +0100 (Thu, September 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-14 19:07:13 +0000 (Wed, December 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -79,7 +79,7 @@ class DeleteItemsPopup(CcpnDialogMainWidget):
         self.GLSignals = GLNotifier(parent=self)
 
         # set the buttons and the size
-        self.__postInit__()
+        self._postInit()
 
     def _setWidgets(self):
         """Add widgets to the popup

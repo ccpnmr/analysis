@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-14 17:34:54 +0000 (Mon, November 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-14 19:07:14 +0000 (Wed, December 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -141,10 +141,11 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
         self.setRevertButton(callback=self._revertClicked, enabled=False)
         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
 
-    def __postInit__(self):
-        """post initialise functions
+    def _postInit(self):
+        """post-initialise functions
+        CCPN-Internal to be called at the end of __init__
         """
-        super().__postInit__()
+        super()._postInit()
 
         self.tabs = tuple(self.tabWidget.widget(ii) for ii in range(self.tabWidget.count()))
         self._populate()
@@ -384,7 +385,7 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
             self.tabWidget.setCurrentIndex(2)
 
         # don't forget to call postInit to finish initialise
-        self.__postInit__()
+        self._postInit()
 
     def _fillPullDowns(self):
         if self.spectrum.dimensionCount == 1:
@@ -460,7 +461,7 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
         self.tabWidget.setTabClickCallback(self._tabClicked)
 
         # don't forget to call postInit to finish initialise
-        self.__postInit__()
+        self._postInit()
 
     def _fillPullDowns(self):
         for aTab in self.tabs:
@@ -537,7 +538,7 @@ class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
         self.tabWidget.setTabClickCallback(self._tabClicked)
 
         # don't forget to call postInit to finish initialise
-        self.__postInit__()
+        self._postInit()
 
     def _fillPullDowns(self):
         for aTab in self.tabs:

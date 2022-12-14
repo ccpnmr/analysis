@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-12 17:50:30 +0000 (Mon, December 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-14 19:07:14 +0000 (Wed, December 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -232,7 +232,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self._tempDialog = ProjectFileDialog()
         self._tempDialog._storePaths()
 
-        self.__postInit__()
+        # initialise the buttons and dialog size
+        self._postInit()
         self._okButton = self.getButton(self.OKBUTTON)
         self._applyButton = self.getButton(self.APPLYBUTTON)
         self._revertButton = self.getButton(self.RESETBUTTON)

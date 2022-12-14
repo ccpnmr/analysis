@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-10 17:19:33 +0100 (Mon, October 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-14 19:31:36 +0000 (Wed, December 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -25,21 +25,16 @@ __date__ = "$Date: 2022-10-05 14:38:53 +0100 (Wed, October 05, 2022) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PyQt5 import QtCore, QtWidgets
-from functools import partial
+
+from PyQt5 import QtCore
 import pandas as pd
-import time
-from ccpn.ui.gui.widgets.Font import setWidgetFont
-from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Column import ColumnClass, Column
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.table.TableABC import TableABC
 from ccpn.ui.gui.widgets.table.Table import Table
 from ccpn.ui.gui.widgets.table._TableModel import _TableModel, DISPLAY_ROLE, CHECK_ROLE, \
     BACKGROUND_ROLE, CHECKED, UNCHECKED, ENABLED, CHECKABLE, SELECTABLE, EDIT_ROLE, \
-    INDEX_ROLE, ICON_ROLE, TOOLTIP_ROLE, ALIGNMENT_ROLE
-from ccpn.util.Logging import getLogger
+    ICON_ROLE, TOOLTIP_ROLE, ALIGNMENT_ROLE
+from ccpn.util.Common import NOTHING
 
 
 #=========================================================================================
@@ -51,10 +46,7 @@ class _ValidateModel(_TableModel):
 
     def _getDisplayRole(self, colDef, obj):
         # booleans are returned as None so that only the checkbox and not the 'True|False' text appears
-        if isinstance((value := colDef.getFormatValue(obj)), bool):
-            return None
-        else:
-            return value
+        return None if isinstance((value := colDef.getFormatValue(obj)), bool) else value
 
     def _getCheckRole(self, colDef, obj):
         # change booleans state to CHECKED/UNCHECKED to make checkboxes appear in table-view
@@ -209,20 +201,13 @@ class ValidateSpectraTable(Table):
     # Table context menu
     #=========================================================================================
 
-    def setTableMenu(self):
+    def setTableMenu(self, tableMenuEnabled=NOTHING):
         """Set up the context menu for the main table.
         """
-        menu = Menu('', self, isFloatWidget=True)
-        setWidgetFont(menu, )
-
         # no options from the super-class are required
         self._actions = []
-        # self._actions = [menu.addAction('New', self._newTransfer),
-        #                  menu.addAction('Remove selected', self._removeTransfer)
-        #                  ]
 
-        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(partial(self._raiseTableContextMenu, menu))
+        super().setTableMenu(tableMenuEnabled=False)
 
     #=========================================================================================
     # Selection/Action methods

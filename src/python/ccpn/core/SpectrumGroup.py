@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-15 16:27:54 +0000 (Tue, November 15, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-12-14 14:35:13 +0000 (Wed, December 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.DataEnum import DataEnum
 from ccpn.core.lib.PeakCollectionLib import _getCollectionNameForPeak
 from collections import defaultdict
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking, progressHandler
 
 class SeriesTypes(DataEnum):
     """
@@ -426,15 +426,28 @@ class SpectrumGroup(AbstractWrapperObject):
                 peakLists = self._getPeakLists4Collections(sourcePeakList, createNewTargetPeakList=newTargetPeakList,
                                                            pickPeaks=False, useSliceColour=useSliceColour)
                 ## copy the peaks and apply any fitting. All in-place
-                for peak in sourcePeakList.peaks:
-                    for peakList in peakLists:
-                        newPeak = peak.copyTo(peakList)
-                        collectionName = _getCollectionNameForPeak(newPeak) #not from Peak to avoid copying wrong assignments.
-                        newPeak.height = newPeak.spectrum.getHeight(newPeak.position)
-                        if refit:
-                            newPeak.fit(fitMethod=fitMethod, keepPosition=True)
-                            newPeak.estimateVolume()
-                        collectionPeaks[collectionName].add(newPeak)
+                totalCopies = len(sourcePeakList.peaks)
+                text = f'Copying and refitting peaks' if refit else f'Copying peaks'
+                with progressHandler(title='busy', maximum=totalCopies, text=text, autoClose=True,
+                                     hideCancelButton=True, ) as progress:
+                    try:
+                        for i, peak in enumerate(sourcePeakList.peaks):
+                            progress.setValue(i)
+                            for peakList in peakLists:
+                                newPeak = peak.copyTo(peakList)
+                                collectionName = _getCollectionNameForPeak(newPeak) #not from Peak to avoid copying wrong assignments.
+                                newPeak.height = newPeak.spectrum.getHeight(newPeak.position)
+                                if refit:
+                                    newPeak.fit(fitMethod=fitMethod, keepPosition=True)
+                                    newPeak.estimateVolume()
+
+                                collectionPeaks[collectionName].add(newPeak)
+                    except Exception as err:
+                        getLogger().warning(f'Error copying peaks in collection: {err}')
+                    else:
+                        progress.finalise()
+                        # set closing conditions here, or call progress.close() if autoClose not set
+                        progress.waitForEvents()
 
                     if peak.spectrum in self.spectra:  # don't add in cluster if the origin is not from this series
                         collectionPeaks[collectionName].add(peak)

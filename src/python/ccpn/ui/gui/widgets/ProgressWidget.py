@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-28 16:07:48 +0000 (Mon, November 28, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-12-14 14:34:47 +0000 (Wed, December 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets.Label import Label
 class ProgressDialog(QtWidgets.QProgressDialog):
 
     def __init__(self, parent, title='Progress Dialog', text='busy...', minimum=0, maximum=100,
-                 delay=1000, closeDelay=250, autoClose=True, hideCancelButton=False):
+                 delay=1000, steps=100, closeDelay=250, autoClose=True, hideCancelButton=False):
         super().__init__(parent=parent)
 
         self.setWindowTitle(title)
@@ -46,6 +46,8 @@ class ProgressDialog(QtWidgets.QProgressDialog):
         self.setAutoClose(autoClose)
         self.setMinimumDuration(delay)
         self._closeDelay = closeDelay / 1000 if isinstance(closeDelay, (int, float)) else 0
+        self.steps = steps
+        self._step = int((maximum - minimum) // (steps or 1)) + 1
 
         # give full control to the dialog
         self.setWindowModality(QtCore.Qt.ApplicationModal)
@@ -83,10 +85,15 @@ class ProgressDialog(QtWidgets.QProgressDialog):
 
         self.setValue(int(value))
 
+    def setValue(self, value):
+
+        if value % self._step == 0:
+            super().setValue(value)
+
     def finalise(self):
         """Set the progress to 100%
         """
-        self.setValue(self.maximum())
+        super().setValue(self.maximum())
 
     def waitForEvents(self):
         """Process events and sleep if visible (to stop quick popup)
@@ -142,13 +149,14 @@ class ProgressWidget(QtWidgets.QProgressBar, Base):
 class ProgressTextBar(tqdm):
 
     def __init__(self, parent, title='Progress Dialog', text='busy...', minimum=0, maximum=100,
-                 delay=1000, closeDelay=250,
+                 delay=1000, closeDelay=250, steps=100,
                  autoClose=True, hideCancelButton=True):
         super().__init__(initial=minimum, total=maximum - minimum, delay=delay / 1000,
                          ncols=120, miniters=(maximum - minimum) / 100)
         # for compatibility with ProgressDialog above - perform no operation
         self._closeDelay = closeDelay
         self._autoClose = autoClose
+        self.steps = steps
 
     def setText(self, text):
         self.set_description(text)

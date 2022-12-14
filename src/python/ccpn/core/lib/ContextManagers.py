@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-05 19:53:16 +0000 (Mon, December 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-12-14 14:34:47 +0000 (Wed, December 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1110,6 +1110,7 @@ class ProgressCancelled(Exception):
 
 @contextmanager
 def progressHandler(title='Progress', text='busy...', minimum=0, maximum=100,
+                    steps=100,
                     delay=1000, closeDelay=250,
                     autoClose=True, hideCancelButton=False):
     """A context manager to wrap a method in a progress dialog defined by the current gui state.
@@ -1124,7 +1125,7 @@ def progressHandler(title='Progress', text='busy...', minimum=0, maximum=100,
     try:
         # get the dialog handler from the gui state - use subclass
         progress = handler(mainWindow,
-                           title=title, text=text,
+                           title=title, text=text, steps=steps,
                            minimum=minimum, maximum=maximum,
                            delay=delay, closeDelay=closeDelay,
                            autoClose=autoClose,

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-12-08 16:51:19 +0000 (Thu, December 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-12-15 15:59:34 +0000 (Thu, December 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -63,6 +63,7 @@ from ccpn.pipes import loadedPipes as LP
 from ccpn.util.Path import aPath, joinPath
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.core.lib.ContextManagers import progressHandler
+
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
@@ -151,7 +152,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         """
         if PipelinePath in widgetsState:
             if widgetsState[PipelinePath]:
-                path =  aPath(widgetsState[PipelinePath])
+                path = aPath(widgetsState[PipelinePath])
                 path = path.assureSuffix('.json')
                 self._openSavedPipeline(path)
 
@@ -466,31 +467,27 @@ class GuiPipeline(CcpnModule, Pipeline):
                     newGuiPipe._formatLabelWidgets()
                     return
 
-
     def runPipeline(self):
         # self.goButton.setEnabled(False)
         self.project._logger.info('Pipeline: Started.')
         self.queue = []
 
-
         if self.inputData:
             if len(self.pipelineArea.findAll()[1]) > 0:
                 guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
-                count = len(guiPipes)
-                pDiv = (count // 100) + 1  # 10 if count > 100 else 1
-                totalCopies = int(count / pDiv)
-                with progressHandler(text='Running Pipeline...', maximum=totalCopies,
-                                     autoClose=True, delay=1,) as progress:
+                with progressHandler(text='Running Pipeline...', maximum=len(guiPipes),
+                                     autoClose=True, delay=1, raiseErrors=False) as progress:
+
                     with undoBlockWithoutSideBar():
                         with notificationEchoBlocking():
                             self._kwargs = {}
                             if len(guiPipes) > 0:
+
                                 for cc, guiPipe in enumerate(guiPipes):
-                                    progress.setValue(int(cc / pDiv))
+                                    progress.checkCancelled()
+                                    progress.setValue(cc)
                                     progress.setText(f'Running Pipeline: {guiPipe.pipeName}')
-                                    if progress.wasCanceled():
-                                        progress.finalise()
-                                        break
+
                                     pipe = guiPipe.pipe
                                     if guiPipe.isActive:
                                         pipe.isActive = True
@@ -504,7 +501,11 @@ class GuiPipeline(CcpnModule, Pipeline):
                                         self.inputData = result or set()
                                     else:
                                         pipe.isActive = False
-                progress.finalise()
+
+                if progress.error:
+                    # handle other errors
+                    getLogger().debug(f'other exception {progress.error}')
+
         else:
             self.project._logger.info('Pipeline: No input data.')
             showWarning('Pipeline', 'No input data')
@@ -512,7 +513,7 @@ class GuiPipeline(CcpnModule, Pipeline):
             self._updateGuiInputData()
 
         self.project._logger.info('Pipeline: Finished.')
-        MessageDialog.showInfo('Pipeline','Finished')
+        MessageDialog.showInfo('Pipeline', 'Finished')
         # self.goButton.setEnabled(True)
 
     def _closeModule(self):
@@ -560,7 +561,6 @@ class GuiPipeline(CcpnModule, Pipeline):
                     pipelineBox.setActive(value[2])
                     pipelineBoxes.append(pipelineBox)
         return pipelineBoxes
-
 
     def _getSettingsDict(self):
 
@@ -654,7 +654,6 @@ class GuiPipeline(CcpnModule, Pipeline):
                 fp.close()
                 getLogger().info('Pipeline File saved in: ' + str(pipelineFilePath))
 
-
     #################################### _________ GUI PIPELINE SETTINGS ____________ ####################################
 
     def _pipelineBoxesWidgetParams(self, currentGuiPipesName):
@@ -731,7 +730,7 @@ class GuiPipeline(CcpnModule, Pipeline):
             for guiPipe in guiPipes:
                 guiPipe._updateWidgets()
 
-    def _renamePipelineCallback(self,):
+    def _renamePipelineCallback(self, ):
         self.pipelineName = self.pipelineReNameTextEdit.get()
 
     def _addPipeDirectionCallback(self):

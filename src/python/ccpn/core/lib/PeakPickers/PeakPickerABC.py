@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-05 19:53:17 +0000 (Mon, December 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-15 15:59:34 +0000 (Thu, December 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -346,59 +346,44 @@ class PeakPickerABC(CcpNmrJson):
         count = len(newPeaks)
         pDiv = (count // 100) + 1
         totalCopies = int(count / pDiv)
-        with progressHandler(text=f'Creating peaks in {peakList.pid}', maximum=totalCopies, autoClose=False) as progress:
+        with progressHandler(text=f'Creating peaks in {peakList.pid}', maximum=len(peaks), autoClose=False,
+                             raiseErrors=False) as progress:
 
-            try:
-                corePeaks = []
-                # test to minimise the number of calls to _storeCurrent
-                self.spectrum.project._undo.increaseStorageBlocking()
+            corePeaks = []
+            # test to minimise the number of calls to _storeCurrent
+            self.spectrum.project._undo.increaseStorageBlocking()
 
-                for cc, (pk, pointPositions) in enumerate(newPeaks):
+            for cc, (pk, pointPositions) in enumerate(newPeaks):
+                progress.checkCancelled()
+                progress.setValue(cc)
 
-                    if cc % pDiv == 0:
-                        # update the progress-bar - 100 steps at the most
-                        progress.setValue(int(cc / pDiv))
-                    # check if the progress was cancelled
-                    if progress.wasCanceled():
-                        progress.setText('Cancelling...')  # may not be visible
-                        raise RuntimeError('Cancel')
+                if len(pk.points) != self.dimensionCount:
+                    raise RuntimeError(f'{pk}: invalid dimensionality of points attribute')
 
-                    if len(pk.points) != self.dimensionCount:
-                        raise RuntimeError(f'{pk}: invalid dimensionality of points attribute')
+                # # correct the peak.points for "offset" (the slice-positions taken) and ordering (i.e. inverse)
+                # pointPositions = [float(p) + float(self.sliceTuples[idx][0]) for idx, p in enumerate(pk.points[::-1])]
+                #
+                # # check whether a peak already exists at pointPositions in the peakList
+                # if self._validatePointPeak(pointPositions, peakList):
 
-                    # # correct the peak.points for "offset" (the slice-positions taken) and ordering (i.e. inverse)
-                    # pointPositions = [float(p) + float(self.sliceTuples[idx][0]) for idx, p in enumerate(pk.points[::-1])]
-                    #
-                    # # check whether a peak already exists at pointPositions in the peakList
-                    # if self._validatePointPeak(pointPositions, peakList):
+                if pk.height is None:
+                    # height was not defined; get the interpolated value from the data
+                    pk.height = self.spectrum.dataSource.getPointValue(pointPositions)
 
-                    if pk.height is None:
-                        # height was not defined; get the interpolated value from the data
-                        pk.height = self.spectrum.dataSource.getPointValue(pointPositions)
+                if cc == len(newPeaks) - 1:
+                    # clear the flag on the last iteration, so only stores update to current once
+                    self.spectrum.project._undo.decreaseStorageBlocking()
 
-                    if cc == len(newPeaks) - 1:
-                        # clear the flag on the last iteration, so only stores update to current once
-                        self.spectrum.project._undo.decreaseStorageBlocking()
+                if (self.positiveThreshold and pk.height > self.positiveThreshold) or \
+                        (self.negativeThreshold and pk.height < self.negativeThreshold):
+                    cPeak = peakList.newPeak(pointPositions=pointPositions, height=pk.height, volume=pk.volume, pointLineWidths=pk.lineWidths)
+                    if self.autoFit:
+                        peakParabolicInterpolation(cPeak, update=True)
+                    corePeaks.append(cPeak)
 
-                    if (self.positiveThreshold and pk.height > self.positiveThreshold) or \
-                            (self.negativeThreshold and pk.height < self.negativeThreshold):
-                        cPeak = peakList.newPeak(pointPositions=pointPositions, height=pk.height, volume=pk.volume, pointLineWidths=pk.lineWidths)
-                        if self.autoFit:
-                            peakParabolicInterpolation(cPeak, update=True)
-                        corePeaks.append(cPeak)
-
-            except Exception as es:
-                if 'Cancel' not in str(es):
-                    # if not cancel button
-                    getLogger().warning(f'_createCorePeaks: {es}')
-
-            else:
-                # set the progress to 100%
-                progress.finalise()
-
-            finally:
-                # set closing conditions here, or call progress.close() if autoClose not set
-                progress.waitForEvents()
+        if progress.error:
+            # if not cancel button
+            getLogger().warning(f'_createCorePeaks: {progress.error}')
 
         return corePeaks
 

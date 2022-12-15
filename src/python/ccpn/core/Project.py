@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-28 16:07:47 +0000 (Mon, November 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-15 15:59:33 +0000 (Thu, December 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -572,7 +572,7 @@ class Project(AbstractWrapperObject):
         """
         from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationEchoBlocking, apiNotificationBlanking
         from contextlib import suppress
-        from ccpn.core.lib.ContextManagers import progressHandler, ProgressCancelled
+        from ccpn.core.lib.ContextManagers import progressHandler
 
         status = self._getAPIObjectsStatus(completeScan=True, onlyInvalids=False)
         df = status.data.sort_values('hierarchy', ascending=False)
@@ -580,35 +580,15 @@ class Project(AbstractWrapperObject):
         with undoStackBlocking() as _:
             with notificationEchoBlocking():
                 with apiNotificationBlanking():
-
-                    count = len(df)
-                    pDiv = (count // 100) + 1
-                    totalCopies = int(count / pDiv)
-
-                    with progressHandler(title='busy', maximum=totalCopies,
+                    with progressHandler(title='busy', maximum=len(df),
                                          text='Cleaning-up Project', autoClose=True, hideCancelButton=True) as progress:
-                        try:
-                            for cc, (ii, ob) in enumerate(df.iterrows()):
+                        for cc, (ii, ob) in enumerate(df.iterrows()):
+                            # don't need to check cancelled
+                            progress.setValue(cc)
 
-                                if cc % pDiv == 0:
-                                    # update the progress-bar - 100 steps at the most
-                                    progress.setValue(int(cc / pDiv))
-
-                                with suppress(Exception):
-                                    apiObj = ob['object']
-                                    apiObj.delete()
-
-                        except ProgressCancelled:
-                            getLogger().debug('progress cancelled')
-
-                        except Exception as es:
-                            # not cancel button
-                            getLogger().warning(f'error closing project: {es}')
-
-                        else:
-                            progress.finalise()
-                            # set closing conditions here, or call progress.close() if autoClose not set
-                            progress.waitForEvents()
+                            with suppress(Exception):
+                                apiObj = ob['object']
+                                apiObj.delete()
 
     def close(self):
         """Clean up the wrapper project previous to deleting or replacing

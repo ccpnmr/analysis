@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-12-14 14:34:47 +0000 (Wed, December 14, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-12-15 15:59:34 +0000 (Thu, December 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1102,17 +1102,12 @@ def renameObjectNoBlanking(self):
     self._finaliseAction('rename')
 
 
-class ProgressCancelled(Exception):
-    """Exception to catch cancelled progress/busy dialogs
-    """
-    pass
-
-
 @contextmanager
 def progressHandler(title='Progress', text='busy...', minimum=0, maximum=100,
                     steps=100,
                     delay=1000, closeDelay=250,
-                    autoClose=True, hideCancelButton=False):
+                    autoClose=True, hideCancelButton=False,
+                    raiseErrors=True):
     """A context manager to wrap a method in a progress dialog defined by the current gui state.
     """
     from ccpn.framework.Application import getApplication
@@ -1125,25 +1120,46 @@ def progressHandler(title='Progress', text='busy...', minimum=0, maximum=100,
     try:
         # get the dialog handler from the gui state - use subclass
         progress = handler(mainWindow,
-                           title=title, text=text, steps=steps,
-                           minimum=minimum, maximum=maximum,
+                           title=title, text=text,
+                           steps=steps, minimum=minimum, maximum=maximum,
                            delay=delay, closeDelay=closeDelay,
                            autoClose=autoClose,
                            hideCancelButton=hideCancelButton,
                            )
 
+    except Exception as es:
+        raise RuntimeError('progressHandler: Error initialising') from es
+
+    try:
         # transfer control to the calling function
         yield progress
 
+    except progress.ProgressCancelled:
+        # handle pressing the cancel button, or calling progress.cancel()
+        getLogger().debug('progressHandler: cancelled')
+
     except Exception as es:
-        if isinstance(es, RuntimeError):
+        # handle other errors
+        getLogger().debug(f'progressHandler: {es}')
+        progress.error = es
+        if raiseErrors:
             raise es
+
+    else:
+        # set counter to 100%
+        progress.finalise()
+
+    finally:
+        # set closing conditions here, or call progress.close() if autoClose not set
+        progress.waitForEvents()
 
 
 @contextmanager
 def busyHandler(title='Progress', text='busy...', minimum=0, maximum=100,
+                steps=100,
                 delay=1000, closeDelay=250,
-                autoClose=True, hideCancelButton=True):
+                autoClose=True, hideCancelButton=True,
+                raiseErrors=True):
     """A context manager to wrap a method in a busy dialog defined by the current gui state.
     """
     from ccpn.framework.Application import getApplication
@@ -1156,17 +1172,36 @@ def busyHandler(title='Progress', text='busy...', minimum=0, maximum=100,
         # get the dialog handler from the gui state - use subclass
         progress = BusyDialog(mainWindow,
                               title=title, text=text,
-                              hideBar=True, hideCancelButton=True,
-                              minimum=minimum, maximum=maximum,
+                              hideBar=True, hideCancelButton=hideCancelButton,
+                              steps=steps, minimum=minimum, maximum=maximum,
                               delay=delay, closeDelay=closeDelay,
                               autoClose=autoClose)
 
+    except Exception as es:
+        raise RuntimeError('busyHandler: Error initialising') from es
+
+    try:
         # transfer control to the calling function
         yield progress
 
+    except progress.ProgressCancelled:
+        # handle pressing the cancel button, or calling progress.cancel()
+        getLogger().debug('busyHandler: cancelled')
+
     except Exception as es:
-        if isinstance(es, RuntimeError):
+        # handle other errors
+        getLogger().debug(f'busyHandler: {es}')
+        progress.error = es
+        if raiseErrors:
             raise es
+
+    else:
+        # set counter to 100%
+        progress.finalise()
+
+    finally:
+        # set closing conditions here, or call progress.close() if autoClose not set
+        progress.waitForEvents()
 
 
 class BlankedPartial(object):

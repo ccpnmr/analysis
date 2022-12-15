@@ -1019,8 +1019,6 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     # Table functions
     #=========================================================================================
 
-    pass
-
 
 #=========================================================================================
 # Table testing
@@ -1092,6 +1090,13 @@ def main():
     for row, col, colour in cells:
         if 0 <= row < table.rowCount() and 0 <= col < table.columnCount():
             table.setBackground(row, col, colour)
+
+    # set the horizontalHeader information
+    header = table.horizontalHeader()
+    # test a single stretching column
+    header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+    header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
+    header.setStretchLastSection(False)
 
     win.setCentralWidget(frame)
     frame.layout().addWidget(table, 0, 0)

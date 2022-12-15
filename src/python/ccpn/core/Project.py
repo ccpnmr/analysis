@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-15 15:59:33 +0000 (Thu, December 15, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-12-15 16:11:21 +0000 (Thu, December 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1522,7 +1522,7 @@ class Project(AbstractWrapperObject):
         """
 
         with logCommandManager('application.', 'loadData', path):
-            with undoBlock():
+            with undoBlockWithoutSideBar():
                 reader = ExcelReader(project=self, excelPath=str(path))
                 result = reader.load()
         return result

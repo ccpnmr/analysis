@@ -53,7 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-12 09:57:12 +0000 (Mon, December 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-15 18:15:09 +0000 (Thu, December 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -71,31 +71,32 @@ import numpy
 import pandas as pd
 
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.SpectrumTraits import SpectrumTraits
 from ccpn.core._implementation.SpectrumData import SliceData, PlaneData, RegionData
 from ccpn.core.Project import Project
+
 from ccpn.core.lib import Pid
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection, getDefaultSpectrumColours
 from ccpn.core.lib.SpectrumLib import _includeInDimensionalCopy, _includeInCopy, _includeInCopyList, \
     checkSpectrumPropertyValue, _setDefaultAxisOrdering
+
 from ccpn.core.lib.ContextManagers import \
     newObject, deleteObject, ccpNmrV3CoreUndoBlock, \
     undoStackBlocking, renameObject, undoBlock, notificationBlanking, \
     ccpNmrV3CoreSetter, inactivity, undoBlockWithoutSideBar, notificationEchoBlocking
+
 from ccpn.core.lib.DataStore import DataStore, DataStoreTrait
-from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC, getDataFormats
 from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
 from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
-from ccpn.core.lib.Cache import cached
 from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerTrait
-from ccpn.core.lib.SpectrumLib import SpectrumDimensionTrait
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatch
 from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY, CCPN_SPECTRA_DIRECTORY
 from ccpn.framework.Application import getApplication
-from ccpn.util.traits.CcpNmrJson import CcpNmrJson, jsonHandler
-from ccpn.util.traits.CcpNmrTraits import Int, Float, Instance, Any
+
 from ccpn.util.Constants import SCALETOLERANCE
 from ccpn.util.Common import isIterable, _getObjectsByPids
 from ccpn.util.Logging import getLogger
@@ -209,7 +210,7 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def spectrumDimensions(self) -> tuple:
-        """:return A tuple with the spectrum dimensions (== SpectrumReference or PseudoDimension) instances
+        """A tuple with the spectrum dimensions (== SpectrumReference or PseudoDimension) instances
         """
         if self._spectrumDimensions is None:
             data2obj = self.project._data2Obj
@@ -272,23 +273,23 @@ class Spectrum(AbstractWrapperObject):
     # data reading;
 
     @property
-    def _dataStore(self):
+    def _dataStore(self) -> (DataStore, None):
         """A DataStore instance encoding the filePath and dataFormat of the (binary) spectrum data.
-           None indicates no spectrum filePile path has been defined
+           None indicates no spectrum filePile path has been defined.
         """
         return self._spectrumTraits.dataStore
 
     @property
-    def dataSource(self):
+    def dataSource(self) -> (SpectrumDataSourceABC, None):
         """A SpectrumDataSource instance for reading (writing) of the (binary) spectrum data.
-        None indicates no valid spectrum data file has been defined
+        None indicates no valid spectrum data file has been defined.
         """
         return self._spectrumTraits.dataSource
 
     @property
     def peakPicker(self):
         """A PeakPicker instance for region picking in this spectrum.
-        None indicates no valid PeakPicker has been defined
+        None indicates no valid PeakPicker has been defined.
         """
         # GWV: this should not happen; a default is set on restore or newSpectrum
         # if self._spectrumTraits.peakPicker is None:
@@ -324,7 +325,8 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def name(self) -> str:
-        """short form of name, used for id"""
+        """The name of the spectrum.
+        """
         return self._wrappedData.name
 
     @name.setter
@@ -334,21 +336,22 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def dimensionCount(self) -> int:
-        """Number of dimensions in spectrum"""
+        """The number of dimensions of the spectrum.
+        """
         return self._wrappedData.numDim
 
     @property
     def dimensions(self) -> tuple:
-        """Convenience: tuple (len dimensionCount) with the dimension integers (1-based);
-        e.g. (1,2,3,..).
+        """Convenience:
+        The dimension integers (1-based) of the spectrum; e.g. (1,2,3,..).
         Useful for mapping in axisCodes order: eg: self.getByAxisCodes('dimensions', ['N','C','H'])
         """
         return tuple(range(1, self.dimensionCount + 1))
 
     @property
     def dimensionIndices(self) -> tuple:
-        """Convenience: tuple (len dimensionCount) with the dimension indices (0-based);
-        e.g. (0,1,2,3).
+        """Convenience:
+        The dimension indices (0-based) of the spectrum; e.g. (0,1,2,3).
         Useful for mapping in axisCodes order: eg: self.getByAxisCodes('dimensionIndices', ['N','C','H'])
         """
         return tuple(range(0, self.dimensionCount))
@@ -358,7 +361,8 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def dimensionTriples(self) -> tuple:
-        """Convenience: return a tuple of triples (dimensionIndex, axisCode, dimension) for each dimension
+        """Convenience:
+        A tuple of  (dimensionIndex, axisCode, dimension) triples for each dimension
 
         Useful for iterating over axis codes; eg in an H-N-CO ordered spectrum
             for dimIndex, axisCode, dimension in self.getByAxisCodes('dimensionTriples', ('N','C','H'), exactMatch=False)
@@ -373,7 +377,8 @@ class Spectrum(AbstractWrapperObject):
     @property
     @_includeInCopy
     def positiveContourCount(self) -> int:
-        """number of positive contours to draw"""
+        """The number of positive contours to draw.
+        """
         return self._wrappedData.positiveContourCount
 
     @positiveContourCount.setter
@@ -384,7 +389,8 @@ class Spectrum(AbstractWrapperObject):
     @property
     @_includeInCopy
     def positiveContourBase(self) -> float:
-        """base level of positive contours"""
+        """The base level for the positive contours.
+        """
         return self._wrappedData.positiveContourBase
 
     @positiveContourBase.setter
@@ -395,7 +401,8 @@ class Spectrum(AbstractWrapperObject):
     @property
     @_includeInCopy
     def positiveContourFactor(self) -> float:
-        """level multiplier for positive contours"""
+        """The level multiplier for positive contours.
+        """
         return self._wrappedData.positiveContourFactor
 
     @positiveContourFactor.setter
@@ -406,7 +413,8 @@ class Spectrum(AbstractWrapperObject):
     @property
     @_includeInCopy
     def positiveContourColour(self) -> str:
-        """colour of positive contours"""
+        """The colour of the positive contours.
+        """
         return self._wrappedData.positiveContourColour
 
     @positiveContourColour.setter
@@ -416,8 +424,8 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     @_includeInCopy
-    def includePositiveContours(self):
-        """Include flag for the positive contours
+    def includePositiveContours(self) -> bool:
+        """The flag to include the positive contours.
         """
         result = self._getInternalParameter(self._INCLUDEPOSITIVECONTOURS)
         if result is None:
@@ -429,8 +437,6 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def includePositiveContours(self, value: bool):
-        """Include flag for the positive contours
-        """
         if not isinstance(value, bool):
             raise ValueError("Spectrum.includePositiveContours: must be True/False")
 
@@ -439,7 +445,8 @@ class Spectrum(AbstractWrapperObject):
     @property
     @_includeInCopy
     def negativeContourCount(self) -> int:
-        """number of negative contours to draw"""
+        """The number of negative contours to draw.
+        """
         return self._wrappedData.negativeContourCount
 
     @negativeContourCount.setter
@@ -450,7 +457,8 @@ class Spectrum(AbstractWrapperObject):
     @property
     @_includeInCopy
     def negativeContourBase(self) -> float:
-        """base level of negative contours"""
+        """return: The base level for the negative contours.
+        """
         return self._wrappedData.negativeContourBase
 
     @negativeContourBase.setter
@@ -461,7 +469,8 @@ class Spectrum(AbstractWrapperObject):
     @property
     @_includeInCopy
     def negativeContourFactor(self) -> float:
-        """level multiplier for negative contours"""
+        """The level multiplier for negative contours.
+        """
         return self._wrappedData.negativeContourFactor
 
     @negativeContourFactor.setter
@@ -472,7 +481,8 @@ class Spectrum(AbstractWrapperObject):
     @property
     @_includeInCopy
     def negativeContourColour(self) -> str:
-        """colour of negative contours"""
+        """The colour of the negative contours.
+        """
         return self._wrappedData.negativeContourColour
 
     @negativeContourColour.setter
@@ -483,7 +493,7 @@ class Spectrum(AbstractWrapperObject):
     @property
     @_includeInCopy
     def includeNegativeContours(self):
-        """Include flag for the negative contours
+        """The flag to include the negative contours.
         """
         result = self._getInternalParameter(self._INCLUDENEGATIVECONTOURS)
         if result is None:
@@ -495,8 +505,6 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def includeNegativeContours(self, value: bool):
-        """Include flag for the negative contours
-        """
         if not isinstance(value, bool):
             raise ValueError("Spectrum.includeNegativeContours: must be True/False")
 
@@ -505,7 +513,7 @@ class Spectrum(AbstractWrapperObject):
     @property
     @_includeInCopy
     def sliceColour(self) -> str:
-        """colour of 1D slices
+        """The colour of 1D slices.
         """
         return self._wrappedData.sliceColour
 
@@ -519,7 +527,7 @@ class Spectrum(AbstractWrapperObject):
     @property
     @_includeInCopy
     def scale(self) -> float:
-        """Scaling factor for data in the spectrum.
+        """The scaling factor for data in the spectrum.
         """
         value = self._wrappedData.scale
         if value is None:
@@ -554,7 +562,7 @@ class Spectrum(AbstractWrapperObject):
     @property
     @_includeInCopy
     def spinningRate(self) -> float:
-        """NMR tube spinning rate (in Hz)
+        """The NMR tube spinning rate (in Hz)
         """
         return self._wrappedData.experiment.spinningRate
 
@@ -566,7 +574,7 @@ class Spectrum(AbstractWrapperObject):
     @property
     @_includeInCopy
     def noiseLevel(self) -> (float, None):
-        """Noise level for the spectrum
+        """The Noise level for the spectrum
         """
         noise = self._wrappedData.noiseLevel
         scale = self.scale if self.scale is not None else 1.0
@@ -589,7 +597,9 @@ class Spectrum(AbstractWrapperObject):
     @property
     @_includeInCopy
     def negativeNoiseLevel(self) -> (float, None):
-        """Negative noise level value. Stored in Internal"""
+        """A optional negative noise level value.
+        """
+        # Stored in Internal
         value = self._getInternalParameter(self._NEGATIVENOISELEVEL)
         scale = self.scale if self.scale is not None else 1.0
         if value is None:
@@ -1283,7 +1293,7 @@ class Spectrum(AbstractWrapperObject):
     @property
     def referenceSubstances(self):
         """
-        :return: a list of substances
+        a list of substances
         """
         pids = self._getInternalParameter(self._REFERENCESUBSTANCES) or []
         objs = _getObjectsByPids(self.project, pids)

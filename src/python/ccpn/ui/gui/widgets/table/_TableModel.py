@@ -524,16 +524,16 @@ class _TableModel(QtCore.QAbstractTableModel):
 
                     width = self._estimateColumnWidth(col)
 
-                    header = self._view.horizontalHeader()
-                    if visibleCols := [col for col in range(self.columnCount()) if not header.isSectionHidden(col)]:
-                        # get the width of all the previous visible columns
-                        lastCol = visibleCols[-1]
-                        if col == lastCol and self._view is not None:
-                            # stretch the last column to fit the table - sum the previous columns
-                            # I think setStretchLastSection automatically does this
-                            colWidths = sum(self._estimateColumnWidth(cc) for cc in visibleCols[:-1])
-                            viewWidth = self._view.viewport().size().width()
-                            width = max(width, viewWidth - colWidths)
+                    # header = self._view.horizontalHeader()
+                    # if visibleCols := [col for col in range(self.columnCount()) if not header.isSectionHidden(col)]:
+                    #     # get the width of all the previous visible columns
+                    #     lastCol = visibleCols[-1]
+                    #     if col == lastCol and self._view is not None:
+                    #         # stretch the last column to fit the table - sum the previous columns
+                    #         # I think setStretchLastSection automatically does this
+                    #         colWidths = sum(self._estimateColumnWidth(cc) for cc in visibleCols[:-1])
+                    #         viewWidth = self._view.viewport().size().width()
+                    #         width = max(width, viewWidth - colWidths)
 
                     # return the size
                     return QtCore.QSize(width, height)

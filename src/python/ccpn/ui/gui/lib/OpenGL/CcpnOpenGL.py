@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-07 16:00:54 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-16 14:52:39 +0000 (Fri, December 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -73,7 +73,7 @@ import re
 import time
 import numpy as np
 from functools import partial
-from contextlib import contextmanager
+# from contextlib import contextmanager
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QPoint, QSize, Qt, pyqtSlot
 from PyQt5.QtWidgets import QApplication, QOpenGLWidget
@@ -2933,7 +2933,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._visibleSpectrumViewsChange = True
         self.update()
 
-    @contextmanager
+    # @contextmanager
     def glBlocking(self):
         try:
             # stop notifiers and logging interfering with paint event
@@ -3032,7 +3032,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if not self._ordering:
                 return
 
-            with self.glBlocking():
+            for _ in self.glBlocking():
                 # simple profile of building all
 
                 # NOTE:ED - this should be updated to explicit build calls
@@ -3079,7 +3079,7 @@ class CcpnGLWidget(QOpenGLWidget):
             # only need to paint the mouse cursor
             self._paintGLMouseOnly()
 
-    @contextmanager
+    # @contextmanager
     def _disableGLAliasing(self):
         """Disable aliasing for the contained routines
         """
@@ -3089,7 +3089,7 @@ class CcpnGLWidget(QOpenGLWidget):
         finally:
             GL.glEnable(GL.GL_MULTISAMPLE)
 
-    @contextmanager
+    # @contextmanager
     def _enableGLAliasing(self):
         """Enable aliasing for the contained routines
         """
@@ -3099,7 +3099,7 @@ class CcpnGLWidget(QOpenGLWidget):
         finally:
             GL.glDisable(GL.GL_MULTISAMPLE)
 
-    @contextmanager
+    # @contextmanager
     def _enableLogicOp(self, logicOp=GL.GL_COPY):
         """Enable logic operation for the contained routines
         """
@@ -3135,12 +3135,12 @@ class CcpnGLWidget(QOpenGLWidget):
         # draw the spectra, need to reset the viewport
         self.viewports.setViewport(self._currentView)
 
-        with self._disableGLAliasing():
+        for _ in self._disableGLAliasing():
             currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
             currentShader.setPMatrix(self._uPMatrix)
             self.buildCursors()
 
-            with self._enableLogicOp(GL.GL_INVERT):
+            for _ in self._enableLogicOp(GL.GL_INVERT):
                 # enable invert mode so that only the cursor needs to be refreshed in the other viewports
                 self.drawLastCursors()
                 self.drawCursors()
@@ -3162,7 +3162,7 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader.setPMatrix(self._uPMatrix)
         currentShader.setMVMatrix(self._IMatrix)
 
-        with self._disableGLAliasing():
+        for _ in self._disableGLAliasing():
             # draw the grid components
             self.drawGrid()
 
@@ -3185,11 +3185,11 @@ class CcpnGLWidget(QOpenGLWidget):
         if not self._stackingMode:
             if not (self.is1D and self.strip._isPhasingOn):  # other mouse buttons checks needed here
                 self._GLIntegrals.drawSymbols(self._spectrumSettings)
-                with self._disableGLAliasing():
+                for _ in self._disableGLAliasing():
                     self._GLIntegrals.drawSymbolRegions(self._spectrumSettings)
                     self.drawRegions()
 
-            with self._disableGLAliasing():
+            for _ in self._disableGLAliasing():
                 self.drawMarksRulers()
 
         # draw the text to the screen
@@ -3232,7 +3232,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.drawTraces()
         currentShader.setMVMatrix(self._IMatrix)
 
-        with self._disableGLAliasing():
+        for _ in self._disableGLAliasing():
             self.drawInfiniteLines()
 
             currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
@@ -3244,7 +3244,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if self._successiveClicks:
                 self.drawDottedCursor()
 
-            with self._enableLogicOp(GL.GL_INVERT):
+            for _ in self._enableLogicOp(GL.GL_INVERT):
                 # enable invert mode so that only the cursor needs to be refreshed in the other viewports
                 self.drawCursors()
 
@@ -6068,7 +6068,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._dragRegions = set()
         self.update()
 
-    @contextmanager
+    # @contextmanager
     def _mouseUnderMenu(self):
         """Context manager to set the menu status to active
         so that when the menu appears the live traces stay visible
@@ -6079,7 +6079,7 @@ class CcpnGLWidget(QOpenGLWidget):
         finally:
             self._menuActive = False
 
-    @contextmanager
+    # @contextmanager
     def _disableCursorUpdating(self):
         """Context manager to set the menu status to active
         so that when the menu appears the live traces stay visible
@@ -6324,7 +6324,7 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 strip.viewStripMenu = self._getCanvasContextMenu()
 
-            with self._mouseUnderMenu():
+            for _ in self._mouseUnderMenu():
                 strip._raiseContextMenu(event)
 
         elif controlRightMouse(event) and axis is None:

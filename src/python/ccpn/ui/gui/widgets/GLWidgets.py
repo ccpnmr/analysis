@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-16 11:10:20 +0000 (Wed, November 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-16 14:52:39 +0000 (Fri, December 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -560,7 +560,7 @@ class GuiNdWidget(CcpnGLWidget):
             # define and draw the boundaries
             drawList.defineIndexVBO()
 
-            with self._disableGLAliasing():
+            for _ in self._disableGLAliasing():
                 GL.glEnable(GL.GL_BLEND)
 
                 # use the viewports.devicePixelRatio for retina displays

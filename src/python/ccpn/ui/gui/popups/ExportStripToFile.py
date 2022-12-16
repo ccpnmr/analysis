@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-14 19:07:13 +0000 (Wed, December 14, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-12-16 10:42:32 +0000 (Fri, December 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -331,7 +331,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.fullList = GLFULLLIST
         self._copyRangeValue = None
 
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose, False)
+        # self.setAttribute(QtCore.Qt.WA_DeleteOnClose, False)
 
     def exec_(self) -> Optional[dict]:
         """Disable strip updating while the popup is visible

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-14 19:07:13 +0000 (Wed, December 14, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-12-16 10:42:32 +0000 (Fri, December 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -171,7 +171,12 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         # set the background/fontSize for the tooltips
         _toolBG = getColours()[TOOLTIP_BACKGROUND]
         self.setStyleSheet(f'QToolTip {{ background-color: {_toolBG}; font-size: {self.font().pointSize()}pt ; }}')
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
+
+        ## WARNING ==> setAttribute WA_DeleteOnClose, True :
+        ## This flag should be used after checking all popup are closed correctly
+        ## and there is no access to the object after deleting it,
+        ## otherwise will raise threading issues
+        # self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
 
     def _postInit(self):
         """post-initialise functions

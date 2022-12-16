@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-21 17:29:00 +0000 (Mon, November 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-12-16 10:42:32 +0000 (Fri, December 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -307,7 +307,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                                                 objectName='annSDS',
                                                 # selectedInd=annotationType,
                                                 callback=self._symbolsChanged,
-                                                direction='horizontal',
+                                                direction='v',
                                                 grid=(row, 1), gridSpan=(1, 3), hAlign='l',
                                                 tipTexts=None,
                                                 )

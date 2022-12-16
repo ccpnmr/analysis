@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-16 13:11:27 +0000 (Wed, November 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-16 13:30:02 +0000 (Fri, December 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -270,6 +270,7 @@ class ScatterPlot(Widget):
         self._plotItem = self._scatterView.addPlot()
         self._scatterViewbox = self._plotItem.vb
         self._addScatterSelectionBox()
+        self._plotItem.mouseClickEvent = self._scatterViewboxMouseClickEvent  # click on the background canvas
         self._scatterViewbox.mouseClickEvent = self._scatterViewboxMouseClickEvent  # click on the background canvas
         self._scatterViewbox.mouseDragEvent = self._scatterMouseDragEvent
         self._scatterViewbox.scene().mouseReleaseEvent = self._scatterMouseReleaseEvent
@@ -713,11 +714,11 @@ class ScatterPlot(Widget):
                 getLogger().warning('Menu error: %s' % str(e))
         return menu
 
-    def _raiseScatterContextMenu(self, ev):
+    def _raiseScatterContextMenu(self, event):
         """ Creates all the menu items for the scatter context menu. """
-        mainMenu = self._createMenu(self.setupContextMenu())
-        self._addSubMenus(mainMenu)
-        self.contextMenu.exec_(ev.screenPos().toPoint())
+        contextMenu = self._createMenu(self.setupContextMenu())
+        self._addSubMenus(contextMenu)
+        contextMenu.exec_(QtGui.QCursor.pos())
 
     def _showExportDialog(self, viewBox):
         """

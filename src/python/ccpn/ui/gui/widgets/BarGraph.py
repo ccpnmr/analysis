@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-17 18:36:23 +0100 (Mon, October 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-16 13:30:02 +0000 (Fri, December 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -577,10 +577,10 @@ class CustomViewBox(pg.ViewBox):
         self.contextMenu.addAction('Export', self.showExportDialog)
         return self.contextMenu
 
-    def _raiseContextMenu(self, ev):
+    def _raiseContextMenu(self, event):
 
-        self.contextMenu = self._getContextMenu()
-        self.contextMenu.exec_(ev.screenPos().toPoint())
+        contextMenu = self._getContextMenu()
+        contextMenu.exec_(QtGui.QCursor.pos())
 
     def _checkThresholdAction(self):
         tl = self.xLine

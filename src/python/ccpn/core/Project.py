@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-12-15 16:11:21 +0000 (Thu, December 15, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-12-16 14:56:46 +0000 (Fri, December 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -574,19 +574,22 @@ class Project(AbstractWrapperObject):
         from contextlib import suppress
         from ccpn.core.lib.ContextManagers import progressHandler
 
-        status = self._getAPIObjectsStatus(completeScan=True, onlyInvalids=False)
+        status = self._getAPIObjectsStatus(completeScan=False, onlyInvalids=False, checkValidity=False)
         df = status.data.sort_values('hierarchy', ascending=False)
+        getLogger().debug(f'Purging {len(df)} API-items')
 
         with undoStackBlocking() as _:
             with notificationEchoBlocking():
                 with apiNotificationBlanking():
                     with progressHandler(title='busy', maximum=len(df),
                                          text='Cleaning-up Project', autoClose=True, hideCancelButton=True) as progress:
+
                         for cc, (ii, ob) in enumerate(df.iterrows()):
                             # don't need to check cancelled
                             progress.setValue(cc)
 
                             with suppress(Exception):
+                                # ignore errors
                                 apiObj = ob['object']
                                 apiObj.delete()
 
@@ -1376,7 +1379,7 @@ class Project(AbstractWrapperObject):
                 )
         dataUrl.url = Implementation.Url(path=str(path.as_posix()))
 
-    def _getAPIObjectsStatus(self, completeScan=False, onlyInvalids=True, includeDefaultChildren=False):
+    def _getAPIObjectsStatus(self, completeScan=False, onlyInvalids=True, includeDefaultChildren=False, checkValidity=True):
         """
         Scan all API objects and check their validity.
 
@@ -1385,7 +1388,8 @@ class Project(AbstractWrapperObject):
         includeDefaultChildren: bool, False to exclude default objects for inspection such as
                                 ChemComps and associated, nmrExpPrototypes etc.See _APIStatus._excludedChildren
                                 for the full list of exclusions.
-
+        checkValidity: bool, default True, check the validity of each API object
+                       set to False if only the list is required, note that this overrides completeScan
         Return: the API Status object. See _APIStatus for full description
 
         """
@@ -1393,7 +1397,8 @@ class Project(AbstractWrapperObject):
         from ccpn.core._implementation.APIStatus import APIStatus
 
         root = self._apiNmrProject.root
-        apiStatus = APIStatus(apiObj=root, onlyInvalids=onlyInvalids, completeScan=completeScan, includeDefaultChildren=includeDefaultChildren)
+        apiStatus = APIStatus(apiObj=root, onlyInvalids=onlyInvalids, completeScan=completeScan,
+                              includeDefaultChildren=includeDefaultChildren, checkValidity=checkValidity)
         return apiStatus
 
     def _update(self):

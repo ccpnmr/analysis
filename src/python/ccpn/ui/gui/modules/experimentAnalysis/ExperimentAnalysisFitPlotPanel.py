@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-10-28 11:42:21 +0100 (Fri, October 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-16 13:58:56 +0000 (Fri, December 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,6 +42,10 @@ from ccpn.util.Common import percentage
 import numpy as np
 from collections import OrderedDict as od
 from ccpn.ui.gui.widgets.Icon import Icon
+from PyQt5 import QtCore, QtGui, QtWidgets
+from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
+
 
 class FittingPlotToolBar(ExperimentAnalysisPlotToolBar):
 
@@ -157,6 +161,7 @@ class FittingPlot(pg.PlotItem):
         self.getAxis('left').setPen(self.gridPen)
         self.getAxis('bottom').tickFont = self.gridFont
         self.getAxis('left').tickFont = self.gridFont
+        self.exportDialog = None
         self._bindingPlotViewbox = self.vb
         self._bindingPlotViewbox.mouseClickEvent = self._viewboxMouseClickEvent
         self.autoBtn.mode = None
@@ -237,8 +242,11 @@ class FittingPlot(pg.PlotItem):
     def mouseClickEvent(self, *args):
         print('Under implementation. _mouseClickEvent on bindingPlot ', args)
 
-    def _viewboxMouseClickEvent(self, *args):
-        print('Under implementation. _viewboxMouseClickEvent on bindingPlot ', args)
+    def _viewboxMouseClickEvent(self, event, *args):
+        if event.button() == QtCore.Qt.RightButton:
+            event.accept()
+            self._raiseContextMenu(event)
+
 
     def mouseMoved(self, event):
         position = event
@@ -249,6 +257,20 @@ class FittingPlot(pg.PlotItem):
         label = f'x:{round(x,3)} \ny:{round(y,3)}'
         self.crossHair.hLine.label.setText(label)
 
+    def _getContextMenu(self):
+        self.contextMenu = Menu('', None, isFloatWidget=True)
+        self.contextMenu.addAction('Export', self.showExportDialog)
+        return self.contextMenu
+
+    def _raiseContextMenu(self, event):
+        contextMenu = self._getContextMenu()
+        contextMenu.exec_(QtGui.QCursor.pos())
+
+    def showExportDialog(self):
+        if self.exportDialog is None:
+            scene =  self._bindingPlotViewbox.scene()
+            self.exportDialog = CustomExportDialog(scene, titleName='Exporting')
+        self.exportDialog.show(self)
 
 class _CustomLabel(QtWidgets.QGraphicsSimpleTextItem):
     """ A text annotation of a scatterPlot.

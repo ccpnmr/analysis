@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-16 14:56:46 +0000 (Fri, December 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-19 11:46:27 +0000 (Mon, December 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -574,24 +574,63 @@ class Project(AbstractWrapperObject):
         from contextlib import suppress
         from ccpn.core.lib.ContextManagers import progressHandler
 
-        status = self._getAPIObjectsStatus(completeScan=False, onlyInvalids=False, checkValidity=False)
+        status = self._getAPIObjectsStatus(completeScan=True, onlyInvalids=False, checkValidity=False)
+
+        # reverse hierarchy to get lowest-level first, although not always perfect for cross-links
         df = status.data.sort_values('hierarchy', ascending=False)
         getLogger().debug(f'Purging {len(df)} API-items')
+        apiHint = 'None'  # for debug message
 
+        # block everything
         with undoStackBlocking() as _:
             with notificationEchoBlocking():
                 with apiNotificationBlanking():
-                    with progressHandler(title='busy', maximum=len(df),
+
+                    # override unnecessary warnings from root
+                    root = self._apiNmrProject.root
+                    root.override = True
+
+                    with progressHandler(title='busy', maximum=len(df) + 1,
                                          text='Cleaning-up Project', autoClose=True, hideCancelButton=True) as progress:
 
+                        retries = []
                         for cc, (ii, ob) in enumerate(df.iterrows()):
                             # don't need to check cancelled
+                            # if 'close' clicked, will pop up again
                             progress.setValue(cc)
 
-                            with suppress(Exception):
-                                # ignore errors
+                            try:
+                                # errors only come from delete
                                 apiObj = ob['object']
-                                apiObj.delete()
+
+                                # override API to delete without checking state and notifiers :|
+                                apiObj.__dict__['isLoaded'] = True
+                                apiObj.__dict__['inConstructor'] = True
+                                if not apiObj.isDeleted:
+                                    # hierarchy may still delete bottom-level items
+                                    apiObj.delete()
+
+                            except Exception:
+                                # there might still be an issue with the removal order
+                                retries.append(apiObj)
+
+                        # perform a second pass to catch all the lowest-level items
+                        for apiObj in retries:
+                            try:
+                                apiHint = str(apiObj)
+                                # ignore deleted again
+                                if not apiObj.isDeleted:
+                                    apiObj.delete()
+
+                            except AttributeError:
+                                # errors shouldn't be an issue here, just NoneType, don't need to log
+                                pass
+
+                            except Exception as es:
+                                # only log anything weird
+                                getLogger().debug2(f'issue purging {apiHint}  -->  {es}')
+
+        getLogger().debug('done purge')
 
     def close(self):
         """Clean up the wrapper project previous to deleting or replacing

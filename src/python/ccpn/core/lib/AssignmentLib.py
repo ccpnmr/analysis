@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-15 15:59:34 +0000 (Thu, December 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-19 12:22:20 +0000 (Mon, December 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1213,7 +1213,7 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
 
         foundMts = {}
         with progressHandler(text='Set up NmrResidues...', maximum=len(peakList.peaks), autoClose=False,
-                             raiseErrors=False) as progress:
+                                     raiseErrors=False) as progress:
 
             with undoBlock():
                 for cc, peak in enumerate(peakList.peaks):
@@ -1223,8 +1223,7 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
 
                     # only process those that are empty OR those not empty when checkbox cleared
                     dimensionNmrAtoms = peak.dimensionNmrAtoms  # for speed reasons !?
-                    if not keepAssignments or all(not dimAtoms for dimAtoms in dimensionNmrAtoms):
-
+                    if not keepAssignments or not any(dimensionNmrAtoms):
                         if peak.multiplets:
                             existingDims = [[] for _nd in range(numDims)]
                             for mt in peak.multiplets:
@@ -1244,15 +1243,18 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
                                     foundMts[mt] = thisDims
 
                             # assign all the dimensions
-                            for i, ((axis, isotope), dims) in enumerate(zip(axisIso, existingDims)):
-                                peak.assignDimension(axisCode=axis, value=dims)
+                            # for i, ((axis, isotope), dims) in enumerate(zip(axisIso, existingDims)):
+                            #     peak.assignDimension(axisCode=axis, value=dims)
+                            peak.assignDimensions(axisCodes=peak.axisCodes, values=existingDims)
 
                         else:
                             # make a new nmrResidue with new nmrAtoms and assign to the peak
                             nmrResidue = nmrChain.newNmrResidue()
-                            for i, (axis, isotope) in enumerate(axisIso):
-                                nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)
-                                peak.assignDimension(axisCode=axis, value=[nmrAtom])
+                            # for i, (axis, isotope) in enumerate(axisIso):
+                            #     nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)
+                            #     peak.assignDimension(axisCode=axis, value=[nmrAtom])
+                            newNmrs = [[nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)] for axis, isotope in axisIso]
+                            peak.assignDimensions(axisCodes=peak.axisCodes, values=newNmrs)
 
         if progress.error:
             # report any errors

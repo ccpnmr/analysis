@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-13 14:44:13 +0000 (Tue, December 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-19 12:22:19 +0000 (Mon, December 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -502,7 +502,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         try:
             return self._data.loc[uniqueId]
         except Exception as es:
-            raise ValueError(f'{self.className}._getByUniqueId: error getting row, uniqueId {uniqueId} in {self}  -  {es}')
+            raise ValueError(f'{self.className}._getByUniqueId: error getting row, uniqueId {uniqueId} in {self}  -  {es}') from None
 
     def _getAttribute(self, uniqueId, name, attribType):
         """Get the named attribute from the chemicalShift with supplied uniqueId
@@ -514,7 +514,7 @@ class ChemicalShiftList(AbstractWrapperObject):
             _val = self._data.at[uniqueId, name]
             return None if (_val is None or (_val != _val)) else attribType(_val)
         except Exception as es:
-            raise ValueError(f'{self.className}._getAttribute: error getting attribute {name} in {self}  -  {es}')
+            raise ValueError(f'{self.className}._getAttribute: error getting attribute {name} in {self}  -  {es}') from None
 
     def _setAttribute(self, uniqueId, name, value):
         """Set the attribute of the chemicalShift with the supplied uniqueId
@@ -522,7 +522,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         try:
             self._data.at[uniqueId, name] = value
         except Exception as es:
-            raise ValueError(f'{self.className}._setAttribute: error setting attribute {name} in {self}  -  {es}')
+            raise ValueError(f'{self.className}._setAttribute: error setting attribute {name} in {self}  -  {es}') from None
 
     def _getAttributes(self, uniqueId, startName, endName, attribTypes):
         """Get the named attributes from the chemicalShift with supplied uniqueId
@@ -535,7 +535,7 @@ class ChemicalShiftList(AbstractWrapperObject):
             return tuple(None if (val is None or (val != val)) else attribType(val) for val, attribType in zip(_val, attribTypes))
 
         except Exception as es:
-            raise ValueError(f'{self.className}._getAttributes: error getting attributes {startName}|{endName} in {self}  -  {es}')
+            raise ValueError(f'{self.className}._getAttributes: error getting attributes {startName}|{endName} in {self}  -  {es}') from None
 
     def _setAttributes(self, uniqueId, startName, endName, value):
         """Set the attributes of the chemicalShift with the supplied uniqueId
@@ -543,7 +543,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         try:
             self._data.loc[uniqueId, startName:endName] = value
         except Exception as es:
-            raise ValueError(f'{self.className}._setAttributes: error setting attributes {startName}|{endName} in {self}  -  {es}')
+            raise ValueError(f'{self.className}._setAttributes: error setting attributes {startName}|{endName} in {self}  -  {es}') from None
 
     def _undoRedoShifts(self, shifts):
         """update the shifts after undo/redo
@@ -581,7 +581,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         if nmrAtom and uniqueId:
             raise ValueError(f'{self.className}._searchChemicalShifts: use either nmrAtom or uniqueId')
 
-        if self._wrappedData.data is None:
+        if (_data := self._wrappedData.data) is None:
             return
 
         if nmrAtom:
@@ -591,9 +591,7 @@ class ChemicalShiftList(AbstractWrapperObject):
                 raise ValueError(f'{self.className}._searchChemicalShifts: nmrAtom must be of type NmrAtom, str')
 
             # search dataframe for single element
-            _data = self._wrappedData.data
-            rows = _data[_data[CS_NMRATOM] == nmrAtom.pid]
-            return len(rows) > 0
+            return nmrAtom.pid in set(_data[CS_NMRATOM])
 
         elif uniqueId is not None:
             # get shift by uniqueId
@@ -601,9 +599,7 @@ class ChemicalShiftList(AbstractWrapperObject):
                 raise ValueError(f'{self.className}._searchChemicalShifts: uniqueId must be an int - {uniqueId}')
 
             # search dataframe for single element
-            _data = self._wrappedData.data
-            rows = _data[_data[CS_UNIQUEID] == uniqueId]
-            return len(rows) > 0
+            return uniqueId in set(_data[CS_UNIQUEID])
 
     def delete(self):
         """Delete the chemicalShiftList and associated chemicalShifts
@@ -795,11 +791,11 @@ class ChemicalShiftList(AbstractWrapperObject):
         self._shifts.append(shift)
         _newShifts = self._shifts[:]
 
-        with undoBlockWithoutSideBar():
-            # add an undo/redo item to recover shifts
-            with undoStackBlocking() as addUndoItem:
-                addUndoItem(undo=partial(self._undoRedoShifts, _oldShifts),
-                            redo=partial(self._undoRedoShifts, _newShifts))
+        # with undoBlockWithoutSideBar():
+        # add an undo/redo item to recover shifts
+        with undoStackBlocking() as addUndoItem:
+            addUndoItem(undo=partial(self._undoRedoShifts, _oldShifts),
+                        redo=partial(self._undoRedoShifts, _newShifts))
 
         return shift
 

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-12-08 13:23:28 +0000 (Thu, December 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-12-19 12:22:20 +0000 (Mon, December 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -566,9 +566,10 @@ class Peak(AbstractWrapperObject):
         _post = set(makeIterableList(value))
         nmrResidues = {nmr.nmrResidue for nmr in (_pre | _post)}
         shifts = list({cs for nmrAt in (_pre | _post) for cs in nmrAt.chemicalShifts})
-        newShifts = shifts.copy()
+        newShifts = list(shifts)
 
-        _thisNmrPids = self.spectrum.chemicalShiftList._getNmrAtomPids()
+        chemShiftList = self.spectrum.chemicalShiftList
+        _thisNmrPids = chemShiftList._getNmrAtomPids()
         _pre = {atm.pid for atm in _pre}
         _post = {atm.pid for atm in _post}
 
@@ -580,8 +581,7 @@ class Peak(AbstractWrapperObject):
             self._dimensionNmrAtoms = value
 
             # add those that are not already in the list - otherwise recalculate
-            newShifts.extend(self.spectrum.chemicalShiftList.newChemicalShift(nmrAtom=nmrAtom)
-                             for nmrAtom in (_post - _pre - _thisNmrPids))
+            newShifts.extend(chemShiftList.newChemicalShift(nmrAtom=nmrAtom) for nmrAtom in (_post - _pre - _thisNmrPids))
 
             # update the chemicalShift value/valueError
             self._recalculatePeakShifts(nmrResidues, newShifts)
@@ -755,7 +755,7 @@ class Peak(AbstractWrapperObject):
         try:
             axis = axisCodes.index(axisCode)
         except ValueError:
-            raise ValueError("axisCode %s not recognised" % axisCode)
+            raise ValueError(f"axisCode {axisCode} not recognised") from None
 
         if value is None:
             value = []
@@ -774,10 +774,52 @@ class Peak(AbstractWrapperObject):
             if na.isotopeCode in [UnknownIsotopeCode, self._UNKNOWN_VALUE_STRING, None]:
                 try:
                     isotopeCodes = self.spectrum.getByAxisCodes('isotopeCodes', [axisCode])
-                    if len(isotopeCodes)==1:
+                    if len(isotopeCodes) == 1:
                         na._setIsotopeCode(isotopeCodes[0])
                 except Exception as err:
                     getLogger().debug2(f'Impossible to set isotopeCode to {na}. {err}')
+
+    @logCommand(get='self')
+    def assignDimensions(self, axisCodes: list,
+                         values: list[Union[Union[str, 'NmrAtom'], Sequence[Union[str, 'NmrAtom']]]] = None):
+        """Assign dimensions with axisCode to values (NmrAtom, or Pid or sequence of either, or None).
+        """
+        specAxisCodes = self.spectrum.axisCodes
+        if len(axisCodes) != len(specAxisCodes) or len(values) != len(specAxisCodes):
+            raise TypeError(f'{self.__class__.__name__}.assignDimensions: axisCodes or values are not the correct length')
+        if badAxisCodes := list(set(specAxisCodes)-set(axisCodes)):
+            raise ValueError(f'{self.__class__.__name__}.assignDimensions: axisCodes {badAxisCodes} not recognised') from None
+        if not isinstance(values, list):
+            raise TypeError(f'{self.__class__.__name__}.assignDimensions: values is not a list')
+
+        dimensionNmrAtoms = [None] * len(specAxisCodes)
+        for axis, value in zip(axisCodes, values):
+            if axis not in specAxisCodes:
+                raise ValueError(f'{self.__class__.__name__}.assignDimensions: axisCode {axis} not recognised')
+
+            if value is None:
+                value = []
+            elif isinstance(value, str):
+                value = [self.getByPid(value)]
+            elif isinstance(value, Sequence):
+                value = [(self.getByPid(x) if isinstance(x, str) else x) for x in value]
+            else:
+                value = [value]
+            dimensionNmrAtoms[specAxisCodes.index(axis)] = value
+
+        # set all the nmrAtoms
+        self.dimensionNmrAtoms = dimensionNmrAtoms
+
+        for axis, value in zip(axisCodes, values):
+            # isotopeCode. if not defined, assign to the nmrAtoms from the spectrum isotopeCodes
+            for na in value:
+                if na.isotopeCode in [UnknownIsotopeCode, self._UNKNOWN_VALUE_STRING, None]:
+                    try:
+                        isotopeCodes = self.spectrum.getByAxisCodes('isotopeCodes', [specAxisCodes.index(axis)])
+                        if len(isotopeCodes) == 1:
+                            na._setIsotopeCode(isotopeCodes[0])
+                    except Exception as err:
+                        getLogger().debug2(f'Impossible to set isotopeCode to {na}. {err}')
 
     def getByAxisCodes(self, parameterName: str, axisCodes: Sequence[str] = None,
                        exactMatch: bool = False) -> list:

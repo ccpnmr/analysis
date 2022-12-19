@@ -10,12 +10,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-23 17:20:31 +0000 (Wed, February 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-19 12:22:19 +0000 (Mon, December 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -182,10 +182,7 @@ class ChemicalShift(V3CoreObjectABC):
         if self.static:
             return ChemicalShiftState.STATIC
         else:
-            if self.orphan:
-                return ChemicalShiftState.ORPHAN
-            else:
-                return ChemicalShiftState.DYNAMIC
+            return ChemicalShiftState.ORPHAN if self.orphan else ChemicalShiftState.DYNAMIC
 
     #~~~~~~~~~~~~~~~~
 
@@ -206,8 +203,7 @@ class ChemicalShift(V3CoreObjectABC):
         """
         if not isinstance(val, (float, int, type(None))):
             raise ValueError(f'{self.className}.value must be of type float, int or None')
-        _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
-        if _nmrAtomPid:
+        if _nmrAtomPid := self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str):
             raise ValueError(f'{self.className}.value cannot be changed with attached nmrAtom')
         self._wrapperList._setAttribute(self._uniqueId, CS_VALUE, val)
 
@@ -228,8 +224,7 @@ class ChemicalShift(V3CoreObjectABC):
         """
         if not isinstance(value, (float, int, type(None))):
             raise ValueError(f'{self.className}.valueError must be of type float, int or None')
-        _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
-        if _nmrAtomPid:
+        if _nmrAtomPid := self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str):
             raise ValueError(f'{self.className}.valueError cannot be changed with attached nmrAtom')
         self._wrapperList._setAttribute(self._uniqueId, CS_VALUEERROR, value)
 
@@ -302,18 +297,18 @@ class ChemicalShift(V3CoreObjectABC):
 
         if value is not None:
             # check the new value is valid - allow core object, str or Pid
-            _nmrAtom = self._project.getByPid(value) if isinstance(value, str) else value
-            if not _nmrAtom:
+            nmrAt = self._project.getByPid(value) if isinstance(value, str) else value
+            if not nmrAt:
                 raise ValueError(f'{self.className}.nmrAtom: {value} not found')
-            if _nmrAtom == nat:
+            if nmrAt == nat:
                 # trivial - ignore
                 return
 
-            if not isinstance(_nmrAtom, NmrAtom):
+            if not isinstance(nmrAt, NmrAtom):
                 raise ValueError(f'{self.className}.nmrAtom: {value} must be of type NmrAtom')
-            if self._wrapperList._searchChemicalShifts(nmrAtom=_nmrAtom):
-                raise ValueError(f'{self.className}.nmrAtom: {_nmrAtom.pid} already exists')
-            value = _nmrAtom
+            if self._wrapperList._searchChemicalShifts(nmrAtom=nmrAt):
+                raise ValueError(f'{self.className}.nmrAtom: {nmrAt.pid} already exists')
+            value = nmrAt
 
         with undoStackBlocking() as addUndoItem:
             if _oldNmrAt is None:
@@ -352,8 +347,7 @@ class ChemicalShift(V3CoreObjectABC):
         """
         if not isinstance(value, (str, type(None))):
             raise ValueError(f'{self.className}.chainCode must be of type str or None')
-        _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
-        if _nmrAtomPid:
+        if _nmrAtomPid := self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str):
             raise RuntimeError(f'{self.className}.chainCode: derived value, cannot modify when nmrAtom is set')
         # only set if the nmrAtom has not been set
         self._wrapperList._setAttribute(self._uniqueId, CS_CHAINCODE, value)
@@ -379,8 +373,7 @@ class ChemicalShift(V3CoreObjectABC):
         """
         if not isinstance(value, (str, type(None))):
             raise ValueError(f'{self.className}.sequenceCode must be of type str or None')
-        _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
-        if _nmrAtomPid:
+        if _nmrAtomPid := self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str):
             raise RuntimeError(f'{self.className}.sequenceCode: derived value, cannot modify when nmrAtom is set')
         # only set if the nmrAtom has not been set
         self._wrapperList._setAttribute(self._uniqueId, CS_SEQUENCECODE, value)
@@ -406,8 +399,7 @@ class ChemicalShift(V3CoreObjectABC):
         """
         if not isinstance(value, (str, type(None))):
             raise ValueError(f'{self.className}.residueType must be of type str or None')
-        _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
-        if _nmrAtomPid:
+        if _nmrAtomPid := self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str):
             raise RuntimeError(f'{self.className}.residueType: derived value, cannot modify when nmrAtom is set')
         # only set if the nmrAtom has not been set
         self._wrapperList._setAttribute(self._uniqueId, CS_RESIDUETYPE, value)
@@ -433,8 +425,7 @@ class ChemicalShift(V3CoreObjectABC):
         """
         if not isinstance(value, (str, type(None))):
             raise ValueError(f'{self.className}.atomName must be of type str or None')
-        _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
-        if _nmrAtomPid:
+        if _nmrAtomPid := self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str):
             raise RuntimeError(f'{self.className}.atomName: derived value, cannot modify when nmrAtom is set')
         # only set if the nmrAtom has not been set
         self._wrapperList._setAttribute(self._uniqueId, CS_ATOMNAME, value)
@@ -456,8 +447,7 @@ class ChemicalShift(V3CoreObjectABC):
         """All assigned peaks for attached nmrAtom.
         """
         _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
-        _nmrAtom = self.project.getByPid(_nmrAtomPid)
-        if _nmrAtom:
+        if _nmrAtom := self.project.getByPid(_nmrAtomPid):
             return tuple(set(makeIterableList(_nmrAtom.assignedPeaks)))
 
         return ()
@@ -496,9 +486,8 @@ class ChemicalShift(V3CoreObjectABC):
         """Restore the links to the nmrAtoms
         CCPN Internal - called from first creation from _restoreObject
         """
-        _nmrAtom = self.nmrAtom
-        # must assume that the shift value is correct at this point
-        if _nmrAtom:
+        if _nmrAtom := self.nmrAtom:
+            # must assume that the shift value is correct at this point
             _nmrAtom._chemicalShifts.append(self)
 
     #=========================================================================================
@@ -523,9 +512,8 @@ class ChemicalShift(V3CoreObjectABC):
                   (self.chainCode or None, self.sequenceCode or None, self.residueType or None, self.atomName or None)
                   ) + \
                  (self.comment,)
-        newRow = ShiftParameters(*newRow)
 
-        return newRow
+        return ShiftParameters(*newRow)
 
     def _getAsPandasSeries(self):
         """Return the contents of the shift as a pandas series
@@ -536,29 +524,30 @@ class ChemicalShift(V3CoreObjectABC):
     def _recalculateShiftValue(self, nmrAtom=None):
         """Calculate the shift value
         """
-        nmrAtom = nmrAtom or self.nmrAtom
-        if not self.static:
-            if nmrAtom:
-                if nmrAtom.assignedPeaks:
-                    # remember the oldest setting
-                    self._oldValue, self._oldValueError = self.value, self.valueError
-                else:
-                    self._oldValue = self._oldValueError = None
+        if self.static:
+            return
 
-                value, valueError = nmrAtom._recalculateShiftValue(self._wrapperList.spectra)
+        if nmrAtom := (nmrAtom or self.nmrAtom):
+            if nmrAtom.assignedPeaks:
+                # remember the oldest setting
+                self._oldValue, self._oldValueError = self.value, self.valueError
             else:
-                value, valueError = None, None
-            valueError = valueError if value is not None else None
+                self._oldValue = self._oldValueError = None
 
-            if not (value is None and valueError is None):
-                # update the dataframe
-                self._wrapperList._setAttribute(self._uniqueId, CS_VALUE, value)
-                self._wrapperList._setAttribute(self._uniqueId, CS_VALUEERROR, valueError)
+            value, valueError = nmrAtom._recalculateShiftValue(self._wrapperList.spectra)
+        else:
+            value, valueError = None, None
+        valueError = valueError if value is not None else None
 
-            elif not (self._oldValue is None and self._oldValueError is None):
-                # make sure that the empty value does not change
-                self._wrapperList._setAttribute(self._uniqueId, CS_VALUE, self._oldValue)
-                self._wrapperList._setAttribute(self._uniqueId, CS_VALUEERROR, self._oldValueError)
+        if value is not None or valueError is not None:
+            # update the dataframe
+            self._wrapperList._setAttribute(self._uniqueId, CS_VALUE, value)
+            self._wrapperList._setAttribute(self._uniqueId, CS_VALUEERROR, valueError)
+
+        elif self._oldValue is not None or self._oldValueError is not None:
+            # make sure that the empty value does not change
+            self._wrapperList._setAttribute(self._uniqueId, CS_VALUE, self._oldValue)
+            self._wrapperList._setAttribute(self._uniqueId, CS_VALUEERROR, self._oldValueError)
 
     def _renameNmrAtom(self, nmrAtom):
         """Update the values in the table for the renamed nmrAtom

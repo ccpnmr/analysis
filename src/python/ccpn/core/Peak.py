@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-19 12:22:20 +0000 (Mon, December 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-19 15:11:26 +0000 (Mon, December 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -313,8 +313,8 @@ class Peak(AbstractWrapperObject):
 
             # log any peak assignments that have moved in this axis
             if peakDim.position != _old:
-                assigned = set([ff(pdc.resonance) for pdc in peakDim.mainPeakDimContribs if hasattr(pdc, 'resonance')])
-                shifts |= set(sh for nmrAt in assigned for sh in nmrAt.chemicalShifts)
+                assigned = {ff(pdc.resonance) for pdc in peakDim.mainPeakDimContribs if hasattr(pdc, 'resonance')}
+                shifts |= {sh for nmrAt in assigned for sh in nmrAt.chemicalShifts}
 
         self._childActions.extend(sh._recalculateShiftValue for sh in shifts)
         self._finaliseChildren.extend((sh, 'change') for sh in shifts)

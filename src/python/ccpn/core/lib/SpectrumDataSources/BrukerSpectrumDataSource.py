@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-08 13:34:08 +0000 (Thu, December 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-19 18:36:24 +0000 (Mon, December 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -310,6 +310,37 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         Subclassed to accommodate the special Bruker directory structure
         """
         return (None if self.dataFile is None else self._brukerRoot.parent)
+
+    def getAllFilePaths(self) -> list:
+        """
+        Get all the files handled by this dataSource: the binary and
+        acqu* and proc* parameter files.
+
+        :return: list of Path instances
+        """
+        result = [self.path]
+
+        # acqu files
+        for _p in self._acqusFiles[0:self.dimensionCount]:
+            result.append( self._brukerRoot / _p )
+
+        # proc files:
+        for _p in self._procFiles[0:self.dimensionCount]:
+            result.append( self._pdataDir / _p )
+        return result
+
+    def copyFiles(self, destinationDirectory) -> list:
+        """Copy all data files to a new destination directory
+        :param destinationDirectory: a string or Path instance defining the destination directory
+        :return A list of files copied
+        """
+        _destination = aPath(destinationDirectory)
+        if not _destination.is_dir():
+            raise ValueError(f'"{_destination}" is not a valid directory')
+
+        _dir, _base, _suffix = self._brukerRoot.split3()
+        result = self._brukerRoot.copyDir(_destination / _base )
+        return [result]
 
     def setPath(self, path, checkSuffix=False):
         """Parse and set path, assure there is the directory with acqus and pdata dirs

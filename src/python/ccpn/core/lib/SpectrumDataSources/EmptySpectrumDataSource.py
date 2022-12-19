@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-07 21:32:03 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-19 18:36:24 +0000 (Mon, December 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -67,6 +67,12 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         """Return None, as there is no actual file
         """
         return None
+
+    def getAllFilePaths(self) -> list:
+        """
+        :return An empty list, as EmptySpectrumDataSource does not have a physical/binary file.
+        """
+        return []
 
     def checkValid(self) -> bool:
         """check if valid format

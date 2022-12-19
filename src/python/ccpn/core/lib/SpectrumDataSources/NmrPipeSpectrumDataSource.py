@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-07 21:32:03 +0000 (Wed, December 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-19 18:36:24 +0000 (Mon, December 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -104,7 +104,8 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
     NmrPipe spectra can be loaded by either:
     - A nD plane file; if required, the template will be reconstructed
-    - A folder with a series of 2D planes with .dator .pipe suffixes
+    - A folder with a valid NmrPipe suffix and containing a series of 2D *001.dat or *001.pipe
+      named planes (i.e. .dat .pipe suffixes)
     """
 
     #=========================================================================================
@@ -376,13 +377,16 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
             return super().setPath(None)
 
         _path = aPath(path)
-        # check directories
+
+        # check for directories
         if _path.is_dir() and _path.suffix in self.suffixes:
             self.isDirectory = False
+            # try to establish if this is a directory with a NmrPipe series of files
             for pattern in ['*001.dat', '*001.pipe']:
-                files = [f for f in _path.glob(pattern)]
+                files = _path.globList(pattern)
                 if len(files) > 0:
-                    _path = files[0]
+                    self._path = _path  # retain the initiating path
+                    _path = files[0]  # define the first binary
                     self.isDirectory = True
                     break
 
@@ -415,6 +419,31 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
             # remove any duplicates
             result = list(set(result))
+
+        return result
+
+    def copyFiles(self, destinationDirectory) -> list:
+        """Copy all data files to a new destination directory
+        :param destinationDirectory: a string or Path instance defining the destination directory
+        :return A list of files copied
+        """
+        _destination = aPath(destinationDirectory)
+        if not _destination.is_dir():
+            raise ValueError(f'"{_destination}" is not a valid directory')
+
+        if self.isDirectory:
+            # A directory; create the same in the destination
+            _dir, _base, _suffix = self._path.split3()
+            _destination = _destination / _base + _suffix
+            result = [self._path.copyDir(_destination)]
+        elif self.nFiles > 1:
+            # More than one file; i.e. a multifile 3D or 4D.
+            # Put in a single new directory within destinationDirectory with name from path and 'pipe' suffix
+            _destination = _destination .fetchDir(self.nameFromPath() + self.suffixes[0])
+            result = super().copyFiles(destinationDirectory=_destination)
+        else:
+            # effectively the one-file situation; call super class to handle.
+            result = super().copyFiles(destinationDirectory=destinationDirectory)
 
         return result
 

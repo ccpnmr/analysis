@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-09-30 15:19:12 +0100 (Fri, September 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-19 10:06:15 +0000 (Mon, December 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1306,8 +1306,7 @@ class NmrResidue(AbstractWrapperObject):
         """
         from ccpn.core.NmrAtom import _newNmrAtom  # imported here to avoid circular imports
 
-        result = _newNmrAtom(self, name=name, isotopeCode=isotopeCode, comment=comment, **kwds)
-        return result
+        return _newNmrAtom(self, name=name, isotopeCode=isotopeCode, comment=comment, **kwds)
 
     def fetchNmrAtom(self, name: str, isotopeCode: str = None):
         """Fetch NmrAtom with name=name, creating it if necessary

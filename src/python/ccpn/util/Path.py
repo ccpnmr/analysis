@@ -3,6 +3,8 @@
 Includes extensions of sys.path functions and CCPN-specific functionality
 
 """
+from __future__ import annotations
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -12,12 +14,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-11-16 16:27:31 +0000 (Wed, November 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-19 18:35:41 +0000 (Mon, December 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,7 +29,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
 #
 # Convenient I/O functions
 #
@@ -77,12 +78,12 @@ class Path(_Path_):
         return self.name.split('.')[0]
 
     @property
-    def filepath(self):
-        """Return the folder without the filename"""
+    def filepath(self) -> Path:
+        """The folder without the filename"""
         return self if self.is_dir() else self.parent
 
-    def addTimeStamp(self):
-        """Return a Path instance with path.timeStamp-suffix profile
+    def addTimeStamp(self) -> Path:
+        """:return a Path instance with path.timeStamp-suffix profile
         """
         now = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
         return self.parent / (self.stem + '-' + str(now) + self.suffix)
@@ -112,7 +113,7 @@ class Path(_Path_):
 
         return value
 
-    def incrementVersion(self):
+    def incrementVersion(self) -> Path:
         """return: a Path instance with directory/basename(version).suffixes profile
         """
         _dir = self.parent
@@ -124,16 +125,16 @@ class Path(_Path_):
         _version += 1
         return _dir / _basename + f'({_version})' + ''.join(self.suffixes)
 
-    def uniqueVersion(self):
-        """Return a Path instance which is unique by incrementing version index
+    def uniqueVersion(self) -> Path:
+        """:return a Path instance which is unique by incrementing version index
         """
         result = Path(self)
         while result.exists():
             result = result.incrementVersion()
         return result
 
-    def normalise(self):
-        """Return normalised path
+    def normalise(self) -> Path:
+        """:return a normalised path
         """
         return Path(os.path.normpath(self.asString()))  # python <= 3.4; strings only
 
@@ -151,7 +152,7 @@ class Path(_Path_):
                 raise FileNotFoundError('Error opening file "%s"' % self)
         return fp
 
-    def globList(self, pattern='*'):
+    def globList(self, pattern='*') -> list:
         """Return a list rather than a generator
         """
         return [p for p in self.glob(pattern=pattern)]
@@ -163,7 +164,7 @@ class Path(_Path_):
             raise ValueError('%s is not a directory' % self)
         _rmdirs(str(self))
 
-    def fetchDir(self, *dirNames):
+    def fetchDir(self, *dirNames) -> Path:
         """Return and (if needed) create all dirNames relative to self
         :return: Path instance of self / dirName[0] / dirName[1] ...
         """
@@ -177,6 +178,26 @@ class Path(_Path_):
                 result.mkdir()
         return result
 
+    def copyDir(self, destination, overwrite=False) -> Path:
+        """Recursively copy directory represented by self to destination.
+        :param destination: a Path or str denoting the destination
+        :return a Path instance of the location of the copied directory
+        """
+        import shutil
+        if not self.exists():
+            raise FileNotFoundError(f'{self} does not exist')
+        if not self.is_dir():
+            raise RuntimeError(f'{self} is not a directory')
+
+        _dest = aPath(destination)
+        if _dest.exists():
+            if not overwrite:
+                raise FileExistsError(f'{destination} already exists and overwrite=False')
+            _dest.rm()
+
+        _result = shutil.copytree(self, dst=_dest, symlinks=True)
+        return Path(_result)
+
     def removeFile(self):
         """Remove file represented by self.
         """
@@ -188,14 +209,25 @@ class Path(_Path_):
         """Copy file represented by self to destination.
         """
         import shutil
-        if self.is_dir():
-            raise RuntimeError('%s is a directory' % self)
+        if not self.exists():
+            raise FileNotFoundError(f'{self} does not exist')
+        if not self.is_file():
+            raise RuntimeError(f'{self} is not a file')
         shutil.copy2(self, destination)
 
-    def assureSuffix(self, suffix):
-        """Return Path instance with an assured suffix; adds suffix if not present.
-        .prefix to suffix is ignored if present.
+    def rm(self):
+        """Remove file/directory represented by self if it exists.
+        """
+        if self.exists():
+            if self.is_dir():
+                self.removeDir()
+            else:
+                self.removeFile()
+
+    def assureSuffix(self, suffix) -> Path:
+        """Create a Path instance with an assured suffix; adds suffix if not present.
         Does not change suffix if there is one (like with_suffix does).
+        :return Path instance with an assured suffix
         """
         if not isinstance(suffix, str):
             raise TypeError('suffix %s must be a str' % str(suffix))
@@ -209,23 +241,24 @@ class Path(_Path_):
 
         return self
 
-    def withoutSuffix(self):
-        """Return self without suffix
+    def withoutSuffix(self) -> Path:
+        """:return a Path instance of self without suffix
         """
         if len(self.suffixes) > 0:
-            return self.with_suffix('')
+            return Path(self.with_suffix(''))
         else:
             return self
 
-    def withSuffix(self, suffix):
-        """Return self with suffix; inverse of withoutSuffix()
+    def withSuffix(self, suffix) -> Path:
+        """Create self with suffix; inverse of withoutSuffix()
         partially copies with_suffix, but does not allow for empty argument
+        :return a Path instance of self with suffix
         """
         if suffix is None or len(suffix) == 0:
             raise ValueError('No suffix defined')
         return self.with_suffix(suffix=suffix)
 
-    def listDirFiles(self, extension:str=None):
+    def listDirFiles(self, extension:str=None) -> list:
         """Obsolete; extension is without a "."
         use listdir instead
         """
@@ -253,22 +286,22 @@ class Path(_Path_):
         else:
             return result
 
-    def split3(self):
-        """Return a tuple of (.parent, .stem, .suffix) strings
+    def split3(self) -> tuple:
+        """:return a tuple of (.parent, .stem, .suffix) strings
         """
         return (str(self.parent), str(self.stem), str(self.suffix))
 
-    def split2(self):
-        """Return a tuple (.parent, .name) strings
+    def split2(self) -> tuple:
+        """:return a tuple (.parent, .name) strings
         """
         return (str(self.parent), str(self.name))
 
-    def asString(self):
-        """Return self as a string"""
+    def asString(self) -> str:
+        """:return self as a string"""
         return str(self)
 
-    def startswith(self, prefix):
-        """Return True if self starts with prefix"""
+    def startswith(self, prefix) -> bool:
+        """:return True if self starts with prefix"""
         path = self.asString()
         return path.startswith(prefix)
 

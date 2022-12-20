@@ -194,12 +194,11 @@ class _TableModel(QtCore.QAbstractTableModel):
             rowList = [self._sortIndex[row] for row in range(rows)]
         else:
             #  map to sorted indexes
-            rowList = list(OrderedSet(self._sortIndex[row] for row in range(rows)) & OrderedSet(
-                    self._sortIndex[ii] for ii in self._filterIndex))
+            rowList = list(OrderedSet(self._sortIndex[row] for row in range(rows)) &
+                           OrderedSet(self._sortIndex[ii] for ii in self._filterIndex))
 
         df = df[colList]
-        df = df[:].iloc[rowList]
-        return df
+        return df[:].iloc[rowList]
 
     def setToolTips(self, orientation, values):
         """Set the tooltips for the horizontal/vertical headers.
@@ -364,7 +363,7 @@ class _TableModel(QtCore.QAbstractTableModel):
     def columnCount(self, parent=None):
         """Return the column count for the dataFrame
         """
-        return self._df.shape[1]
+        return 1 if type(self._df) == pd.Series else self._df.shape[1]
 
     def data(self, index, role=DISPLAY_ROLE):
         """Process the data callback for the model
@@ -417,7 +416,7 @@ class _TableModel(QtCore.QAbstractTableModel):
             elif role == BORDER_ROLE:
                 if (colourDict := self._colour[row, col]):
                     # get the colour from the dict
-                    return True if colourDict.get(BACKGROUND_ROLE) else False
+                    return bool(colourDict.get(BACKGROUND_ROLE))
 
             elif role == TOOLTIP_ROLE:
                 data = self._df.iat[row, col]
@@ -464,6 +463,7 @@ class _TableModel(QtCore.QAbstractTableModel):
         """
         if not index.isValid():
             return False
+
         if role == EDIT_ROLE:
             # get the source cell
             fRow = self._filterIndex[index.row()] if self._filterIndex is not None else index.row()
@@ -490,13 +490,14 @@ class _TableModel(QtCore.QAbstractTableModel):
         """
         if role == DISPLAY_ROLE and orientation == QtCore.Qt.Horizontal:
             try:
-                # quickest way to get the column header
+                # quickest way to get the column-header
                 return self._df.columns[col]
             except Exception:
                 return None
+
         elif role == DISPLAY_ROLE and orientation == QtCore.Qt.Vertical:
             try:
-                # quickest way to get the column header
+                # quickest way to get the row-number
                 return col + 1
             except Exception:
                 return None
@@ -582,7 +583,7 @@ class _TableModel(QtCore.QAbstractTableModel):
             # update the current maximum
             maxLen = max(newLen, maxLen)
 
-        return int(min(self._MAXCHARS, maxLen) * self._chrWidth)
+        return round(min(self._MAXCHARS, maxLen) * self._chrWidth)
 
     def setForeground(self, row, column, colour):
         """Set the foreground colour for dataFrame cell at position (row, column).

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:08 +0000 (Wed, November 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-20 20:04:00 +0000 (Tue, December 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -180,13 +180,17 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
     #   so need this alternative to add padding to the left of the cell :|
     _leftPadding = '  '  # 2 spaces should be enough
     _focusBorderWidth = 1
-    _focusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERFOCUS]))
-    _noFocusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERNOFOCUS]))
+    _focusPen = None
+    _noFocusPen = None
 
     def __init__(self, focusBorderWidth=1, *args, **kwds):
         super(_TableDelegateABC, self).__init__(*args, *kwds)
 
-        # double the line-widths and account for the device-pixel-ratio
+        # set the colours
+        self._focusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERFOCUS]))
+        self._noFocusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERNOFOCUS]))
+
+        # double the line-widths accounts for the device-pixel-ratio
         self._focusBorderWidth = focusBorderWidth
         self._focusPen.setWidthF(focusBorderWidth * 2.0)
         self._focusPen.setJoinStyle(QtCore.Qt.MiterJoin)  # square ends
@@ -232,22 +236,21 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
                 painter.drawRoundedRect(option.rect, 4, 4)
             painter.restore()
 
-        else:
-            if focus:
-                painter.save()
-                painter.setClipRect(option.rect)
-                painter.setPen(self._focusPen)
-                painter.drawRect(option.rect)
-                painter.restore()
+        elif focus:
+            painter.save()
+            painter.setClipRect(option.rect)
+            painter.setPen(self._focusPen)
+            painter.drawRect(option.rect)
+            painter.restore()
 
-            elif not focus and index.data(BORDER_ROLE):
-                # move the focus rectangle drawing to after, otherwise, alternative-background-color is used
-                painter.save()
-                painter.setClipRect(option.rect)
-                painter.setPen(self._noFocusPen)
-                painter.setRenderHint(QtGui.QPainter.Antialiasing)
-                painter.drawRoundedRect(option.rect, 4, 4)
-                painter.restore()
+        elif not focus and index.data(BORDER_ROLE):
+            # move the focus rectangle drawing to after, otherwise, alternative-background-color is used
+            painter.save()
+            painter.setClipRect(option.rect)
+            painter.setPen(self._noFocusPen)
+            painter.setRenderHint(QtGui.QPainter.Antialiasing)
+            painter.drawRoundedRect(option.rect, 4, 4)
+            painter.restore()
 
     def updateEditorGeometry(self, widget, itemStyle, index):
         """Fit editor geometry to the index

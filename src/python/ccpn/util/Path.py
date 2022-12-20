@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-19 18:35:41 +0000 (Mon, December 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-20 10:02:21 +0000 (Tue, December 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -185,15 +185,15 @@ class Path(_Path_):
         """
         import shutil
         if not self.exists():
-            raise FileNotFoundError(f'{self} does not exist')
+            raise FileNotFoundError(f'"{self}" does not exist')
         if not self.is_dir():
-            raise RuntimeError(f'{self} is not a directory')
+            raise RuntimeError(f'"{self}" is not a directory')
 
         _dest = aPath(destination)
         if _dest.exists():
             if not overwrite:
-                raise FileExistsError(f'{destination} already exists and overwrite=False')
-            _dest.rm()
+                raise FileExistsError(f'"{destination}" already exists and overwrite=False')
+            _dest.remove()
 
         _result = shutil.copytree(self, dst=_dest, symlinks=True)
         return Path(_result)
@@ -205,17 +205,47 @@ class Path(_Path_):
             raise RuntimeError('%s is a directory' % self)
         self.unlink()
 
-    def copyfile(self, destination):
+    def copyFile(self, destination, overwrite) -> Path:
         """Copy file represented by self to destination.
+        if destination is an existing directory: Create new path from self and destination
+
+        :param destination: a Path or string instance. Create new path destination is an existing directory
+        :param overwrite: Overwrite existing file
+        :return Path instance of the newly created file
         """
         import shutil
-        if not self.exists():
-            raise FileNotFoundError(f'{self} does not exist')
-        if not self.is_file():
-            raise RuntimeError(f'{self} is not a file')
-        shutil.copy2(self, destination)
 
-    def rm(self):
+        if not self.exists():
+            raise FileNotFoundError(f'"{self}" does not exist')
+        if not self.is_file():
+            raise RuntimeError(f'"{self}" is not a file')
+
+        _dest = aPath(destination)
+        if _dest.is_dir():   # implies it exists as is_dir returns False if it doesn't
+            _dir, _base, _suffix = self.split3()
+            # create a new path from the destination directory and basename, suffix of self
+            # NB shutil.copy2 used below can do the same, but always overwrites the target
+            _dest = _dest / _base + _suffix
+
+        if _dest.exists() and not overwrite:
+            raise FileExistsError(f'"{_dest}" already exists and overwrite=False')
+
+        shutil.copy2(self, _dest)
+        return _dest
+
+    def copyfile(self, destination):
+        """Copy file represented by self to destination.
+        depricated; use copyFile instead
+        """
+        self.copyFile(destination)
+        # import shutil
+        # if not self.exists():
+        #     raise FileNotFoundError(f'{self} does not exist')
+        # if not self.is_file():
+        #     raise RuntimeError(f'{self} is not a file')
+        # shutil.copy2(self, destination)
+
+    def remove(self):
         """Remove file/directory represented by self if it exists.
         """
         if self.exists():

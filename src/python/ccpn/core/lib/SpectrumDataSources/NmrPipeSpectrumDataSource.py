@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-19 18:36:24 +0000 (Mon, December 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-20 10:01:44 +0000 (Tue, December 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -422,9 +422,10 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
         return result
 
-    def copyFiles(self, destinationDirectory) -> list:
+    def copyFiles(self, destinationDirectory, overwrite=False) -> list:
         """Copy all data files to a new destination directory
         :param destinationDirectory: a string or Path instance defining the destination directory
+        :param overwrite: Overwrite any existing files
         :return A list of files copied
         """
         _destination = aPath(destinationDirectory)
@@ -433,17 +434,20 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
         if self.isDirectory:
             # A directory; create the same in the destination
+            # self._path contains the originating path
             _dir, _base, _suffix = self._path.split3()
             _destination = _destination / _base + _suffix
-            result = [self._path.copyDir(_destination)]
+            result = [self._path.copyDir(_destination, overwrite=overwrite)]
+
         elif self.nFiles > 1:
-            # More than one file; i.e. a multifile 3D or 4D.
+            # More than one file; i.e. a multi-file 3D or 4D.
             # Put in a single new directory within destinationDirectory with name from path and 'pipe' suffix
             _destination = _destination .fetchDir(self.nameFromPath() + self.suffixes[0])
-            result = super().copyFiles(destinationDirectory=_destination)
+            result = super().copyFiles(destinationDirectory=_destination, overwrite=overwrite)
+
         else:
             # effectively the one-file situation; call super class to handle.
-            result = super().copyFiles(destinationDirectory=destinationDirectory)
+            result = super().copyFiles(destinationDirectory=destinationDirectory, overwrite=overwrite)
 
         return result
 

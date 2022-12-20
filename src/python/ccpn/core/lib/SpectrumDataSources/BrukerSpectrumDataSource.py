@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-19 18:36:24 +0000 (Mon, December 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-20 10:01:44 +0000 (Tue, December 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -329,17 +329,18 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             result.append( self._pdataDir / _p )
         return result
 
-    def copyFiles(self, destinationDirectory) -> list:
+    def copyFiles(self, destinationDirectory, overwrite=False) -> list:
         """Copy all data files to a new destination directory
         :param destinationDirectory: a string or Path instance defining the destination directory
-        :return A list of files copied
+        :param overwrite: Overwrite any existing files
+        :return A list of files/directory copied
         """
         _destination = aPath(destinationDirectory)
         if not _destination.is_dir():
             raise ValueError(f'"{_destination}" is not a valid directory')
 
         _dir, _base, _suffix = self._brukerRoot.split3()
-        result = self._brukerRoot.copyDir(_destination / _base )
+        result = self._brukerRoot.copyDir(_destination / _base, overwrite=overwrite )
         return [result]
 
     def setPath(self, path, checkSuffix=False):

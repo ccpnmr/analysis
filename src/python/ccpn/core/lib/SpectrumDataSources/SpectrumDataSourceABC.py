@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-19 18:36:24 +0000 (Mon, December 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-20 10:01:44 +0000 (Tue, December 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1593,9 +1593,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """to be subclassed"""
         raise NotImplementedError('Not implemented')
 
-    def copyFiles(self, destinationDirectory) -> list:
+    def copyFiles(self, destinationDirectory, overwrite=False) -> list:
         """Copy all data files to a new destination directory
         :param destinationDirectory: a string or Path instance defining the destination directory
+        :param overwrite: Overwrite any existing files
         :return A list of files copied
         """
         import shutil
@@ -1605,9 +1606,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         result = []
         for _p in self.getAllFilePaths():
-            shutil.copy2(_p, dst=_destination)
-            _dir, _base, _suffix = _p.split3()
-            _newPath = _destination / _base + _suffix
+            _newPath = _p.copyFile(_destination, overwrite=overwrite)
             result.append(_newPath)
 
         return result

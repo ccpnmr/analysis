@@ -53,7 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-20 11:57:00 +0000 (Tue, December 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-20 13:06:16 +0000 (Tue, December 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2925,12 +2925,36 @@ class Spectrum(AbstractWrapperObject):
 
         return spectrumGroup
 
-    def _undoCopyDataToProject(self, filePath, dataPaths):
-        """Undo the effects of copyDataToProject, including removing the copied files
+    def _undoCopyDataToDirectory(self, filePath, dataPaths):
+        """Undo the effects of copyDataToDirectory, including removing the copied files
         """
         for _p in dataPaths:
             _p.remove()
         self.filePath = filePath
+
+    def _copyDataToDirectory(self, destination) -> list:
+        """Copy spectrum data to destination directory; set filePath to copied location.
+        Populate the undo stack
+        :return A list files/directory copied
+        """
+        if not self.hasValidPath():
+            raise RuntimeError(f'{self.name} has no valid data')
+
+        if self.isEmptySpectrum():
+            return []
+
+        with undoStackBlocking() as _undoItem:
+            _originalFilePath = self.filePath
+            _data = self.dataSource.copyFiles(destinationDirectory=destination, overwrite=True)
+            if len(_data) == 0:
+                getLogger().warning(f'Unexpected outcome copying data file(s) to project: no data')
+            else:
+                self.filePath = _data[0]
+                self._makeRelativePath()
+                _undoItem(undo=partial(self._undoCopyDataToDirectory, _originalFilePath, _data),
+                          redo=partial(self._copyDataToDirectory, destination)
+                          )
+        return _data
 
     @logCommand(get='self')
     def copyDataToProject(self) -> list:
@@ -2943,18 +2967,7 @@ class Spectrum(AbstractWrapperObject):
         if self.isEmptySpectrum():
             return []
 
-        with undoStackBlocking() as _undoItem:
-            _originalFilePath = self.filePath
-            _data = self.dataSource.copyFiles(destinationDirectory=self.project.spectraPath, overwrite=True)
-            if len(_data) == 0:
-                getLogger().warning(f'Unexpected outcome copying data file(s) to project: no data')
-            else:
-                self.filePath = _data[0]
-                self._makeRelativePath()
-            _undoItem(undo=partial(self._undoCopyDataToProject, _originalFilePath, _data),
-                      redo=self.copyDataToProject
-                      )
-        return _data
+        return self._copyDataToDirectory(self.project.spectraPath)
 
     #-----------------------------------------------------------------------------------------
     # Implementation properties and functions

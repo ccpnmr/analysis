@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-20 10:02:21 +0000 (Tue, December 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-20 10:06:48 +0000 (Tue, December 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -238,12 +238,6 @@ class Path(_Path_):
         depricated; use copyFile instead
         """
         self.copyFile(destination)
-        # import shutil
-        # if not self.exists():
-        #     raise FileNotFoundError(f'{self} does not exist')
-        # if not self.is_file():
-        #     raise RuntimeError(f'{self} is not a file')
-        # shutil.copy2(self, destination)
 
     def remove(self):
         """Remove file/directory represented by self if it exists.

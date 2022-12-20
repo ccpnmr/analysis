@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-20 10:01:44 +0000 (Tue, December 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-20 11:57:00 +0000 (Tue, December 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -104,8 +104,8 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
     NmrPipe spectra can be loaded by either:
     - A nD plane file; if required, the template will be reconstructed
-    - A folder with a valid NmrPipe suffix and containing a series of 2D *001.dat or *001.pipe
-      named planes (i.e. .dat .pipe suffixes)
+    - A folder with a valid NmrPipe suffix and containing a series of numbered 2D planes with a valid
+      NmrPipe suffix; e.g. matching *001.dat or *001.pipe or *001.ft3, etc
     """
 
     #=========================================================================================
@@ -382,7 +382,8 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         if _path.is_dir() and _path.suffix in self.suffixes:
             self.isDirectory = False
             # try to establish if this is a directory with a NmrPipe series of files
-            for pattern in ['*001.dat', '*001.pipe']:
+            for _suffix in self.suffixes:
+                pattern = f'*001{_suffix}'
                 files = _path.globList(pattern)
                 if len(files) > 0:
                     self._path = _path  # retain the initiating path
@@ -442,8 +443,9 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         elif self.nFiles > 1:
             # More than one file; i.e. a multi-file 3D or 4D.
             # Put in a single new directory within destinationDirectory with name from path and 'pipe' suffix
-            _destination = _destination .fetchDir(self.nameFromPath() + self.suffixes[0])
-            result = super().copyFiles(destinationDirectory=_destination, overwrite=overwrite)
+            _destination = _destination.fetchDir(self.nameFromPath() + self.suffixes[0])
+            super().copyFiles(destinationDirectory=_destination, overwrite=overwrite)
+            result = [_destination]
 
         else:
             # effectively the one-file situation; call super class to handle.

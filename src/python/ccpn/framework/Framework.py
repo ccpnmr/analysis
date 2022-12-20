@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-12 15:12:13 +0000 (Mon, December 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-20 11:57:00 +0000 (Tue, December 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -941,7 +941,7 @@ class Framework(NotifierBase, GuiBase):
         """Save project to newPath and return True if successful
         """
         if self.preferences.general.keepSpectraInsideProject:
-            self._cloneSpectraToProjectDir()
+            self.project.copySpectraToProject()
 
         successful = self.project.save(newPath=newPath, createFallback=createFallback,
                                        overwriteExisting=overwriteExisting)
@@ -1179,48 +1179,6 @@ class Framework(NotifierBase, GuiBase):
         # non-native webview is currently disabled
         self._showHtmlFile('', str(path))
         return []
-
-    def _cloneSpectraToProjectDir(self):
-        """ Keep a copy of spectra inside the project directory "myproject.ccpn/data/spectra".
-        This is useful when saving the project in an external driver and want to keep the spectra together with the project.
-        """
-        from shutil import copyfile
-
-        try:
-            for spectrum in self.project.spectra:
-                oldPath = spectrum.filePath
-                # For Bruker need to keep all the tree structure.
-                # Uses the fact that there is a folder called "pdata" and start to copy from the dir before.
-                ss = oldPath.split('/')
-                if 'pdata' in ss:
-                    brukerDir = os.path.join(os.sep, *ss[:ss.index('pdata')])
-                    brukerName = brukerDir.split('/')[-1]
-                    os.mkdir(os.path.join(self.spectraPath, brukerName))
-                    destinationPath = os.path.join(self.spectraPath, brukerName)
-                    copy_tree(brukerDir, destinationPath)
-                    clonedPath = os.path.join(destinationPath, *ss[ss.index('pdata'):])
-                    # needs to repoint the path but doesn't seem to work!! troubles with $INSIDE!!
-                    # spectrum.filePath = clonedPath
-                else:
-                    # copy the file and or other files containing params
-                    from ntpath import basename
-
-                    pathWithoutFileName = os.path.join(os.sep, *ss[:ss.index(basename(oldPath))])
-                    fullpath = os.path.join(pathWithoutFileName, basename(oldPath))
-                    import glob
-
-                    otherFilesWithSameName = glob.glob(fullpath + ".*")
-                    clonedPath = os.path.join(self.spectraPath, basename(oldPath))
-                    for otherFileTocopy in otherFilesWithSameName:
-                        otherFilePath = os.path.join(self.spectraPath, basename(otherFileTocopy))
-                        copyfile(otherFileTocopy, otherFilePath)
-                    if oldPath != clonedPath:
-                        copyfile(oldPath, clonedPath)
-                        # needs to repoint the path but doesn't seem to work!! troubles with $INSIDE!!
-                        # spectrum.filePath = clonedPath
-
-        except Exception as e:
-            getLogger().debug(str(e))
 
     #-----------------------------------------------------------------------------------------
     # NEF-related code

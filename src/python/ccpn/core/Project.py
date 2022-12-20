@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-12 09:03:47 +0000 (Mon, December 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-20 11:56:59 +0000 (Tue, December 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -308,7 +308,7 @@ class Project(AbstractWrapperObject):
         return self.projectPath / CCPN_DATA_DIRECTORY
 
     @property
-    def spectraPath(self):
+    def spectraPath(self) -> Path:
         """
         :return: the absolute path to the data sub-directory of the current project
                  as a Path instance
@@ -337,7 +337,7 @@ class Project(AbstractWrapperObject):
         :return: the absolute path to the archives sub-directory of the current project
                  as a Path instance
         """
-        return aPath(self.project.path) / CCPN_ARCHIVES_DIRECTORY
+        return self.projectPath / CCPN_ARCHIVES_DIRECTORY
 
     # TODO: define not using API
     @property
@@ -1665,6 +1665,20 @@ class Project(AbstractWrapperObject):
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
 
         return getExpClassificationDict(self._wrappedData)
+
+    @logCommand('project.')
+    def copySpectraToProject(self) -> list:
+        """ Copy spectra from the original location to the local spectra directory of self;
+        e.g. in "myproject.ccpn/data/spectra".
+        This is useful when saving the project and want to keep the spectra together with the project.
+        :return A list of Path instances of files/directories copied
+        """
+        result = []
+        with undoBlock():
+            for sp in self.spectra:
+                _files = sp.copyDataToProject()
+                result.extend(_files)
+        return result
 
     #===========================================================================================
     # new<Object> and other methods

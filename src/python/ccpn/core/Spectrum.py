@@ -53,7 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-15 18:15:09 +0000 (Thu, December 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-20 11:57:00 +0000 (Tue, December 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -721,7 +721,7 @@ class Spectrum(AbstractWrapperObject):
 
         :return The new absolute path as a Path object
 
-        CCPNINTERNAL: used in the ValidateSpectra popup
+        CCPNINTERNAL:
         """
         _dataStore = DataStore.newFromPath(path=self._dataStore.aPath(),
                                            dataFormat=self._dataStore.dataFormat,
@@ -740,7 +740,7 @@ class Spectrum(AbstractWrapperObject):
 
         :return The new relative path as a Path object
 
-        CCPNINTERNAL: used in the ValidateSpectra popup
+        CCPNINTERNAL:
         """
         _path = self._dataStore.redirectPath()
         _dataStore = DataStore.newFromPath(path=_path,
@@ -2830,6 +2830,10 @@ class Spectrum(AbstractWrapperObject):
             raise RuntimeError('Not valid path for %s ' % self)
         return self.dataSource.allPoints()
 
+    #-----------------------------------------------------------------------------------------
+    # Utility routines
+    #-----------------------------------------------------------------------------------------
+
     def _getPseudoDimension(self) -> int:
         """Convenience routine: get the pseudoDimension;
         so far defined as a single time dimension; to be changed later?
@@ -2921,6 +2925,37 @@ class Spectrum(AbstractWrapperObject):
 
         return spectrumGroup
 
+    def _undoCopyDataToProject(self, filePath, dataPaths):
+        """Undo the effects of copyDataToProject, including removing the copied files
+        """
+        for _p in dataPaths:
+            _p.remove()
+        self.filePath = filePath
+
+    @logCommand(get='self')
+    def copyDataToProject(self) -> list:
+        """Copy the (binary) data files to the project's spectra directory and make filepath relative
+        :return A list with files/directory copied
+        """
+        if not self.hasValidPath():
+            raise RuntimeError(f'{self.name} has no valid data')
+
+        if self.isEmptySpectrum():
+            return []
+
+        with undoStackBlocking() as _undoItem:
+            _originalFilePath = self.filePath
+            _data = self.dataSource.copyFiles(destinationDirectory=self.project.spectraPath, overwrite=True)
+            if len(_data) == 0:
+                getLogger().warning(f'Unexpected outcome copying data file(s) to project: no data')
+            else:
+                self.filePath = _data[0]
+                self._makeRelativePath()
+            _undoItem(undo=partial(self._undoCopyDataToProject, _originalFilePath, _data),
+                      redo=self.copyDataToProject
+                      )
+        return _data
+
     #-----------------------------------------------------------------------------------------
     # Implementation properties and functions
     #-----------------------------------------------------------------------------------------
@@ -3009,17 +3044,6 @@ class Spectrum(AbstractWrapperObject):
 
         dataSource.spectrum = self
         return dataSource
-
-    # def _checkParameters(self, dataSource):
-    #     """Check parameters of dataSource against self
-    #     raise RuntimeError on any errors found
-    #     """
-    #     # check some fundamental parameters
-    #     if self.dataSource is None:
-    #         raise RuntimeError(f'No valid dataSource defined; cannot check parameters')
-    #
-    #     if not self.dataSource.checkParameters(self):
-    #         raise RuntimeError(f' spectrum {self.name}: {self.dataSource.errorString}')
 
     def _getPeakPicker(self):
         """Check whether a peakPicker class has been saved with this spectrum.

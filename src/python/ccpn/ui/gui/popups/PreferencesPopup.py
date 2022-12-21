@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:06 +0000 (Wed, November 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-21 12:16:46 +0000 (Wed, December 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,8 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 import os
+
+import pandas as pd
 from PyQt5 import QtWidgets, QtCore, QtGui, Qt
 from functools import partial
 from copy import deepcopy, copy
@@ -47,6 +49,11 @@ from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.HLine import HLine, LabeledHLine
+from ccpn.ui.gui.widgets.table.Table import Table
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.Font import DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR, \
+    getFontHeight, getSystemFonts, getFont, getSystemFont, TABLEFONT, updateSystemFonts
+from ccpn.ui.gui.widgets.CompoundWidgets import ButtonCompoundWidget
 from ccpn.util.Logging import getLogger
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, colourNameNoSpace, _setColourPulldown
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
@@ -65,7 +72,6 @@ from ccpn.ui.gui.widgets.FileDialog import SpectrumFileDialog, ProjectFileDialog
     ProjectSaveFileDialog
 from ccpn.framework.lib.pipeline.PipesLoader import _fetchUserPipesPath
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
-from ccpn.ui.gui.widgets.Font import DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR, getFontHeight
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLFONT_DEFAULTSIZE, _OLDGLFONT_SIZES
 
 
@@ -226,7 +232,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self._tempDialog = ProjectFileDialog()
         self._tempDialog._storePaths()
 
-        self.__postInit__()
+        # initialise the buttons and dialog size
+        self._postInit()
         self._okButton = self.getButton(self.OKBUTTON)
         self._applyButton = self.getButton(self.APPLYBUTTON)
         self._revertButton = self.getButton(self.RESETBUTTON)
@@ -671,7 +678,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # NOTE:ED - testing new font loader
         for num, fontName in enumerate(FONTLIST):
             row += 1
-            _label = _makeLabel(parent, text="{}".format(fontName), grid=(row, 0))
+            _label = _makeLabel(parent, text=f"{fontName}", grid=(row, 0))
             _data = Button(parent, grid=(row, 1), callback=partial(self._getFont, num, fontName), hAlign='l')
             _data.setMinimumWidth(PulldownListsMinimumWidth)
 
@@ -685,7 +692,26 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.glFontSizeData.currentIndexChanged.connect(self._queueChangeGLFontSize)
 
         row += 1
-        parent.addSpacer(15, 2, expandX=True, expandY=True, grid=(row, 1), gridSpan=(1, 1))
+        _label = _makeLabel(parent, text='Available printing-fonts', grid=(row, 0), vAlign='t')
+        ft = self._availableFontTable = Table(parent, grid=(row, 1), gridSpan=(1, 2), hAlign='l',
+                                              showHorizontalHeader=False, showVerticalHeader=False,
+                                              selectionCallbackEnabled=False, actionCallbackEnabled=False,
+                                              tableMenuEnabled=False
+                                              )
+        ft.setEditable(False)
+        ft.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        ft.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+        ft.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+        parent.getLayout().addWidget(ft, row, 1, 1, 2)  # there is a bug somewhere if not done like this :|
+        self._updateFontTable(ft)
+
+        row += 1
+        ButtonCompoundWidget(parent, grid=(row, 1), gridSpan=(1, 2),
+                             text=' Update ', buttonAlignment='right', icon=Icon('icons/redo'), enabled=True,
+                             minimumWidths=(25, 25, 25), callback=self._updateAvailableFonts)
+
+        row += 1
+        parent.addSpacer(15, 2, expandX=True, expandY=True, grid=(row, 2), gridSpan=(1, 1))
 
     @queueStateChange(_verifyPopupApply)
     def _queueShowAllTips(self):
@@ -819,6 +845,31 @@ class PreferencesPopup(CcpnDialogMainWidget):
         fontName = f'{name}, {size}pt, {type}' if type else f'{name}, {size}pt'
         widget._fontString = fontString
         widget.setText(fontName)
+
+    def _updateAvailableFonts(self, value):
+        """Update the loaded system-fonts
+        """
+        updateSystemFonts()
+
+        self._updateFontTable(self._availableFontTable)
+
+    @staticmethod
+    def _updateFontTable(table):
+        """Update the fonts in the table
+        """
+        db = sorted((fnt, '!@£$%&*(),.; The Quick brown fox jumped over the lazy dog, 0123456789') for fnt in getSystemFonts())
+        table.updateDf(pd.DataFrame(db, columns=['name', 'font']))
+
+        # set the font-type for the second column to match the font-name
+        ps = getFont(TABLEFONT, size='VLARGE').pointSize()
+        for rr, (fnt, _) in enumerate(db):
+            # set the font for each cell in the table
+            rowFnt = getSystemFont(fnt, None, ps)
+            table.model().setCellFont(rr, 1, rowFnt)
+
+        # resize the table-items
+        table.resizeColumnToContents(0)
+        table.resizeRowsToContents()
 
     def _populateGeneralTab(self):
         """Populate the widgets in the generalTab

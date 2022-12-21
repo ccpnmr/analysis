@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:29 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-21 12:16:45 +0000 (Wed, December 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -98,7 +98,7 @@ class EstimateNoisePopup(CcpnDialogMainWidget):
         self._populate()
 
         # set the links to the buttons
-        self.__postInit__()
+        self._postInit()
         self._okButton = self.dialogButtons.button(self.OKBUTTON)
         self._helpButton = self.dialogButtons.button(self.HELPBUTTON)
 

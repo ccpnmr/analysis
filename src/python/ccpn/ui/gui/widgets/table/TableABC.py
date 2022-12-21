@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:08 +0000 (Wed, November 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-21 12:16:48 +0000 (Wed, December 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -97,6 +97,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     _selectionCallback = NOTHING
     _defaultEditable = True
     _rowHeightScale = None
+    _tableMenuEnabled = True
 
     # define the default TableModel class
     defaultTableModel = _TableModel
@@ -112,6 +113,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
                  actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
                  enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
+                 tableMenuEnabled=NOTHING,
                  **kwds
                  ):
         """Initialise the table.
@@ -192,7 +194,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         self.setMinimumSize(2 * height, 2 * height + self.horizontalScrollBar().height())
 
         # set up the menus
-        self.setTableMenu()
+        self.setTableMenu(tableMenuEnabled)
         self.setHeaderMenu()
 
         self._tableBlockingLevel = 0
@@ -232,7 +234,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
             self.resizeColumnsToContents()
             maxLen = str(len(df))
             indexHeader = self.verticalHeader()
-            px = indexHeader.fontMetrics().boundingRect(maxLen).width()+5
+            px = indexHeader.fontMetrics().boundingRect(maxLen).width() + 5
             indexHeader.setMinimumWidth(px)
             if resize:
                 # resize if required
@@ -411,7 +413,6 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         """
         return self.model().displayedDf
 
-
     def isEditable(self):
         """Return True if the default state of the table is editable
         """
@@ -571,9 +572,10 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
 
     def selectFirstRow(self, doCallback=True):
         from ccpn.core.lib.ContextManagers import nullContext
+
         context = nullContext if doCallback else self._blockTableSignals
         model = self.model()
-        rowIndex = model.index(0, 0) #First Row!
+        rowIndex = model.index(0, 0)  #First Row!
         with context('selectFirstRow'):
             selectionModel = self.selectionModel()
             selectionModel.clearSelection()
@@ -872,9 +874,23 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     # Table context menu
     #=========================================================================================
 
-    def setTableMenu(self) -> Menu:
+    def setTableMenu(self, tableMenuEnabled=NOTHING) -> typing.Optional[Menu]:
         """Set up the context menu for the main table
         """
+        if tableMenuEnabled is not NOTHING:
+            self._tableMenuEnabled = bool(tableMenuEnabled)
+        else:
+            # revert to the super-class setting
+            with suppress(AttributeError):
+                del self._tableMenuEnabled
+
+        if not self._tableMenuEnabled:
+            self._thisTableMenu = None
+            # disconnect any previous menus
+            with suppress(TypeError):
+                self.customContextMenuRequested.disconnect(self._raiseTableContextMenu)
+            return
+
         self._thisTableMenu = menu = Menu('', self, isFloatWidget=True)
         setWidgetFont(menu, )
 
@@ -906,7 +922,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         """Create a new menu and popup at cursor position
         """
         if not (menu := self._thisTableMenu):
-            getLogger().warning('menu is not defined')
+            getLogger().debug('menu is not defined')
             return
 
         # call the class setup

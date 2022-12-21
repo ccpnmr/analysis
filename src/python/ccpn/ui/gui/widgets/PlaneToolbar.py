@@ -13,12 +13,12 @@ __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliz
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:41 +0100 (Tue, July 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-21 12:16:47 +0000 (Wed, December 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -515,7 +515,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         pass
 
     def _initPlaneSelection(self, widget, strip, axis):
-        self.__postInit__(widget, strip, axis)
+        self._postInit(widget, strip, axis)
 
     # define the buttons for the Plane axis widget
     BUTTONS = (('_axisLabel', ActiveLabel, _initAxisCode, _setAxisCode, (0, 0), (1, 1)),
@@ -547,12 +547,14 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         self.strip.optionsChanged.connect(self._optionsChanged)
         self.mainWindow = mainWindow
 
-    def __postInit__(self, widget, strip, axis):
-        """Seems an awkward way of getting a generic post init function but can't think of anything else yet
+    def _postInit(self, widget, strip, axis):
+        """post-initialise functions
+        CCPN-Internal to be called at the end of __init__
+        Seems an awkward way of getting a generic post-init function but can't think of anything else yet
         """
         # assume that nothing has been set yet
         self._axisSelector._initialise(strip, axis)
-        self._axisLabel.setText(strip.axisCodes[axis] + ':')
+        self._axisLabel.setText(f'{strip.axisCodes[axis]}:')
         self._axisLabel.setToolTip(strip.axisCodes[axis])
         callbacks = {
             '_previousPlane'    : self._previousPlane,
@@ -941,10 +943,10 @@ DEFAULTCOLOUR = CCPNGLWIDGET_HEXFOREGROUND
 class StripHeaderWidget(_OpenGLFrameABC):
 
     def _initIcon(self, widget, strip):
-        self.__postIconInit__(widget, strip)
+        self._postIconInit(widget, strip)
 
     def _initStripHeader(self, widget, strip):
-        self.__postHeaderInit__(widget, strip)
+        self._postHeaderInit(widget, strip)
 
     BUTTONS = (('_nmrChainLeft', _StripLabel, None, None, (0, 0), (2, 1)),
                ('_nmrChainRight', _StripLabel, _initIcon, None, (0, 5), (2, 1)),
@@ -953,13 +955,13 @@ class StripHeaderWidget(_OpenGLFrameABC):
                ('_stripPercent', _StripLabel, _initStripHeader, None, (1, 3), (1, 2)),
                )
 
-    def __postIconInit__(self, widget, strip):
+    def _postIconInit(self, widget, strip):
         """Seems an awkward way of getting a generic post init function but can't think of anything else yet
         """
         # assume that nothing has been set yet
         pass
 
-    def __postHeaderInit__(self, widget, strip):
+    def _postHeaderInit(self, widget, strip):
         """Seems an awkward way of getting a generic post init function but can't think of anything else yet
         """
         # assume that nothing has been set yet
@@ -1184,7 +1186,7 @@ class StripHeaderWidget(_OpenGLFrameABC):
         if position in STRIPPOSITIONS:
             return self._labels[position]
         else:
-            raise ValueError('Error: %s is not a valid position' % str(position))
+            raise ValueError(f'Error: {str(position)} is not a valid position')
 
     def getLabelVisible(self, position=STRIPPOSITION_CENTRE):
         """Return if the widget at the given position is visible

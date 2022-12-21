@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:02 +0000 (Wed, November 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-21 12:16:42 +0000 (Wed, December 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -572,43 +572,65 @@ class Project(AbstractWrapperObject):
         """
         from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationEchoBlocking, apiNotificationBlanking
         from contextlib import suppress
-        from ccpn.core.lib.ContextManagers import progressHandler, ProgressCancelled
+        from ccpn.core.lib.ContextManagers import progressHandler
 
-        status = self._getAPIObjectsStatus(completeScan=True, onlyInvalids=False)
+        status = self._getAPIObjectsStatus(completeScan=True, onlyInvalids=False, checkValidity=False)
+
+        # reverse hierarchy to get lowest-level first, although not always perfect for cross-links
         df = status.data.sort_values('hierarchy', ascending=False)
+        getLogger().debug(f'Purging {len(df)} API-items')
+        apiHint = 'None'  # for debug message
 
+        # block everything
         with undoStackBlocking() as _:
             with notificationEchoBlocking():
                 with apiNotificationBlanking():
 
-                    count = len(df)
-                    pDiv = (count // 100) + 1
-                    totalCopies = int(count / pDiv)
+                    # override unnecessary warnings from root
+                    root = self._apiNmrProject.root
+                    root.override = True
 
-                    with progressHandler(title='busy', maximum=totalCopies,
+                    with progressHandler(title='busy', maximum=len(df) + 1,
                                          text='Cleaning-up Project', autoClose=True, hideCancelButton=True) as progress:
-                        try:
-                            for cc, (ii, ob) in enumerate(df.iterrows()):
 
-                                if cc % pDiv == 0:
-                                    # update the progress-bar - 100 steps at the most
-                                    progress.setValue(int(cc / pDiv))
+                        retries = []
+                        for cc, (ii, ob) in enumerate(df.iterrows()):
+                            # don't need to check cancelled
+                            # if 'close' clicked, will pop up again
+                            progress.setValue(cc)
 
-                                with suppress(Exception):
-                                    apiObj = ob['object']
+                            try:
+                                # errors only come from delete
+                                apiObj = ob['object']
+
+                                # override API to delete without checking state and notifiers :|
+                                apiObj.__dict__['isLoaded'] = True
+                                apiObj.__dict__['inConstructor'] = True
+                                if not apiObj.isDeleted:
+                                    # hierarchy may still delete bottom-level items
                                     apiObj.delete()
 
-                        except ProgressCancelled:
-                            getLogger().debug('progress cancelled')
+                            except Exception:
+                                # there might still be an issue with the removal order
+                                retries.append(apiObj)
 
-                        except Exception as es:
-                            # not cancel button
-                            getLogger().warning(f'error closing project: {es}')
+                        # perform a second pass to catch all the lowest-level items
+                        for apiObj in retries:
+                            try:
+                                apiHint = str(apiObj)
+                                # ignore deleted again
+                                if not apiObj.isDeleted:
+                                    apiObj.delete()
 
-                        else:
-                            progress.finalise()
-                            # set closing conditions here, or call progress.close() if autoClose not set
-                            progress.waitForEvents()
+                            except AttributeError:
+                                # errors shouldn't be an issue here, just NoneType, don't need to log
+                                pass
+
+                            except Exception as es:
+                                # only log anything weird
+                                getLogger().debug2(f'issue purging {apiHint}  -->  {es}')
+
+        getLogger().debug('done purge')
 
     def close(self):
         """Clean up the wrapper project previous to deleting or replacing
@@ -1396,7 +1418,7 @@ class Project(AbstractWrapperObject):
                 )
         dataUrl.url = Implementation.Url(path=str(path.as_posix()))
 
-    def _getAPIObjectsStatus(self, completeScan=False, onlyInvalids=True, includeDefaultChildren=False):
+    def _getAPIObjectsStatus(self, completeScan=False, onlyInvalids=True, includeDefaultChildren=False, checkValidity=True):
         """
         Scan all API objects and check their validity.
 
@@ -1405,7 +1427,8 @@ class Project(AbstractWrapperObject):
         includeDefaultChildren: bool, False to exclude default objects for inspection such as
                                 ChemComps and associated, nmrExpPrototypes etc.See _APIStatus._excludedChildren
                                 for the full list of exclusions.
-
+        checkValidity: bool, default True, check the validity of each API object
+                       set to False if only the list is required, note that this overrides completeScan
         Return: the API Status object. See _APIStatus for full description
 
         """
@@ -1413,7 +1436,8 @@ class Project(AbstractWrapperObject):
         from ccpn.core._implementation.APIStatus import APIStatus
 
         root = self._apiNmrProject.root
-        apiStatus = APIStatus(apiObj=root, onlyInvalids=onlyInvalids, completeScan=completeScan, includeDefaultChildren=includeDefaultChildren)
+        apiStatus = APIStatus(apiObj=root, onlyInvalids=onlyInvalids, completeScan=completeScan,
+                              includeDefaultChildren=includeDefaultChildren, checkValidity=checkValidity)
         return apiStatus
 
     def _update(self):
@@ -1542,7 +1566,7 @@ class Project(AbstractWrapperObject):
         """
 
         with logCommandManager('application.', 'loadData', path):
-            with undoBlock():
+            with undoBlockWithoutSideBar():
                 reader = ExcelReader(project=self, excelPath=str(path))
                 result = reader.load()
         return result

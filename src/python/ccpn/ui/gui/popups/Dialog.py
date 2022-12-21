@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:06 +0000 (Wed, November 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-21 12:16:45 +0000 (Wed, December 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,7 @@ from ccpn.ui.gui.lib.ChangeStateHandler import ChangeDict
 def _updateGl(self, spectrumList):
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
-    # # spawn a redraw of the contours
+    # # spawn a redraw-event of the contours
     # for spec in spectrumList:
     #     for specViews in spec.spectrumViews:
     #         specViews.buildContours = True
@@ -80,7 +80,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     APPLYBUTTONTEXT = 'Apply'
     OKBUTTONTEXT = 'OK'
 
-    # ok button is disabled on __init__ if the revert button has been enabled, requires call to __postInit__
+    # ok button is disabled on __init__ if the revert button has been enabled, requires call to _postInit
     DISABLEOK = False
 
     USESCROLLWIDGET = False
@@ -115,14 +115,14 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         # get the initial size as a QSize
         try:
             self._size = QtCore.QSize(*size) if size else None
-        except Exception as es:
-            raise TypeError(f'bad size {size}')
+        except Exception:
+            raise TypeError(f'bad size {size}') from None
 
         # get the initial size as a QSize
         try:
             self._minimumSize = QtCore.QSize(*minimumSize) if minimumSize else None
-        except Exception as es:
-            raise TypeError(f'bad minimumSize {size}')
+        except Exception:
+            raise TypeError(f'bad minimumSize {size}') from None
 
         # set up the mainWidget area
         self.mainWidget = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
@@ -172,12 +172,21 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         _toolBG = getColours()[TOOLTIP_BACKGROUND]
         self.setStyleSheet(f'QToolTip {{ background-color: {_toolBG}; font-size: {self.font().pointSize()}pt ; }}')
 
-    def __postInit__(self):
-        """post initialise functions
+        ## WARNING ==> setAttribute WA_DeleteOnClose, True :
+        ## This flag should be used after checking all popup are closed correctly
+        ## and there is no access to the object after deleting it,
+        ## otherwise will raise threading issues
+        # self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
+
+    def _postInit(self):
+        """post-initialise functions
+        CCPN-Internal to be called at the end of __init__
         """
+        # set the desired buttons, and size of dialog
         self._setButtons()
         self._setDialogSize()
 
+        # set the initial enabled/disabled state of buttons
         if self.getButton(self.OKBUTTON) and self.DISABLEOK:
             self.getButton(self.OKBUTTON).setEnabled(False or not self.EDITMODE)
         if self.getButton(self.APPLYBUTTON):
@@ -194,8 +203,8 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         # get the initial size as a QSize
         try:
             size = self._size if isinstance(self._size, QtCore.QSize) else QtCore.QSize(*self._size) if self._size else None
-        except Exception as es:
-            raise TypeError('bad size {}'.format(self._size))
+        except Exception:
+            raise TypeError(f'bad size {self._size}') from None
 
         _size = QtCore.QSize(size.width() if size else self.sizeHint().width(),
                              size.height() if size else self.sizeHint().height())
@@ -203,8 +212,8 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         # get the initial minimumSize as a QSize
         try:
             minimumSize = self._minimumSize if isinstance(self._minimumSize, QtCore.QSize) else QtCore.QSize(*self._minimumSize) if self._minimumSize else None
-        except Exception as es:
-            raise TypeError('bad minimumSize {}'.format(self._minimumSize))
+        except Exception:
+            raise TypeError(f'bad minimumSize {self._minimumSize}') from None
 
         _minimumSize = QtCore.QSize(minimumSize.width() if minimumSize else self.sizeHint().width(),
                                     minimumSize.height() if minimumSize else self.sizeHint().height())
@@ -364,7 +373,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         Revert (roll-back) the state of the project to before the popup was opened
         """
         if self.project and self.project._undo:
-            for undos in range(self._currentNumApplies):
+            for _ in range(self._currentNumApplies):
                 self.project._undo.undo()
 
         self._populate()
@@ -376,10 +385,10 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         """Set the state of the ok/apply/cancel buttons
         """
         if not hasattr(self, GETCHANGESTATE):
-            raise RuntimeError('widget {} must have changes defined'.format(self))
+            raise RuntimeError(f'widget {self} must have changes defined')
         _getChanges = getattr(self, GETCHANGESTATE)
         if not callable(_getChanges):
-            raise RuntimeError('changes method for {} not correctly defined'.format(self))
+            raise RuntimeError(f'changes method for {self} not correctly defined')
 
         # get the information from the popup - which must handle its own nested _changes
         _changes = _getChanges()
@@ -483,7 +492,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
 
         if self.EDITMODE:
             # get the list of widgets that have been changed - exit if all empty
-            allChanges = True if self._changes else False
+            allChanges = bool(self._changes)
             if not allChanges:
                 return True
 
@@ -603,12 +612,13 @@ class CcpnDialog(QtWidgets.QDialog, Base):
         self.setFixedSize(self.maximumWidth(), self.maximumHeight())
         self.setSizeGripEnabled(False)
 
-    def setDefaultButton(self, button):
-        if isinstance(button, QtWidgets.QPushButton):
-            button.setDefault(True)
-            button.setAutoDefault(True)
-        else:
-            raise TypeError('%s is not a button' % str(button))
+    @staticmethod
+    def setDefaultButton(button):
+        if not isinstance(button, QtWidgets.QPushButton):
+            raise TypeError(f'{str(button)} is not a button')
+
+        button.setDefault(True)
+        button.setAutoDefault(True)
 
 
 def dialogErrorReport(self, undo, es):
@@ -630,9 +640,9 @@ def dialogErrorReport(self, undo, es):
         undo.undo()
         undo.clearRedoItems()
 
-        getLogger().debug('>>>Undo.%s._applychanges' % errorName)
+        getLogger().debug(f'>>>Undo.{errorName}._applychanges')
     else:
-        getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
+        getLogger().debug(f'>>>Undo.{errorName}._applychanges nothing to remove')
 
 
 @contextmanager
@@ -684,10 +694,10 @@ def _verifyPopupApply(self, attributeName, value, last, *postArgs, **postKwds):
     """Change the state of the apply button based on the changes in the tabs
     """
     if not hasattr(self, GETCHANGESTATE):
-        raise RuntimeError('widget {} must have changes defined'.format(self))
+        raise RuntimeError(f'widget {self} must have changes defined')
     _getChanges = getattr(self, GETCHANGESTATE)
     if not callable(_getChanges):
-        raise RuntimeError('changes method for {} not correctly defined'.format(self))
+        raise RuntimeError(f'changes method for {self} not correctly defined')
 
     # _changes must be a ChangeDict and be enabled to accept changes from the gui
     if not self._changes.enabled:
@@ -705,7 +715,7 @@ def _verifyPopupApply(self, attributeName, value, last, *postArgs, **postKwds):
         for k, pf in sorted(postKwds.items()):
             if pf is not None:
                 attributeName += str(pf)
-        attributeName += str(id(self))
+        attributeName += f'{id(self)}'
 
         if value:
             # store in dict - overwrite as required
@@ -714,12 +724,12 @@ def _verifyPopupApply(self, attributeName, value, last, *postArgs, **postKwds):
                 # put to the front if needed - could put priority into the attribute-name and then sort
                 self._changes.move_to_end(attributeName, last=False)
 
-        else:
-            if attributeName in self._changes:
-                # delete from dict - empty dict implies no changes
-                del self._changes[attributeName]
+        elif attributeName in self._changes:
+            # delete from dict - empty dict implies no changes
+            del self._changes[attributeName]
 
-        getLogger().debug2('>>>attrib %s %s' % (attributeName, self._changes[attributeName] if attributeName in self._changes else 'None'))
+        getLogger().debug2(f">>>attrib {attributeName} {self._changes[attributeName] if attributeName in self._changes else 'None'}")
+
         if getattr(self, 'LIVEDIALOG', None):
             self._changeSettings()
 

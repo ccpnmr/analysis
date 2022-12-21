@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:04 +0000 (Wed, November 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-21 12:16:44 +0000 (Wed, December 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1811,6 +1811,10 @@ class GuiSpectrumDisplay(CcpnModule):
                     strip._finaliseAction('delete')
                     with notificationBlanking():
                         strip._delete()
+
+                        # this makes it unrecoverable
+                        #   - okay, as strips not allowed to undo, note that it is not in the undo-list above
+                        strip.close()
 
                     addUndoItem(redo=partial(self._redrawAxes, deletingStrip=True))
 

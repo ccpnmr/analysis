@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 16:20:49 +0100 (Thu, October 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-21 12:16:45 +0000 (Wed, December 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -78,7 +78,9 @@ class CreateNmrChainPopup(CcpnDialogMainWidget):
         self.setOkButton(callback=self._applyChanges, text='Create')
         self.setCloseButton(callback=self.reject)
         self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
-        self.__postInit__()
+
+        # initialise the buttons and dialog size
+        self._postInit()
         self._createButton = self.dialogButtons.button(self.OKBUTTON)
         self._closeButton = self.dialogButtons.button(self.CLOSEBUTTON)
 

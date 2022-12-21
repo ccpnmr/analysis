@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-06 18:40:16 +0000 (Tue, December 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-21 12:16:44 +0000 (Wed, December 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,19 +28,19 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 
 # import sys
-import os
+# import os
 import io
 import numpy as np
 import math
-import glob
+# import glob
 import contextlib
-from itertools import zip_longest
+# from itertools import zip_longest
 from dataclasses import dataclass
 from collections import OrderedDict
 from collections.abc import Iterable
 # from PyQt5 import QtGui
-from PyQt5.QtCore import QStandardPaths
-from PyQt5.QtGui import QFontDatabase
+# from PyQt5.QtCore import QStandardPaths
+# from PyQt5.QtGui import QFontDatabase
 # from PyQt5.QtWidgets import QApplication
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Flowable
 from reportlab.lib.styles import getSampleStyleSheet
@@ -58,6 +58,7 @@ from reportlab.platypus.tables import Table, TableStyle
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
+from ccpn.ui.gui.widgets.Font import getSystemFonts
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import viewportDimensions
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import SPECTRUM_STACKEDMATRIX, SPECTRUM_MATRIX, \
     GLLINE_STYLES_ARRAY, SPECTRUM_XLIMITS, SPECTRUM_AF, SPECTRUM_ALIASINGINDEX, SPECTRUM_FOLDINGMODE, \
@@ -195,9 +196,11 @@ class GLExporter():
             # print the whole spectrumDisplay
             spectrumDisplay = self.params[GLSPECTRUMDISPLAY]
 
+            _ratios = self._getStripUpdateRatios(spectrumDisplay.orderedStrips)
+
             self._selectedStrip = self.strip
             self.numStrips = len(spectrumDisplay.strips)
-            self._buildPageDimensions(spectrumDisplay.strips)
+            self._buildPageDimensions(spectrumDisplay.strips, _ratios)
 
             for strNum, strip in enumerate(spectrumDisplay.orderedStrips):
                 self.stripNumber = strNum
@@ -218,9 +221,9 @@ class GLExporter():
             # self._parent still points to the last strip - check not to double up the last axis
             if self.params[GLSTRIPDIRECTION] == 'Y':
                 if self._parent and not self._parent._drawRightAxis:
-                    self._createStrip(spectrumDisplay.orderedStrips[0], spectrumDisplay._rightGLAxis, singleStrip=False, axesOnly=True)
+                    self._createStrip(strip, spectrumDisplay._rightGLAxis, singleStrip=False, axesOnly=True)
             elif self._parent and not self._parent._drawBottomAxis:
-                self._createStrip(spectrumDisplay.orderedStrips[0], spectrumDisplay._bottomGLAxis, singleStrip=False, axesOnly=True)
+                self._createStrip(strip, spectrumDisplay._bottomGLAxis, singleStrip=False, axesOnly=True)
 
             # reset after creating the other strips
             # NOTE:ED - need to store the previous values
@@ -231,9 +234,11 @@ class GLExporter():
             strip = self.params[GLSTRIP]
             spectrumDisplay = strip.spectrumDisplay
 
+            _ratios = self._getStripUpdateRatios([strip])
+
             self._selectedStrip = strip
             self.numStrips = 1
-            self._buildPageDimensions([strip])
+            self._buildPageDimensions([strip], _ratios)
 
             self.stripNumber = 0
             self._linkedAxisStrip = None
@@ -243,9 +248,9 @@ class GLExporter():
             self._linkedAxisStrip = strip
             if self.params[GLSTRIPDIRECTION] == 'Y':
                 if self._parent and not self._parent._drawRightAxis:
-                    self._createStrip(spectrumDisplay.orderedStrips[0], spectrumDisplay._rightGLAxis, singleStrip=True, axesOnly=True)
+                    self._createStrip(strip, spectrumDisplay._rightGLAxis, singleStrip=True, axesOnly=True)
             elif self._parent and not self._parent._drawBottomAxis:
-                self._createStrip(spectrumDisplay.orderedStrips[0], spectrumDisplay._bottomGLAxis, singleStrip=True, axesOnly=True)
+                self._createStrip(strip, spectrumDisplay._bottomGLAxis, singleStrip=True, axesOnly=True)
 
             # reset after creating the other strips
             self._resetStripRightBottomAxes()
@@ -260,7 +265,7 @@ class GLExporter():
         self.strip = strip
         self._parent = self.strip._CcpnGLWidget if _parent is None else _parent
 
-        self._buildPage(singleStrip=singleStrip)
+        self._buildPage(singleStrip=singleStrip, strip=strip, axesOnly=axesOnly)
         self._setStripAxes()
         self._modifyScaling()
         self._buildStrip(axesOnly=axesOnly)
@@ -295,36 +300,6 @@ class GLExporter():
         self.stripWidths.append(report.width)
         self.stripHeights.append(report.height)
 
-    def _getFontPaths(self):
-        font_paths = set(QStandardPaths.standardLocations(QStandardPaths.FontsLocation))
-
-        if isWindowsOS():
-            font_paths = list(font_paths | {"C:/Windows/Fonts"})
-        elif isMacOS():
-            font_paths = list(font_paths | {"/System/Library/Fonts"})
-        elif isLinux():
-            font_paths = list(font_paths | {"~/.fonts", "~/.local/share/fonts", "/usr/local/share/fonts", "/usr/share/fonts"})
-
-        unloadable = []
-        familyPath = {}
-
-        db = QFontDatabase()
-        for fpath in font_paths:  # go through all font paths
-            if aPath(fpath).is_dir():
-                for filename in glob.glob(f'{fpath}/**/*.ttf', recursive=True):  # go through all files at each path
-                    path = os.path.join(fpath, filename)
-
-                    idx = db.addApplicationFont(path)  # add font path
-                    if idx < 0:
-                        unloadable.append(path)  # font wasn't loaded if idx is -1
-                    else:
-                        names = db.applicationFontFamilies(idx)  # load back font family name
-                        for n in names:
-                            _paths = familyPath.setdefault(n, set())
-                            _paths.add(path)
-
-        return unloadable, familyPath
-
     def _importFonts(self):
         from ccpn.framework.PathsAndUrls import fontsPath
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLFONT_SUBSTITUTE
@@ -337,8 +312,7 @@ class GLExporter():
         if self.params[GLUSEPRINTFONT]:
             _fontName, _fontSize = self.params[GLPRINTFONT]
 
-            unloadable, familyPath = self._getFontPaths()
-            _paths = familyPath.get(_fontName, [])
+            _paths = getSystemFonts().get(_fontName, [])
             for _path in _paths:
                 with contextlib.suppress(Exception):
                     pdfmetrics.registerFont(TTFont(_fontName, _path))
@@ -360,25 +334,26 @@ class GLExporter():
         justFont = pdfmetrics.Font('Open Sans', faceName, 'WinAnsiEncoding')
         pdfmetrics.registerFont(justFont)
 
-    def _buildPageDimensions(self, strips):
+    def _buildPageDimensions(self, strips, ratios):
         """Calculate the scaling required for the whole page
         """
         st = strips[0]._CcpnGLWidget
+        xr, yr = ratios
         if self.params[GLSTRIPDIRECTION] == 'Y':
-            fh = st.height()
-            _widths = [st._CcpnGLWidget.width() for st in strips]
+            fh = st.height() * yr[st.strip.id]
+            _widths = [st._CcpnGLWidget.width() * xr[st.id] for st in strips]
             if self.numStrips > 1:
                 _widths.append((self.numStrips - 1) * self.params[GLSTRIPPADDING])
             if st and not st._drawRightAxis:
-                _widths.append(strips[0].spectrumDisplay._rightGLAxis.width())
+                _widths.append(strips[0].spectrumDisplay._rightGLAxis.width() * xr['axis'])
             fw = sum(_widths)
         else:
-            fw = st.width()
-            _heights = [st._CcpnGLWidget.height() for st in strips]
+            fw = st.width() * xr[st.strip.id]
+            _heights = [st._CcpnGLWidget.height() * yr[st.id] for st in strips]
             if self.numStrips > 1:
                 _heights.append((self.numStrips - 1) * self.params[GLSTRIPPADDING])
             if st and not st._drawBottomAxis:
-                _heights.append(self.strip.spectrumDisplay._bottomGLAxis.height())
+                _heights.append(self.strip.spectrumDisplay._bottomGLAxis.height() * yr['axis'])
             fh = sum(_heights)
 
         # dimensions of the strip list - should be ints
@@ -412,7 +387,7 @@ class GLExporter():
         # read the strip spacing from the params
         self._stripSpacing = self.params[GLSTRIPPADDING]  #* self._displayScale
 
-    def _buildPage(self, singleStrip=True):
+    def _buildPage(self, singleStrip=True, strip=None, axesOnly=False):
         """Build the main sections of the pdf file from a drawing object
         and add the drawing object to a reportlab document
         """
@@ -430,6 +405,20 @@ class GLExporter():
 
         _parentH = self._parent.h
         _parentW = self._parent.w
+
+        # more scale here :|
+        if axesOnly:
+            if (sc := self._updateScalesX.get('axis', 0.0)) > 0.01:
+                # hard-limit so there are no division-by-zeroes
+                _parentW = int(_parentW * sc)
+            if (sc := self._updateScalesY.get('axis', 0.0)) > 0.01:
+                _parentH = int(_parentH * sc)
+        else:
+            if (sc := self._updateScalesX.get(strip.id, 0.0)) > 0.01:
+                # hard-limit so there are no division-by-zeroes
+                _parentW = int(_parentW * sc)
+            if (sc := self._updateScalesY.get(strip.id, 0.0)) > 0.01:
+                _parentH = int(_parentH * sc)
 
         if not self.rAxis and not self.bAxis:
             # no axes visible
@@ -674,63 +663,113 @@ class GLExporter():
 
         thisPlot.add(gr, name='mainPlotBox')
 
+    def _getStripUpdateRatios(self, strips):
+        """Get the ratios for keeping the aspect if strips have _updateAxes set
+        """
+        self._updateScalesX = {}
+        self._updateScalesY = {}
+        for strip in strips:
+            self._updateAxes = False
+            _dd = self.params[GLSTRIPREGIONS][strip.id]
+            if _dd.useRegion:
+                # set the range for the display
+                yt, yb = _axisT, _axisB = round(strip._CcpnGLWidget.axisT, 2), round(strip._CcpnGLWidget.axisB, 2)
+                xl, xr = _axisL, _axisR = round(strip._CcpnGLWidget.axisL, 2), round(strip._CcpnGLWidget.axisR, 2)
+                for ii, ddAxis in enumerate(_dd.axes):
+                    # if _dd.minMaxMode == 0:
+                    if ii == 0:
+                        _axisL, _axisR = ddAxis['Min'], ddAxis['Max']
+                    else:
+                        _axisT, _axisB = ddAxis['Min'], ddAxis['Max']
+
+                    # elif ii == 0:
+                    #     _axisL, _axisR = ddAxis['Centre'] + ddAxis['Width'] / 2, ddAxis['Centre'] - ddAxis['Width'] / 2
+                    # else:
+                    #     _axisT, _axisB = ddAxis['Centre'] + ddAxis['Width'] / 2, ddAxis['Centre'] - ddAxis['Width'] / 2
+
+                self._updateScalesX[strip.id] = abs((_axisR - _axisL) / (xr - xl))
+                self._updateScalesY[strip.id] = abs((_axisT - _axisB) / (yt - yb))
+
+            else:
+                self._updateScalesX[strip.id] = 1.0
+                self._updateScalesY[strip.id] = 1.0
+
+        # repeat the last value depending on strip-direction
+        if self.params[GLSTRIPDIRECTION] == 'Y':
+            self._updateScalesX['axis'] = 1.0
+            self._updateScalesY['axis'] = self._updateScalesY[strip.id]
+        else:
+            self._updateScalesX['axis'] = self._updateScalesX[strip.id]
+            self._updateScalesY['axis'] = 1.0
+
+        return (self._updateScalesX, self._updateScalesY)
+
     def _setStripAxes(self):
 
         # set the range for the display
         self._oldValues = (self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR, self.strip._CcpnGLWidget.axisT, self.strip._CcpnGLWidget.axisB)
+        self._oldSize = (self.strip._CcpnGLWidget.w, self.strip._CcpnGLWidget.h)
         try:
             self._updateAxes = False
             _dd = self.params[GLSTRIPREGIONS][self.strip.id]
             self._updateAxes = _dd.useRegion
             if self._updateAxes:
                 for ii, ddAxis in enumerate(_dd.axes):
-                    if _dd.minMaxMode == 0:
-                        self.strip.setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
 
-                        if self.params[GLSTRIPDIRECTION] == 'Y':
-                            if not self.rAxis:
-                                self.strip.spectrumDisplay._rightGLAxis._setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
-                        elif not self.bAxis:
-                            self.strip.spectrumDisplay._bottomGLAxis._setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
-                    else:
-                        self.strip.setAxisPosition(ii, ddAxis['Centre'], rescale=False, update=False)
-                        self.strip.setAxisWidth(ii, ddAxis['Width'], rescale=False, update=False)
+                    # if _dd.minMaxMode == 0:
+                    self.strip.setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
 
-                        if self.params[GLSTRIPDIRECTION] == 'Y':
-                            if not self.rAxis:
-                                self.strip.spectrumDisplay._rightGLAxis._setAxisPosition(ii, ddAxis['Centre'], rescale=False, update=False)
-                                self.strip.spectrumDisplay._rightGLAxis._setAxisWidth(ii, ddAxis['Width'], rescale=False, update=False)
-                        elif not self.bAxis:
-                            self.strip.spectrumDisplay._bottomGLAxis._setAxisPosition(ii, ddAxis['Centre'], rescale=False, update=False)
-                            self.strip.spectrumDisplay._bottomGLAxis._setAxisWidth(ii, ddAxis['Width'], rescale=False, update=False)
+                    if self.params[GLSTRIPDIRECTION] == 'Y':
+                        if not self.rAxis:
+                            self.strip.spectrumDisplay._rightGLAxis._setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
+                    elif not self.bAxis:
+                        self.strip.spectrumDisplay._bottomGLAxis._setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
+                    # else:
+                    #     self.strip.setAxisPosition(ii, ddAxis['Centre'], rescale=False, update=False)
+                    #     self.strip.setAxisWidth(ii, ddAxis['Width'], rescale=False, update=False)
+                    #
+                    #     if self.params[GLSTRIPDIRECTION] == 'Y':
+                    #         if not self.rAxis:
+                    #             self.strip.spectrumDisplay._rightGLAxis._setAxisPosition(ii, ddAxis['Centre'], rescale=False, update=False)
+                    #             self.strip.spectrumDisplay._rightGLAxis._setAxisWidth(ii, ddAxis['Width'], rescale=False, update=False)
+                    #     elif not self.bAxis:
+                    #         self.strip.spectrumDisplay._bottomGLAxis._setAxisPosition(ii, ddAxis['Centre'], rescale=False, update=False)
+                    #         self.strip.spectrumDisplay._bottomGLAxis._setAxisWidth(ii, ddAxis['Width'], rescale=False, update=False)
 
-                self._axisL = self.strip._CcpnGLWidget.axisL
-                self._axisR = self.strip._CcpnGLWidget.axisR
-                self._axisT = self.strip._CcpnGLWidget.axisT
-                self._axisB = self.strip._CcpnGLWidget.axisB
+                self._setAxisValues()
 
-                self.strip._CcpnGLWidget._rescaleAllAxes(update=False)
-                self.strip._CcpnGLWidget._buildGL()
-                self.strip._CcpnGLWidget.buildAxisLabels()
+                # self.strip._CcpnGLWidget.w *= (self._updateScalesX.get(self.strip.id, 1.0) / self._updateScalesY.get(self.strip.id, 1.0))
+                self.strip._CcpnGLWidget.w *= self._updateScalesX.get(self.strip.id, 1.0)
+                self.strip._CcpnGLWidget.h *= self._updateScalesY.get(self.strip.id, 1.0)
 
+                self._rebuildGL(self.strip._CcpnGLWidget)
                 if self.params[GLSTRIPDIRECTION] == 'Y':
                     if not self.rAxis:
-                        self.strip.spectrumDisplay._rightGLAxis._rescaleAllAxes(update=False)
-                        self.strip.spectrumDisplay._rightGLAxis._buildGL()
-                        self.strip.spectrumDisplay._rightGLAxis.buildAxisLabels(refresh=True)
+                        self._rebuildGL(self.strip.spectrumDisplay._rightGLAxis)
                 elif not self.bAxis:
-                    self.strip.spectrumDisplay._bottomGLAxis._rescaleAllAxes(update=False)
-                    self.strip.spectrumDisplay._bottomGLAxis._buildGL()
-                    self.strip.spectrumDisplay._bottomGLAxis.buildAxisLabels(refresh=True)
+                    self._rebuildGL(self.strip.spectrumDisplay._bottomGLAxis)
 
             else:
-                self._axisL = self.strip._CcpnGLWidget.axisL
-                self._axisR = self.strip._CcpnGLWidget.axisR
-                self._axisT = self.strip._CcpnGLWidget.axisT
-                self._axisB = self.strip._CcpnGLWidget.axisB
+                self._setAxisValues()
 
         except Exception as es:
             getLogger().debug(f'_setStripAxes: problem creating page {es}')
+
+    @staticmethod
+    def _rebuildGL(GLWidget):
+        """Rebuild the GL-widget
+        """
+        GLWidget._rescaleAllAxes(update=False)
+        GLWidget._buildGL()
+        GLWidget.buildAxisLabels(refresh=True)
+
+    def _setAxisValues(self):
+        """Set the axis values from the strip
+        """
+        self._axisL = self.strip._CcpnGLWidget.axisL
+        self._axisR = self.strip._CcpnGLWidget.axisR
+        self._axisT = self.strip._CcpnGLWidget.axisT
+        self._axisB = self.strip._CcpnGLWidget.axisB
 
     def _buildStrip(self, axesOnly=False):
         # create an object that can be added to a report
@@ -801,13 +840,17 @@ class GLExporter():
         if self.params[GLAXISLABELS] or self.params[GLAXISUNITS] or self.params[GLAXISTITLES]: self._addGridLabels()
 
     def _resetStripAxes(self):
-        with contextlib.suppress(Exception):
+        try:
             if self._updateAxes:
                 # reset the strip to the original values
                 self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR, self.strip._CcpnGLWidget.axisT, self.strip._CcpnGLWidget.axisB = self._oldValues
+                self.strip._CcpnGLWidget.w, self.strip._CcpnGLWidget.h = self._oldSize
+
                 self.strip._CcpnGLWidget._rescaleAllZoom()
                 self.strip._CcpnGLWidget._buildGL()
                 self.strip._CcpnGLWidget.buildAxisLabels()
+        except Exception as es:
+            getLogger().debug('There was an issue resetting the strip')
 
     def _resetStripRightBottomAxes(self):
         with contextlib.suppress(Exception):
@@ -1837,17 +1880,19 @@ class GLExporter():
                         fontName=_fontName,
                         fillColor=colour)
 
-        if boxed:
+        with contextlib.suppress(KeyError):
+            # sometimes reportlab can't find the font :|
             bounds = newStr.getBounds()
-            # arbitrary scaling
-            dx = _fontSize * 0.11
-            dy = _fontSize * 0.125
-            colourGroups[colourPath].add(Rect(bounds[0] - dx, bounds[1] - dy,
-                                              (bounds[2] - bounds[0]) + 5 * dx, (bounds[3] - bounds[1]) + 2.0 * dy,
-                                              strokeColor=None,
-                                              fillColor=self.backgroundColour))
+            if boxed:
+                # arbitrary scaling
+                dx = _fontSize * 0.11
+                dy = _fontSize * 0.125
+                colourGroups[colourPath].add(Rect(bounds[0] - dx, bounds[1] - dy,
+                                                  (bounds[2] - bounds[0]) + 5 * dx, (bounds[3] - bounds[1]) + 2.0 * dy,
+                                                  strokeColor=None,
+                                                  fillColor=self.backgroundColour))
 
-        colourGroups[colourPath].add(newStr)
+            colourGroups[colourPath].add(newStr)
 
     def _addGridLabels(self):
         """

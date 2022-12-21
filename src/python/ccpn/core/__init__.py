@@ -491,16 +491,15 @@ _coreClassMap = collections.OrderedDict()
 # Main data classes
 for className in _coreImportOrder:
     try:
-        impModule = importlib.import_module('ccpn.core.%s' % className)
+        impModule = importlib.import_module(f'ccpn.core.{className}')
     except Exception:
         # _OldChemicalShift and _PeakCluster have been moved to _implementation
-        impModule = importlib.import_module('ccpn.core._implementation.%s' % className)
+        impModule = importlib.import_module(f'ccpn.core._implementation.{className}')
     cls = getattr(impModule, className)
     parentClass = cls._parentClass
-    if parentClass is not None:
-        if cls not in parentClass._childClasses:
-            # Should not be necessary to check, but apparently this code can be executed twice
-            parentClass._childClasses.append(cls)
+    if parentClass is not None and cls not in parentClass._childClasses:
+        # Should not be necessary to check, but apparently this code can be executed twice
+        parentClass._childClasses.append(cls)
     _coreClassMap[cls.className] = cls
     _coreClassMap[cls.shortClassName] = cls
 
@@ -510,12 +509,12 @@ from ccpn.ui._implementation import _uiImportOrder
 
 _importOrder.extend(_uiImportOrder)
 for className in _uiImportOrder:
-    cls = getattr(importlib.import_module('ccpn.ui._implementation.%s' % className), className)
+    cls = getattr(importlib.import_module(f'ccpn.ui._implementation.{className}'), className)
+
     parentClass = cls._parentClass
-    if parentClass is not None:
-        if cls not in parentClass._childClasses:
-            # Should not be necessary to check, but apparently this code can be executed twice
-            parentClass._childClasses.append(cls)
+    if parentClass is not None and cls not in parentClass._childClasses:
+        # Should not be necessary to check, but apparently this code can be executed twice
+        parentClass._childClasses.append(cls)
     _coreClassMap[cls.className] = cls
     _coreClassMap[cls.shortClassName] = cls
 

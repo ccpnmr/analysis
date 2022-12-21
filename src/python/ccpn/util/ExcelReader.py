@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:09 +0000 (Wed, November 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-21 12:16:48 +0000 (Wed, December 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Path import aPath, joinPath
 from ccpn.util.Colour import name2Hex
 from itertools import cycle
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking, progressHandler
 
 ################################       Excel Headers Warning      ######################################################
 """The excel headers for sample, sampleComponents, substances properties are named as the appear on the wrapper.
@@ -213,6 +214,7 @@ class ExcelReader(object):
 
 
         """
+        self._totalProcessesCount = 0
         self._project = project
         self.excelPath = aPath(excelPath)
         self.pandasFile = pd.ExcelFile(self.excelPath)
@@ -227,17 +229,33 @@ class ExcelReader(object):
         self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
         self.samplesDicts = self._createSamplesDataDicts(self.dataframes)
         self.spectrumGroups = self._createSpectrumGroups(self.dataframes)
+        self._totalProcessesCount = 5
 
+        processCount = 1
+        #### Loading Substances metadata #######
         getLogger().info('Loading Substances metadata...')
-        self._dispatchAttrsToObjs(self.substancesDicts)
+        self._dispatchAttrsToObjs(self.substancesDicts, processCount=processCount, sheetName='Substances')
+        processCount += 1
+
+        #### Loading Substances Spectra #######
         getLogger().info('Loading Substances Spectra...')
-        self._loadSpectraForSheet(self.substancesDicts)
+        self._loadSpectraForSheet(self.substancesDicts, processCount=processCount, sheetName='Substances')
+        processCount += 1
+
+        #### Loading Samples metadata #######
         getLogger().info('Loading Samples metadata...')
-        self._dispatchAttrsToObjs(self.samplesDicts)
+        self._dispatchAttrsToObjs(self.samplesDicts,  processCount=processCount, sheetName='Samples')
+        processCount += 1
+
+        #### Loading Substances Spectra #######
         getLogger().info('Loading Samples Spectra...')
-        self._loadSpectraForSheet(self.samplesDicts)
+        self._loadSpectraForSheet(self.samplesDicts, processCount=processCount, sheetName='Samples')
+        processCount += 1
+
+        #### Loading SpectrumGroups #######
         getLogger().info('Loading SpectrumGroups...')
-        self._fillSpectrumGroups()
+        self._fillSpectrumGroups(processCount=processCount, sheetName='')
+
         getLogger().info('Loading from Excel completed...')
 
         # self._project.unblankNotification()
@@ -378,7 +396,7 @@ class ExcelReader(object):
     ######################             LOAD SPECTRA ON PROJECT              ##############################################
     ######################################################################################################################
 
-    def _loadSpectraForSheet(self, dictLists):
+    def _loadSpectraForSheet(self, dictLists, processCount, sheetName):
         """
         Paths in an Excel sheet can be:
             - absolute (full path)
@@ -387,29 +405,35 @@ class ExcelReader(object):
         """
         _args = []
         if self._project is not None:
-            for objDict in dictLists:
-                for obj, dct in objDict.items():
-                    for key, value in dct.items():
-                        if key == SPECTRUM_PATH:
-                            excelSpectrumPath = aPath(str(value))
-                            if excelSpectrumPath.exists():
-                                ### We have the absolute (full path)
-                                self._addSpectrum(filePath=excelSpectrumPath, dct=dct, obj=obj)
-                            else:
-                                ### We are in a relative path scenario
-                                self.directoryPath = self.excelPath.filepath
-                                globalFilePath = aPath(joinPath(self.directoryPath, excelSpectrumPath))
-                                if globalFilePath.exists():
-                                    ### it is a folder, e.g Bruker type. We can handle it already.
-                                    self._addSpectrum(filePath=globalFilePath, dct=dct, obj=obj)
+            process = f'Performing actions {str(processCount)}/{str(self._totalProcessesCount)}:'
+            text = f'Loading Spectra for {sheetName}'
+            text = f"""{process}\n{text}"""
+            with progressHandler(title='Loading Data', maximum=len(dictLists), text=text, autoClose=True,
+                                 hideCancelButton=True, ) as progress:
+                for i, objDict in enumerate(dictLists):
+                    progress.setValue(i)
+                    for obj, dct in objDict.items():
+                        for key, value in dct.items():
+                            if key == SPECTRUM_PATH:
+                                excelSpectrumPath = aPath(str(value))
+                                if excelSpectrumPath.exists():
+                                    ### We have the absolute (full path)
+                                    self._addSpectrum(filePath=excelSpectrumPath, dct=dct, obj=obj)
                                 else:
-                                    ### it is a single spectrum file name or relative path for a single file,
-                                    ### e.g.: "mySpectrum" or "mySpectrum.hdf5" or "myDir/mySpectrum.hdf5"
-                                    globalDirFilePath = globalFilePath.filepath
-                                    globalfilePaths = globalDirFilePath.listDirFiles()
-                                    for _globalfilePath in globalfilePaths:
-                                        if _globalfilePath.basename == excelSpectrumPath.basename:
-                                            self._addSpectrum(filePath=_globalfilePath, dct=dct, obj=obj)
+                                    ### We are in a relative path scenario
+                                    self.directoryPath = self.excelPath.filepath
+                                    globalFilePath = aPath(joinPath(self.directoryPath, excelSpectrumPath))
+                                    if globalFilePath.exists():
+                                        ### it is a folder, e.g Bruker type. We can handle it already.
+                                        self._addSpectrum(filePath=globalFilePath, dct=dct, obj=obj)
+                                    else:
+                                        ### it is a single spectrum file name or relative path for a single file,
+                                        ### e.g.: "mySpectrum" or "mySpectrum.hdf5" or "myDir/mySpectrum.hdf5"
+                                        globalDirFilePath = globalFilePath.filepath
+                                        globalfilePaths = globalDirFilePath.listDirFiles()
+                                        for _globalfilePath in globalfilePaths:
+                                            if _globalfilePath.basename == excelSpectrumPath.basename:
+                                                self._addSpectrum(filePath=_globalfilePath, dct=dct, obj=obj)
 
 
     def _addSpectrum(self, filePath, dct, obj):
@@ -461,37 +485,50 @@ class ExcelReader(object):
                 if SERIES in dct:  # direct insertion of series values for speed optimisation
                     spectrum._setInternalParameter(spectrum._SERIESITEMS, {'SG:' + str(value): dct[SERIES]})
 
-    def _fillSpectrumGroups(self):
+    def _fillSpectrumGroups(self,  processCount, sheetName=None):
 
         colourNames = cycle(TOP_SG_COLOURS)
-        for sgName, spectra in self._tempSpectrumGroupsSpectra.items():
-            spectrumGroup = self._project.getByPid('SG:' + str(sgName))
-            if spectrumGroup is not None:
-                spectrumGroup.spectra = spectra
-            # give some default colours
-            if self._addDefaultSpectrumColours:
-                hexColour = name2Hex( next(colourNames))
-                spectrumGroup.sliceColour = hexColour
-                for sp in spectra:
-                    sp.sliceColour = hexColour
+        loopLenght = len(self._tempSpectrumGroupsSpectra.items())
+        process = f'Performing actions {str(processCount)}/{str(self._totalProcessesCount)}:'
+        text = f'Loading SpectrumGroups'
+        text = f"""{process}\n{text}"""
+        with progressHandler(title='Loading Data', maximum=loopLenght, text=text, autoClose=True,
+                             hideCancelButton=True, ) as progress:
 
+            for i, (sgName, spectra) in enumerate(self._tempSpectrumGroupsSpectra.items()):
+                progress.setValue(i)
+                spectrumGroup = self._project.getByPid('SG:' + str(sgName))
+                if spectrumGroup is not None:
+                    spectrumGroup.spectra = spectra
+                # give some default colours
+                if self._addDefaultSpectrumColours:
+                    hexColour = name2Hex( next(colourNames))
+                    spectrumGroup.sliceColour = hexColour
+                    for sp in spectra:
+                        sp.sliceColour = hexColour
 
     ######################################################################################################################
     ######################            DISPATCH ATTRIBUTES TO RELATIVE OBJECTS         ####################################
     ######################################################################################################################
 
-    def _dispatchAttrsToObjs(self, dataDicts):
+    def _dispatchAttrsToObjs(self, dataDicts, processCount, sheetName):
         from ccpn.core.Sample import Sample
         from ccpn.core.Substance import Substance
+        loopLenght = len(dataDicts)
+        process = f'Performing actions {str(processCount)}/{str(self._totalProcessesCount)}:'
+        text = f'Loading Spectra for {sheetName}'
+        text = f"""{process}\n{text}"""
+        with progressHandler(title='Loading Data', maximum=loopLenght, text=text, autoClose=True,
+                             hideCancelButton=True, ) as progress:
 
-        for objDict in dataDicts:
-            for obj, dct in objDict.items():
-                if isinstance(obj, Substance):
-                    self._setWrapperProperties(obj, SUBSTANCE_PROPERTIES, dct)
-
-                if isinstance(obj, Sample):
-                    self._setWrapperProperties(obj, SAMPLE_PROPERTIES, dct)
-                    self._createSampleComponents(obj, dct)
+            for i, objDict in enumerate(dataDicts):
+                progress.setValue(i)
+                for obj, dct in objDict.items():
+                    if isinstance(obj, Substance):
+                        self._setWrapperProperties(obj, SUBSTANCE_PROPERTIES, dct)
+                    if isinstance(obj, Sample):
+                        self._setWrapperProperties(obj, SAMPLE_PROPERTIES, dct)
+                        self._createSampleComponents(obj, dct)
 
     def _setWrapperProperties(self, wrapperObject, properties, dataframe):
         for attr in properties:

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:07 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-21 12:16:43 +0000 (Wed, December 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -56,9 +56,7 @@ def _traverse(cls, project: Project, dataBlock: StarIo.NmrDataBlock,
     result = OrderedDict()
     saveframeOrderedDict = _getSaveFramesInOrder(dataBlock)
 
-    # Load metadata and molecular system first
-    metaDataFrame = dataBlock['nef_nmr_meta_data']
-    if metaDataFrame:
+    if metaDataFrame := dataBlock['nef_nmr_meta_data']:
         cls._saveFrameName = 'nef_nmr_meta_data'
         result[cls._saveFrameName] = traverseFunc(project, metaDataFrame)
         del saveframeOrderedDict['nef_nmr_meta_data']
@@ -69,7 +67,7 @@ def _traverse(cls, project: Project, dataBlock: StarIo.NmrDataBlock,
         result[cls._saveFrameName] = traverseFunc(project, saveFrame)
         del saveframeOrderedDict['nef_molecular_system']
 
-    # Load assignments, or preload from shiftlists
+    # Load assignments, or preload from shift-lists
     # to make sure '@' and '#' identifiers match the right serials
     saveFrame = dataBlock.get('ccpn_assignment')
     if saveFrame:
@@ -82,11 +80,13 @@ def _traverse(cls, project: Project, dataBlock: StarIo.NmrDataBlock,
             saveFrameName = cls._saveFrameName = saveFrame.name
 
             if selection and saveFrameName not in selection:
-                getLogger().debug2('>>>   -- skip saveframe {}'.format(saveFrameName))
+                getLogger().debug2(f'>>>   -- skip saveframe {saveFrameName}')
                 continue
-            getLogger().debug2('>>> _traverse saveframe {}'.format(saveFrameName))
+            getLogger().debug2(f'>>> _traverse saveframe {saveFrameName}')
 
-            result[cls._saveFrameName] = traverseFunc(project, saveFrame)
+            if (val := traverseFunc(project, saveFrame)):
+                # only set if there is a result?
+                result[cls._saveFrameName] = val
 
     return result
 

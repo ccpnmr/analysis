@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:30 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-21 12:16:48 +0000 (Wed, December 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -59,6 +59,7 @@ _TABLE_KWDS = ('parent', 'df',
                'selectionCallback', 'selectionCallbackEnabled',
                'actionCallback', 'actionCallbackEnabled',
                'enableExport', 'enableDelete', 'enableSearch', 'enableCopyCell',
+               'tableMenuEnabled',
                'ignoreStyleSheet',
                )
 
@@ -84,6 +85,7 @@ class Table(TableABC, Base):
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
                  actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
                  enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
+                 tableMenuEnabled=NOTHING,
                  # local parameters
                  ignoreStyleSheet=True,
                  **kwds):
@@ -124,6 +126,7 @@ class Table(TableABC, Base):
                          selectionCallback=selectionCallback, selectionCallbackEnabled=selectionCallbackEnabled,
                          actionCallback=actionCallback, actionCallbackEnabled=actionCallbackEnabled,
                          enableExport=enableExport, enableDelete=enableDelete, enableSearch=enableSearch, enableCopyCell=enableCopyCell,
+                         tableMenuEnabled=tableMenuEnabled,
                          )
         baseKwds = {k: v for k, v in kwds.items() if k not in _TABLE_KWDS}
         Base._init(self, ignoreStyleSheet=ignoreStyleSheet, **baseKwds)
@@ -162,7 +165,7 @@ def main():
                      450 + random.randint(-100, 400),
                      700 + random.randint(-MAX_ROWS, MAX_ROWS),
                      150.3 + random.random() * 1e2,
-                     'bravo' + chrs[3:]])
+                     f'bravo{chrs[3:]}'])
 
     df = pd.DataFrame(data, columns=cols, index=rowIndex)
 

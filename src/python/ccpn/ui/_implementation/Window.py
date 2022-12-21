@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:04 +0000 (Wed, November 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-21 12:16:43 +0000 (Wed, December 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -434,8 +434,14 @@ class Window(AbstractWrapperObject):
             # move to the hidden module area
             self._hiddenModules.moveDock(display, position='top', neighbor=None)
 
+            _strips = list(display.strips)
             # delete the spectrumDisplay
             display.delete()
+
+            # this makes it unrecoverable - okay, as strips not allowed to undo
+            for st in _strips:
+                st.close()
+
             # Update the list of opened GUI SpectrumDisplays modules
             self.moduleArea._updateSpectrumDisplays()
 

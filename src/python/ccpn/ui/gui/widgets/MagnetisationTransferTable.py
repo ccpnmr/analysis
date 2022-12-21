@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:08 +0000 (Wed, November 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-21 12:16:47 +0000 (Wed, December 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,8 +32,6 @@ import pandas as pd
 import time
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTypes, \
     MagnetisationTransferParameters, MagnetisationTransferTuple
-from ccpn.ui.gui.widgets.Font import setWidgetFont
-from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.table.TableABC import TableABC
@@ -154,19 +152,15 @@ class MagnetisationTransferTable(TableABC):
     # Table context menu
     #=========================================================================================
 
-    def setTableMenu(self):
-        """Set up the context menu for the main table.
+    def addTableMenuOptions(self, menu):
+        """Add options to the right-mouse menu
         """
-        self._thisTableMenu = menu = Menu('', self, isFloatWidget=True)
-        setWidgetFont(menu, )
+        menu = self._thisTableMenu
 
         # no options from the super-class are required
         self._actions = [menu.addAction('New', self._newTransfer),
                          menu.addAction('Remove selected', self._removeTransfer)
                          ]
-
-        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(self._raiseTableContextMenu)
 
         return menu
 

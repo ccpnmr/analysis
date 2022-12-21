@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:29 +0100 (Wed, October 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-21 12:16:45 +0000 (Wed, December 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -143,12 +143,13 @@ from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
 #         self.setCancelButton(callback=self._cancelClicked)
 #         self.setRevertButton(callback=self._revertClicked)
 #         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
-#         self.__postInit__()
+#         # initialise the buttons and dialog size
+#         self._postInit()
 #
-#     def __postInit__(self):
+#     def _postInit(self):
 #         """post initialise functions - setting up buttons and populating the widgets
 #         """
-#         super().__postInit__()
+#         super()._postInit()
 #         self._populate()
 #
 #     def _populate(self):

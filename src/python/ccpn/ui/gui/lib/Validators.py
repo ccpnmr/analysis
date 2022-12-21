@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:05 +0000 (Wed, November 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-12-21 12:16:44 +0000 (Wed, December 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,11 +33,11 @@ from ccpn.ui.gui.modules.CcpnModule import INVALIDROWCOLOUR, WARNINGROWCOLOUR
 
 
 #=========================================================================================
-# Start of code
+# LineEditValidator
 #=========================================================================================
 
 class LineEditValidator(QtGui.QValidator):
-    """Validator to restrict input to non-whitespace characters
+    """Validator to restrict input to non-alpha-numeric characters
     """
 
     def __init__(self, parent=None, allowSpace=True, allowEmpty=True):
@@ -84,6 +84,36 @@ class LineEditValidator(QtGui.QValidator):
     def checkState(self):
         state, _, _ = self.validate(self.parent().text(), 0)
         return state
+
+
+#=========================================================================================
+# LineEditValidatorWhiteSpace
+#=========================================================================================
+
+class LineEditValidatorWhiteSpace(LineEditValidator):
+    """Validator to restrict input to non-whitespace characters
+    """
+
+    def __init__(self, parent=None, allowSpace=True, allowEmpty=True, allowPeriod=False):
+        super().__init__(parent=parent, allowSpace=allowSpace, allowEmpty=allowEmpty)
+
+        self._allowPeriod = allowPeriod
+
+    def _isValidInput(self, value):
+        """Return True if the name does not contain any bad characters
+        """
+        notAllowedSequences = {'Illegal_Characters': '[^A-Za-z0-9_ \#\!\@\£\$\%\&\*\(\)\-\=\_\+\[\]\{\}\;\.]+',
+                               'Empty_Spaces'      : '\s',
+                               'Period'            : '\.',
+                               }
+
+        if not value and not self._allowEmpty:
+            return False
+        if self._allowSpace:
+            notAllowedSequences.pop('Empty_Spaces')
+        if self._allowPeriod:
+            notAllowedSequences.pop('Period')
+        return not any(re.findall(seq, value) for seq in notAllowedSequences.values())
 
 
 #=========================================================================================

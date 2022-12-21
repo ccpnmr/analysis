@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import contextlib
 from PyQt5 import QtWidgets, QtCore, QtGui
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.util.Colour import rgbRatioToHex
@@ -122,24 +123,20 @@ class SpectrumDisplayScrollArea(ScrollArea):
         """Update the positioning of the widgets as required
         """
         rect = self.viewport().geometry()
-        try:
+        with contextlib.suppress(Exception):
             from ccpn.ui.gui.widgets.GLAxis import GuiNdWidgetAxis
             from ccpn.ui.gui.widgets.GLAxis import Gui1dWidgetAxis
 
-            try:
+            with contextlib.suppress(Exception):
                 offset = 0
                 if len(self._spectrumDisplay.axisCodes) > 2:
                     offset = self._spectrumDisplay.strips[0]._stripToolBarWidget.height()
-            except:
-                pass
 
             _width = max(rect.width(), self._minimumSizes[0])
             _height = max(rect.height(), self._minimumSizes[1]) - offset
             margins = self._viewportMargins
 
-            # search for the axis widgets
-            children = self.findChildren((Gui1dWidgetAxis, GuiNdWidgetAxis))
-            if children:
+            if children := self.findChildren((Gui1dWidgetAxis, GuiNdWidgetAxis)):
                 for child in children:
                     if child._axisType == BOTTOMAXIS:
                         # resize the X axis widgets
@@ -151,18 +148,13 @@ class SpectrumDisplayScrollArea(ScrollArea):
             if self._cornerWidget:
                 self._cornerWidget.setGeometry(_width, _height, margins[2], offset)
 
-        except:
-            pass
-
     def refreshViewPort(self):
         from ccpn.ui.gui.widgets.GLAxis import GuiNdWidgetAxis
         from ccpn.ui.gui.widgets.GLAxis import Gui1dWidgetAxis
 
         self._updateAxisWidgets()
 
-        # search for the axis widgets
-        children = self.findChildren((Gui1dWidgetAxis, GuiNdWidgetAxis))
-        if children:
+        if children := self.findChildren((Gui1dWidgetAxis, GuiNdWidgetAxis)):
             for child in children:
                 child._updateAxes = True
                 child.update()
@@ -201,15 +193,20 @@ class _ScrollWidgetCorner(QtWidgets.QWidget):
         try:
             # try a QColor first
             self._background = QtGui.QColor(colour)
-        except:
+        except Exception:
             # otherwise assume to be a tuple (0..1, 0..1, 0..1, 0..1, 0..1)
             if type(colour) != tuple or \
                     len(colour) != 4 or \
                     any(not isinstance(val, float) for val in colour) or \
                     any(not (0 <= col <= 1) for col in colour):
-                raise TypeError("colour must be a tuple(r, g, b, alpha)")
+                raise TypeError("colour must be a tuple(r, g, b, alpha)") from None
 
             self._background = QtGui.QColor(rgbRatioToHex(*colour[:3]))
+
+            try:
+                self._background = QtGui.QColor(rgbRatioToHex(*colour[:3]))
+            except Exception:
+                raise TypeError("colour must be a tuple(r, g, b, alpha)") from None
 
     def paintEvent(self, a0: QtGui.QPaintEvent):
         """Paint the background in the required colour

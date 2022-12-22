@@ -15,11 +15,10 @@ definitions:
         caches:
           - docker
         script:
-          - mkdir /tmp/scripts
-          - echo 'git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/${1}"' >> /tmp/scripts/bitbucket_to_github.sh
-          - echo 'git push --force github ${2}' >> /tmp/scripts/bitbucket_to_github.sh
+          - echo 'git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/${1}"' >> ./bitbucket_to_github.sh
+          - echo 'git push --force github ${2}' >> ./bitbucket_to_github.sh
         artifacts:
-          - /tmp/scripts/bitbucket_to_github.sh
+          - ./bitbucket_to_github.sh
 
     - step: &Push-to-GitHub-Main
         name: Push code changes to GitHub

@@ -45,7 +45,7 @@ definitions:
         caches:
           - docker
         script:
-          - /bin/bash /tmp/scripts/bitbucket_to_github.sh analysis-private $BITBUCKET_BRANCH
+          - /bin/bash bitbucket_to_github.sh analysis-private $BITBUCKET_BRANCH
 
 pipelines:
   branches:

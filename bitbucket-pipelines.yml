@@ -8,18 +8,6 @@ definitions:
       memory: 1024
 
   steps:
-    - step: &setup
-        name: load scripts
-        services:
-          - docker
-        caches:
-          - docker
-        script:
-          - echo 'git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/${1}"' >> ./bitbucket_to_github.sh
-          - echo 'git push --force github ${2}' >> ./bitbucket_to_github.sh
-        artifacts:
-          - ./bitbucket_to_github.sh
-
     - step: &Push-to-GitHub-Main
         name: Push code changes to GitHub
         services:
@@ -27,7 +15,10 @@ definitions:
         caches:
           - docker
         script:
-          - /bin/bash internal/scripts/bitbucket_to_github.sh analysis main
+          - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis.git"
+          - git checkout $BITBUCKET_BRANCH
+          - git fetch --unshallow
+          - git push --force github main
 
     - step: &Push-to-GitHub-Updates
         name: Push code changes to GitHub
@@ -36,7 +27,10 @@ definitions:
         caches:
           - docker
         script:
-          - /bin/bash internal/scripts/bitbucket_to_github.sh analysis updates
+          - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis.git"
+          - git checkout $BITBUCKET_BRANCH
+          - git fetch --unshallow
+          - git push --force github updates
 
     - step: &Push-to-GitHub-Edge
         name: Push code changes to GitHub
@@ -45,7 +39,9 @@ definitions:
         caches:
           - docker
         script:
-          - /bin/bash bitbucket_to_github.sh analysis-private $BITBUCKET_BRANCH
+          - ls -l
+          - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis-private.git"
+          - git push --force github $BITBUCKET_BRANCH
 
 pipelines:
   branches:

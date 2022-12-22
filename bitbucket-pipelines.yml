@@ -39,6 +39,7 @@ definitions:
         caches:
           - docker
         script:
+          - ls -l
           - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis-private.git"
           - git checkout $BITBUCKET_BRANCH
           - git fetch --unshallow

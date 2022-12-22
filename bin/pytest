@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# get the script file if symbolic
+_path="${BASH_SOURCE[0]}"
+
+# iterate through the symbolic links if needed
+for ii in {1..3}; do
+    if [[ -d ${_path} ]]; then
+        # change to absolute path
+        _path="$(cd "${_path}" || exit; pwd -P)"
+    fi
+    _pathlink="$(readlink "${_path}")"
+    _pathlink="${_pathlink:-${_path}}"
+    _path="$(dirname "${_pathlink}")"
+done
+
+CCPNMR_TOP_DIR="${_pathlink}"
+export CCPNMR_TOP_DIR
+source "${CCPNMR_TOP_DIR}"/bin/paths.sh
+
+PYTEST=/Users/ejb66/miniconda3/envs/ccpn-v3.1.0/bin/pytest
+
+FILENAME=$*
+FILENAME=${FILENAME##*/};FILENAME=${FILENAME%.*}
+STAMP="$(date +%Y%m%d_%H%M%S)"
+
+# execute pytest and redirect all output to file 'TESTOUT_<timestamp>.txt'
+"${PYTEST}" ${CCPNMR_TOP_DIR}/src/python/ccpn/core/testing/Test_* > "TESTOUT_${STAMP}.txt" 2>&1
+

@@ -8,6 +8,19 @@ definitions:
       memory: 1024
 
   steps:
+    - step: &setup
+        name: load scripts
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - mkdir /tmp/scripts
+          - echo 'git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/${1}"' >> /tmp/scripts/bitbucket_to_github.sh
+          - echo 'git push --force github ${2}' >> /tmp/scripts/bitbucket_to_github.sh
+        artifacts:
+          - /tmp/scripts/bitbucket_to_github.sh
+
     - step: &Push-to-GitHub-Main
         name: Push code changes to GitHub
         services:
@@ -16,7 +29,6 @@ definitions:
           - docker
         script:
           - /bin/bash internal/scripts/bitbucket_to_github.sh analysis main
-
 
     - step: &Push-to-GitHub-Updates
         name: Push code changes to GitHub
@@ -27,7 +39,6 @@ definitions:
         script:
           - /bin/bash internal/scripts/bitbucket_to_github.sh analysis updates
 
-
     - step: &Push-to-GitHub-Edge
         name: Push code changes to GitHub
         services:
@@ -35,8 +46,7 @@ definitions:
         caches:
           - docker
         script:
-          - /bin/bash ${HOME}/internal/scripts/bitbucket_to_github.sh analysis-private $BITBUCKET_BRANCH
-
+          - /bin/bash /tmp/scripts/bitbucket_to_github.sh analysis-private $BITBUCKET_BRANCH
 
 pipelines:
   branches:
@@ -71,10 +81,14 @@ pipelines:
 
     # release candidates
     "[0-9].[0-9].[0-9]-edge":
+      - step: *setup
       - step: *Push-to-GitHub-Edge
     "[0-9].[0-9].[0-9][0-9]-edge":
+      - step: *setup
       - step: *Push-to-GitHub-Edge
     "[0-9].[0-9][0-9].[0-9]-edge":
+      - step: *setup
       - step: *Push-to-GitHub-Edge
     "[0-9].[0-9][0-9].[0-9][0-9]-edge":
+      - step: *setup
       - step: *Push-to-GitHub-Edge

@@ -16,8 +16,6 @@ definitions:
           - docker
         script:
           - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis.git"
-          - git checkout $BITBUCKET_BRANCH
-          - git fetch --unshallow
           - git push --force github main
 
     - step: &Push-to-GitHub-Updates
@@ -28,8 +26,6 @@ definitions:
           - docker
         script:
           - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis.git"
-          - git checkout $BITBUCKET_BRANCH
-          - git fetch --unshallow
           - git push --force github updates
 
     - step: &Push-to-GitHub-Edge
@@ -39,7 +35,6 @@ definitions:
         caches:
           - docker
         script:
-          - ls -l
           - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis-private.git"
           - git push --force github $BITBUCKET_BRANCH
 

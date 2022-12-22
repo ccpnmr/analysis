@@ -25,5 +25,5 @@ definitions:
 
 pipelines:
   branches:
-    3.1.[0-9]-edge:
+    3.1.[0-9]:
       - step: *Push-to-GitHub

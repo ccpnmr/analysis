@@ -1,7 +1,4 @@
-# This is an example Starter pipeline configuration
-# Use a skeleton to build, test and deploy using manual and parallel steps
-# -----
-# You can specify a custom docker image from Docker Hub as your build environment.
+# Push release/updates/edge to github
 
 image: atlassian/default-image:3
 
@@ -11,7 +8,7 @@ definitions:
       memory: 1024
 
   steps:
-    - step: &Push-to-GitHub
+    - step: &Push-to-GitHub-Main
         name: Push code changes to GitHub
         services:
           - docker
@@ -21,9 +18,69 @@ definitions:
           - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis.git"
           - git checkout $BITBUCKET_BRANCH
           - git fetch --unshallow
+          - git push --force github main
+
+    - step: &Push-to-GitHub-Updates
+        name: Push code changes to GitHub
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis.git"
+          - git checkout $BITBUCKET_BRANCH
+          - git fetch --unshallow
+          - git push --force github updates
+
+    - step: &Push-to-GitHub-Edge
+        name: Push code changes to GitHub
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis-private.git"
+          - git checkout $BITBUCKET_BRANCH
+          - git fetch --unshallow
           - git push --force github $BITBUCKET_BRANCH
 
 pipelines:
   branches:
+    # release branches
+    "[0-9].[0-9].[0-9]":
+      - step: *Push-to-GitHub-Main
+    "[0-9].[0-9].[0-9][0-9]":
+      - step: *Push-to-GitHub-Main
+    "[0-9].[0-9][0-9].[0-9]":
+      - step: *Push-to-GitHub-Main
+    "[0-9].[0-9][0-9].[0-9][0-9]":
+      - step: *Push-to-GitHub-Main
+
+    # release + hotfixes to update server
+    "[0-9].[0-9].[0-9]-updates":
+      - step: *Push-to-GitHub-Updates
+    "[0-9].[0-9].[0-9][0-9]-updates":
+      - step: *Push-to-GitHub-Updates
+    "[0-9].[0-9][0-9].[0-9]-updates":
+      - step: *Push-to-GitHub-Updates
+    "[0-9].[0-9][0-9].[0-9][0-9]-updates":
+      - step: *Push-to-GitHub-Updates
+
+    "[0-9].[0-9].[0-9]-updates[0-9]":
+      - step: *Push-to-GitHub-Updates
+    "[0-9].[0-9].[0-9][0-9]-updates[0-9]":
+      - step: *Push-to-GitHub-Updates
+    "[0-9].[0-9][0-9].[0-9]-updates[0-9]":
+      - step: *Push-to-GitHub-Updates
+    "[0-9].[0-9][0-9].[0-9][0-9]-updates[0-9]":
+      - step: *Push-to-GitHub-Updates
+
+    # release candidates
     "[0-9].[0-9].[0-9]-edge":
-      - step: *Push-to-GitHub
+      - step: *Push-to-GitHub-Edge
+    "[0-9].[0-9].[0-9][0-9]-edge":
+      - step: *Push-to-GitHub-Edge
+    "[0-9].[0-9][0-9].[0-9]-edge":
+      - step: *Push-to-GitHub-Edge
+    "[0-9].[0-9][0-9].[0-9][0-9]-edge":
+      - step: *Push-to-GitHub-Edge

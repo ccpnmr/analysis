@@ -76,14 +76,10 @@ pipelines:
 
     # release candidates
     "[0-9].[0-9].[0-9]-edge":
-      - step: *setup
       - step: *Push-to-GitHub-Edge
     "[0-9].[0-9].[0-9][0-9]-edge":
-      - step: *setup
       - step: *Push-to-GitHub-Edge
     "[0-9].[0-9][0-9].[0-9]-edge":
-      - step: *setup
       - step: *Push-to-GitHub-Edge
     "[0-9].[0-9][0-9].[0-9][0-9]-edge":
-      - step: *setup
       - step: *Push-to-GitHub-Edge

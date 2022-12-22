@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:42 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2022-12-22 19:06:38 +0000 (Thu, December 22, 2022) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,9 +29,8 @@ import itertools
 import operator
 import numpy as np
 from functools import partial
-from typing import Optional, Tuple, Union, Sequence, Any
+from typing import Optional, Tuple, Union, Sequence, Any, List
 import pandas as pd
-from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices
 from ccpn.util import Common as commonUtil
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -43,7 +42,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, \
     undoBlock, undoBlockWithoutSideBar, undoStackBlocking, ccpNmrV3CoreUndoBlock
 from ccpn.util.Logging import getLogger
-from ccpn.util.Common import makeIterableList, isIterable
+from ccpn.util.Common import makeIterableList
 from ccpn.util.Constants import SCALETOLERANCE
 from ccpn.core.NmrAtom import UnknownIsotopeCode
 
@@ -781,13 +780,13 @@ class Peak(AbstractWrapperObject):
 
     @logCommand(get='self')
     def assignDimensions(self, axisCodes: list,
-                         values: list[Union[Union[str, 'NmrAtom'], Sequence[Union[str, 'NmrAtom']]]] = None):
+                         values: List[Union[Union[str, 'NmrAtom'], Sequence[Union[str, 'NmrAtom']]]] = None):
         """Assign dimensions with axisCode to values (NmrAtom, or Pid or sequence of either, or None).
         """
         specAxisCodes = self.spectrum.axisCodes
         if len(axisCodes) != len(specAxisCodes) or len(values) != len(specAxisCodes):
             raise TypeError(f'{self.__class__.__name__}.assignDimensions: axisCodes or values are not the correct length')
-        if badAxisCodes := list(set(specAxisCodes)-set(axisCodes)):
+        if badAxisCodes := list(set(specAxisCodes) - set(axisCodes)):
             raise ValueError(f'{self.__class__.__name__}.assignDimensions: axisCodes {badAxisCodes} not recognised') from None
         if not isinstance(values, list):
             raise TypeError(f'{self.__class__.__name__}.assignDimensions: values is not a list')

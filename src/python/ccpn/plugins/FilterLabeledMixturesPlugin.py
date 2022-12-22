@@ -1,18 +1,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:32 +0000 (Thu, February 04, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2022-12-22 19:06:38 +0000 (Thu, December 22, 2022) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -22,28 +23,26 @@ __date__ = "$Date: 2017-11-28 10:28:42 +0000 (Tue, Nov 28, 2017) $"
 # Start of code
 #=========================================================================================
 
-
 import os
+from dataclasses import dataclass
 from PyQt5 import QtCore, QtGui, QtWidgets
-from functools import partial
+from xml.etree import ElementTree
+from ccpn.core.lib.ContextManagers import progressHandler, busyHandler
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
-from ccpn.ui.gui.lib.GuiPath import PathEdit
-from ccpn.ui.gui.guiSettings import BORDERNOFOCUS_COLOUR
-from ccpn.framework.lib.Plugin import Plugin
 from ccpn.ui.gui.modules.PluginModule import PluginModule
 from ccpn.ui.gui.widgets.FileDialog import DataFileDialog
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
-from ccpn.util.AttrDict import AttrDict
-from xml.etree import ElementTree
+from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
+from ccpn.ui.gui.lib.GuiPath import PathEdit
+from ccpn.ui.gui.guiSettings import BORDERNOFOCUS_COLOUR
+from ccpn.framework.lib.Plugin import Plugin
 from ccpn.util.Path import aPath
 from ccpn.util.SafeFilename import getSafeFilename
-from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 
 
 LineEditsMinimumWidth = 195
@@ -61,10 +60,25 @@ REMOVETAGLIST = ['LMOL.LabeledMixture.name',
                  'NMR.Experiment.labeledMixtures',
                  'LMOL.exo-LabeledMixture',
                  ]
-PROJECTPATH = 'projectPath'
-PROJECTFILES = 'projectFiles'
-INVALIDFILES = 'invalidFiles'
-REMOVETAGS = 'removeTags'
+
+
+# PROJECTPATH = 'projectPath'
+# PROJECTFILES = 'projectFiles'
+# INVALIDFILES = 'invalidFiles'
+# REMOVETAGS = 'removeTags'
+
+
+#=========================================================================================
+# Plugin Gui class
+#=========================================================================================
+
+@dataclass
+class PluginInfo():
+    # small class to hold parameter-set
+    projectPath = None
+    projectFiles = []
+    invalidFiles = []
+    removeTags = REMOVETAGLIST
 
 
 class FilterLabeledMixturesGuiPlugin(PluginModule):
@@ -82,12 +96,21 @@ class FilterLabeledMixturesGuiPlugin(PluginModule):
             self.project = None
             self.preferences = None
 
-        # NOTE:ED - change this to _blankContainer?
-        self.obj = AttrDict()
-        self.obj[PROJECTPATH] = None
-        self.obj[REMOVETAGS] = REMOVETAGLIST
+        self.obj = PluginInfo()
+        self.obj.projectPath = None
+        self.obj.removeTags = REMOVETAGLIST
 
-        # correct way to setup a scroll area
+        # set up the widgets
+        sf = self._setScrollFrame()
+        self._setWidgets(sf)
+        self._populate()
+
+        self.plugin._loggerCallback = self._guiLogger
+
+    def _setScrollFrame(self):
+        """Set up a scroll frame to contain widgets
+        """
+        # correct way to set up a scroll area
         self._scrollFrame = ScrollableFrame(parent=self.mainWidget,
                                             showBorder=False, setLayout=True,
                                             acceptDrops=True, grid=(0, 0), gridSpan=(1, 1), spacing=(5, 5))
@@ -99,16 +122,16 @@ class FilterLabeledMixturesGuiPlugin(PluginModule):
         self._scrollFrame.setContentsMargins(*DEFAULTMARGINS)
         self._scrollFrame.getLayout().setSpacing(DEFAULTSPACING)
 
-        self._setWidgets(self._scrollFrame)
-        self._populate()
-
-        self.plugin._loggerCallback = self._guiLogger
+        return self._scrollFrame
 
     def _guiLogger(self, *args):
+        """Log the gui information
+        """
         self.xmlFilterLogData.append(*args)
 
     def _setWidgets(self, parent):
-
+        """Set up the main widgets
+        """
         row = 0
         self.userWorkingPathLabel = Label(parent, "Project Path ", grid=(row, 0), )
         self.userWorkingPathData = PathEdit(parent, grid=(row, 1), vAlign='t')
@@ -116,6 +139,17 @@ class FilterLabeledMixturesGuiPlugin(PluginModule):
         self.userWorkingPathButton = Button(parent, grid=(row, 2), callback=self._getUserWorkingPath,
                                             icon='icons/directory', hPolicy='fixed')
         self.userWorkingPathData.textChanged.connect(self._setUserWorkingPath)
+
+        row += 1
+        self.validProjectOnly = CheckBoxCompoundWidget(
+                parent,
+                grid=(row, 0), gridSpan=(1, 2), hAlign='left',
+                fixedWidths=(None, 30),
+                orientation='left',
+                labelText='Valid projects only',
+                checked=True,
+                callback=self._toggleValidProjects
+                )
 
         row += 1
         _frame = MoreLessFrame(parent, name='Xml Files', showMore=True, grid=(row, 0), gridSpan=(1, 3))
@@ -159,15 +193,21 @@ class FilterLabeledMixturesGuiPlugin(PluginModule):
         ButtonList(parent=parent, texts=texts, callbacks=callbacks, tipTexts=tipTexts, grid=(row, 0), gridSpan=(1, 3), hAlign='r')
 
     def runGui(self):
-        self.plugin.run(**self.obj)
+        """Run the non-Gui plugin
+        """
+        self.plugin.run(self.obj)
         self._populate()
-        self._setUserWorkingPath(self.obj[PROJECTPATH])
+        self._setUserWorkingPath(self.obj.projectPath)
 
     def _populate(self):
+        """Populate the widgets
+        """
         self.xmlFilterData.clear()
         self.xmlFilterData.addItems(REMOVETAGLIST)
 
     def _getUserWorkingPath(self):
+        """Return the current working path
+        """
         if os.path.exists(os.path.expanduser(self.userWorkingPathData.text())):
             currentDataPath = os.path.expanduser(self.userWorkingPathData.text())
         else:
@@ -180,9 +220,18 @@ class FilterLabeledMixturesGuiPlugin(PluginModule):
 
         self._setUserWorkingPath(self.userWorkingPathData.get())
 
+    @staticmethod
+    def _validProject(value):
+        """Return True if the proejct contains the memops folder
+        """
+        pth = aPath(value)
+        return (pth / 'memops').exists() and (pth / 'memops').is_dir()
+
     def _setUserWorkingPath(self, value):
+        """Set the current working path
+        """
         value = aPath(value)
-        self.obj[PROJECTPATH] = value
+        self.obj.projectPath = value
         if self.userWorkingPathData.validator().checkState == QtGui.QValidator.Acceptable:
 
             self.plugin.setProjectPath(value)
@@ -191,21 +240,27 @@ class FilterLabeledMixturesGuiPlugin(PluginModule):
 
             self.xmlFileData.clear()
             self.xmlFileData.addItems([str(fp) for fp in filePaths])
-            if self.plugin.validProjectPath():
+
+            # colour the items depending on folder/checkbox state
+            if self._validProject(value) or not self.validProjectOnly.isChecked():
                 self._validateXmlFiles()
             else:
                 self._ignoreXmlFiles()
 
     def _validateXmlFiles(self):
-        """Colour items
+        """Colour items depending on validity check
         """
-        value = self.obj[PROJECTPATH]
-        if not (os.path.exists(value / 'memops') and os.path.isdir(value / 'memops')):
+        value = self.obj.projectPath
+        if not self._validProject(value) and self.validProjectOnly.isChecked():
             return
 
-        invalidFiles = self.plugin.validateXmlFiles()
-
         branchFiles = self.xmlFileData.getItems()
+
+        # simple progress-bar
+        with progressHandler(maximum=len(branchFiles)) as busy:
+            for cc, invalidFiles in enumerate(self.plugin.iterateXmlFiles()):
+                busy.setValue(cc)
+
         for item in branchFiles:
             # colour depending on whether contains bad tags
             filePath = aPath(item.text())
@@ -218,7 +273,7 @@ class FilterLabeledMixturesGuiPlugin(PluginModule):
     def _ignoreXmlFiles(self):
         """Colour items as grey
         """
-        value = self.obj[PROJECTPATH]
+        value = self.obj.projectPath
         if (os.path.exists(value / 'memops') and os.path.isdir(value / 'memops')):
             return
 
@@ -228,33 +283,49 @@ class FilterLabeledMixturesGuiPlugin(PluginModule):
             item.setForeground(QtCore.Qt.gray)
 
     def _toggleWordWrap(self, value):
+        """Change the word-wrap state of the text-widget
+        """
         if value:
             self.xmlFilterLogData.setLineWrapMode(QtWidgets.QTextEdit.WidgetWidth)
         else:
             self.xmlFilterLogData.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
 
+    def _toggleValidProjects(self, value):
+        """If True, check only valid proejcts, i.e., those that contain the memops folder
+        """
+        self._setUserWorkingPath(self.obj.projectPath)
+
+
+#=========================================================================================
+# Plugin non-Gui class
+#=========================================================================================
 
 class FilterLabeledMixturesPlugin(Plugin):
+    """Non-Gui class to implement functionality
+    """
     PLUGINNAME = 'Filter Labeled Mixtures'
     guiModule = FilterLabeledMixturesGuiPlugin
 
     def __init__(self, *args, **kwds):
+        """Initialise the class
+        """
         super().__init__(*args, **kwds)
 
-        self._kwds = AttrDict([(PROJECTPATH, None),
-                               (PROJECTFILES, None),
-                               (INVALIDFILES, None),
-                               (REMOVETAGS, REMOVETAGLIST)])
+        # create an empty parameter-set
+        self._kwds = PluginInfo()
+
         self._loggerCallback = None
 
     def _logger(self, *args):
+        """Log information to the secified logger
+        """
         if self._loggerCallback:
             self._loggerCallback(*args)
 
     def _containsTags(self, parent) -> bool:
         """Recursively check whether the tree contains bad tags
         """
-        if parent.tag in self._kwds[REMOVETAGS]:
+        if parent.tag in (self._kwds.removeTags or []):
             return True
 
         for lm in list(parent):
@@ -268,11 +339,12 @@ class FilterLabeledMixturesPlugin(Plugin):
         tree = ElementTree.parse(filePath, self._parser)
         self._root = tree.getroot()
 
-        tags = self._containsTags(self._root)
-        return tags
+        return self._containsTags(self._root)
 
     def validProjectPath(self):
-        projectPath = self._kwds[PROJECTPATH]
+        """Return True if the project is valid
+        """
+        projectPath = self._kwds.projectPath
         if not projectPath:
             return
 
@@ -280,48 +352,73 @@ class FilterLabeledMixturesPlugin(Plugin):
             return True
 
     def setProjectPath(self, value):
-        self._logger('set project path: {}'.format(value))
-        self._kwds[PROJECTPATH] = value
+        """Set the project
+        """
+        self._logger(f'set project path: {value}')
+        self._kwds.projectPath = value or None
 
     def setRemoveTags(self, value):
-        self._logger('set invalid tags: {}'.format(value))
-        self._kwds[REMOVETAGS] = value
+        """Set the list of tags to remove
+        """
+        self._logger(f'set invalid tags: {value}')
+        self._kwds.removeTags = value or []
 
     def getProjectFiles(self):
-        projectPath = self._kwds[PROJECTPATH]
+        """Read and return the list of valid .xml files in the project folder
+        """
+        projectPath = self._kwds.projectPath
         if not projectPath:
             return
 
         filePaths = [(aPath(r) / file) for r, d, f in os.walk(projectPath) for file in f if os.path.splitext(file)[1] == '.xml']
-        self._kwds[PROJECTFILES] = filePaths
+        self._kwds.projectFiles = filePaths
 
-        return self._kwds[PROJECTFILES]
+        return self._kwds.projectFiles
 
     def validateXmlFiles(self):
-        projectFiles = self._kwds[PROJECTFILES]
+        """Validate the files in the project folder
+        """
+        projectFiles = self._kwds.projectFiles or []
         if not projectFiles:
             return
 
-        self._kwds[INVALIDFILES] = []
+        self._kwds.invalidFiles = []
         for filePath in projectFiles:
-            error = self.containsTags(filePath)
-            if error:
-                self._kwds[INVALIDFILES].append(filePath)
+            if self.containsTags(filePath):
+                self._kwds.invalidFiles.append(filePath)
 
-        return self._kwds[INVALIDFILES]
+        return self._kwds.invalidFiles
+
+    def iterateXmlFiles(self):
+        """Validate the files in the project folder as iterator
+        Can be used with progresshandler
+        """
+        projectFiles = self._kwds.projectFiles or []
+        if not projectFiles:
+            return
+
+        self._kwds.invalidFiles = []
+        for filePath in projectFiles:
+            if self.containsTags(filePath):
+                self._kwds.invalidFiles.append(filePath)
+            yield
+
+        yield self._kwds.invalidFiles
 
     def _deleteRecurse(self, parent, indent=0):
-        """Recursively deletes elements in the tree
+        """Recursively delete elements in the tree
         """
         for lm in list(parent):
             self._deleteRecurse(lm, indent + 1)
 
         for lm in list(parent):
-            if lm.tag in self._kwds[REMOVETAGS]:
+            if lm.tag in (self._kwds.removeTags or []):
                 parent.remove(lm)
-                self._logger('_' * indent + 'DELETE {}'.format(lm.tag.title().strip()))
+                self._logger('_' * indent + f'DELETE {lm.tag.title().strip()}')
 
     def writeFile(self, filePath, tree):
+        """Write out the modified .xml file
+        """
         fileName = filePath.basename
         renameFilePath = (filePath.parent / fileName)  #.assureSuffix('.xml')
         prefix, ext = os.path.splitext(renameFilePath)
@@ -329,101 +426,104 @@ class FilterLabeledMixturesPlugin(Plugin):
 
         # write out the modified file
         safeName = aPath(getSafeFilename(renameFilePath))
-        self._logger('Renaming old file {}'.format(safeName))
+        self._logger(f'Renaming old file {safeName}')
         os.rename(filePath, safeName)
-        self._logger('Writing modified file {}'.format(filePath))
+        self._logger(f'Writing modified file {filePath}')
         tree.write(filePath, encoding='UTF-8', xml_declaration=True)
 
     def removeTags(self, projectPath, projectFiles, invalidFiles, removeTags):
+        """Remove the bad tags from the .xml file
+        """
         for invalidFile in invalidFiles:
             parser = ElementTree.XMLParser(target=ElementTree.TreeBuilder(insert_comments=True))
             tree = ElementTree.parse(invalidFile, parser)
             root = tree.getroot()
 
             # delete tags
-            self._logger('Removing bad tags: {}'.format(invalidFile))
+            self._logger(f'Removing bad tags: {invalidFile}')
             self._deleteRecurse(root)
 
             # write edited file
             self.writeFile(invalidFile, tree)
 
-    def run(self, **kwargs):
+    def run(self, *args, **kwargs):
+        """Entry-point for the plugin
+        """
+        # read the parameters, these will have been set by the gui
+        projectPath = self._kwds.projectPath
+        projectFiles = self._kwds.projectFiles or []
+        invalidFiles = self._kwds.invalidFiles or []
+        removeTags = self._kwds.removeTags or []
 
-        projectPath = self._kwds[PROJECTPATH]
-        projectFiles = self._kwds[PROJECTFILES]
-        invalidFiles = self._kwds[INVALIDFILES]
-        removeTags = self._kwds[REMOVETAGS]
-
-        self._logger('Running {} - {}'.format(self.PLUGINNAME, invalidFiles))
+        self._logger(f'Running {self.PLUGINNAME} - {invalidFiles}')
 
         if projectPath and projectFiles and removeTags:
             self.removeTags(projectPath, projectFiles, invalidFiles, removeTags)
-        return
 
-        from xml.etree import ElementTree
-        from ccpn.util.Path import aPath
-        from ccpn.util.SafeFilename import getSafeFilename
-
-        # active parser to include comments in import/export
-        parser = ElementTree.XMLParser(target=ElementTree.TreeBuilder(insert_comments=True))
-
-        # read in the file
-        filePath = aPath(
-                '/Users/ejb66/Documents/CcpNmrData/sh3_tutorial_LabPtn.ccpn/ccpnv3/ccp/nmr/Nmr/sh3_tutorial+sh3_tutorial_vicky_2009-04-16-10-58-30-845_00001.xml')
-        tree = ElementTree.parse(filePath, parser)
-
-        # list of elements to remove from file
-        includeElems = ['LMOL.LabeledMolecule', 'LMOL.LabeledMixture.name', 'NMR.Experiment.labeledMixtures', 'LMOL.exo-LabeledMixture',
-                        'NMR.Experiment.refExperiment']
-
-        indent = 0
-
-        def printRecur(parent):
-            """Recursively prints the tree
-            """
-            global indent
-
-            if parent.tag in includeElems:
-                print('_' * indent + '{}'.format(parent.tag.title().strip()))
-
-            indent += 4
-            for lm in list(parent):
-                printRecur(lm)
-            indent -= 4
-
-        def deleteRecur(parent):
-            """Recursively deletes elements in the tree
-            """
-            for lm in list(parent):
-                deleteRecur(lm)
-
-            for lm in list(parent):
-                if lm.tag in includeElems:
-                    parent.remove(lm)
-                    print('_' * indent + 'DELETE {}'.format(lm.tag.title().strip()))
-
-        # print the tree
-        root = tree.getroot()
-        printRecur(root)
-
-        # delete tags
-        deleteRecur(root)
-
-        # print again to test
-        printRecur(root)
-
-        # NOTE:ED - needs swapping round when working
-        fileName = filePath.basename
-        renameFileName = fileName + '_OLD'
-        renameFilePath = (filePath.parent / renameFileName).assureSuffix('.xml')
-
-        # write out the modified file
-        safeName = aPath(getSafeFilename(renameFilePath))
-        tree.write(safeName, encoding='UTF-8', xml_declaration=True)
-
-        # with open(renameFilePath, "a+") as fp:
-        #     # added for completeness
-        #     fp.write('\n<!--End of Memops Data-->')
+        # from xml.etree import ElementTree
+        # from ccpn.util.Path import aPath
+        # from ccpn.util.SafeFilename import getSafeFilename
+        # 
+        # # active parser to include comments in import/export
+        # parser = ElementTree.XMLParser(target=ElementTree.TreeBuilder(insert_comments=True))
+        # 
+        # # read in the file
+        # filePath = aPath(
+        #         '/Users/ejb66/Documents/CcpNmrData/sh3_tutorial_LabPtn.ccpn/ccpnv3/ccp/nmr/Nmr/sh3_tutorial+sh3_tutorial_vicky_2009-04-16-10-58-30-845_00001.xml')
+        # tree = ElementTree.parse(filePath, parser)
+        # 
+        # # list of elements to remove from file
+        # includeElems = ['LMOL.LabeledMolecule', 'LMOL.LabeledMixture.name', 'NMR.Experiment.labeledMixtures', 'LMOL.exo-LabeledMixture',
+        #                 'NMR.Experiment.refExperiment']
+        # 
+        # indent = 0
+        # 
+        # def printRecur(parent):
+        #     """Recursively prints the tree
+        #     """
+        #     global indent
+        # 
+        #     if parent.tag in includeElems:
+        #         print('_' * indent + '{}'.format(parent.tag.title().strip()))
+        # 
+        #     indent += 4
+        #     for lm in list(parent):
+        #         printRecur(lm)
+        #     indent -= 4
+        # 
+        # def deleteRecur(parent):
+        #     """Recursively deletes elements in the tree
+        #     """
+        #     for lm in list(parent):
+        #         deleteRecur(lm)
+        # 
+        #     for lm in list(parent):
+        #         if lm.tag in includeElems:
+        #             parent.remove(lm)
+        #             print('_' * indent + 'DELETE {}'.format(lm.tag.title().strip()))
+        # 
+        # # print the tree
+        # root = tree.getroot()
+        # printRecur(root)
+        # 
+        # # delete tags
+        # deleteRecur(root)
+        # 
+        # # print again to test
+        # printRecur(root)
+        # 
+        # # NOTE:ED - needs swapping round when working
+        # fileName = filePath.basename
+        # renameFileName = fileName + '_OLD'
+        # renameFilePath = (filePath.parent / renameFileName).assureSuffix('.xml')
+        # 
+        # # write out the modified file
+        # safeName = aPath(getSafeFilename(renameFilePath))
+        # tree.write(safeName, encoding='UTF-8', xml_declaration=True)
+        # 
+        # # with open(renameFilePath, "a+") as fp:
+        # #     # added for completeness
+        # #     fp.write('\n<!--End of Memops Data-->')
 
 
 FilterLabeledMixturesPlugin.register()  # Registers the pipe in the pluginList

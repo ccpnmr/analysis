@@ -1,0 +1,29 @@
+# This is an example Starter pipeline configuration
+# Use a skeleton to build, test and deploy using manual and parallel steps
+# -----
+# You can specify a custom docker image from Docker Hub as your build environment.
+
+image: atlassian/default-image:3
+
+definitions:
+  services:
+    docker:
+      memory: 1024
+
+  steps:
+    - step: &Push-to-GitHub
+        name: Push code changes to GitHub
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - git remote add github "$GITHUB_TOKEN@github.com:ccpnmr/analysis.git"
+          - git checkout $BITBUCKET_BRANCH
+          - git pull
+          - git push github $BITBUCKET_BRANCH
+
+pipelines:
+  branches:
+    3.1.1-edge:
+      - step: *Push-to-GitHub

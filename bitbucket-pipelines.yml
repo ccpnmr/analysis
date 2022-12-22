@@ -20,8 +20,8 @@ definitions:
         script:
           - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis.git"
           - git checkout $BITBUCKET_BRANCH
-          - git pull
-          - git push github $BITBUCKET_BRANCH
+          - git fetch --unshallow
+          - git push --force github $BITBUCKET_BRANCH
 
 pipelines:
   branches:

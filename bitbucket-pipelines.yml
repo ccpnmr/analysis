@@ -15,7 +15,7 @@ definitions:
         caches:
           - docker
         script:
-          - /bin/bash bitbucket_to_github.sh analysis main
+          - /bin/bash internal/scripts/bitbucket_to_github.sh analysis main
 
 
     - step: &Push-to-GitHub-Updates
@@ -25,10 +25,8 @@ definitions:
         caches:
           - docker
         script:
-          - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis.git"
-          - git checkout $BITBUCKET_BRANCH
-          - git fetch --unshallow
-          - git push --force github updates
+          - /bin/bash internal/scripts/bitbucket_to_github.sh analysis updates
+
 
     - step: &Push-to-GitHub-Edge
         name: Push code changes to GitHub
@@ -37,7 +35,7 @@ definitions:
         caches:
           - docker
         script:
-          - /bin/bash bitbucket_to_github.sh analysis-private $BITBUCKET_BRANCH
+          - /bin/bash internal/scripts/bitbucket_to_github.sh analysis-private $BITBUCKET_BRANCH
 
 
 pipelines:

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-05 13:21:17 +0000 (Thu, January 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-05 13:37:33 +0000 (Thu, January 05, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1383,24 +1383,6 @@ class Project(AbstractWrapperObject):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Library functions
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    # def _updateApiDataUrl(self, path):
-    #     """Update the data url to path; for legacy purposes
-    #     """
-    #     # Reset remoteData DataStores to match path
-    #     if path is None or len(path) == 0:
-    #         getLogger().debug('_updateApiDataUrl: invalid path %r' % path)
-    #         return
-    #     path = aPath(path)
-    #     if not path.exists():
-    #         getLogger().debug('_updateApiDataUrl: path %r does not exist' % path)
-    #         return
-    #
-    #     memopsRoot = self._wrappedData.root
-    #     dataUrl = memopsRoot.findFirstDataLocationStore(name='standard').findFirstDataUrl(
-    #             name='remoteData'
-    #             )
-    #     dataUrl.url = Implementation.Url(path=str(path.as_posix()))
 
     def _getAPIObjectsStatus(self, completeScan=False, onlyInvalids=True, includeDefaultChildren=False):
         """

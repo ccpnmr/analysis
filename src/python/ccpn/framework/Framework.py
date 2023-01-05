@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-05 13:21:17 +0000 (Thu, January 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-05 13:37:33 +0000 (Thu, January 05, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -520,7 +520,6 @@ class Framework(NotifierBase, GuiBase):
                 # set the initial axis ordering
                 _getDefaultOrdering(spectrum)
 
-        # newProject._updateApiDataUrl(self.preferences.general.dataPath)
         # the project is now ready to use
 
         # Now that all objects, including the graphics are there, restore current

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-05 13:37:33 +0000 (Thu, January 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-05 14:00:21 +0000 (Thu, January 05, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -61,7 +61,8 @@ from ccpn.framework.PathsAndUrls import \
     CCPN_SPECTRA_DIRECTORY, \
     CCPN_PLUGINS_DIRECTORY, \
     CCPN_SCRIPTS_DIRECTORY, \
-    CCPN_SUB_DIRECTORIES
+    CCPN_SUB_DIRECTORIES, \
+    CCPN_BACKUPS_DIRECTORY
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
@@ -2284,7 +2285,7 @@ def _newProject(application, name:str, path:Path, isTemporary:bool = False) -> P
 
     _setRepositoryPath(apiProject, 'userData', path)
     # GWV: not sure why this one is needed, but just to be consistent with the old Api.py code
-    backupPath = path / 'backups'
+    backupPath = path / CCPN_BACKUPS_DIRECTORY
     _setRepositoryPath(apiProject, 'backup', backupPath)
     # Just a leftover from the past
     apiProject._temporaryDirectory = None

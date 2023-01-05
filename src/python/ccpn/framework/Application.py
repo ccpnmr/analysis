@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:03 +0000 (Wed, November 30, 2022) $"
+__dateModified__ = "$dateModified: 2023-01-05 14:40:08 +0000 (Thu, January 05, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 from ccpn.util.decorators import singleton
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.ui import interfaces, defaultInterface
+
 
 ANALYSIS_ASSIGN = 'AnalysisAssign'
 ANALYSIS_SCREEN = 'AnalysisScreen'
@@ -93,7 +94,9 @@ class Arguments:
     """Class for setting FrameWork input arguments directly"""
     language = defaultLanguage
     interface = 'NoUi'
-    nologging = True
+    noLogging = True
+    noDebugLogging = False
+    noEchoLogging = False
     debug = False
     debug2 = False
     debug3 = False
@@ -131,7 +134,9 @@ def defineProgramArguments():
                         help='Use dark colour scheme')
     parser.add_argument('--light', dest='lightColourScheme', action='store_true',
                         help='Use dark colour scheme')
-    parser.add_argument('--nologging', dest='nologging', action='store_true', help='Do not log information to a file')
+    parser.add_argument('--no-logging', dest='noLogging', action='store_true', help='Do not log information to a file')
+    parser.add_argument('--no-debug-logging', dest='noDebugLogging', action='store_true', help='Do not log debug information to the terminal')
+    parser.add_argument('--no-echo-logging', dest='noEchoLogging', action='store_true', help='Do not log any debug/warning/info messages to the terminal')
     parser.add_argument('--debug', dest='debug', action='store_true', help='Set logging level to debug')
     parser.add_argument('--debug1', dest='debug', action='store_true', help='Set logging level to debug1 (=debug)')
     parser.add_argument('--debug2', dest='debug2', action='store_true', help='Set logging level to debug2')

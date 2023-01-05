@@ -1,4 +1,4 @@
-# Push release/updates/edge to github
+# Push release/updates/edge to GitHub
 
 image: atlassian/default-image:3
 
@@ -41,6 +41,11 @@ definitions:
 pipelines:
   branches:
     # release branches
+    #   the default-branch from which the download .zip is created
+    #   names are of the form X.Y.Z, e.g., 3.1.10
+    #     X major - a single digit currently = 3
+    #     Y minor - 1 or 2 digits
+    #     Z patch - 1 or 2 digits
     "[0-9].[0-9].[0-9]":
       - step: *Push-to-GitHub-Main
     "[0-9].[0-9].[0-9][0-9]":
@@ -51,6 +56,9 @@ pipelines:
       - step: *Push-to-GitHub-Main
 
     # release + hotfixes to update server
+    #   branch containing updates to release that are pushed to the update server
+    #   names are of the form X.Y.Z-updates, e.g., 3.1.10-updates
+    #     X, Y, Z as above
     "[0-9].[0-9].[0-9]-updates":
       - step: *Push-to-GitHub-Updates
     "[0-9].[0-9].[0-9][0-9]-updates":
@@ -70,6 +78,9 @@ pipelines:
       - step: *Push-to-GitHub-Updates
 
     # release candidates
+    #   the latest working-branch before content is merged into -updates and pushed to the server
+    #   names are of the form X.Y.Z-edge, e.g., 3.1.10-edge
+    #     X, Y, Z as above
     "[0-9].[0-9].[0-9]-edge":
       - step: *Push-to-GitHub-Edge
     "[0-9].[0-9].[0-9][0-9]-edge":

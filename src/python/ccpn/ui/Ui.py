@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:43 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-01-05 15:28:43 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,6 +40,7 @@ from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.util import Register
 from ccpn.util.Update import installUpdates, UpdateAgent
 from ccpn.util.Logging import getLogger
+from ccpn.util.Path import aPath
 
 
 class Ui(NotifierBase):
@@ -310,31 +311,30 @@ class NoUi(Ui):
             sys.stderr.write("Please enter registration details:\n")
 
             # ('name', 'organisation', 'email')
-            for n, attr in enumerate(Register.userAttributes):
+            for attr in Register.userAttributes:
                 if 'email' in attr:
                     validEmail = False
-                    while validEmail is False:
+                    while not validEmail:
                         oldVal = registrationDict.get(attr)
                         sys.stderr.flush()
                         if oldVal:
-                            regIn = input('%s [%s] >' % (str(attr), oldVal))
+                            regIn = input(f'{str(attr)} [{oldVal}] >')
                             registrationDict[attr] = regIn or oldVal
                         else:
-                            regIn = input(attr + ' >')
+                            regIn = input(f'{attr} >')
                             registrationDict[attr] = regIn or ''
 
-                        validEmail = True if validEmailRegex.match(registrationDict.get(attr)) else False
+                        validEmail = bool(validEmailRegex.match(registrationDict.get(attr)))
                         if not validEmail:
                             sys.stderr.write(attr + ' is invalid, please try again\n')
 
                 else:
                     sys.stderr.flush()
-                    oldVal = registrationDict.get(attr)
-                    if oldVal:
-                        regIn = input('%s [%s] >' % (str(attr), oldVal))
+                    if oldVal := registrationDict.get(attr):
+                        regIn = input(f'{str(attr)} [{oldVal}] >')
                         registrationDict[attr] = regIn or oldVal
                     else:
-                        regIn = input(attr + ' >')
+                        regIn = input(f'{attr} >')
                         registrationDict[attr] = regIn or ''
 
             # write the updated md5
@@ -373,6 +373,217 @@ class NoUi(Ui):
         """
         # nothing required?
         pass
+
+    def _getDataLoader(self, path, pathFilter=None):
+        """Get dataLoader for path (or None if not present), optionally only testing for
+        dataFormats defined in filter.
+        Allows for reporting or checking through popups.
+        Does not do the actual loading.
+
+        :param path: the path to get a dataLoader for
+        :param pathFilter: a list/tuple of optional dataFormat strings; (defaults to all dataFormats)
+        :returns a tuple (dataLoader, createNewProject, ignore)
+        """
+        # local import here
+        from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
+        from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
+        from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+        from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
+        from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
+        from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
+        from ccpn.framework.lib.DataLoaders.DataLoaderABC import _getPotentialDataLoaders
+
+        from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders, _checkPathForDataLoader
+        from ccpn.core.Project import Project
+
+        if pathFilter is None:
+            pathFilter = tuple(getDataLoaders().keys())
+
+        _loaders = _checkPathForDataLoader(path=path, pathFilter=pathFilter)
+        if len(_loaders) > 0 and _loaders[-1].isValid:
+            # found a valid one; use that
+            dataLoader = _loaders[-1]
+
+        # log errors
+        elif len(_loaders) == 0:
+            dataLoader = None
+            txt = f'No valid loader found for {path}'
+
+        elif len(_loaders) == 1 and not _loaders[0].isValid:
+            dataLoader = None
+            txt = f'No valid loader: {_loaders[0].errorString}'
+
+        else:
+            dataLoader = None
+            txt = f'No valid loader found for {path}; tried {[dl.dataFormat for dl in _loaders]}'
+
+        if dataLoader is None:
+            getLogger().warning(txt)
+            return (None, False, False)
+
+        # if (dataLoader :=  checkPathForDataLoader(path, pathFilter=pathFilter)) is None:
+        #     dataFormats = [dl.dataFormat for dl in _getPotentialDataLoaders(path)]
+        #     txt = f'Loading "{path}" unsuccessful; tried all of {dataFormats}, but failed'
+        #     getLogger().warning(txt)
+        #     return (None, False, False)
+
+        createNewProject = dataLoader.createNewProject
+        ignore = False
+
+        path = dataLoader.path
+        if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
+            createNewProject = True
+            dataLoader.createNewProject = True
+            # ok = MessageDialog.showYesNoWarning(f'Load Project',
+            #                                     f'Project "{path.name}" was created with version-2 Analysis.\n'
+            #                                     f'\n'
+            #                                     f'CAUTION:\n'
+            #                                     f'The project will be converted to a version-3 project and saved as a new directory with .ccpn extension.\n'
+            #                                     f'\n'
+            #                                     f'Do you want to continue loading?')
+            #
+            # if not ok:
+            #     # skip loading so that user can backup/copy project
+            #     getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
+            #     ignore = True
+
+        elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat and Project._needsUpgrading(path):
+            createNewProject = True
+            dataLoader.createNewProject = True
+
+            DONT_OPEN = "Don't Open"
+            CONTINUE = 'Continue'
+            MAKE_ARCHIVE = 'Make a backup archive (.tgz) of the project'
+
+            dataLoader.makeArchive = False
+            # ok = MessageDialog.showMulti(f'Load Project',
+            #                              f'You are opening an older project (version 3.0.x) - {path.name}\n'
+            #                              f'\n'
+            #                              f'When you save, it will be upgraded and will not be readable by version 3.0.4\n',
+            #                              texts=[DONT_OPEN, CONTINUE],
+            #                              checkbox=MAKE_ARCHIVE, checked=False,
+            #                              )
+            #
+            # if not any(ss in ok for ss in [DONT_OPEN, MAKE_ARCHIVE, CONTINUE]):
+            #     # there was an error from the dialog
+            #     getLogger().debug(f'==> Cancelled loading ccpn project "{path}" - error in dialog')
+            #     ignore = True
+            #
+            # if DONT_OPEN in ok:
+            #     # user selection not to load
+            #     getLogger().info(f'==> Cancelled loading ccpn project "{path}"')
+            #     ignore = True
+            #
+            # elif MAKE_ARCHIVE in ok:
+            #     # flag to make a backup archive
+            #     dataLoader.makeArchive = True
+
+        elif dataLoader.dataFormat == NefDataLoader.dataFormat:
+            (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
+            if dataLoader and not createNewProject and not ignore:
+                # we are importing; popup the import window
+                ok = self.mainWindow._showNefPopup(dataLoader)
+                if not ok:
+                    ignore = True
+
+        elif dataLoader.dataFormat == SparkyDataLoader.dataFormat:
+            (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
+
+        # elif dataLoader.isSpectrumLoader and dataLoader.existsInProject():
+        #     ok = MessageDialog.showYesNoWarning('Loading Spectrum',
+        #                                         f'"{dataLoader.path}"\n'
+        #                                         f'already exists in the project\n'
+        #                                         '\n'
+        #                                         'do you want to load?'
+        #                                         )
+        #     if not ok:
+        #         ignore = True
+
+        # elif dataLoader.dataFormat == StarDataLoader.dataFormat and dataLoader:
+        #     (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
+        #     if dataLoader and not ignore:
+        #         title = 'New project from NmrStar' if createNewProject else \
+        #             'Import from NmrStar'
+        #         dataLoader.getDataBlock()  # this will read and parse the file
+        #         popup = StarImporterPopup(dataLoader=dataLoader,
+        #                                   parent=self.mainWindow,
+        #                                   size=(700, 1000),
+        #                                   title=title
+        #                                   )
+        #         popup.exec_()
+        #         ignore = (popup.result == popup.CANCEL_PRESSED)
+
+        # elif dataLoader.dataFormat == DirectoryDataLoader.dataFormat and len(dataLoader) > MAXITEMLOGGING:
+        #     ok = MessageDialog.showYesNoWarning('Directory "%s"\n' % dataLoader.path,
+        #                                         f'\n'
+        #                                         'CAUTION: You are trying to load %d items\n'
+        #                                         '\n'
+        #                                         'Do you want to continue?' % (len(dataLoader, ))
+        #                                         )
+        #
+        #     if not ok:
+        #         ignore = True
+
+        return (dataLoader, createNewProject, ignore)
+
+    def _loadData(self, dataLoader) -> list:
+        """Load the data defined by dataLoader instance, catching errors
+        and suspending sidebar.
+        :return a list of loaded opjects
+        """
+        from ccpn.core.lib.ContextManagers import catchExceptions
+
+        result = []
+        errorStringTemplate = 'Loading "%s" failed:' % dataLoader.path + '\n%s'
+        with catchExceptions(errorStringTemplate=errorStringTemplate):
+            result = dataLoader.load()
+
+        return result
+
+    def loadData(self, *paths, pathFilter=None) -> list:
+        """Loads data from paths; query if none supplied
+        Optionally filter for dataFormat(s)
+        :param *paths: argument list of path's (str or Path instances)
+        :param pathFilter: keyword argument: list/tuple of dataFormat strings
+        :returns list of loaded objects
+        """
+        if not paths:
+            return []
+
+        dataLoaders = []
+        for path in paths:
+
+            _path = aPath(path)
+            if not _path.exists():
+                txt = f'"{path}" does not exist'
+                getLogger().warning(txt)
+                if len(paths) == 1:
+                    return []
+                else:
+                    continue
+
+            dataLoader, createNewProject, ignore = self._getDataLoader(path, pathFilter=pathFilter)
+            if ignore:
+                continue
+
+            if dataLoader is None:
+                txt = f'Unable to load "{path}"'
+                getLogger().warning(txt)
+                if len(paths) == 1:
+                    return []
+                else:
+                    continue
+
+            dataLoaders.append(dataLoader)
+
+        # load the project using the dataLoaders;
+        # We'll ask framework who will pass it back as ui._loadData calls
+        objs = self.application._loadData(dataLoaders)
+        if len(objs) == 0:
+            txt = f'No objects were loaded from {paths}'
+            getLogger().warning(txt)
+
+        return objs
 
 
 class TestUi(NoUi):

@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:08 +0100 (Mon, September 13, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2023-01-05 15:28:42 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -117,26 +117,26 @@ class SubstanceTest(WrapperTesting):
         self.assertEqual(substance1._id, 'notmuch.')
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
-        with self.assertRaisesRegexp(ValueError, 'must be set'):
+        with self.assertRaisesRegex(ValueError, 'must be set'):
             substance1.rename(name='', labelling=None)
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
-        with self.assertRaisesRegexp(ValueError, 'not allowed in'):
+        with self.assertRaisesRegex(ValueError, 'not allowed in'):
             substance1.rename(name='^Badname', labelling=None)
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
-        with self.assertRaisesRegexp(ValueError, 'must be a string'):
+        with self.assertRaisesRegex(ValueError, 'must be a string'):
             substance1.rename(name=12, labelling=None)
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
         substance1.rename(name='notmuch', labelling='')
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
-        with self.assertRaisesRegexp(ValueError, 'not allowed in'):
+        with self.assertRaisesRegex(ValueError, 'not allowed in'):
             substance1.rename(name='notmuch', labelling='^Badname')
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
-        with self.assertRaisesRegexp(ValueError, 'must be a string'):
+        with self.assertRaisesRegex(ValueError, 'must be a string'):
             substance1.rename(name='notmuch', labelling=12)
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
@@ -156,7 +156,6 @@ class Test_Substance_SpectrumLink(WrapperTesting):
             self.spectrum1 = self.project.newEmptySpectrum(isotopeCodes=('13C', '1H', '15N'), name='COHnNh')
             self.assertEqual(self.spectrum1.isotopeCodes, ['13C', '1H', '15N'])
 
-
             self.chain1 = self.project.createChain(sequence='ACDC', compoundName='sequence1', shortName='cC1',
                                                    molType='protein')
 
@@ -171,7 +170,7 @@ class Test_Substance_SpectrumLink(WrapperTesting):
             self.substance2 = self.chain2.substances[0]
 
     def test_Substance_SpectrumLink(self):
-        checkGetSetAttr(self, obj=self.spectrum1, attrib='referenceSubstance', value=self.substance1)
+        checkGetSetAttr(self, obj=self.spectrum1, attrib='referenceSubstances', value=[self.substance1])
 
         ref1 = self.substance1.referenceSpectra
         self.assertEqual(ref1[0], self.spectrum1)
@@ -182,28 +181,28 @@ class Test_Substance_SpectrumLink(WrapperTesting):
         self.substance1.clearSpecificAtomLabelling()
 
     def test_Substance_GetAtomLabelling(self):
-        with self.assertRaisesRegexp(ValueError, 'Atom with ID None does not exist'):
+        with self.assertRaisesRegex(ValueError, 'Atom with ID None does not exist'):
             atomLabel = self.substance1.getSpecificAtomLabelling('X.1.ALA.CA')
         atomLabel = self.substance1.getSpecificAtomLabelling('cC1.1.ALA.CA')
 
-        with self.assertRaisesRegexp(ValueError, 'chain do not match the Substance'):
+        with self.assertRaisesRegex(ValueError, 'chain do not match the Substance'):
             atomLabel = self.substance2.getSpecificAtomLabelling('cC1.1.ALA.CA')
 
     def _test_Substance_removeAtomLabelling(self):
-        with self.assertRaisesRegexp(ValueError, 'does not exist'):
+        with self.assertRaisesRegex(ValueError, 'does not exist'):
             atomLabel = self.substance1.removeSpecificAtomLabelling('X.1.ALA.CA')
 
-        with self.assertRaisesRegexp(ValueError, 'chain do not match the Substance'):
+        with self.assertRaisesRegex(ValueError, 'chain do not match the Substance'):
             atomLabel = self.substance2.removeSpecificAtomLabelling('cC1.1.ALA.CA')
 
         atomLabel = self.substance1.removeSpecificAtomLabelling('cC1.1.ALA.CA')
         self.assertEqual(atomLabel, None)
 
     def test_Substance_SetAtomLabelling(self):
-        with self.assertRaisesRegexp(ValueError, 'Atom with ID None does not exist'):
+        with self.assertRaisesRegex(ValueError, 'Atom with ID None does not exist'):
             atomLabel = self.substance1.setSpecificAtomLabelling('X.1.ALA.CA', {'12C': 0.32, '13C': 0.68})
 
-        with self.assertRaisesRegexp(ValueError, 'chain do not match the Substance'):
+        with self.assertRaisesRegex(ValueError, 'chain do not match the Substance'):
             atomLabel = self.substance2.setSpecificAtomLabelling('cC1.1.ALA.CA', {'12C': 0.32, '13C': 0.68})
 
         atomLabel = self.substance1.setSpecificAtomLabelling('cC1.1.ALA.CA', {'12C': 0.32, '13C': 0.68})

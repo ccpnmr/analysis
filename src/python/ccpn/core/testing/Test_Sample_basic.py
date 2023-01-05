@@ -1,19 +1,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:08 +0100 (Mon, September 13, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2023-01-05 15:28:42 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -66,8 +66,8 @@ class TestSample_No_setUp(WrapperTesting):
         """
         Test that creating a new Sample with '' raises an error.
         """
-        with self.assertRaisesRegexp(ValueError, 'must be set'):
-          self.project.newSample('')
+        with self.assertRaisesRegex(ValueError, 'must be set'):
+            self.project.newSample('')
         self.assertEqual(len(self.project.samples), 0)
 
     def test_newSample_Badname(self):
@@ -75,7 +75,7 @@ class TestSample_No_setUp(WrapperTesting):
         Test that creating a new Sample with '^Badname' raises an error.
         ^ is a bad character and not to be included in strings.
         """
-        with self.assertRaisesRegexp(ValueError, 'Character'):
+        with self.assertRaisesRegex(ValueError, 'Character'):
             self.project.newSample('^Badname')
         self.assertEqual(len(self.project.samples), 0)
 
@@ -83,7 +83,7 @@ class TestSample_No_setUp(WrapperTesting):
         """
         Test that creating a new Sample with 42 (non-string) raises an error.
         """
-        with self.assertRaisesRegexp(ValueError, 'must be a string'):
+        with self.assertRaisesRegex(ValueError, 'must be a string'):
             self.project.newSample(42)
         self.assertEqual(len(self.project.samples), 0)
 
@@ -116,7 +116,7 @@ class TestSample_setUp(WrapperTesting):
         """
         Test that renaming to '' raises an error and does not alter the original Sample.
         """
-        with self.assertRaisesRegexp(ValueError, 'must be set'):
+        with self.assertRaisesRegex(ValueError, 'must be set'):
             self.newSample.rename('')
         self.assertEqual(self.newSample.name, 'ValidSample')
 
@@ -125,7 +125,7 @@ class TestSample_setUp(WrapperTesting):
         Test that renaming to '^Badname' raises an error and does not alter the original Sample.
         ^ is a bad character and not to be included in strings.
         """
-        with self.assertRaisesRegexp(ValueError, 'Character'):
+        with self.assertRaisesRegex(ValueError, 'Character'):
             self.newSample.rename('^Badname')
         self.assertEqual(self.newSample.name, 'ValidSample')
 
@@ -133,7 +133,7 @@ class TestSample_setUp(WrapperTesting):
         """
         Test that renaming to None raises an error and does not alter the original Sample.
         """
-        # with self.assertRaisesRegexp(ValueError, 'Sample name must be set'):
+        # with self.assertRaisesRegex(ValueError, 'Sample name must be set'):
         #   self.newSample.rename(None)
         #
         self.newSample.rename(None)
@@ -142,10 +142,10 @@ class TestSample_setUp(WrapperTesting):
         """
         Test that renaming to 42 (non-string) raises an error and does not alter the original Sample.
         """
-        # with self.assertRaisesRegexp(TypeError, 'argument of type'):
+        # with self.assertRaisesRegex(TypeError, 'argument of type'):
         #   self.newSample.rename(42)
         #
-        with self.assertRaisesRegexp(ValueError, 'must be a string'):
+        with self.assertRaisesRegex(ValueError, 'must be a string'):
             self.newSample.rename(42)
         self.assertEqual(self.newSample.name, 'ValidSample')
 

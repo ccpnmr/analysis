@@ -3,19 +3,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-07-29 17:59:13 +0100 (Fri, July 29, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-01-05 15:28:41 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -312,7 +312,7 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
     if not name:
         name = SampleComponent._uniqueName(self.project, name=name)
     SampleComponent._validateStringValue(attribName='name', value = name)
-    SampleComponent._validateStringValue(attribName='labelling', value = labelling, allowNone=True)
+    SampleComponent._validateStringValue(attribName='labelling', value = labelling, allowNone=True, allowEmpty=True)
 
     if not isinstance(name, str):
         name = str(name)
@@ -320,14 +320,13 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
     _apiNmrProject = self._project._apiNmrProject
     apiRefComponentStore = _apiNmrProject.sampleStore.refSampleComponentStore
     # existing = [sC for sC in self._apiSample.sortedSampleComponents() if sC.name == name and sC.labeling == labelling]
-    existing = self._apiSample.findAllSampleComponents(name=name, labelling=labelling)
-    if existing:
-        raise ValueError('{}.{}.{} already exists'.format(self._apiSample.name, name, labelling if labelling != DEFAULT_LABELLING else ''))
+    if self._apiSample.findAllSampleComponents(name=name, labelling=labelling):
+        raise ValueError(f"{self._apiSample.name}.{name}.{labelling if labelling != DEFAULT_LABELLING else ''} already exists")
 
     if concentrationUnit is not None and concentrationUnit not in Constants.concentrationUnits:
-        self._project._logger.warning("Unsupported value %s for SampleComponent.concentrationUnit"
-                                      % concentrationUnit)
-        raise ValueError("SampleComponent.concentrationUnit must be in the list: %s" % Constants.concentrationUnits)
+        self._project._logger.warning(f"Unsupported value {concentrationUnit} for SampleComponent.concentrationUnit")
+
+        raise ValueError(f"SampleComponent.concentrationUnit must be in the list: {Constants.concentrationUnits}")
 
     apiSample = self._wrappedData
 
@@ -336,8 +335,7 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
     if len(apiExistingSubstances) > 1:
         # should only return one element
         raise RuntimeError('Too many identical substances')
-    apiSubstance = apiRefComponentStore.findFirstComponent(name=name, labeling=labelling)
-    if apiSubstance:
+    if apiSubstance := apiRefComponentStore.findFirstComponent(name=name, labeling=labelling):
         substance = self._project._data2Obj.get(apiSubstance)
     else:
         from ccpn.core.Substance import _newSubstance

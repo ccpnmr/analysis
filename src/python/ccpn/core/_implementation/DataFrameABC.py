@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:02 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-01-05 15:28:41 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,6 +28,7 @@ __date__ = "$Date: 2021-10-28 11:21:59 +0100 (Thu, October 28, 2021) $"
 
 import sys
 import collections
+import collections.abc
 import math
 import numbers
 import typing
@@ -1002,7 +1003,7 @@ class DataFrameABC(pd.DataFrame):
         return cols
 
 
-def fitToDataType(data: collections.Sequence, dataType: type, force: bool = False) -> list:
+def fitToDataType(data: collections.abc.Sequence, dataType: type, force: bool = False) -> list:
     """Convert any data sequence to a list of dataType.
 
     If force will convert all values to type, if possible, and set None otherwise.

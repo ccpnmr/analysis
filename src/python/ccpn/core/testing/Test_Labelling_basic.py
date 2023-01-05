@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:08 +0100 (Mon, September 13, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2023-01-05 15:28:41 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -109,7 +109,7 @@ class TestLabellingBasic_setUp(WrapperTesting):
         Test that creating a new SampleComponent with name '^Badname' and
         Labelling as a valid name raises an error and no component is added.
         """
-        with self.assertRaisesRegexp(ValueError, 'Character'):
+        with self.assertRaisesRegex(ValueError, 'Character'):
             self.sample.newSampleComponent('^Badname', 'ValidLabelling')
         self.checkNumComponents(0)
 
@@ -118,7 +118,7 @@ class TestLabellingBasic_setUp(WrapperTesting):
         Test that creating a new SampleComponent with name '^Badname' and
         Labelling as an empty string raises an error and no component is added.
         """
-        with self.assertRaisesRegexp(ValueError, 'Character'):
+        with self.assertRaisesRegex(ValueError, 'Character'):
             self.sample.newSampleComponent('^Badname', '')
         self.checkNumComponents(0)
 
@@ -127,7 +127,7 @@ class TestLabellingBasic_setUp(WrapperTesting):
         Test that creating a new SampleComponent with name '^Badname' and
         Labelling as '^Badname' raises an error and no component is added.
         """
-        with self.assertRaisesRegexp(ValueError, 'Character'):
+        with self.assertRaisesRegex(ValueError, 'Character'):
             self.sample.newSampleComponent('^Badname', '^Badname')
         self.checkNumComponents(0)
 
@@ -136,7 +136,7 @@ class TestLabellingBasic_setUp(WrapperTesting):
         Test that creating a new SampleComponent with name '^Badname' and
         Labelling as None raises an error and no component is added.
         """
-        with self.assertRaisesRegexp(ValueError, 'Character'):
+        with self.assertRaisesRegex(ValueError, 'Character'):
             self.sample.newSampleComponent('^Badname', None)
         self.checkNumComponents(0)
 
@@ -145,7 +145,7 @@ class TestLabellingBasic_setUp(WrapperTesting):
         Test that creating a new SampleComponent with name '^Badname' and
         Labelling as 42 (non-string) raises an error and no component is added.
         """
-        with self.assertRaisesRegexp(ValueError, 'Character'):
+        with self.assertRaisesRegex(ValueError, 'Character'):
             self.sample.newSampleComponent('^Badname', 42)
         self.checkNumComponents(0)
 
@@ -158,16 +158,15 @@ class TestLabellingBasic_setUp(WrapperTesting):
         Test that creating a new SampleComponent with Labelling as empty string still creates a
         valid sample component.
         """
-        # with self.assertRaisesRegexp(ApiError, 'Empty string not allowed'):
+        # with self.assertRaisesRegex(ApiError, 'Empty string not allowed'):
         #   self.sample.newSampleComponent('ValidSampleComponent', '')
         #
-        #with self.assertRaisesRegexp(ValueError, "SampleComponent 'labelling' name must be set"):
+        #with self.assertRaisesRegex(ValueError, "SampleComponent 'labelling' name must be set"):
         #    self.sample.newSampleComponent('ValidSampleComponent', '')
         #self.checkNumComponents(0)
 
         self.sample.newSampleComponent('ValidSampleComponent', '')
         self.checkNumComponents(1)
-
 
     def test_SampleComponentLabelling_Badname(self):
         """
@@ -175,10 +174,10 @@ class TestLabellingBasic_setUp(WrapperTesting):
         and no component is added.
         ^ is a bad character and not to be included in strings.
         """
-        # with self.assertRaisesRegexp(ValueError, 'Character'):
+        # with self.assertRaisesRegex(ValueError, 'Character'):
         #   self.sample.newSampleComponent('ValidSampleComponent', '^Badname')
         #
-        with self.assertRaisesRegexp(ValueError, 'Character'):
+        with self.assertRaisesRegex(ValueError, 'Character'):
             self.sample.newSampleComponent('ValidSampleComponent', '^Badname')
         self.checkNumComponents(0)
 
@@ -187,9 +186,9 @@ class TestLabellingBasic_setUp(WrapperTesting):
         Test that creating a new SampleComponent with Labelling as 42 (non-string) raises an error
         and no component is added.
         """
-        # with self.assertRaisesRegexp(TypeError, 'not iterable'):
+        # with self.assertRaisesRegex(TypeError, 'not iterable'):
         #   self.sample.newSampleComponent('ValidSampleComponent', 42)
         #
-        with self.assertRaisesRegexp(ValueError, "must be a string"):
+        with self.assertRaisesRegex(ValueError, "must be a string"):
             self.sample.newSampleComponent('ValidSampleComponent', 42)
         self.checkNumComponents(0)

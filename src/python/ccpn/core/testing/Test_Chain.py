@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:08 +0100 (Mon, September 13, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2023-01-05 15:28:41 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -212,13 +212,13 @@ class ChainTest(WrapperTesting):
         self.project.newUndoPoint()
         chain.rename('B')
         self.assertEqual(chain.shortName, 'B')
-        self.assertEqual(nmrChain.shortName, 'B')
+        self.assertEqual(nmrChain.shortName, 'A')
         undo.undo()
         self.assertEqual(chain.shortName, 'A')
         self.assertEqual(nmrChain.shortName, 'A')
         undo.redo()
         self.assertEqual(chain.shortName, 'B')
-        self.assertEqual(nmrChain.shortName, 'B')
+        self.assertEqual(nmrChain.shortName, 'A')
 
     #=========================================================================================
     # testBoundAtoms
@@ -241,9 +241,9 @@ class ChainTest(WrapperTesting):
         chainb = project.createChain('FPC', compoundName='fpc', molType='protein')
         for chain in chaina, chainb:
             for atom in chain.atoms:
-                self.assertEquals(boundAtomsTestData.get(atom._id, []),
-                                  [(x.name if x.residue is atom.residue else x._id)
-                                   for x in atom.boundAtoms])
+                self.assertEqual(boundAtomsTestData.get(atom._id, []),
+                                 [(x.name if x.residue is atom.residue else x._id)
+                                  for x in atom.boundAtoms])
 
     #=========================================================================================
     # testCrosslinkAtoms
@@ -259,8 +259,8 @@ class ChainTest(WrapperTesting):
         atom1 = project.getByPid('MA:A.1.CYS.SG')
         atom2 = project.getByPid('MA:B.3.CYS.SG')
         atom1.addInterAtomBond(atom2)
-        self.assertEquals([x._id for x in atom1.boundAtoms], ['A.1.CYS.CB', 'B.3.CYS.SG'])
-        self.assertEquals([x._id for x in atom2.boundAtoms], ['A.1.CYS.SG', 'B.3.CYS.CB'])
+        self.assertEqual([x._id for x in atom1.boundAtoms], ['A.1.CYS.CB', 'B.3.CYS.SG'])
+        self.assertEqual([x._id for x in atom2.boundAtoms], ['A.1.CYS.SG', 'B.3.CYS.CB'])
 
         chainc = chaina.clone()
 
@@ -276,8 +276,8 @@ class ChainTest(WrapperTesting):
         atom2 = project.getByPid('MA:D.3.CYS.SG')
         atom3 = project.getByPid('MA:C.1.CYS.HG')
         atom4 = project.getByPid('MA:D.3.CYS.HG')
-        self.assertEquals([x._id for x in atom1.boundAtoms], ['C.1.CYS.CB', 'D.3.CYS.SG'])
-        self.assertEquals([x._id for x in atom2.boundAtoms], ['C.1.CYS.SG', 'D.3.CYS.CB'])
+        self.assertEqual([x._id for x in atom1.boundAtoms], ['C.1.CYS.CB', 'D.3.CYS.SG'])
+        self.assertEqual([x._id for x in atom2.boundAtoms], ['C.1.CYS.SG', 'D.3.CYS.CB'])
         self.assertIsNone(atom3)
         self.assertIsNone(atom4)
 
@@ -329,7 +329,7 @@ class Test_Properties(WrapperTesting):
         """
         Test that renaming a Chain with no parameter raises TypeError.
         """
-        with self.assertRaisesRegexp(TypeError, 'required argument'):
+        with self.assertRaisesRegex(TypeError, 'required argument'):
             self.chain.rename()
 
     def test_renameChain_None(self):
@@ -342,28 +342,28 @@ class Test_Properties(WrapperTesting):
         """
         Test that renaming a Chain with 42 raises TypeError.
         """
-        with self.assertRaisesRegexp(ValueError, 'must be a string'):
+        with self.assertRaisesRegex(ValueError, 'must be a string'):
             self.chain.rename(42)
 
     def test_renameChain_ES(self):
         """
         Test that renaming a Chain with '' raises ValueError.
         """
-        with self.assertRaisesRegexp(ValueError, 'must be set'):
+        with self.assertRaisesRegex(ValueError, 'must be set'):
             self.chain.rename('')
 
     def test_renameChain_Badname(self):
         """
         Test that renaming a Chain with ^Badname raises ValueError.
         """
-        with self.assertRaisesRegexp(ValueError, 'not allowed'):
+        with self.assertRaisesRegex(ValueError, 'not allowed'):
             self.chain.rename('^Badname')
 
     def test_renameChain_Whitespace(self):
         """
         Test that renaming a Chain with whitespace raises ValueError.
         """
-        with self.assertRaisesRegexp(ValueError, 'not allowed'):
+        with self.assertRaisesRegex(ValueError, 'not allowed'):
             self.chain.rename('not found')
 
     #=========================================================================================
@@ -388,7 +388,7 @@ class Test_Properties(WrapperTesting):
         """
         Test that creating a new Chain with 42 raises TypeError.
         """
-        with self.assertRaisesRegexp(ValueError, 'must be a string'):
+        with self.assertRaisesRegex(ValueError, 'must be a string'):
             self.newChain = self.project.createChain('ACDC', shortName=42, molType='protein')
         self.assertEqual(len(self.project.chains), 1)
 
@@ -396,7 +396,7 @@ class Test_Properties(WrapperTesting):
         """
         Test that creating a new Chain with ^Badname raises ValueError.
         """
-        with self.assertRaisesRegexp(ValueError, 'not allowed in'):
+        with self.assertRaisesRegex(ValueError, 'not allowed in'):
             self.newChain = self.project.createChain('ACDC', shortName='^Badname', molType='protein')
         self.assertEqual(len(self.project.chains), 1)
 
@@ -405,8 +405,8 @@ class Test_Properties(WrapperTesting):
         Test that creating a new Chain with existing raises ValueError.
         """
         self.newChain = self.project.createChain('ACDC', shortName='exists', molType='protein')
-        # with self.assertRaisesRegexp(ValueError, 'already exists'):
+        # with self.assertRaisesRegex(ValueError, 'already exists'):
         #     self.newChain = self.project.createChain('ACDC', shortName='exists', molType='protein')
         self.newChain = self.project.createChain('ACDC', shortName='exists', molType='protein')
         self.assertEqual(len(self.project.chains), 3)
-        self.assertEqual(self.project.chains[2].name, 'exists_1') # shortname
+        self.assertEqual(self.project.chains[2].name, 'exists_1')  # shortname

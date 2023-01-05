@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-07 11:26:45 +0000 (Wed, December 07, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-01-05 15:28:42 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,6 +35,7 @@ import subprocess
 import platform
 
 import faulthandler
+
 
 try:
     # set the soft limits for the maximum number of open files
@@ -171,7 +172,7 @@ class Framework(NotifierBase, GuiBase):
         # NOTE:ED - what is revision for? there are no uses and causes a new error for sphinx documentation unless a string
         # self.revision = Version.revision
 
-        self.useFileLogger = not self.args.nologging
+        self.useFileLogger = not getattr(self.args, 'noLogging', False)
 
         # map to 0-3, with 0 no debug
         _level = ([self.args.debug,
@@ -195,8 +196,9 @@ class Framework(NotifierBase, GuiBase):
         # self._menuSpec = None
 
         # Blocking level for command echo and logging
-        self._echoBlocking = 0
+        self._echoBlocking = int(getattr(self.args, 'noDebugLogging', False))
         self._enableLoggingToConsole = True
+        logger.disabled = getattr(self.args, 'noEchoLogging', False)  # overrides noDebugLogging
 
         self._backupTimerQ = None
         self._autoBackupThread = None
@@ -218,10 +220,12 @@ class Framework(NotifierBase, GuiBase):
 
         # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
+
         self._dataLoaders = getDataLoaders()
 
         # register SpectrumDataSource formats for the first and only time
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+
         self._spectrumDataSourceFormats = getDataFormats()
 
         # get a user interface; nb. ui.start() is called by the application
@@ -533,7 +537,7 @@ class Framework(NotifierBase, GuiBase):
     # Utilities
     #-----------------------------------------------------------------------------------------
 
-    def setDebug(self, level:int):
+    def setDebug(self, level: int):
         """Set the debugging level
         :param level: 0: off, 1-3: debug level 1-3
         """
@@ -554,8 +558,8 @@ class Framework(NotifierBase, GuiBase):
         CCPNINTERNAL: used throughout to check
         """
         if self._debugLevel == Logging.DEBUG1 or \
-           self._debugLevel == Logging.DEBUG2 or \
-           self._debugLevel == Logging.DEBUG3:
+                self._debugLevel == Logging.DEBUG2 or \
+                self._debugLevel == Logging.DEBUG3:
             return True
         return False
 
@@ -578,11 +582,12 @@ class Framework(NotifierBase, GuiBase):
         # translator.setDebug(True)
         sys.stderr.write('==> Language set to "%s"\n' % translator._language)
 
-
-    def cleanGarbageCollector(self):
+    @staticmethod
+    def cleanGarbageCollector():
         """ Force the garbageCollector to clean. See more at
         https://docs.python.org/3/library/gc.html"""
         import gc
+
         gc.collect()
 
     #-----------------------------------------------------------------------------------------
@@ -877,6 +882,7 @@ class Framework(NotifierBase, GuiBase):
         """
         # local import to avoid cycles
         from ccpn.core.Project import _newProject
+
         name = name or 'default'
 
         if Project._checkName(name, correctName=False) is None:
@@ -1196,6 +1202,7 @@ class Framework(NotifierBase, GuiBase):
         CCPNINTERNAL: called from NefDataLoader.load()
         """
         from ccpn.core.Project import DEFAULT_CHEMICALSHIFTLIST
+
         TOBEDELETED = '_toBeDeleted'
 
         if _newProject := dataLoader.createNewProject:
@@ -1477,6 +1484,7 @@ class Framework(NotifierBase, GuiBase):
             MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
         else:
             from ccpn.ui.gui.popups.SeriesPeakCollectionPopup import SeriesPeakCollectionPopup
+
             popup = SeriesPeakCollectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
             return popup
@@ -1497,6 +1505,7 @@ class Framework(NotifierBase, GuiBase):
             MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')
         else:
             from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
+
             popup = SpectrumProjectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
 
@@ -1566,7 +1575,7 @@ class Framework(NotifierBase, GuiBase):
         if not self.project.peakLists:
             txt = 'Project has no PeakList\'s. Peak Lists cannot be copied'
             getLogger().warning(txt)
-            MessageDialog.showWarning('Cannot perform a copy',txt)
+            MessageDialog.showWarning('Cannot perform a copy', txt)
             return
         else:
             from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
@@ -1641,7 +1650,6 @@ class Framework(NotifierBase, GuiBase):
                 popup.exec_()
             else:
                 MessageDialog.showWarning('Make Strip Plot', 'No selected spectrumDisplay')
-
 
     ################################################################################################
     ## MENU callbacks:  Molecule
@@ -1830,7 +1838,7 @@ class Framework(NotifierBase, GuiBase):
 
     @logCommand('application.')
     def showRestraintTable(self, position: str = 'bottom', relativeTo: CcpnModule = None,
-                           restraintTable = None, selectFirstItem=False):
+                           restraintTable=None, selectFirstItem=False):
         """Displays Peak table on left of main window with specified list selected.
         """
         from ccpn.ui.gui.modules.RestraintTableModule import RestraintTableModule
@@ -1878,7 +1886,7 @@ class Framework(NotifierBase, GuiBase):
 
     @logCommand('application.')
     def showViolationTable(self, position: str = 'bottom', relativeTo: CcpnModule = None,
-                           violationTable = None, selectFirstItem=False):
+                           violationTable=None, selectFirstItem=False):
         """Displays Violation table on left of main window with specified list selected.
         """
         from ccpn.ui.gui.modules.ViolationTableModule import ViolationTableModule as _module
@@ -2057,6 +2065,7 @@ class Framework(NotifierBase, GuiBase):
 
     def showChemicalShiftMappingModule(self, position: str = 'top', relativeTo: CcpnModule = None):
         from ccpn.ui.gui.modules.experimentAnalysis.chemicalShiftMapping.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
+
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
@@ -2066,6 +2075,7 @@ class Framework(NotifierBase, GuiBase):
 
     def showRelaxationModule(self, position: str = 'top', relativeTo: CcpnModule = None):
         from ccpn.ui.gui.modules.experimentAnalysis.relaxation.RelaxationGuiModule import RelaxationGuiModule
+
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea

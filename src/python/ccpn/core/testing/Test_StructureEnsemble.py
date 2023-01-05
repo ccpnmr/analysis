@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-01-05 15:28:42 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -53,7 +53,7 @@ class StructureEnsembleTesting_None(WrapperTesting):
         self.assertEqual(ensemble.data.shape, (3204, 17))
         self.assertTrue(self.project.save())
         # _path = self.project.path
-        # _framework = Framework.createFramework(projectPath=_path, nologging=True, _skipUpdates=True, )
+        # _framework = Framework.createFramework(projectPath=_path, noLogging=True, _skipUpdates=True, )
 
         try:
             ensemble = self.project.structureEnsembles[0]
@@ -97,10 +97,10 @@ class StructureEnsembleTesting_Project(WrapperTesting):
 
         models = self.project.structureEnsembles[0].models
         self.assertGreater(len(models), 0)
-        self.assertEquals(len(models), 20)
+        self.assertEqual(len(models), 20)
 
         data = self.project.structureEnsembles[0].data
-        self.assertEquals(data.shape, (29680, 17))
+        self.assertEqual(data.shape, (29680, 17))
 
     def test_getModels(self):
         models = self.project.structureEnsembles[0].models
@@ -108,11 +108,11 @@ class StructureEnsembleTesting_Project(WrapperTesting):
         # assert len(models) == 20
         #
         self.assertGreater(len(models), 0)
-        self.assertEquals(len(models), 20)
+        self.assertEqual(len(models), 20)
 
     def test_coords(self):
         data = self.project.structureEnsembles[0].data
-        self.assertEquals(data.shape, (29680, 17))
+        self.assertEqual(data.shape, (29680, 17))
 
 
 #=========================================================================================
@@ -156,9 +156,9 @@ class StructureEnsembleTesting_Properties(WrapperTesting):
         """
         # checkGetSetAttr(self, self.project.structureEnsembles[0], 'name', 'ValidName')
 
-        self.assertEquals(self.project.structureEnsembles[0].name, 'myStructureEnsemble')
+        self.assertEqual(self.project.structureEnsembles[0].name, 'myStructureEnsemble')
         self.project.structureEnsembles[0].rename('validName')
-        self.assertEquals(self.project.structureEnsembles[0].name, 'validName')
+        self.assertEqual(self.project.structureEnsembles[0].name, 'validName')
 
     def test_properties_structuresEnsemble_Comment(self):
         """
@@ -199,7 +199,7 @@ class StructureEnsembleTesting_Data(WrapperTesting):
         Test that structureEnsemble attribute .comment is populated.
         """
         self.data = self.ensemble.data
-        with self.assertRaisesRegexp(TypeError, 'Value is not of type EnsembleData'):  # should raise ValueError
+        with self.assertRaisesRegex(TypeError, 'Value is not of type EnsembleData'):  # should raise ValueError
             self.ensemble.data = 'badValue'
 
 
@@ -255,12 +255,12 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
         self.newEnsemble = self.project.newStructureEnsemble(data=self.data)
         namedTuples = self.newEnsemble.data.as_namedtuples()
         AtomRecord = namedTuples[0].__class__
-        self.assertEquals(namedTuples[9], (AtomRecord(Index=10,
-                                                      atomName='CD1',
-                                                      residueName='LEU',
-                                                      chainCode='C',
-                                                      sequenceId=3,
-                                                      modelNumber=3)))  # check initial values
+        self.assertEqual(namedTuples[9], (AtomRecord(Index=10,
+                                                     atomName='CD1',
+                                                     residueName='LEU',
+                                                     chainCode='C',
+                                                     sequenceId=3,
+                                                     modelNumber=3)))  # check initial values
 
     #=========================================================================================
     # test_properties_structuresEnsemble_resetModels
@@ -270,7 +270,7 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
         """
         Test that structureEnsemble attribute .comment is populated.
         """
-        self.assertEquals(list(self.data['atomName']), self.testAtomName)
+        self.assertEqual(list(self.data['atomName']), self.testAtomName)
 
         self.assertEqual(list(self.project.models[0].data['atomName']), self.testAtomName[0:5])
         self.assertEqual(list(self.project.models[1].data['atomName']), self.testAtomName[5:9])
@@ -291,7 +291,7 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
 
         namedTuples = self.data.as_namedtuples()
         AtomRecord = namedTuples[0].__class__
-        self.assertEquals(namedTuples[9:17], (
+        self.assertEqual(namedTuples[9:17], (
             AtomRecord(Index=10, atomName='CD1', residueName='LEU', chainCode='C', sequenceId=3,
                        modelNumber=3),
             AtomRecord(Index=11, atomName='HD11', residueName='LEU', chainCode='C', sequenceId=3,
@@ -313,7 +313,7 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
 
         namedTuples = self.data.as_namedtuples()
         AtomRecord = namedTuples[0].__class__
-        self.assertEquals(namedTuples[9:17], (
+        self.assertEqual(namedTuples[9:17], (
             AtomRecord(Index=10, atomName='CE', residueName='MET', chainCode='D', sequenceId=4,
                        modelNumber=4),
             AtomRecord(Index=11, atomName='HE1', residueName='MET', chainCode='D', sequenceId=4,
@@ -335,7 +335,7 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
 
         namedTuples = self.data.as_namedtuples()
         AtomRecord = namedTuples[0].__class__
-        self.assertEquals(namedTuples[9:17], (
+        self.assertEqual(namedTuples[9:17], (
             AtomRecord(Index=10, atomName='CD1', residueName='LEU', chainCode='C', sequenceId=3,
                        modelNumber=3),
             AtomRecord(Index=11, atomName='HD11', residueName='LEU', chainCode='C', sequenceId=3,
@@ -357,7 +357,7 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
 
         namedTuples = self.data.as_namedtuples()
         AtomRecord = namedTuples[0].__class__
-        self.assertEquals(namedTuples[9:17], (
+        self.assertEqual(namedTuples[9:17], (
             AtomRecord(Index=10, atomName='CE', residueName='MET', chainCode='D', sequenceId=4,
                        modelNumber=4),
             AtomRecord(Index=11, atomName='HE1', residueName='MET', chainCode='D', sequenceId=4,

@@ -1,19 +1,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-15 12:24:45 +0000 (Sat, January 15, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2023-01-05 15:28:42 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -97,7 +97,7 @@ class TestSubstanceCreation(WrapperTesting):
         Test that creating a new Substance with '^Badname' raises an error.
         ^ is a bad character and not to be included in strings.
         """
-        with self.assertRaisesRegexp(ValueError, 'Character'):
+        with self.assertRaisesRegex(ValueError, 'Character'):
             self.project.newSubstance('^Badname')
         self.assertEqual(len(self.project.substances), 0)
 
@@ -105,7 +105,7 @@ class TestSubstanceCreation(WrapperTesting):
         """
         Test that creating a new Substance with 42.0 (non-string) raises TypeError
         """
-        with self.assertRaisesRegexp(ValueError, 'must be a string'):
+        with self.assertRaisesRegex(ValueError, 'must be a string'):
             s = self.project.newSubstance(42.0)
         self.assertEqual(len(self.project.substances), 0)
 
@@ -113,7 +113,7 @@ class TestSubstanceCreation(WrapperTesting):
         """
         Test that creating a new Substance with '' raises ValueError.
         """
-        with self.assertRaisesRegexp(ValueError, 'must be set'):
+        with self.assertRaisesRegex(ValueError, 'must be set'):
             self.project.newSubstance('')
         self.assertEqual(len(self.project.substances), 0)
 
@@ -121,7 +121,7 @@ class TestSubstanceCreation(WrapperTesting):
         """
         Test that creating a new Substance with leading/trailing whitespace raises ValueError.
         """
-        with self.assertRaisesRegexp(ValueError, 'not allowed in'):
+        with self.assertRaisesRegex(ValueError, 'not allowed in'):
             self.project.newSubstance(' newName ')
         self.assertEqual(len(self.project.substances), 0)
 
@@ -135,14 +135,14 @@ class TestSubstanceCreation(WrapperTesting):
         self.assertIs(self.project.substances[0], s)
         self.assertEqual(s.pid, 'SU:testSubstance.')
 
-        with self.assertRaisesRegexp(ValueError, 'already exists'):
+        with self.assertRaisesRegex(ValueError, 'already exists'):
             s2 = self.project.newSubstance('testSubstance')
 
     def test_newSubstance_WhitespaceLabelling(self):
         """
         Test that creating a new Substance with leading/trailing whitespace raises ValueError.
         """
-        with self.assertRaisesRegexp(ValueError, 'not allowed in'):
+        with self.assertRaisesRegex(ValueError, 'not allowed in'):
             self.project.newSubstance('newName', ' whitespaceLabel ')
         self.assertEqual(len(self.project.substances), 0)
 
@@ -227,7 +227,7 @@ class TestExistingSubstancesWithSameNameReused(WrapperTesting):
     def test_createChainFromExistingSubstance(self):
         physicalChain = self.project.createChain('acd', molType='protein')
         newPhysicalChain = physicalChain.substances[0].createChain()
-        self.assertEquals(physicalChain.substances, newPhysicalChain.substances)
+        self.assertEqual(physicalChain.substances, newPhysicalChain.substances)
         self.assertIsNot(physicalChain, newPhysicalChain)
 
 
@@ -262,7 +262,7 @@ class SubstanceProperties(WrapperTesting):
         self.assertEqual(s.bondCount, 0)
         self.assertIsNone(s.casNumber)
         # self.assertIsNone(s.comment)
-        self.assertEqual(s.comment, '')                    # comments now use None2Str
+        self.assertEqual(s.comment, '')  # comments now use None2Str
         self.assertIsNone(s.logPartitionCoefficient)
         self.assertIsNone(s.empiricalFormula)
         self.assertEqual(s.hBondAcceptorCount, 0)
@@ -309,7 +309,7 @@ class SubstanceProperties(WrapperTesting):
         self.assertEqual(s.bondCount, 0)
         self.assertIsNone(s.casNumber)
         # self.assertIsNone(s.comment)
-        self.assertEqual(s.comment, '')                    # comments now use None2Str
+        self.assertEqual(s.comment, '')  # comments now use None2Str
         self.assertIsNone(s.logPartitionCoefficient)
         self.assertIsNone(s.empiricalFormula)
         self.assertEqual(s.hBondAcceptorCount, 0)
@@ -351,7 +351,7 @@ class SubstanceProperties(WrapperTesting):
         self.assertIsNone(s.bondCount)
         self.assertIsNone(s.casNumber)
         # self.assertIsNone(s.comment)
-        self.assertEqual(s.comment, '')                    # comments now use None2Str
+        self.assertEqual(s.comment, '')  # comments now use None2Str
         self.assertIsNone(s.logPartitionCoefficient)
         self.assertIsNone(s.empiricalFormula)
         self.assertIsNone(s.hBondAcceptorCount)
@@ -390,7 +390,7 @@ class SubstanceProperties(WrapperTesting):
         self.assertIsNone(s.bondCount)
         self.assertIsNone(s.casNumber)
         # self.assertIsNone(s.comment)
-        self.assertEqual(s.comment, '')                    # comments now use None2Str
+        self.assertEqual(s.comment, '')  # comments now use None2Str
         self.assertIsNone(s.logPartitionCoefficient)
         self.assertIsNone(s.empiricalFormula)
         self.assertIsNone(s.hBondAcceptorCount)
@@ -429,7 +429,7 @@ class SubstanceProperties(WrapperTesting):
         self.assertIsNone(s.bondCount)
         self.assertIsNone(s.casNumber)
         # self.assertIsNone(s.comment)
-        self.assertEqual(s.comment, '')                    # comments now use None2Str
+        self.assertEqual(s.comment, '')  # comments now use None2Str
         self.assertIsNone(s.logPartitionCoefficient)
         self.assertIsNone(s.empiricalFormula)
         self.assertIsNone(s.hBondAcceptorCount)
@@ -506,7 +506,7 @@ class Test_MoleculeSubstance(WrapperTesting):
         Test that the Substance set with ^badname raises an error
         Substance is not initialised
         """
-        with self.assertRaisesRegexp(ValueError, 'not allowed in'):
+        with self.assertRaisesRegex(ValueError, 'not allowed in'):
             s = self.project.newSubstance('testSubstance',
                                           substanceType='Molecule',
                                           labelling='^Badname')
@@ -517,7 +517,7 @@ class Test_MoleculeSubstance(WrapperTesting):
         Test that the Substance set with non-string raises an error
         Substance is not initialised
         """
-        with self.assertRaisesRegexp(ValueError, 'must be a string'):
+        with self.assertRaisesRegex(ValueError, 'must be a string'):
             s = self.project.newSubstance('testSubstance',
                                           substanceType='Molecule',
                                           labelling=12)
@@ -687,7 +687,7 @@ class Test_PolymerSubstance(WrapperTesting):
         """
         Test that the labelling property of Substance can be set.
         """
-        with self.assertRaisesRegexp(ValueError, 'createPolymerSubstance requires non-empty sequence'):
+        with self.assertRaisesRegex(ValueError, 'createPolymerSubstance requires non-empty sequence'):
             s = self.project.createPolymerSubstance(None,
                                                     name='testPolymerSubstance',
                                                     molType='protein',
@@ -698,12 +698,12 @@ class Test_PolymerSubstance(WrapperTesting):
                                                 name='testPolymerSubstance',
                                                 molType='protein',
                                                 labelling='H')
-        with self.assertRaisesRegexp(ValueError, 'already exists'):
+        with self.assertRaisesRegex(ValueError, 'already exists'):
             s = self.project.createPolymerSubstance('acd',
                                                     name='testPolymerSubstance',
                                                     molType='protein',
                                                     labelling='H')
-        with self.assertRaisesRegexp(ValueError, 'already in use'):
+        with self.assertRaisesRegex(ValueError, 'already in use'):
             s = self.project.createPolymerSubstance('acd',
                                                     name='testPolymerSubstance',
                                                     molType='protein',
@@ -735,7 +735,7 @@ class Test_PolymerSubstance(WrapperTesting):
         self.assertEqual(s.labelling, None)
         self.assertEqual(len(self.project.substances), 1)
 
-        with self.assertRaisesRegexp(ValueError, 'already exists'):
+        with self.assertRaisesRegex(ValueError, 'already exists'):
             s = self.project.createPolymerSubstance('acd',
                                                     name='testPolymerSubstance',
                                                     molType='protein',
@@ -757,8 +757,8 @@ class Test_PolymerSubstance(WrapperTesting):
         """
         Test that the labelling property of Substance can be set.
         """
-        # with self.assertRaisesRegexp(ValueError, 'not allowed in '):
-        with self.assertRaisesRegexp(ValueError, 'not allowed in '):
+        # with self.assertRaisesRegex(ValueError, 'not allowed in '):
+        with self.assertRaisesRegex(ValueError, 'not allowed in '):
             s = self.project.createPolymerSubstance('acd',
                                                     name='testPolymerSubstance',
                                                     molType='protein',
@@ -769,8 +769,8 @@ class Test_PolymerSubstance(WrapperTesting):
         """
         Test that the labelling property of Substance can be set.
         """
-        # with self.assertRaisesRegexp(ValueError, 'not allowed in '):
-        with self.assertRaisesRegexp(ValueError, 'not allowed in'):
+        # with self.assertRaisesRegex(ValueError, 'not allowed in '):
+        with self.assertRaisesRegex(ValueError, 'not allowed in'):
             s = self.project.createPolymerSubstance('acd',
                                                     name='testPolymerSubstance',
                                                     molType='protein',
@@ -781,7 +781,7 @@ class Test_PolymerSubstance(WrapperTesting):
         """
         Test that the labelling property of Substance can be set.
         """
-        with self.assertRaisesRegexp(ValueError, 'must be a string'):
+        with self.assertRaisesRegex(ValueError, 'must be a string'):
             s = self.project.createPolymerSubstance('acd',
                                                     name='testPolymerSubstance',
                                                     molType='protein',
@@ -859,13 +859,13 @@ class Test_PolymerSubstance(WrapperTesting):
         self.assertEqual(s.longPid, 'Substance:testSubstanceMolecule.')
         self.assertEqual(s.shortClassName, 'SU')
 
-        with self.assertRaisesRegexp(ValueError, 'clashes with substance of different type'):
+        with self.assertRaisesRegex(ValueError, 'clashes with substance of different type'):
             s = self.project.newSubstance('testSubstanceMolecule', substanceType='Material', labelling='different')
 
-        with self.assertRaisesRegexp(ValueError, 'clashes with substance of different type'):
+        with self.assertRaisesRegex(ValueError, 'clashes with substance of different type'):
             s = self.project.newSubstance('testSubstanceMolecule', substanceType='Cell', labelling='different')
 
-        with self.assertRaisesRegexp(ValueError, 'clashes with substance of different type'):
+        with self.assertRaisesRegex(ValueError, 'clashes with substance of different type'):
             s = self.project.newSubstance('testSubstanceMolecule', substanceType='Composite', labelling='different')
 
         s = self.project.newSubstance('testSubstanceMaterial', substanceType='Material')
@@ -876,7 +876,7 @@ class Test_PolymerSubstance(WrapperTesting):
         self.assertEqual(s.longPid, 'Substance:testSubstanceCell.')
         self.assertEqual(s.shortClassName, 'SU')
 
-        with self.assertRaisesRegexp(ValueError, 'clashes with substance of different type'):
+        with self.assertRaisesRegex(ValueError, 'clashes with substance of different type'):
             s = self.project.newSubstance('testSubstanceCell', substanceType='Molecule', labelling='different')
 
     def test_Substance_atom(self):

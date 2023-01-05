@@ -4,18 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:34 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-01-05 14:27:54 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -65,6 +66,9 @@ class NmrChainTest(WrapperTesting):
         self.assertEqual(nc3.shortName, '@7')
         self.assertRaises(ApiError, nc3.rename, '#7')
 
+        # cannot create chain beginning with @- for safety/clarity
+        self.assertRaises(ValueError, self.project.newNmrChain, shortName='@-_new')
+
     def test_NmrChain_Chain(self):
         chain = self.project.createChain(sequence='AACKC', shortName='x', molType='protein')
         nmrChain = self.project.newNmrChain(shortName='x')
@@ -76,16 +80,16 @@ class NmrChainTest(WrapperTesting):
     def test_deassign(self):
         ncx = self.project.getNmrChain('@-')
         self.assertRaises(ApiError, ncx.deassign)
-        self.assertEquals(ncx.pid, 'NC:@-')
+        self.assertEqual(ncx.pid, 'NC:@-')
 
         ncx = self.project.fetchNmrChain('AA')
-        self.assertEquals(ncx.pid, 'NC:AA')
+        self.assertEqual(ncx.pid, 'NC:AA')
         ncx.deassign()
-        self.assertEquals(ncx.pid, 'NC:@2')
+        self.assertEqual(ncx.pid, 'NC:@2')
 
         ncx = self.project.newNmrChain(isConnected=True)
-        self.assertEquals(ncx.pid, 'NC:#3')
+        self.assertEqual(ncx.pid, 'NC:#3')
         ncx.deassign()
         self.undo.undo()
         self.undo.redo()
-        self.assertEquals(ncx.pid, 'NC:#3')
+        self.assertEqual(ncx.pid, 'NC:#3')

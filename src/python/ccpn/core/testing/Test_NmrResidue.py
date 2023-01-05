@@ -4,19 +4,19 @@ Test code for NmrResidue
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-22 12:39:43 +0000 (Mon, November 22, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2023-01-05 14:27:54 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -62,7 +62,7 @@ class ResidueAllNmrResiduesTest(WrapperTesting):
                     ]
 
         for res in self.chain.residues:
-            self.assertEquals(res.allNmrResidues, ())
+            self.assertEqual(res.allNmrResidues, ())
 
         nmrResidues = []
         nmrChain = self.project.newNmrChain(isConnected=True)
@@ -79,13 +79,13 @@ class ResidueAllNmrResiduesTest(WrapperTesting):
 
         nmrChain.assignConnectedResidues(self.chain.residues[2])
 
-        self.assertEquals([x.pid for x in nmrResidues],
-                          ['NR:A.3.GLU', 'NR:A.3-1.', 'NR:A.3+0.', 'NR:A.3+2.',
-                           'NR:A.4.PHE', 'NR:A.4-1.', 'NR:A.4+0.', 'NR:A.4+2.',
-                           'NR:A.5.GLY', 'NR:A.5-1.', 'NR:A.5+0.', 'NR:A.5+2.']
-                          )
+        self.assertEqual([x.pid for x in nmrResidues],
+                         ['NR:A.3.GLU', 'NR:A.3-1.', 'NR:A.3+0.', 'NR:A.3+2.',
+                          'NR:A.4.PHE', 'NR:A.4-1.', 'NR:A.4+0.', 'NR:A.4+2.',
+                          'NR:A.5.GLY', 'NR:A.5-1.', 'NR:A.5+0.', 'NR:A.5+2.']
+                         )
         for ii, residue in enumerate(self.chain.residues):
-            self.assertEquals(tuple(x.pid for x in residue.allNmrResidues), allResidues[ii])
+            self.assertEqual(tuple(x.pid for x in residue.allNmrResidues), allResidues[ii])
 
         self.assertIs(nmrResidues[4].previousNmrResidue, nmrResidues[0])
         self.assertIs(nmrResidues[8].previousNmrResidue, nmrResidues[4])
@@ -280,7 +280,7 @@ class NmrStretchTest(WrapperTesting):
         self.undo.redo()
         self.assertEqual([x.id for x in nmrResidues],
                          ['@-.@1.ALA', '@-.@2.VAL', '@-.@3.', ])
-        self.assertEquals([x.id for x in self.project.nmrChains], ['@-'])
+        self.assertEqual([x.id for x in self.project.nmrChains], ['@-'])
 
     def test_disconnect_triplet_7(self):
         nmrChain = self.project.newNmrChain(isConnected=True)
@@ -743,7 +743,11 @@ class NmrStretchTest(WrapperTesting):
 
         # attach nmrChain to the end
         nmrChain4 = self.project.getByPid('NC:#4')
-        self.assertRaises(ValueError, singleNmrResidue.nmrChain.assignConnectedResidues, residues[8])
+        # self.assertRaises(ValueError, singleNmrResidue.nmrChain.assignConnectedResidues, residues[8])
+        singleNmrResidue.nmrChain.assignConnectedResidues(residues[8])
+        self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
+                         ['X.4.ARG', 'X.5.THR', 'X.6.TYR', 'X.7.ILE', 'X.8.PRO', 'X.9.ALA'])
+        self.undo.undo()
 
         nmrChain4.assignConnectedResidues(residues[8])
 

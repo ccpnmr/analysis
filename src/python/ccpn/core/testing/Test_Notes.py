@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 22:18:49 +0100 (Fri, August 20, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2023-01-05 14:27:54 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -60,7 +60,7 @@ class NoteTest_setUp(WrapperTesting):
         Test that renaming to '' raises an error and does not alter the original Note.
         ^ is a bad character and not to be included in strings.
         """
-        with self.assertRaisesRegexp(ValueError, 'must be set'):
+        with self.assertRaisesRegex(ValueError, 'must be set'):
             self.note.rename('')
         self.assertEqual(self.note.name, 'ValidNote')
 
@@ -68,7 +68,7 @@ class NoteTest_setUp(WrapperTesting):
         """
         Test that renaming to '^Badname' raises an error and does not alter the original Note.
         """
-        with self.assertRaisesRegexp(ValueError, 'Character'):
+        with self.assertRaisesRegex(ValueError, 'Character'):
             self.note.rename('^Badname')
         self.assertEqual(self.note.name, 'ValidNote')
 
@@ -83,10 +83,10 @@ class NoteTest_setUp(WrapperTesting):
         """
         Test that renaming to 42 (non-string) raises an error and does not alter the original Note.
         """
-        # with self.assertRaisesRegexp(TypeError, 'argument of type'):
+        # with self.assertRaisesRegex(TypeError, 'argument of type'):
         #   self.note.rename(42)
         #
-        with self.assertRaisesRegexp(ValueError, 'must be a string'):
+        with self.assertRaisesRegex(ValueError, 'must be a string'):
             self.note.rename(42)
         self.assertEqual(self.note.name, 'ValidNote')
 
@@ -171,10 +171,10 @@ class NoteTest_setUp(WrapperTesting):
         """
         Test that text setter does not accept a non-string.
         """
-        # with self.assertRaisesRegexp(ApiError, 'String input is not of a valid type'):
+        # with self.assertRaisesRegex(ApiError, 'String input is not of a valid type'):
         #   self.note.text = 42
         #
-        with self.assertRaisesRegexp(TypeError, 'Note text must be a string'):
+        with self.assertRaisesRegex(TypeError, 'Note text must be a string'):
             self.note.text = 42
         self.assertEqual(self.note.header, None)
 
@@ -237,7 +237,7 @@ class NoteTest_No_setUp(WrapperTesting):
         """
         Test that creating a new Note with '' raises an error.
         """
-        with self.assertRaisesRegexp(ValueError, 'must be set'):
+        with self.assertRaisesRegex(ValueError, 'must be set'):
             self.project.newNote('')
 
     def test_newNote_Badname(self):
@@ -245,7 +245,7 @@ class NoteTest_No_setUp(WrapperTesting):
         Test that creating a new Note with '^Badname' raises an error.
         ^ is a bad character and not to be included in strings.
         """
-        with self.assertRaisesRegexp(ValueError, 'Character'):
+        with self.assertRaisesRegex(ValueError, 'Character'):
             self.project.newNote('^Badname')
 
     def test_newNote_None(self):
@@ -258,8 +258,8 @@ class NoteTest_No_setUp(WrapperTesting):
         """
         Test that creating a new Note with 42 (non-string) raises an error.
         """
-        # with self.assertRaisesRegexp(TypeError, 'argument of type'):
+        # with self.assertRaisesRegex(TypeError, 'argument of type'):
         #   self.project.newNote(42)
         #
-        with self.assertRaisesRegexp(ValueError, 'must be a string'):
+        with self.assertRaisesRegex(ValueError, 'must be a string'):
             self.project.newNote(42)

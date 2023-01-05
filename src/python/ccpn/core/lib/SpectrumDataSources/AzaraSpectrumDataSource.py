@@ -13,7 +13,7 @@ See SpectrumDataSourceABC for a description of the methods
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:03 +0000 (Wed, November 30, 2022) $"
+__dateModified__ = "$dateModified: 2023-01-05 14:36:47 +0000 (Thu, January 05, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -160,7 +160,7 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
 
         self.setDefaultParameters()
 
-        with open(str(params), mode='rU', encoding='utf-8') as fp:
+        with open(str(params), mode='r', encoding='utf-8') as fp:
             
             dim = 0
             comments = []

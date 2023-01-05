@@ -4,21 +4,24 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = ""
-__credits__ = ""
-__licence__ = ("")
-__reference__ = ("")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified$"
-__version__ = "$Revision$"
+__dateModified__ = "$dateModified: 2023-01-05 14:36:48 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
-# Created:
+# Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
-__date__ = "$Date$"
+__date__ = "$Date: 2021-07-20 19:12:45 +0000 (Tue, July 20, 2021) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -44,7 +47,7 @@ def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
     """
     try:
         def _updateDict(d, u):
-            import collections
+            import collections.abc
 
             # recursive update of dictionary
             # this deletes every key in u that is not in d
@@ -52,7 +55,7 @@ def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
             for k, v in u.items():
                 if k not in d:
                     continue
-                if isinstance(v, collections.Mapping):
+                if isinstance(v, collections.abc.Mapping):
                     r = _updateDict(d.get(k, {}), v)
                     d[k] = r
                 else:
@@ -60,7 +63,7 @@ def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
             return d
 
         # read the default settings
-        preferencesPath = (defaultPath if defaultPath else defaultPreferencesPath)
+        preferencesPath = defaultPath or defaultPreferencesPath
         with open(preferencesPath) as fp:
             preferences = json.load(fp, object_hook=AttrDict)
 
@@ -68,12 +71,12 @@ def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
         if not skipUserPreferences:
             # from ccpn.framework.PathsAndUrls import userPreferencesPath
 
-            preferencesPath = (userPath if userPath else os.path.expanduser(userPreferencesPath))
+            preferencesPath = userPath or os.path.expanduser(userPreferencesPath)
             if os.path.isfile(preferencesPath):
                 with open(preferencesPath) as fp:
                     userPreferences = json.load(fp, object_hook=AttrDict)
                 preferences = _updateDict(preferences, userPreferences)
-    except:  #should we have the preferences hard coded as py dict for extra safety? if json goes wrong the whole project crashes!
+    except Exception:  #should we have the preferences hard coded as py dict for extra safety? if json goes wrong the whole project crashes!
         with open(defaultPreferencesPath) as fp:
             preferences = json.load(fp, object_hook=AttrDict)
 
@@ -81,7 +84,7 @@ def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
 
 
 def _message(*chars):
-    return ''.join([c for c in map(chr, chars)])
+    return ''.join(list(map(chr, chars)))
 
 
 ENCRYPTEDLIST = (_message(112, 114, 111, 120, 121, 80, 97, 115, 115, 119, 111, 114, 100),)
@@ -117,41 +120,38 @@ class UserPreferences():
     def setProxyFromCommandLine(self):
         pass
 
-    def _decode(self, key, string):
+    @staticmethod
+    def _decode(key, string):
         try:
             decoded_chars = []
             for i in range(len(string)):
                 key_c = key[i % len(key)]
                 decoded_c = chr(ord(string[i]) - ord(key_c) % 256)
                 decoded_chars.append(decoded_c)
-            decoded_string = "".join(decoded_chars)
-            return decoded_string
-        except:
+            return ''.join(decoded_chars)
+
+        except Exception:
             return ''
 
-    def _encode(self, key, string):
+    @staticmethod
+    def _encode(key, string):
         try:
             encoded_chars = []
             for i in range(len(string)):
                 key_c = key[i % len(key)]
                 encoded_c = chr(ord(string[i]) + ord(key_c) % 256)
                 encoded_chars.append(encoded_c)
-            encoded_string = "".join(encoded_chars)
-            #return encoded_string.encode()
-            return encoded_string
-        except:
+            return ''.join(encoded_chars)
+
+        except Exception:
             return ''
 
     def decodeValue(self, string):
         """Decode a user value
         """
-        if not isinstance(string, str):
-            return None
-        return self._decode(USERKEY, string)
+        return self._decode(USERKEY, string) if isinstance(string, str) else None
 
     def encodeValue(self, string):
         """Encode a user value
         """
-        if not isinstance(string, str):
-            return None
-        return self._encode(USERKEY, string)
+        return self._encode(USERKEY, string) if isinstance(string, str) else None

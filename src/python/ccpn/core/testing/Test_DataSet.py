@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-23 17:37:46 +0000 (Thu, December 23, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2023-01-05 14:27:54 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -203,14 +203,14 @@ class DataTest(WrapperTesting):
         undo = self.project._undo
         self.project.newUndoPoint()
         data1.setDataParameter('tensor', Tensor._fromDict({'orientationMatrix': numpy.identity(3),
-                                                       'isotropic'            : 2.1, 'axial': -3.0, 'rhombic': 0.9}))
+                                                           'isotropic'        : 2.1, 'axial': -3.0, 'rhombic': 0.9}))
         undo.undo()
         undo.redo()
         tensor = data1.dataParameters['tensor']
         self.assertTrue(isinstance(tensor, Tensor))
-        self.assertAlmostEquals(tensor.isotropic, 2.1)
-        self.assertAlmostEquals(tensor.axial, -3.0)
-        self.assertAlmostEquals(tensor.rhombic, 0.9)
+        self.assertAlmostEqual(tensor.isotropic, 2.1)
+        self.assertAlmostEqual(tensor.axial, -3.0)
+        self.assertAlmostEqual(tensor.rhombic, 0.9)
 
     def test_Pandas_parameter(self):
         """

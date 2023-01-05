@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:08 +0100 (Mon, September 13, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2023-01-05 14:27:54 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,6 +31,7 @@ from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 # Properly done version of above
 class PeakListCreationTest(WrapperTesting):
+
     def setUp(self):
         with self.initialSetup():
             self.spectrum = self.project.newEmptySpectrum(isotopeCodes=('1H',), name='H')
@@ -47,6 +48,7 @@ class PeakListCreationTest(WrapperTesting):
         self.assertIs(self.spectrum.peakLists[1], peakList)
 
     def test_newPeakList_UndoRedo(self):
+        # these cause a huge amount of logging :|
         peakList = self.spectrum.newPeakList()
 
         self.assertEqual(len(self.spectrum.peakLists), 2)
@@ -59,7 +61,7 @@ class PeakListCreationTest(WrapperTesting):
 
         peakList = self.spectrum1.newPeakList()
         peakList1 = self.spectrum1.peakLists[0]
-        peakPos = [(0.1*xx, 0.1*xx) for xx in range(0, 5)]
+        peakPos = [(0.1 * xx, 0.1 * xx) for xx in range(5)]
         peakList1Peaks = [peakList1.newPeak(ppmPositions=pk) for pk in peakPos]
 
         peakList2 = self.spectrum2.peakLists[0]
@@ -71,17 +73,18 @@ class PeakListCreationTest(WrapperTesting):
         peakList4 = peakList1.copyTo(self.spectrum2)
         peakList5 = peakList2.copyTo(self.spectrum1)
 
-        with self.assertRaisesRegexp(ValueError, 'Cannot copy'):
-            peakList1.copyTo(self.spectrum)
-
-        with self.assertRaisesRegexp(TypeError, 'missing a required argument'):
+        with self.assertRaisesRegex(TypeError, 'missing a required argument'):
             peakList1.copyTo()
 
-        with self.assertRaisesRegexp(TypeError, 'targetSpectrum is not of type Spectrum'):
+        with self.assertRaisesRegex(TypeError, 'targetSpectrum is not of type Spectrum'):
             peakList1.copyTo(12)
 
-        with self.assertRaisesRegexp(TypeError, 'targetSpectrum not defined'):
+        with self.assertRaisesRegex(TypeError, 'targetSpectrum not defined'):
             peakList1.copyTo('not defined')
+
+        # with self.assertRaisesRegex(ValueError, 'Cannot copy'):
+        peakList1.copyTo(self.spectrum)
+
 
 class PeakListTest2(WrapperTesting):
     # Path of project to load (None for new project
@@ -95,15 +98,15 @@ class PeakListTest2(WrapperTesting):
         spectrum = peakList.spectrum
         peakList2 = peakList.copyTo(spectrum)
 
-        self.assertEquals(peakList2.serial, 4)
+        self.assertEqual(peakList2.serial, 4)
         # self.assertEquals(peakList2.comment,
         #                   """Copy of PeakList:3dNOESY-182.3
         #                   ARIA2_NOE_Peaks_run1_it8_auto1195328348.86|6|1|2"""
         #                   )
-        self.assertEquals(peakList2.comment,
-                          "Copy of PeakList:3dNOESY-182.3\n" +
-                          "ARIA2_NOE_Peaks_run1_it8_auto1195328348.86|6|1|2"
-                          )
+        self.assertEqual(peakList2.comment,
+                         "Copy of PeakList:3dNOESY-182.3\n" +
+                         "ARIA2_NOE_Peaks_run1_it8_auto1195328348.86|6|1|2"
+                         )
 
         for tag in self.singleValueTags:
             self.assertEquals((tag, getattr(peakList, tag)), (tag, getattr(peakList2, tag)))

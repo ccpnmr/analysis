@@ -92,19 +92,19 @@ In that way you need only refresh your peak table once, even when you pick 500 p
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-15 12:29:32 +0000 (Sat, January 15, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2023-01-05 14:27:54 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -361,22 +361,22 @@ class NotificationTest(WrapperTesting):
         spectrumGroup = project.newSpectrumGroup(name='Groupie')
         spectrumGroup2 = project.newSpectrumGroup(name='Sloupie')
         spectrumGroup.spectra = (spectrum,)
-        self.assertEquals(ll, ['modSpectrumGroup'])
+        self.assertEqual(ll, ['modSpectrumGroup'])
         spectrumGroup.spectra = ()
-        self.assertEquals(ll, ['modSpectrumGroup', 'modSpectrumGroup'])
+        self.assertEqual(ll, ['modSpectrumGroup', 'modSpectrumGroup'])
         del ll[:]
         self.assertFalse(bool(spectrum.spectrumGroups))
         tt = (spectrumGroup,)
         spectrum.spectrumGroups = tt
-        self.assertEquals(ll, ['modSpectrum', 'modLink'])
+        self.assertEqual(ll, ['modSpectrum', 'modLink'])
         spectrum.rename('HF-copy')
-        self.assertEquals(ll, ['modSpectrum', 'modLink', 'renameSpectrum'])
+        self.assertEqual(ll, ['modSpectrum', 'modLink', 'renameSpectrum'])
         del ll[:]
         spectrum.spectrumGroups = (spectrumGroup, spectrumGroup2)
-        self.assertEquals(ll, ['modSpectrum', 'modLink'])
+        self.assertEqual(ll, ['modSpectrum', 'modLink'])
         spectrumGroup.delete()
-        self.assertEquals(ll, ['modSpectrum', 'modLink'])
+        self.assertEqual(ll, ['modSpectrum', 'modLink'])
         spectrum.spectrumGroups = ()
-        self.assertEquals(ll, ['modSpectrum', 'modLink', 'modSpectrum', 'modLink'])
+        self.assertEqual(ll, ['modSpectrum', 'modLink', 'modSpectrum', 'modLink'])
         spectrumGroup3 = project.newSpectrumGroup(name='Heapie', spectra=(spectrum, spectrum2))
-        self.assertEquals(ll, ['modSpectrum', 'modLink', 'modSpectrum', 'modLink'])
+        self.assertEqual(ll, ['modSpectrum', 'modLink', 'modSpectrum', 'modLink'])

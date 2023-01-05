@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-20 11:56:59 +0000 (Tue, December 20, 2022) $"
+__dateModified__ = "$dateModified: 2023-01-05 13:21:17 +0000 (Thu, January 05, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1384,23 +1384,23 @@ class Project(AbstractWrapperObject):
     # Library functions
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def _updateApiDataUrl(self, path):
-        """Update the data url to path; for legacy purposes
-        """
-        # Reset remoteData DataStores to match path
-        if path is None or len(path) == 0:
-            getLogger().debug('_updateApiDataUrl: invalid path %r' % path)
-            return
-        path = aPath(path)
-        if not path.exists():
-            getLogger().debug('_updateApiDataUrl: path %r does not exist' % path)
-            return
-
-        memopsRoot = self._wrappedData.root
-        dataUrl = memopsRoot.findFirstDataLocationStore(name='standard').findFirstDataUrl(
-                name='remoteData'
-                )
-        dataUrl.url = Implementation.Url(path=str(path.as_posix()))
+    # def _updateApiDataUrl(self, path):
+    #     """Update the data url to path; for legacy purposes
+    #     """
+    #     # Reset remoteData DataStores to match path
+    #     if path is None or len(path) == 0:
+    #         getLogger().debug('_updateApiDataUrl: invalid path %r' % path)
+    #         return
+    #     path = aPath(path)
+    #     if not path.exists():
+    #         getLogger().debug('_updateApiDataUrl: path %r does not exist' % path)
+    #         return
+    #
+    #     memopsRoot = self._wrappedData.root
+    #     dataUrl = memopsRoot.findFirstDataLocationStore(name='standard').findFirstDataUrl(
+    #             name='remoteData'
+    #             )
+    #     dataUrl.url = Implementation.Url(path=str(path.as_posix()))
 
     def _getAPIObjectsStatus(self, completeScan=False, onlyInvalids=True, includeDefaultChildren=False):
         """
@@ -2302,9 +2302,9 @@ def _newProject(application, name:str, path:Path, isTemporary:bool = False) -> P
 
     _setRepositoryPath(apiProject, 'userData', path)
     # GWV: not sure why this one is needed, but just to be consistent with the old Api.py code
-    backupPath = path.with_stem(path.stem + '_backup')
+    backupPath = path / 'backups'
     _setRepositoryPath(apiProject, 'backup', backupPath)
-
+    # Just a leftover from the past
     apiProject._temporaryDirectory = None
 
     apiIo._createLogger(apiProject, applicationName=application.applicationName, useFileLogger=True)

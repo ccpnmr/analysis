@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-20 11:57:00 +0000 (Tue, December 20, 2022) $"
+__dateModified__ = "$dateModified: 2023-01-05 13:21:17 +0000 (Thu, January 05, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -520,7 +520,7 @@ class Framework(NotifierBase, GuiBase):
                 # set the initial axis ordering
                 _getDefaultOrdering(spectrum)
 
-        newProject._updateApiDataUrl(self.preferences.general.dataPath)
+        # newProject._updateApiDataUrl(self.preferences.general.dataPath)
         # the project is now ready to use
 
         # Now that all objects, including the graphics are there, restore current

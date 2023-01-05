@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:43 +0000 (Wed, December 21, 2022) $"
+__dateModified__ = "$dateModified: 2023-01-05 14:35:36 +0000 (Thu, January 05, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -130,11 +130,11 @@ POSITIONCERTAINTYLEN = len(POSITIONCERTAINTY)
 
 DEFAULTRESTRAINTLINKLOAD = False
 
-REGEXREMOVEENDQUOTES = u'\`\d*`+?'
-REGEXPREFIXQUOTEDNUMBER = u'^\`(\d+)\`'
-REGEXPOSTFIXQUOTEDNUMBER = u'\`(\d+)\`$'
-# REGEXCHECKNMRATOM = u'^\?\@\d+$|^\w+\@\d+$'
-REGEXCHECKNMRATOM = u'^\?\@\d+$|^\w+\%?\*?\%?\@\d+$'
+REGEXREMOVEENDQUOTES = r'\`\d*`+?'
+REGEXPREFIXQUOTEDNUMBER = r'^\`(\d+)\`'
+REGEXPOSTFIXQUOTEDNUMBER = r'\`(\d+)\`$'
+# REGEXCHECKNMRATOM = r'^\?\@\d+$|^\w+\@\d+$'
+REGEXCHECKNMRATOM = r'^\?\@\d+$|^\w+\%?\*?\%?\@\d+$'
 
 NEFEXTENSION = '.nef'
 
@@ -4139,8 +4139,8 @@ class CcpnNefReader(CcpnNefContent):
             replaceList = ('ccpn_object_pid', 'internal_data_string',)
 
             for (obj, _pre, _post) in ((Chain, '(\"{}\")', '\"{}\"'),
-                                       (Residue, '(?:\"{}\.)(.*?)\"', '\"{}.\\1\"'),
-                                       (Atom, '(?:\"{}\.)(.*?)\"', '\"{}.\\1\"'),
+                                       (Residue, r'(?:\"{}\.)(.*?)\"', '\"{}.\\1\"'),
+                                       (Atom, r'(?:\"{}\.)(.*?)\"', '\"{}.\\1\"'),
                                        ):
                 # rename the items in the additionalData saveFrame
                 _oldPid = Pid.Pid._join(obj.shortClassName, itemName)
@@ -4211,8 +4211,8 @@ class CcpnNefReader(CcpnNefContent):
             replaceList = ('ccpn_object_pid', 'internal_data_string',)
 
             for (obj, _pre, _post) in ((NmrChain, '(\"{}\")', '\"{}\"'),
-                                       (NmrResidue, '(?:\"{}\.)(.*?)\"', '\"{}.\\1\"'),
-                                       (NmrAtom, '(?:\"{}\.)(.*?)\"', '\"{}.\\1\"'),
+                                       (NmrResidue, r'(?:\"{}\.)(.*?)\"', '\"{}.\\1\"'),
+                                       (NmrAtom, r'(?:\"{}\.)(.*?)\"', '\"{}.\\1\"'),
                                        ):
                 # rename the items in the additionalData saveFrame
                 _oldPid = Pid.Pid._join(obj.shortClassName, itemName)
@@ -5685,14 +5685,15 @@ class CcpnNefReader(CcpnNefContent):
                                                                   )
         # self._updateStringParameters(peakListParameters)
         peakListId = _stripSpectrumSerial(_name) or peakListParameters.get('serial') or 1
-        # peakListParameters.pop('serial', None)
+        peakListParameters.pop('serial', None)
 
         peakList = None
         if (_loop := saveFrame.get('nef_peak')) is not None:
             peakList = self.load_nef_peak(spectrum=spectrum,
                                           loop=_loop,
                                           saveFrame=saveFrame,
-                                          peakListId=peakListId)
+                                          peakListId=peakListId,
+                                          peakListParameters=peakListParameters)
         return peakList
 
     def load_nef_nmr_spectrum(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
@@ -6444,7 +6445,7 @@ class CcpnNefReader(CcpnNefContent):
 
     # def load_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop) -> List[Peak]:
     def load_nef_peak(self, spectrum: Spectrum, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
-                      peakListId=None) -> List[Peak]:
+                      peakListId=None, peakListParameters=None) -> List[Peak]:
         """Serves to load nef_peak loop
         """
         # NOTE:ED - new calling parameter
@@ -6517,6 +6518,11 @@ class CcpnNefReader(CcpnNefContent):
                         # must block the creation of peakListViews here until the serial has been defined
                         #   otherwise creates a badly numbered peakListView :|
                         peakList = spectrum.newPeakList(str(peakListSerial))
+
+                        if peakListParameters:
+                            # if a new peakList, need to set the parameters from the saveFrame
+                            for att, val in peakListParameters.items():
+                                setattr(peakList, att, val)
                     try:
                         # change the serial number to match the new name
                         peakList._resetSerial(peakListSerial)

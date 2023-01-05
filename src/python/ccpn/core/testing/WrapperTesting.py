@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-01-05 14:40:08 +0000 (Thu, January 05, 2023) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -64,6 +64,7 @@ def fixCheckAllValid(project):
                 for model in list(st.models):
                     model._wrappedData.setSubmatrixData(dm.name, _matrix.flatten())
 
+
 #=========================================================================================
 # checkGetSetAttr
 #=========================================================================================
@@ -71,7 +72,7 @@ def fixCheckAllValid(project):
 def checkGetSetAttr(cls, obj, attrib, value, *funcOut):
     """
     Test that the object has a populated attribute.
-    Read the attribute using getattr(), if it not populated then an error is raised.
+    Read the attribute using getattr(), if not populated then an error is raised.
     If populated, then test the setter/getter are consistent.
 
     :param obj:
@@ -94,6 +95,9 @@ class WrapperTesting(unittest.TestCase):
 
     # Path for project to load - can be overridden in subclasses
     projectPath = None
+    noLogging = True
+    noDebugLogging = False
+    noEchoLogging = True  # block all logging to the terminal - debug<n>|warning|info
 
     @contextlib.contextmanager
     def initialSetup(self):
@@ -105,11 +109,13 @@ class WrapperTesting(unittest.TestCase):
         projectPath = self.projectPath
         if projectPath is not None:
             projectPath = os.path.join(TEST_PROJECTS_PATH, projectPath)
-        self.framework = Framework.createFramework(projectPath=projectPath, nologging=False, _skipUpdates=True)
+        self.framework = Framework.createFramework(projectPath=projectPath,
+                                                   noLogging=self.noLogging, noDebugLogging=self.noDebugLogging, noEchoLogging=self.noEchoLogging,
+                                                   _skipUpdates=True)
         self.project = self.framework.project
         if self.project is None:
             self.tearDown()
-            raise RuntimeError("No project found for project path %s" % projectPath)
+            raise RuntimeError(f"No project found for project path {projectPath}")
 
         self.project._resetUndo(debug=True, application=self.framework)
         self.undo = self.project._undo
@@ -134,18 +140,15 @@ class WrapperTesting(unittest.TestCase):
         # delete all the singletons - was causing leakage between running testcases
         singleton._instances = {}
 
-
     def loadData(self, dataPath):
         """load data relative to TEST_PROJECTS_PATH (unless dataPath is absolute"""
         if not os.path.isabs(dataPath):
             dataPath = os.path.join(TEST_PROJECTS_PATH, dataPath)
-        dataList = self.framework.loadData(dataPath)
-        #
-        return dataList
+        return self.framework.loadData(dataPath)
 
     def raiseDelayedError(self, *args, **kwargs):
         """Debugging tool. To raise an error the """
         if hasattr(self, 'delayedError') and self.delayedError:
             self.delayedError -= 1
         else:
-            raise Exception('Deliberate delayed error!!')
+            raise RuntimeError('Deliberate delayed error!!')

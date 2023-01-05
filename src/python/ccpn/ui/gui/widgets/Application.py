@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:07 +0000 (Wed, November 30, 2022) $"
+__dateModified__ = "$dateModified: 2023-01-05 14:40:09 +0000 (Thu, January 05, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -73,7 +73,8 @@ class TestApplication(Application):
 
 
 def newTestApplication(projectPath=None, useTestProjects=False,
-                       nologging=False, interface='NoUi', debug=True,
+                       noLogging=False, noDebugLogging=False, noEchoLogging=False,
+                       interface='NoUi', debug=True,
                        noApplication=False):
     """Create a full application for testing.
     This will contain an empty project and preferences.
@@ -93,7 +94,9 @@ def newTestApplication(projectPath=None, useTestProjects=False,
 
     :param projectPath: str or Path object, path of project to load on startup
     :param useTestProjects: bool, True uses the Ccpn testing folder as the root for the project to load
-    :param nologging: bool, enable or disable lopgging
+    :param noLogging: bool, enable or disable logging to file
+    :param noDebugLogging: bool, enable or disable logging debug statements
+    :param noEchoLogging: bool, enable or disable logging all statements debug/info/warning
     :param interface: 'NoUi' or 'Gui', determines whether mainWindow is created
     :param debug: bool, enable/disable debugging
     :param noApplication: bool, enable/disable creation of CCpn application
@@ -120,8 +123,13 @@ def newTestApplication(projectPath=None, useTestProjects=False,
 
     if not isinstance(useTestProjects, bool):
         raise TypeError('useProjects must be a bool')
-    if not isinstance(nologging, bool):
-        raise TypeError('nologging must be a bool')
+    if not isinstance(noLogging, bool):
+        raise TypeError('noLogging must be a bool')
+    if not isinstance(noDebugLogging, bool):
+        raise TypeError('noDebugLogging must be a bool')
+    if not isinstance(noEchoLogging, bool):
+        raise TypeError('noEchoLogging must be a bool')
+
     if interface not in ['NoUi', 'Gui']:
         raise TypeError('interface must be NoUi|Gui')
     if not isinstance(debug, bool):
@@ -145,7 +153,8 @@ def newTestApplication(projectPath=None, useTestProjects=False,
         builtins._skipExecuteLoop = True
 
     # build new ccpn application/project
-    _framework = Framework.createFramework(projectPath=projectPath, nologging=nologging, _skipUpdates=True,
+    _framework = Framework.createFramework(projectPath=projectPath, noLogging=noLogging, noDebugLogging=noDebugLogging, noEchoLogging=noEchoLogging,
+                                           _skipUpdates=True,
                                            interface=interface, debug=debug,
                                            lightColourScheme=True, darkColourScheme=False)
     _project = _framework.project

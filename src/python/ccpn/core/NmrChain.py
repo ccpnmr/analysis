@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:03 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2023-01-05 14:28:51 +0000 (Thu, January 05, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,9 @@ from ccpn.util.Logging import getLogger
 from ccpn.util import Common as commonUtil
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
 from ccpnmodel.ccpncore.lib import Constants
+
+
+DEFAULT_NMRCHAINCODE = '@-'
 
 
 class NmrChain(AbstractWrapperObject):
@@ -96,7 +99,7 @@ class NmrChain(AbstractWrapperObject):
     @property
     def shortName(self) -> str:
         """short form of name, used in Pid and to identify the NmrChain
-        Names of the form '\@ijk' and '#ijk' (where ijk is an integers)
+        Names of the form '@ijk' and '#ijk' (where ijk is an integers)
         are reserved and cannot be set. They can be obtained by the deassign command.
         Connected NmrChains (isConnected == True) always have canonical names of the form '#ijk'"""
         return self._wrappedData.code
@@ -456,13 +459,21 @@ def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False
     nmrProject = self._apiNmrProject
     serial = None
 
+    # if isinstance(shortName, str) and shortName.startswith(DEFAULT_NMRCHAINCODE):
+    #     raise ValueError(f"Cannot create NmrChain beginning with {DEFAULT_NMRCHAINCODE}")
+
     if shortName is not None:
-        shortName = NmrChain._uniqueName(project=self, name=shortName)
+        if shortName and isinstance(shortName, str) and shortName[0] in '#@':
+            if shortName[:2] == DEFAULT_NMRCHAINCODE:
+                raise ValueError(f"Cannot create NmrChain beginning with {DEFAULT_NMRCHAINCODE}")
+
+        else:
+            shortName = NmrChain._uniqueName(project=self, name=shortName)
 
     if shortName:
         previous = self.getNmrChain(shortName.translate(Pid.remapSeparators))
         if previous is not None:
-            raise ValueError("%s already exists" % previous.longPid)
+            raise ValueError(f"{previous.longPid} already exists")
         if shortName[0] in '#@':
             try:
                 serial = int(shortName[1:])
@@ -471,14 +482,14 @@ def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False
                 pass
             else:
                 if serial is not None and serial > 0:
-                    # this is a reserved name - try to set it with serial
-                    if nmrProject.findFirstNmrChain(serial=serial) is None:
-                        # We are setting a shortName that matches the passed-in serial. OK.
-                        # Set isConnected to match - this overrides the isConnected parameter.
-                        isConnected = (shortName[0] == '#')
-                        shortName = None
-                    else:
-                        raise ValueError("Cannot create NmrChain with reserved name %s" % shortName)
+                    if nmrProject.findFirstNmrChain(serial=serial) is not None:
+                        raise ValueError(f"Cannot create NmrChain with reserved name {shortName}")
+
+                    # We are setting a shortName that matches the passed-in serial. OK.
+                    # Set isConnected to match - this overrides the isConnected parameter.
+                    isConnected = (shortName[0] == '#')
+                    shortName = None
+
     else:
         shortName = None
 
@@ -493,8 +504,7 @@ def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False
         try:
             result._resetSerial(serial)
         except ValueError:
-            self.project._logger.warning("Could not set shortName of %s to %s - keeping default value"
-                                         % (result, shortName))
+            self.project._logger.warning(f"Could not set shortName of {result} to {shortName} - keeping default value")
 
     return result
 

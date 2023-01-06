@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:42 +0000 (Thu, January 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-06 11:14:30 +0000 (Fri, January 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -99,7 +99,7 @@ class PeakListTest2(WrapperTesting):
         peakList2 = peakList.copyTo(spectrum)
 
         self.assertEqual(peakList2.serial, 4)
-        # self.assertEquals(peakList2.comment,
+        # self.assertEqual(peakList2.comment,
         #                   """Copy of PeakList:3dNOESY-182.3
         #                   ARIA2_NOE_Peaks_run1_it8_auto1195328348.86|6|1|2"""
         #                   )
@@ -109,7 +109,7 @@ class PeakListTest2(WrapperTesting):
                          )
 
         for tag in self.singleValueTags:
-            self.assertEquals((tag, getattr(peakList, tag)), (tag, getattr(peakList2, tag)))
+            self.assertEqual((tag, getattr(peakList, tag)), (tag, getattr(peakList2, tag)))
 
     def test_PeakList_copy_keyparameters(self):
         peakList = self.project.getPeakList('3dNOESY-182.3')
@@ -125,11 +125,11 @@ class PeakListTest2(WrapperTesting):
             }
         peakList2 = peakList.copyTo(spectrum, **params)
 
-        self.assertEquals(peakList2.serial, 4)
-        self.assertEquals(peakList2.comment, 'ACOMMENT')
+        self.assertEqual(peakList2.serial, 4)
+        self.assertEqual(peakList2.comment, 'ACOMMENT')
 
         for tag, val in params.items():
-            self.assertEquals(val, getattr(peakList2, tag))
+            self.assertEqual(val, getattr(peakList2, tag))
 
     def test_PeakList_copy_exo(self):
         peakList = self.project.getPeakList('3dNOESY-182.3')
@@ -138,11 +138,11 @@ class PeakListTest2(WrapperTesting):
 
         self.assertIs(peakList2._parent, spectrum)
 
-        self.assertEquals(peakList2.serial, 2)
-        self.assertEquals(peakList2.comment,
+        self.assertEqual(peakList2.serial, 2)
+        self.assertEqual(peakList2.comment,
                           "Copy of PeakList:3dNOESY-182.3\n" +
                           "ARIA2_NOE_Peaks_run1_it8_auto1195328348.86|6|1|2"
                           )
 
         for tag in self.singleValueTags:
-            self.assertEquals((tag, getattr(peakList, tag)), (tag, getattr(peakList2, tag)))
+            self.assertEqual((tag, getattr(peakList, tag)), (tag, getattr(peakList2, tag)))

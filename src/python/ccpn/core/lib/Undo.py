@@ -8,7 +8,7 @@ from ccpn.core.lib.Undo import _deleteAllApiObjects, restoreOriginalLinks, no_op
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-06 18:40:15 +0000 (Tue, December 06, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-01-06 11:14:30 +0000 (Fri, January 06, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -163,6 +163,10 @@ class Undo(deque):
         # Set to True to unblank errors during undo/redo
         self._debug = debug
         self.application = application
+
+        # CCPNInternal - required for v2 pytests that do not create v3-application
+        self._allowNoApplication = False
+        self._lastFuncCall = None
 
     @property
     def undoItemBlocking(self):
@@ -437,6 +441,24 @@ class Undo(deque):
             self._lastEventMarkClean = False
             self.undoChanged.call(lambda x: x(UndoEvents.UNDO_ADD))
 
+    @property
+    def allowNoApplication(self):
+        """Return True if undo/redo suspension is temporarily disabled
+        CCPNInternal - only required for v2 pytesting
+        """
+        return self._allowNoApplication
+
+    @allowNoApplication.setter
+    def allowNoApplication(self, value):
+        """Allow setting of the allowNoApplication flag only if V3-application is not present
+        """
+        if self.application:
+            raise RuntimeError(f'{self.__class__.__name__}.allowNoApplication cannot be modified if V3-application is present')
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}.allowNoApplication must be a bool')
+
+        self._allowNoApplication = value
+
     def undo(self):
         """Undo one operation - or one waypoint if waypoints are set
 
@@ -459,48 +481,31 @@ class Undo(deque):
         else:
             undoTo = max(self.nextIndex - 2, -1)
 
-        from ccpn.core.lib.ContextManagers import undoBlock
+        # block addition of items while operating
+        self._blocked = True
+        self._lastFuncCall = None
 
         if self.application and self.application._disableUndoException:
             # mode is activated with switch --disable-undo-exception
+            # allows the program to crash with a full error-trace
 
-            # block addition of items while operating
-            self._blocked = True
-
-            with undoBlock():
-                undoCall = redoCall = None
-                for n in range(self.nextIndex - 1, undoTo, -1):
-                    undoCall, redoCall = self[n]
-
-                    if undoCall:
-                        undoCall()
-                self.nextIndex = undoTo + 1
+            self._processUndos(undoTo)
 
             # Added by Rasmus March 2015. Surely we need to reset self._blocked?
             self._blocked = False
 
         else:
-            # block addition of items while operating
-            self._blocked = True
-
             try:
-                with undoBlock():
-                    undoCall = redoCall = None
-                    for n in range(self.nextIndex - 1, undoTo, -1):
-                        undoCall, redoCall = self[n]
-
-                        if undoCall:
-                            undoCall()
-                    self.nextIndex = undoTo + 1
+                self._processUndos(undoTo)
 
             except Exception as e:
                 from ccpn.util.Logging import getLogger
 
-                getLogger().warning("Error while undoing (%s). Undo stack is cleared." % e)
+                getLogger().warning(f'Error while undoing ({e}). Undo stack is cleared.')
                 if self.application and self.application._ccpnLogging:
                     self._logObjects()
                 if self._debug:
-                    sys.stderr.write("UNDO DEBUG: error in undo. Last undo function was: %s\n" % undoCall)
+                    sys.stderr.write(f'UNDO DEBUG: error in undo. Last undo function was: {self._lastFuncCall}\n')
                     raise
                 self.clear()
 
@@ -509,6 +514,31 @@ class Undo(deque):
                 self._blocked = False
 
         self.undoChanged.call(lambda x: x(UndoEvents.UNDO_UNDO))
+
+    def _processUndos(self, undoTo):
+        """Process the functions on the undo-stack in undo order with/without an undoBlock.
+        undoBlock automatically handles sidebar notifications
+        """
+        from ccpn.core.lib.ContextManagers import undoBlock
+
+        if self._allowNoApplication:
+            # process the stack without a V3-application, required for pytest of v2 cases with undo
+            self._processUndo(undoTo)
+        else:
+            with undoBlock():
+                self._processUndo(undoTo)
+
+    def _processUndo(self, undoTo):
+        """Process the functions on the undo-stack in undo order
+        """
+        for n in range(self.nextIndex - 1, undoTo, -1):
+            undoCall, _redoCall = self[n]
+            self._lastFuncCall = repr(undoCall)
+
+            if undoCall:
+                undoCall()
+
+        self.nextIndex = undoTo + 1
 
     def redo(self):
         """Redo one waypoint - or one operation if waypoints are not set.
@@ -530,53 +560,67 @@ class Undo(deque):
         else:
             redoTo = min(self.nextIndex, len(self))
 
-        from ccpn.core.lib.ContextManagers import undoBlock
+        # block addition of items while operating
+        self._blocked = True
+        self._lastFuncCall = None
 
         if self.application and self.application._disableUndoException:
             # mode is activated with switch --disable-undo-exception
+            # allows the program to crash with a full error-trace
 
-            # block addition of items while operating
-            self._blocked = True
-
-            with undoBlock():
-                for n in range(self.nextIndex, redoTo + 1):
-                    undoCall, redoCall = self[n]
-
-                    if redoCall:
-                        redoCall()
-                self.nextIndex = redoTo + 1
+            self._processRedos(redoTo)
 
             # Added by Rasmus March 2015. Surely we need to reset self._blocked?
             self._blocked = False
 
         else:
-            # block addition of items while operating
-            self._blocked = True
-
             try:
-                with undoBlock():
-                    for n in range(self.nextIndex, redoTo + 1):
-                        undoCall, redoCall = self[n]
-
-                        if redoCall:
-                            redoCall()
-                    self.nextIndex = redoTo + 1
+                self._processRedos(redoTo)
 
             except Exception as e:
                 from ccpn.util.Logging import getLogger
 
-                getLogger().warning("Error while redoing (%s). Undo stack is cleared." % e)
+                getLogger().warning(f'Error while redoing ({e}). Undo stack is cleared.')
                 if self.application and self.application._ccpnLogging:
                     self._logObjects()
                 if self._debug:
-                    sys.stderr.write("REDO DEBUG: error in redo. Last redo call was: %s\n" % redoCall)
+                    sys.stderr.write(f'REDO DEBUG: error in redo. Last redo call was: {self._lastFuncCall}\n')
                     raise
                 self.clear()
+
             finally:
                 # Added by Rasmus March 2015. Surely we need to reset self._blocked?
                 self._blocked = False
 
         self.undoChanged.call(lambda x: x(UndoEvents.UNDO_REDO))
+
+    def _processRedos(self, redoTo):
+        """Process the functions on the undo-stack in redo order with/without an undoBlock.
+        undoBlock automatically handles sidebar notifications
+        """
+        from ccpn.core.lib.ContextManagers import undoBlock
+
+        if self._allowNoApplication:
+            self._processRedo(redoTo)
+        else:
+            # process the stack without a V3-application, required for pytest of v2 cases with undo
+            with undoBlock():
+                self._processRedo(redoTo)
+
+    def _processRedo(self, redoTo):
+        """Process the functions on the undo-stack in redo order
+        """
+        redoCall = None
+        for n in range(self.nextIndex, redoTo + 1):
+            _undoCall, redoCall = self[n]
+            self._lastFuncCall = repr(redoCall)
+
+            if redoCall:
+                redoCall()
+
+        self.nextIndex = redoTo + 1
+
+        return redoCall
 
     def clear(self):
         """Clear and reset undo object

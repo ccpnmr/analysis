@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:14 +0100 (Wed, October 12, 2022) $"
+__dateModified__ = "$dateModified: 2023-01-06 13:28:12 +0000 (Fri, January 06, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -63,21 +63,23 @@ def main():
 
             self._lock = QtCore.QMutex()
             self._counter = 0
-            self._realEvents = []
-            self._handledEvents = []
+            self.realEvents = []
+            self.handledEvents = []
             self._progressSuspension = 0
 
         def start(self):
             print(f'   GO!                 {datetime.datetime.now()}')
             # start loading random stuff on the queue form two threads
-            QtCore.QTimer.singleShot(0, partial(self._startStuff, 'thread1'))
-            QtCore.QTimer.singleShot(0, partial(self._startStuff, 'thread2'))
-            QtCore.QTimer.singleShot(0, partial(self._startStuff, 'thread3'))
+            QtCore.QTimer.singleShot(0, partial(self._namedQTimerThread, 'thread1'))
+            QtCore.QTimer.singleShot(0, partial(self._namedQTimerThread, 'thread2'))
+            QtCore.QTimer.singleShot(0, partial(self._namedQTimerThread, 'thread3'))
 
             def _enableBlocking():
+                print('BLOCKING')
                 self._progressSuspension = 1
 
             def _disableBlocking():
+                print('BLOCKING RELEASED')
                 self._progressSuspension = 0
 
             # block after 3 seconds - simulate overriding block
@@ -106,7 +108,7 @@ def main():
             for ii in range(20):
                 self.processEvents()
                 time.sleep(1 / 20)
-            self._handledEvents.extend(vals)
+            self.handledEvents.extend(vals)
             print(f'       {vals} - end sleep')
 
         def _queueAppend(self, itm):
@@ -124,18 +126,18 @@ def main():
             elif self._scheduler.isActive:
                 print(f'   append queued                   {datetime.datetime.now()}      {itm}')
 
-        def _startStuff(self, name, count=0):
+        def _namedQTimerThread(self, name, count=0):
             """Randomly add items to the queue
             """
             val = f'{name} - {count}'
 
             # add to the deferred queue and store in the realEvents list which holds when the events were created
             self._queueAppend(val)
-            self._realEvents.append(val)
+            self.realEvents.append(val)
 
             if count < 15:
                 # create another random event
-                QtCore.QTimer.singleShot(int(random.random() * 1000), partial(self._startStuff, name, count + 1))
+                QtCore.QTimer.singleShot(int(random.random() * 800) + 200, partial(self._namedQTimerThread, name, count + 1))
 
         def _buttonClicked(self, *args):
             """Handle user clicking button
@@ -143,7 +145,7 @@ def main():
             if self._counter < 30:
                 # add to the deferred queue and store in the realEvents list which holds when the events were created
                 self._queueAppend(self._counter)
-                self._realEvents.append(self._counter)
+                self.realEvents.append(self._counter)
 
                 self._counter += 1
 
@@ -163,8 +165,8 @@ def main():
     window.show()
     app.start()
 
-    print('\n'.join([f'{qVal}    {rVal}' for qVal, rVal in zip_longest(app._handledEvents, app._realEvents)]))
-    assert app._handledEvents == app._realEvents
+    print('\n'.join([f'{qVal}    {rVal}' for qVal, rVal in zip_longest(app.handledEvents, app.realEvents)]))
+    assert app.handledEvents == app.realEvents
 
 
 class SchedulerTester(QtCore.QObject):
@@ -173,6 +175,7 @@ class SchedulerTester(QtCore.QObject):
     Simulates multiple threads posting events.
     Example process add labels to a list and simulates taking two seconds to finish.
     """
+    threadFinished = QtCore.pyqtSignal(str)
 
     def __init__(self, application):
         super().__init__()
@@ -181,33 +184,35 @@ class SchedulerTester(QtCore.QObject):
         self._queuePending = UpdateQueue()
         self._queueActive = None
         self._scheduler = UpdateScheduler(self, self._queueProcess, name='QueueTester',
-                                          log=False, completeCallback=None)
+                                          log=False, completeCallback=self._finalise)
 
         self._lock = QtCore.QMutex()
         self._counter = 0
-        self._realEvents = []
-        self._handledEvents = []
+        self.realEvents = []
+        self.handledEvents = []
         self._progressSuspension = 0
-        self._exitSignal = False
+        self.exitSignal = False
 
     def start(self):
         print(f'   GO!                 {datetime.datetime.now()}')
 
         # start loading random stuff on the queue form two threads
-        QtCore.QTimer.singleShot(0, partial(self._startStuff, 'thread1'))
-        QtCore.QTimer.singleShot(0, partial(self._startStuff, 'thread2'))
-        QtCore.QTimer.singleShot(0, partial(self._startStuff, 'thread3'))
+        QtCore.QTimer.singleShot(0, partial(self._namedQTimerThread, 'thread1'))
+        QtCore.QTimer.singleShot(0, partial(self._namedQTimerThread, 'thread2'))
+        QtCore.QTimer.singleShot(0, partial(self._namedQTimerThread, 'thread3'))
 
         def _enableBlocking():
+            print('BLOCKING')
             self._progressSuspension = 1
 
         def _disableBlocking():
+            print('BLOCKING RELEASED')
             self._progressSuspension = 0
 
-        # block after 3 seconds - simulate overriding block
-        QtCore.QTimer.singleShot(3000, _enableBlocking)
-        # unblock after 7 seconds - simulate overriding block
-        QtCore.QTimer.singleShot(7000, _disableBlocking)
+        # block after 7 seconds - simulate overriding block
+        QtCore.QTimer.singleShot(7000, _enableBlocking)
+        # unblock after 10 seconds - simulate overriding block
+        QtCore.QTimer.singleShot(11000, _disableBlocking)
 
     def _queueProcess(self):
         """Process current items in the queue
@@ -218,17 +223,15 @@ class SchedulerTester(QtCore.QObject):
             self._queueActive = self._queuePending
             self._queuePending = UpdateQueue()
 
-        vals = []
-        for itm in self._queueActive.items():
-            vals.append(itm)
+        vals = list(self._queueActive.items())
 
         # example pause for 1 second whilst processing events (may happen in qui)
-        for ii in range(20):
+        for _ in range(20):
             self._application.processEvents()
-            time.sleep(1 / 20)
+            time.sleep(0.1)
 
         # add the events to the processed queue
-        self._handledEvents.extend(vals)
+        self.handledEvents.extend(vals)
         print(f'       {vals} - end sleep')
 
     def _queueAppend(self, itm):
@@ -243,31 +246,46 @@ class SchedulerTester(QtCore.QObject):
             print(f'   append busy                     {datetime.datetime.now()}      {itm}')
             self._scheduler.signalRestart()
 
-        elif self._scheduler.isActive:
+        else:
             print(f'   append queued                   {datetime.datetime.now()}      {itm}')
 
-    def _startStuff(self, name, count=0):
-        """Randomly add items to the queue
+    def _namedQTimerThread(self, name, count=0):
+        """Add items to the queue at random intervals
         """
         val = f'{name} - {count}'
-        print(f'new event  -  _startStuff  {val}')
+        print(f'new event  -  _namedQTimerThread  {val}')
 
         # add to the deferred queue and store in the realEvents list which holds when the events were created
         self._queueAppend(val)
-        self._realEvents.append(val)
+        self.realEvents.append(val)
 
         if count < 15:
             # create another random event
-            QtCore.QTimer.singleShot(int(random.random() * 1000), partial(self._startStuff, name, count + 1))
+            QtCore.QTimer.singleShot(int(random.random() * 800) + 200, partial(self._namedQTimerThread, name, count + 1))
+
         else:
-            self._exitSignal += 1
+            self.exitSignal += 1
+            self.threadFinished.emit(name)
+
+    def _finalise(self):
+        """Action when the current queue has been emptied
+        """
+        print(f'   active queue processed - pending queue contains {len(self._queuePending)} items')
+
+    @property
+    def queueEmpty(self):
+        """Return True if there are no more active/pending items
+        """
+        return not self._queueActive or not self._queuePending
 
 
 class TestScheduler(unittest.TestCase):
+    """Test-case to check that the queued events are processed in the same order that they are created
+    """
 
     @staticmethod
     def _queueEnd():
-        print(f'END')
+        print('END')
 
     def test_scheduler(self):
         # create a simple app
@@ -275,18 +293,28 @@ class TestScheduler(unittest.TestCase):
 
         # create and start a scheduler test-case
         obj = SchedulerTester(app)
+        obj.threadFinished.connect(self._threadFinished)
         obj.start()
 
         # wait until all the threads have finished
-        while obj._exitSignal != 3:
+        while obj.exitSignal < 3 or not obj.queueEmpty:
+            time.sleep(0.1)
             app.processEvents()
 
         # process any remaining threads/timers
         QtCore.QTimer.singleShot(0, self._queueEnd)
         app.processEvents()
 
-        print('\n'.join([f'{qVal}    {rVal}' for qVal, rVal in zip_longest(obj._handledEvents, obj._realEvents)]))
-        self.assertListEqual(obj._handledEvents, obj._realEvents)
+        # print out the final list of processes and check the order
+        print('\n'.join([f'{qVal}    {rVal}' for qVal, rVal in zip_longest(obj.handledEvents, obj.realEvents)]))
+        self.assertListEqual(obj.handledEvents, obj.realEvents)
+
+    @staticmethod
+    @QtCore.pyqtSlot(str)
+    def _threadFinished(name):
+        """Thread has completed all tasks
+        """
+        print(f'thread finished - {name}')
 
 
 if __name__ == '__main__':

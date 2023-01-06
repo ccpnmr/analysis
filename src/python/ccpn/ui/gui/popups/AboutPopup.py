@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-06 15:36:55 +0000 (Fri, January 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-06 15:50:33 +0000 (Fri, January 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -39,25 +39,24 @@ from ccpn.util import Path
 # The image is in ccpn.ui.gui.widgets
 year = datetime.date.today().year
 
+TEXT = '''
+Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - %s
 
-TEXT = ''' Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - %s
-| 
-            **Active Developers:**
-            Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń,
-            Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister
+**Active Developers:**
+Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń,
+Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister
 
+**This program uses:**
+The CCPN data model: J Biomol NMR (2006) 36:147–155, DOI 10.1007/s10858-006-9076-z 
+PyQtGraph (https://www.pyqtgraph.org)
+PyQt (https://pyqt.sourceforge.net)
+Miniconda, subject to Anaconda End User Licence Agreement (https://docs.continuum.io/anaconda/eula)
 
-            **This program uses:**
-            The CCPN data model: J Biomol NMR (2006) 36:147–155, DOI 10.1007/s10858-006-9076-z 
-            PyQtGraph (https://www.pyqtgraph.org)
-            PyQt (https://pyqt.sourceforge.net)
-            Miniconda, subject to Anaconda End User Licence Agreement (https://docs.continuum.io/anaconda/eula)
-
-            **Disclaimer:**
-            This program is offered 'as-is'. Under no circumstances will the authors, CCPN, the Department of Molecular 
-            and Cell Biology, or the University of Leicester be liable for any damage, loss of data, loss of revenue or 
-            any other undesired consequences originating from the usage of this software.
-        ''' % year
+**Disclaimer:**
+This program is offered 'as-is'. Under no circumstances will the authors, CCPN, the Department of Molecular 
+and Cell Biology, or the University of Leicester be liable for any damage, loss of data, loss of revenue or 
+any other undesired consequences originating from the usage of this software.
+''' % year
 
 
 class AboutPopup(CcpnDialog):
@@ -87,7 +86,6 @@ class AboutPopup(CcpnDialog):
 
 def main():
     from ccpn.ui.gui.widgets.Application import TestApplication
-
 
     app = TestApplication()
     popup = AboutPopup()

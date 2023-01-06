@@ -42,7 +42,7 @@ from __future__ import annotations  # pycharm still highlights as errors
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -53,7 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-12-20 13:06:16 +0000 (Tue, December 20, 2022) $"
+__dateModified__ = "$dateModified: 2023-01-06 10:16:50 +0000 (Fri, January 06, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -3588,7 +3588,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
 
     spectrum = project._data2Obj.get(apiDataSource)
     if spectrum is None:
-        raise RuntimeError("something went wrong creating a new Spectrum instance")
+        raise RuntimeError("Something went wrong creating a new Spectrum instance!")
     spectrum._apiExperiment = apiExperiment
 
     # initialise the dimensional SpectrumReference objects

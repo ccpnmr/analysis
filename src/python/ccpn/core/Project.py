@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-05 14:00:21 +0000 (Thu, January 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-06 10:16:50 +0000 (Fri, January 06, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1222,7 +1222,9 @@ class Project(AbstractWrapperObject):
 
     def _newApiObject(self, wrappedData, cls: AbstractWrapperObject):
         """Create new wrapper object of class cls, associated with wrappedData.
-        and call creation notifiers"""
+        and call creation notifiers
+        """
+        # See AbstractWrapperObject:1145
 
         factoryFunction = cls._factoryFunction
         if factoryFunction is None:
@@ -2299,6 +2301,10 @@ def _newProject(application, name:str, path:Path, isTemporary:bool = False) -> P
     project._isNew = True
     project._isTemporary = isTemporary
     # NB: linkages are set in Framework._initialiseProject()
+
+    # we always have the default chemicalShift list, but cannto (yet!?) be done here because it crashes on the
+    # newObject context manager, as this new project is not yet linked to the application
+    # project.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
 
     project._objectVersion = application.applicationVersion
 

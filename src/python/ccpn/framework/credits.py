@@ -1,13 +1,10 @@
 """
 This module defines the code for creating the credits
 """
-
-
-import contextlib
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -20,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:43 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-01-06 15:36:55 +0000 (Fri, January 06, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,12 +28,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import contextlib
+
+
 authors = ('Ed Brooksbank', 'Joanna Fox', 'Victoria A Higman', 'Luca Mureddu', 'Eliza Płoskoń',
            'Timothy J Ragan', 'Brian O Smith', 'Gary S Thompson', 'Geerten W Vuister')
 
 
-def _strList(inlist: list, maxlen: int = 80) -> list:
-
+def _strList(inlist: tuple, maxlen: int = 80) -> list:
     outstr = ''
     # skip = False  # print commas and ampersand
     lencount = maxlen
@@ -48,21 +47,17 @@ def _strList(inlist: list, maxlen: int = 80) -> list:
     for cName in nameList[:-1]:
         skip = False
         if len(outstr + cName) > lencount and cName not in nameList[-2:]:
-            outstr += cName + ', '
+            outstr += f'{cName}, '
             outList.append(outstr)
             lencount += maxlen
             skip = True
             outstr = ''
         elif cName not in nameList[-2:]:
-            outstr += cName + ', '
+            outstr += f'{cName}, '
         else:
             outstr += cName
 
-    if len(nameList) == 1:
-        outstr = nameList[0]
-    else:
-        outstr = outstr + ' & ' + nameList[-1]
-
+    outstr = nameList[0] if len(nameList) == 1 else f'{outstr} & {nameList[-1]}'
     if outstr:
         outList.append(outstr)
 
@@ -91,13 +86,16 @@ def printCreditsText(fp, programName, version):
             authorList = _strList(authors, maxlen=60)
             lines.append(f"{prefix}{authorList[0]}")
             lines.extend(f"{' ' * len(prefix)}{crLine}" for crLine in authorList[1:])
+
     lines.append("")
+
     with contextlib.suppress(Exception):
         if isinstance(__reference__, str):
             lines.append(f"Please cite:  {__reference__}")
         elif isinstance(__reference__, tuple):
             lines.append(f"Please cite:  {__reference__[0]}")
             lines.extend(f"              {refLine}" for refLine in __reference__[1:])
+
     lines.extend(("",
                   "DISCLAIMER:   This program is offered 'as-is'. Under no circumstances will the authors, CCPN,",
                   "              the Department of Molecular and Cell Biology, or the University of Leicester be",

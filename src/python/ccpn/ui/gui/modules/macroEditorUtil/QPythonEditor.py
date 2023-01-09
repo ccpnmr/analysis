@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-11-28 15:41:43 +0000 (Mon, November 28, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-09 17:57:08 +0000 (Mon, January 09, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -118,7 +118,7 @@ class PyCodeEditor(PyCodeEdit, Base):
                 request_id = completionMode._request_id
                 results = [(line, column, request_id), []]
                 with timeout(seconds=self.maxCompletionWaiting,
-                             timeoutMessage='MacroEditor: Completion aborted',
+                             timeoutMessage='MacroEditor: Completion aborted\n',
                              loggingType='debug3'):
                     cw = CcpnNameSpacesProvider()
                     completions = cw.complete(code, line, column, path, encoding, prefix)

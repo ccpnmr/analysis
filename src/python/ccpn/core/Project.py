@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-06 10:16:50 +0000 (Fri, January 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-09 17:58:38 +0000 (Mon, January 09, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1246,8 +1246,13 @@ class Project(AbstractWrapperObject):
         """ call object-has-changed notifiers
         """
         if self._apiNotificationBlanking == 0:
-            obj = self._data2Obj[wrappedData]
-            obj._finaliseAction('change')
+            obj = self._data2Obj.get(wrappedData)
+            if not obj:
+                # NOTE:GWV - it shouldn't get here but occasionally it does; e.g. when
+                # upgrading a V2 project with correctFinalResult() routine
+                getLogger().debug(f'_modifiedApiObject: no V3 object for {wrappedData}')
+            else:
+                obj._finaliseAction('change')
 
     def _finaliseApiDelete(self, wrappedData):
         """Clean up after object deletion
@@ -1259,7 +1264,7 @@ class Project(AbstractWrapperObject):
         obj = self._data2Obj.get(wrappedData)
         if not obj:
             # NOTE:ED - it shouldn't get here but occasionally it does :|
-            getLogger().warning(f'_finaliseApiDelete: no V3 object for {wrappedData}')
+            getLogger().debug(f'_finaliseApiDelete: no V3 object for {wrappedData}')
 
         else:
             # obj._finaliseAction('delete')  # GWV: 20181127: now as notify('delete') decorator on delete method
@@ -1308,25 +1313,30 @@ class Project(AbstractWrapperObject):
         or an iterable of API objects"""
 
         if self._apiNotificationBlanking == 0:
-            getDataObj = self._data2Obj.get
 
             target = operator.attrgetter(pathToObject)(wrappedData)
 
-            # GWV: a bit too much for now; should be the highest debug level only
-            #self._project._logger.debug('%s: %s.%s = %s'
-            #                            % (action, wrappedData, pathToObject, target))
-
+            targets = []
             if not target:
-                pass
+                return
+
             elif hasattr(target, '_metaclass'):
-                if not target.isDeleted:
-                    # Hack. This is an API object - only if exists
-                    getDataObj(target)._finaliseAction(action)
+                # Hack. This is an API object - only if exists
+                targets = [target]
+
             else:
                 # This must be an iterable
-                for obj in target:
-                    if not obj.isDeleted:
-                        getDataObj(obj)._finaliseAction(action)
+                targets = target
+
+            for apiObj in targets:
+                if not apiObj.isDeleted:
+                    if (obj := self._data2Obj.get(apiObj)) is None:
+                        # NOTE:GWV - it shouldn't get here but occasionally it does; e.g. when
+                        # upgrading a V2 project with correctFinalResult() routine
+                        getLogger().debug(f'_notifyRelatedApiObject: no V3 object for {apiObj}')
+                    else:
+                        obj._finaliseAction(action)
+
 
     # def _finaliseApiRename(self, wrappedData):
     #     """Reset Finalise rename - called from API object (for API notifiers)

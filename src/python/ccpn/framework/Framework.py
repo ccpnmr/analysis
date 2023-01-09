@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-05 13:37:33 +0000 (Thu, January 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-09 17:58:38 +0000 (Mon, January 09, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -76,7 +76,7 @@ from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.core.lib.Pid import Pid
 from ccpn.core.lib.ContextManagers import \
-    logCommandManager, undoBlockWithSideBar, rebuildSidebar
+    logCommandManager, undoBlockWithSideBar, rebuildSidebar, inactivity
 
 from ccpn.framework.Application import Arguments
 from ccpn.framework import Version
@@ -506,19 +506,20 @@ class Framework(NotifierBase, GuiBase):
 
         if newProject._isUpgradedFromV2:
             getLogger().debug('initialising v2 noise and contour levels')
-            for spectrum in newProject.spectra:
-                # calculate the new noise level
-                spectrum.noiseLevel = spectrum.estimateNoise()
+            with inactivity(application=self):
+                for spectrum in newProject.spectra:
+                    # calculate the new noise level
+                    spectrum.noiseLevel = spectrum.estimateNoise()
 
-                # Check  contourLevels, contourColours
-                spectrum._setDefaultContourValues()
+                    # Check  contourLevels, contourColours
+                    spectrum._setDefaultContourValues()
 
-                # set the initial contour colours
-                (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-                spectrum.sliceColour = spectrum.positiveContourColour
+                    # set the initial contour colours
+                    (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
+                    spectrum.sliceColour = spectrum.positiveContourColour
 
-                # set the initial axis ordering
-                _getDefaultOrdering(spectrum)
+                    # set the initial axis ordering
+                    _getDefaultOrdering(spectrum)
 
         # the project is now ready to use
 

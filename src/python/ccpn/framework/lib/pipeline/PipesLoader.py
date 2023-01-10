@@ -1,7 +1,7 @@
 from ccpn.util import Path
 from ccpn.framework.PathsAndUrls import userPreferencesDirectory
 import os
-
+from ccpn.util.Logging import getLogger
 
 def loadPipeSysModules(paths):
     """"
@@ -67,5 +67,8 @@ def _fetchDemoPipe():
             src = os.path.join(pipeTemplates, templateFile)
             dstFile = os.path.join(destDir, templateFile)
             if not os.path.isfile(dstFile):
-                copyfile(src, dstFile)
+                try:
+                    copyfile(src, dstFile)
+                except Exception as err:
+                    getLogger().warning(f"Fetching User's pipes. Cannot copy the file {src} to {dstFile}. Exit with error: {err}")
 

@@ -3,12 +3,12 @@ This file contains the Bruker data access class
 it serves as an interface between the V3 Spectrum class and the actual spectral data
 Some routines rely on code from the Nmrglue package, included in the miniconda distribution
 
-See SpectrumDataSourceABC for a description of the methods
+See SpectrumDataSourceABC for a description of the attributes and methods
 """
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:03 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-10 14:30:44 +0000 (Tue, January 10, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,13 +32,34 @@ __date__ = "$Date: 2020-11-20 10:28:48 +0000 (Fri, November 20, 2020) $"
 
 import os
 from typing import Sequence
+from itertools import permutations, combinations_with_replacement
 
 from ccpn.util.Path import Path, aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flatten
+from ccpn.util.traits.CcpNmrTraits import CPath
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 from ccpn.framework.constants import NO_SUFFIX, ANY_SUFFIX
+
+
+def _makeBrukerFileNames(dimensionCount) -> tuple:
+    """helper function to constucts all possible bruker filenames for dimensionCount
+    :return list with the names
+    """
+    _first = combinations_with_replacement('ri', dimensionCount)
+
+    # we still need to permute the _first expansion
+    _second = []
+    for _n in _first:
+        _second.extend(permutations(_n))
+
+    # remove the duplicates
+    _names = list(set(_second))
+    _names.sort()
+
+    # creat in reverse order so that 'rrr' comes first
+    return tuple(f'{dimensionCount}' +''.join(_n) for _n in _names[::-1])
 
 
 class BrukerSpectrumDataSource(SpectrumDataSourceABC):
@@ -62,15 +83,17 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
     openMethod = open
     defaultOpenReadMode = 'rb'
 
+    #=========================================================================================
+
     _processedDataFilesDict = dict([
         (1, '1r 1i'.split()),
         (2, '2rr 2ri 2ir 2ii'.split()),
-        (3, '3rrr 3rri 3rir 3rii 3irr 3iri 3iir 3iii'.split()),
-        (4, '4rrrr 4rrri 4rrir 4rrii 4rirr 4riri 4riir 4riii 4irrr 4irri 4irir 4irii 4iirr 4iiri 4iiir 4iiii'.split()),
-        (5, '5rrrrr'),
-        (6, '6rrrrrr'),
-        (7, '7rrrrrrr'),
-        (8, '8rrrrrrrr'),
+        (3, _makeBrukerFileNames(3)),
+        (4, _makeBrukerFileNames(4)),
+        (5, _makeBrukerFileNames(5)),
+        (6, _makeBrukerFileNames(6)),
+        (7, _makeBrukerFileNames(7)),
+        (8, _makeBrukerFileNames(8)),
     ])
     _processedDataFiles = [f for f in flatten(_processedDataFilesDict.values())]  # all the possible processed data files as a list
     _acqusFiles = 'acqus acqu2s acqu3s acqu4s acqu5s acqu6s acqu7s acqu8s'.split()
@@ -160,91 +183,71 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 'ZGOPTNS'    : 'acquisition (zg) options',
                 }
 
-    def __init__(self, path=None, spectrum=None):
-        "Init local attributes"
-        self._pdataDir = None
-        self._brukerRoot = None
-        self.acqus = None
-        self.procs = None
-        super().__init__(path, spectrum)
+    #=========================================================================================
+
+    _brukerRoot = CPath(default_value=None, allow_none=True).tag(info =
+                                        'an attribute to store the path to the Bruker root directory; used during parsing'
+                                                                 )
+    _pdataDir = CPath(default_value=None, allow_none=True).tag(info =
+                                        'an attribute to store the path to the Bruker pdata directory; used during parsing'
+                                                           )
+
+    #=========================================================================================
+
+    def __init__(self, path=None, spectrum=None, dimensionCount=None):
+        """Init local attributes
+        """
+
+        self.acqus = None  # list of parsed acqus files (per dimension)
+        self.procs = None  # list of parsed proc files (per dimension)
+
+        super().__init__(path=path, spectrum=spectrum, dimensionCount=dimensionCount)
 
     def _isBrukerTopDir(self, path):
-        """Return True if path (of type Path) is a Bruker top directory with acqu* files
-        and a pdata directory
+        """Return True if path (of type Path) is a Bruker top directory with a pdata directory or acqu* files
         """
         hasAcquFiles = len(path.globList('acqu*')) > 0
         pdata = path / self._PDATA
         return path is not None and path.exists() and path.is_dir() and \
-               pdata.exists() and pdata.is_dir() and \
-               hasAcquFiles
+               ((pdata.exists() and pdata.is_dir()) or hasAcquFiles)
 
-    def _checkBrukerTopDir(self, path):
-        """Check if path (of type Path) is a Bruker top directory with acqu* files
-        and a pdata directory
-        raise RuntimeError on problems
-        """
-        hasAcquFiles = len(path.globList('acqu*')) > 0
-        pdata = path / self._PDATA
-        if path is None or not path.exists():
-            errorMsg = 'Bruker top directory "%s": does not exist' % path
-            getLogger().debug2(errorMsg)
-            raise RuntimeError(errorMsg)
-        if not path.is_dir():
-            errorMsg = 'Bruker top directory "%s": is not a directory' % path
-            getLogger().debug2(errorMsg)
-            raise RuntimeError(errorMsg)
-        if not hasAcquFiles:
-            errorMsg = 'Bruker top directory "%s": has no acqu* files' % path
-            getLogger().debug2(errorMsg)
-            raise RuntimeError(errorMsg)
-        if not pdata.exists() or not pdata.is_dir():
-            errorMsg = 'Bruker top directory "%s": has no valid pdata directory' % path
-            getLogger().debug2(errorMsg)
-            raise RuntimeError(errorMsg)
-
-    def _hasBinaryData(self, path=None):
-        """Return True if path (defaults to self._pdataDir) contains binary data
+    def _hasBinaryData(self, path) -> bool:
+        """Return True if path contains  bruker binary data
         """
         if path is None:
-            path = self._pdataDir
-        return len(path.globList('[1-8][r,i]*')) > 0
+            return False
+        _binaryData = path.globList('[1-8][r,i]*')
+        return len(_binaryData) > 0
+
+    def _getBinaryFile(self):
+        """:returns binary-data file in self._pdataDir as a Path instance or None if none present
+        """
+        if self._pdataDir is None:
+            return None
+
+        if len(self._pdataDir.globList('proc*')) == 0:
+            return None
+
+        if not self._hasBinaryData(self._pdataDir):
+            return None
+
+        dimensionality = self._getDimensionality()
+        if dimensionality not in self._processedDataFilesDict:
+            return None
+
+        return self._pdataDir / self._processedDataFilesDict[dimensionality][0]
 
     def _isBrukerPdataDir(self, path):
         """Return True if path (of type Path) is a Bruker pdata directory with
-        proc files and binary data
+        proc files and/or binary files
         """
         if path is None:
             return False
         hasProcFiles = len(path.globList('proc*')) > 0
         hasBrukerTopdir = self._isBrukerTopDir(path.parent.parent)
-        hasPdata = path.parent.stem == self._PDATA
-        return path.exists() and path.is_dir() and \
-               hasPdata and hasBrukerTopdir and hasProcFiles
-
-    def _checkBrukerPdataDir(self, path):
-        """Check if path (of type Path) is a valid Bruker pdata directory with
-        proc* and binary data [r/i]* files;
-        raise RuntimeError on problems
-        """
-        if path is None or not path.exists():
-            errorMsg = 'Bruker pdata directory "%s": does not exist' % path
-            getLogger().debug2(errorMsg)
-            raise RuntimeError(errorMsg)
-        if not path.is_dir():
-            errorMsg = 'Bruker pdata directory "%s": is not a directory' % path
-            getLogger().debug2(errorMsg)
-            raise RuntimeError(errorMsg)
-
-        hasProcFiles = len(path.globList('proc*')) > 0
-        if not hasProcFiles:
-            errorMsg = 'Bruker pdata directory "%s": has no proc* files' % path
-            getLogger().debug2(errorMsg)
-            raise RuntimeError(errorMsg)
-
-        if not self._hasBinaryData():
-            errorMsg = 'Bruker pdata directory "%s": has no valid processed data' % path
-            getLogger().debug2(errorMsg)
-            raise RuntimeError(errorMsg)
+        isPdata = path.parent.stem == self._PDATA
+        return path.exists() and path.is_dir() and isPdata and hasBrukerTopdir and \
+               (hasProcFiles or self._hasBinaryData(path))
 
     def _getDimensionality(self):
         """Return dimensionality from proc files in self._pdataDir
@@ -261,7 +264,13 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         """Find and return first pdata subdir with valid data, starting from Bruker topDir
         :return path of valid pdata 'proc'-directory or None if not found
         """
+        if self._brukerRoot is None:
+            return None
+
         _pdata = self._brukerRoot / self._PDATA
+        if not _pdata.exists():
+            return None
+
         _procDirs = []
         # add numeric proc dirs only; to sort later
         for p in _pdata.globList('[1-9]*'):
@@ -270,15 +279,27 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             except:
                 pass
         _procDirs.sort(key=int)
+        if len(_procDirs) == 0:
+            return None
 
         for p in _procDirs:
             _path = _pdata / str(p)
-            if self._isBrukerPdataDir(_path) and self._hasBinaryData(_path):
+            if self._hasBinaryData(_path):
                 return _path
         return None
 
+    def _findFistProcFile(self):
+        """Find the first proc file in self._pDataDir
+        :return Path to this file or None if it does not exist
+        """
+        if self._pdataDir is None or not self._pdataDir.exists():
+            return None
+        else:
+            return self._pdataDir /  self._procFiles[0]
+
     def nameFromPath(self):
         """Return a name derived from _brukerRoot and pdataDir
+        Subclassed to accommodate the special Bruker directory structure
         """
         return '%s-%s' % (self._brukerRoot.stem, self._pdataDir.stem)
 
@@ -290,9 +311,41 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         """
         return (None if self.dataFile is None else self._brukerRoot.parent)
 
-    def setPath(self, path, substituteSuffix=False):
+    def getAllFilePaths(self) -> list:
+        """
+        Get all the files handled by this dataSource: the binary and
+        acqu* and proc* parameter files.
+
+        :return: list of Path instances
+        """
+        result = [self.path]
+
+        # acqu files
+        for _p in self._acqusFiles[0:self.dimensionCount]:
+            result.append( self._brukerRoot / _p )
+
+        # proc files:
+        for _p in self._procFiles[0:self.dimensionCount]:
+            result.append( self._pdataDir / _p )
+        return result
+
+    def copyFiles(self, destinationDirectory, overwrite=False) -> list:
+        """Copy all data files to a new destination directory
+        :param destinationDirectory: a string or Path instance defining the destination directory
+        :param overwrite: Overwrite any existing files
+        :return A list of files/directory copied
+        """
+        _destination = aPath(destinationDirectory)
+        if not _destination.is_dir():
+            raise ValueError(f'"{_destination}" is not a valid directory')
+
+        _dir, _base, _suffix = self._brukerRoot.split3()
+        result = self._brukerRoot.copyDir(_destination / _base, overwrite=overwrite )
+        return [result]
+
+    def setPath(self, path, checkSuffix=False):
         """Parse and set path, assure there is the directory with acqus and pdata dirs
-        set the _brukerRoot and _pdata attributes to point to the relevant directories
+        set the _brukerRoot and _pdataDir attributes to point to the relevant directories
 
         Return self or None on error
         """
@@ -301,65 +354,135 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
 
         self._pdataDir = None
         self._brukerRoot = None
-        self._binaryData = None
-
-        self.acqus = None   # list of the acqu files, parsed as dicts
-        self.procs = None   # list of the proc files, parsed as dicts
+        self._binaryFile = None
+        self._parameterFile = None
+        self._path = None
 
         if path is None:
             _path = None
+            self._path = None
 
         else:
             _path = Path(path)
+            self._path = _path
 
             if _path.is_file() and _path.stem in self._processedDataFiles:
                 # Bruker binary processed data file
+                self._brukerRoot = _path.parent.parent.parent
                 self._pdataDir = _path.parent
-                self._brukerRoot = _path.parent.parent.parent
-                self._binaryData = _path
+                self._binaryFile = _path
+                self._parameterFile = self._findFistProcFile()
+                # We should have a valid Bruker file.
+                self.shouldBeValid = True
 
-            elif _path.is_file() and _path.stem in self._procFiles:
+            elif _path.is_file() and _path.stem in self._procFiles and self._isBrukerPdataDir(_path.parent):
                 # Bruker proc file
-                self._pdataDir = _path.basename
                 self._brukerRoot = _path.parent.parent.parent
-                self._binaryData = None
+                self._pdataDir = _path.parent
+                self._binaryFile = self._getBinaryFile()
+                self._parameterFile = self._findFistProcFile()
+                # We should have a valid Bruker file.
+                self.shouldBeValid = True
 
             elif self._isBrukerTopDir(_path):
                 # Bruker top directory
                 self._brukerRoot = _path
                 self._pdataDir = self._findFirstPdataDir()
-                self._binaryData = None
+                self._binaryFile = self._getBinaryFile()
+                self._parameterFile = self._findFistProcFile()
+                # We should have a valid Bruker file.
+                self.shouldBeValid = True
 
             elif _path.is_dir() and _path.stem == self._PDATA and self._isBrukerTopDir(_path.parent):
                 # Bruker/pdata directory
                 self._brukerRoot = _path.parent
                 self._pdataDir = self._findFirstPdataDir()
-                self._binaryData = None
+                self._binaryFile = self._getBinaryFile()
+                self._parameterFile = self._findFistProcFile()
+                # We should have a valid Bruker file.
+                self.shouldBeValid = True
 
-            elif self._isBrukerPdataDir(_path):
+            elif self._isBrukerPdataDir(_path) and self._isBrukerTopDir(_path.parent.parent):
                 # Bruker pdata 'proc'-directory
-                self._pdataDir = _path
                 self._brukerRoot = _path.parent.parent
-                self._binaryData = None
+                self._pdataDir = _path
+                self._binaryFile = self._getBinaryFile()
+                self._parameterFile = self._findFistProcFile()
+                # We should have a valid Bruker file.
+                self.shouldBeValid = True
 
             else:
-                logger.debug2('"%s" does not define a valid path with Bruker data' % path)
+                # We do not have a valid Bruker file.
+                txt = f'"{path}" does not define a valid path with Bruker data'
+                logger.debug2(txt)
+                self.errorString = txt
+                self.shouldBeValid = False
                 return None
 
-            # check the directories; From now on, raise errors when not correct
-            self._checkBrukerTopDir(self._brukerRoot)
-            self._checkBrukerPdataDir(self._pdataDir)
+        return super().setPath(self._binaryFile, checkSuffix=False)
 
-            dimensionality = self._getDimensionality()
-            if dimensionality not in self._processedDataFilesDict:
-                raise RuntimeError('Undefined Bruker dimensionality "%s"in "%s"' % (dimensionality, self._pdataDir))
+    def checkValid(self) -> bool:
+        """check if valid format corresponding to dataFormat by:
+        - checking directories are defined
+        - checking bruker Topdir
+        - checking pdata dir
 
-            if self._binaryData is None:
-                self._binaryData = self._pdataDir / self._processedDataFilesDict[dimensionality][0]
-            if not self._binaryData.exists():
-                raise RuntimeError('Unable to find Bruker binary data "%s"' % self._binaryData)
+        call super class for:
+        - checking suffix and existence of path
+        - reading (and checking dimensionCount) parameters
 
-        return super().setPath(self._binaryData, substituteSuffix=False)
+        :return: True if ok, False otherwise
+        """
+
+        self.isValid = False
+        self.errorString = 'Checking validity'
+
+        # if self._path is None or not self._path.exists():
+        #     errorMsg = f'Path "{self._path}" does not exist'
+        #     return self._returnFalse(errorMsg)
+
+        # checking Bruker topdir
+        if self._brukerRoot is None:
+            errorMsg = 'Bruker top directory is undefined'
+            return self._returnFalse(errorMsg)
+
+        if not self._brukerRoot.exists():
+            errorMsg = f'Bruker top directory "{self._brukerRoot}" does not exist'
+            return self._returnFalse(errorMsg)
+
+        if not self._brukerRoot.is_dir():
+            errorMsg = f'Bruker top directory "{self._brukerRoot}" is not a directory'
+            return self._returnFalse(errorMsg)
+
+        pdata = self._brukerRoot / self._PDATA
+        if not pdata.exists() or not pdata.is_dir():
+            errorMsg = f'Bruker top directory "{self._brukerRoot}" has no valid pdata directory'
+            return self._returnFalse(errorMsg)
+
+        hasAcquFiles = len(self._brukerRoot.globList('acqu*')) > 0
+        if not hasAcquFiles:
+            errorMsg = f'Bruker top directory "{self._brukerRoot}" has no acqu* files'
+            return self._returnFalse(errorMsg)
+
+        if self._pdataDir is None or not self._pdataDir.exists():
+            errorMsg = 'No valid Bruker pdata/n (n=[1,..]) directory with (binary, proc) data'
+            return self._returnFalse(errorMsg)
+
+        if not self._pdataDir.is_dir():
+            errorMsg = f'Bruker pdata "{self._pdataDir}" is not a directory'
+            return self._returnFalse(errorMsg)
+
+        hasProcFiles = len(self._pdataDir.globList('proc*')) > 0
+        if not hasProcFiles:
+            errorMsg = f'Bruker pdata "{self._pdataDir}" has no proc* files'
+            return self._returnFalse(errorMsg)
+
+        if not self._checkValidExtra():
+            return False
+
+        self.isValid = True
+        self.errorString = ''
+        return super(BrukerSpectrumDataSource, self).checkValid()
 
     def readParameters(self):
         """Read the parameters from the Bruker directory
@@ -368,7 +491,9 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         logger = getLogger()
 
         self.setDefaultParameters()
-        self.dimensionCount = self._getDimensionality()
+
+        _dimensionCount = self._getDimensionality()
+        self.setDimensionCount(_dimensionCount)
 
         try:
             # read acqus and procs
@@ -394,39 +519,39 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             self.temperature = self.acqus[0]['TE']
 
             # Dimensional parameters
-            for i in range(self.dimensionCount):
-                # collaps the acq and proc dicts into one, so we do not have to
+            for dimIndx in range(self.dimensionCount):
+                # collapse the acq and proc dicts into one, so we do not have to
                 # remember where the parameter lives
                 dimDict = dict()
-                dimDict.update(self.acqus[i])
-                dimDict.update(self.procs[i])
+                dimDict.update(self.acqus[dimIndx])
+                dimDict.update(self.procs[dimIndx])
 
                 # establish dimension type (time/frequency)
                 if int(float(dimDict.get('FT_mod', 1))) == 0:
                     # point/time axis
-                    self.dimensionTypes[i] = specLib.DIMENSION_TIME
-                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_TIME
+                    self.dimensionTypes[dimIndx] = specLib.DIMENSION_TIME
+                    self.measurementTypes[dimIndx] = specLib.MEASUREMENT_TYPE_TIME
                 else:
                     # frequency axis
-                    self.dimensionTypes[i] = specLib.DIMENSION_FREQUENCY
-                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_SHIFT
+                    self.dimensionTypes[dimIndx] = specLib.DIMENSION_FREQUENCY
+                    self.measurementTypes[dimIndx] = specLib.MEASUREMENT_TYPE_SHIFT
 
-                self.pointCounts[i] = int(dimDict['SI'])
-                if self.dimensionTypes[i] == specLib.DIMENSION_TIME:
+                self.pointCounts[dimIndx] = int(dimDict['SI'])
+                if self.dimensionTypes[dimIndx] == specLib.DIMENSION_TIME:
                     tdeff = int(dimDict['TDeff'])
-                    if tdeff > 0 and tdeff < self.pointCounts[i]:
-                        self.pointCounts[i] = tdeff
+                    if tdeff > 0 and tdeff < self.pointCounts[dimIndx]:
+                        self.pointCounts[dimIndx] = tdeff
 
-                self.blockSizes[i] = int(dimDict['XDIM'])
-                if self.blockSizes[i] == 0:
-                    self.blockSizes[i] = self.pointCounts[i]
+                self.blockSizes[dimIndx] = int(dimDict['XDIM'])
+                if self.blockSizes[dimIndx] == 0:
+                    self.blockSizes[dimIndx] = self.pointCounts[dimIndx]
                 else:
                     # for 1D data blockSizes can be > numPoints, which is wrongaaaaaaaaa
                     # (comment from orginal V2-based code)
-                    self.blockSizes[i] = min(self.blockSizes[i], self.pointCounts[i])
+                    self.blockSizes[dimIndx] = min(self.blockSizes[dimIndx], self.pointCounts[dimIndx])
 
-                self.isotopeCodes[i] = dimDict.get('AXNUC')
-                self.axisLabels[i] = dimDict.get('AXNAME')
+                self.isotopeCodes[dimIndx] = dimDict.get('AXNUC')
+                self.axisLabels[dimIndx] = dimDict.get('AXNAME')
 
                 # SW_p is in Hz; from the procs file, likely denotes "SW_processed", not "SW_ppm"
                 # SW_p can be zero in topspin 4.1.4 for time domain dimensions
@@ -437,19 +562,26 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 # check again; swHz cannot be zero as this will (later) violate valuePerPoint in the model
                 if swHz == 0.0:
                     swHz = 1.0
-                    getLogger().warning(f'Extracting parameters for {self}: spectralWidthHz[{i}] set to 1.0')
-                self.spectralWidthsHz[i] = swHz
+                    getLogger().warning(f'Extracting parameters for {self}: spectralWidthHz[{dimIndx}] set to 1.0')
+                self.spectralWidthsHz[dimIndx] = swHz
 
-                # SF is in MHz; from the procs file, but generally less digits
+                # SF is in MHz; from the procs file, but generally less digits for dimension 1 (!)
                 # SFO1 - SF08: the eight spectrometer RF channels; no direct relation to SF of a dimension
-                self.spectrometerFrequencies[i] = float(dimDict.get('SF', 1.0))
+                sf = float(dimDict.get('SF', 1.0))
+                # # Correct dimension 1
+                # sfo1 = self.acqus[0].get('SFO1')
+                # o1 = self.acqus[0].get('O1')
+                # if dimIndx == 0 and sfo1 is not None and o1 is not None and \
+                #     round(sf,2) - round(sfo1, 2) == 0.0:
+                #     sf = sfo1 - o1 * 1e-6
+                self.spectrometerFrequencies[dimIndx] = sf
 
-                self.referenceValues[i] = float(dimDict.get('OFFSET', 0.0))
-                self.referencePoints[i] = float(dimDict.get('refPoint', 1.0)) # CCPN first point is defined as 1
+                self.referenceValues[dimIndx] = float(dimDict.get('OFFSET', 0.0))
+                self.referencePoints[dimIndx] = float(dimDict.get('refPoint', 1.0)) # CCPN first point is defined as 1
                 # origNumPoints[i] = int(dimDict.get('$FTSIZE', 0))
                 # pointOffsets[i] = int(dimDict.get('$STSR', 0))
-                self.phases0[i] = float(dimDict.get('PHC0', 0.0))
-                self.phases1[i] = float(dimDict.get('PHC1', 0.0))
+                self.phases0[dimIndx] = float(dimDict.get('PHC0', 0.0))
+                self.phases1[dimIndx] = float(dimDict.get('PHC1', 0.0))
 
         except Exception as es:
             errTxt = 'Parsing parameters for %s; %s' % (self._brukerRoot, es)

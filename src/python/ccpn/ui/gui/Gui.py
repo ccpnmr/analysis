@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:43 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-10 14:30:45 +0000 (Tue, January 10, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -296,15 +296,17 @@ class Gui(Ui):
 
         return (dataLoader, createNewProject, ignore)
 
-    def _getDataLoader(self, path, pathFilter=None):
+    def _getDataLoader(self, path, formatFilter=None):
         """Get dataLoader for path (or None if not present), optionally only testing for
         dataFormats defined in filter.
         Allows for reporting or checking through popups.
         Does not do the actual loading.
 
         :param path: the path to get a dataLoader for
-        :param pathFilter: a list/tuple of optional dataFormat strings; (defaults to all dataFormats)
+        :param formatFilter: a list/tuple of optional dataFormat strings; filter optional dataLoaders for this
         :returns a tuple (dataLoader, createNewProject, ignore)
+
+        :raises RuntimeError in case of failure to define a proper dataLoader
         """
         # local import here
         from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
@@ -313,38 +315,31 @@ class Gui(Ui):
         from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
-        from ccpn.framework.lib.DataLoaders.DataLoaderABC import _getPotentialDataLoaders
 
-        if pathFilter is None:
-            pathFilter = tuple(getDataLoaders().keys())
+        _path = aPath(path)
+        if not _path.exists():
+            raise RuntimeError(f'Path "{path}" does not exist')
 
-        _loaders = _checkPathForDataLoader(path=path, pathFilter=pathFilter)
+        _loaders = _checkPathForDataLoader(path=path, formatFilter=formatFilter)
+        dataLoader = None
+        # log errors
+        errMsg = None
+
         if len(_loaders) > 0 and _loaders[-1].isValid:
-            # found a valid one; use that
+            # there is a valid one; use that
             dataLoader = _loaders[-1]
 
-        # log errors
-        elif len(_loaders) == 0:
-            dataLoader = None
-            txt = f'No valid loader found for {path}'
-
-        elif len(_loaders) == 1 and not _loaders[0].isValid:
-            dataLoader = None
-            txt = f'No valid loader: {_loaders[0].errorString}'
+        elif len(_loaders) > 0:
+            # We always get a loader back; report it here
+            errMsg = f'{_loaders[-1].dataFormat} loader reported:\n\n{_loaders[-1].errorString}'
 
         else:
-            dataLoader = None
-            txt = f'No valid loader found for {path}; tried {[dl.dataFormat for dl in _loaders]}'
+            raise RuntimeError(f'Unknown error finding a loader for {path}')
 
-        if dataLoader is None:
-            getLogger().warning(txt)
-            return (None, False, False)
-
-        # if (dataLoader :=  checkPathForDataLoader(path, pathFilter=pathFilter)) is None:
-        #     dataFormats = [dl.dataFormat for dl in _getPotentialDataLoaders(path)]
-        #     txt = f'Loading "{path}" unsuccessful; tried all of {dataFormats}, but failed'
-        #     getLogger().warning(txt)
-        #     return (None, False, False)
+        # raise error if needed
+        if errMsg:
+            getLogger().warning(errMsg)
+            raise RuntimeError(errMsg)
 
         createNewProject = dataLoader.createNewProject
         ignore = False
@@ -410,6 +405,7 @@ class Gui(Ui):
 
         elif dataLoader.isSpectrumLoader and dataLoader.existsInProject():
             ok = MessageDialog.showYesNoWarning('Loading Spectrum',
+                                                f'"{dataLoader.dataSource.path}"\n' 
                                                 f'"{dataLoader.path}"\n'
                                                 f'already exists in the project\n'
                                                 '\n'
@@ -450,8 +446,8 @@ class Gui(Ui):
     #-----------------------------------------------------------------------------------------
 
     @logCommand('application.')
-    def newProject(self, name: str = 'default') -> typing.Optional[Project]:
-        """Create a new project instance with name.
+    def newProject(self, name:str = 'default') -> (Project, None):
+        """Create a new project instance with name; create default project if name=None
         :return a Project instance or None
         """
         oldMainWindowPos = self.mainWindow.pos()
@@ -564,15 +560,16 @@ class Gui(Ui):
             if (path := dialog.selectedFile()) is None:
                 return None
 
-        dataLoader, createNewProject, ignore = self._getDataLoader(path)
-        if ignore or dataLoader is None or not createNewProject:
-            return None
+        with catchExceptions(errorStringTemplate='Error loading project: %s'):
+            dataLoader, createNewProject, ignore = self._getDataLoader(path)
+            if ignore or dataLoader is None or not createNewProject:
+                return None
 
-        # load the project using the dataLoader;
-        # We'll ask framework, who will pass it back to ui._loadProject
-        if (objs := self.application._loadData([dataLoader])):
-            if len(objs) == 1:
-                return objs[0]
+            # load the project using the dataLoader;
+            # We'll ask framework, who will pass it back to ui._loadProject
+            if (objs := self.application._loadData([dataLoader])):
+                if len(objs) == 1:
+                    return objs[0]
 
         return None
 
@@ -591,7 +588,7 @@ class Gui(Ui):
             self.mainWindow.deleteLater()
             self.mainWindow = None
 
-    def saveProjectAs(self, newPath=None, overwrite: bool = False) -> bool:
+    def saveProjectAs(self, newPath=None, overwrite:bool=False) -> bool:
         """Opens save Project to newPath.
         Optionally open file dialog.
         :param newPath: new path to save project (str | Path instance)
@@ -620,7 +617,7 @@ class Gui(Ui):
         # check the project name derived from path
         newName = newPath.basename
         if (_name := self.project._checkName(newName, correctName=True)) != newName:
-            newPath = newPath.parent / _name + CCPN_EXTENSION
+            newPath = (newPath.parent / _name).assureSuffix(CCPN_EXTENSION)
             MessageDialog.showInfo(title, f'Project name changed from "{newName}" to "{_name}"\nSee console/log for details', parent=self)
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
@@ -634,26 +631,29 @@ class Gui(Ui):
                         MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
                         return False
 
-            self.mainWindow._updateWindowTitle()
-            self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
-            self.mainWindow._fillRecentProjectsMenu()  # Update the menu
+                self.mainWindow._updateWindowTitle()
+                self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
+                self.mainWindow._fillRecentProjectsMenu() # Update the menu
 
-            successMessage = 'Project successfully saved to "%s"' % self.project.path
-            MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
-            self.mainWindow.statusBar().showMessage(successMessage)
-            getLogger().info(successMessage)
+                successMessage = 'Project successfully saved to "%s"' % self.project.path
+                MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
+                self.mainWindow.statusBar().showMessage(successMessage)
+                getLogger().info(successMessage)
 
-            return True
+                return True
 
-        # PyCharm thinks the next statement is unreachable; not true as the with catchExceptions does yield
-        # and finish
-        return False
+            # PyCharm thinks the next statement is unreachable; not true (?) as the with
+            # catchExceptions does yield and finish
+            return False
 
     @logCommand('application.')
     def saveProject(self) -> bool:
         """Save project.
         :return True if successful
         """
+        if self.project.isTemporary:
+            return self.saveProjectAs()
+
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
             with MessageDialog.progressManager(self.mainWindow, f'Saving project ... '):
                 if not self.application._saveProject(newPath=None,
@@ -676,7 +676,7 @@ class Gui(Ui):
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
 
         result = []
-        errorStringTemplate = 'Loading "%s" failed:' % dataLoader.path + '\n%s'
+        errorStringTemplate = f'Loading "{dataLoader.path}" failed:\n\n' + '%s'
         with catchExceptions(errorStringTemplate=errorStringTemplate):
             # For data loads that are possibly time consuming, use progressManager
             if isinstance(dataLoader, (StarDataLoader, NefDataLoader)):
@@ -687,11 +687,11 @@ class Gui(Ui):
         return result
 
     # @logCommand('application.') # eventually decorated by  _loadData()
-    def loadData(self, *paths, pathFilter=None) -> list:
+    def loadData(self, *paths, formatFilter:(list,tuple)=None) -> list:
         """Loads data from paths; query if none supplied
         Optionally filter for dataFormat(s)
         :param *paths: argument list of path's (str or Path instances)
-        :param pathFilter: keyword argument: list/tuple of dataFormat strings
+        :param formatFilter: list/tuple of dataFormat strings
         :returns list of loaded objects
         """
         if len(paths) == 0:
@@ -708,24 +708,23 @@ class Gui(Ui):
             if not _path.exists():
                 txt = f'"{path}" does not exist'
                 getLogger().warning(txt)
-                MessageDialog.showError('Load Data', txt, parent=self.mainWindow)
-                if len(paths) == 1:
-                    return []
-                else:
-                    continue
-
-            dataLoader, createNewProject, ignore = self._getDataLoader(path, pathFilter=pathFilter)
-            if ignore:
+                MessageDialog.showError('Load Data', txt, parent=self)
                 continue
 
-            if dataLoader is None:
-                txt = f'Unable to load "{path}"'
-                getLogger().warning(txt)
-                MessageDialog.showError('Load Data', txt, parent=self.mainWindow)
+            try:
+                dataLoader, createNewProject, ignore = self._getDataLoader(path, formatFilter=formatFilter)
+
+            except RuntimeError as es:
+                MessageDialog.showError(f'Loading "{_path}"',
+                                        f'{es}',
+                                        parent=self.mainWindow)
                 if len(paths) == 1:
                     return []
                 else:
                     continue
+
+            if ignore:
+                continue
 
             dataLoaders.append(dataLoader)
 
@@ -733,7 +732,8 @@ class Gui(Ui):
         # We'll ask framework who will pass it back as ui._loadData calls
         objs = self.application._loadData(dataLoaders)
         if len(objs) == 0:
-            txt = f'No objects were loaded from {paths}'
+            _pp = ','.join(f'"{p}"' for p in paths)
+            txt = f'No objects were loaded from {_pp}'
             getLogger().warning(txt)
             MessageDialog.showError('Load Data', txt, parent=self.mainWindow)
 
@@ -759,7 +759,7 @@ class Gui(Ui):
         if not paths:
             return []
 
-        pathFilter = list(getSpectrumLoaders().keys())
+        formatFilter = list(getSpectrumLoaders().keys())
 
         spectrumLoaders = []
         count = 0
@@ -767,12 +767,11 @@ class Gui(Ui):
         for path in paths:
             _path = aPath(path)
             if _path.is_dir():
-                dirLoader = DirectoryDataLoader(path, recursive=False,
-                                                pathFilter=pathFilter)
+                dirLoader = DirectoryDataLoader(path, recursive=False, formatFilter=formatFilter)
                 spectrumLoaders.append(dirLoader)
                 count += len(dirLoader)
 
-            elif (sLoader := checkPathForDataLoader(path, pathFilter=pathFilter)) is not None:
+            elif (sLoader := checkPathForDataLoader(path, formatFilter=formatFilter)) is not None:
                 spectrumLoaders.append(sLoader)
                 count += 1
 

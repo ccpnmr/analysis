@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:43 +0000 (Thu, January 05, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-10 14:30:45 +0000 (Tue, January 10, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -5555,16 +5555,20 @@ class CcpnNefReader(CcpnNefContent):
                                                                                    mapping=nef2CcpnMap.get('nef_spectrum_dimension')
                                                                                    )
                 _params.update(nefDimensionParameters)
-                # nef dimension parameters do not have the reference point as a parameter
-                # assume 1.0 as default; maybe overridden later by the ccpn dimension parameters
+
+            # nef dimension parameters do not have the reference point as a parameter
+            # assume 1.0 as default; maybe overridden later by the ccpn dimension parameters
+            _params['referencePoints'] = [1.0] * dimensionCount
 
             if (_loop := saveFrame.get('ccpn_spectrum_dimension')) is not None:
-                ccpnDimensionParameters = self._parametersFromSpectrumDimensionLoop(_loop,
+                ccpnDimensionParameters = self._parametersFromSpectrumDimensionLoop( _loop,
                                                                                     mapping=nef2CcpnMap.get('ccpn_spectrum_dimension')
-                                                                                    )
+                                                                                   )
                 _params.update(ccpnDimensionParameters)
 
-            _params['referencePoints'] = [1.0] * dimensionCount
+            expName = _params.pop('experimentName', None)
+            expType = _params.pop('experimentType', None)
+            refExpDims = _params.pop('referenceExperimentDimensions', None)
 
             # create a new spectrum; first empty but change dataFormat if known
             filePath = _params.pop('filePath', None)
@@ -5572,17 +5576,16 @@ class CcpnNefReader(CcpnNefContent):
             if filePath is not None and dataFormat is None:
                 # see if we can derive a dataFormat from the filePath
                 _loaders = _getPotentialDataLoaders(filePath)
-                if len(_loaders) == 1:
-                    dataFormat = _loaders[0].dataFormat
+                if len(_loaders) == 1 and _loaders[0].isSpectrumLoader:
+                    dataFormat = _loaders[0].spectumDataSourceClass.dataFormat
 
-            expName = _params.pop('experimentName', None)
-            expType = _params.pop('experimentType', None)
-            refExpDims = _params.pop('referenceExperimentDimensions', None)
             spectrum = _newEmptySpectrum(project, name=spectrumName, path=filePath, **_params)
             # Optionally change the dataFormat
             if filePath is not None and dataFormat is not None:
                 try:
-                    spectrum._openFile(path=filePath, dataFormat=dataFormat, checkParameters=True)
+                    spectrum._close()
+                    spectrum._setdataFormat(dataFormat)  # specially override the dataFormat setting
+                    spectrum.filePath = filePath  # This will also try to reopen the file
                 except (RuntimeError, ValueError) as es:
                     getLogger().warning(f'{es}')
 

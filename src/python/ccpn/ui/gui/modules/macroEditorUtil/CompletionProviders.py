@@ -4,21 +4,21 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$Author: Luca Mureddu $"
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
 __dateModified__ = "$Date: 2021-07-31 19:34:45 +0000 (,  31, 2021) $"
-__dateModified__ = "$dateModified: 2022-04-04 17:25:23 +0100 (Mon, April 04, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-01-10 14:30:45 +0000 (Tue, January 10, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -119,7 +119,7 @@ def _getAvailablePids() -> list:
             ids = [j.id for i in ll for j in i]
             result = list(set(ids))
     except:
-        sys.stderr.write('==> Completion warning. Pids not found!')
+        sys.stderr.write('==> Completion warning. Pids not found!\n')
 
     return result or []
 
@@ -191,7 +191,7 @@ class CcpnNameSpacesProvider:
             completions = script.completions()
         except Exception as ex:
             completions = []
-            sys.stderr.write('==> Completion warning. ! %s' %ex)
+            sys.stderr.write('==> Completion warning! %s\n' % ex)
 
         for completion in completions:
             iconType = ''

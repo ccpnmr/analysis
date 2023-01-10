@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-01 12:04:27 +0100 (Wed, June 01, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-10 14:30:46 +0000 (Tue, January 10, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,9 +26,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets, QtCore
 from pyqtgraph.widgets.VerticalLabel import VerticalLabel as pyqtVerticalLabel
-from ccpn.ui.gui.widgets.Base import Base
+
+from ccpn.ui.gui.widgets.Base import Base, HALIGN_DICT
 from ccpn.framework.Translation import translator
 import ccpn.ui.gui.guiSettings as guiSettings
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -71,7 +72,6 @@ def maTex2Pixmap(mathTex, fontSize=10):
     return qpixmap
 
 
-
 class Label(QtWidgets.QLabel, Base):
     _styleSheet = """QLabel {
             color: %s;
@@ -82,8 +82,10 @@ class Label(QtWidgets.QLabel, Base):
             border: 0px;
             }"""
 
-    def __init__(self, parent=None, text='', textColour=None, textSize=None, bold=False, italic=False,
+    def __init__(self, parent=None,
+                 text='', textColour=None, textSize=None, bold=False, italic=False,
                  margins=[2, 1, 2, 1], icon=None, iconSize=(16, 16), **kwds):
+
         super().__init__(parent)
         Base._init(self, **kwds)
 

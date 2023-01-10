@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:46 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-10 14:30:45 +0000 (Tue, January 10, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,13 +42,6 @@ class SpectrumProjectionPopup(CcpnDialogMainWidget):  # ExportDialogABC):
 
     def __init__(self, parent=None, mainWindow=None, title='Spectrum Projection', **kwds):
 
-        # # for ExportDialogABC
-        # super().__init__(parent=parent, mainWindow=mainWindow, title=title,
-        #                  fileMode='anyFile',
-        #                  acceptMode='export',
-        #                  selectFile=None,
-        #                  **kwds)
-
         # for CcpnDialogMainWidget:
         super().__init__(parent=parent, setLayout=True, windowTitle=title,
                          **kwds)
@@ -60,11 +53,12 @@ class SpectrumProjectionPopup(CcpnDialogMainWidget):  # ExportDialogABC):
         else:
             self.mainWindow = self.project = self.application = None
 
+        self.validSpectra = None
         if self.project:
             # Only select 3D's for now
-            validSpectra = [s for s in self.project.spectra if s.dimensionCount == 3]
+            self.validSpectra = [s for s in self.project.spectra if s.dimensionCount == 3]
 
-            if len(validSpectra) == 0:
+            if len(self.validSpectra) == 0:
                 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
                 showWarning('No valid spectra', 'No 3D spectra in current dataset')
@@ -91,31 +85,31 @@ class SpectrumProjectionPopup(CcpnDialogMainWidget):  # ExportDialogABC):
         """Create the widgets for the userFrame
         """
         # spectrum selection
-        spectrumLabel = Label(userFrame, 'Spectrum', grid=(0, 0))
+        spectrumLabel = Label(userFrame, 'Spectrum', grid=(0, 0), hAlign='r')
         self.spectrumPulldown = PulldownList(userFrame, grid=(0, 1), callback=self._setSpectrum, gridSpan=(1, 2))
 
         # projection axis
-        axisLabel = Label(userFrame, 'Projection axis', grid=(2, 0))
+        axisLabel = Label(userFrame, 'Projection axis', grid=(2, 0), hAlign='r')
         self.projectionAxisPulldown = PulldownList(userFrame, grid=(2, 1), gridSpan=(1, 2))
 
         # method
-        methodLabel = Label(userFrame, 'Projection method', grid=(4, 0))
+        methodLabel = Label(userFrame, 'Projection method', grid=(4, 0), hAlign='r')
         self.methodPulldown = PulldownList(userFrame, grid=(4, 1), gridSpan=(1, 2), callback=self._setMethod)
         self.methodPulldown.setData(PROJECTION_METHODS)
 
         # threshold
-        thresholdLabel = Label(userFrame, 'Threshold', grid=(5, 0))
+        thresholdLabel = Label(userFrame, 'Threshold', grid=(5, 0), hAlign='r')
         self.thresholdData = ScientificDoubleSpinBox(userFrame, grid=(5, 1), gridSpan=(1, 2), vAlign='t', min=0.1, max=1e12)
 
         # Contour colours checkbox
-        contourLabel = Label(userFrame, 'Preserve contour colours', grid=(6, 0))
+        contourLabel = Label(userFrame, 'Preserve contour colours', grid=(6, 0), hAlign='r')
         self.contourCheckBox = CheckBox(userFrame, checked=True, grid=(6, 1))
 
         userFrame.addSpacer(5, 5, grid=(7, 1), expandX=True, expandY=True)
 
         if self.project:
-            validSpectra = [s for s in self.project.spectra if s.dimensionCount == 3]
-            self.spectrumPulldown.setData([s.pid for s in validSpectra])
+            if self.validSpectra:
+                self.spectrumPulldown.setData([s.pid for s in self.validSpectra])
 
             # select a spectrum from current or validSpectra
             if self.application.current.strip is not None and \
@@ -124,7 +118,7 @@ class SpectrumProjectionPopup(CcpnDialogMainWidget):  # ExportDialogABC):
                     self.application.current.strip.spectra[0].dimensionCount == 3:
                 self.spectrum = self.application.current.strip.spectra[0]
             else:
-                self.spectrum = validSpectra[0]
+                self.spectrum = self.validSpectra[0]
 
         else:
             self.spectrum = None
@@ -145,13 +139,6 @@ class SpectrumProjectionPopup(CcpnDialogMainWidget):  # ExportDialogABC):
         self.projectionAxisPulldown.setData(spectrum.axisCodes)
         self.thresholdData.set(spectrum.positiveContourBase)
 
-    # def _setProjectionAxis(self, projectionAxis):
-    #     """Callback when setting projection axis
-    #     """
-    #     spectrum = self.project.getByPid(self.spectrumPulldown.currentText())
-    #     path = aPath(spectrum._getDefaultProjectionPath(self.axisCodes))
-    #     self.updateFilename(path)
-
     def _setMethod(self, method):
         """Callback when setting method"""
         if method.endswith('threshold'):
@@ -170,21 +157,6 @@ class SpectrumProjectionPopup(CcpnDialogMainWidget):  # ExportDialogABC):
         ac = list(spectrum.axisCodes)
         ac.remove(self.projectionAxisCode)
         return ac
-
-    # def makeProjection(self):
-    #     self._acceptDialog()
-    #
-    #     if self.accepted:
-    #         spectrum = self.project.getByPid(self.spectrumPulldown.currentText())
-    #         axisCodes = self.axisCodes
-    #         method = self.methodPulldown.currentText()
-    #         threshold = self.thresholdData.get()
-    #
-    #         with progressManager(self, 'Making %s projection from %s' % ('-'.join(axisCodes), spectrum.name)):
-    #             projectedSpectrum = spectrum.extractProjectionToFile(axisCodes, method=method, threshold=threshold)
-    #             if not self.contourCheckBox.get():
-    #                 # settings are copied by default from the originating spectrum
-    #                 projectedSpectrum._setDefaultContourColours()
 
     def makeProjection(self):
         """Make projection from the specified spectrum.
@@ -209,6 +181,7 @@ class SpectrumProjectionPopup(CcpnDialogMainWidget):  # ExportDialogABC):
 
         else:
             raise RuntimeError(f'Error getting spectrum from pulldown')
+
 
 
 def main():

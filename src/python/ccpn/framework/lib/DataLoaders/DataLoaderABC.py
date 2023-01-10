@@ -9,7 +9,7 @@ work of loading the data into the project.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -21,9 +21,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:07 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-10 14:30:45 +0000 (Tue, January 10, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,7 +44,7 @@ from ccpn.util.decorators import singleton
 
 
 #--------------------------------------------------------------------------------------------
-# Need to review lib/io/Formats.py and ioFormats.analyseUrl(path)
+#ToDo Need to review former lib/io/Formats.py and ioFormats.analyseUrl(path)
 #--------------------------------------------------------------------------------------------
 
 CCPNMRTGZCOMPRESSED = 'ccpNmrTgzCompressed'
@@ -89,58 +89,83 @@ def getSpectrumLoaders() -> dict:
     return dict( [(df, dl) for df, dl in _loaders.items() if dl.isSpectrumLoader])
 
 
-def _getSuffixDict() -> Tuple[dict, defaultdict]:
-    """
-    :return dict of (suffix, [dataLoader class]-list) (key, value) pairs
+@singleton
+class DataLoaderSuffixDict(dict):
+    """A class to contain a dict of (suffix, [DataLoader class]-list)
+    (key, value) pairs;
+
+    The get(suffix) returns a list of klasses for suffix; its maps None or zero-length to NO_SUFFIX
+    and any non-existing suffix in the dict to ANY_SUFFIX
 
     NB: Only to be used internally
     """
-    _loadersDict = getDataLoaders()
 
-    # create an (suffix, [dataFormats]) dict
-    _suffixDict = defaultdict(list)
+    def __init__(self):
+        # local import to avoid cycles
 
-    for dType, dl in _loadersDict.items():
+        super().__init__(self)
 
-        suffixes =  [NO_SUFFIX, ANY_SUFFIX] if len(dl.suffixes) == 0 else dl.suffixes
-        for suffix in suffixes:
+        # Fill the dict
+        for dataFormat, klass in getDataLoaders().items():
+            suffixes =  [NO_SUFFIX, ANY_SUFFIX] if len(klass.suffixes) == 0 else klass.suffixes
+            for suffix in suffixes:
+                suffix = NO_SUFFIX if suffix is None else suffix
+                self[suffix].append(klass)
 
-            suffix = NO_SUFFIX if suffix is None else suffix
-            _suffixDict[suffix].append(dl)
+    def __getitem__(self, item):
+        """Can't get subclassed defaultdict to work
+        Always assure a list for item
+        """
+        if not item in self:
+            super().__setitem__(item, [])
+        return super().__getitem__(item)
 
-    return _suffixDict
+    def get(self, suffix) -> list:
+        """get a list of klasses for suffix;
+        map None or zero-length to NO_SUFFIX and
+        map non existing suffix to ANY_SUFFIX
+        """
+        if suffix is None or len(suffix) == 0:
+            return self[NO_SUFFIX]
+        elif suffix not in self:
+            return self[ANY_SUFFIX]
+        else:
+            return self[suffix]
 
 
 def _getPotentialDataLoaders(path) -> list:
     """
     :param path: path to evaluate
-    :return list of possible dataLoader classes based on suffix
+    :return list of possible dataLoader classes based on suffix and path type (directory, file)
 
     NB: Only to be used internally
+    CCPNINTERNAL: used in  CcpnNefIo
     """
 
     if path is None:
         raise ValueError('Undefined path')
-    path = aPath(path)
+    _path = aPath(path)
 
-    # get the dict that maps the suffix to potential loaders
-    _suffixDict =  _getSuffixDict()
-    if len(path.suffixes) == 0:
-        # No suffix; return all loaders that are accept no-suffix
-        loaders = _suffixDict.get(NO_SUFFIX, [])
-    else:
-        # get the loaders for suffix; fall-back to those that accept any suffix
-        # in case there was none defined for suffix
-        loaders = _suffixDict.get(path.suffix,
-                                  _suffixDict.get(ANY_SUFFIX, []))
+    _suffixDict = DataLoaderSuffixDict()
+    loaders = _suffixDict.get(_path.suffix)
+
+    # if it is a file: exclude loaders that require a directory
+    if _path.is_file():  # also False if _path does not exist
+        loaders = [ld for ld in loaders if not ld.requireDirectory]
+
+    # if it is a directory: include loaders that do allow a directory
+    if _path.is_dir(): # also False if _path does not exist
+        loaders = [ld for ld in loaders if ld.allowDirectory]
 
     return loaders
 
-def _checkPathForDataLoader(path, pathFilter=None) -> list:
-    """Check path if it corresponds to any defined data format.
-    Optionally exclude any dataLoader with types not in pathFilter (default: all dataFormats)
 
-    :param pathFilter: a tuple/list of dataFormat strings; expands to all dataFormat's if None
+def _checkPathForDataLoader(path, formatFilter=None) -> list:
+    """Check path if it corresponds to any defined data format.
+    Optionally only include only dataLoader with dataFormat in filter (default: all dataFormats; i.e.
+    no filtering).
+
+    :param formatFilter: a tuple/list of dataFormat strings of formats to select for
     :return a list of DataLoader instance(s) (either valid or invalid); last one is potential valid one
 
     CCPNINTERNAL: used in Gui._getDataLoader
@@ -148,68 +173,47 @@ def _checkPathForDataLoader(path, pathFilter=None) -> list:
     if not isinstance(path, (str, Path)):
         raise ValueError('checkPathForDataLoader: invalid path %r' % path)
 
-    if pathFilter is None:
-        pathFilter = list(getDataLoaders().keys())
+    if formatFilter is None or len(formatFilter) == 0:
+        # no filter, allow all by expanding
+        formatFilter = list(getDataLoaders().keys())
 
     _loaders = _getPotentialDataLoaders(path)
+
     result = []
     for cls in _loaders:
         instance = cls.newFromPath(path)
+        if len(_loaders) == 1:
+            # There is only one potential loader; it should be valid
+            instance.shouldBeValid = True
         result.append(instance)
-        if instance.isValid:
-            if instance.dataFormat in pathFilter:
-                break
+        # Check if we are done
+        if instance.isValid or instance.shouldBeValid:
+            if instance.dataFormat in formatFilter:
+                return result
             else:
                 instance.isValid = False
-                instance.errorString = f'DataFormat "{instance.dataFormat}" for valid path "{instance.path}" not in filter'
+                instance.shouldBeValid = False
+                instance.errorString = f'Valid path "{instance.path}": dataFormat "{instance.dataFormat}" not in formatFilter'
+
+    # we are only here if we haven't found any valid data loader
+    result.append(NotFoundDataLoader(path=path))
     return result
 
-def checkPathForDataLoader(path, pathFilter=None):
-    """Check path if it corresponds to any defined data format.
-    Optionally exclude any dataLoader with types not in pathFilter (default: all dataFormats)
 
-    :param pathFilter: a tuple/list of dataFormat strings; expands to all dataFormat if None
+def checkPathForDataLoader(path, formatFilter=None):
+    """Check path if it corresponds to any defined data format.
+    Optionally only include only dataLoader with dataFormat in filter (default: all dataFormats)
+
+    :param formatFilter: a tuple/list of dataFormat strings
     :return a DataLoader instance or None if there was no match
     """
-    _loaders = _checkPathForDataLoader(path=path, pathFilter=pathFilter)
+    _loaders = _checkPathForDataLoader(path=path, formatFilter=formatFilter)
     if len(_loaders) > 0 and _loaders[-1].isValid:
         # found a valid one; return that
         return _loaders[-1]
 
-    # log errors
-    if len(_loaders) == 0:
-        getLogger().debug2(f'No valid loader found for {path}')
-
-    elif len(_loaders) == 1 and not _loaders[0].isValid:
-        getLogger().debug2(f'{_loaders[0].errorString}')
-
-    else:
-        txt = 'tried:\n' + '\n'.join(dl.errorString for dl in _loaders)
-        getLogger().debug2(txt)
-
     return None
 
-    # if not isinstance(path, (str, Path)):
-    #     raise ValueError('checkPathForDataLoader: invalid path %r' % path)
-    #
-    # if pathFilter is None:
-    #     pathFilter = list(getDataLoaders().keys())
-    #
-    # _loaders = _getPotentialDataLoaders(path)
-    # for cls in _loaders:
-    #
-    #     # create an instance and check
-    #     instance = cls.newFromPath(path)
-    #     if instance.checkValid():
-    #         # we found a valid format for path
-    #         if instance.dataFormat in pathFilter:
-    #             getLogger().debug2('%-20s %-20s: %s' % (instance.dataFormat, '(Valid, in filter)', path))
-    #             return instance
-    #         else:
-    #             getLogger().debug2('%-20s %-20s: %s' % (instance.dataFormat, '(Valid, not in filter)', path))
-    #
-    # getLogger().debug2(f'No valid loader found for {path}')
-    # return None
 
 #--------------------------------------------------------------------------------------------
 # DataLoader class
@@ -233,8 +237,9 @@ class DataLoaderABC(TraitBase):
     requireDirectory = False  # explicitly require a directory
     isSpectrumLoader = False    # Subclassed for SpectrumLoaders
     loadFunction = (None, None) # A (function, attributeName) tuple;
-                                # :param function(obj:(Application,Project), path:Path) -> List[newObj]
-                                # :param attributeName := 'project' or 'application'
+                                # :param attributeName:=('project','application') to get obj
+                                #                       as either self.project or self.application
+                                # :param function(obj:(Application,Project), path:Path) -> List[newObj1, ...]
 
     #=========================================================================================
     # end to be subclassed
@@ -243,6 +248,7 @@ class DataLoaderABC(TraitBase):
     # traits
     path = CPath().tag(info='a path to a file to be loaded')
     application = Any(default_value=None, allow_none=True)
+    # NB: project derived via a property from application
 
     # project related
     createNewProject = Bool(default_value=False).tag(info='flag to indicate if a new project will be created')
@@ -251,6 +257,7 @@ class DataLoaderABC(TraitBase):
 
     # new implementation, using newFromPath method and validity testing later on
     isValid = Bool(default_value=False).tag(info='flag to indicate if path denotes a valid dataType')
+    shouldBeValid = Bool(default_value=False).tag(info='flag to indicate that path should denotes a valid dataType, but some elements are missing')
     errorString = CString(default_value='').tag(info='error description for validity testing')
 
     ignore = Bool(default_value=False).tag(info='flag to indicate if loader needs ignoring')
@@ -280,6 +287,7 @@ class DataLoaderABC(TraitBase):
         # local import to avoid cycles
         from ccpn.framework.Application import getApplication
         self.application = getApplication()
+        # NB: self.project derived via a property from application
 
         self.checkValid()
 
@@ -294,7 +302,7 @@ class DataLoaderABC(TraitBase):
         """New instance with path
         :return: instance of the class
         """
-        instance = cls(path)
+        instance = cls(path=path)
         return instance
 
     @classmethod
@@ -303,12 +311,10 @@ class DataLoaderABC(TraitBase):
         :return: None or instance of the class
 
         Can be subclassed;
-        GWV 20/09/2022: depricated; maintained for code backward compatibility
+        GWV 20/09/2022: deprecated; maintained for code backward compatibility; still used in some instances
         """
-        instance = cls(path)
+        instance = cls(path=path)
         if not instance.isValid:
-            # instance.isValid = False
-            # instance.errorString = f'Invalid path "{instance.path}"; required sub-directory "{CCPN_API_DIRECTORY}" not found'
             return None
 
         return instance
@@ -324,6 +330,9 @@ class DataLoaderABC(TraitBase):
         self.isValid = False
         self.errorString = f'Validity of {self.path} has not been checked'
 
+        if not self._checkSuffix():
+            return False
+
         if not self._checkPath():
             return False
 
@@ -338,15 +347,31 @@ class DataLoaderABC(TraitBase):
 
         Can be subclassed
         """
+        if not self.isValid:
+            raise RuntimeError(f'Error loading "{self.path}"; invalid loader')
+
         try:
-            func, attributeName = self.loadFunction
+            # get the object (either a project or application), to pass on
+            # to the loaderFunc
+            loaderFunc, attributeName = self.loadFunction
             obj = getattr(self, attributeName)
-            result = func(obj, self.path)
+            result = loaderFunc(obj, self.path)
 
         except (ValueError, RuntimeError) as es:
-            raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
+            raise RuntimeError(f'Error loading "{self.path}": {es}')
 
         return result
+
+    def getAllFilePaths(self) -> list:
+        """
+        Get all the files handles by this loader. Generally, this will be the path that
+        the loader represented, but sometimes there might be more; i.e. for certain spectrum
+        loaders that handle more files; like a binary and a parameter file.
+        To be subclassed for those instances
+
+        :return: list of Path instances
+        """
+        return [self.path]
 
     def _checkSuffix(self) -> bool:
         """Check if suffix of self.path confirms to settings of class attribute suffixes.
@@ -368,7 +393,7 @@ class DataLoaderABC(TraitBase):
             return True
 
         self.isValid = False
-        self.errorString = f'Invalid path suffix for "{_path}"; should be one of {self.suffixes}'
+        self.errorString = f'Invalid path suffix; should be one of {self.suffixes}'
         return False
 
     def _checkPath(self):
@@ -380,9 +405,6 @@ class DataLoaderABC(TraitBase):
         if not _path.exists():
             self.isValid = False
             self.errorString = f'Path "{_path}" does not exists'
-            return False
-
-        if not self._checkSuffix():
             return False
 
         if _path.basename == '':
@@ -438,3 +460,17 @@ class DataLoaderABC(TraitBase):
     __repr__ = __str__
 
 
+class NotFoundDataLoader(DataLoaderABC):
+    """A class denoting the absence of any valid dataLoader
+    """
+    dataFormat = 'NotFound'
+    suffixes = [ANY_SUFFIX, NO_SUFFIX]
+    allowDirectory = True
+
+    def checkValid(self) -> bool:
+
+        if not super().checkValid():
+            return False
+        # Path was valid; set general other error message
+        self.isValid = False
+        self.errorString = f'{self.path}: unable to identify a valid dataLoader'

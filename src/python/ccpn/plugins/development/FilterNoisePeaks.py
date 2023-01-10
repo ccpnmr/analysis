@@ -1,19 +1,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-29 13:40:33 +0100 (Tue, March 29, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-10 14:30:45 +0000 (Tue, January 10, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-11-28 10:28:42 +0000 (Tue, Nov 28, 2017) $"
 import os, copy, json, pprint, math, shutil, pandas, operator, numpy
 from collections import OrderedDict as OD
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 from ccpn.framework.lib.Plugin import Plugin
 from ccpn.ui.gui.modules.PluginModule import PluginModule
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
@@ -50,6 +51,7 @@ from ccpn.util.nef.GenericStarParser import SaveFrame, DataBlock, DataExtent, Lo
 from functools import partial
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.util.decorators import logCommand
+from ccpn.util.Logging import getLogger
 
 
 ############
@@ -138,7 +140,7 @@ class FilterNoisePeaksGuiPlugin(PluginModule):
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
         grid = _addColumn(grid)
-        widget = Spinbox(self.scrollAreaLayout, value=10, step=1, grid=grid, gridSpan=(1, 2),
+        widget = Spinbox(self.scrollAreaLayout, value=60, step=1, grid=grid, gridSpan=(1, 2),
                          tipText=help['Reference peaks'])
         widget.setRange(10, 100000)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
@@ -153,7 +155,7 @@ class FilterNoisePeaksGuiPlugin(PluginModule):
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
         grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=6, decimals=1, step=0.1, grid=grid, gridSpan=(1, 2),
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=4, decimals=1, step=0.1, grid=grid, gridSpan=(1, 2),
                                tipText=help['Threshold factor'])
         widget.setRange(1, 10)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
@@ -379,7 +381,7 @@ class FilterNoisePeaksGuiPlugin(PluginModule):
         noiseScoreReferenceList = []
         for peak in sortedPeakScores[1:nTrainingPeaks]:
             noiseScoreReferenceList.append(peak[1])
-            print(peak[0], peak[1])
+            # print(peak[0], peak[1])
 
         # For all peaks in the sorted peak list, calculate the derivative
         # and update the average and standard deviation of the derivatives
@@ -400,14 +402,14 @@ class FilterNoisePeaksGuiPlugin(PluginModule):
             derivatives.append(derivative)
 
         if not noiseScoreThreshold:
-            print('>> No threshold calculated')
+            getLogger().warning('>> No threshold calculated')
             return
 
         npnoiseScoreThreshold = numpy.mean(noiseScoreReferenceList) + 4 * numpy.std(noiseScoreReferenceList)
 
-        print(">>>noiseScoreThreshold", noiseScoreThreshold)
-        print(">>>npnoiseScoreThreshold", npnoiseScoreThreshold)
-        print(">>>numPeakScores", len(sortedPeakScores))
+        # print(">>>noiseScoreThreshold", noiseScoreThreshold)
+        # print(">>>npnoiseScoreThreshold", npnoiseScoreThreshold)
+        # print(">>>numPeakScores", len(sortedPeakScores))
         #spectrum = self._spectrumId2Spectrum(self.settings['Spectrum']['SpectrumId'])
         #spectrum.newPeakList()
         #newPeakList = spectrum.peakLists[-1]
@@ -423,7 +425,7 @@ class FilterNoisePeaksGuiPlugin(PluginModule):
             #     self.project.deleteObjects(peakId)
             # if peak[3] > noiseScoreThreshold and peak[3] != 1e100:
             if peak[3] > noiseScoreThreshold:
-                print(peak[0].lineWidths, peak[0].height, peak[1])
+                # print(peak[0].lineWidths, peak[0].height, peak[1])
                 peakId = 'PK:{0}.{1}.{2}'.format(self.settings['Spectrum']['SpectrumId'],
                                                  self.settings['Spectrum']['Peak list'], peak[0].serial)
                 self.project.deleteObjects(peakId)
@@ -465,7 +467,7 @@ class FilterNoisePeaksPlugin(Plugin):
 
     def run(self, **kwargs):
         """ Insert here the script for running Tsar """
-        print('Filtering noise peaks', kwargs)
+        getLogger().info(f'Filtering noise peaks {kwargs}')
 
 
 FilterNoisePeaksPlugin.register()  # Registers the pipe in the pluginList

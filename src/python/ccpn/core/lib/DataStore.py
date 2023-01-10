@@ -13,19 +13,19 @@ Replaced:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-29 10:55:51 +0100 (Tue, March 29, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-10 14:30:44 +0000 (Tue, January 10, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -238,7 +238,7 @@ class DataStore(CcpNmrJson):
         self._getPathRedirections()
 
     @property
-    def path(self):
+    def path(self) -> Path:
         """Return a Path representation of self, optionally encoded with $DATA, $ALONGSIDE, $INSIDE redirections
         """
         if self._path is None:
@@ -249,8 +249,16 @@ class DataStore(CcpNmrJson):
     @path.setter
     def path(self, value):
         """Set path to value; optionally auto versioning or redirecting
-        None makes it undefined
+        len(value) = 0 or None makes it undefined
         """
+        if value is not None:
+            if not isinstance(value, (str, Path)):
+                raise ValueError(f'invalid value "{value}"')
+
+            value = str(value)
+            if len(value) == 0:
+                value = None
+
         self._path = value
         while self._path is not None and self.autoVersioning and self.exists():
             self._path = self.path.incrementVersion().asString()
@@ -283,19 +291,21 @@ class DataStore(CcpNmrJson):
 
         return instance
 
-    def hasPathDefined(self):
-        """Return True if path has been defined
+    def hasPathDefined(self) -> bool:
+        """:return True if path has been defined
         """
         return self._path is not None
 
-    def expandPath(self, path=None):
+    def expandPath(self, path=None) -> Path:
         """return path decoded for $DATA, $ALONGSIDE, $INSIDE redirections
-        returns Path instance
+        :return Path instance
         """
-        if path is None:
+        if path is not None:
+            _path = Path(path)
+        elif path is None and self._path is not None:
             _path = Path(self._path)
         else:
-            _path = Path(path)
+            raise RuntimeError('Undefined path: cannot expand')
 
         for d, p in self._getPathRedirections():
             if _path.startswith(d):
@@ -303,24 +313,27 @@ class DataStore(CcpNmrJson):
                 break
         return _path
 
-    def redirectPath(self, path=None):
+    def redirectPath(self, path=None) -> Path:
         """Redefine path into $DATA, $ALONGSIDE, $INSIDE redirections
-        return Path instance
+        :return Path instance
         """
-        if path is None:
+        if path is not None:
+            _path = Path(path)
+        elif path is None and self._path is not None:
             _path = Path(self._path)
         else:
-            _path = Path(path)
+            raise RuntimeError('Undefined path: cannot redirect')
 
         # check in reverse order, prioritising $INSIDE, then $ALONGSIDE, then $DATA
         for d, p in self._getPathRedirections()[::-1]:
-            if str(path).startswith(str(p)):
+            p = str(p)
+            if _path.startswith(p):
                 _path = Path(d) / _path.relative_to(p)
                 break
         return _path
 
-    def aPath(self):
-        """Return aPath instance of self, decoded for $DATA, $ALONGSIDE, $INSIDE redirections
+    def aPath(self) -> Path:
+        """:return aPath instance of self, decoded for $DATA, $ALONGSIDE, $INSIDE redirections
         """
         if self._path is None:
             return aPath(constants.UNDEFINED_STRING)
@@ -328,8 +341,8 @@ class DataStore(CcpNmrJson):
         _path = self.expandPath(self._path)
         return aPath(_path)
 
-    def exists(self):
-        """Return True if self.aPath() (i.e. expanded) exists
+    def exists(self) -> bool:
+        """:return True if self.aPath() (i.e. expanded) exists
         """
         if self._path is None:
             return False
@@ -352,7 +365,7 @@ class DataStore(CcpNmrJson):
 
     def _importFromSpectrum(self, spectrum):
         """Restore state from spectrum, either from internal parameter store or from api-dataStores
-        Returns self
+        :return self
         """
         if spectrum is None:
             raise ValueError('Invalid spectrum "%s"' % spectrum)
@@ -392,7 +405,7 @@ class DataStore(CcpNmrJson):
 
     def _restoreFromApiSpectrum(self, apiSpectrum):
         """This routine implements the extraction from the old storage mechanism (using api DataStores).
-        Returns self
+        :return self
         """
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
         from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
@@ -428,7 +441,8 @@ class DataStore(CcpNmrJson):
         return self
 
     def _getPathRedirections(self):
-        """Get the redirection paths; return list of items of the pathRedirection dict
+        """Get the redirection paths;
+        :return list of items of the pathRedirection dict
         """
         redirections = PathRedirections().getPaths()
         # Convert and store the redirections for future reference

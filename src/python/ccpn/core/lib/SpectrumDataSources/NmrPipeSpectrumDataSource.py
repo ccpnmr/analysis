@@ -10,7 +10,7 @@ is fully read into the temporary buffer at the moment of first data access
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -20,9 +20,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:03 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-10 14:30:44 +0000 (Tue, January 10, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -101,6 +101,11 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
     The NmrPipe files are stored as either:
     - a single file
     - or for 3D/4D as a series of 2D planes defined by a template name; e.g. 'myFile%003d.ft3'
+
+    NmrPipe spectra can be loaded by either:
+    - A nD plane file; if required, the template will be reconstructed
+    - A folder with a valid NmrPipe suffix and containing a series of numbered 2D planes with a valid
+      NmrPipe suffix; e.g. matching *001.dat or *001.pipe or *001.ft3, etc
     """
 
     #=========================================================================================
@@ -114,6 +119,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
     MAXDIM = 4          # Explicitly overide as NmrPipe can only handle upto 4 dimensions
 
     suffixes = ['.pipe', '.fid', '.ft', '.ft1', '.ft2', '.ft3', '.ft4', '.dat']
+    allowDirectory = True
     openMethod = open
     defaultOpenReadMode = 'rb'
 
@@ -121,32 +127,21 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
     template = CString(allow_none=True, default_value=None).tag(
                                         info='The template to generate the path of the individual files comprising the nD',
-                                        isDimensional=False,
-                                        doCopy=True,
-                                        spectrumAttribute=None,
-                                        hasSetterInSpectrumClass=False
                                        )
-
     nFiles = CInt(default_value=0).tag(
                                         info='The number of files comprising the nD',
-                                        isDimensional=False,
-                                        doCopy=True,
-                                        spectrumAttribute=None,
-                                        hasSetterInSpectrumClass=False
                                        )
-
     baseDimensionality = CInt(default_value=2).tag(
                                         info='Dimensionality of the NmrPipe files comprising the nD',
-                                        isDimensional=False,
-                                        doCopy=True,
-                                        spectrumAttribute=None,
-                                        hasSetterInSpectrumClass=False
                                        )
-    isTransposed = Bool(default_value=False).tag(isDimensional=False,
-                                                 doCopy=False,
-                                                 spectrumAttribute=None,
-                                                 hasSetterInSpectrumClass=False
-                                                 )
+    isTransposed = Bool(default_value=False).tag(
+                                        info='Data of underpinning NmrPipe files are transposed',
+                                        )
+    isDirectory = Bool(default_value=False).tag(
+                                        info='Initiating path was a directory',
+                                        )
+
+    #=========================================================================================
 
     def __init__(self, path=None, spectrum=None, temporaryBuffer=True, bufferPath=None):
         """Initialise; optionally set path or extract from spectrum
@@ -371,7 +366,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
         return path, offset
 
-    def setPath(self, path, substituteSuffix=False):
+    def setPath(self, path, checkSuffix=False):
         """define valid path to a (binary) data file, if needed appends or substitutes
         the suffix (if defined).
 
@@ -379,15 +374,118 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         """
         if path is None:
             self.dataFile = None  # A reset essentially
-            return self
+            return super().setPath(None)
 
         _path = aPath(path)
-        if _path.is_dir():
-            files = [f for f in _path.glob('*001.dat')]
-            if len(files) > 0:
-                _path = files[0]
 
-        return super().setPath(path=_path, substituteSuffix=substituteSuffix)
+        # check for directories
+        if _path.is_dir() and _path.suffix in self.suffixes:
+            self.isDirectory = False
+            # try to establish if this is a directory with a NmrPipe series of files
+            for _suffix in self.suffixes:
+                pattern = f'*001{_suffix}'
+                files = _path.globList(pattern)
+                if len(files) > 0:
+                    self._path = _path  # retain the initiating path
+                    _path = files[0]  # define the first binary
+                    self.isDirectory = True
+                    break
+
+            if not self.isDirectory:
+                # did not find a "001" file
+                return None
+
+        return super().setPath(path=_path, checkSuffix=checkSuffix)
+
+    def getAllFilePaths(self) -> list:
+        """
+        Get all the files handled by this dataSource: the binary and a parameter file.
+
+        :return: list of Path instances
+        """
+
+        if self.nFiles == 0:
+            raise RuntimeError(f'DataSource {self.dataFormat}: nFiles = 0')
+        elif self.nFiles == 1:
+            result = [self.path]
+        else:
+            # nD's: get all the nmrPipe files
+            sliceTuples = [(1, p) for p in self.pointCounts]
+
+            result = []
+            # loop over all the xy-planes
+            for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=(specLib.X_DIM, specLib.Y_DIM)):
+                path, offset = self._getPathAndOffset(position)
+                result.append(path)
+
+            # remove any duplicates
+            result = list(set(result))
+
+        return result
+
+    def copyFiles(self, destinationDirectory, overwrite=False) -> list:
+        """Copy all data files to a new destination directory
+        :param destinationDirectory: a string or Path instance defining the destination directory
+        :param overwrite: Overwrite any existing files
+        :return A list of files copied
+        """
+        _destination = aPath(destinationDirectory)
+        if not _destination.is_dir():
+            raise ValueError(f'"{_destination}" is not a valid directory')
+
+        if self.isDirectory:
+            # A directory; create the same in the destination
+            # self._path contains the originating path
+            _dir, _base, _suffix = self._path.split3()
+            _destination = _destination / _base + _suffix
+            result = [self._path.copyDir(_destination, overwrite=overwrite)]
+
+        elif self.nFiles > 1:
+            # More than one file; i.e. a multi-file 3D or 4D.
+            # Put in a single new directory within destinationDirectory with name from path and 'pipe' suffix
+            _destination = _destination.fetchDir(self.nameFromPath() + self.suffixes[0])
+            super().copyFiles(destinationDirectory=_destination, overwrite=overwrite)
+            result = [_destination]
+
+        else:
+            # effectively the one-file situation; call super class to handle.
+            result = super().copyFiles(destinationDirectory=destinationDirectory, overwrite=overwrite)
+
+        return result
+
+    def nameFromPath(self) -> str:
+        """Return a name derived from path (to be subclassed for specific cases; e.g. Bruker)
+        """
+        name = self.path.parent.stem if self.isDirectory else self.path.stem
+        return name
+
+    def checkValid(self) -> bool:
+        """check if valid format corresponding to dataFormat by:
+        - checking template and binary files are defined
+
+        call super class for:
+        - checking suffix and existence of path
+        - reading (and checking dimensionCount) parameters
+
+        :return: True if ok, False otherwise
+        """
+
+        if not super().checkValid():
+            return False
+
+        self.isValid = False
+        self.shouldBeValid = True
+
+        self.errorString = 'Checking validity'
+
+        if self.nFiles > 1 and self.template is None:
+            errorMsg = f'No NmrPipe template defined, in spite of {self.nFiles} files comprising the {self.dimensionCount}D'
+            return self._returnFalse(errorMsg)
+
+        self.isValid = True
+        self.errorString = ''
+        return True
+
 
     def fillHdf5Buffer(self):
         """Fill hdf5buffer with data from self

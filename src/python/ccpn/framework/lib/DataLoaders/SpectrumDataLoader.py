@@ -6,7 +6,7 @@ rotuines and info
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:07 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-10 14:30:45 +0000 (Tue, January 10, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,8 +32,7 @@ __date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC, NO_SUFFIX, ANY_SUFFIX
 from ccpn.core.Spectrum import _newSpectrumFromDataSource
-from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats, checkPathForSpectrumFormats, \
-      DataSourceTrait
+from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import DataSourceTrait
 from ccpn.core.lib.DataStore import DataStore, DataStoreTrait
 
 
@@ -65,9 +64,10 @@ class SpectrumDataLoaderABC(DataLoaderABC):
         """
         :param path: path to (binary) spectrum file; may contain redirections (e.g $DATA)
         """
-        dataStore = DataStore.newFromPath(path, dataFormat=self.spectumDataSourceClass.dataFormat)
-        super().__init__(path=dataStore.aPath())
-        self.dataStore = dataStore
+        self.dataStore = DataStore.newFromPath(path, dataFormat=self.spectumDataSourceClass.dataFormat)
+        self.dataSource = self.spectumDataSourceClass(self.dataStore.aPath())
+
+        super().__init__(path=self.dataStore.aPath())
 
     def checkValid(self) -> bool:
         """check if path defines one of the valid spectrum data formats
@@ -78,12 +78,31 @@ class SpectrumDataLoaderABC(DataLoaderABC):
         """
         if not super().checkValid():
             return False
-        if (dataSource := self.spectumDataSourceClass.checkForValidFormat(self.path)) is None:
-            self.isValid = False
-            self.errorString = f'Failed to initiate a {self.spectumDataSourceClass.__name__} instance for "{self.path}"'
+
+        self.isValid = False
+        self.errorString = 'Checking validity'
+
+        if self.dataSource is None:
+            self.errorString = f'"{self.path}": Failed to initiate a {self.spectumDataSourceClass.__name__} instance'
             return False
-        self.dataSource = dataSource
-        return True
+
+        self.isValid = self.dataSource.isValid
+        self.shouldBeValid = self.dataSource.shouldBeValid
+        self.errorString = self.dataSource.errorString
+        return self.isValid
+
+    def getAllFilePaths(self) -> list:
+        """
+        Get all the files handles by this loader. Generally, this will be the path that
+        the loader represented, but sometimes there might be more; i.e. for certain spectrum
+        loaders that handle more files; like a binary and a parameter file.
+        To be subclassed for those instances
+
+        :return: list of Path instances
+        """
+        if self.dataSource is None:
+            raise RuntimeError('dataSource undefined: unable to get files')
+        return self.dataSource.getAllFilePaths()
 
     @classmethod
     def _documentClass(cls) -> str:
@@ -101,23 +120,26 @@ class SpectrumDataLoaderABC(DataLoaderABC):
         :return: a list of [spectrum]
         """
         if self.dataSource is None:
-            raise RuntimeError('Error loading "%s"' % self.path)
+            raise RuntimeError(f'DataSource is None')
 
-        try:
-            spectrum = _newSpectrumFromDataSource(project=self.project,
-                                                  dataStore=self.dataStore,
-                                                  dataSource=self.dataSource)
-        except (RuntimeError, ValueError) as es:
-            raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
+        if not self.dataSource.isValid:
+            raise RuntimeError(f'Error: {self.dataSource.errorString}')
+
+        spectrum = _newSpectrumFromDataSource(project=self.project,
+                                              dataStore=self.dataStore,
+                                              dataSource=self.dataSource)
 
         return [spectrum]
 
     def existsInProject(self) -> bool:
-        """:return True if spectrum exists in the project
+        """Check for existance of spectra with the identical binary data.
+        :return True if such a spectrum exists in the project
         """
-        # check the dataSources of all spectra of the project for open file pointers to the same file
+        # check the dataSources of all spectra of the project for file pointers to the same file
+        _binaryData = self.dataSource.path if self.dataSource is not None else ''
         for ds in [sp.dataSource for sp in self.project.spectra if sp.hasValidPath()]:
-            if ds.path == self.dataStore.aPath() and ds.hasOpenFile():
+            _p = ds.path
+            if _p is not None and len(_p) > 0 and _p == _binaryData:
                 return True
         return False
 
@@ -149,6 +171,7 @@ UcsfSpectrumLoader._initClass()   # also registers
 class AzaraSpectrumLoader(SpectrumDataLoaderABC):
     from ccpn.core.lib.SpectrumDataSources.AzaraSpectrumDataSource import AzaraSpectrumDataSource
     spectumDataSourceClass = AzaraSpectrumDataSource
+
 AzaraSpectrumLoader._initClass()   # also registers
 
 

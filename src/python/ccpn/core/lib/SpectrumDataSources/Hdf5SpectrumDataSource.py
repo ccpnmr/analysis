@@ -14,7 +14,7 @@ See SpectrumDataSourceABC for a description of the methods
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -24,9 +24,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:06 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-10 14:30:44 +0000 (Tue, January 10, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -121,8 +121,8 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         :param spectrum: associate instance with spectrum and import spectrum's parameters
         :param dimensionCount: limit instance to dimensionCount dimensions
         """
-        super().__init__(path=path, spectrum=spectrum, dimensionCount=dimensionCount)
         self._hdf5Metadata = Hdf5Metadata()
+        super().__init__(path=path, spectrum=spectrum, dimensionCount=dimensionCount)
 
     @property
     def spectrumData(self):
@@ -262,7 +262,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
             self.fp.create_dataset(self._HDF5dataSetName,
                                    self.pointCounts[::-1],  # data are organised numpy style z, y, x
-                                   dtype=self.dataType,
+                                   dtype=self._dtype,
                                    chunks=True,
                                    track_times=False,  # to assure same hash after opening/storing
                                    **dataSetKwds)

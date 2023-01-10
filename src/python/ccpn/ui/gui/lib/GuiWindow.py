@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:04 +0000 (Wed, November 30, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-01-10 17:39:25 +0000 (Tue, January 10, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -826,10 +826,15 @@ class GuiWindow():
                 with progressManager(self, 'Snapping peaks to extrema'):
 
                     try:
-                        peaks.sort(key=lambda x: x.position[0] if x.position and None not in x.position else 0, reverse=False)  # reorder peaks by position
-                        for peak in peaks:
-                            peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
-                                                minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
+                        _is1Ds = [p.spectrum.dimensionCount==1 for p in peaks]
+                        if all(_is1Ds):
+                            from ccpn.core.lib.peakUtils import snap1DPeaksByGroup
+                            snap1DPeaksByGroup(peaks)
+                        else:
+                            peaks.sort(key=lambda x: x.position[0] if x.position and None not in x.position else 0, reverse=False)  # reorder peaks by position
+                            for peak in peaks:
+                                peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
+                                                    minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
 
                     except Exception as es:
                         showWarning('Snap to Extremum', str(es))

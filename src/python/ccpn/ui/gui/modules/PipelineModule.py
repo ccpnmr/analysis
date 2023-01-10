@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:44 +0000 (Wed, December 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-01-10 17:39:25 +0000 (Tue, January 10, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -475,18 +475,18 @@ class GuiPipeline(CcpnModule, Pipeline):
         if self.inputData:
             if len(self.pipelineArea.findAll()[1]) > 0:
                 guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
-                with progressHandler(text='Running Pipeline...', maximum=len(guiPipes),
-                                     autoClose=True, delay=1, raiseErrors=False) as progress:
-
+                # with progressHandler(text='Running Pipeline...', maximum=len(guiPipes),
+                #                      autoClose=True, delay=1, raiseErrors=False) as progress:
+                if True:
                     with undoBlockWithoutSideBar():
                         with notificationEchoBlocking():
                             self._kwargs = {}
                             if len(guiPipes) > 0:
 
                                 for cc, guiPipe in enumerate(guiPipes):
-                                    progress.checkCancelled()
-                                    progress.setValue(cc)
-                                    progress.setText(f'Running Pipeline: {guiPipe.pipeName}')
+                                    # progress.checkCancelled()
+                                    # progress.setValue(cc)
+                                    # progress.setText(f'Running Pipeline: {guiPipe.pipeName}')
 
                                     pipe = guiPipe.pipe
                                     if guiPipe.isActive:
@@ -502,9 +502,9 @@ class GuiPipeline(CcpnModule, Pipeline):
                                     else:
                                         pipe.isActive = False
 
-                if progress.error:
-                    # handle other errors
-                    getLogger().warn(f'An error occurred running the pipeline: {progress.error}')
+                # if progress.error:
+                #     # handle other errors
+                #     getLogger().warn(f'An error occurred running the pipeline: {progress.error}')
 
         else:
             self.project._logger.info('Pipeline: No input data.')

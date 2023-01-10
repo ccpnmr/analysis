@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:06 +0100 (Wed, October 12, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-01-10 17:39:25 +0000 (Tue, January 10, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -23,16 +23,20 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from typing import Sequence, Union
 import numpy as np
-from ccpn.util.Logging import getLogger
-from collections import OrderedDict
-from scipy.optimize import curve_fit
-from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
-from ccpn.core.lib.ContextManagers import newObject, undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 import pandas as pd
 from pandas import MultiIndex as m_ix
+from typing import Sequence, Union
+from scipy.spatial.distance import cdist
+from collections import defaultdict
+from scipy.optimize import linear_sum_assignment
+from scipy.optimize import curve_fit
+from collections import OrderedDict
+from ccpn.util.Logging import getLogger
+from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
+from ccpn.core.lib.ContextManagers import newObject, undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.util.Common import makeIterableList, percentage
+from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima
 
 
 # This variables will be moved to SeriesAnalysisVariables.py
@@ -805,6 +809,82 @@ def _getBins(y, binCount=None):
     fittedCurve = _fitBins(y, edges)
     fittedCurveExtremum = edges[np.argmax(fittedCurve)]  # value at the Extremum of the fitted curve
     return statistics, edges, binNumbers, fittedCurve, mostCommonBinNumber, highestValues, fittedCurveExtremum
+
+
+def snap1DPeaksByGroup(peaks, ppmLimit=0.05, figOfMeritLimit=1, doNeg=False):
+    """
+    :param peaks: 1D peaks to be snapped.
+    :param ppmLimit: lfloat. imit in ppm to define a searching window.
+    :param figOfMeritLimit: float. don't snap peaks with FOM below limit threshold
+    :param doNeg: If to include also negative maxima as a solution.
+    :return: None
+    """
+    ## peaks can be from different spectra, so let's group first.
+    spectraPeaks = defaultdict(list)
+    for peak in peaks:
+        if peak.figureOfMerit >= figOfMeritLimit:
+            spectraPeaks[peak.spectrum].append(peak)
+
+    ## Start the snapping routine
+    for spectrum, peaks in spectraPeaks.items():
+        xValues, yValues = spectrum.positions, spectrum.intensities
+        noiseLevel = spectrum.noiseLevel
+        negativeNoiseLevel = spectrum.negativeNoiseLevel
+        snappingPeaks = np.array(peaks)
+        snappingPositions = np.array([pk.position[0] for pk in snappingPeaks])
+
+        ## Cluster peaks in groups by the ppmLimit. Consider a group of peaks if they fall within the ppmLimits,
+        i = np.argsort(snappingPositions)
+        snappingPositions = snappingPositions[i]
+        snappingPeaks = snappingPeaks[i]
+        mask = np.diff(snappingPositions, prepend=snappingPositions[0]) <= ppmLimit
+        reverseMask = ~mask
+        indices = np.nonzero(reverseMask)[0]
+        peakGroups = np.split(snappingPeaks, indices)
+
+        for peakGroup in peakGroups[:]:
+            peakGroup = np.array(peakGroup)
+            if len(peakGroup) == 1:
+                ## if there is only one peak in the group then snap normally to closest:
+                snap1DPeaksToExtrema(list(peakGroup), maximumLimit=ppmLimit)
+            else:
+                positions = np.array([pk.position[0] for pk in peakGroup])
+                limits = np.min(positions), np.max(positions)
+                searchingLimits = limits[0] - ppmLimit, limits[1] + ppmLimit
+                xROItarget, yROItarget = _1DregionsFromLimits(xValues, yValues, limits=searchingLimits)
+                maxValues, minValues = _find1DMaxima(yROItarget, xROItarget, positiveThreshold=noiseLevel,
+                                                     negativeThreshold=negativeNoiseLevel, findNegative=doNeg)
+                foundCoords = np.array(maxValues + minValues)
+                if len(foundCoords) == 0:
+                    ## No new coords found. Recalculate height at position.
+                    for peak in peakGroup:
+                        peak.height = peak.spectrum.getHeight(peak.position)
+                    continue
+                if len(foundCoords) == len(peakGroup):
+                    ## found the same count of new coords and peaks in the group. Order by position and snap sequentially.
+                    peakGroup = list(peakGroup)
+                    peakGroup.sort(key=lambda x: x.position[0], reverse=False)  # reorder peaks by position
+                    foundCoords = list(foundCoords)
+                    foundCoords.sort(key=lambda x: x[0], reverse=False)  # reorder peaks by position
+                    for peak, coord in zip(peakGroup, foundCoords):
+                        peak.position = [coord[0], ]
+                        peak.height = float(coord[1])
+                else:
+                    ## found different count of new coords and peaks. Order by distanceMatrix and snap to best fit.
+                    snap1DPeaksByGroup(peaks, ppmLimit=ppmLimit / 2)
+                    ## keep the distance Matrix code for an alternative dev. (Warning. Proved to be unreliable)
+                    # try:
+                    #     distanceMatrix = cdist(snappingPeakPos, foundCoords, metric='seuclidean', )
+                    #     originIndexes, targetIndexes = linear_sum_assignment(distanceMatrix)
+                    #     newCoords = foundCoords[targetIndexes]
+                    #     peakGroup = peakGroup[originIndexes]
+                    #     for peak, coord in zip(peakGroup, newCoords):
+                    #         peak.position = [coord[0],]
+                    #         peak.height = float(coord[1])
+                    # except Exception:
+                    #     print(
+                    #         f'Something wrong. SnappingPeakPos: {snappingPeaks} .New found coords: {foundCoords} ')
+                    #
 
 
 def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaksAsLimits=False,

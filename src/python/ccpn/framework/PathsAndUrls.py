@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:07 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-01-11 15:49:41 +0000 (Wed, January 11, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,7 +28,7 @@ __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 from ccpn.util import Path
 
 # CCPN Urls
-ccpnUrl                         = 'https://www.ccpn.ac.uk'
+ccpnUrl                             = 'https://www.ccpn.ac.uk'
 ccpn2Url                        = 'https://www.ccpn.ac.uk'
 ccpnLicenceUrl                  = 'https://www.ccpn.ac.uk/software/licensing'
 ccpnTutorials                   = 'https://www.ccpn.ac.uk/support/tutorials'
@@ -41,6 +41,7 @@ ccpnDocumentationUrl            = 'https://www.ccpn.ac.uk/api-documentation/v3/h
 # CCPN code
 ccpnCodePath                    = Path.aPath(Path.getTopDirectory())
 ccpnConfigPath                  = ccpnCodePath / 'config'
+ccpnResourcesPath              = ccpnCodePath / 'resources'
 ccpnRunTerminal                 = ccpnCodePath / 'bin' / 'runTerminal.sh'
 defaultPreferencesPath          = ccpnConfigPath / 'defaultv3settings.json'
 tipOfTheDayConfig               = ccpnConfigPath / 'tipConfig.hjson'
@@ -72,8 +73,8 @@ peakPickerPath                  = ccpnPythonPath / 'core' / 'lib' / 'PeakPickers
 # Program tutorials and documentation
 shortcutsPath                   = ccpnCodePath / 'doc' / 'static' / 'AnalysisShortcuts.htm'
 tutorialsPath                   = ccpnCodePath / 'tutorials'
-beginnersTutorialPath           = ccpnCodePath / 'tutorials' / 'BeginnersTutorial.pdf'
-backboneAssignmentTutorialPath  = ccpnCodePath / 'tutorials' / 'BackboneAssignmentTutorial.pdf'
+beginnersTutorialPath                        = ccpnCodePath / 'tutorials' / 'BeginnersTutorial.pdf'
+backboneAssignmentTutorialPath     = ccpnCodePath / 'tutorials' / 'BackboneAssignmentTutorial.pdf'
 screenTutorialPath              = ccpnCodePath / 'tutorials' / 'CcpNmr_AnalysisScreen_Tutorial_Beta2Release.pdf'
 cspTutorialPath                 = ccpnCodePath / 'tutorials' / 'CSPTutorial.pdf'
 solidStatePeptideTutorialPath   = ccpnCodePath / 'tutorials' / 'SolidStatePeptideAssignmentTutorial.pdf'

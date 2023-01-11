@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-10 14:30:44 +0000 (Tue, January 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-11 20:43:35 +0000 (Wed, January 11, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1419,7 +1419,8 @@ class Project(AbstractWrapperObject):
     # Library functions
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def _getAPIObjectsStatus(self, completeScan=False, onlyInvalids=True, includeDefaultChildren=False):
+    def _getAPIObjectsStatus(self, completeScan=False, onlyInvalids=True,
+                             includeDefaultChildren=False, checkValidity=True):
         """
         Scan all API objects and check their validity.
 

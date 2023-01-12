@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-10 14:30:46 +0000 (Tue, January 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-12 11:50:09 +0000 (Thu, January 12, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -293,12 +293,20 @@ class Path(_Path_):
 
     def listdir(self, suffix:str=None, excludeDotFiles=False) -> list:
         """
-        If self is a directory path, return a list of its files as Path instance.
+        If self is a directory , return a list of its files as Path instance.
         If the suffix is given (e.g.: .pdf, .jpeg...), returns only files of that pattern.
         Non recursive.
+
+        :param suffix: optional suffix used to filter
+        :param excludeDotFiles: flag to exclude (nix) dot-files (e.g. like .cshrc)
+        :returns A list with Path instances
+        :raises FileNotFoundError or RuntimeError
         """
+        if not self.exists():
+            raise FileNotFoundError(f'listdir: "{self}" does not exist')
+
         if not self.is_dir():
-            raise RuntimeError('listdir: %s: not a directory')
+            raise RuntimeError(f'listdir: "{self}" is not a directory')
 
         if not suffix:
             result = [Path(f) for f in self.glob('*')]

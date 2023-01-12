@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:43 +0000 (Thu, January 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-12 10:39:54 +0000 (Thu, January 12, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -6540,8 +6540,15 @@ class CcpnNefReader(CcpnNefContent):
                     peak._resetSerial(serial)
                     peaks[peakLabel] = peak
                     result.append(peak)
+
+                    if peakListParameters:
+                        # spectrum always has a peakList, so need to set the parameters from the saveFrame if (the first peakList)
+                        # may be a little slow if lots of peaks
+                        for att, val in peakListParameters.items():
+                            setattr(peakList, att, val)
+
                 except Exception as es:
-                    self.warning(f'Error creating new peak', loop)
+                    self.warning(f'Error creating new peak - {es}', loop)
 
             # Add assignment
             # NB the self.defaultChainCode or converts code None to the default chain code

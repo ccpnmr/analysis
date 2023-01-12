@@ -39,10 +39,11 @@ See doc strings of these methods for detailed documentation
 """
 from __future__ import annotations  # pycharm still highlights as errors
 
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -53,8 +54,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-07 11:26:45 +0000 (Wed, December 07, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-01-12 18:44:56 +0000 (Thu, January 12, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -101,6 +102,7 @@ from ccpn.util.Common import isIterable, _getObjectsByPids
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand, singleton
 from ccpn.util.Path import Path, aPath
+from ccpn.util.OrderedSet import OrderedSet
 
 
 # defined here too as imported from Spectrum throughout the code base
@@ -1216,31 +1218,119 @@ class Spectrum(AbstractWrapperObject):
         self._setDimensionalAttributes('referenceValue', value)
 
     @property
-    def referenceSubstances(self):
-        """
-        :return: a list of substances
+    def referenceSubstances(self) -> tuple:
+        """A tuple of substances associated with the spectrum.
+        :return: a tuple of substances
         """
         pids = self._getInternalParameter(self._REFERENCESUBSTANCES) or []
-        objs = _getObjectsByPids(self.project, pids)
-        return objs
+
+        return tuple(self.project.getByPids(pids))
 
     @referenceSubstances.setter
+    @ccpNmrV3CoreSetter()
     def referenceSubstances(self, substances):
-        """ Add substances to the spectrum.referenceSubstances list
+        """Add substances to the spectrum.referenceSubstances list
+        :param substances: list of objects, as core objects or pid strings
         """
         from ccpn.core.Substance import Substance
 
-        currentPids = self._getInternalParameter(self._REFERENCESUBSTANCES) or []  #don't remove current pids
-        pids = [su.pid for su in substances if isinstance(su, Substance)]
-        self._setInternalParameter(self._REFERENCESUBSTANCES, pids + currentPids)
-        ## set to substance internal the cross-link to self
-        for su in substances:
-            currentSpPids = su._getInternalParameter(su._REFERENCESPECTRA) or []
-            su._setInternalParameter(su._REFERENCESPECTRA, list(set(currentSpPids + [self.pid])))
+        # convert to a list of core objects - only allow substances and pid strings
+        newSubs = self.project.getObjectsByPids(substances, objectTypes=(Substance, str))
+
+        # remember the previous pids
+        oldSubs = set(self.project.getByPids(self._getInternalParameter(self._REFERENCESUBSTANCES) or []))  # don't remove current pids
+
+        # set the new pids
+        self._setInternalParameter(self._REFERENCESUBSTANCES, [su.pid for su in newSubs])
+
+        # update the cross-links for consistency, remove the old ones, add the new
+        for su in oldSubs - set(newSubs):
+            su._removeReferenceSpectrum(self)
+        for su in set(newSubs) - oldSubs:
+            su._addReferenceSpectrum(self)
 
     def clearReferenceSubstances(self):
-        "remove the links to any ReferenceSubstances"
-        self._setInternalParameter(self._REFERENCESUBSTANCES, [])
+        """remove the links to any ReferenceSubstances
+        """
+        self.referenceSubstances = []
+
+    def _addReferenceSubstance(self, value):
+        """Insert substance into reference-substances list.
+        :param value: core Substance object
+        """
+        pids = self._getInternalParameter(self._REFERENCESUBSTANCES) or []
+        try:
+            if value.pid not in pids:
+                # only add if it does not already exist - handles undo/redo, validation in load project
+                pids.append(value.pid)
+        except Exception:
+            raise ValueError(f'Cannot add {value} to referenceSubstances') from None
+        else:
+            self._setInternalParameter(self._REFERENCESUBSTANCES, pids)
+
+    def _removeReferenceSubstance(self, value):
+        """Remove substance from reference-substances list.
+        :param value: core Substance object
+        """
+        pids = self._getInternalParameter(self._REFERENCESUBSTANCES) or []
+        try:
+            if value.pid in pids:
+                # only remove if already exists - handles undo/redo, validation in load project
+                pids.remove(value.pid)
+        except Exception:
+            raise ValueError(f'{value} not found in referenceSubstances') from None
+        else:
+            self._setInternalParameter(self._REFERENCESUBSTANCES, pids)
+
+    def _updateReferenceSubstance(self, value, action='create'):
+        """Update substance.pid in reference-substances list.
+        :param value: core Substance object
+        :param action: str in ('create', 'delete', 'rename')
+        """
+        pids = self._getInternalParameter(self._REFERENCESUBSTANCES) or []
+        try:
+            if action == 'rename':
+                # replace the old pid in the list with new pid at the same index
+                indx = pids.index(value._oldPid)
+                pids.remove(value._oldPid)
+                pids.insert(indx, value.pid)
+
+            elif action == 'create':
+                # necessary to handle undo/redo
+                if (oldPid := f'{value.pid}-Deleted') in pids:
+                    # remove the 'deleted' pid and insert valid pid
+                    indx = pids.index(oldPid)
+                    pids.remove(oldPid)
+                    pids.insert(indx, value.pid)
+                elif value.pid in pids:
+                    # already exists - checking for consistency on project loading
+                    return
+                else:
+                    # append new substance to list
+                    pids.append(value.pid)
+
+            elif action == 'delete':
+                # remove the valid pid and insert 'deleted' pid at the same index
+                indx = pids.index(value.pid)
+                pids.remove(value.pid)
+                pids.insert(indx, f'{value.pid}-Deleted')
+
+            else:
+                raise ValueError(f'{action} not recognised') from None
+
+            self._setInternalParameter(self._REFERENCESUBSTANCES, pids)
+
+        except Exception:
+            raise ValueError(f'{value} not found in referenceSubstances') from None
+
+    def _cleanReferenceSubstances(self):
+        """Remove deleted/invalid substances from reference-substances list on restoring project.
+        """
+        pids = self._getInternalParameter(self._REFERENCESUBSTANCES) or []
+        validSubs = filter(None, self.project.getByPids(pids))
+
+        # write valid pids back into internal-parameters
+        self._setInternalParameter(self._REFERENCESUBSTANCES, [su.pid for su in validSubs])
 
     @property
     @_includeInDimensionalCopy
@@ -1483,7 +1573,7 @@ class Spectrum(AbstractWrapperObject):
         if items is not None:
             series = ()
             for sg in self.spectrumGroups:
-                series += (items[sg.pid], ) if sg.pid in items else (None, )
+                series += (items[sg.pid],) if sg.pid in items else (None,)
             return series
 
     @_seriesItems.setter
@@ -1947,6 +2037,7 @@ class Spectrum(AbstractWrapperObject):
         """
         from ccpn.core.lib.SpectrumLib import _getParameterValues
         from collections import defaultdict
+
         dd = defaultdict(list)
         for ic, dim in zip(self.isotopeCodes, self.dimensions):
             dd[ic].append(dim)
@@ -2859,14 +2950,13 @@ class Spectrum(AbstractWrapperObject):
             try:
                 if not _attr.startswith(('_', '__')):
                     vv = getattr(self, _attr)
-                    if isinstance(vv, (list, tuple)) and len(vv) == self.dimensionCount: # skip non-dimensional properties
-                        if isinstance(vv[0], (str, float, int)): #skip objects
+                    if isinstance(vv, (list, tuple)) and len(vv) == self.dimensionCount:  # skip non-dimensional properties
+                        if isinstance(vv[0], (str, float, int)):  #skip objects
                             for dim in self.dimensionIndices:
-                                df.loc[0, f'{_attr}_{str(dim)}'] = vv[dim] # write to df.
+                                df.loc[0, f'{_attr}_{str(dim)}'] = vv[dim]  # write to df.
             except Exception as e:
                 getLogger().debug3(f'Error in creating spectrumAsDataFrame. Attr: {_attr}. Error:{e}')
         return df
-
 
     def _getDataSourceFromPath(self, path, dataFormat=None, checkParameters=True) -> tuple:
         """Return a (dataStore, dataSource) tuple if path points  a file compatible
@@ -2935,32 +3025,37 @@ class Spectrum(AbstractWrapperObject):
 
             _path = dataStore.aPath()
             if not _path.exists():
-                raise RuntimeError(f'Spectrum._getDataSource: dataStore path "{_path}" does not exist')
+                # NOTE:ED - originally raised an error here when a spectrum
+                #  without a valid filePath was deleted followed by undo
+                # raise RuntimeError(f'Spectrum._getDataSource: dataStore path "{_path}" does not exist')
+                getLogger().debug(f'Spectrum._getDataSource: dataStore path "{_path}" does not exist')
 
             if (dataSource := getSpectrumDataSource(_path, dataStore.dataFormat)) is None:
-                raise RuntimeError(f'Spectrum._getDataSource: error for path "{_path}" with dataFormat "{dataStore.dataFormat}"')
+                # raise RuntimeError(f'Spectrum._getDataSource: error for path "{_path}" with dataFormat "{dataStore.dataFormat}"')
+                getLogger().debug(f'Spectrum._getDataSource: error for path "{_path}" with dataFormat "{dataStore.dataFormat}"')
 
         if dataStore.useBuffer:
             dataSource.setBuffering(isBuffered=True, bufferIsTemporary=True)
 
-        if checkParameters:
-            # check some fundamental parameters
-            if dataSource.dimensionCount != self.dimensionCount:
-                raise RuntimeError('Spectrum._getDataSource: incompatible dimensionCount (%s) of "%s"' %
-                                   (dataSource.dimensionCount, dataStore.aPath()))
+        if dataSource:
+            if checkParameters:
+                # check some fundamental parameters
+                if dataSource.dimensionCount != self.dimensionCount:
+                    raise RuntimeError('Spectrum._getDataSource: incompatible dimensionCount (%s) of "%s"' %
+                                       (dataSource.dimensionCount, dataStore.aPath()))
 
-            for idx, np in enumerate(self.pointCounts):
-                if dataSource.pointCounts[idx] != np:
-                    raise RuntimeError('Spectrum._getDataSource: incompatible pointsCount[%s] = %s of "%s"' %
-                                       (idx, dataSource.pointCounts[idx], dataStore.aPath()))
+                for idx, np in enumerate(self.pointCounts):
+                    if dataSource.pointCounts[idx] != np:
+                        raise RuntimeError('Spectrum._getDataSource: incompatible pointsCount[%s] = %s of "%s"' %
+                                           (idx, dataSource.pointCounts[idx], dataStore.aPath()))
 
-            for isC_spectrum, isC_dataSource in zip(self.isComplex, dataSource.isComplex):
-                if isC_spectrum != isC_dataSource:
-                    raise RuntimeError('Spectrum._getDataSource: incompatible isComplex definitions; %s has %r ; %s has %r' %
-                                       (self, self.isComplex, dataSource, dataSource.isComplex))
+                for isC_spectrum, isC_dataSource in zip(self.isComplex, dataSource.isComplex):
+                    if isC_spectrum != isC_dataSource:
+                        raise RuntimeError('Spectrum._getDataSource: incompatible isComplex definitions; %s has %r ; %s has %r' %
+                                           (self, self.isComplex, dataSource, dataSource.isComplex))
 
-        dataSource.spectrum = self
-        return dataSource
+            dataSource.spectrum = self
+            return dataSource
 
     def _getPeakPicker(self):
         """Check whether a peakPicker class has been saved with this spectrum.
@@ -2977,7 +3072,7 @@ class Spectrum(AbstractWrapperObject):
         """This method check, and if needed updates specific parameter values
         """
         # Quietly set some values
-        getLogger().debug2('Updating %s parameters' % self)
+        getLogger().debug2(f'Updating {self} parameters')
         with inactivity():
             # getting the noiseLevel by calling estimateNoise() if not defined
             if self.noiseLevel is None:
@@ -3029,6 +3124,14 @@ class Spectrum(AbstractWrapperObject):
         specLib._getDefaultOrdering(spectrum)
 
         return spectrum
+
+    def _cleanSpectrumReferences(self):
+        """Clean and update the cross-references on restoring project
+        """
+        # check that the reference-substances are cross-referenced correctly
+        self._cleanReferenceSubstances()
+        for su in self.referenceSubstances:
+            su._updateReferenceSpectrum(self)
 
     @renameObject()
     @logCommand(get='self')
@@ -3103,7 +3206,7 @@ class Spectrum(AbstractWrapperObject):
             for integralList in self.integralLists:
                 integralList._finaliseAction(action)
 
-        # propagate the rename-action to associated spectrumViews/children
+        # propagate the change-action to associated spectrumViews/children
         elif action == 'change':
             # get the changed attribute states - defined in the ccpNmrV3CoreSetter arguments
             scaleChanged = actionKwds.get(_SCALECHANGED, False)
@@ -3145,6 +3248,15 @@ class Spectrum(AbstractWrapperObject):
             if self.chemicalShiftList and actionKwds.get(_UPDATECHEMICALSHIFTS, False):
                 # notify the chemical-shifts to recalculate
                 self.chemicalShiftList.recalculatePeakShifts()
+
+        if action != 'change':
+            # update the state of the reference pids in reference-substances
+            #   ESSENTIAL for rename
+            #   pids also change when created/deleted during undo/redo, i.e., insertion of '-Deleted'
+            #   not strictly necessary as objects cannot be retrieved from old pids
+            #   but will help with debugging
+            for su in self.referenceSubstances:
+                su._updateReferenceSpectrum(self, action)
 
     def _clearCache(self):
         """Clear the cache

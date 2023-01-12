@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:02 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-01-12 18:44:56 +0000 (Thu, January 12, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,24 +26,24 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from collections import OrderedDict
+from contextlib import contextmanager
 import typing
 
-from ccpn.util import Common as commonUtil
 from ccpn.core.Project import Project
 from ccpn.core.Sample import Sample
 from ccpn.core.SampleComponent import SampleComponent
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpn.util.Constants import DEFAULT_LABELLING
+from ccpn.core.lib.ContextManagers import newObject, renameObject, ccpNmrV3CoreSetter, undoBlock
 from ccpnmodel.ccpncore.api.ccp.lims.RefSampleComponent import AbstractComponent as ApiRefComponent
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpnmodel.ccpncore.lib.molecule import MoleculeModify
+from ccpn.util import Common as commonUtil
+from ccpn.util.Constants import DEFAULT_LABELLING
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock
-from ccpn.util.Logging import getLogger
-from contextlib import contextmanager
+from ccpn.util.OrderedSet import OrderedSet
 
 
 _apiClassNameMap = {
@@ -56,7 +56,7 @@ class Substance(AbstractWrapperObject):
     """A Substance is a chemical entity or material that can be added to a Sample.
     Substances are defined by their name and labelling attributes (labelling defaults to None).
     Renaming a Substance will also rename all SampleComponents and SpectrumHits associated with
-    it, so as to preserve the link between the objects.
+    it, to preserve the link between the objects.
 
     The most common case (by far) is substanceType 'Molecule', which corresponds to a chemical entity,
     such as Calmodulin, ATP, or NaCl. This type of Substance will have Smiles strings, sequence,
@@ -517,7 +517,6 @@ class Substance(AbstractWrapperObject):
     def _getChemComps(self):
         """
         CCPN internal
-        :param substance:
         :return: a ChemComp Obj if available
         """
         chemComps = []
@@ -535,19 +534,117 @@ class Substance(AbstractWrapperObject):
         return tuple(x for x in self._project.sampleComponents if x._key == relativeId)
 
     @property
-    def referenceSpectra(self) -> typing.Tuple[Spectrum, ...]:
-        """Reference Spectra acquired for Substance"""
-        _referenceSpectra = []
-        for spectrum in self.project.spectra:
-            if self in spectrum.referenceSubstances:
-                _referenceSpectra.append(spectrum)
-        return tuple(_referenceSpectra)
+    def referenceSpectra(self) -> tuple:
+        """A tuple of spectra associated with the substance.
+        :return: a tuple of spectra
+        """
+        pids = self._getInternalParameter(self._REFERENCESPECTRA) or []
+
+        return tuple(self.project.getByPids(pids))
 
     @referenceSpectra.setter
+    @ccpNmrV3CoreSetter()
     def referenceSpectra(self, spectra):
+        """Add spectrum to the substance.referenceSpectra list
+        :param spectra: list of objects, as core objects or pid strings
+        """
+        # convert to a list of core objects - only allow spectra and pid strings
+        newSpecs = self.project.getObjectsByPids(spectra, objectTypes=(Spectrum, str))
 
-        for spectrum in spectra:
-            spectrum.referenceSubstances = [self]
+        # remember the previous pids
+        oldSpecs = set(self.project.getByPids(self._getInternalParameter(self._REFERENCESPECTRA) or []))  # don't remove current pids
+
+        # set the new pids
+        self._setInternalParameter(self._REFERENCESPECTRA, [sp.pid for sp in newSpecs])
+
+        # update the cross-links for consistency, remove the old ones, add the new
+        for sp in oldSpecs - set(newSpecs):
+            sp._removeReferenceSubstance(self)
+        for sp in set(newSpecs) - oldSpecs:
+            sp._addReferenceSubstance(self)
+
+    def clearReferenceSpectra(self):
+        """remove the links to any ReferenceSpectra
+        """
+        self.referenceSpectra = []
+
+    def _addReferenceSpectrum(self, value):
+        """Insert spectrum into reference-spectrum list.
+        :param value: core Spectrum object
+        """
+        pids = self._getInternalParameter(self._REFERENCESPECTRA) or []
+        try:
+            if value.pid not in pids:
+                # only add if it does not already exist - handles undo/redo, validation in load project
+                pids.append(value.pid)
+        except Exception:
+            raise ValueError(f'Cannot add {value} to referenceSpectra') from None
+        else:
+            self._setInternalParameter(self._REFERENCESPECTRA, pids)
+
+    def _removeReferenceSpectrum(self, value):
+        """Remove spectrum from reference-spectrum list.
+        :param value: core Spectrum object
+        """
+        pids = self._getInternalParameter(self._REFERENCESPECTRA) or []
+        try:
+            if value.pid in pids:
+                # only remove if already exists - handles undo/redo, validation in load project
+                pids.remove(value.pid)
+        except Exception:
+            raise ValueError(f'{value} not found in referenceSpectra') from None
+        else:
+            self._setInternalParameter(self._REFERENCESPECTRA, pids)
+
+    def _updateReferenceSpectrum(self, value, action='create'):
+        """Update spectrum pid in reference-spectrum list.
+        :param value: core Spectrum object
+        :param action: str in ('create', 'delete', 'rename')
+        """
+        pids = self._getInternalParameter(self._REFERENCESPECTRA) or []
+        try:
+            if action == 'rename':
+                # replace the old pid in the list with new pid at the same index
+                indx = pids.index(value._oldPid)
+                pids.remove(value._oldPid)
+                pids.insert(indx, value.pid)
+
+            elif action == 'create':
+                # necessary to handle undo/redo
+                if (oldPid := f'{value.pid}-Deleted') in pids:
+                    # remove the 'deleted' pid and insert valid pid
+                    indx = pids.index(oldPid)
+                    pids.remove(oldPid)
+                    pids.insert(indx, value.pid)
+                elif value.pid in pids:
+                    # already exists - checking for consistency on project loading
+                    return
+                else:
+                    # append new substance to list
+                    pids.append(value.pid)
+
+            elif action == 'delete':
+                # remove the valid pid and insert 'deleted' pid at the same index
+                indx = pids.index(value.pid)
+                pids.remove(value.pid)
+                pids.insert(indx, f'{value.pid}-Deleted')
+
+            else:
+                raise ValueError(f'{action} not recognised') from None
+
+            self._setInternalParameter(self._REFERENCESPECTRA, pids)
+
+        except Exception:
+            raise ValueError(f'{value} not found in referenceSpectra') from None
+
+    def _cleanReferenceSpectra(self):
+        """Remove deleted/invalid spectra from reference-spectra list on restoring project.
+        """
+        pids = self._getInternalParameter(self._REFERENCESPECTRA) or []
+        validSpecs = filter(None, self.project.getByPids(pids))
+
+        # write valid pids back into internal-parameters
+        self._setInternalParameter(self._REFERENCESPECTRA, [sp.pid for sp in validSpecs])
 
     @property
     def _molecule(self):
@@ -575,14 +672,31 @@ class Substance(AbstractWrapperObject):
             return
 
         try:
-            if action in ['rename']:
+            if action == 'rename':
                 for sampleComponent in self.sampleComponents:
                     for spectrumHit in sampleComponent.spectrumHits:
                         spectrumHit._finaliseAction(action)
                     sampleComponent._finaliseAction(action)
 
+            if action != 'change':
+                # update the state of the reference pids in reference-spectra
+                #   ESSENTIAL for rename
+                #   pids also change when created/deleted during undo/redo, i.e., insertion of '-Deleted'
+                #   not strictly necessary as objects cannot be retrieved from old pids
+                #   but helps with debugging
+                for sp in self.referenceSpectra:
+                    sp._updateReferenceSubstance(self, action)
+
         except Exception as es:
-            raise RuntimeError('Error _finalising Substance.spectrumHits: %s' % str(es))
+            raise RuntimeError(f'Error _finalising Substance: {str(es)}') from es
+
+    def _cleanSubstanceReferences(self):
+        """Clean and update the cross-references on restoring project
+        """
+        # check that the reference-spectra are cross-referenced correctly
+        self._cleanReferenceSpectra()
+        for sp in self.referenceSpectra:
+            sp._updateReferenceSubstance(self)
 
     @renameObject()
     @logCommand(get='self')
@@ -605,7 +719,7 @@ class Substance(AbstractWrapperObject):
         apiNmrProject = self.project._wrappedData
         _molComponent = apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name, labeling=apiLabeling)
         if _molComponent is not None and _molComponent != self._wrappedData:
-            raise ValueError("%s.%s already exists" % (name, labelling if labelling != DEFAULT_LABELLING else ''))
+            raise ValueError(f"{name}.{labelling if labelling != DEFAULT_LABELLING else ''} already exists")
 
         # rename functions from here
         for sampleComponent in self.sampleComponents:
@@ -648,7 +762,7 @@ class Substance(AbstractWrapperObject):
         name = name.strip()
         names = [sib.name for sib in getattr(project, cls._pluralLinkName)]
         while name in names or (apiProject.findFirstMolecule(name=name) or
-               apiComponentStore.findFirstComponent(name=name)):
+                                apiComponentStore.findFirstComponent(name=name)):
             name = commonUtil.incrementName(name)
 
         return name
@@ -683,7 +797,7 @@ class Substance(AbstractWrapperObject):
 
     @logCommand('project.')
     def getChain(self, shortName: str = None, role: str = None,
-                    comment: str = None, **kwds):
+                 comment: str = None, **kwds):
         """Get existing Chain that matches Substance
 
         See the Chain class for details.
@@ -929,7 +1043,6 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
 
 @contextmanager
 def _addUndoApiObject(project, apiObject):
-
     def _getApiObjectTree(apiObject) -> tuple:
         """Retrieve the apiObject tree contained by this object
 
@@ -938,8 +1051,6 @@ def _addUndoApiObject(project, apiObject):
         #EJB 20181127: taken from memops.Implementation.DataObject.delete
         #                   should be in the model??
         #EJB 20190926: taken from AbstractWrapperObject - needed for apiObjects that do not have a v3 object
-
-        from ccpn.util.OrderedSet import OrderedSet
 
         apiObjectlist = OrderedSet()
         # objects still to be checked
@@ -967,6 +1078,7 @@ def _addUndoApiObject(project, apiObject):
 
     from ccpn.core.lib.ContextManagers import BlankedPartial
     from ccpn.core.lib import Undo
+
     undo = project._undo
     undo.decreaseBlocking()
 
@@ -1032,7 +1144,7 @@ def getter(self: SampleComponent) -> typing.Optional[Substance]:
     #   return self._project._data2Obj[apiComponent]
 
 
-def _getSubstanceByName(self: Project, name:str=None, **kwargs) -> typing.Optional[Substance]:
+def _getSubstanceByName(self: Project, name: str = None, **kwargs) -> typing.Optional[Substance]:
     """
     :param self: project instance
     :param kwargs: any substance attribute, e.g.: name, labelling etc

@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:43 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-01-12 18:44:56 +0000 (Thu, January 12, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -651,7 +651,7 @@ class PandasChainedAssignment:
 
     def __init__(self, chained=None):
         acceptable = [None, 'warn', 'raise']
-        assert chained in acceptable, "chained must be in " + str(acceptable)
+        assert chained in acceptable, f"chained must be in {acceptable}"
         self.swcw = chained
 
     def __enter__(self):
@@ -821,12 +821,12 @@ def newObjectList(klasses):
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
                 results = func(*args, **kwds)
-                if not (results and results[0].__class__.__name__ == klasses[0]):
-                    raise RuntimeError('Expected an object of class %s, obtained %s' % (repr(klasses[0]), results[0].__class__))
+                if not results or results[0].__class__.__name__ != klasses[0]:
+                    raise RuntimeError(f'Expected an object of class {repr(klasses[0])}, obtained {results[0].__class__}')
 
                 for result in results:
-                    if not result.__class__.__name__ in klasses:
-                        raise RuntimeError('Expected an object in class types %s, obtained %s' % (klasses, result.__class__))
+                    if result.__class__.__name__ not in klasses:
+                        raise RuntimeError(f'Expected an object in class types {klasses}, obtained {result.__class__}')
 
                     # retrieve list of created api objects from the result
                     apiObjectsCreated = result._getApiObjectTree()
@@ -839,7 +839,9 @@ def newObjectList(klasses):
                                                     objsToBeUnDeleted=apiObjectsCreated)
                                 )
 
-                    _storeNewObjectCurrent(result, addUndoItem)
+                    if application.project._undo.storageBlockingLevel < 1:
+                        # only add current if required
+                        _storeNewObjectCurrent(result, addUndoItem)
 
         # handle notifying all objects in the list - e.g. sampleComponent also makes a substance
         for result in results:
@@ -854,7 +856,7 @@ def newObjectList(klasses):
 
 
 def deleteObject():
-    """ A decorator to wrap the delete(self) method of the V3 core classes
+    """A decorator to wrap delete(self) method of the V3 core classes
     calls self._finalise('delete') prior to deletion
 
     GWV first try
@@ -868,15 +870,14 @@ def deleteObject():
         self = args[0]
         application = getApplication()  # pass it in to reduce overhead
 
-        # moved outside so that the current objects are preserved
-        with notificationBlanking(application=application):
-            with undoStackBlocking(application=application) as addUndoItem:
+        with undoStackBlocking(application=application) as addUndoItem:
+            # moved above so that the current objects are preserved
+            with notificationBlanking(application=application):
                 _storeDeleteObjectCurrent(self, addUndoItem)
 
-        self._finaliseAction('delete')
+            self._finaliseAction('delete')
 
-        with notificationBlanking(application=application):
-            with undoStackBlocking(application=application) as addUndoItem:
+            with notificationBlanking(application=application):
                 # retrieve list of created items from the api
                 apiObjectsCreated = self._getApiObjectTree()
                 addUndoItem(undo=BlankedPartial(self._wrappedData.root._unDelete,
@@ -898,7 +899,7 @@ def deleteObject():
 
 
 def deleteWrapperWithoutSideBar():
-    """ A decorator to wrap the delete(self) method of the V3 core classes
+    """A decorator to wrap delete(self) method of the V3 core classes
     calls self._finalise('delete') prior to deletion
     """
 

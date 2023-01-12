@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:42 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-01-12 18:44:56 +0000 (Thu, January 12, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -217,7 +217,7 @@ class Project(AbstractWrapperObject):
     @property
     def substances(self):
         """STUB: hot-fixed later"""
-        return None
+        return ()
 
     @property
     def nmrChains(self):
@@ -533,6 +533,9 @@ class Project(AbstractWrapperObject):
             # Call any updates
             self._update()
 
+            # Clean any deleted/invalid pids from cross-references and enforce consistency
+            self._cleanCrossReferences()
+
     @classmethod
     def _restoreObject(cls, project, apiObj):
         """Process data that must always be performed after updating all children
@@ -557,11 +560,20 @@ class Project(AbstractWrapperObject):
 
                         getLogger().error(f'Strip {strp} contains bad axes - please close SpectrumDisplay {sd} outlined in red.')
 
-        except Exception as es:
+        except Exception:
             getLogger().warning('There was an issue checking the spectrumDisplays')
 
         # don't need to call super here
         return project
+
+    def _cleanCrossReferences(self):
+        """Clean any deleted/invalid pids from cross-references and enforce consistency
+        """
+        # clean the cross-references for spectra-substances
+        for sp in self.spectra:
+            sp._cleanSpectrumReferences()
+        for su in self.substances:
+            su._cleanSubstanceReferences()
 
     def _close(self):
         self.close()
@@ -1123,7 +1135,7 @@ class Project(AbstractWrapperObject):
             self._logger.warning("Attempt to unregister unknown notifier %s for %s" % (notifier, (className, target)))
 
     def removeNotifier(self, notifier: typing.Callable[..., None]):
-        """Unregister the the notifier from all places where it appears."""
+        """Unregister the notifier from all places where it appears."""
         found = False
         for od in self._context2Notifiers.values():
             if notifier in od:
@@ -1152,8 +1164,8 @@ class Project(AbstractWrapperObject):
         self._progressSuspension += 1
 
         return
-        # TODO suspension temporarily disabled
-        self._notificationSuspension += 1
+        # # TODO suspension temporarily disabled
+        # self._notificationSuspension += 1
 
     def resumeNotification(self):
         """Execute accumulated notifiers and resume immediate notifier execution"""
@@ -1170,38 +1182,38 @@ class Project(AbstractWrapperObject):
         # It is a time-saving measure, allowing you to e.g. execute a
         # peak-created notifier only once when creating hundreds of peaks in one operation
 
-        if self._notificationSuspension > 1:
-            self._notificationSuspension -= 1
-        else:
-            # Should not be necessary, but in this way we never get below 0 no matter what errors happen
-            self._notificationSuspension = 0
-
-            scheduledNotifiers = set()
-
-            executeNotifications = []
-            pendingNotifications = self._pendingNotifications
-            while pendingNotifications:
-                notification = pendingNotifications.pop()
-                notifier = notification[0]
-                onceOnly = notification[1]
-                if onceOnly:
-
-                    # check whether the match pair, (function, object) is in the found set
-                    matchNotifier = (notifier, notification[2])
-                    if matchNotifier not in scheduledNotifiers:
-                        scheduledNotifiers.add(matchNotifier)
-
-                        # append the function call (function, object, *params)
-                        executeNotifications.append((notifier, notification[2:]))
-
-                    # if notifier not in scheduledNotifiers:
-                    #     scheduledNotifiers.add(notifier)
-                    #     executeNotifications.append((notifier, notification[2:]))
-                else:
-                    executeNotifications.append((notifier, notification[2:]))
-            #
-            for notifier, params in reversed(executeNotifications):
-                notifier(*params)
+        # if self._notificationSuspension > 1:
+        #     self._notificationSuspension -= 1
+        # else:
+        #     # Should not be necessary, but in this way we never get below 0 no matter what errors happen
+        #     self._notificationSuspension = 0
+        #
+        #     scheduledNotifiers = set()
+        #
+        #     executeNotifications = []
+        #     pendingNotifications = self._pendingNotifications
+        #     while pendingNotifications:
+        #         notification = pendingNotifications.pop()
+        #         notifier = notification[0]
+        #         onceOnly = notification[1]
+        #         if onceOnly:
+        #
+        #             # check whether the match pair, (function, object) is in the found set
+        #             matchNotifier = (notifier, notification[2])
+        #             if matchNotifier not in scheduledNotifiers:
+        #                 scheduledNotifiers.add(matchNotifier)
+        #
+        #                 # append the function call (function, object, *params)
+        #                 executeNotifications.append((notifier, notification[2:]))
+        #
+        #             # if notifier not in scheduledNotifiers:
+        #             #     scheduledNotifiers.add(notifier)
+        #             #     executeNotifications.append((notifier, notification[2:]))
+        #         else:
+        #             executeNotifications.append((notifier, notification[2:]))
+        #     #
+        #     for notifier, params in reversed(executeNotifications):
+        #         notifier(*params)
 
     # Standard notified functions.
     # RESTRICTED. Use in core classes ONLY
@@ -1266,11 +1278,10 @@ class Project(AbstractWrapperObject):
         """Clean up after object deletion
         """
         if not wrappedData.isDeleted:
-            raise ValueError("_finaliseApiDelete called before wrapped data are deleted: %s" % wrappedData)
+            raise ValueError(f"_finaliseApiDelete called before wrapped data are deleted: {wrappedData}")
 
         # get object
-        obj = self._data2Obj.get(wrappedData)
-        if not obj:
+        if not (obj := self._data2Obj.get(wrappedData)):
             # NOTE:ED - it shouldn't get here but occasionally it does :|
             getLogger().warning(f'_finaliseApiDelete: no V3 object for {wrappedData}')
 
@@ -1283,7 +1294,7 @@ class Project(AbstractWrapperObject):
             # remove from pid2Obj
             del self._pid2Obj[obj.shortClassName][obj._id]
 
-            # Mark object as obviously deleted, and set up for undeletion
+            # Mark the object as obviously deleted, and set up for un-deletion
             obj._id += '-Deleted'
             wrappedData._oldWrapperObject = obj
             obj._wrappedData = None
@@ -1293,12 +1304,12 @@ class Project(AbstractWrapperObject):
         same as _newObject"""
 
         if wrappedData.isDeleted:
-            raise ValueError("_finaliseApiUnDelete called before wrapped data are deleted: %s" % wrappedData)
+            raise ValueError(f"_finaliseApiUnDelete called before wrapped data are deleted: {wrappedData}")
 
         try:
             oldWrapperObject = wrappedData._oldWrapperObject
         except AttributeError:
-            raise ApiError("Wrapper object to undelete wrongly set up - lacks _oldWrapperObject attribute")
+            raise ApiError("Wrapper object to undelete wrongly set up - lacks _oldWrapperObject attribute") from None
 
         # put back in from wrapped2Obj
         self._data2Obj[wrappedData] = oldWrapperObject
@@ -1309,7 +1320,7 @@ class Project(AbstractWrapperObject):
         # put back in pid2Obj
         self._pid2Obj[oldWrapperObject.shortClassName][oldWrapperObject._id] = oldWrapperObject
 
-        # Restore object to pre-undeletion state
+        # Restore object to pre-un-deletion state
         del wrappedData._oldWrapperObject
         oldWrapperObject._wrappedData = wrappedData
 

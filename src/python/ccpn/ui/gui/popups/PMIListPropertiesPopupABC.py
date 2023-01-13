@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:46 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-01-13 13:15:04 +0000 (Fri, January 13, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -264,7 +264,8 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
             _, pl, attrib = item
 
             c = self.listViewSettings[attrib]
-            if not Colour.isSpectrumColour(c):
+            # ignore if the colour is not set
+            if c is not None and not Colour.isSpectrumColour(c):
                 Colour.addNewColourString(c)
 
         # set the colours in the pulldowns
@@ -272,8 +273,8 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
             _, pl, attrib = item
             Colour.fillColourPulldown(pl, allowAuto=True, includeGradients=False)
 
-            c = self.listViewSettings[attrib]
-            Colour.selectPullDownColour(pl, c, allowAuto=True)
+            if c := self.listViewSettings[attrib]:
+                Colour.selectPullDownColour(pl, c, allowAuto=True)
 
         self.meritEnabledBox.setChecked(self.listViewSettings[PMIListABC._MERITENABLED] or False)
         self.meritThresholdData.setValue(self.listViewSettings[PMIListABC._MERITTHRESHOLD] or 0.0)
@@ -390,8 +391,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
     def _queueSetColourButton(self, pulldown):
         dialog = ColourDialog(self)
 
-        newColour = dialog.getColor()
-        if newColour:
+        if newColour := dialog.getColor():
             addNewColour(newColour)
             self._fillPullDowns()
             pulldown.setCurrentText(spectrumColours[newColour.name()])

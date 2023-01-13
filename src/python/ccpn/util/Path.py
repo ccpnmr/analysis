@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-12 11:50:09 +0000 (Thu, January 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-13 11:06:11 +0000 (Fri, January 13, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -291,14 +291,15 @@ class Path(_Path_):
         else:
             return list(self.glob(f'*.{extension}'))
 
-    def listdir(self, suffix:str=None, excludeDotFiles=False) -> list:
+    def listdir(self, suffix:str = None, excludeDotFiles:bool = True, relative:bool = False) -> list:
         """
         If self is a directory , return a list of its files as Path instance.
         If the suffix is given (e.g.: .pdf, .jpeg...), returns only files of that pattern.
         Non recursive.
 
         :param suffix: optional suffix used to filter
-        :param excludeDotFiles: flag to exclude (nix) dot-files (e.g. like .cshrc)
+        :param excludeDotFiles: flag to exclude (nix) dot-files (e.g. like .cshrc .DSstore); default True
+        :param relative: flag to return path relative to self.
         :returns A list with Path instances
         :raises FileNotFoundError or RuntimeError
         """
@@ -314,9 +315,12 @@ class Path(_Path_):
             result = [Path(f) for f in self.glob(f'*{suffix}')]
 
         if excludeDotFiles:
-            return [f for f in result if not str(f).startswith('.')]
-        else:
-            return result
+            result = [f for f in result if not str(f).startswith('.')]
+
+        if relative:
+            result = [f.relative_to(self) for f in result]
+
+        return result
 
     def split3(self) -> tuple:
         """:return a tuple of (.parent, .stem, .suffix) strings

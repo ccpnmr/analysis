@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-12 10:39:54 +0000 (Thu, January 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-13 18:35:46 +0000 (Fri, January 13, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,8 @@ import pandas as pd
 import json
 from functools import partial
 from collections import OrderedDict as OD, namedtuple
+from collections.abc import MutableMapping
+
 # from collections import Counter
 from operator import attrgetter, itemgetter
 from typing import List, Union, Optional, Sequence, Tuple
@@ -173,6 +175,36 @@ NAMETOOBJECTMAPPING = {'nef_chemical_shift_list'               : ChemicalShiftLi
 DATANAME = 'ccpn_structuredata_name'
 DATANAME_DEFAULT = 'structureFromNef'
 DATANAME_DEPRECATED = 'ccpn_dataset_id'
+
+
+def mergeDict(dict1: MutableMapping, dict2: MutableMapping):
+    """Merge right-hand dict into the left-hand dict (dict2 into dict1).
+    Merge is performed inplace.
+     - Keep unique keys from left-hand dict.
+     - Overwrite existing keys with value from right-hand dict.
+     - Adds new keys from right-hand dict.
+
+    :param dict1: original dict
+    :param dict2: new dict to merge
+    :return: updated dict
+    """
+    if not isinstance(dict1, MutableMapping):
+        raise TypeError('mergeDict: dict1 must be compatible with collections.abc.MutableMapping, e.g., a dict')
+    if not isinstance(dict2, MutableMapping):
+        raise TypeError('mergeDict: dict2 must be compatible with collections.abc.MutableMapping, e.g., a dict')
+
+    def _merge(d1: MutableMapping, d2: MutableMapping):
+        """Perform recursive merge of the dicts
+        """
+        if not isinstance(d1, MutableMapping):
+            return d2
+
+        for k, val in d2.items():
+            d1[k] = _merge(d1.get(k, {}), val) if isinstance(val, MutableMapping) else val
+
+        return d1
+
+    return _merge(dict1, dict2)
 
 
 # NEf to CCPN tag mapping (and tag order)
@@ -5703,6 +5735,22 @@ class CcpnNefReader(CcpnNefContent):
         spectrum = self._load_spectrum(saveFrame, project)
         peakList = self._load_peaks(saveFrame, spectrum)
 
+        # Get ccpn-to-nef mapping for saveframe
+        category = saveFrame['sf_category']
+        mapping = nef2CcpnMap.get(category) or {}
+        parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+
+        # Load remaining loops, with spectrum as parent - ccpn multiplets/integrals
+        for loopName in loopNames:
+            if loopName not in ('nef_spectrum_dimension', 'ccpn_spectrum_dimension', 'nef_peak',
+                                'nef_spectrum_dimension_transfer',
+                                ):
+                # Those are treated elsewhere
+                loop = saveFrame.get(loopName)
+                if loop:
+                    importer = self.importers[loopName]
+                    importer(self, spectrum, loop, saveFrame)
+
         return peakList
 
     #
@@ -5710,17 +5758,17 @@ class CcpnNefReader(CcpnNefContent):
 
     def load_ccpn_spectrum_reference_substances(self, parent: Spectrum, loop: StarIo.NmrLoop,
                                                 saveFrame: StarIo.NmrSaveFrame, **kwargs):
-        """load  reference_substances loop"""
+        """load reference_substances loop"""
 
         referenceSubstances = []
         for row in loop.data:
             name = row.get('name')
             labelling = row.get('labelling')
-            nameLabelling = '.'.join([name, labelling or ''])
+            nameLabelling = '.'.join([str(name), str(labelling or '')])
             substance = self.project.getSubstance(nameLabelling)
             if substance is None:
                 self.warning(
-                        "No substance saveframe found with framecode %s. Skipping substance from referenceSubstances"
+                        "No substance found with framecode %s. Skipping substance from referenceSubstances"
                         % nameLabelling, loop)
             else:
                 referenceSubstances.append(substance)
@@ -7155,9 +7203,16 @@ class CcpnNefReader(CcpnNefContent):
 
         referenceSpectra = []
         for row in loop.data:
-            spectrum = self.project.getSpectrum(row.get('nmr_spectrum_id'))
-            if spectrum is not None:
+            name = row.get('nmr_spectrum_id')
+            spectrum = self.project.getObjectsByPartialId(className='Spectrum', idStartsWith=name)
+            # spectrum = self.project.getSpectrum(name)
+            if not spectrum:
+                self.warning(
+                        "No spectrum found with framecode %s. Skipping substance from referenceSubstances"
+                        % name, loop)
+            else:
                 referenceSpectra.append(spectrum)
+
         parent.referenceSpectra = referenceSpectra
 
     #
@@ -7558,10 +7613,11 @@ class CcpnNefReader(CcpnNefContent):
                 getLogger().debug2('Loading NEF additional data: unable to find object "%s"' % pid)
             else:
                 # read in the new _ccpnInternal and write the existing over the top
-                if (dataIn := jsonIo.loads(data)):
+                if (dataIn := jsonIo.loads(data)) and isinstance(dataIn, dict):
                     try:
                         if obj._ccpnInternalData:
-                            dataIn.update(obj._ccpnInternalData)
+                            # recursively update the dict adding new keys, but keep the original values
+                            dataIn = mergeDict(dataIn, obj._ccpnInternalData)
                         obj._ccpnInternalData = dataIn
                     except:
                         self.warning(f'Could not load additional data for {obj}', loop)
@@ -8298,8 +8354,7 @@ def _testNefIo(path: str, skipPrefixes: Sequence[str] = ()):
 #   #
 #   return '\n'.join(lines)
 
-
-if __name__ == '__main__':
+def main():
     # Explanation:
     # _exportToNef will read a project from path and export the corresponding NEF file
     # skipPrefixes=('ccpn', ) means 'remove all ccpn-specific tags from the output';
@@ -8322,3 +8377,105 @@ if __name__ == '__main__':
     # nefpath = _exportToNef(path, skipPrefixes=('ccpn', ))
     # _testNefIo(nefpath, skipPrefixes=('ccpn', ))
     # print(_extractVariantsTable(path))
+
+
+import unittest
+
+
+class testMergeDict(unittest.TestCase):
+
+    def test_merge_d1d2(self):
+        """Merge d2 into d1
+        """
+        d1 = {
+            "Boolean1"  : (True, None, False),
+            "Boolean2"  : True,
+            "DictOuter" : {"String1"    : 'string1',
+                           "nestedLists": [0],
+                           "MuteL"      : {},
+                           },
+            "nestedDict": [],
+            }
+
+        d2 = {
+            "Boolean2"  : False,
+            "Boolean3"  : (True,),
+            "DictOuter" : {"String2"    : 'string2',
+                           "nestedLists": [99],
+                           "MuteL"      : 1.0,
+                           },
+            "nestedDict": {"Boolean1": {"NewItem": 'New',
+                                        }
+                           },
+            }
+
+        result = {
+            "Boolean1"  : (True, None, False),
+            "Boolean2"  : False,  # from d2
+            "DictOuter" : {"String1"    : 'string1',
+                           "nestedLists": [99],  # from d2
+                           "MuteL"      : 1.0,
+                           "String2"    : 'string2',  # from d2
+                           },
+            "nestedDict": {"Boolean1": {"NewItem": 'New',  # from d2
+                                        }
+                           },
+            "Boolean3"  : (True,),  # from d2
+            }
+
+        # inplace merge
+        out = mergeDict(d1, d2)
+
+        self.assertEqual(out, result)
+
+    def test_merge_d2d1(self):
+        """Merge d1 into d2
+        """
+        d1 = {
+            "Boolean1"  : (True, None, False),
+            "Boolean2"  : True,
+            "DictOuter" : {"String1"    : 'string1',
+                           "nestedLists": [0],
+                           "MuteL"      : {},
+                           },
+            "nestedDict": [],
+            }
+
+        d2 = {
+            "Boolean2"  : False,
+            "Boolean3"  : (True,),
+            "DictOuter" : {"String2"    : 'string2',
+                           "nestedLists": [99],
+                           "MuteL"      : 1.0,
+                           },
+            "nestedDict": {"Boolean1": {"NewItem": 'New',
+                                        }
+                           },
+            }
+
+        result = {
+            "Boolean2"  : True,  # from d1
+            "Boolean3"  : (True,),
+            "DictOuter" : {"String2"    : 'string2',
+                           "nestedLists": [0],  # from d1
+                           "MuteL"      : {},
+                           "String1"    : 'string1',  # from d1
+                           },
+            "nestedDict": [],  # from d1
+            "Boolean1"  : (True, None, False),  # from d1
+            }
+
+        # inplace merge
+        out = mergeDict(d2, d1)
+
+        self.assertEqual(out, result)
+
+    def test_merge_bad(self):
+        d1 = {'a': 'b'}
+
+        self.assertRaises(TypeError, mergeDict, d1, [])
+        self.assertRaises(TypeError, mergeDict, [], d1)
+
+
+if __name__ == '__main__':
+    testMergeDict()

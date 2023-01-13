@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-10 14:30:44 +0000 (Tue, January 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-13 19:07:50 +0000 (Fri, January 13, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -422,7 +422,7 @@ class Framework(NotifierBase, GuiBase):
         if not self.ui._checkRegistration():
             return
 
-        self._experimentClassifications = project.getExperimentClassifications()
+        self._experimentClassifications = project._getExperimentClassifications()
         # self._updateAutoBackup()
 
         sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)

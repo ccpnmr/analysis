@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-11 20:43:35 +0000 (Wed, January 11, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-13 19:07:50 +0000 (Fri, January 13, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1678,12 +1678,12 @@ class Project(AbstractWrapperObject):
         archiver = ProjectArchiver(projectPath=self.project.path)
         return archiver.archives
 
-    def getExperimentClassifications(self) -> dict:
+    def _getExperimentClassifications(self) -> dict:
         """Get a dictionary of dictionaries of dimensionCount:sortedNuclei:ExperimentClassification named tuples.
         """
+        # GWV: 13Jan2023: made into private method; only FrameWork needs this.
         # NOTE:ED - better than being in spectrumLib but still needs moving
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
-
         return getExpClassificationDict(self._wrappedData)
 
     @logCommand('project.')

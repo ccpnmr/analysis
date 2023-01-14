@@ -1,11 +1,11 @@
 # Reference ChemicalShifts file template documentation
 
-New reference chemicalShifts needs to be in a Json file.
-See Template for the general structure.
+New reference chemicalShifts need to be in a JSON file.
+See the Template for the general structure.
 
 ## Top Level:
 
-**title**: Mandatory. Str. A short one/two words title.  This will appear in the GUI as an entry in ReferenceChemicalShifts selection widget(s)
+**title**: Mandatory. Str. A short one/two word title.  This will appear in the GUI as an entry in ReferenceChemicalShifts selection widget(s)
 
 **comment**: Mandatory. Str. A brief explanation of what the file contains.  This message will appear in the GUI tooltips for the selection widget(s)
 
@@ -17,11 +17,11 @@ See Template for the general structure.
 
 **user**: Optional. Str. Who created the file
 
-**moleculeType**: Mandatory. Str. The molecule type describe in the file
+**moleculeType**: Mandatory. Str. The molecule type described in the file
 
-**residues**:  Mandatory. List of dictionary. Category containing information about  the residues. Open new level:  ***Residues Level*** , see below.
+**residues**:  Mandatory. List of dictionaries. Category containing information about  the residues. Open new level:  ***Residue Level*** , see below.
 
-## **Residues Level**
+## **Residue Level**
 
 **residueName**: Mandatory. Str. The residue name. Three letter code for protein. E.g.: Alanine
 
@@ -29,9 +29,9 @@ See Template for the general structure.
 
 **ccpcode**: Optional. Str. The unique ccp code if available. E.g.: Ala
 
-**atoms**: Mandatory. List of dictionary. Category containing information about the residue atoms. Open new level:  ***Atoms Level*** , see below.
+**atoms**: Mandatory. List of dictionaries. Category containing information about the residue atoms. Open new level:  ***Atom Level*** , see below.
 
-## Atoms level:
+## Atom level:
 
 **atomName**: Mandatory. Str. The atom name. NEF nomenclature. E.g.: HB%
 
@@ -46,10 +46,10 @@ See Template for the general structure.
 **maxShift**:Optional. Float. The atom maximum observed chemical shift in ppm. E.g.: 5.48
 
 
-The following information is needed only to accurately plot the distribuition curve on the Reference ChemicalShifts GUI module.
+The following information is needed only to accurately plot the distribution curve on the Reference ChemicalShifts GUI module.
 
-**distribution**: Optional. list. The individual observed chemical shifts Y values to plot the distribution curve
+**distribution**: Optional. List. The individually observed chemical shift Y values for plotting the distribution curve
 
-**distributionRefValue**: Optional. float. The reference value of the distribution list.  Mandatory if the distribution list is given
+**distributionRefValue**: Optional. Float. The reference value of the distribution list.  Mandatory if the distribution list is given
 
-**distributionValuePerPoint**: Optional. float. The value per point needed for recreating the X axis of the distribuition. Mandatory if the distribution list is given
+**distributionValuePerPoint**: Optional. Float. The value per point needed for recreating the X axis of the distribution. Mandatory if the distribution list is given

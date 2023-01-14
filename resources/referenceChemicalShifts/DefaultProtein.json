@@ -1,10 +1,10 @@
 {
-  "title": "Default Standard protein",
-  "comment": "Standard Reference ChemicalShift values for protein. Source: BMRB database",
+  "title": "Default Standard Protein",
+  "comment": "Standard Reference ChemicalShift values for Protein. Source: BMRB database",
   "applicationVersion": "3.1.1",
   "creation_date_dd-mm-yy": "12-01-23",
   "user": "CCPN",
-  "moleculeType": "protein",
+  "moleculeType": "Protein",
   "residues": [
     {
       "residueName": "Alanine",

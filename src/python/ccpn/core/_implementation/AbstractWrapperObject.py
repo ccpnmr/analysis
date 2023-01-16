@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-12 18:44:56 +0000 (Thu, January 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-16 13:35:21 +0000 (Mon, January 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -51,6 +51,9 @@ from ccpn.framework.Version import VersionString, applicationVersion
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
+
+
+_RENAME_SENTINEL = Pid.Pid('Dummy:_rename')
 
 
 @functools.total_ordering
@@ -824,8 +827,9 @@ class AbstractWrapperObject(NotifierBase):
 
         """
         if cls not in parent._childClasses:
-            raise Exception
-        raise NotImplementedError("Code error: function not implemented")
+            raise RuntimeError('Code error: cls not in child classes')
+
+        raise NotImplementedError('Code error: function not implemented')
 
     def _rename(self, value: str):
         """Generic rename method that individual classes can use for implementation
@@ -846,7 +850,7 @@ class AbstractWrapperObject(NotifierBase):
         """Change the object name or other key attribute(s), changing the object pid,
            and all internal references to maintain consistency.
            Some Objects (Chain, Residue, Atom) cannot be renamed"""
-        raise ValueError("%s objects cannot be renamed" % self.__class__.__name__)
+        raise ValueError(f'{self.__class__.__name__} objects cannot be renamed')
 
     # In addition each class (except for Project) must define a  newClass method
     # The function (e.g. Project.newMolecule), ... must create a new child object
@@ -1395,12 +1399,14 @@ class AbstractWrapperObject(NotifierBase):
         if action == 'rename':
             try:
                 # get the stored value BEFORE renaming - valid for undo/redo
-                oldPid = self._oldPid
-            except Exception as es:
+                oldPid = self._oldPid or _RENAME_SENTINEL
+            except Exception:
                 oldPid = self.pid
             # Wrapper-level processing
             self._resetIds()
-            self._project._collectionList._resetItemPids(oldPid, self.pid)
+            if oldPid not in [_RENAME_SENTINEL, self.pid]:
+                # update the collections
+                self._project._collectionList._resetItemPids(oldPid, self.pid)
 
         if self._childActions:
             # operations that MUST be performed during _finalise

@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:05 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-01-16 13:35:21 +0000 (Mon, January 16, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,6 +44,7 @@ _UNIQUEID = 'uniqueId'
 _ISDELETED = 'isDeleted'
 _NAME = 'name'
 _COMMENT = 'comment'
+_RENAME_SENTINEL = Pid('Dummy:_rename')  # should match definition in AbstractWrapperObject, but don't want to import
 
 
 class V3CoreObjectABC(NotifierBase):
@@ -372,10 +373,10 @@ class V3CoreObjectABC(NotifierBase):
         if action == 'rename':
             try:
                 # get the stored value BEFORE renaming - valid for undo/redo
-                oldPid = self._oldPid
-            except:
+                oldPid = self._oldPid or _RENAME_SENTINEL
+            except Exception:
                 oldPid = self.pid
-            if oldPid != self.pid:
+            if oldPid not in [_RENAME_SENTINEL, self.pid]:
                 self._resetIds(oldPid.id)
                 self._project._collectionList._resetItemPids(oldPid, self.pid)
 

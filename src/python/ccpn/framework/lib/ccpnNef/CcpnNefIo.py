@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-13 18:35:46 +0000 (Fri, January 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-16 11:17:20 +0000 (Mon, January 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -2962,6 +2962,9 @@ class CcpnNefReader(CcpnNefContent):
         self.warnings = []
         self.project = project
         self.defaultChainCode = None
+
+        # temporarily store the new/overwrite existing state for load methods
+        self._projectIsEmpty = projectIsEmpty
 
         saveframeOrderedDict = self._getSaveFramesInOrder(dataBlock)
 
@@ -7615,9 +7618,13 @@ class CcpnNefReader(CcpnNefContent):
                 # read in the new _ccpnInternal and write the existing over the top
                 if (dataIn := jsonIo.loads(data)) and isinstance(dataIn, dict):
                     try:
-                        if obj._ccpnInternalData:
-                            # recursively update the dict adding new keys, but keep the original values
-                            dataIn = mergeDict(dataIn, obj._ccpnInternalData)
+                        if existingInternal := obj._ccpnInternalData:
+                            if self._projectIsEmpty:
+                                # recursively update the dict replacing the original values
+                                dataIn = mergeDict(existingInternal, dataIn)
+                            else:
+                                # recursively update the dict adding new keys, but keep the original values
+                                dataIn = mergeDict(dataIn, existingInternal)
                         obj._ccpnInternalData = dataIn
                     except:
                         self.warning(f'Could not load additional data for {obj}', loop)

@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-13 11:07:09 +0000 (Fri, January 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-16 10:26:25 +0000 (Mon, January 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -47,6 +47,7 @@ from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices
 from ccpn.util.OrderedSet import OrderedSet
 
 from ccpn.util import Constants
+from ccpn.util.decorators import singleton
 
 
 # from ccpn.util.isotopes import isotopeRecords
@@ -138,6 +139,7 @@ def forceGetattr(obj, attributeName):
         value = obj.__dict__[attributeName]
     return value
 
+
 def recursiveImport(dirname, modname=None, ignoreModules=None, force=False):
     """ recursively import all .py files
     (not starting with '__' and not containing internal '.' in their name)
@@ -200,6 +202,35 @@ def recursiveImport(dirname, modname=None, ignoreModules=None, force=False):
         if os.path.isdir(newdirname) and name.find('.') == -1:
             recursiveImport(newdirname, prefix + name, ignoreModules)
 
+@singleton
+class Process(object):
+    """A simple (singleton)class to hold information about the process:
+    pid:int
+    username:str
+    platform:str
+    executable:Path : python executable as a Path instance
+    initialWorkingDirectory:Path  : cwd() when first started as a Path instance
+    """
+    def __init__(self):
+        import psutil
+        from ccpn.util.Path import aPath
+
+        proc = psutil.Process()
+
+        self.pid = proc.pid
+        self.username = proc.username()
+        self.platform = sys.platform
+        self.executable = aPath(proc.exe())
+        self.initialWorkingDirectory = aPath(proc.cwd())
+
+    def __str__(self):
+        return f'<Process: pid={self.pid}, username={self.username}>'
+
+def getProcess() -> Process:
+    """Get the process info; e.g. getProcess().username
+    :return The Process instance
+    """
+    return Process()
 
 def isWindowsOS():
     return sys.platform[:3].lower() == 'win'

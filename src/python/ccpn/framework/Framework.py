@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-13 19:07:50 +0000 (Fri, January 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-16 10:26:25 +0000 (Mon, January 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -106,7 +106,7 @@ from ccpn.ui.gui import Layout
 from ccpn.util import Logging
 from ccpn.util.Path import Path, aPath, fetchDir
 from ccpn.util.AttrDict import AttrDict
-from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
+from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable, getProcess
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 
@@ -202,6 +202,9 @@ class Framework(NotifierBase, GuiBase):
         self._enableLoggingToConsole = True
         logger.disabled = getattr(self.args, 'noEchoLogging', False)  # overrides noDebugLogging
 
+        # Process info
+        self._process = getProcess()
+
         self._backupTimerQ = None
         self._autoBackupThread = None
 
@@ -226,12 +229,10 @@ class Framework(NotifierBase, GuiBase):
 
         # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
-
         self._dataLoaders = getDataLoaders()
 
         # register SpectrumDataSource formats for the first and only time
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
-
         self._spectrumDataSourceFormats = getDataFormats()
 
         # get a user interface; nb. ui.start() is called by the application

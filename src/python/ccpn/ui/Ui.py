@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:43 +0000 (Thu, January 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-18 12:37:42 +0000 (Wed, January 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -207,6 +207,13 @@ class Ui(NotifierBase):
 
         if not dataLoader.createNewProject:
             getLogger().error('"%s" does not yield a new project' % dataLoader.path)
+            return None
+
+        # Check that the path does not contain a bottom-level space
+        if ' ' in aPath(path).basename:
+            getLogger().error('"%s" does not yield a valid project\n'
+                              'Cannot load project folders where the project-name contains spaces.\n'
+                              'Please rename the folder without spaces and try loading again.' % dataLoader.path)
             return None
 
         if _app and _app.project:
@@ -431,7 +438,17 @@ class NoUi(Ui):
         ignore = False
 
         path = dataLoader.path
-        if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
+
+        # Check that the path does not contain a bottom-level space
+        if dataLoader.dataFormat in [CcpNmrV2ProjectDataLoader.dataFormat, CcpNmrV3ProjectDataLoader.dataFormat] and \
+                ' ' in aPath(dataLoader.path).basename:
+            getLogger().warning('Encountered a problem loading:\n"%s"\n\n'
+                                'Cannot load project folders where the project-name contains spaces.\n\n'
+                                'Please rename the folder without spaces and try loading again.' % dataLoader.path)
+            # skip loading bad projects
+            ignore = True
+
+        elif dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
             createNewProject = True
             dataLoader.createNewProject = True
             # ok = MessageDialog.showYesNoWarning(f'Load Project',

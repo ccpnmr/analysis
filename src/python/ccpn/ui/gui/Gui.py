@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-12 12:44:53 +0000 (Thu, January 12, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-18 12:37:42 +0000 (Wed, January 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -352,19 +352,29 @@ class Gui(Ui):
         ignore = False
 
         path = dataLoader.path
-        if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
+
+        # Check that the path does not contain a bottom-level space
+        if dataLoader.dataFormat in [CcpNmrV2ProjectDataLoader.dataFormat, CcpNmrV3ProjectDataLoader.dataFormat] and \
+                ' ' in aPath(dataLoader.path).basename:
+            MessageDialog.showWarning('Load Project', 'Encountered a problem loading:\n"%s"\n\n'
+                                                      'Cannot load project folders where the project-name contains spaces.\n\n'
+                                                      'Please rename the folder without spaces and try loading again.' % dataLoader.path)
+            # skip loading bad projects
+            ignore = True
+
+        elif dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
             createNewProject = True
             dataLoader.createNewProject = True
-            ok = MessageDialog.showYesNoWarning(f'Load Project',
+            ok = MessageDialog.showYesNoWarning('Load Project',
                                                 f'Project "{path.name}" was created with version-2 Analysis.\n'
-                                                f'\n'
-                                                f'CAUTION:\n'
-                                                f'The project will be converted to a version-3 project and saved as a new directory with .ccpn extension.\n'
-                                                f'\n'
-                                                f'Do you want to continue loading?')
+                                                '\n'
+                                                'CAUTION:\n'
+                                                'The project will be converted to a version-3 project and saved as a new directory with .ccpn extension.\n'
+                                                '\n'
+                                                'Do you want to continue loading?')
 
             if not ok:
-                # skip loading so that user can backup/copy project
+                # skip loading so that user can back-up/copy project
                 getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
                 ignore = True
 
@@ -377,15 +387,15 @@ class Gui(Ui):
             MAKE_ARCHIVE = 'Make a backup archive (.tgz) of the project'
 
             dataLoader.makeArchive = False
-            ok = MessageDialog.showMulti(f'Load Project',
+            ok = MessageDialog.showMulti('Load Project',
                                          f'You are opening an older project (version 3.0.x) - {path.name}\n'
-                                         f'\n'
-                                         f'When you save, it will be upgraded and will not be readable by version 3.0.4\n',
+                                         '\n'
+                                         'When you save, it will be upgraded and will not be readable by version 3.0.4\n',
                                          texts=[DONT_OPEN, CONTINUE],
                                          checkbox=MAKE_ARCHIVE, checked=False,
                                          )
 
-            if not any(ss in ok for ss in [DONT_OPEN, MAKE_ARCHIVE, CONTINUE]):
+            if all(ss not in ok for ss in [DONT_OPEN, MAKE_ARCHIVE, CONTINUE]):
                 # there was an error from the dialog
                 getLogger().debug(f'==> Cancelled loading ccpn project "{path}" - error in dialog')
                 ignore = True
@@ -571,7 +581,7 @@ class Gui(Ui):
             return None
 
         # load the project using the dataLoader;
-        # We'll ask framework, who will pass it back to ui._loadProject
+        # We'll ask framework who will pass it back to ui._loadProject
         if (objs := self.application._loadData([dataLoader])):
             if len(objs) == 1:
                 return objs[0]
@@ -623,7 +633,8 @@ class Gui(Ui):
         newName = newPath.basename
         if (_name := self.project._checkName(newName, correctName=True)) != newName:
             newPath = newPath.parent / _name + CCPN_EXTENSION
-            MessageDialog.showInfo(title, f'Project name changed from "{newName}" to "{_name}"\nSee console/log for details', parent=self)
+            MessageDialog.showInfo(title, f'Project name changed from "{newName}" to "{_name}"\nSee console/log for details',
+                                   parent=self.mainWindow)
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
             with logCommandManager('application.', 'saveProjectAs', newPath, overwrite=overwrite):
@@ -631,7 +642,7 @@ class Gui(Ui):
                     if not self.application._saveProject(newPath=newPath,
                                                          createFallback=False,
                                                          overwriteExisting=True):
-                        txt = "Saving project to %s aborted" % newPath
+                        txt = f"Saving project to {newPath} aborted"
                         getLogger().warning(txt)
                         MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
                         return False

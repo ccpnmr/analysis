@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-16 10:26:25 +0000 (Mon, January 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-18 12:43:42 +0000 (Wed, January 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -509,22 +509,24 @@ class Framework(NotifierBase, GuiBase):
         # This wraps the underlying data, including the wrapped graphics data
         newProject._initialiseProject()
 
-        if newProject._isUpgradedFromV2:
-            getLogger().debug('initialising v2 noise and contour levels')
-            with inactivity(application=self):
-                for spectrum in newProject.spectra:
-                    # calculate the new noise level
-                    spectrum.noiseLevel = spectrum.estimateNoise()
-
-                    # Check  contourLevels, contourColours
-                    spectrum._setDefaultContourValues()
-
-                    # set the initial contour colours
-                    (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-                    spectrum.sliceColour = spectrum.positiveContourColour
-
-                    # set the initial axis ordering
-                    _getDefaultOrdering(spectrum)
+        # GWV: this really should not be here; moved to the_update_v2 method
+        #      that already existed and gets called
+        # if newProject._isUpgradedFromV2:
+        #     getLogger().debug('initialising v2 noise and contour levels')
+        #     with inactivity(application=self):
+        #         for spectrum in newProject.spectra:
+        #             # calculate the new noise level
+        #             spectrum.noiseLevel = spectrum.estimateNoise()
+        #
+        #             # Check  contourLevels, contourColours
+        #             spectrum._setDefaultContourValues()
+        #
+        #             # set the initial contour colours
+        #             (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
+        #             spectrum.sliceColour = spectrum.positiveContourColour
+        #
+        #             # set the initial axis ordering
+        #             _getDefaultOrdering(spectrum)
 
         # the project is now ready to use
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-13 19:07:50 +0000 (Fri, January 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-18 12:43:42 +0000 (Wed, January 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -76,7 +76,6 @@ from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib import ApiPath
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.api.memops import Implementation
-
 
 # TODO These should be merged with the same constants in CcpnNefIo
 # (and likely those in ExportNefPopup) and moved elsewhere
@@ -383,6 +382,9 @@ class Project(AbstractWrapperObject):
         self._id = wrappedData.name
         self._resetIds()
 
+        # reference to XmlLoader instance; set by _newProject or _loadProject
+        self._xmlLoader = None
+
         # tuple to hold children that explicitly need finalising after atomic operations
         self._finaliseChildren = []
         self._childActions = []
@@ -578,6 +580,8 @@ class Project(AbstractWrapperObject):
         from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationEchoBlocking, apiNotificationBlanking
         from contextlib import suppress
         from ccpn.core.lib.ContextManagers import progressHandler
+
+        # with self._xmlLoader.blockReading():
 
         status = self._getAPIObjectsStatus(completeScan=True, onlyInvalids=False, checkValidity=False)
 
@@ -2239,7 +2243,25 @@ class Project(AbstractWrapperObject):
 # Code adapted from prior _implementation/Io.py
 #=========================================================================================
 
+from sandbox.Geerten.XmlLoaderTest.Project_new_load import _loadProject as _loadProjectNew
+from sandbox.Geerten.XmlLoaderTest.Project_new_load import _newProject as _newProjectNew
+
+TEST_NEW = True
+TEST_LOAD = True
+
 def _loadProject(application, path: str) -> Project:
+    if TEST_LOAD:
+        return _loadProjectNew(application, path)
+    else:
+        return _loadProjectOld(application, path)
+
+def _newProject(application, name:str, path:Path, isTemporary:bool = False) -> Project:
+    if TEST_NEW:
+        return _newProjectNew(application, name, path, isTemporary)
+    else:
+        return _newProjectOld(application, name, path, isTemporary)
+
+def _loadProjectOld(application, path: str) -> Project:
     """Load the project defined by path
     :return Project instance
     """
@@ -2309,7 +2331,7 @@ def _setRepositoryPath(apiProject, name, path):
     _repo.url = Implementation.Url(path=str(path))
 
 
-def _newProject(application, name:str, path:Path, isTemporary:bool = False) -> Project:
+def _newProjectOld(application, name:str, path:Path, isTemporary:bool = False) -> Project:
     """Make new project, putting underlying data storage (API project) at path
     :return Project instance
     """

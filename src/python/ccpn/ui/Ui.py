@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-18 11:22:10 +0000 (Wed, January 18, 2023) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-01-18 12:34:37 +0000 (Wed, January 18, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -438,7 +438,17 @@ class NoUi(Ui):
         ignore = False
 
         path = dataLoader.path
-        if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
+
+        # Check that the path does not contain a bottom-level space
+        if dataLoader.dataFormat in [CcpNmrV2ProjectDataLoader.dataFormat, CcpNmrV3ProjectDataLoader.dataFormat] and \
+                ' ' in aPath(dataLoader.path).basename:
+            getLogger().warning('Encountered a problem loading:\n"%s"\n\n'
+                                'Cannot load project folders where the project-name contains spaces.\n\n'
+                                'Please rename the folder without spaces and try loading again.' % dataLoader.path)
+            # skip loading bad projects
+            ignore = True
+
+        elif dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
             createNewProject = True
             dataLoader.createNewProject = True
             # ok = MessageDialog.showYesNoWarning(f'Load Project',

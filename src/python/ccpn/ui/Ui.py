@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 14:50:35 +0000 (Thu, January 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-18 11:22:10 +0000 (Wed, January 18, 2023) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -207,6 +207,13 @@ class Ui(NotifierBase):
 
         if not dataLoader.createNewProject:
             getLogger().error('"%s" does not yield a new project' % dataLoader.path)
+            return None
+
+        # Check that the path does not contain a bottom-level space
+        if ' ' in aPath(path).basename:
+            getLogger().error('"%s" does not yield a valid project\n'
+                              'Cannot load project folders where the project-name contains spaces.\n'
+                              'Please rename the folder without spaces and try loading again.' % dataLoader.path)
             return None
 
         if _app and _app.project:

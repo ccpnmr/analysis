@@ -1,5 +1,7 @@
 """
 """
+from __future__ import annotations
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -14,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-18 12:43:42 +0000 (Wed, January 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-18 17:13:35 +0000 (Wed, January 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -101,14 +103,9 @@ DEFAULT_CHEMICALSHIFTLIST = 'default'
 
 
 class Project(AbstractWrapperObject):
-    """ The Project is the object that contains all data objects and serves as the hub for
-    navigating between them.
-
-    There are 15 top-level data objects directly within a project, of which 8 have child
-    objects of their own, e.g. Spectrum, Sample, Chain, NmrChain, ChemicalShiftList, DataSet
-    and StructureEnsemble. The child data objects are organised in a logical hierarchy; for example,
-    a Spectrum has PeakLists, which in turn, are made up of Peaks, whereas a Chain is made up of Residues,
-    which are made up of Atoms.
+    """ The Project is the root object that contains all data objects and serves as the hub for
+    navigating between them. All objects are organised in an hiarchical tree-like manner,
+    as children, grandchildren, etc.
     """
 
     #: Short class name, for PID.
@@ -158,6 +155,12 @@ class Project(AbstractWrapperObject):
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure (incomplete)
     #-----------------------------------------------------------------------------------------
+
+    @property
+    def _parent(self) -> (AbstractWrapperObject, None):
+        """Parent (containing) object. None for Project, as it is the root of the tree
+        """
+        return None
 
     @property
     def spectra(self):
@@ -339,33 +342,33 @@ class Project(AbstractWrapperObject):
         """
         return self.projectPath / CCPN_ARCHIVES_DIRECTORY
 
-    # TODO: define not using API
     @property
     def backupPath(self):
-        """path to directory containing  backup Project"""
-        backupRepository = self._wrappedData.parent.findFirstRepository(name="backup")
-
-        if not backupRepository:
-            self._logger.warning('Warning: no backup path set, so no backup done')
-            return
-
-        backupUrl = backupRepository.url
-        backupPath = backupUrl.path
-        return backupPath
+        """path to directory containing  backup Project
+        """
+        from ccpn.framework.PathsAndUrls import CCPN_BACKUP_SUFFIX, CCPN_DIRECTORY_SUFFIX
+        _dir, _base, _suffix = self.projectPath.parent.split3()
+        bPath = _dir / _base + CCPN_BACKUP_SUFFIX + CCPN_DIRECTORY_SUFFIX
+        return bPath
 
     #-----------------------------------------------------------------------------------------
     # Implementation methods
     #-----------------------------------------------------------------------------------------
 
-    def __init__(self, wrappedData: ApiNmrProject):
-        """ Special init for root (Project) object
-
+    def __init__(self, wrappedData: ApiNmrProject, path) -> Project:
+        """ Init for Project object
         NB Project is NOT complete before the _initProject function is run.
+        :param path: Path to the project; name is extracted from it
         """
 
         if not isinstance(wrappedData, ApiNmrProject):
             raise ValueError("Project initialised with %s, should be ccp.nmr.Nmr.NmrProject."
                              % wrappedData)
+
+        self._path = path
+        if not aPath(path).exists():
+            raise FileNotFoundError(f'Path "{path}" does not exist')
+        self._checkProjectSubDirectories()
 
         # Define linkage attributes
         self._project = self
@@ -430,8 +433,6 @@ class Project(AbstractWrapperObject):
 
         # reference to special v3 core lists without abstractWrapperObject
         self._collectionList = None
-
-        self._checkProjectSubDirectories()
 
     @property
     def application(self):
@@ -716,10 +717,13 @@ class Project(AbstractWrapperObject):
         self._queryNextUniqueIdValue(className)
         self._wrappedData._nextUniqueIdValues[className] = int(value)
 
-    @property
-    def _parent(self) -> AbstractWrapperObject:
-        """Parent (containing) object."""
-        return None
+    # def saveAs(self, newPath:str = None, overwrite:bool = False):
+    #     """Save project to newPath (optionally overwrite);
+    #        Derive the name from newPath
+    #        :param newPath: new path for storing project files
+    #        :param overwrite: flag to overwrite if path exists
+    #     """
+    #     pass
 
     def save(self, newPath: str = None, changeBackup: bool = True,
              createFallback: bool = False, overwriteExisting: bool = False,
@@ -813,7 +817,8 @@ class Project(AbstractWrapperObject):
     def path(self) -> str:
         """return absolute path to directory containing Project
         """
-        return apiIo.getRepositoryPath(self._wrappedData.root, 'userData')
+        # return apiIo.getRepositoryPath(self._wrappedData.root, 'userData')
+        return self._path
 
     @logCommand('project.')
     def deleteObjects(self, *objs: typing.Sequence[typing.Union[str, Pid.Pid, AbstractWrapperObject]]):

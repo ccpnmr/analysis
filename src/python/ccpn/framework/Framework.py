@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-18 12:43:42 +0000 (Wed, January 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-18 17:13:35 +0000 (Wed, January 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -492,11 +492,13 @@ class Framework(NotifierBase, GuiBase):
     def _initialiseProject(self, newProject: Project):
         """Initialise a project and set up links and objects that involve it
         """
-        from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise, getDefaultSpectrumColours, _getDefaultOrdering
 
         # # Linkages; need to be here as downstream code depends on it
         self._project = newProject
         newProject._application = self
+
+        newProject._resetUndo(debug=self._debugLevel <= Logging.DEBUG2,
+                              application=self)
 
         # Logging
         logger = getLogger()
@@ -1106,7 +1108,7 @@ class Framework(NotifierBase, GuiBase):
         project = _loadProject(application=self, path=str(path))
         self._initialiseProject(project)  # This also sets the linkages
 
-        # Save the result
+        # Now that all has been restored and updated: save the result
         try:
             project.save()
             getLogger().info('==> Saved %s as "%s"' % (project, project.path))

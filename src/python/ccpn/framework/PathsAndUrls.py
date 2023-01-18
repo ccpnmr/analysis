@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:07 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-18 17:13:35 +0000 (Wed, January 18, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -106,7 +106,7 @@ projectStateLayoutFileName      = 'layout_3_1.json'
 # others; also defined in util.Path and from there imported in Api and Implementation
 # DO NOT REMOVE and keep in sync (for circular import reasons) (for now!)
 CCPN_DIRECTORY_SUFFIX    = '.ccpn'
-CCPN_BACKUP_SUFFIX       = '_backup'  # used by ApiLoader; deprecated
+CCPN_BACKUP_SUFFIX       = '_backup'  # used by Project, ApiLoader; deprecated
 
 # subdirectories of Projects
 CCPN_API_DIRECTORY       = 'ccpnv3'

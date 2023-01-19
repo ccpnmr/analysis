@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-18 17:13:35 +0000 (Wed, January 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-19 09:55:07 +0000 (Thu, January 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -355,42 +355,47 @@ class Project(AbstractWrapperObject):
     # Implementation methods
     #-----------------------------------------------------------------------------------------
 
-    def __init__(self, wrappedData: ApiNmrProject, path) -> Project:
-        """ Init for Project object
+    def __init__(self, xmlLoader) -> Project:
+        """ Init for Project object using data from xmlLoader
         NB Project is NOT complete before the _initProject function is run.
         :param path: Path to the project; name is extracted from it
         """
+        from sandbox.Geerten.XmlLoaderTest.XmlLoader import XmlLoader
+        if not isinstance(xmlLoader, XmlLoader):
+            raise ValueError(f'Ex[ected XmlLoader instance, got {xmlLoader}')
 
-        if not isinstance(wrappedData, ApiNmrProject):
-            raise ValueError("Project initialised with %s, should be ccp.nmr.Nmr.NmrProject."
-                             % wrappedData)
+        if not xmlLoader.path.exists():
+            raise FileNotFoundError(f'Path "{xmlLoader.path}" does not exist')
 
-        self._path = path
-        if not aPath(path).exists():
-            raise FileNotFoundError(f'Path "{path}" does not exist')
+        if xmlLoader.apiNmrProject is None or not isinstance(xmlLoader.apiNmrProject, ApiNmrProject):
+            raise RuntimeError('No valid ApiNmrProject defined')
+
+        # Setup object handling dictionaries
+        self._data2Obj = {}
+        self._pid2Obj = {}
+
+        #==> AbstractWrapper defines:
+        # linkage attributes
+        # self._project = self
+        # self._wrappedData = wrappedData
+        # Tuple to hold children that explicitly need finalising after atomic operations
+        # self._finaliseChildren = []
+        # self._childActions = []
+        AbstractWrapperObject.__init__(self, project=self, wrappedData=xmlLoader.apiNmrProject)
+
+        self._path = xmlLoader.path.asString()
         self._checkProjectSubDirectories()
-
-        # Define linkage attributes
-        self._project = self
-        self._wrappedData = wrappedData
 
         # self._appBase = None (delt with below)
         # Reference to application; defined by Framework
         self._application = None
 
-        # setup object handling dictionaries
-        self._data2Obj = {wrappedData: self}
-        self._pid2Obj = {}
-
-        self._id = wrappedData.name
+        self._name = xmlLoader.name
+        self._id = self._name
         self._resetIds()
 
-        # reference to XmlLoader instance; set by _newProject or _loadProject
-        self._xmlLoader = None
-
-        # tuple to hold children that explicitly need finalising after atomic operations
-        self._finaliseChildren = []
-        self._childActions = []
+        # reference to XmlLoader instance;
+        self._xmlLoader = xmlLoader
 
         # Set up notification machinery
         # Active notifiers - saved for later cleanup. CORE APPLICATION ONLY
@@ -717,15 +722,44 @@ class Project(AbstractWrapperObject):
         self._queryNextUniqueIdValue(className)
         self._wrappedData._nextUniqueIdValues[className] = int(value)
 
-    # def saveAs(self, newPath:str = None, overwrite:bool = False):
-    #     """Save project to newPath (optionally overwrite);
-    #        Derive the name from newPath
-    #        :param newPath: new path for storing project files
-    #        :param overwrite: flag to overwrite if path exists
-    #     """
-    #     pass
+    def saveAs(self, newPath:str = None, overwrite:bool = False):
+        """Save project to newPath (optionally overwrite);
+           Derive the name from newPath
+           :param newPath: new path for storing project files
+           :param overwrite: flag to overwrite if path exists
+        """
+        from sandbox.Geerten.XmlLoaderTest.XmlLoader import XmlLoader
+        _newPath = aPath(newPath)
+        _newPath.mkdir(parents=True, exist_ok=overwrite)
+        _newXmlLoader = XmlLoader.newFromLoader(self.xmlLoader, path=_newPath)
+        self.xmlLoader = _newXmlLoader
+        self._path = newPath
 
-    def save(self, newPath: str = None, changeBackup: bool = True,
+    def save(self, comment='regular save'):
+        """Save project; add optional comment to save records
+        """
+        # Update the spectrum internal settings
+        for spectrum in self.spectra:
+            spectrum._saveObject()
+
+        try:
+            apiStatus = self._getAPIObjectsStatus()
+            if apiStatus.invalidObjects:
+                # if deleteInvalidObjects:
+                # delete here ...
+                # run save and apiStatus again. Ensure nothing else has been compromised on the deleting process
+                # else:
+                errorMsg = '\n '.join(apiStatus.invalidObjectsErrors)
+                getLogger().critical('Found compromised items. Project might be left in an invalid state. %s' % errorMsg)
+                raise RuntimeError(errorMsg)
+
+        except Exception as es:
+            getLogger().warning('Error checking project status: %s' % str(es))
+
+        self._xmlLoader.saveUserData(createFallback=True)
+        self._saveHistory.addSaveRecord(version=self._objectVersion, comment=comment)
+
+    def save2(self, newPath: str = None, changeBackup: bool = True,
              createFallback: bool = False, overwriteExisting: bool = False,
              checkValid: bool = False, changeDataLocations: bool = False) -> bool:
         """Save project with all data, optionally to new location or with new name.
@@ -801,7 +835,7 @@ class Project(AbstractWrapperObject):
     @property
     def name(self) -> str:
         """name of Project"""
-        return self._wrappedData.root.name
+        return self._name
 
     @classmethod
     def _checkName(cls, name, correctName=True):

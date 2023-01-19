@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-10 14:30:44 +0000 (Tue, January 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-19 17:09:26 +0000 (Thu, January 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -170,7 +170,7 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
 
         self.setDefaultParameters()
 
-        with open(str(params), mode='r', encoding='utf-8') as fp:
+        with self._parameterFile.open(mode='r', encoding='utf-8') as fp:
             
             dim = 0
             comments = []

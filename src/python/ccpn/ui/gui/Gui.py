@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-19 11:47:50 +0000 (Thu, January 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-19 17:09:26 +0000 (Thu, January 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -450,6 +450,8 @@ class Gui(Ui):
         """Create a new project instance with name; create default project if name=None
         :return a Project instance or None
         """
+        from ccpn.core.lib.ProjectLib import checkProjectName
+
         oldMainWindowPos = self.mainWindow.pos()
         # if not self.project.isTemporary:
         if self.project and (self.project._undo is None or self.project._undo.isDirty()):
@@ -458,7 +460,7 @@ class Gui(Ui):
             if not (_ok := MessageDialog.showYesNo('New Project', message, parent=self.mainWindow)):
                 return
 
-        if (_name := Project._checkName(name, correctName=True)) != name:
+        if (_name := checkProjectName(name, correctName=True)) != name:
             MessageDialog.showInfo('New Project', f'Project name changed from "{name}" to "{_name}"\nSee console/log for details', parent=self)
 
         with catchExceptions(errorStringTemplate='Error creating new project: %s'):
@@ -588,6 +590,7 @@ class Gui(Ui):
             self.mainWindow.deleteLater()
             self.mainWindow = None
 
+    @logCommand('application.')
     def saveProjectAs(self, newPath=None, overwrite:bool=False) -> bool:
         """Opens save Project to newPath.
         Optionally open file dialog.
@@ -595,6 +598,8 @@ class Gui(Ui):
         :param overwrite: flag to indicate overwriting of existing path
         :return True if successful
         """
+        from ccpn.core.lib.ProjectLib import checkProjectName
+
         oldPath = self.project.path
         if newPath is None:
             if (newPath := _getSaveDirectory(self.mainWindow)) is None:
@@ -616,18 +621,17 @@ class Gui(Ui):
 
         # check the project name derived from path
         newName = newPath.basename
-        if (_name := self.project._checkName(newName, correctName=True)) != newName:
+        if (_name := checkProjectName(newName, correctName=True)) != newName:
             newPath = (newPath.parent / _name).assureSuffix(CCPN_EXTENSION)
             MessageDialog.showInfo(title, f'Project name changed from "{newName}" to "{_name}"\nSee console/log for details', parent=self)
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
-            with logCommandManager('application.', 'saveProjectAs', newPath, overwrite=overwrite):
-                with MessageDialog.progressManager(self.mainWindow, f'Saving project as {newPath} ... '):
-                    if not self.application._saveProjectAs(newPath=newPath, overwrite=True):
-                        txt = "Saving project to %s aborted" % newPath
-                        getLogger().warning(txt)
-                        MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
-                        return False
+            with MessageDialog.progressManager(self.mainWindow, f'Saving project as {newPath} ... '):
+                if not self.application._saveProjectAs(newPath=newPath, overwrite=True):
+                    txt = "Saving project to %s aborted" % newPath
+                    getLogger().warning(txt)
+                    MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
+                    return False
 
         self.mainWindow._updateWindowTitle()
         self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
@@ -653,7 +657,7 @@ class Gui(Ui):
                 if not self.application._saveProject():
                     return False
 
-        successMessage = '==> Project successfully saved to "%s"' % self.project.path
+        successMessage = 'Project successfully saved to "%s"' % self.project.path
         MessageDialog.showInfo("Project Save", successMessage, parent=self.mainWindow)
         self.mainWindow.statusBar().showMessage(successMessage)
         getLogger().info(successMessage)

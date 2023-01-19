@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-19 11:47:50 +0000 (Thu, January 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-19 17:09:26 +0000 (Thu, January 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -55,7 +55,6 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
-from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX
 from ccpn.framework.PathsAndUrls import \
     CCPN_ARCHIVES_DIRECTORY, \
     CCPN_STATE_DIRECTORY, \
@@ -148,6 +147,9 @@ class Project(AbstractWrapperObject):
 
     # Needs to know this for restoring the GuiSpectrum Module. Could be removed after decoupling Gui and Data!
     _isNew = None
+
+    #TODO: do we still have this limitation?
+    _MAX_PROJECT_NAME_LENGTH = 32
 
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure (incomplete)
@@ -445,16 +447,6 @@ class Project(AbstractWrapperObject):
         """name of Project"""
         return self._name
 
-    @classmethod
-    def _checkName(cls, name, correctName=True):
-        """Checks name
-
-        :param name: name to be checked
-        :param correctName: flag to correct
-        :return: name (optionally corrected) or None
-        """
-        return apiIo._checkProjectName(name=name, correctName=correctName)
-
     @property
     def path(self) -> str:
         """return absolute path to directory containing Project
@@ -480,8 +472,6 @@ class Project(AbstractWrapperObject):
     def isTemporary(self):
         """Return true if the project is temporary, i.e., opened as a default project
         """
-        # apiProject = self._wrappedData.root
-        # return hasattr(apiProject, '_temporaryDirectory')
         return self._isTemporary
 
     @property
@@ -711,8 +701,8 @@ class Project(AbstractWrapperObject):
         """
         from sandbox.Geerten.XmlLoaderTest.XmlLoader import XmlLoader
         _newPath = aPath(newPath).assureSuffix(CCPN_DIRECTORY_SUFFIX)
-        _newPath.mkdir(parents=True, exist_ok=overwrite)
-        _newXmlLoader = XmlLoader.newFromLoader(self._xmlLoader, path=_newPath)
+        # _newPath.mkdir(parents=True, exist_ok=overwrite)
+        _newXmlLoader = XmlLoader.newFromLoader(self._xmlLoader, path=_newPath, create=True)
         self._xmlLoader = _newXmlLoader
         self._path = _newXmlLoader.path.asString()
         self._name = _newXmlLoader.name

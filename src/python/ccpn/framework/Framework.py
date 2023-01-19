@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-19 11:47:50 +0000 (Thu, January 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-19 17:09:26 +0000 (Thu, January 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -910,15 +910,16 @@ class Framework(NotifierBase, GuiBase):
 
     def _newProject(self, name: str = 'default') -> Project:
         """Create new, empty project with name
-        All projects created as temporary
+        All new projects are created as temporary, to be saved later at another location
         :return a Project instance
         """
         # local import to avoid cycles
         from ccpn.core.Project import _newProject
+        from ccpn.core.lib.ProjectLib import checkProjectName
 
         if name is None:
             raise ValueError(f'Undefined name for new project')
-        if Project._checkName(name, correctName=False) is None:
+        if checkProjectName(name, correctName=False) is None:
             raise ValueError(f'Invalid project name "{name}"; check log/console for details')
 
         # Get a path in the temporary directory
@@ -1215,11 +1216,12 @@ class Framework(NotifierBase, GuiBase):
         CCPNINTERNAL: called from NefDataLoader.load()
         """
         from ccpn.core.Project import DEFAULT_CHEMICALSHIFTLIST
+        from ccpn.core.lib.ProjectLib import checkProjectName
 
         TOBEDELETED = '_toBeDeleted'
 
         if _newProject := dataLoader.createNewProject:
-            name = Project._checkName(dataLoader.nefImporter.getName(), correctName=True)
+            name = checkProjectName(dataLoader.nefImporter.getName(), correctName=True)
             project = self._newProject(name=name)
         else:
             project = self.project

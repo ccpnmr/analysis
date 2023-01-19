@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-18 17:13:35 +0000 (Wed, January 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-19 11:47:50 +0000 (Thu, January 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -947,28 +947,42 @@ class Framework(NotifierBase, GuiBase):
         """
         return self.ui.loadProject(path)
 
-    def _saveProject(self, newPath=None, createFallback=True, overwriteExisting=False) -> bool:
+    def _saveProjectAs(self, newPath=None, overwrite=False) -> bool:
+        """Save project to newPath (optionally overwrite)
+        :return True if successful
+        """
+        if self.preferences.general.keepSpectraInsideProject:
+            self.project.copySpectraToProject()
+
+        try:
+            self.project.saveAs(newPath=newPath, overwrite=overwrite)
+            Layout.saveLayoutToJson(self.ui.mainWindow)
+            self.current._dumpStateToFile(self.statePath)
+            self._getUndo().markSave()
+
+        except Exception as es:
+            failMessage = f'saveAs error: {es}'
+            getLogger().warning(failMessage)
+            return False
+
+        return True
+
+    def _saveProject(self) -> bool:
         """Save project to newPath and return True if successful
         """
         if self.preferences.general.keepSpectraInsideProject:
             self.project.copySpectraToProject()
 
-        successful = self.project.save(newPath=newPath, createFallback=createFallback,
-                                       overwriteExisting=overwriteExisting)
-        if not successful:
-            failMessage = '==> Project save failed'
-            getLogger().warning(failMessage)
-            self.ui.mainWindow.statusBar().showMessage(failMessage)
-            return False
-
-        self._getUndo().markSave()
-
         try:
+            self.project.save()
             Layout.saveLayoutToJson(self.ui.mainWindow)
-        except Exception as e:
-            getLogger().warning('Unable to save Layout %s' % e)
+            self.current._dumpStateToFile(self.statePath)
+            self._getUndo().markSave()
 
-        self.current._dumpStateToFile(self.statePath)
+        except Exception as es:
+            failMessage = f'saveAs: unable to save {es}'
+            getLogger().warning(failMessage)
+            return False
 
         return True
 

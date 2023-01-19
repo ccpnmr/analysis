@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-19 09:55:07 +0000 (Thu, January 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-19 11:47:50 +0000 (Thu, January 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -55,7 +55,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
-from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
+from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX
 from ccpn.framework.PathsAndUrls import \
     CCPN_ARCHIVES_DIRECTORY, \
     CCPN_STATE_DIRECTORY, \
@@ -64,7 +64,8 @@ from ccpn.framework.PathsAndUrls import \
     CCPN_PLUGINS_DIRECTORY, \
     CCPN_SCRIPTS_DIRECTORY, \
     CCPN_SUB_DIRECTORIES, \
-    CCPN_BACKUPS_DIRECTORY
+    CCPN_BACKUPS_DIRECTORY, \
+    CCPN_DIRECTORY_SUFFIX
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
@@ -145,10 +146,6 @@ class Project(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiNmrProject._metaclass.qualifiedName()
 
-    # Top level mapping dictionaries:
-    # pid to object and ccpnData to object
-    #__slots__ = ['_pid2Obj', '_data2Obj']
-
     # Needs to know this for restoring the GuiSpectrum Module. Could be removed after decoupling Gui and Data!
     _isNew = None
 
@@ -163,98 +160,98 @@ class Project(AbstractWrapperObject):
         return None
 
     @property
-    def spectra(self):
+    def spectra(self) -> list:
         """STUB: hot-fixed later"""
-        return ()
+        return []
 
     @property
-    def peakLists(self):
+    def peakLists(self) -> list:
         """STUB: hot-fixed later"""
-        return ()
+        return []
 
     @property
-    def peaks(self):
+    def peaks(self) -> list:
         """STUB: hot-fixed later"""
-        return ()
+        return []
 
     @property
-    def multipletLists(self):
+    def multipletLists(self) -> list:
         """STUB: hot-fixed later"""
-        return ()
+        return []
 
     @property
-    def integralLists(self):
+    def integralLists(self) -> list:
         """STUB: hot-fixed later"""
-        return ()
+        return []
 
     @property
-    def spectrumViews(self):
+    def spectrumViews(self) -> list:
         """STUB: hot-fixed later"""
-        return ()
+        return []
 
     @property
-    def chemicalShiftLists(self):
+    def chemicalShiftLists(self) -> list:
         """STUB: hot-fixed later"""
-        return None
+        return []
 
     @property
-    def chains(self):
+    def chains(self) -> list:
         """STUB: hot-fixed later"""
-        return None
+        return []
 
     @property
-    def restraintTables(self):
+    def restraintTables(self) -> list:
         """STUB: hot-fixed later"""
-        return None
+        return []
 
     @property
-    def violationTables(self):
+    def violationTables(self) -> list:
         """STUB: hot-fixed later"""
-        return None
+        return []
 
     @property
-    def samples(self):
+    def samples(self) -> list:
         """STUB: hot-fixed later"""
-        return None
+        return []
 
     @property
-    def substances(self):
+    def substances(self) -> list:
         """STUB: hot-fixed later"""
-        return None
+        return []
 
     @property
-    def nmrChains(self):
+    def nmrChains(self) -> list:
         """STUB: hot-fixed later"""
-        return None
+        return []
 
     @property
-    def structureData(self):
+    def structureData(self) -> list:
         """STUB: hot-fixed later"""
-        return None
+        return []
 
     @property
-    def complexes(self):
+    def complexes(self) -> list:
         """STUB: hot-fixed later"""
-        return None
+        return []
 
     @property
-    def spectrumGroups(self):
+    def spectrumGroups(self) -> list:
         """STUB: hot-fixed later"""
-        return None
+        return []
 
     @property
-    def notes(self):
+    def notes(self) -> list:
         """STUB: hot-fixed later"""
-        return None
+        return []
+
+    # @property
+    # def _peakClusters(self) -> list:
+    #     """STUB: hot-fixed later"""
+    #     return []
 
     @property
-    def _peakClusters(self):
-        """STUB: hot-fixed later"""
-        return None
-
-    @property
-    def chemicalShifts(self):
-        """Return the list of chemicalShifts in the project
+    def chemicalShifts(self) -> list:
+        """:return the list of chemicalShifts in the project
         """
         _shifts = []
         for shiftList in self.chemicalShiftLists:
@@ -262,8 +259,8 @@ class Project(AbstractWrapperObject):
         return _shifts
 
     @property
-    def collections(self):
-        """Return the list of collections in the project
+    def collections(self) -> list:
+        """:return the list of collections in the project
         """
         return self._collectionList.collections
 
@@ -376,11 +373,11 @@ class Project(AbstractWrapperObject):
 
         #==> AbstractWrapper defines:
         # linkage attributes
-        # self._project = self
-        # self._wrappedData = wrappedData
+        #   self._project = self
+        #   self._wrappedData = wrappedData
         # Tuple to hold children that explicitly need finalising after atomic operations
-        # self._finaliseChildren = []
-        # self._childActions = []
+        #   self._finaliseChildren = []
+        #   self._childActions = []
         AbstractWrapperObject.__init__(self, project=self, wrappedData=xmlLoader.apiNmrProject)
 
         self._path = xmlLoader.path.asString()
@@ -414,7 +411,7 @@ class Project(AbstractWrapperObject):
 
         # api 'change' notification blanking level - to allow for api 'change' call to be
         # disabled in the _modifiedApiObject method.
-        # To be used with the apiNotificationBlanking contact manager; e.g.
+        # To be used with the apiNotificationBlanking context manager; e.g.
         # with apiNotificationBlanking():
         #   do something
         #
@@ -438,6 +435,32 @@ class Project(AbstractWrapperObject):
 
         # reference to special v3 core lists without abstractWrapperObject
         self._collectionList = None
+
+    #-----------------------------------------------------------------------------------------
+    # Attributes
+    #-----------------------------------------------------------------------------------------
+
+    @property
+    def name(self) -> str:
+        """name of Project"""
+        return self._name
+
+    @classmethod
+    def _checkName(cls, name, correctName=True):
+        """Checks name
+
+        :param name: name to be checked
+        :param correctName: flag to correct
+        :return: name (optionally corrected) or None
+        """
+        return apiIo._checkProjectName(name=name, correctName=correctName)
+
+    @property
+    def path(self) -> str:
+        """return absolute path to directory containing Project
+        """
+        # return apiIo.getRepositoryPath(self._wrappedData.root, 'userData')
+        return self._path
 
     @property
     def application(self):
@@ -513,6 +536,10 @@ class Project(AbstractWrapperObject):
 
         self._wrappedData.data = value
 
+    #-----------------------------------------------------------------------------------------
+    # Various, init, restore
+    #-----------------------------------------------------------------------------------------
+
     def _checkProjectSubDirectories(self):
         """if need be, create all project subdirectories
         """
@@ -575,6 +602,10 @@ class Project(AbstractWrapperObject):
 
         # don't need to call super here
         return project
+
+    #-----------------------------------------------------------------------------------------
+    # Save, SaveAs, Close
+    #-----------------------------------------------------------------------------------------
 
     def _close(self):
         self.close()
@@ -672,21 +703,61 @@ class Project(AbstractWrapperObject):
         # del self._wrappedData
         self.__dict__.clear()
 
-    def __repr__(self):
-        """String representation"""
-        if self.isDeleted:
-            return "<Project:-deleted-, isDeleted=True>"
-        else:
-            return f"<Project:{self.name}>"
+    def saveAs(self, newPath:str, overwrite:bool = False):
+        """Save project to newPath (optionally overwrite);
+           Derive the new project name from newPath
+           :param newPath: new path for storing project files
+           :param overwrite: flag to overwrite if path exists
+        """
+        from sandbox.Geerten.XmlLoaderTest.XmlLoader import XmlLoader
+        _newPath = aPath(newPath).assureSuffix(CCPN_DIRECTORY_SUFFIX)
+        _newPath.mkdir(parents=True, exist_ok=overwrite)
+        _newXmlLoader = XmlLoader.newFromLoader(self._xmlLoader, path=_newPath)
+        self._xmlLoader = _newXmlLoader
+        self._path = _newXmlLoader.path.asString()
+        self._name = _newXmlLoader.name
+        self._checkProjectSubDirectories()
+        self.save(comment='saveAs')
 
-    def __str__(self):
-        """String representation"""
-        if self.isDeleted:
-            return "<PR:-deleted-, isDeleted=True>"
-        else:
-            return f"<PR:{self.name}>"
+        # check for application and Gui;
+        if self.application and self.application.hasGui:
+            self.application.mainWindow.sideBar.setProjectName(self)
 
+    def save(self, comment='regular save'):
+        """Save project; add optional comment to save records
+        """
+        # Update the spectrum internal settings
+        for spectrum in self.spectra:
+            spectrum._saveObject()
+
+        try:
+            apiStatus = self._getAPIObjectsStatus()
+            if apiStatus.invalidObjects:
+                # if deleteInvalidObjects:
+                # delete here ...
+                # run save and apiStatus again. Ensure nothing else has been compromised on the deleting process
+                # else:
+                errorMsg = '\n '.join(apiStatus.invalidObjectsErrors)
+                getLogger().critical('Found compromised items. Project might be left in an invalid state. %s' % errorMsg)
+                raise RuntimeError(errorMsg)
+
+        except Exception as es:
+            getLogger().warning('Error checking project status: %s' % str(es))
+
+        self._xmlLoader.saveUserData(keepFallBack=True)
+        self._saveHistory.addSaveRecord(comment=f'{self.name}: {comment}')
+        self._saveHistory.save()
+        self._isTemporary = False
+
+    #-----------------------------------------------------------------------------------------
     # CCPN properties
+    #-----------------------------------------------------------------------------------------
+
+    @property
+    def _apiNmrProject(self) -> ApiNmrProject:
+        """API equivalent to object: NmrProject"""
+        return self._wrappedData
+
     @property
     def _key(self) -> str:
         """Project id: Globally unique identifier (guid)"""
@@ -722,137 +793,6 @@ class Project(AbstractWrapperObject):
         self._queryNextUniqueIdValue(className)
         self._wrappedData._nextUniqueIdValues[className] = int(value)
 
-    def saveAs(self, newPath:str = None, overwrite:bool = False):
-        """Save project to newPath (optionally overwrite);
-           Derive the name from newPath
-           :param newPath: new path for storing project files
-           :param overwrite: flag to overwrite if path exists
-        """
-        from sandbox.Geerten.XmlLoaderTest.XmlLoader import XmlLoader
-        _newPath = aPath(newPath)
-        _newPath.mkdir(parents=True, exist_ok=overwrite)
-        _newXmlLoader = XmlLoader.newFromLoader(self.xmlLoader, path=_newPath)
-        self.xmlLoader = _newXmlLoader
-        self._path = newPath
-
-    def save(self, comment='regular save'):
-        """Save project; add optional comment to save records
-        """
-        # Update the spectrum internal settings
-        for spectrum in self.spectra:
-            spectrum._saveObject()
-
-        try:
-            apiStatus = self._getAPIObjectsStatus()
-            if apiStatus.invalidObjects:
-                # if deleteInvalidObjects:
-                # delete here ...
-                # run save and apiStatus again. Ensure nothing else has been compromised on the deleting process
-                # else:
-                errorMsg = '\n '.join(apiStatus.invalidObjectsErrors)
-                getLogger().critical('Found compromised items. Project might be left in an invalid state. %s' % errorMsg)
-                raise RuntimeError(errorMsg)
-
-        except Exception as es:
-            getLogger().warning('Error checking project status: %s' % str(es))
-
-        self._xmlLoader.saveUserData(createFallback=True)
-        self._saveHistory.addSaveRecord(version=self._objectVersion, comment=comment)
-
-    def save2(self, newPath: str = None, changeBackup: bool = True,
-             createFallback: bool = False, overwriteExisting: bool = False,
-             checkValid: bool = False, changeDataLocations: bool = False) -> bool:
-        """Save project with all data, optionally to new location or with new name.
-
-        ;return True if save succeeded otherwise return False (or throw error)
-        """
-        # Update the spectrum internal settings
-        for spectrum in self.spectra:
-            spectrum._saveObject()
-
-        # path is empty for save under the same name
-        if newPath:
-            # check validity of the newPath
-            newPath = aPath(newPath)
-            newPath.assureSuffix(CCPN_EXTENSION)
-            if newPath.exists() and not overwriteExisting:
-                raise ValueError('Cannot overwrite existing file "%s"' % newPath)
-
-            # check the project name derived from path
-            newName = newPath.basename
-            if (_name := self._checkName(newName, correctName=False)) is None:
-                raise ValueError(f'Project name "{newName}" (derived from path) is invalid; see console/log for details')
-
-            path = str(newPath)
-            if len(path) > 1024:
-                raise ValueError('There is a limit (1024) to the length of the path (%s)' % path)
-            _saveAs = True
-        else:
-            path = str(self.path)
-            _saveAs = False
-
-        try:
-            apiStatus = self._getAPIObjectsStatus()
-            if apiStatus.invalidObjects:
-                # if deleteInvalidObjects:
-                # delete here ...
-                # run save and apiStatus again. Ensure nothing else has been compromised on the deleting process
-                # else:
-                errorMsg = '\n '.join(apiStatus.invalidObjectsErrors)
-                getLogger().critical('Found compromised items. Project might be left in an invalid state. %s' % errorMsg)
-                # raise ValueError(error)
-        except Exception as es:
-            getLogger().warning('Error checking project status: %s' % str(es))
-
-        # don't check valid inside this routine as it is not optimised and only results in a crash. Use apiStatus object.
-        savedOk = apiIo.saveProject(self._wrappedData.root, newPath=path,
-                                    changeBackup=changeBackup, createFallback=createFallback,
-                                    overwriteExisting=overwriteExisting, checkValid=False,
-                                    changeDataLocations=changeDataLocations)
-        if savedOk:
-            self._resetIds()
-            # check for application and Gui; might not yet be there (e.g. on save of converted V2
-            # project)
-            if self.application and self.application.hasGui:
-                self.application.mainWindow.sideBar.setProjectName(self)
-
-            # store the version history in state sub-folder json file
-            if _saveAs:
-                self._checkProjectSubDirectories()
-                # create a new save history
-                self._saveHistory = newProjectSaveHistory(path)
-            else:
-                # find the old history or create a new one
-                self._saveHistory = fetchProjectSaveHistory(path)
-
-            # add a new record
-            self._saveHistory.addSaveRecord().save()
-
-            self._isTemporary = False
-
-        return savedOk
-
-    @property
-    def name(self) -> str:
-        """name of Project"""
-        return self._name
-
-    @classmethod
-    def _checkName(cls, name, correctName=True):
-        """Checks name
-
-        :param name: name to be checked
-        :param correctName: flag to correct
-        :return: name (optionally corrected) or None
-        """
-        return apiIo._checkProjectName(name=name, correctName=correctName)
-
-    @property
-    def path(self) -> str:
-        """return absolute path to directory containing Project
-        """
-        # return apiIo.getRepositoryPath(self._wrappedData.root, 'userData')
-        return self._path
 
     @logCommand('project.')
     def deleteObjects(self, *objs: typing.Sequence[typing.Union[str, Pid.Pid, AbstractWrapperObject]]):
@@ -866,12 +806,11 @@ class Project(AbstractWrapperObject):
                 if obj and not obj.isDeleted:
                     obj.delete()
 
-    @property
-    def _apiNmrProject(self) -> ApiNmrProject:
-        """API equivalent to object: NmrProject"""
-        return self._wrappedData
 
+    #-----------------------------------------------------------------------------------------
     # Undo machinery
+    #-----------------------------------------------------------------------------------------
+
     @property
     def _undo(self):
         """undo stack for Project. Implementation attribute"""
@@ -923,6 +862,8 @@ class Project(AbstractWrapperObject):
         else:
             undo.decreaseWaypointBlocking()
             self._logger.debug("Waypoint setting unblocked")
+
+    #-----------------------------------------------------------------------------------------
 
     # Should be removed:
     @property
@@ -1692,14 +1633,6 @@ class Project(AbstractWrapperObject):
 
         return getCcpCodeData(self._apiNmrProject, ccpCode, molType='protein', atomType=atomType)
 
-    # def packageProject(self, filePrefix, includeBackups=True, includeLogs=True):
-    #     """Package the project
-    #     """
-    #     from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-    #
-    #     return apiIo.packageProject(self._wrappedData.parent, filePrefix,
-    #                                 includeBackups=includeBackups, includeLogs=includeLogs)
-
     @logCommand('project.')
     def saveToArchive(self) -> Path:
         """Make new time-stamped archive of project
@@ -2276,6 +2209,22 @@ class Project(AbstractWrapperObject):
         from ccpn.core.Collection import _fetchCollection
 
         return _fetchCollection(self, name=name)
+
+    def __repr__(self):
+        """String representation"""
+        if self.isDeleted:
+            return "<Project:-deleted-, isDeleted=True>"
+        else:
+            return f"<Project:{self.name}>"
+
+    def __str__(self):
+        """String representation"""
+        if self.isDeleted:
+            return "<PR:-deleted-, isDeleted=True>"
+        else:
+            return f"<PR:{self.name}>"
+
+#End class Project
 
 
 #=========================================================================================

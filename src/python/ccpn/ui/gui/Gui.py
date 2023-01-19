@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-13 11:06:11 +0000 (Fri, January 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-19 11:47:50 +0000 (Thu, January 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -622,29 +622,23 @@ class Gui(Ui):
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
             with logCommandManager('application.', 'saveProjectAs', newPath, overwrite=overwrite):
-                with MessageDialog.progressManager(self.mainWindow, f'Saving project {newPath} ... '):
-                    if not self.application._saveProject(newPath=newPath,
-                                                         createFallback=False,
-                                                         overwriteExisting=True):
+                with MessageDialog.progressManager(self.mainWindow, f'Saving project as {newPath} ... '):
+                    if not self.application._saveProjectAs(newPath=newPath, overwrite=True):
                         txt = "Saving project to %s aborted" % newPath
                         getLogger().warning(txt)
                         MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
                         return False
 
-                self.mainWindow._updateWindowTitle()
-                self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
-                self.mainWindow._fillRecentProjectsMenu() # Update the menu
+        self.mainWindow._updateWindowTitle()
+        self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
+        self.mainWindow._fillRecentProjectsMenu() # Update the menu
 
-                successMessage = 'Project successfully saved to "%s"' % self.project.path
-                MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
-                self.mainWindow.statusBar().showMessage(successMessage)
-                getLogger().info(successMessage)
+        successMessage = 'Project successfully saved to "%s"' % self.project.path
+        MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
+        self.mainWindow.statusBar().showMessage(successMessage)
+        getLogger().info(successMessage)
 
-                return True
-
-            # PyCharm thinks the next statement is unreachable; not true (?) as the with
-            # catchExceptions does yield and finish
-            return False
+        return True
 
     @logCommand('application.')
     def saveProject(self) -> bool:
@@ -656,12 +650,11 @@ class Gui(Ui):
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
             with MessageDialog.progressManager(self.mainWindow, f'Saving project ... '):
-                if not self.application._saveProject(newPath=None,
-                                                     createFallback=True,
-                                                     overwriteExisting=True):
+                if not self.application._saveProject():
                     return False
 
         successMessage = '==> Project successfully saved to "%s"' % self.project.path
+        MessageDialog.showInfo("Project Save", successMessage, parent=self.mainWindow)
         self.mainWindow.statusBar().showMessage(successMessage)
         getLogger().info(successMessage)
 

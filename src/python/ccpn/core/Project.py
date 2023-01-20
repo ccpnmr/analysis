@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-19 17:09:26 +0000 (Thu, January 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-20 12:20:38 +0000 (Fri, January 20, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import functools
 # import os
-import re
 import typing
 import operator
 from typing import Sequence, Union, Optional, List
@@ -44,7 +43,7 @@ from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
 
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
-from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, fetchProjectSaveHistory, newProjectSaveHistory
+from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, newProjectSaveHistory
 from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
     inactivity, logCommandManager
 
@@ -359,7 +358,7 @@ class Project(AbstractWrapperObject):
         NB Project is NOT complete before the _initProject function is run.
         :param path: Path to the project; name is extracted from it
         """
-        from sandbox.Geerten.XmlLoaderTest.XmlLoader import XmlLoader
+        from ccpn.core.lib.XmlLoader import XmlLoader
         if not isinstance(xmlLoader, XmlLoader):
             raise ValueError(f'Ex[ected XmlLoader instance, got {xmlLoader}')
 
@@ -605,66 +604,65 @@ class Project(AbstractWrapperObject):
         WARNING: project is irrecoverable after this
         """
         from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationEchoBlocking, apiNotificationBlanking
-        from contextlib import suppress
         from ccpn.core.lib.ContextManagers import progressHandler
 
-        # with self._xmlLoader.blockReading():
+        with self._xmlLoader.blockReading():
 
-        status = self._getAPIObjectsStatus(completeScan=True, onlyInvalids=False, checkValidity=False)
+            status = self._getAPIObjectsStatus(completeScan=True, onlyInvalids=False, checkValidity=False)
 
-        # reverse hierarchy to get lowest-level first, although not always perfect for cross-links
-        df = status.data.sort_values('hierarchy', ascending=False)
-        getLogger().debug(f'Purging {len(df)} API-items')
-        apiHint = 'None'  # for debug message
+            # reverse hierarchy to get lowest-level first, although not always perfect for cross-links
+            df = status.data.sort_values('hierarchy', ascending=False)
+            getLogger().debug(f'Purging {len(df)} API-items')
+            apiHint = 'None'  # for debug message
 
-        # block everything
-        with undoStackBlocking() as _:
-            with notificationEchoBlocking():
-                with apiNotificationBlanking():
+            # block everything
+            with undoStackBlocking() as _:
+                with notificationEchoBlocking():
+                    with apiNotificationBlanking():
 
-                    # override unnecessary warnings from root
-                    root = self._apiNmrProject.root
-                    root.override = True
+                        # override unnecessary warnings from root
+                        root = self._apiNmrProject.root
+                        root.override = True
 
-                    with progressHandler(title='busy', maximum=len(df) + 1,
-                                         text='Cleaning-up Project', autoClose=True, hideCancelButton=True) as progress:
+                        with progressHandler(title='busy', maximum=len(df) + 1,
+                                             text='Cleaning-up Project', autoClose=True, hideCancelButton=True) as progress:
 
-                        retries = []
-                        for cc, (ii, ob) in enumerate(df.iterrows()):
-                            # don't need to check cancelled
-                            # if 'close' clicked, will pop up again
-                            progress.setValue(cc)
+                            retries = []
+                            for cc, (ii, ob) in enumerate(df.iterrows()):
+                                # don't need to check cancelled
+                                # if 'close' clicked, will pop up again
+                                progress.setValue(cc)
 
-                            try:
-                                # errors only come from delete
-                                apiObj = ob['object']
+                                try:
+                                    # errors only come from delete
+                                    apiObj = ob['object']
 
-                                # override API to delete without checking state and notifiers :|
-                                apiObj.__dict__['isLoaded'] = True
-                                apiObj.__dict__['inConstructor'] = True
-                                if not apiObj.isDeleted:
-                                    # hierarchy may still delete bottom-level items
-                                    apiObj.delete()
+                                    # override API to delete without checking state and notifiers :|
+                                    apiObj.__dict__['isLoaded'] = True
+                                    apiObj.__dict__['inConstructor'] = True
+                                    if not apiObj.isDeleted:
+                                        # hierarchy may still delete bottom-level items
+                                        apiObj.delete()
 
-                            except Exception:
-                                # there might still be an issue with the removal order
-                                retries.append(apiObj)
+                                except Exception:
+                                    # there might still be an issue with the removal order
+                                    retries.append(apiObj)
 
-                        # perform a second pass to catch all the lowest-level items
-                        for apiObj in retries:
-                            try:
-                                apiHint = str(apiObj)
-                                # ignore deleted again
-                                if not apiObj.isDeleted:
-                                    apiObj.delete()
+                            # perform a second pass to catch all the lowest-level items
+                            for apiObj in retries:
+                                try:
+                                    apiHint = str(apiObj)
+                                    # ignore deleted again
+                                    if not apiObj.isDeleted:
+                                        apiObj.delete()
 
-                            except AttributeError:
-                                # errors shouldn't be an issue here, just NoneType, don't need to log
-                                pass
+                                except AttributeError:
+                                    # errors shouldn't be an issue here, just NoneType, don't need to log
+                                    pass
 
-                            except Exception as es:
-                                # only log anything weird
-                                getLogger().debug2(f'issue purging {apiHint}  -->  {es}')
+                                except Exception as es:
+                                    # only log anything weird
+                                    getLogger().debug2(f'issue purging {apiHint}  -->  {es}')
 
         getLogger().debug('done purge')
 
@@ -699,7 +697,7 @@ class Project(AbstractWrapperObject):
            :param newPath: new path for storing project files
            :param overwrite: flag to overwrite if path exists
         """
-        from sandbox.Geerten.XmlLoaderTest.XmlLoader import XmlLoader
+        from ccpn.core.lib.XmlLoader import XmlLoader
         _newPath = aPath(newPath).assureSuffix(CCPN_DIRECTORY_SUFFIX)
         # _newPath.mkdir(parents=True, exist_ok=overwrite)
         _newXmlLoader = XmlLoader.newFromLoader(self._xmlLoader, path=_newPath, create=True)

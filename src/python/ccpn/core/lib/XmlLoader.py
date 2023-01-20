@@ -961,7 +961,7 @@ class XmlLoader(XmlLoaderABC):
         return self.apiNmrProject
 
     @classmethod
-    def newFromLoader(cls, xmlLoader, path=None) -> XmlLoader:
+    def newFromLoader(cls, xmlLoader, path=None, create=False) -> XmlLoader:
         """Create a new instance using loader; set path, memopsRoot and apiNmrProject
         :return An XmlLoader instance
         """
@@ -971,7 +971,7 @@ class XmlLoader(XmlLoaderABC):
         if path is None:
             path = xmlLoader.path
 
-        result = cls(path=path)
+        result = cls(path=path, create=create)
 
         result.memopsRoot = xmlLoader.memopsRoot
         setattr(result.memopsRoot, XML_LOADER_ATTR, result)
@@ -1493,20 +1493,17 @@ def _refreshTopObjects(memopsRoot, packageName):
     # For now, going to assume that there is only one location, checking first the
     # reference data, next the userData.
 
-    if packageName in [p.name for p in xmlLoader.refData.packages]:
-        _id = (xmlLoader.refData.name, packageName, None)
+    if (pkg := xmlLoader.lookup((REFDATA, packageName, None))) is not None:
+        pass
 
-    elif packageName in [p.name for p in xmlLoader.userData.packages]:
-        _id = (xmlLoader.userData.name, packageName, None)
+    elif (pkg := xmlLoader.lookup((USERDATA, packageName, None))) is not None:
+        pass
 
     else:
         getLogger().debug(f'No Package instance found for "{packageName}"; skipping')
         return
 
-
-    if (pkg := xmlLoader.lookup(_id )) is None:
-        raise RuntimeError(f'No Package instance found for "{packageName}"; this should not happen')
-
+    # print(f'>DEBUG refreshTopObjects> {pkg}: loaded:{pkg.isLoaded}')
     if not pkg.isLoaded:
         pkg.load(reload=False)
 

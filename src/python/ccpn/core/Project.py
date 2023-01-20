@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-20 12:20:38 +0000 (Fri, January 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-20 18:51:46 +0000 (Fri, January 20, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,7 @@ from collections.abc import Iterable
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.Updater import UPDATE_POST_PROJECT_INITIALISATION
 from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
+from ccpn.core.lib.ProjectSaveHistory import fetchProjectSaveHistory
 
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
@@ -425,8 +426,9 @@ class Project(AbstractWrapperObject):
         # Special attributes:
         self._implExperimentTypeMap = None
 
-        # reference to a ProjectSaveHistory instance; defined _newProject() or _loadProject()
-        self._saveHistory = None
+        # reference to a ProjectSaveHistory instance; need to fetch
+        # as path may have changed; e.g. for a V2 project
+        self._saveHistory = fetchProjectSaveHistory(self.path)
 
         # reference to the logger; defined in call to _initialiseProject())
         self._logger = None
@@ -736,6 +738,7 @@ class Project(AbstractWrapperObject):
         self._saveHistory.addSaveRecord(comment=f'{self.name}: {comment}')
         self._saveHistory.save()
         self._isTemporary = False
+        self._isNew = False
 
     #-----------------------------------------------------------------------------------------
     # CCPN properties
@@ -1132,7 +1135,7 @@ class Project(AbstractWrapperObject):
 
         return
         # TODO suspension temporarily disabled
-        self._notificationSuspension += 1
+        # self._notificationSuspension += 1
 
     def resumeNotification(self):
         """Execute accumulated notifiers and resume immediate notifier execution"""
@@ -1148,39 +1151,39 @@ class Project(AbstractWrapperObject):
         # This was broken at one point, and we never found time to fix it
         # It is a time-saving measure, allowing you to e.g. execute a
         # peak-created notifier only once when creating hundreds of peaks in one operation
-
-        if self._notificationSuspension > 1:
-            self._notificationSuspension -= 1
-        else:
-            # Should not be necessary, but in this way we never get below 0 no matter what errors happen
-            self._notificationSuspension = 0
-
-            scheduledNotifiers = set()
-
-            executeNotifications = []
-            pendingNotifications = self._pendingNotifications
-            while pendingNotifications:
-                notification = pendingNotifications.pop()
-                notifier = notification[0]
-                onceOnly = notification[1]
-                if onceOnly:
-
-                    # check whether the match pair, (function, object) is in the found set
-                    matchNotifier = (notifier, notification[2])
-                    if matchNotifier not in scheduledNotifiers:
-                        scheduledNotifiers.add(matchNotifier)
-
-                        # append the function call (function, object, *params)
-                        executeNotifications.append((notifier, notification[2:]))
-
-                    # if notifier not in scheduledNotifiers:
-                    #     scheduledNotifiers.add(notifier)
-                    #     executeNotifications.append((notifier, notification[2:]))
-                else:
-                    executeNotifications.append((notifier, notification[2:]))
-            #
-            for notifier, params in reversed(executeNotifications):
-                notifier(*params)
+        #
+        # if self._notificationSuspension > 1:
+        #     self._notificationSuspension -= 1
+        # else:
+        #     # Should not be necessary, but in this way we never get below 0 no matter what errors happen
+        #     self._notificationSuspension = 0
+        #
+        #     scheduledNotifiers = set()
+        #
+        #     executeNotifications = []
+        #     pendingNotifications = self._pendingNotifications
+        #     while pendingNotifications:
+        #         notification = pendingNotifications.pop()
+        #         notifier = notification[0]
+        #         onceOnly = notification[1]
+        #         if onceOnly:
+        #
+        #             # check whether the match pair, (function, object) is in the found set
+        #             matchNotifier = (notifier, notification[2])
+        #             if matchNotifier not in scheduledNotifiers:
+        #                 scheduledNotifiers.add(matchNotifier)
+        #
+        #                 # append the function call (function, object, *params)
+        #                 executeNotifications.append((notifier, notification[2:]))
+        #
+        #             # if notifier not in scheduledNotifiers:
+        #             #     scheduledNotifiers.add(notifier)
+        #             #     executeNotifications.append((notifier, notification[2:]))
+        #         else:
+        #             executeNotifications.append((notifier, notification[2:]))
+        #     #
+        #     for notifier, params in reversed(executeNotifications):
+        #         notifier(*params)
 
     # Standard notified functions.
     # RESTRICTED. Use in core classes ONLY
@@ -2219,132 +2222,93 @@ class Project(AbstractWrapperObject):
 # Code adapted from prior _implementation/Io.py
 #=========================================================================================
 
-from sandbox.Geerten.XmlLoaderTest.Project_new_load import _loadProject as _loadProjectNew
-from sandbox.Geerten.XmlLoaderTest.Project_new_load import _newProject as _newProjectNew
+def _newProject(application, name:str, path:Path, isTemporary:bool = False) -> Project:
+    """Make new project, putting underlying data storage (API project) at path
+    :return Project instance
+    """
+    from ccpn.core.lib.XmlLoader import XmlLoader
+    from ccpn.core.lib.ProjectSaveHistory import newProjectSaveHistory
 
-TEST_NEW = True
-TEST_LOAD = True
+    xmlLoader = XmlLoader(path=path, name=name, create=True)
+    xmlLoader.newProject(overwrite=True)
+
+    project = Project(xmlLoader)
+    xmlLoader.project = project
+    project._isNew = True
+    project._isTemporary = isTemporary
+    # NB: linkages are set in Framework._initialiseProject()
+
+    project._objectVersion = application.applicationVersion
+    project._saveHistory = newProjectSaveHistory(project.path)
+
+    # the initialisation is completed by Framework._initialiseProject when it has done its things
+    # project._initialiseProject()
+
+    return project
+
 
 def _loadProject(application, path: str) -> Project:
-    if TEST_LOAD:
-        return _loadProjectNew(application, path)
-    else:
-        return _loadProjectOld(application, path)
-
-def _newProject(application, name:str, path:Path, isTemporary:bool = False) -> Project:
-    if TEST_NEW:
-        return _newProjectNew(application, name, path, isTemporary)
-    else:
-        return _newProjectOld(application, name, path, isTemporary)
-
-def _loadProjectOld(application, path: str) -> Project:
     """Load the project defined by path
     :return Project instance
     """
+    from ccpn.core.lib.XmlLoader import XmlLoader
     from ccpn.core._implementation.updates.update_v2 import updateProject_fromV2
 
     _path = aPath(path)
     if not _path.exists():
         raise ValueError(f'Path {_path} does not exist')
 
-    if (apiProject := apiIo.loadProject(str(path), useFileLogger=True)) is None:
-        raise RuntimeError("No valid project loaded from %s" % path)
+    xmlLoader = XmlLoader(path=_path)
+    xmlLoader.loadProject()
 
-    apiNmrProject = apiProject.fetchNmrProject()
-    apiNmrProject.initialiseData()
-    apiNmrProject.initialiseGraphicsData()
-    project = Project(apiNmrProject)
-    project._isNew = False
-    # NB: linkages are set in Framework._initialiseProject()
+    _isV2 = xmlLoader.isV2  # save this, because if V2, we are going to change the xmlLoader
+    # If path pointed to a V2 project, we need to do some manipulations
+    if _isV2:
+        _newPath = _path.withSuffix(CCPN_DIRECTORY_SUFFIX).uniqueVersion()
+        # _newPath.mkdir(parents=True, exist_ok=False)
+        _newXmlLoader = XmlLoader.newFromLoader(xmlLoader, path=_newPath, create=True)
+        xmlLoader = _newXmlLoader
 
-    # If path pointed to a V2 project, save the result
-    if project._isUpgradedFromV2:
+    project = Project(xmlLoader)
+    # back linkage
+    xmlLoader.project = project
+
+    # If path pointed to a V2 project, call the updates, and save the data
+    if _isV2:
         try:
             # call the update
-            getLogger().info('==> Upgrading %s to version-3' % project)
+            getLogger().info(f'==> Upgrading {project} to version-3')
             updateProject_fromV2(project)
-            # Using api calls as V3-Project has not yet been fully instantiated
-            apiProject.touch()
-            apiProject.save()
-            getLogger().info('==> Writing model data')
         except Exception as es:
-            getLogger().warning('Failed upgrading %s (%s)' % (project, str(es)))
+            txt = f'Failed upgrading {project} from version-2: {es}'
+            getLogger().warning(txt)
+            raise RuntimeError(txt)
+
+        getLogger().debug(f'after update: Saving project to {xmlLoader.path}')
+        # Save using the xmlLoader only as we do not have a complete and valid V3-Project yet
+        xmlLoader.saveUserData(keepFallBack=False)
+        project._saveHistory.addSaveRecord(version=project._objectVersion,
+                                           comment='upgraded from version-2')
+        project._saveHistory.save()
+        project._isNew = True
+        project._isTemporary = True
+
+    elif xmlLoader.pathHasChanged or xmlLoader.nameHasChanged:
+        # path or name have changed (actually, they are connected)
+        # save it, keeping a fallback for if all goes wrong
+        # Save using the xmlLoader only as we do not have a complete and valid V3-Project yet
+        xmlLoader.saveUserData(keepFallBack=True)
+        project._saveHistory.addSaveRecord(version=project._objectVersion,
+                                           comment='Path/name has changed')
+        project._saveHistory.save()
+        project._isNew = False
+        project._isTemporary = False
 
     else:
-        # check if it has been moved
-        projectPath = project.path
-        oldName = project.name
-        newName = aPath(projectPath).basename
-        if oldName != newName:
-            # Directory name has changed. Change project name and move Project xml file.
-            oldProjectFilePath = aPath(ApiPath.getProjectFile(projectPath, oldName))
-            if oldProjectFilePath.exists():
-                oldProjectFilePath.removeFile()
-            apiProject.__dict__['name'] = newName
-            # Using api calls as V3-Project has not yet been fully instantiated
-            apiProject.touch()
-            apiProject.save()
+        project._isNew = False
+        project._isTemporary = False
 
-    project._resetUndo(debug=application._debugLevel <= Logging.DEBUG2, application=application)
-
-    # Do some admin
-    # need project.path, as it may have changed; e.g. for a V2 project
-    project._saveHistory = getProjectSaveHistory(project.path)
-
-    # the initialisation is completed by Framework when it has done its things
-    # project._initialiseProject()
-
-    return project
-
-
-def _setRepositoryPath(apiProject, name, path):
-    """
-    :param apiProject: Implemention project root instance
-    :param name: name of the repository
-    :param path: path of the repository
-    """
-    _repo = apiProject.findFirstRepository(name=name)
-    _repo.url = Implementation.Url(path=str(path))
-
-
-def _newProjectOld(application, name:str, path:Path, isTemporary:bool = False) -> Project:
-    """Make new project, putting underlying data storage (API project) at path
-    :return Project instance
-    """
-    # # apiIo.newProject will create a temp path if path is None
-    # if (apiProject := apiIo.newProject(name, str(path), overwriteExisting=overwrite, useFileLogger=True)) is None:
-    #     raise RuntimeError(f'New project "{name}" could not be created (overlaps existing project?), path: {path}, overwrite: {overwrite}')
-
-    # Abstracted from from Api.py
-    apiProject = Implementation.MemopsRoot(name=name)
-
-    _setRepositoryPath(apiProject, 'userData', path)
-    # GWV: not sure why this one is needed, but just to be consistent with the old Api.py code
-    backupPath = path / CCPN_BACKUPS_DIRECTORY
-    _setRepositoryPath(apiProject, 'backup', backupPath)
-    # Just a leftover from the past
-    apiProject._temporaryDirectory = None
-
-    apiIo._createLogger(apiProject, applicationName=application.applicationName, useFileLogger=True)
-
-    apiNmrProject = apiProject.fetchNmrProject()
-    apiNmrProject.initialiseData()
-    apiNmrProject.initialiseGraphicsData()
-    project = Project(apiNmrProject)
-    project._isNew = True
-    project._isTemporary = isTemporary
-    # NB: linkages are set in Framework._initialiseProject()
-
-    # we always have the default chemicalShift list, but cannto (yet!?) be done here because it crashes on the
-    # newObject context manager, as this new project is not yet linked to the application
-    # project.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
-
-    project._objectVersion = application.applicationVersion
-
-    project._resetUndo(debug=application._debugLevel <= Logging.DEBUG2, application=application)
-    project._saveHistory = newProjectSaveHistory(project.path)
-
-    # the initialisation is completed by Framework when it has done its things
+    # the initialisation is completed by Framework._initialiseProject when it has done its things
     # project._initialiseProject()
 
     return project

@@ -316,7 +316,8 @@ class TopObject(XmlLoaderABC):
     """
     guid = Unicode(default_value=None, allow_none=True)
     path = CPath(default_value=None, allow_none=True)
-    # isLoaded = Bool(False)  # Flag to indicate load has been called
+    isLoaded = Bool(False)  # Flag to indicate load has been completed
+    isReading = Int(default_value=0)  # Reading indicator, as topObjects recursive get called to load!
 
     # parent
     package = Any(default_value=None, allow_none=True)
@@ -350,25 +351,30 @@ class TopObject(XmlLoaderABC):
         _name = _atop.name if hasattr(_atop, 'name') else 'noName'
         return f'{_atop.className}-{_name}'
 
-    @property
-    def isLoaded(self) -> bool:
-        """:return True if apiTopObject is defined
-        """
-        return self.apiTopObject is not None # and self.apiTopObject.isLoaded
+    # @property
+    # def isLoaded(self) -> bool:
+    #     """:return True if apiTopObject is defined
+    #     """
+    #     return self.apiTopObject is not None # and self.apiTopObject.isLoaded
 
     def load(self, reload:bool = False) -> TopObject:
         """Load self, either as a new api topObject or reload for an existing api topObject
         :param reload: flag to indicated reloading an existing apiTopObject (from xml)
         :return self
         """
+        if self.isLoaded and not reload:
+            return self
+
+        # check self and memops for existence of apiTopObject; they get created prior to
+        # loading
         if self.apiTopObject is None:
-            self.apiTopObject = self._loadFromXml(useMemopsRoot=True)
+            dataDict = self.root.memopsRoot.__dict__
+            self.apiTopObject = dataDict.get('topObjects').get(self.guid)
 
-        elif self.apiTopObject is not None and reload:
-            self._loadFromXml(useMemopsRoot=False)
-
-        else:
-            raise RuntimeError(f'apiTopObject is defined and reload={reload}')
+        _stack = self.root.loadingStack
+        _stack.append(self)
+        self._loadFromXml()
+        _stack.pop()
 
         return self
 
@@ -383,50 +389,56 @@ class TopObject(XmlLoaderABC):
         guid = xmlPath.basename.split(KEY_SEPARATOR)[-1]
         return guid
 
-    def _loadFromXml(self, useMemopsRoot) -> Implementation.TopObject:
+    def _loadFromXml(self):
         """Load api topObject from self.path
-        :param useMemopsRoot: if True: use memopsRoot; if False: use self.apiTopObject
-        :return apiTopObject
         """
         if not self.path.exists():
             raise FileNotFoundError(f'Failed to load "{self.path}": file does not exist')
 
-        if not useMemopsRoot and self.apiTopObject is None:
-            raise ValueError(f'Undefined apiTopObject, cannot (re)load')
+        if self.package.name == 'ccp.general.DataLocation':
+            pass
 
-        with self.path.open('r') as fp:
-            if useMemopsRoot:
-                try:
-                    apiTopObject = loadFromStream(stream=fp,
-                                               topObject=self.xmlLoader.memopsRoot,
-                                               topObjId=self.guid,
+        if not self.isReading:
+            self.isReading += 1
+            with self.path.open('r') as fp:
+                if self.apiTopObject is None:
+                    try:
+                        apiTopObject = loadFromStream(stream=fp,
+                                                   topObject=self.xmlLoader.memopsRoot,
+                                                   topObjId=self.guid,
+                                                   partialLoad=False)
+                    except Exception as es:
+                        raise RuntimeError(f'Failed to load "{self.path}": {es}')
+
+                else:
+                    try:
+                        apiTopObject = self.apiTopObject
+                        # Routine does not return an object if called with apiTopObj!!
+                        result = loadFromStream(stream=fp,
+                                               topObject=apiTopObject,
+                                               topObjId=apiTopObject.guid,
                                                partialLoad=False)
-                except Exception as es:
-                    raise RuntimeError(f'Failed to load "{self.path}": {es}')
 
-            else:
-                try:
-                    loadFromStream(stream=fp,
-                                           topObject=self.apiTopObject,
-                                           topObjId=self.apiTopObject.guid,
-                                           partialLoad=False)
-                    # Routine does not return an object if call with TopObj!!
-                    apiTopObject = self.apiTopObject
 
-                except Exception as es:
-                    raise RuntimeError(f'Failed to load "{self.path}": {es}')
+                    except Exception as es:
+                        raise RuntimeError(f'Failed to load "{self.path}": {es}')
 
-        if apiTopObject is None:
-            raise RuntimeError(f'Failed to load "{self.path}": unknown error')
+            if apiTopObject is None:
+                raise RuntimeError(f'Failed to load "{self.path}": unknown error')
 
-        # need to hack this as no other access method exists
-        forceSetattr(apiTopObject, 'isModified', False)
-        forceSetattr(apiTopObject, 'isLoaded', True)
-        forceSetattr(apiTopObject, ACTIVE_REPOSITORIES_ATTR, [self.package.repository.apiRepository])
+            self.apiTopObject = apiTopObject
+            self.isLoaded = True  # xml-file reflects contents
 
-        return apiTopObject
+            # need to hack this as no other access method exists
+            # forceSetattr(apiTopObject, 'isModified', False)
+            # forceSetattr(apiTopObject, 'isLoaded', True)
+            forceSetattr(apiTopObject, ACTIVE_REPOSITORIES_ATTR, [self.package.repository.apiRepository])
 
-    def save(self, updateIsModified):
+            self.isReading -= 1
+
+        return
+
+    def save(self, updateIsModified=True):
         """Save the apiTopObject to the xml file defined by self.path
         """
         if self.apiTopObject is None:
@@ -441,9 +453,11 @@ class TopObject(XmlLoaderABC):
         if updateIsModified:
             forceSetattr(self.apiTopObject, 'isModified', False)
 
+        self.isLoaded = True # xml-file reflects contents
+
     def __str__(self):
         _loaded = 'loaded' if self.isLoaded else 'not-loaded'
-        return f'<{self.__class__.__name__}: {self.guid} ({_loaded})>'
+        return f'<{self.__class__.__name__}: ({self.package.repository.name},{self.package.name}) {self.guid} ({_loaded})>'
 
     __repr__ = __str__
 
@@ -592,14 +606,15 @@ class Repository(XmlLoaderABC):
             result.extend(pkg.getTopObjects())
         return result
 
-    def loadPackages(self) -> list:
+    def load(self, reload=False) -> list:
         """Load all topObjects, as contained in the packages
+        :param reload: flag to indicate reloading of all topObjects
         :return a list with all loaded topObjects
         """
         result = []
         for pkg in self.packages:
             if not pkg.isMemops:
-                result.extend(pkg.loadTopObjects())
+                result.extend(pkg.load(reload=reload))
         return result
 
     def _findPackagesFromApi(self):
@@ -716,7 +731,9 @@ class XmlLoader(XmlLoaderABC):
     apiNmrProject      = Any(default_value=None, allow_none=True)    # The api NMR project
 
     # the children
-    repositories       = List()  # List with Repository instances
+    repositories       = List(default_value=[])  # List with Repository instances
+
+    loadingStack       = List(default_value=[])  # for debugging
 
     # useFileLogger      = False  # Toggling the logging from Api calls (!?) (to be eliminated)
     MAX_BACKUPS_ON_SAVE = 10  # Maximum number of backups to keep on save
@@ -1069,6 +1086,7 @@ class XmlLoader(XmlLoaderABC):
         self.apiNmrProject = nmrProjects[0]
         # We appear to have to do this often, as 'stray' topobjects appear
         self._updateTopObjects()
+        # self.userData.load(reload=False)  # load all remaining userdata
 
         # Once we are done loading we can remove the symlink in case of a V2 project
         # This can only be done now, because loading is not complete until the apiNmrProject is initiated,
@@ -1236,9 +1254,9 @@ class XmlLoader(XmlLoaderABC):
         count = 0
         for apiTopObj in self.memopsRoot.topObjects:
 
-            _repoName, _pkgName, guid = _id = _getIdFromTopObject(apiTopObj)
+            _repoName, _pkgName, guid = _getIdFromTopObject(apiTopObj)
 
-            if (_topObj := self.lookup(_id)) is None:
+            if (_topObj := self.lookup((None, None, guid))) is None:
                 # This happens, e.g. for newProjects; see if we can create the required objects
 
                 if (_repo := self.lookup((_repoName, None, None))) is None:
@@ -1252,6 +1270,8 @@ class XmlLoader(XmlLoaderABC):
 
                 _xmlPath = _getXmlPathFromApiTopObject(_pkg, apiTopObj)
                 _topObj = _pkg._addTopObject(path=_xmlPath)
+                _topObj.apiTopObject = apiTopObj
+                _topObj.save()
 
             _topObj.apiTopObject = apiTopObj
             count += 1
@@ -1313,29 +1333,6 @@ class XmlLoader(XmlLoaderABC):
 
     __repr__ = __str__
 #end class
-
-#
-# def isV3project(path):
-#     """Convience method: return True is path is (appears to be?) a V3 project"""
-#     path = aPath(path)
-#     if not path.is_dir(): return False
-#     if path.suffix != CCPN_DIRECTORY_SUFFIX: return False
-#     if path.name == CCPN_API_DIRECTORY: return False
-#     if not (path / CCPN_API_DIRECTORY / MEMOPS / IMPLEMENTATION).exists(): return False
-#     # it is a directory with .ccpn suffix, not named ccpnv3, that has ccpnv3/memops/implementation subdirectory,
-#     # so we assume it to be a V3 project directory.
-#     return True
-#
-#
-# def isV2project(path):
-#     """Convience method: return True is path is (appears to be?) a V2 project"""
-#     path = aPath(path)
-#     if not path.is_dir(): return False
-#     if isV3project(path): return False
-#     if not (path / MEMOPS / IMPLEMENTATION).exists(): return False
-#     # it is a directory which is not a V3project directory , that has memops/implementation subdirectory,
-#     # so we assume it to be a V2 project directory.
-#     return True
 
 
 def saveToStream(stream, apiTopObject, mapping=None, comment=None, simplified=True, compact=True, expanded=False):
@@ -1522,12 +1519,13 @@ Implementation.MemopsRoot.refreshTopObjects = _refreshTopObjects
 # topObject.load (Implementation:4983) and topObject.loadFrom (implementation:4999)
 def _load(apiTopObject):
     """
-    Load TopObject from specific Repository
+    Load apiTopObject
     """
     if not isinstance(apiTopObject, Implementation.TopObject):
         raise ValueError(f'Invalid apiTopObject {apiTopObject}')
 
-    # Find our xml-loader; if not, for now create it on the fly
+    # Find our xml-loader; if not, for just return as this likely results from
+    # a 'new' instance
     memopsRoot = apiTopObject.root
     if not hasattr(memopsRoot, XML_LOADER_ATTR):
         # xmlLoader = XmlLoader.newFromMemops(memopsRoot)
@@ -1540,7 +1538,8 @@ def _load(apiTopObject):
     if xmlLoader.readingBlockingLevel:
         return
 
-    _id =(None, None, apiTopObject.guid)
+    # _repoName, _packageName, _guid = _getIdFromTopObject(apiTopObject)
+    _id = (None, None, apiTopObject.guid)
 
     if (topObj := xmlLoader.lookup(_id)) is None:
         # optionally we may have to create the TopObject instance;
@@ -1548,7 +1547,7 @@ def _load(apiTopObject):
         raise RuntimeError(f'Unable to load {apiTopObject}')
 
     topObj.apiTopObject = apiTopObject
-    topObj.load(reload=True)  # True as apiTopObject instance already exists
+    topObj.load()
 
 # Hotfix; don't work as code is not using regular inheritance, but rather hard inserted
 # Implementation.TopObject.load = _load

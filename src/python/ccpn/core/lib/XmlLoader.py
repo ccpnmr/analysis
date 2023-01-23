@@ -8,8 +8,6 @@ The routines are adapted from and (partially/mostly/all?) replace :
   ccpnmodel.ccpncore.lib.ApiPath
   ccpnmodel/ccpncore/memops/format/xml/XmlIO.py
 
-xmlLoader2.memops._movedPackageNames
-Out[59]: {'ccp.molecule.Symmetry': 'molsim.Symmetry'}
 
 api.memops.implementation
 <MemopsRoot>
@@ -18,7 +16,7 @@ api.memops.implementation
     .root  --> self
     .repositories --> a (frozen)set of Repository Instances
     ._upgradesFromV2
-    ._movedPackageNames
+    ._movedPackageNames   --> (see below)
     ._notifies --> dict (class attribute)
     ._undo
     .isLoaded
@@ -117,9 +115,6 @@ ccp.molecule.ChemCompCoord
 ccp.molecule.ChemCompCharge
 any
 
-xmlLoader2.memops._movedPackageNames
-            new-name                 old-name
-Out[59]: {'ccp.molecule.Symmetry': 'molsim.Symmetry'}
 
 
 xml.memops.Implementation.py
@@ -144,6 +139,10 @@ From code:
     # Special hack for moving data of renamed packages on upgrade
     for newName, oldName in project._movedPackageNames.items():
         movePackageData(project, newName, oldName)
+
+xmlLoader2.memopsRoot._movedPackageNames
+            new-name                 old-name
+Out[59]: {'ccp.molecule.Symmetry': 'molsim.Symmetry'}
 
 
 === Hotfixed methods ===
@@ -266,6 +265,15 @@ USERDATA_PACKAGES       = ['ccp.nmr.Nmr',
                            'ccpnmr.gui.Window',
                           ]
 
+# Current reference data packages with xml-data
+REFDATA_PACKAGES        = ['ccp.molecule.ChemCompCoord',
+                           'ccp.molecule.ChemComp',
+                           'ccp.molecule.ChemElement',
+                           'ccp.molecule.ChemCompLabel',
+                           'ccp.nmr.NmrExpPrototype',
+                           'ccp.nmr.NmrReference'
+                           ]
+
 #TODO: original code implemented silencing of garbage collection on reading/writing: still valid?
 SILENCE_GARBAGE_COLLECTION = False
 
@@ -322,8 +330,8 @@ class TopObject(XmlLoaderABC):
     """
     A class to maintain a TopObject, i.e. a child of a Package
     """
-    guid = Unicode(default_value=None, allow_none=True)
-    path = CPath(default_value=None, allow_none=True)
+    _guid = Unicode(default_value=None, allow_none=True)
+    _path = CPath(default_value=None, allow_none=True)
     isLoaded = Bool(False)  # Flag to indicate load has been completed
     isReading = Int(default_value=0)  # Reading indicator, as topObjects recursive get called to load!
 
@@ -341,13 +349,25 @@ class TopObject(XmlLoaderABC):
         super().__init__(root=package.root)
 
         self.package = package
-        self.path = path
-        self.guid = self._getGuidFromXmlPath(path)
+        self._path = path.relative_to(self.package.path)
+        self._guid = self._getGuidFromXmlPath(path)
 
         # ApiTopObject only knows aboud its guid and packageName, not its repository!
         # However, the two should be unique for the _id
         self._id = (None, self.package.name, self.guid)
         self.addToLookup()
+
+    @property
+    def guid(self) -> Path:
+        """:return the guid of the topObject
+        """
+        return self._guid
+
+    @property
+    def path(self) -> Path:
+        """:return the full path of the topObject
+        """
+        return self.package.path / self._path
 
     @property
     def apiName(self) -> (str, None):
@@ -460,7 +480,7 @@ class TopObject(XmlLoaderABC):
 
     def __str__(self):
         _loaded = 'loaded' if self.isLoaded else 'not-loaded'
-        return f'<{self.__class__.__name__}: ({self.package.repository.name},{self.package.name}) {self.guid} ({_loaded})>'
+        return f'<{self.__class__.__name__}: ({self.package.repository.name},{self.package.name}) "{self.guid}" ({_loaded})>'
 
     __repr__ = __str__
 
@@ -470,8 +490,8 @@ class Package(XmlLoaderABC):
     A class to maintain a package, i.e. a child of a Repository
     Does not have an api equivalent.
     """
-    name = Unicode(default_value=None, allow_none=True)
-    path = CPath(default_value=None, allow_none=True)
+    _name = Unicode(default_value=None, allow_none=True)
+    _path = CPath(default_value=None, allow_none=True)
     # parent
     repository = Any(default_value=None, allow_none=True)
     # children
@@ -487,13 +507,13 @@ class Package(XmlLoaderABC):
 
         self.repository = repository
 
-        self.path = path
+        self._path = path.relative_to(self.repository.path)
         if self.path.exists() and not self.path.is_dir():
             raise FileExistsError(f'{self.path} exists but is not a directory')
         if not self.path.exists() and createPath:
             self.path.mkdir(parents=True, exist_ok=False)
 
-        self.name = '.'.join(path.relative_to(repository.path).parts)
+        self._name = '.'.join(self._path.parts)
         self._id = (self.repository.name, self.name, None)
         self.addToLookup()
 
@@ -503,6 +523,18 @@ class Package(XmlLoaderABC):
                 self._addTopObject(_path)
 
         # print('>>>', self)
+
+    @property
+    def name(self) -> str:
+        """:return name of Package
+        """
+        return self._name
+
+    @property
+    def path(self) -> Path:
+        """:return the full path of the Package
+        """
+        return self.repository.path / self._path
 
     @property
     def isMemops(self) -> bool:
@@ -1252,16 +1284,19 @@ class XmlLoader(XmlLoaderABC):
             repo._updateApiRepositoryPath()
 
     def _updateTopObjects(self):
-        """Update the topObjects; allocating each one to a repository/package;
+        """Update using the apiTopObjects in memopsRoot;
+        allocating each one to a repository/package;
         """
         count = 0
         for apiTopObj in self.memopsRoot.topObjects:
 
-            _repoName, _pkgName, _guid = _getIdFromTopObject(apiTopObj)
+            _guid = apiTopObj.guid
+            _pkgName = apiTopObj.packageName
 
             if (_topObj := self.lookup((None, _pkgName, _guid))) is None:
                 # This happens, e.g. for newProjects; see if we can create the required objects
 
+                _repoName, _pkgName, _guid = _getIdFromTopObject(apiTopObj)
                 if (_repo := self.lookup((_repoName, None, None))) is None:
                     # This is an unrecoverable error
                     raise RuntimeError(f'TopObject {apiTopObj} does not have a repository defined')
@@ -1551,41 +1586,3 @@ def _load(apiTopObject):
 # Implementation.TopObject.load = _load
 # Implementation.TopObject.loadFrom = _loadFrom
 
-
-#=========================================================================================
-# Testing below
-#=========================================================================================
-
-# def loadNew():
-#     loader = XmlLoader(path='~/Desktop/tmp3.ccpn')
-#     proj = loader.newProject(overWrite=True)
-#     # loader._loadMemopsFromXml()
-#     # proj = loader3.loadProject()
-#     loader.print()
-#     print()
-#     return loader
-#
-# def load3():
-#     loader = XmlLoader(path='~/Desktop/tmp2.ccpn')
-#     loader.loadProject()
-#     loader.print()
-#     print()
-#     return loader
-#
-# def loadV2():
-#     loader = XmlLoader('/Users/geerten/Desktop/NMR_data_formats/testData/V2-projects/GlpG')
-#     loader.loadProject()
-#     loader.print()
-#     print()
-#     return loader
-#
-# def load4():
-#     loader = XmlLoader.newFromProject(project)
-#     loader.print()
-#     print()
-#     return loader
-#
-# # loader1 = loadNew()
-# # loader2 = loadV2()
-# loader3 = load3()
-# loader4 = load4()

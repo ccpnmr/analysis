@@ -215,6 +215,7 @@ from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.memops.metamodel import Constants as metaConstants
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject
 from ccpnmodel.ccpncore.memops.format.xml import XmlIO
+from ccpnmodel.v_3_0_2.upgrade import correctFinalResult
 
 from ccpn.core.Project import Project
 from ccpn.core.lib.ProjectLib import checkProjectName, isV2project, isV3project
@@ -590,6 +591,33 @@ class Package(XmlLoaderABC):
         self.topObjects.append(topObj)
         return topObj
 
+    def _renamePackage(self, newName):
+        """Move/Rename the package to newName;
+        Use for V2 packages that have been renamed
+        """
+        if not self.root.isV2:
+            raise RuntimeError(f'_renamePackage {self.name} to {newName}: Only for Version-2 projects')
+
+        oldName = self.name
+        oldPath = self.path
+        oldId = self._id
+
+        self._name = newName
+        self._path = Path().joinpath(*newName.split('.'))
+        # make a symlink to the old package directory
+        if self.path.exists() and self.path.is_symlink():
+            self.path.unlink()
+        self.path.symlink_to(oldPath, target_is_directory=True)
+
+        self._id = (self.repository.name, self.name, None)
+        # We keep the old _id's in the lookup, as I do not know how the
+        # apiTopObjects will be referred to
+        self.addToLookup()
+        for topObj in self.topObjects:
+            _id = (None, self.name, topObj.guid)
+            topObj._id = _id
+            topObj.addToLookup()
+
     def __str__(self):
         _defined = len(self.topObjects)
         _loaded = len(self.loadedTopObjects)
@@ -604,7 +632,7 @@ class Repository(XmlLoaderABC):
     """
     name = Unicode(default_value=None, allow_none=True)
     path = CPath(default_value=None, allow_none=True)
-    useParent = Bool(False)  # Use the parent of the path to set the url
+    useParent = Bool(False)  # Use the parent of the path to set the api url
 
     apiRepository = Any(default_value=None, allow_none=True)  # The corresponding api Repository instance
 
@@ -652,7 +680,7 @@ class Repository(XmlLoaderABC):
                 result.extend(pkg.load(reload=reload))
         return result
 
-    def _findPackagesFromApi(self):
+    def _definePackagesFromApi(self):
         """find and define (from apiRepository) the already (existing/possible) packages
         !!! This gives too many, as some package locators have both refData and userData
         """
@@ -669,12 +697,15 @@ class Repository(XmlLoaderABC):
         """find and define the already existing packages from self.path
         """
         self.packages = []
-        for _pkgPath in self._findPackagePaths():
+        _paths = self._findPackagePaths()
+        for _pkgPath in _paths:
             self._addPackage(path=_pkgPath, createPath=False)
 
     def _addPackage(self, name=None, path=None, createPath=False) -> Package:
         """Define and add a new package, either by name or by path,
         optionally create the Package directory
+        :param name: the name of the package
+        :param path: the path to the package
         :return newly created Package instance
         """
         if name is None and path is None:
@@ -694,7 +725,8 @@ class Repository(XmlLoaderABC):
 
     def _findPackagePaths(self, path=None) -> list:
         """Recursively find all packages under path, initialised to self.path;
-        Assume a package to be a directory containing XML files.
+        Assume a package to be a directory containing XML files and no further
+        containing packages
         :param path: path to initiate the search; defaults to self.path (i.e the root
                      of the repository.
         :return A list Path instances, each representing a package
@@ -705,16 +737,20 @@ class Repository(XmlLoaderABC):
         result = []
         for _p in path.listdir(excludeDotFiles=True):
 
-            # recursion
             if _p.is_dir():
+                # recursion
                 result.extend( self._findPackagePaths(_p) )
 
             elif _p.suffix == XML_SUFFIX:
-                return [path]
+                # we found a xml-file in this directory; hence we assume path
+                # is a package with xml-encoding TopObjects
+                result.append(path)
+                break
 
             else:
                 pass
 
+        print(f'>returning> {path} found:{len(result)}')
         return result
 
     @property
@@ -1086,13 +1122,6 @@ class XmlLoader(XmlLoaderABC):
             raise FileNotFoundError('path "%s" is not a directory' % self.path)
 
         self.isV2 = isV2project(self.path)
-        linkPath = None
-        if self.isV2:
-            # make a temporary symlink
-            linkPath = self.path / CCPN_API_DIRECTORY
-            if linkPath.exists() and linkPath.is_symlink():  # This should not happen, but just in-case it went wrong
-                linkPath.unlink()
-            linkPath.symlink_to(self.path, target_is_directory=True)
 
         # load memops; sets self.memopsRoot
         _projectXml = self._getXmlProjectFile()
@@ -1119,6 +1148,7 @@ class XmlLoader(XmlLoaderABC):
         elif len(nmrProjects) > 1:
             self.logger.warning('Multiple NMR projects defined by "%s": loading only first one.' % self.path)
         self.apiNmrProject = nmrProjects[0]
+
         # We appear to have to do this often, as 'stray' topobjects appear
         self._updateTopObjects()
         # self.userData.load(reload=False)  # load all remaining userdata
@@ -1127,12 +1157,14 @@ class XmlLoader(XmlLoaderABC):
         # This can only be done now, because loading is not complete until the apiNmrProject is initiated,
         # which triggers additional top-object instantiations.
         if self.isV2:
-            from ccpnmodel.v_3_0_2.upgrade import correctFinalResult
+            # Following previous code (Api.py:460): Special hack for moving data
+            # of renamed packages on upgrade
+            for newName, oldName in self.memopsRoot._movedPackageNames.items():
+                if (pkg := self.lookup( (USERDATA, oldName))) is not None:
+                    pkg._renamePackage(newName)
+            # upgrade api data
             correctFinalResult(self.memopsRoot)
             # self.memopsRoot.checkAllValid()  # This traverses all repositories/packages and loads and checks values
-
-            # remove symlink
-            linkPath.unlink()
 
         # init the project data
         self._initApiData()

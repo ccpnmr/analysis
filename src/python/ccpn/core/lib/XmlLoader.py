@@ -344,8 +344,9 @@ class TopObject(XmlLoaderABC):
         self.path = path
         self.guid = self._getGuidFromXmlPath(path)
 
-        # The guid (also in apiTopObject, should be unique)
-        self._id = (None, None, self.guid)
+        # ApiTopObject only knows aboud its guid and packageName, not its repository!
+        # However, the two should be unique for the _id
+        self._id = (None, self.package.name, self.guid)
         self.addToLookup()
 
     @property
@@ -358,12 +359,6 @@ class TopObject(XmlLoaderABC):
         _atop = self.apiTopObject
         _name = _atop.name if hasattr(_atop, 'name') else 'noName'
         return f'{_atop.className}-{_name}'
-
-    # @property
-    # def isLoaded(self) -> bool:
-    #     """:return True if apiTopObject is defined
-    #     """
-    #     return self.apiTopObject is not None # and self.apiTopObject.isLoaded
 
     def load(self, reload:bool = False) -> TopObject:
         """Load self, either as a new api topObject or reload for an existing api topObject
@@ -1262,9 +1257,9 @@ class XmlLoader(XmlLoaderABC):
         count = 0
         for apiTopObj in self.memopsRoot.topObjects:
 
-            _repoName, _pkgName, guid = _getIdFromTopObject(apiTopObj)
+            _repoName, _pkgName, _guid = _getIdFromTopObject(apiTopObj)
 
-            if (_topObj := self.lookup((None, None, guid))) is None:
+            if (_topObj := self.lookup((None, _pkgName, _guid))) is None:
                 # This happens, e.g. for newProjects; see if we can create the required objects
 
                 if (_repo := self.lookup((_repoName, None, None))) is None:
@@ -1494,7 +1489,8 @@ def _refreshTopObjects(memopsRoot, packageName):
         return
 
     # We have to find the package: that is a problem as a package has no info on its
-    # parent repository, and package's by the same same can live in two repositories!
+    # parent repository, and (potentially?) package's by the same name can live in two
+    # repositories!
     # For now, going to assume that there is only one location, checking first the
     # reference data, next the userData.
 
@@ -1541,7 +1537,7 @@ def _load(apiTopObject):
         return
 
     # _repoName, _packageName, _guid = _getIdFromTopObject(apiTopObject)
-    _id = (None, None, apiTopObject.guid)
+    _id = (None, apiTopObject.packageName, apiTopObject.guid)
 
     if (topObj := xmlLoader.lookup(_id)) is None:
         # optionally we may have to create the TopObject instance;

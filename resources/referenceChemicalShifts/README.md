@@ -45,7 +45,6 @@ See the Template for the general structure.
 
 **maxShift**:Optional. Float. The atom maximum observed chemical shift in ppm. E.g.: 5.48
 
-
 The following information is needed only to accurately plot the distribution curve on the Reference ChemicalShifts GUI module.
 
 **distribution**: Optional. List. The individually observed chemical shift Y values for plotting the distribution curve

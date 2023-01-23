@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-20 18:51:46 +0000 (Fri, January 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-23 17:47:20 +0000 (Mon, January 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -40,11 +40,11 @@ from collections.abc import Iterable
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.Updater import UPDATE_POST_PROJECT_INITIALISATION
 from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
-from ccpn.core.lib.ProjectSaveHistory import fetchProjectSaveHistory
 
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
-from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, newProjectSaveHistory
+from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, fetchProjectSaveHistory
+from ccpn.core.lib.ProjectLib import createLogger
 from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
     inactivity, logCommandManager
 
@@ -544,9 +544,7 @@ class Project(AbstractWrapperObject):
         (linkages, Current, notifiers and such)
         """
 
-        # The logger has already been set up when creating/loading the API project
-        # so just get it
-        self._logger = Logging.getLogger()
+        self._logger = createLogger(self)
 
         # Set up notifiers
         self._registerPresetApiNotifiers()
@@ -684,14 +682,13 @@ class Project(AbstractWrapperObject):
         # Remove undo stack:
         self._resetUndo(maxWaypoints=0)
 
-        apiIo.cleanupProject(self)
+        Logging._clearLogHandlers()
         self._clearAllApiNotifiers()
         self.deleteAllNotifiers()
-        for tag in ('_data2Obj', '_pid2Obj'):
-            getattr(self, tag).clear()
-            # delattr(self,tag)
-        # del self._wrappedData
-        self.__dict__.clear()
+        # clear the lookup dicts
+        self._data2Obj.clear()
+        self._pid2Obj.clear()
+        # self.__dict__.clear()  # GWV: dangerous; why done?
 
     def saveAs(self, newPath:str, overwrite:bool = False):
         """Save project to newPath (optionally overwrite);

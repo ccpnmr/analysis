@@ -116,7 +116,6 @@ ccp.molecule.ChemCompCharge
 any
 
 
-
 xml.memops.Implementation.py
     def loadFromStream(stream, topObjId=None, topObject=None, partialLoad=False):
                 ---> load xml file
@@ -125,7 +124,8 @@ xml.memops.Implementation.py
     :returns The object
 
 === Other Notes ===
-closing a project calls _closeAPIobjects, --> _getAPIObjectsStatus
+closing a project calls:
+ _closeAPIobjects, --> _getAPIObjectsStatus
 --> APIStatus.buildAll --> api.memops.Implementation.getLabellingSchemes
 --> refreshTopObjects --> reads xml-labelling schemes
 
@@ -136,21 +136,22 @@ loads only do the ~7 elementary topObjects, Framework is holding on to the
 experimentClassificationDict.
 
 From code:
-    # Special hack for moving data of renamed packages on upgrade
-    for newName, oldName in project._movedPackageNames.items():
-        movePackageData(project, newName, oldName)
+# Special hack for moving data of renamed packages on upgrade
+for newName, oldName in project._movedPackageNames.items():
+    movePackageData(project, newName, oldName)
 
 xmlLoader2.memopsRoot._movedPackageNames
             new-name                 old-name
 Out[59]: {'ccp.molecule.Symmetry': 'molsim.Symmetry'}
+--> implemented in XmlLoader.loadProject for V2 projects
 
 
 === Hotfixed methods ===
-- ccpnmodel.ccpncore.lib._cpp.nmr.Nmr.NmrProject
 
-- ccpnmodel.ccpncore.lib.ApiPath def_addModuleFunctionsToApiClass
-called from ccpnmodel.ccpncore.api.memops.Implementation
-Imports Modules from ccpnmodel.ccpncore.lib
+Using: ccpnmodel.ccpncore.lib.ApiPath._addModuleFunctionsToApiClass
+       called from ccpnmodel.ccpncore.api.memops.Implementation
+
+Imports Modules from ccpnmodel.ccpncore.lib:
 
 Imported ccpnmodel.ccpncore.lib._memops.Implementation.MemopsRoot
 Imported ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore
@@ -165,6 +166,7 @@ Imported ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.AbstractDataDim
 Imported ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.DataSource
 Imported ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.Experiment
 Imported ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.NmrProject
+--> inserts NmrProject.initialiseData() and NmrProject.initialiseGraphicsData()
 Imported ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.Peak
 Imported ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList
 Imported ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.Resonance
@@ -173,8 +175,8 @@ Imported ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.Shift
 Imported ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.ShiftList
 Imported ccpnmodel.ccpncore.lib._ccp.nmr.NmrConstraint.GenericConstraint
 
-NmrProject.initialiseData() and NmrProject.initialiseGraphicsData()
-are inserted from ccpnmodel.ccpncore.lib._cpp.nmr.Nmr.NmrProject
+ccpncore.lib.chemComp.Io  --> fetchChemComp  (and others) : uses XmlIo.LoadFromFile
+
 
 =========================================================================================
 
@@ -217,12 +219,12 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject
 from ccpnmodel.ccpncore.memops.format.xml import XmlIO
 from ccpnmodel.v_3_0_2.upgrade import correctFinalResult
 
-from ccpn.core.Project import Project
+# from ccpn.core.Project import Project
 from ccpn.core.lib.ProjectLib import checkProjectName, isV2project, isV3project
 
 from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.CcpNmrTraits import Unicode, Bool, CPath, Any, Int, Dict, List, Tuple
-from ccpn.util.Common import forceGetattr, forceSetattr, getProcess
+from ccpn.util.Common import getProcess
 
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import Path, aPath
@@ -389,11 +391,11 @@ class TopObject(XmlLoaderABC):
         if self.isLoaded and not reload:
             return self
 
-        # check self and memops for existence of apiTopObject; they get created prior to
-        # loading
+        # check self and memops for existence of apiTopObject;
+        # Sometimes they get created prior to loading
         if self.apiTopObject is None:
-            dataDict = self.root.memopsRoot.__dict__
-            self.apiTopObject = dataDict.get('topObjects').get(self.guid)
+            _apiTopObjects = forceGetattr(self.root.memopsRoot, 'topObjects')
+            self.apiTopObject = _apiTopObjects.get(self.guid)
 
         _stack = self.root.loadingStack
         _stack.append(self)
@@ -659,7 +661,7 @@ class Repository(XmlLoaderABC):
             self.path.mkdir(parents=True, exist_ok=False)
 
         if self.path.exists():
-            self._findPackagesFromPath()
+            self._definePackagesFromPath()
 
     def getTopObjects(self) -> list:
         """:return a list with topObjects as contained in the packages
@@ -693,7 +695,7 @@ class Repository(XmlLoaderABC):
                 if repo.name == self.name:
                     self._addPackage(name=_pLocator.targetName, createPath=False)
 
-    def _findPackagesFromPath(self):
+    def _definePackagesFromPath(self):
         """find and define the already existing packages from self.path
         """
         self.packages = []
@@ -750,7 +752,7 @@ class Repository(XmlLoaderABC):
             else:
                 pass
 
-        print(f'>returning> {path} found:{len(result)}')
+        # print(f'>returning> {path} found:{len(result)}')
         return result
 
     @property
@@ -1059,8 +1061,7 @@ class XmlLoader(XmlLoaderABC):
         """
         # can't do : result.apiNmrProject = list(memopsRoot.nmrProjects)[0]
         # as this triggers another call to memopsRoot.refreshTopObjects()
-        dataDict = forceGetattr(memopsRoot, '__dict__')
-        nmrProjects = list(dataDict.get('nmrProjects').values())
+        nmrProjects = list(forceGetattr(memopsRoot,'nmrProjects').values())
         self.apiNmrProject = nmrProjects[0]
         self._updateApiRepositoryPaths()
         self._defineRepositories()
@@ -1149,7 +1150,7 @@ class XmlLoader(XmlLoaderABC):
             self.logger.warning('Multiple NMR projects defined by "%s": loading only first one.' % self.path)
         self.apiNmrProject = nmrProjects[0]
 
-        # We appear to have to do this often, as 'stray' topobjects appear
+        # We appear to have to do this often, as 'stray' topObjects appear
         self._updateTopObjects()
         # self.userData.load(reload=False)  # load all remaining userdata
 
@@ -1224,10 +1225,10 @@ class XmlLoader(XmlLoaderABC):
 
         # code adapted from XmlIO.loadProjectFile; not sure what it is doing.
         # GWV: the only way to get a hold and modify? (forceGetattr() returns a tuple)
-        activeRepositories = self.memopsRoot.__dict__[ACTIVE_REPOSITORIES_ATTR]
+        activeRepositories = list(forceGetattr(self.memopsRoot, ACTIVE_REPOSITORIES_ATTR))
         if not activeRepositories:  # len is zero
             _repo = self.memopsRoot.findFirstRepository(name=USERDATA)
-            self.memopsRoot.__dict__[ACTIVE_REPOSITORIES_ATTR] = [_repo]
+            forceSetattr(self.memopsRoot, ACTIVE_REPOSITORIES_ATTR, [_repo])
 
         # define the Repositories instances
         self._defineRepositories()
@@ -1326,7 +1327,8 @@ class XmlLoader(XmlLoaderABC):
             _pkgName = apiTopObj.packageName
 
             if (_topObj := self.lookup((None, _pkgName, _guid))) is None:
-                # This happens, e.g. for newProjects; see if we can create the required objects
+                # This happens, e.g. for newProjects;
+                # see if we can create the required objects
 
                 _repoName, _pkgName, _guid = _getIdFromTopObject(apiTopObj)
                 if (_repo := self.lookup((_repoName, None, None))) is None:
@@ -1375,7 +1377,6 @@ class XmlLoader(XmlLoaderABC):
         """Set all topObject and self to unmodified status"""
         # set memopsRoot and all topObjects as not-modified
         for topObject in [self.memopsRoot] +list(self.memopsRoot.topObjects):
-            # topObject.__dict__['isModified'] = False
             forceSetattr(topObject, 'isModified', False)
 
     @contextmanager
@@ -1468,10 +1469,7 @@ def _getIdFromTopObject(topObj) -> tuple:
     (repoName, packageName, guid)
     """
 
-    # not using forceGetAttr as its implementation triggers an unwanted sequence
-    # via the hasattr function used in current implementation of forceGetAttr (GR#$$@%)
-    dataDict = topObj.__dict__
-    activeRepositories = list(dataDict.get(ACTIVE_REPOSITORIES_ATTR))
+    activeRepositories = list(forceGetattr(topObj, ACTIVE_REPOSITORIES_ATTR))
 
     if len(activeRepositories) == 0:
         # This sometimes happens; the model does not always sets a
@@ -1481,7 +1479,8 @@ def _getIdFromTopObject(topObj) -> tuple:
         ff = memopsRoot.findFirstPackageLocator
         repositories = list((ff(targetName=USERDATA) or ff(targetName='any')).repositories)
         activeRepositories.extend(repositories)
-        dataDict[ACTIVE_REPOSITORIES_ATTR] = activeRepositories
+        forceSetattr(topObj, ACTIVE_REPOSITORIES_ATTR, activeRepositories)
+        # dataDict[ACTIVE_REPOSITORIES_ATTR] = activeRepositories
 
     if len(activeRepositories) == 0:
         # getLogger().debug(f'No repository found for "{packageName}"')
@@ -1518,6 +1517,22 @@ def _getXmlPathFromApiTopObject(package, apiTopObject) -> Path:
 
     return _xmlPath
 
+
+def forceSetattr(obj, attributeName, value):
+    """Force setting of attributeName
+    """
+    obj.__dict__[attributeName] = value
+
+
+def forceGetattr(obj, attributeName):
+    """Force getting of attributeName
+    """
+    if not attributeName in obj.__dict__.keys():
+        raise AttributeError('Object "%s" does not have attribute "%s"' % (obj, attributeName))
+
+    value = obj.__dict__[attributeName]
+    return value
+
 #=========================================================================================
 # Hot-fixing:
 #   MemopsRoot.refreshTopObjects
@@ -1533,11 +1548,11 @@ def _refreshTopObjects(memopsRoot, packageName):
     if packageName is None or packageName == MEMOPS_PACKAGE:
         raise ValueError(f'Invalid packageName "{packageName}"')
 
-    # fix absence of active repositories; not sure why this happens
-    activeRepositories = memopsRoot.__dict__[ACTIVE_REPOSITORIES_ATTR]
-    if not activeRepositories:  # len is zero
-        _repo = memopsRoot.findFirstRepository(name=USERDATA)
-        memopsRoot.__dict__[ACTIVE_REPOSITORIES_ATTR] = [_repo]
+    # # fix absence of active repositories; not sure if/why this happens
+    # activeRepositories = memopsRoot.__dict__[ACTIVE_REPOSITORIES_ATTR]
+    # if not activeRepositories:  # len is zero
+    #     _repo = memopsRoot.findFirstRepository(name=USERDATA)
+    #     memopsRoot.__dict__[ACTIVE_REPOSITORIES_ATTR] = [_repo]
 
     # Find our xml-loader; if not, just skip as this likely is the result of
     # initialising the MemopsRoot instance; we'll return later
@@ -1548,7 +1563,7 @@ def _refreshTopObjects(memopsRoot, packageName):
         getLogger().debug(f'MemopsRoot.refreshTopObjects: no xmlLoader (yet), skipping loading {packageName}')
         return
 
-    getLogger().debug(f'MemopsRoot.refreshTopObjects: try loading {packageName}')
+    # getLogger().debug(f'MemopsRoot.refreshTopObjects: try loading {packageName}')
 
     xmlLoader = getattr(memopsRoot, XML_LOADER_ATTR)  # use back linkage
 

@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-16 10:26:25 +0000 (Mon, January 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-23 17:47:20 +0000 (Mon, January 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -118,27 +118,6 @@ def incrementName(name, split: str = '_'):
 #     if originalName != name:
 #         getLogger().info('Name:% already assigned. Renamed to %s' % (originalName, name))
 #     return name
-
-
-def forceSetattr(obj, attributeName, value):
-    """Force setting of attributeName if regular setattr fails"""
-    try:
-        setattr(obj, attributeName, value)
-    except:
-        obj.__dict__[attributeName] = value
-
-
-def forceGetattr(obj, attributeName):
-    """Force getting of attributeName if regular getattr fails"""
-    if not hasattr(obj, attributeName):
-        raise AttributeError('Object "%s" does not have attribute "%s"' % (obj, attributeName))
-
-    try:
-        value = getattr(obj, attributeName)
-    except:
-        value = obj.__dict__[attributeName]
-    return value
-
 
 def recursiveImport(dirname, modname=None, ignoreModules=None, force=False):
     """ recursively import all .py files

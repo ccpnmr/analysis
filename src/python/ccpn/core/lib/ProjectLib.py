@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-19 17:09:26 +0000 (Thu, January 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-23 17:47:20 +0000 (Mon, January 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -29,9 +29,13 @@ __date__ = "$Date: 2023-01-19 11:47:50 +0000 (Thu, January 19, 2023) $"
 #=========================================================================================
 
 import re
+import sys
 
-from ccpn.util.Path import aPath, Path
+from ccpn.util import Logging
 from ccpn.util.Logging import getLogger
+from ccpn.util.Path import aPath, Path
+
+from ccpn.framework.Application import getApplication
 
 from ccpn.framework.PathsAndUrls import \
     CCPN_API_DIRECTORY, \
@@ -39,7 +43,9 @@ from ccpn.framework.PathsAndUrls import \
     CCPN_BACKUP_SUFFIX, \
     ccpnmodelDataPythonPath, \
     userCcpnDataPath, \
-    CCPN_BACKUPS_DIRECTORY
+    CCPN_BACKUPS_DIRECTORY, \
+    CCPN_LOGS_DIRECTORY
+
 
 from ccpnmodel.ccpncore.memops.metamodel import Constants as metaConstants
 MEMOPS                  = metaConstants.modellingPackageName
@@ -90,3 +96,20 @@ def isV2project(path) -> bool:
     # it is a directory which is not a V3project directory , that has memops/implementation subdirectory,
     # so we assume it to be a V2 project directory.
     return True
+
+
+def createLogger(project):
+    """Create a logger for project
+    Adapted from Api.py
+    """
+
+    # Cannot use the back linkage to application, as this routine is called during Project initialisation
+    _app = getApplication()
+
+    logger = Logging.createLogger(_app.applicationName,
+                                  project.projectPath / CCPN_LOGS_DIRECTORY,
+                                  stream=sys.stderr,
+                                  level = _app._debugLevel
+                                  )
+
+    return logger

@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-13 11:06:11 +0000 (Fri, January 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-23 15:18:12 +0000 (Mon, January 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -315,7 +315,7 @@ class Path(_Path_):
             result = [Path(f) for f in self.glob(f'*{suffix}')]
 
         if excludeDotFiles:
-            result = [f for f in result if not str(f).startswith('.')]
+            result = [f for f in result if not f.basename.startswith('.')]
 
         if relative:
             result = [f.relative_to(self) for f in result]

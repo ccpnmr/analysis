@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:48 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-01-23 17:22:29 +0000 (Mon, January 23, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -24,6 +24,8 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #=========================================================================================
 
 import os
+
+import numpy as np
 import pandas as pd
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import aPath, joinPath
@@ -38,7 +40,8 @@ Changing these will fail to set the attribute"""
 # SHEET NAMES
 SUBSTANCE = 'Substance'
 SAMPLE = 'Sample'
-NOTGIVEN = 'Not Given'
+NOTGIVEN = 'NotGiven'
+SERIES = 'Series'
 
 # """REFERENCES PAGE"""
 SPECTRUM_GROUP_NAME = 'spectrumGroupName'
@@ -48,9 +51,14 @@ SUBSTANCE_NAME = 'substanceName'
 # added from beta6
 SPECTRUM_NAME = 'spectrumName'
 SPECTRUMGROUP = 'SpectrumGroup'
-SERIES = 'series'
+
 SPECTRUMHEXCOLOUR = 'spectrumHexColour'
 SPECTRUMGROUPHEXCOLOUR = 'spectrumGroupHexColour'
+POSITIVECONTOURCOLOUR = 'positiveContourColour'
+NEGATIVECONTOURCOLOUR = 'negativeContourColour'
+POSITIVECONTOURBASE = 'positiveContourBase'
+NEGATIVECONTOURBASE = 'negativeContourBase'
+INCLUDENEGATIVECONTOURS = 'includeNegativeContours'
 ### Substance properties: # do not change these names
 comment = 'comment'
 smiles = 'smiles'
@@ -95,6 +103,11 @@ Valid = 'Valid'
 Salt = 'Salt'
 Other = 'Other'
 
+# Series
+SERIES_VALUE = 'series'
+SERIES_UNIT = 'seriesUnit'
+
+
 SAMPLE_PROPERTIES = [comment, pH, ionicStrength, amount, amountUnit, isHazardous, creationDate, batchIdentifier,
                      plateIdentifier, rowNumber, columnNumber]
 
@@ -117,7 +130,27 @@ SAMPLE_SHEET_COLUMNS = [SAMPLE_NAME,
                         SPECTRUMGROUPHEXCOLOUR] \
                        + SAMPLE_PROPERTIES
 
-TOP_SG_COLOURS = ['red', 'blue', 'purple', 'green', 'gold', 'dimgrey', 'darksalmon']
+SERIES_SHEET_COLUMNS = [
+                        SPECTRUM_GROUP_NAME,
+                        SPECTRUM_PATH,
+                        SPECTRUM_NAME,
+                        SERIES_VALUE,
+                        SERIES_UNIT,
+                        SPECTRUMHEXCOLOUR,
+                        SPECTRUMGROUPHEXCOLOUR]
+
+TOP_SG_COLOURS = ['red',
+                                      'blue',
+                                      'purple',
+                                      'green',
+                                      'gold',
+                                      'dimgrey',
+                                      'darksalmon',
+                                      'orangered'
+                                      'firebrick',
+                                      'tan',
+                                      'beige',
+                                      ]
 
 
 def makeTemplate(path, fileName='lookupTemplate.xlsx', ):
@@ -224,6 +257,11 @@ class ExcelReader(object):
     def load(self):
         """Load the actual data in the the project
         """
+        if SERIES in self.sheets:
+            getLogger().info('Loading Series...')
+            self._loadSeries()
+            getLogger().info('Loading from Excel completed...')
+            return
         self._addDefaultSpectrumColours = True
         self._tempSpectrumGroupsSpectra = {}  # needed to improve the loading speed
         self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
@@ -282,8 +320,33 @@ class ExcelReader(object):
             dataFrames.append(self._getDataFrameFromSheet(sheetName))
         for sheetName in [name for name in sheetNamesList if SAMPLE in name]:
             dataFrames.append(self._getDataFrameFromSheet(sheetName))
-
+        for sheetName in [name for name in sheetNamesList if SERIES in name]:
+            dataFrames.append(self._getDataFrameFromSheet(sheetName))
         return dataFrames
+
+    ###################################################################################################
+    ######################                  CREATE SERIES               ##############################################
+    ###################################################################################################
+
+    def _loadSeries(self):
+        # createSeries from SpectrumGroups
+        for df in self.dataframes:
+            for ix, seriesGroup in df.groupby(SPECTRUM_GROUP_NAME, sort=False):
+                seriesName = seriesGroup[SPECTRUM_GROUP_NAME].unique()[0]
+                spectra = []
+                seriesValues = []
+                seriesUnit = None
+                for rix, row in seriesGroup.iterrows():
+                    dct = row.to_dict()
+                    spPath = row[SPECTRUM_PATH]
+                    spectra.append(self._loadSpectumFromPath(spPath, dct, obj=None))
+                    seriesValues.append(row.get(SERIES_VALUE))
+                    seriesUnit = row.get(SERIES_UNIT)
+
+                spGroup = self._createNewSpectrumGroup(seriesName)
+                spGroup.spectra = spectra
+                spGroup.series = tuple(seriesValues)
+                spGroup.seriesUnits = seriesUnit
 
     ######################################################################################################################
     ######################                  CREATE SUBSTANCES               ##############################################
@@ -389,12 +452,35 @@ class ExcelReader(object):
                 getLogger().warning('Impossible to create the spectrumGroup %s. A spectrumGroup with the same name already '
                                     'exsists in the project. ' % name)
 
-                # name = self._checkDuplicatedSpectrumGroupName(name)
-                # self._createNewSpectrumGroup(name)
 
     ######################################################################################################################
     ######################             LOAD SPECTRA ON PROJECT              ##############################################
     ######################################################################################################################
+
+    def _loadSpectumFromPath(self, path, dct, obj=None):
+
+        newSpectrum = None
+        excelSpectrumPath = aPath(str(path))
+
+        if excelSpectrumPath.exists():
+            ### We have the absolute (full path)
+            newSpectrum = self._addSpectrum(filePath=excelSpectrumPath, dct=dct, obj=obj)
+        else:
+            ### We are in a relative path scenario
+            self.directoryPath = self.excelPath.filepath
+            globalFilePath = aPath(joinPath(self.directoryPath, excelSpectrumPath))
+            if globalFilePath.exists():
+                ### it is a folder, e.g Bruker type. We can handle it already.
+                newSpectrum = self._addSpectrum(filePath=globalFilePath, dct=dct, obj=obj)
+            else:
+                ### it is a single spectrum file name or relative path for a single file,
+                ### e.g.: "mySpectrum" or "mySpectrum.hdf5" or "myDir/mySpectrum.hdf5"
+                globalDirFilePath = globalFilePath.filepath
+                globalfilePaths = globalDirFilePath.listDirFiles()
+                for _globalfilePath in globalfilePaths:
+                    if _globalfilePath.basename == excelSpectrumPath.basename:
+                        newSpectrum = self._addSpectrum(filePath=_globalfilePath, dct=dct, obj=obj)
+        return newSpectrum
 
     def _loadSpectraForSheet(self, dictLists, processCount, sheetName):
         """
@@ -415,26 +501,7 @@ class ExcelReader(object):
                     for obj, dct in objDict.items():
                         for key, value in dct.items():
                             if key == SPECTRUM_PATH:
-                                excelSpectrumPath = aPath(str(value))
-                                if excelSpectrumPath.exists():
-                                    ### We have the absolute (full path)
-                                    self._addSpectrum(filePath=excelSpectrumPath, dct=dct, obj=obj)
-                                else:
-                                    ### We are in a relative path scenario
-                                    self.directoryPath = self.excelPath.filepath
-                                    globalFilePath = aPath(joinPath(self.directoryPath, excelSpectrumPath))
-                                    if globalFilePath.exists():
-                                        ### it is a folder, e.g Bruker type. We can handle it already.
-                                        self._addSpectrum(filePath=globalFilePath, dct=dct, obj=obj)
-                                    else:
-                                        ### it is a single spectrum file name or relative path for a single file,
-                                        ### e.g.: "mySpectrum" or "mySpectrum.hdf5" or "myDir/mySpectrum.hdf5"
-                                        globalDirFilePath = globalFilePath.filepath
-                                        globalfilePaths = globalDirFilePath.listDirFiles()
-                                        for _globalfilePath in globalfilePaths:
-                                            if _globalfilePath.basename == excelSpectrumPath.basename:
-                                                self._addSpectrum(filePath=_globalfilePath, dct=dct, obj=obj)
-
+                                self._loadSpectumFromPath(value, dct, obj=obj)
 
     def _addSpectrum(self, filePath, dct, obj):
         """
@@ -443,7 +510,7 @@ class ExcelReader(object):
         :obj: obj to link the spectrum to. E.g. Sample or Substance,
         """
         name = dct.get(SPECTRUM_NAME)
-        if not name:
+        if not name and obj is not None:
             name = obj.name
 
         data = self._project.application.loadData(filePath)
@@ -452,14 +519,22 @@ class ExcelReader(object):
             if not sp.name == name:
                 sp.rename(name)
 
-            self._linkSpectrumToObj(obj, sp, dct)
+            if obj is not None:
+                self._linkSpectrumToObj(obj, sp, dct)
             if EXP_TYPE in dct:  # use exp name as it is much faster and safer to save than exp type.
                 sp.experimentName = dct[EXP_TYPE]
                 # getLogger().debug3(msg=(e, data[0], dct[EXP_TYPE]))
-            if SPECTRUMHEXCOLOUR in dct:
-                sp.sliceColour = dct[SPECTRUMHEXCOLOUR]
-                self._addDefaultSpectrumColours = False
 
+            sp.sliceColour = dct.get(SPECTRUMHEXCOLOUR, sp.sliceColour)
+            sp.positiveContourColour = dct.get(POSITIVECONTOURCOLOUR,  sp.positiveContourColour)
+            sp.negativeContourColour = dct.get(NEGATIVECONTOURCOLOUR,  sp.negativeContourColour)
+            sp.positiveContourBase = dct.get(POSITIVECONTOURBASE, sp.positiveContourBase)
+            sp.negativeContourBase = dct.get(NEGATIVECONTOURBASE, sp.negativeContourBase)
+            incNeg = dct.get(INCLUDENEGATIVECONTOURS)
+            includeNegativeContours =  False if incNeg in ['no', 'N', 'No','n', None, NOTGIVEN] else True
+            sp.includeNegativeContours = includeNegativeContours
+            self._addDefaultSpectrumColours = False
+            return sp
     ######################################################################################################################
     ######################              ADD SPECTRUM TO RELATIVE OBJECTS              ####################################
     ######################################################################################################################
@@ -482,8 +557,8 @@ class ExcelReader(object):
                     tempSGspectra.append(spectrum)
                 # if spectrumGroup is not None: # this strategy is very slow. do not use here.
                 #     spectrumGroup.spectra += (spectrum,)
-                if SERIES in dct:  # direct insertion of series values for speed optimisation
-                    spectrum._setInternalParameter(spectrum._SERIESITEMS, {'SG:' + str(value): dct[SERIES]})
+                if SERIES_VALUE in dct:  # direct insertion of series values for speed optimisation
+                    spectrum._setInternalParameter(spectrum._SERIESITEMS, {'SG:' + str(value): dct[SERIES_VALUE]})
 
     def _fillSpectrumGroups(self,  processCount, sheetName=None):
 

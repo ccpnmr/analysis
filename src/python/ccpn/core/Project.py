@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-23 17:47:20 +0000 (Mon, January 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-23 18:17:17 +0000 (Mon, January 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -426,14 +426,15 @@ class Project(AbstractWrapperObject):
         # Special attributes:
         self._implExperimentTypeMap = None
 
-        # reference to a ProjectSaveHistory instance; need to fetch
-        # as path may have changed; e.g. for a V2 project
-        self._saveHistory = fetchProjectSaveHistory(self.path)
+        # reference to a ProjectSaveHistory instance;
+        # set by _newProject or _loadProject
+        self._saveHistory = None
 
         # reference to the logger; defined in call to _initialiseProject())
         self._logger = None
 
         # flag to indicate if the project is temporary, i.e., opened as a default project
+        # set by _newProject or _loadProject
         self._isTemporary = False
 
         # reference to special v3 core lists without abstractWrapperObject
@@ -698,12 +699,12 @@ class Project(AbstractWrapperObject):
         """
         from ccpn.core.lib.XmlLoader import XmlLoader
         _newPath = aPath(newPath).assureSuffix(CCPN_DIRECTORY_SUFFIX)
-        # _newPath.mkdir(parents=True, exist_ok=overwrite)
         _newXmlLoader = XmlLoader.newFromLoader(self._xmlLoader, path=_newPath, create=True)
         self._xmlLoader = _newXmlLoader
         self._path = _newXmlLoader.path.asString()
         self._name = _newXmlLoader.name
         self._checkProjectSubDirectories()
+        self._saveHistory = newProjectSaveHistory(self.path)
         self.save(comment='saveAs')
 
         # check for application and Gui;
@@ -2262,13 +2263,14 @@ def _loadProject(application, path: str) -> Project:
     # If path pointed to a V2 project, we need to do some manipulations
     if _isV2:
         _newPath = _path.withSuffix(CCPN_DIRECTORY_SUFFIX).uniqueVersion()
-        # _newPath.mkdir(parents=True, exist_ok=False)
         _newXmlLoader = XmlLoader.newFromLoader(xmlLoader, path=_newPath, create=True)
         xmlLoader = _newXmlLoader
 
     project = Project(xmlLoader)
     # back linkage
     xmlLoader.project = project
+
+    project._saveHistory = fetchProjectSaveHistory(project.path)
 
     # If path pointed to a V2 project, call the updates, and save the data
     if _isV2:

@@ -258,6 +258,14 @@ GENERALDATA             = 'generalData'
 BACKUPDATA              = 'backup'
 REPOSITORIES            = [USERDATA, REFDATA, GENERALDATA, BACKUPDATA]
 
+USERDATA_PACKAGES       = ['ccp.nmr.Nmr',
+                           'ccp.lims.RefSampleComponent',
+                           'ccp.lims.Sample'
+                           'ccp.molecule.MolSystem',
+                           'ccpnmr.gui.Task',
+                           'ccpnmr.gui.Window',
+                          ]
+
 #TODO: original code implemented silencing of garbage collection on reading/writing: still valid?
 SILENCE_GARBAGE_COLLECTION = False
 
@@ -1410,19 +1418,16 @@ def _getIdFromTopObject(topObj) -> tuple:
         memopsRoot = topObj.root
         ff = memopsRoot.findFirstPackageLocator
         repositories = list((ff(targetName=USERDATA) or ff(targetName='any')).repositories)
-        if len(repositories) == 0:
-            # getLogger().debug(f'No repository found for "{packageName}"')
-            raise RuntimeError(f'No repository found for {TopObject}')
-        elif len(repositories) > 1:
-            getLogger().debug(f'Several repositories found for {topObj}; using first one {repositories[0]}')
-        activeRepositories.append(repositories[0])
-
-        # apiRepo = topObj.root.findFirstRepository(name=USERDATA)
-        # activeRepositories.append(apiRepo)
-
+        activeRepositories.extend(repositories)
         dataDict[ACTIVE_REPOSITORIES_ATTR] = activeRepositories
 
+    if len(activeRepositories) == 0:
+        # getLogger().debug(f'No repository found for "{packageName}"')
+        raise RuntimeError(f'No repository found for {topObj}')
+    elif len(activeRepositories) > 1:
+        getLogger().debug(f'Several repositories found for {topObj}; using first one {repositories[0]}')
     apiRepo = activeRepositories[0]
+
     return (apiRepo.name, topObj.packageName, topObj.guid)
 
 

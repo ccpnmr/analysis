@@ -4,7 +4,7 @@ This module defines base classes for Series Analysis
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 16:20:49 +0100 (Thu, October 27, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-01-23 11:35:50 +0000 (Mon, January 23, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,17 +25,16 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-import pandas as pd
 
-from ccpn.core.DataTable import TableFrame
+from ccpn.util.DataEnum import DataEnum
+from lmfit.models import update_param_vals
+import numpy as np
+import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.util.Logging import getLogger
+from ccpn.core.DataTable import TableFrame
 from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult, CalculationModel
 from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationOutputFrame, HetNoeOutputFrame
-from ccpn.util.Logging import getLogger
-import numpy as np
-from lmfit.models import update_param_vals
-import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
-
 
 #####################################################
 ###########        Minimisers        ################
@@ -173,12 +172,41 @@ class ExponentialDecayFittingModel(_RelaxationBaseFittingModel):
 ##########  Calculation Models   ####################
 #####################################################
 
+class HetNoeDefs(DataEnum):
+    """
+    NOT YET ENABLED. Experimental
+    Definitions used for converting one of  potential variable name used to
+    describe a series value for the HetNOE spectrumGroup, e.g.: 'saturated' to 1.
+    Series values can be int/float or str.
+    Definitions:
+        The unSaturated condition:  0 or one of  ('unsat', 'unsaturated', 'nosat', 'noNOE')
+        the Saturated: 1 or  one of  ('sat',  'saturated', 'NOE')
+    see  ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables for variables
+
+    """
+
+    UNSAT = 0,  sv.UNSAT_OPTIONS
+    SAT = 1, sv.SAT_OPTIONS
+
+    @staticmethod
+    def getValueForDescription(description: str) -> int:
+        """ Get a value as int for a description if  is present in the list of possible description for the DataEnum"""
+        for value, descriptions in zip(HetNoeDefs.values(), HetNoeDefs.descriptions()):
+            _descriptions = [str(i).lower() for i in descriptions] + [str(value)]
+            if str(description).lower() in _descriptions:
+                return value
+
+        errorMessage = f'''Description "{description}" not recognised as a HetNOE series value. Please use one of {HetNoeDefs.descriptions()}'''
+        getLogger().warning(errorMessage)
+
 class HetNoeCalculation(CalculationModel):
     """
     Calculate HeteroNuclear NOE Values
     """
     ModelName = sv.HETNOE
-    Info        = 'Calculate HeteroNuclear NOE Values using peak Intensity (Height or Volume).'
+    Info        = '''Calculate HeteroNuclear NOE Values using peak Intensity (Height or Volume).
+    Define your series value with 0 for the unsaturated experiment while 
+    use the value 1 for the saturated experiment '''
 
     Description = '''Model:
                   HnN = I_Sat / I_UnSat
@@ -214,6 +242,23 @@ class HetNoeCalculation(CalculationModel):
     #########################
     ### Private functions ###
     #########################
+
+    def _convertNoeLabelToInteger(self, inputData):
+        """ Convert a label 'sat' to ones  and 'unsat' to zeros"""
+
+        satDef = HetNoeDefs(1)
+        unsatDef = HetNoeDefs(0)
+        # df = inputData #.copy()
+        inputData[sv.SERIES_STEP_X_label] =  inputData[self.xSeriesStepHeader]
+        for i, row in inputData.iterrows():
+            seriesStep = row[self.xSeriesStepHeader]
+            seriesStepIndex = HetNoeDefs.getValueForDescription(seriesStep)
+            noeDef = HetNoeDefs(seriesStepIndex)
+            if noeDef.value == satDef.value:
+                inputData.loc[i, self.xSeriesStepHeader] = satDef.value
+            if noeDef.value == unsatDef.value:
+                inputData.loc[i, self.xSeriesStepHeader] = unsatDef.value
+        return inputData
 
     def _getHetNoeOutputFrame(self, inputData):
         """

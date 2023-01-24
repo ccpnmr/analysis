@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:46 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-24 13:15:57 +0000 (Tue, January 24, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -588,6 +588,16 @@ class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
 # GeneralTab
 #=========================================================================================
 
+class _SpectrumPathRow(SpectrumPathRow):
+    """Just a class to re-jig the columns"""
+    SELECT_COLLUMN = 4  # Not used
+    LABEL_COLLUMN = 0
+    DATAFORMAT_COLLUMN = 5  # Not used
+    DATA_COLLUMN = 1
+    BUTTON_COLLUMN = 2
+    RELOAD_COLLUMN = 3  # Not used
+
+
 class GeneralTab(Widget):
     def __init__(self, parent=None, container=None, mainWindow=None, spectrum=None, item=None, colourOnly=False):
 
@@ -627,11 +637,20 @@ class GeneralTab(Widget):
         self.commentData.textChanged.connect(partial(self._queueSpectrumCommentChange, spectrum))  # ejb - was editingFinished
         row += 1
 
-        self.spectrumRow = SpectrumPathRow(parentWidget=self, row=row, labelText='Path',
-                                           obj=self.spectrum,
-                                           enabled=(not self.spectrum.isEmptySpectrum()),
-                                           callback=partial(self._queueSpectrumPathChange, spectrum),
+        self.spectrumRow = _SpectrumPathRow(parentWidget=self, rowIndex=row, labelText='Path',
+                                            spectrum=self.spectrum,
+                                            enabled=(not self.spectrum.isEmptySpectrum()),
+                                            callback=self._queueSpectrumPathChange,
+                                            )
+        row += 1
+
+        from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+        _dataFormats = list(getDataFormats().keys())
+        Label(self, text="DataFormat ", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'Format of the binary data defined by path'))
+        self.dataFormatWidget = PulldownList(parent=self, vAlign='t', grid=(row, 1), editable=False, texts=_dataFormats,
                                            )
+        self.dataFormatWidget.select(self.spectrum.dataFormat)
+        self.dataFormatWidget.disable()
         row += 1
 
         Label(self, text="Chemical Shift List ", vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'chemicalShiftList'))
@@ -746,7 +765,7 @@ class GeneralTab(Widget):
 
         with self._changes.blockChanges():
 
-            self.spectrumRow._resetFilePath()
+            self.spectrumRow.revert()
             self.spectrumPidLabel.setText(self.spectrum.pid)
             self.nameData.setText(self.spectrum.name)
             self.commentData.setText(self.spectrum.comment)
@@ -832,13 +851,16 @@ class GeneralTab(Widget):
         spectrum.rename(name)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSpectrumPathChange(self, spectrum, value):
-        if value.text != value.initialFilePath:  # spectrum.filePath:
-            return partial(self._changeSpectrumPath, spectrum, value.text)
+    def _queueSpectrumPathChange(self, value):
+        """Callback when validating text of the spectrumRow instance
+        """
+        if self.spectrumRow.hasChanged:
+            return self._changeSpectrumPath
 
-    def _changeSpectrumPath(self, spectrum, name):
-        # handled in the spectrumRow class
-        pass
+    def _changeSpectrumPath(self):
+        """Method queued to update the spectrum row on apply
+        """
+        self.spectrumRow.update()
 
     @queueStateChange(_verifyPopupApply)
     def _queueSpectrumCommentChange(self, spectrum, value):

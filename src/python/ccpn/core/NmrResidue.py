@@ -4,7 +4,7 @@ Module documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:42 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-24 13:15:55 +0000 (Tue, January 24, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -219,14 +219,15 @@ class NmrResidue(AbstractWrapperObject):
         self.rename to reset the residueType"""
         return self._wrappedData.residueType or ''
 
-    @residueType.setter
-    def residueType(self, value: typing.Optional[str]):
-        if not isinstance(value, (str, type(None))):
-            raise TypeError(f'residueType {repr(value)} must be a string or None')
-        if isinstance(value, str) and not value:
-            raise TypeError(f'residueType {repr(value)} must be a non-empty string')
-        if self.residueType != value:
-            self._wrappedData.resetResidueType(value)
+    # GWV 20230109: disabled setter
+    # @residueType.setter
+    # def residueType(self, value: typing.Optional[str]):
+    #     if not isinstance(value, (str, type(None))):
+    #         raise TypeError(f'residueType {repr(value)} must be a string or None')
+    #     if isinstance(value, str) and not value:
+    #         raise TypeError(f'residueType {repr(value)} must be a non-empty string')
+    #     if self.residueType != value:
+    #         self._wrappedData.resetResidueType(value)
 
     @property
     def relativeOffset(self) -> typing.Optional[int]:
@@ -1577,10 +1578,15 @@ def _fetchNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None
 
 def _renameNmrResidue(self: Project, apiResonanceGroup: ApiResonanceGroup):
     """Reset pid for NmrResidue and all offset NmrResidues"""
-    nmrResidue = self._data2Obj.get(apiResonanceGroup)
-    nmrResidue._finaliseAction('rename')
-    # for xx in nmrResidue.offsetNmrResidues:
-    #     xx._finaliseAction('rename')
+    if (nmrResidue := self._data2Obj.get(apiResonanceGroup)) is None:
+        # NOTE:GWV - it shouldn't get here but occasionally it does; e.g. when
+        # upgrading a V2 project with correctFinalResult() routine
+        getLogger().debug(f'_renameNmrResidue: no V3 object for {apiResonanceGroup}')
+
+    else:
+        nmrResidue._finaliseAction('rename')
+        # for xx in nmrResidue.offsetNmrResidues:
+        #     xx._finaliseAction('rename')
 
 
 # 20190501:ED haven't investigated this properly
@@ -1588,9 +1594,10 @@ def _renameNmrResidue(self: Project, apiResonanceGroup: ApiResonanceGroup):
 
 # Notifiers:
 #NBNB TBD We must make Resonance.ResonanceGroup 1..1 when we move beyond transition model
-Project._setupApiNotifier(_renameNmrResidue, ApiResonanceGroup, 'setSequenceCode')
+# GWV 20230109: disabled notifiers for sequenceCode and residueType: changed only via rename
+# Project._setupApiNotifier(_renameNmrResidue, ApiResonanceGroup, 'setSequenceCode')
 Project._setupApiNotifier(_renameNmrResidue, ApiResonanceGroup, 'setDirectNmrChain')
-Project._setupApiNotifier(_renameNmrResidue, ApiResonanceGroup, 'setResidueType')
+# Project._setupApiNotifier(_renameNmrResidue, ApiResonanceGroup, 'setResidueType')
 Project._setupApiNotifier(_renameNmrResidue, ApiResonanceGroup, 'setAssignedResidue')
 del _renameNmrResidue
 

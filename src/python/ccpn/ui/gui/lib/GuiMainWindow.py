@@ -6,7 +6,7 @@ It works in concert with a wrapper object for storing/retrieving attibute values
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:44 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-24 13:15:56 +0000 (Tue, January 24, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -534,7 +534,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         badSpectra = [str(spectrum.pid) for spectrum in project.spectra if not spectrum.hasValidPath()]
 
         if badSpectra:
-            text = 'Use menu "Spectrum --> Validate paths..." Or "VP" shortcut to correct.\n'
+            text = 'Use menu "Spectrum --> Validate paths..." Or "VP" shortcut to correct\n\n'
             text += 'Please inspect file path(s) for:\n'
             for sp in badSpectra:  # these can be >1000 lines message. Added in a scrollable area.
                 text += '%s\n' % str(sp)
@@ -581,7 +581,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         # try and open with the NefDataloader
         dataLoader = NefDataLoader(path)
-        if dataLoader.checkForValidFormat(path) is None:
+        if not dataLoader.isValid:
             txt = f"_getDataLoader: Loading '{path}' unsuccessful; unrecognised type, should be '{NefDataLoader.dataFormat}'"
             getLogger().debug(txt)
             return
@@ -1218,7 +1218,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         if urls is None:
             return []
 
-        getLogger().info('Handling urls...')
+        getLogger().info('Handling urls ...')
 
         # dataLoaders: A list of (url, dataLoader, createsNewProject, ignore) tuples.
         # createsNewProject: to evaluate later call _loadProject; eg. for NEF
@@ -1231,9 +1231,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             try:
                 dataLoader, createsNewProject, ignore = self.ui._getDataLoader(url)
                 dataLoaders.append((url, dataLoader, createsNewProject, ignore))
+
             except (RuntimeError, ValueError) as es:
-                MessageDialog.showError('Load Data',
-                                        'While examining %s:\n%s' % (url, str(es)),
+                MessageDialog.showError(f'Loading "{url}"',
+                                        f'{es}',
                                         parent=self)
 
         # All ignored urls

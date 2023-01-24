@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-11 15:49:41 +0000 (Wed, January 11, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-24 13:15:56 +0000 (Tue, January 24, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -107,7 +107,7 @@ projectStateLayoutFileName      = 'layout_3_1.json'
 # others; also defined in util.Path and from there imported in Api and Implementation
 # DO NOT REMOVE and keep in sync (for circular import reasons) (for now!)
 CCPN_DIRECTORY_SUFFIX    = '.ccpn'
-CCPN_BACKUP_SUFFIX       = '_backup'  # used by ApiLoader; deprecated
+CCPN_BACKUP_SUFFIX       = '_backup'  # used by Project, ApiLoader; deprecated
 
 # subdirectories of Projects
 CCPN_API_DIRECTORY       = 'ccpnv3'

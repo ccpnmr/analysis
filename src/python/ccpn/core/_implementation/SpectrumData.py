@@ -1,10 +1,12 @@
 """
 This file contains the ABC and specfic classes for the numpy.ndarray-based data objects
 """
+from __future__ import annotations
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:02 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-24 13:15:55 +0000 (Tue, January 24, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,16 +41,18 @@ class SpectrumDataABC(np.ndarray):
     spectrumDataLen = None
 
     _dtype = 'float32'  # numpy data format of the resulting slice, plane, region data
-    _attributes = '_dataSource _position, _dimensions'.split()
+
+    # Attributes maintained in addition to dimensionCount (ndim), pointCounts (shape)
+    _attributes = '_dataSource _position, _dimensions _dataTypes'.split()
 
     # from https://numpy.org/doc/stable/user/basics.subclassing.html
     def __new__(subtype, shape=None, dtype=None, buffer=None, offset=0,
                 strides=None, order=None,
-                dataSource=None, dimensions=(), position=None
+                dataSource=None, dimensions=(), position=None, dataTypes=None
                 ):
         # Create the ndarray instance of our type, given the usual
         # ndarray input arguments.
-        # GWV added the dataSource and dimensions arguments.
+        # GWV added the dataSource, dimensions, position and dataTypes arguments.
         # This will call the standard ndarray constructor, but return an object of our type.
         # It also triggers a call to SpectrumDataABC.__array_finalize__
 
@@ -56,16 +60,15 @@ class SpectrumDataABC(np.ndarray):
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 
         if dataSource is not None and not isinstance(dataSource, SpectrumDataSourceABC):
-            raise ValueError('Invalid dataSource; got %s' % dataSource)
+            raise ValueError(f'Invalid dataSource; got {dataSource}')
 
         if dimensions is None or not isIterable(dimensions):
-            raise ValueError('Invalid dimensions; expected list/tuple, got %s' % dimensions)
+            raise ValueError(f'Invalid dimensions; expected list/tuple, got {dimensions}')
         dimensions = tuple(dimensions)
         maxDimLen =  subtype.spectrumDataLen if subtype.spectrumDataLen is not None else \
                      dataSource.dimensionCount
         if len(dimensions) == 0 or len(dimensions) > maxDimLen:
-            raise ValueError('Invalid length dimensions; expected at most %d, got %s' %
-                             maxDimLen, dimensions)
+            raise ValueError(f'Invalid length dimensions; expected at most {maxDimLen}, got {dimensions}')
 
         if shape is None:
             pointCounts = dataSource.getByDimensions('pointCounts', dimensions=dimensions)
@@ -82,13 +85,16 @@ class SpectrumDataABC(np.ndarray):
         obj.fill(0.0)
 
         # set the new attributes to the value passed
-        # GWV: this appears not to work??
-        # for attr in subtype._attributes:
-        #     setattr(obj, attr, None)
-
         obj._dataSource = dataSource
         obj._dimensions = tuple(dimensions)
         obj._position = position
+
+        if dataTypes is not None:
+            obj._dataTypes = dataTypes
+        elif dataTypes is None and dataSource is not None:
+            obj._dataTypes  = [dataSource.dataTypes[dimIdx] for dimIdx in obj.dimensionIndices]
+        else:
+            obj._dataTypes = [specLib.DATA_TYPE_REAL]*obj.ndim
 
         # Finally, we must return the newly created object:
         return obj
@@ -127,84 +133,92 @@ class SpectrumDataABC(np.ndarray):
         self._dataSource = getattr(obj, '_dataSource', None)
         self._dimensions = getattr(obj, '_dimensions', None)
         self._position = getattr(obj, '_position', None)
+        self._dataTypes = getattr(obj, '_dataTypes', None)
 
         # We do not need to return anything
         return
 
     @property
     def dataSource(self):
+        """:return: the originating dataSource object (or None if not defined)
+        """
         return self._dataSource
 
     @property
-    def dimensions(self) -> tuple:
+    def dimensions(self) -> list:
+        """The dimensions (1-based) for self in the originating dataSource object
+        :return a list of dimensions or [] if not defined
+        """
         dims = self._dimensions if self._dimensions is not None else []
-        return tuple(dims)
+        return dims
 
     @property
-    def dimensionIndices(self) -> tuple:
-        return tuple(dim-1 for dim in self._dimensions)
+    def dimensionIndices(self) -> list:
+        """The dimension indices (0-based) for self in the originating dataSource object
+        :return a list of dimension indices or [] if not defined
+        """
+        return [dim-1 for dim in self._dimensions]
 
     @property
     def dimensionCount(self) -> int:
-        """Conveniance for nomenclature;
-        :return number of dimensions (i.e. the numpy.ndarray ndim parameter)
+        """:return number of dimensions of self (i.e. the numpy.ndarray ndim parameter)
         """
         return self.ndim
 
     @property
     def dimensionsString(self) -> str:
         """Conveniance
-        :return a string representation of the dimensions; e.g "xy", "zxy"
+        :return a string representation of the dimensions; e.g "XY", "ZXY"
         """
         dimNames = specLib.dimensionNames
         dims = [dimNames[dim][0] for dim in self.dimensions]
         dimStr = ''.join(dims)
-        return dimStr
+        return dimStr.upper()
 
     @property
     def pointCounts(self) -> tuple:
-        """Conveniance:
-        :return the shape of self in self.dimension's order
+        """The total number of points of self (i.e. shape).
+        This corresponds to the pointCounts of the dataSource object in self.dimension's order
+        :return a tuple of the total number of points
         """
         return tuple(list(self.shape)[::-1])
 
     @property
     def dataTypes(self) -> tuple:
-        """Conveniance:
-        :return dataSource.dataTypes in self.dimension's order
+        """The dataTypes of self along the succesive dimensions of self.
+        This corresponds to the dataTypes of the dataSource object in self.dimension's order
+        :return a tuple of the dataTypes
         """
-        if self.dataSource is not None:
-            result  = [self.dataSource.dataTypes[dimIdx] for dimIdx in self.dimensionIndices]
+        if self._dataTypes is None:
+            return tuple([specLib.DATA_TYPE_REAL]*self.ndim)
         else:
-            result = [specLib.DATA_TYPE_REAL]*self.ndim
-        return tuple(result)
+            return tuple(self._dataTypes)
 
     @property
     def isComplex(self) -> tuple:
-        """Conveniance:
-        :return dataSource.isComplex in self.dimension's order
+        """Conveniance: A flag indicating a complex dataType along the succesive dimensions of self.
+        :return a tuple of isComplex flags
         """
-        if self.dataSource is not None:
-            result  = [self.dataSource.isComplex[dimIdx] for dimIdx in self.dimensionIndices]
-        else:
-            result = [False]*self.ndim
+        result  = [(dt != specLib.DATA_TYPE_REAL) for dt in self.dataTypes]
         return tuple(result)
 
     @property
     def realPointCounts(self) -> tuple:
-        """Conveniance: return a tuple with the number of points in self.dimension's
-        order as used throughout the code
-        :return the shape of self  self.dimension's order
+        """Conveniance: return a tuple with the real number of points along the succesive dimensions of self.
+        :return a tuple of real points values
         """
         result = [(np//2 if isC else np) for np, isC in zip(self.pointCounts, self.isComplex)]
         return tuple(result)
 
     @property
-    def position(self) -> tuple:
+    def position(self) -> (tuple, None):
+        """:return: the position (1-based) where the slice was taken in the original dataSource object,
+        or None if undefined
+        """
         pos = tuple(self._position) if self._position is not None else None
         return pos
 
-    def getSliced(self, *sliceTuples):
+    def getSliced(self, *sliceTuples) -> SpectrumDataABC:
         """Conveniance
         Get a part of the data, as defined by slices (1-based) in dimension order;
         updates self.position, so that it points to the actual location in the spectrum
@@ -268,6 +282,12 @@ class SpectrumDataABC(np.ndarray):
                 pos[dimIdx] += incr
             self._position = pos
 
+    def copy(self, order='K') -> SpectrumDataABC:
+        """Make a copy of SpectrumDataObject, preserving order('K') as default argument (in contrast to the inherent method
+        which uses order='C').
+        """
+        return super().copy(order=order)
+
     def __getitem__(self, item):
         """Just subclassed to catch the slice to update the internal position
         parameter
@@ -304,25 +324,116 @@ class SpectrumDataABC(np.ndarray):
 
         return result
 
-    def __str__(self):
-
+    def _objString(self) -> str:
+        """:return a string describing the obj"""
         rcString = {False:'R', True:'C'}
         pos = ','.join(str(p) for p in self._position) \
                     if self._position is not None else None
         sizes =  'x'.join('%s%s' % (p, rcString[isC])
                           for p, isC in zip(self.realPointCounts, self.isComplex))
-        return '<%s: %s (%s) @%s>\n%s' % (self.spectrumDataType,
-                                          self.dimensionsString,
-                                          sizes,
-                                          pos,
-                                          super().__str__()
-                                         )
+
+        return f'<{self.spectrumDataType}: {self.dimensionsString}, @{pos} ({sizes})>'
+
+    def __str__(self):
+        return f'{self._objString()}\n{super().__str__()}'
 
 
 class SliceData(SpectrumDataABC):
+    """Class to hold 1D slice data, either as float32 numpy array or optionally as
+    a complex64 numpy array in case of complex data
+    """
     spectrumDataType = 'SliceData'
     spectrumDataLen = 1
 
+    @property
+    def pointCounts(self) -> tuple:
+        """The total number of points of self (i.e. shape).
+        This corresponds to the pointCounts of the dataSource object in self.dimension's order
+        :return a tuple of the total number of points
+        """
+        if self.dtype == np.complex64:
+            _np = self.shape[0] * 2
+        else:
+            _np = self.shape[0]
+        return (_np,)
+
+    @property
+    def isShuffled(self) -> bool:
+        """:return True if the data are shuffled; i.e. in n(RI) or nPN order
+        """
+        dataType = self.dataTypes[0]
+        return dataType in (specLib.DATA_TYPE_COMPLEX_nRI, specLib.DATA_TYPE_COMPLEX_PN)
+
+    def shuffle(self) -> SpectrumDataABC:
+        """For complex data: generate a copy of self with the data shuffled,
+        i.e. in n(RI) or nPN order.
+        :return data as float32
+        """
+        if not self.isComplex[0]:
+            raise RuntimeError(f'{self._objString()}: not complex data')
+
+        dataType = self.dataTypes[0]
+        totalSize = self.pointCounts[0]
+        realSize = self.realPointCounts[0]
+
+        _data = self.copy()
+
+        if self.isShuffled or self.dtype == np.complex64:
+            pass
+
+        elif dataType == specLib.DATA_TYPE_COMPLEX_nRnI:
+            _data[0::2] = self[0:realSize]  # The real part
+            _data[1::2] = self[realSize:totalSize]  # The imaginary part
+            _data._dataTypes[0] = specLib.DATA_TYPE_COMPLEX_nRI
+
+        else:
+            raise RuntimeError(f'{self._objString()}: unable to shuffle dataType "{dataType}"')
+
+        return _data
+
+    def unshuffle(self) -> SpectrumDataABC:
+        """For complex data: generate a copy of self with the data un-shuffled,
+        i.e. in (nR)(nI) order.
+        :return data as float32
+        """
+        if not self.isComplex[0]:
+            raise RuntimeError(f'{self._objString()}: not complex data')
+
+        if self.dtype == np.complex64:
+            raise RuntimeError(f'{self._objString()}: data are in numpy.complex64 format; use asFloat() method first')
+
+        dataType = self.dataTypes[0]
+        totalSize = self.pointCounts[0]
+        realSize = self.realPointCounts[0]
+
+        _data = self.copy()
+
+        if dataType == specLib.DATA_TYPE_COMPLEX_nRI:
+            _data[0:realSize] = self[0::2]  # The real part
+            _data[realSize:totalSize] = self[1::2]  # The imaginary part
+            _data._dataTypes[0] = specLib.DATA_TYPE_COMPLEX_nRnI
+
+        elif dataType == specLib.DATA_TYPE_COMPLEX_nRnI:
+            pass
+
+        else:
+            raise RuntimeError(f'{self._objString()}: unable to unshuffle dataType "{dataType}"')
+
+        return _data
+
+    def asComplex(self):
+        """:return a shuffled self as complex64 view
+        """
+        if not self.isShuffled:
+            raise RuntimeError(f'{self._objString()}: cannot create complex view as data are not shuffled')
+        return self.view(np.complex64)
+
+    def asFloat(self):
+        """:return a shuffled self as float32 view
+        """
+        if not self.isShuffled:
+            raise RuntimeError(f'{self._objString()}: cannot create complex view as data are not shuffled')
+        return self.view(np.float32)
 
 class PlaneData(SpectrumDataABC):
     spectrumDataType = 'PlaneData'

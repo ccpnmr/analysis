@@ -5,7 +5,7 @@ This module defines the data loading mechanism for a V2 project
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -17,9 +17,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:07 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-24 13:15:56 +0000 (Tue, January 24, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -59,9 +59,10 @@ class CcpNmrV2ProjectDataLoader(DataLoaderABC):
             return False
 
         _apiPath = self.path /  MEMOPS / IMPLEMENTATION
+        self.isValid = False
         if not _apiPath.exists():
             self.isValid = False
-            self.errorString = f'Invalid path "{self.path}"; required sub-directory "{MEMOPS}/{IMPLEMENTATION}" not found'
+            self.errorString = f'Required sub-directory "{MEMOPS}/{IMPLEMENTATION}" not found'
             return False
 
         self.isValid = True

@@ -5,7 +5,7 @@ PulldownList widget
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:08 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-24 13:15:57 +0000 (Tue, January 24, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,6 +28,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+
+from ccpn.util.Logging import getLogger
+
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
@@ -157,18 +160,19 @@ class PulldownList(QtWidgets.QComboBox, Base):
         return (self.currentText(), self.currentObject())
 
     def select(self, item):
-        # Works with an object or a text
-
-        index = None
+        """Select an item or text
+        :param item: an item or text of the pulldown list
+        """
+        indx = None
 
         if item in self.texts:
-            index = list(self.texts).index(item)
+            indx = list(self.texts).index(item)
 
         elif item in self.objects:
-            index = list(self.objects).index(item)
+            indx = list(self.objects).index(item)
 
-        if index is not None:
-            self.setCurrentIndex(index)
+        if indx is not None:
+            self.setCurrentIndex(indx)
 
     def paintEvent(self, e: QtGui.QPaintEvent) -> None:
         """Set the colour of the selected pulldown-text
@@ -195,7 +199,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
 
     def setSelected(self, item, doCallback=False):
 
-        print("ccpn.ui.gui.widgets.PulldownList.setSelected is deprecated use; .select()")
+        getLogger().warning("ccpn.ui.gui.widgets.PulldownList.setSelected is deprecated use; .select()")
 
         self.select(item)
 

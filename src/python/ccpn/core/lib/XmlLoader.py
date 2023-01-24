@@ -1013,7 +1013,7 @@ class XmlLoader(XmlLoaderABC):
         with self.blockReading():
             self.apiNmrProject = self.memopsRoot.newNmrProject(name=self.name)  # creates the Nmr repository
             self._initApiData()
-            # But not (yet) the Graphics data
+            # And the Graphics data
             self._initApiGraphicsData()
 
         # associate the topObjects with their repository / package
@@ -1145,23 +1145,29 @@ class XmlLoader(XmlLoaderABC):
         self._updateTopObjects()
         # self.userData.load(reload=False)  # load all remaining userdata
 
-        # Once we are done loading we can remove the symlink in case of a V2 project
-        # This can only be done now, because loading is not complete until the apiNmrProject is initiated,
-        # which triggers additional top-object instantiations.
         if self.isV2:
             # Following previous code (Api.py:460): Special hack for moving data
             # of renamed packages on upgrade
             for newName, oldName in self.memopsRoot._movedPackageNames.items():
                 if (pkg := self.lookup( (USERDATA, oldName))) is not None:
                     pkg._renamePackage(newName)
+
             # upgrade api data
             correctFinalResult(self.memopsRoot)
-            # self.memopsRoot.checkAllValid()  # This traverses all repositories/packages and loads and checks values
 
-        # init the project data
-        self._initApiData()
-        # init the Graphics data
-        self._initApiGraphicsData()
+            # init the v3 objects
+            with self.blockReading():
+                self._initApiData()
+                # And the Graphics data
+                self._initApiGraphicsData()
+
+            # This traverses all repositories/packages and loads and checks values
+            # self.memopsRoot.checkAllValid()
+
+        # # init the project data
+        # self._initApiData()
+        # # init the Graphics data
+        # self._initApiGraphicsData()
 
         self._updateTopObjects()
         self.setUnmodified()

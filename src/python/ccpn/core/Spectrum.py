@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-24 13:15:55 +0000 (Tue, January 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-24 17:58:24 +0000 (Tue, January 24, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -3371,12 +3371,15 @@ class Spectrum(AbstractWrapperObject):
         """Delete Spectrum"""
         with undoBlock():
 
-            fp = self.filePath
+            _path = self.filePath
+            dataFormat = self.dataFormat
             self._close()
 
             with undoStackBlocking() as addUndoItem:
                 # recover the dataSource when undeleting
-                addUndoItem(undo=partial(setattr, self, 'filePath', fp))
+                addUndoItem(undo=
+                            partial(self._openFile, path=_path, dataFormat=dataFormat, checkParameters=False)
+                )
 
             # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier?
             specDisplays = []

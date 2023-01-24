@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-24 13:15:55 +0000 (Tue, January 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-24 13:56:10 +0000 (Tue, January 24, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,7 @@ from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
 
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
-from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, fetchProjectSaveHistory
+from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, fetchProjectSaveHistory, newProjectSaveHistory
 from ccpn.core.lib.ProjectLib import createLogger
 from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
     inactivity, logCommandManager

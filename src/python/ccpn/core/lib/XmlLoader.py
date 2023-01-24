@@ -1155,19 +1155,19 @@ class XmlLoader(XmlLoaderABC):
             # upgrade api data
             correctFinalResult(self.memopsRoot)
 
-            # init the v3 objects
-            with self.blockReading():
-                self._initApiData()
-                # And the Graphics data
-                self._initApiGraphicsData()
+            # # init the v3 objects
+            # with self.blockReading():
+            #     self._initApiData()
+            #     # And the Graphics data
+            #     self._initApiGraphicsData()
 
             # This traverses all repositories/packages and loads and checks values
             # self.memopsRoot.checkAllValid()
 
-        # # init the project data
-        # self._initApiData()
-        # # init the Graphics data
-        # self._initApiGraphicsData()
+        # init the V3 project data
+        self._initApiData()
+        # init the Graphics data
+        self._initApiGraphicsData()
 
         self._updateTopObjects()
         self.setUnmodified()

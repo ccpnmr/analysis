@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-24 13:15:56 +0000 (Tue, January 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-24 20:29:17 +0000 (Tue, January 24, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -487,7 +487,7 @@ class Gui(Ui):
 
             return newProject
 
-    def _loadProject(self, dataLoader) -> typing.Union[Project, None]:
+    def _loadProject(self, dataLoader) -> (Project, None):
         """Helper function, loading project from dataLoader instance
         check and query for closing current project
         build the project Gui elements
@@ -498,34 +498,31 @@ class Gui(Ui):
         from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
 
         if not dataLoader.createNewProject:
-            raise RuntimeError('DataLoader %s does not create a new project')
+            raise RuntimeError(f'DataLoader {dataLoader} does not create a new project')
+
+        if self.project is None:
+            raise RuntimeError('No current project; this should never happen!')
 
         oldProjectLoader = None
         oldProjectIsTemporary = True
         oldMainWindowPos = self.mainWindow and self.mainWindow.pos()
-        if self.project:
-            # if not self.project.isTemporary:
-            if self.project._undo is None or self.project._undo.isDirty():
-                message = f"Do you really want to open a new project (current project will be closed" \
-                          f"{' and any changes will be lost' if self.project.isModified else ''})?"
 
-                if not (_ok := MessageDialog.showYesNo('Load Project', message, parent=self.mainWindow)):
-                    return None
+        # if not self.project.isTemporary:
+        if self.project._undo is None or self.project._undo.isDirty():
+            message = f"Do you really want to open a new project (current project will be closed" \
+                      f"{' and any changes will be lost' if self.project.isModified else ''})?"
 
-            # Some error recovery; store info to re-open the current project (or a new default)
-            oldProjectLoader = CcpNmrV3ProjectDataLoader(self.project.path)
-            oldProjectIsTemporary = self.project.isTemporary
+            if not (_ok := MessageDialog.showYesNo('Load Project', message, parent=self.mainWindow)):
+                return None
+
+        # Some error recovery; store info to re-open the current project (or a new default)
+        oldProjectLoader = CcpNmrV3ProjectDataLoader(self.project.path)
+        oldProjectIsTemporary = self.project.isTemporary
 
         try:
-            if self.project:
-                # NOTE:ED - getting a strange QT bug disabling the menu-bar from here
-                #  I think because the main-window isn't visible on the first load :|
-                with MessageDialog.progressManager(self.mainWindow, f'Loading project {dataLoader.path} ... '):
-                    _loaded = dataLoader.load()
-                    if _loaded is None or len(_loaded) == 0:
-                        return None
-            else:
-                # progress not required on the first load
+            # NOTE:ED - getting a strange QT bug disabling the menu-bar from here
+            #  I think because the main-window isn't visible on the first load :|
+            with MessageDialog.progressManager(self.mainWindow, f'Loading project {dataLoader.path} ... '):
                 _loaded = dataLoader.load()
                 if _loaded is None or len(_loaded) == 0:
                     return None
@@ -563,7 +560,7 @@ class Gui(Ui):
         return newProject
 
     # @logCommand('application.') # eventually decorated by  _loadData()
-    def loadProject(self, path=None) -> typing.Union[Project, None]:
+    def loadProject(self, path=None) -> (Project, None):
         """Loads project defined by path
         :return a Project instance or None
         """

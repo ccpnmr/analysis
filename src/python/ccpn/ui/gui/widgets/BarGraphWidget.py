@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:29 +0100 (Wed, October 26, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-01-24 15:00:38 +0000 (Tue, January 24, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -184,8 +184,71 @@ class BarGraphWidget(Widget):
                     ys.append(y)
         return xs,ys
 
+    def getPlotData(self):
+        """ Return X and Y data as tuple"""
+        xs, ys = self._getPlotData()
+        if len(xs) == len(ys) and len(xs)>0:
+            yAll = [a for j in ys for a in j]
+            yAll = np.array(yAll)
+            xAll = [a for j in xs for a in j]
+            xAll = np.array(xAll)
+            return xAll, yAll
+        return np.array([]), np.array([])
+
+    def _getDefaultPlotLimits(self):
+        """ Get the limits for x and y axes to best fit the data as tuple of tuple
+         (xMin, xMax), (yMin, yMax)"""
+        import numpy as np
+        xs, ys = self.getPlotData()
+        if len(xs) == 0:
+            return
+        xMin, xMax = int(np.min(xs)), int(np.max(xs))
+        yMin, yMax = np.min(ys), np.max(ys)
+        if yMin > 0:
+            yMin = 0
+        else:
+            yMin += yMin / 2
+        xMax += xMax / 2
+        yMax += yMax / 2
+        return (xMin, xMax), (yMin, yMax)
+
+    def setDefaultPlotLimits(self):
+        limits = self._getDefaultPlotLimits()
+        if limits is None:
+            return
+        xLims, yLims = limits
+        self.setLimits(xMin=xLims[0], xMax=xLims[1], yMin=yLims[0], yMax=yLims[1])
+
     def zoomFull(self):
         self.plotWidget.autoRange()
+
+    def setLimits(self, **kwargs):
+        """
+       Set limits that constrain the possible view ranges.
+
+        **Panning limits**. The following arguments define the region within the
+        viewbox coordinate system that may be accessed by panning the view.
+
+        =========== ============================================================
+        xMin        Minimum allowed x-axis value
+        xMax        Maximum allowed x-axis value
+        yMin        Minimum allowed y-axis value
+        yMax        Maximum allowed y-axis value
+        =========== ============================================================
+
+        **Scaling limits**. These arguments prevent the view being zoomed in or
+        out too far.
+
+        =========== ============================================================
+        minXRange   Minimum allowed left-to-right span across the view.
+        maxXRange   Maximum allowed left-to-right span across the view.
+        minYRange   Minimum allowed top-to-bottom span across the view.
+        maxYRange   Maximum allowed top-to-bottom span across the view.
+        =========== ============================================================
+
+        :return:
+        """
+        self.plotWidget.setLimits(**kwargs)
 
     def fitXZoom(self):
         xs, ys = self._getPlotData()
@@ -218,8 +281,13 @@ class BarGraphWidget(Widget):
             # filter for only the visible range.
             masked = np.ma.masked_inside(xAll, xm, xM)
             filtered = yAll[masked.mask]
+            yMin = np.min(filtered)
+            if yMin > 0:
+                yMin = 0
+            else:
+                yMin += yMin / 2
             if len(filtered) > 0:
-                self.plotWidget.setYRange(np.min(filtered),  np.max(filtered))
+                self.plotWidget.setYRange(yMin,  np.max(filtered))
             else:
                 self.zoomFull()
 
@@ -453,6 +521,7 @@ class BarGraphWidget(Widget):
             self.customViewBox.showAllLabels()
         if self.customViewBox.showAboveThresholdOnly:
             self.customViewBox.showAboveThreshold()
+        self.setDefaultPlotLimits()
 
     def addLegend(self):
         self.legendItem = pg.LegendItem((100, 60), offset=(70, 30))  # args are (size, offset)

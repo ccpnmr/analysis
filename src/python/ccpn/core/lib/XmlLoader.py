@@ -292,21 +292,15 @@ class XmlLoaderABC(TraitBase):
         self.root = root
 
     @property
-    def xmlLoader(self) -> XmlLoader:
-        """:return root XmlLoader instance
-        """
-        return self.root
-
-    @property
     def id(self) -> tuple:
         """:return the id as a tuple
         """
         return self._id
 
     def addToLookup(self):
-        """Add self to the root lookup dict
+        """Add self.id to the root lookup dict
         """
-        self.root._lookupDict[self._id] = self
+        self.root._lookupDict[self.id] = self
 
     def lookup(self, id:tuple):
         """Lookup object corresponding to id, or root if id is None
@@ -361,7 +355,7 @@ class TopObject(XmlLoaderABC):
         self.addToLookup()
 
     @property
-    def guid(self) -> Path:
+    def guid(self) -> str:
         """:return the guid of the topObject
         """
         return self._guid
@@ -421,16 +415,13 @@ class TopObject(XmlLoaderABC):
         if not self.path.exists():
             raise FileNotFoundError(f'Failed to load "{self.path}": file does not exist')
 
-        if self.package.name == 'ccp.general.DataLocation':
-            pass
-
         if not self.isReading:
             self.isReading += 1
             with self.path.open('r') as fp:
                 if self.apiTopObject is None:
                     try:
                         apiTopObject = loadFromStream(stream=fp,
-                                                   topObject=self.xmlLoader.memopsRoot,
+                                                   topObject=self.root.memopsRoot,
                                                    topObjId=self.guid,
                                                    partialLoad=False)
                     except Exception as es:
@@ -456,8 +447,8 @@ class TopObject(XmlLoaderABC):
             self.isLoaded = True  # xml-file reflects contents
 
             # need to hack this as no other access method exists
-            # forceSetattr(apiTopObject, 'isModified', False)
-            # forceSetattr(apiTopObject, 'isLoaded', True)
+            forceSetattr(apiTopObject, 'isModified', False)
+            forceSetattr(apiTopObject, 'isLoaded', True)
             forceSetattr(apiTopObject, ACTIVE_REPOSITORIES_ATTR, [self.package.repository.apiRepository])
 
             self.isReading -= 1

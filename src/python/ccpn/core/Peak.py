@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-22 19:06:38 +0000 (Thu, December 22, 2022) $"
+__dateModified__ = "$dateModified: 2023-01-24 17:10:53 +0000 (Tue, January 24, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -302,10 +302,14 @@ class Peak(AbstractWrapperObject):
         ff = self._project._data2Obj.get
 
         dims = self._wrappedData.sortedPeakDims()
-        if value is not None and len(value) != len(dims):
-            raise ValueError(f'{self.__class__.__name__}.ppmPositions must be None or tuple|list of length {len(dims)}')
+        # if value is not None and len(value) != len(dims):
+        #     raise ValueError(f'{self.__class__.__name__}.ppmPositions must be None or tuple|list of length {len(dims)}')
 
         for ii, peakDim in enumerate(dims):
+            if value and ii >= len(value):
+                # skip dims outside current peak range
+                continue
+
             _old = peakDim.position  # the current pointPosition, quick to get
             peakDim.value = value[ii] if value else None
             peakDim.realValue = None

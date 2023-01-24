@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-22 19:06:38 +0000 (Thu, December 22, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-24 20:29:52 +0000 (Tue, January 24, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -124,9 +124,10 @@ class Peak(AbstractWrapperObject):
             return None
 
         scale = self.peakList.spectrum.scale
-        scale = scale if scale is not None else 1.0
-        if -SCALETOLERANCE < scale < SCALETOLERANCE:
-            getLogger().warning('Scaling {}.height by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+        # GWV: done in setter of Spectrum.scale
+        # scale = scale if scale is not None else 1.0
+        # if -SCALETOLERANCE < scale < SCALETOLERANCE:
+        #     getLogger().warning('Scaling {}.height by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
 
         return self._wrappedData.height * scale
 
@@ -143,12 +144,12 @@ class Peak(AbstractWrapperObject):
             self._wrappedData.height = None
         else:
             scale = self.peakList.spectrum.scale
-            scale = scale if scale is not None else 1.0
-            if -SCALETOLERANCE < scale < SCALETOLERANCE:
-                getLogger().warning('Scaling {}.height by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
-                self._wrappedData.height = None
-            else:
-                self._wrappedData.height = float(value) / scale
+            # scale = scale if scale is not None else 1.0
+            # if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            #     getLogger().warning('Scaling {}.height by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+            #     self._wrappedData.height = None
+            # else:
+            self._wrappedData.height = float(value) / scale
 
     @property
     def heightError(self) -> Optional[float]:
@@ -157,10 +158,10 @@ class Peak(AbstractWrapperObject):
             return None
 
         scale = self.peakList.spectrum.scale
-        scale = scale if scale is not None else 1.0
-        if -SCALETOLERANCE < scale < SCALETOLERANCE:
-            getLogger().warning('Scaling {}.heightError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
-
+        # scale = scale if scale is not None else 1.0
+        # if -SCALETOLERANCE < scale < SCALETOLERANCE:
+        #     getLogger().warning('Scaling {}.heightError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+        #
         return self._wrappedData.heightError * scale
 
     @heightError.setter
@@ -176,12 +177,12 @@ class Peak(AbstractWrapperObject):
             self._wrappedData.heightError = None
         else:
             scale = self.peakList.spectrum.scale
-            scale = scale if scale is not None else 1.0
-            if -SCALETOLERANCE < scale < SCALETOLERANCE:
-                getLogger().warning('Scaling {}.heightError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
-                self._wrappedData.heightError = None
-            else:
-                self._wrappedData.heightError = float(value) / scale
+            # scale = scale if scale is not None else 1.0
+            # if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            #     getLogger().warning('Scaling {}.heightError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+            #     self._wrappedData.heightError = None
+            # else:
+            self._wrappedData.heightError = float(value) / scale
 
     @property
     def volume(self) -> Optional[float]:
@@ -190,9 +191,9 @@ class Peak(AbstractWrapperObject):
             return None
 
         scale = self.peakList.spectrum.scale
-        scale = scale if scale is not None else 1.0
-        if -SCALETOLERANCE < scale < SCALETOLERANCE:
-            getLogger().warning('Scaling {}.volume by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+        # scale = scale if scale is not None else 1.0
+        # if -SCALETOLERANCE < scale < SCALETOLERANCE:
+        #     getLogger().warning('Scaling {}.volume by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
 
         return self._wrappedData.volume * scale
 
@@ -209,12 +210,12 @@ class Peak(AbstractWrapperObject):
             self._wrappedData.volume = None
         else:
             scale = self.peakList.spectrum.scale
-            scale = scale if scale is not None else 1.0
-            if -SCALETOLERANCE < scale < SCALETOLERANCE:
-                getLogger().warning('Scaling {}.volume by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
-                self._wrappedData.volume = None
-            else:
-                self._wrappedData.volume = float(value) / scale
+            # scale = scale if scale is not None else 1.0
+            # if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            #     getLogger().warning('Scaling {}.volume by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+            #     self._wrappedData.volume = None
+            # else:
+            self._wrappedData.volume = float(value) / scale
 
     @property
     def volumeError(self) -> Optional[float]:
@@ -223,9 +224,9 @@ class Peak(AbstractWrapperObject):
             return None
 
         scale = self.peakList.spectrum.scale
-        scale = scale if scale is not None else 1.0
-        if -SCALETOLERANCE < scale < SCALETOLERANCE:
-            getLogger().warning('Scaling {}.volumeError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+        # scale = scale if scale is not None else 1.0
+        # if -SCALETOLERANCE < scale < SCALETOLERANCE:
+        #     getLogger().warning('Scaling {}.volumeError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
 
         return self._wrappedData.volumeError * scale
 
@@ -242,12 +243,12 @@ class Peak(AbstractWrapperObject):
             self._wrappedData.volumeError = None
         else:
             scale = self.peakList.spectrum.scale
-            scale = scale if scale is not None else 1.0
-            if -SCALETOLERANCE < scale < SCALETOLERANCE:
-                getLogger().warning('Scaling {}.volumeError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
-                self._wrappedData.volumeError = None
-            else:
-                self._wrappedData.volumeError = float(value) / scale
+            # scale = scale if scale is not None else 1.0
+            # if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            #     getLogger().warning('Scaling {}.volumeError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+            #     self._wrappedData.volumeError = None
+            # else:
+            self._wrappedData.volumeError = float(value) / scale
 
     @property
     def figureOfMerit(self) -> Optional[float]:
@@ -648,6 +649,7 @@ class Peak(AbstractWrapperObject):
 
         isotopeCodes = tuple(None if x == UnknownIsotopeCode else x for x in self.peakList.spectrum.isotopeCodes)
 
+        #TODO: this needs to be implemented in V3 terms, using NmrAtom instances (and its attributes, methods) only
         apiPeak = self._wrappedData
         peakDims = apiPeak.sortedPeakDims()
         dimensionCount = len(peakDims)

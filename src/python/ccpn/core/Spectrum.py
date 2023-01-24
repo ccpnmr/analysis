@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-24 17:58:24 +0000 (Tue, January 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-24 20:29:52 +0000 (Tue, January 24, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -533,7 +533,7 @@ class Spectrum(AbstractWrapperObject):
         """
         value = self._wrappedData.scale
         if value is None:
-            getLogger().warning(f'Scaling {self} changed from None to 1.0')
+            getLogger().debug(f'Scaling {self} changed from None to 1.0')
             value = 1.0
         if -SCALETOLERANCE < value < SCALETOLERANCE:
             getLogger().warning(f'Scaling {self} by minimum tolerance (±{SCALETOLERANCE})')

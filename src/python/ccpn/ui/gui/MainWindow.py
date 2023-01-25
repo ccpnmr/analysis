@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-25 16:45:04 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-25 18:04:11 +0000 (Wed, January 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -102,14 +102,13 @@ _MULTIPLET_PEAKS = 16
 
 
 class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
-    # inherits NotifierBase
+    # inherits NotifierBase from _Implementation.Window
 
     WindowMaximiseMinimise = QtCore.pyqtSignal(bool)
 
     def __init__(self, application=None):
 
-        # super(GuiMainWindow, self).__init__(parent=None)
-        # GuiWindow.__init__(self, application)
+        # Shortcuts only inserts methods
         super(QtWidgets.QMainWindow, self).__init__()
 
         # format = QtGui.QSurfaceFormat()
@@ -140,6 +139,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self._hiddenModules.setVisible(False)
 
         self.pythonConsoleModule = None  # Python console module; defined upon first time Class initialisation. Either by toggleConsole or Restoring layouts
+        self.namespace = None
 
         logger.debug('GuiMainWindow.moduleArea: layout: %s' % self.moduleArea.layout)  ## pyqtgraph object
         self.moduleArea.setGeometry(0, 0, 1000, 800)

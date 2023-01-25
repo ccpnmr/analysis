@@ -527,4 +527,5 @@ _coreClassMap['Project']._linkWrapperClasses(_allGetters=_allGetters)
 
 # Explicit import to assure registering and class-method activities
 # Do not remove!
-from ccpn.ui.gui.MainWindow import MainWindow
+import ccpn.ui.gui.MainWindow
+import ccpn.ui.gui.modules.SpectrumDisplay

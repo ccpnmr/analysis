@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-25 16:45:03 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-25 18:04:11 +0000 (Wed, January 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -828,128 +828,7 @@ def _getSaveDirectory(mainWindow):
 #
 #######################################################################################
 
-#
-# ## Window class
-# _coreClassWindow = _coreClassMap['Window']
-# from ccpn.ui.gui.lib.GuiMainWindow import GuiMainWindow as _GuiMainWindow
-#
-#
-# class MainWindow(_coreClassWindow, _GuiMainWindow):
-#     """GUI main window, corresponds to OS window"""
-#
-#     def __init__(self, project: Project, wrappedData: 'ApiWindow'):
-#         _coreClassWindow.__init__(self, project, wrappedData)
-#
-#         logger = Logging.getLogger()
-#
-#         logger.debug('MainWindow>> project: %s' % project)
-#         logger.debug('MainWindow>> project.application: %s' % project.application)
-#
-#         application = project.application
-#         _GuiMainWindow.__init__(self, application=application)
-#
-#         # hide the window here and make visible later
-#         self.hide()
-#
-#         # patches for now:
-#         project._mainWindow = self
-#         # logger.debug('MainWindow>> project._mainWindow: %s' % project._mainWindow)
-#
-#         application._mainWindow = self
-#         application.ui.mainWindow = self
-#         # logger.debug('MainWindow>> application: %s' % application)
-#         # logger.debug('MainWindow>> application.project: %s' % application.project)
-#         # logger.debug('MainWindow>> application._mainWindow: %s' % application._mainWindow)
-#         # logger.debug('MainWindow>> application.ui.mainWindow: %s' % application.ui.mainWindow)
-#
-#
-# from ccpn.ui.gui.lib.GuiWindow import GuiWindow as _GuiWindow
-#
-#
-# class SideWindow(_coreClassWindow, _GuiWindow):
-#     """GUI side window, corresponds to OS window"""
-#
-#     def __init__(self, project: Project, wrappedData: 'ApiWindow'):
-#         _coreClassWindow.__init__(self, project, wrappedData)
-#         _GuiWindow.__init__(self, project.application)
-#
-#
-# def _factoryFunction(project: Project, wrappedData):
-#     """create Window, dispatching to subtype depending on wrappedData"""
-#     if wrappedData.title == 'Main':
-#         return MainWindow(project, wrappedData)
-#     else:
-#         return SideWindow(project, wrappedData)
-#
-#
-# Gui._factoryFunctions[_coreClassWindow.className] = _factoryFunction
 
-# from ccpn.ui.gui.MainWindow import MainWindow
-
-
-## Task class
-# There is no special GuiTask, so nothing needs to be done
-
-## Mark class - put in namespace for documentation
-Mark = _coreClassMap['Mark']
-
-## SpectrumDisplay class
-_coreClassSpectrumDisplay = _coreClassMap['SpectrumDisplay']
-from ccpn.ui.gui.modules.SpectrumDisplay1d import SpectrumDisplay1d as _SpectrumDisplay1d
-
-
-class StripDisplay1d(_coreClassSpectrumDisplay, _SpectrumDisplay1d):
-    """1D bound display"""
-
-    def __init__(self, project: Project, wrappedData: 'ApiBoundDisplay'):
-        """Local override init for Qt subclass"""
-        Logging.getLogger().debug('StripDisplay1d>> project: %s, project.application: %s' %
-                                  (project, project.application))
-        _coreClassSpectrumDisplay.__init__(self, project, wrappedData)
-
-        # hack for now
-        self.application = project.application
-
-        _SpectrumDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow)
-
-
-from ccpn.ui.gui.modules.SpectrumDisplayNd import SpectrumDisplayNd as _SpectrumDisplayNd
-
-
-#TODO: Need to check on the consequences of hiding name from the wrapper
-
-# NB: GWV had to comment out the name property to make it work
-# conflicts existed between the 'name' and 'window' attributes of the two classes
-# the pyqtgraph descendents need name(), GuiStripNd had 'window', but that could be replaced with
-# mainWindow throughout
-
-class SpectrumDisplayNd(_coreClassSpectrumDisplay, _SpectrumDisplayNd):
-    """ND bound display"""
-
-    def __init__(self, project: Project, wrappedData: 'ApiBoundDisplay'):
-        """Local override init for Qt subclass"""
-        Logging.getLogger().debug('SpectrumDisplayNd>> project: %s, project.application: %s' % (project, project.application))
-        _coreClassSpectrumDisplay.__init__(self, project, wrappedData)
-
-        # hack for now;
-        self.application = project.application
-
-        _SpectrumDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow)
-
-
-#old name
-StripDisplayNd = SpectrumDisplayNd
-
-
-def _factoryFunction(project: Project, wrappedData):
-    """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
-    if wrappedData.is1d:
-        return StripDisplay1d(project, wrappedData)
-    else:
-        return StripDisplayNd(project, wrappedData)
-
-
-Gui._factoryFunctions[_coreClassSpectrumDisplay.className] = _factoryFunction
 
 ## Strip class
 _coreClassStrip = _coreClassMap['Strip']

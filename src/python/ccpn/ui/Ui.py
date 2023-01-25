@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-18 12:37:42 +0000 (Wed, January 18, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-25 16:45:03 +0000 (Wed, January 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -68,7 +68,8 @@ class Ui(NotifierBase):
         """
         for className in _uiImportOrder:
             # Remove ui-specific settings. Will be reset as necessary in subclasses
-            _coreClassMap[className]._factoryFunction = cls._factoryFunctions.get(className)
+            if (_factoryFunction := cls._factoryFunctions.get(className)) is not None:
+                _coreClassMap[className]._factoryFunction = _factoryFunction
 
     def initialize(self, mainWindow):
         """UI operations done after every project load/create"""

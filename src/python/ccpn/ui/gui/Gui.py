@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-24 20:29:17 +0000 (Tue, January 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-25 16:45:03 +0000 (Wed, January 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -184,6 +184,9 @@ class Gui(Ui):
     def initialize(self, mainWindow):
         """UI operations done after every project load/create
         """
+        if mainWindow is None:
+            raise ValueError(f'Gui.initialize: Undefined mainWindow')
+
         with notificationEchoBlocking():
             with undoStackBlocking():
                 # Set up mainWindow
@@ -825,63 +828,64 @@ def _getSaveDirectory(mainWindow):
 #
 #######################################################################################
 
+#
+# ## Window class
+# _coreClassWindow = _coreClassMap['Window']
+# from ccpn.ui.gui.lib.GuiMainWindow import GuiMainWindow as _GuiMainWindow
+#
+#
+# class MainWindow(_coreClassWindow, _GuiMainWindow):
+#     """GUI main window, corresponds to OS window"""
+#
+#     def __init__(self, project: Project, wrappedData: 'ApiWindow'):
+#         _coreClassWindow.__init__(self, project, wrappedData)
+#
+#         logger = Logging.getLogger()
+#
+#         logger.debug('MainWindow>> project: %s' % project)
+#         logger.debug('MainWindow>> project.application: %s' % project.application)
+#
+#         application = project.application
+#         _GuiMainWindow.__init__(self, application=application)
+#
+#         # hide the window here and make visible later
+#         self.hide()
+#
+#         # patches for now:
+#         project._mainWindow = self
+#         # logger.debug('MainWindow>> project._mainWindow: %s' % project._mainWindow)
+#
+#         application._mainWindow = self
+#         application.ui.mainWindow = self
+#         # logger.debug('MainWindow>> application: %s' % application)
+#         # logger.debug('MainWindow>> application.project: %s' % application.project)
+#         # logger.debug('MainWindow>> application._mainWindow: %s' % application._mainWindow)
+#         # logger.debug('MainWindow>> application.ui.mainWindow: %s' % application.ui.mainWindow)
+#
+#
+# from ccpn.ui.gui.lib.GuiWindow import GuiWindow as _GuiWindow
+#
+#
+# class SideWindow(_coreClassWindow, _GuiWindow):
+#     """GUI side window, corresponds to OS window"""
+#
+#     def __init__(self, project: Project, wrappedData: 'ApiWindow'):
+#         _coreClassWindow.__init__(self, project, wrappedData)
+#         _GuiWindow.__init__(self, project.application)
+#
+#
+# def _factoryFunction(project: Project, wrappedData):
+#     """create Window, dispatching to subtype depending on wrappedData"""
+#     if wrappedData.title == 'Main':
+#         return MainWindow(project, wrappedData)
+#     else:
+#         return SideWindow(project, wrappedData)
+#
+#
+# Gui._factoryFunctions[_coreClassWindow.className] = _factoryFunction
 
-## Window class
-_coreClassWindow = _coreClassMap['Window']
-from ccpn.ui.gui.lib.GuiMainWindow import GuiMainWindow as _GuiMainWindow
+# from ccpn.ui.gui.MainWindow import MainWindow
 
-
-class MainWindow(_coreClassWindow, _GuiMainWindow):
-    """GUI main window, corresponds to OS window"""
-
-    def __init__(self, project: Project, wrappedData: 'ApiWindow'):
-        _coreClassWindow.__init__(self, project, wrappedData)
-
-        logger = Logging.getLogger()
-
-        logger.debug('MainWindow>> project: %s' % project)
-        logger.debug('MainWindow>> project.application: %s' % project.application)
-
-        application = project.application
-        _GuiMainWindow.__init__(self, application=application)
-
-        # hide the window here and make visible later
-        self.hide()
-
-        # patches for now:
-        project._mainWindow = self
-        # logger.debug('MainWindow>> project._mainWindow: %s' % project._mainWindow)
-
-        application._mainWindow = self
-        application.ui.mainWindow = self
-        # logger.debug('MainWindow>> application: %s' % application)
-        # logger.debug('MainWindow>> application.project: %s' % application.project)
-        # logger.debug('MainWindow>> application._mainWindow: %s' % application._mainWindow)
-        # logger.debug('MainWindow>> application.ui.mainWindow: %s' % application.ui.mainWindow)
-
-        setWidgetFont(self, )
-
-
-from ccpn.ui.gui.lib.GuiWindow import GuiWindow as _GuiWindow
-
-
-class SideWindow(_coreClassWindow, _GuiWindow):
-    """GUI side window, corresponds to OS window"""
-
-    def __init__(self, project: Project, wrappedData: 'ApiWindow'):
-        _coreClassWindow.__init__(self, project, wrappedData)
-        _GuiWindow.__init__(self, project.application)
-
-
-def _factoryFunction(project: Project, wrappedData):
-    """create Window, dispatching to subtype depending on wrappedData"""
-    if wrappedData.title == 'Main':
-        return MainWindow(project, wrappedData)
-    else:
-        return SideWindow(project, wrappedData)
-
-
-Gui._factoryFunctions[_coreClassWindow.className] = _factoryFunction
 
 ## Task class
 # There is no special GuiTask, so nothing needs to be done

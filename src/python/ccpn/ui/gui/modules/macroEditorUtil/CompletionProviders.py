@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 __modifiedBy__ = "$Author: Luca Mureddu $"
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
 __dateModified__ = "$Date: 2021-07-31 19:34:45 +0000 (,  31, 2021) $"
-__dateModified__ = "$dateModified: 2023-01-24 13:15:56 +0000 (Tue, January 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-25 16:45:04 +0000 (Wed, January 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -61,6 +61,7 @@ def _getCcpnNamespaceFromImports():
     from ccpn.framework.Application import getApplication
     from ccpn.framework.Preferences import getPreferences
     from ccpn.ui.gui.lib.GuiMainWindow import GuiMainWindow
+    from ccpn.ui.gui.MainWindow import MainWindow
     from ccpn.framework.Current import Current
     from ccpn.ui.Ui import Ui
     from ccpn.util.Logging import getLogger
@@ -68,12 +69,12 @@ def _getCcpnNamespaceFromImports():
     _namespace = [
                  {'application'     : Framework},
                  {'current'         : Current},
-                 {'mainWindow'      : GuiMainWindow},
+                 {'mainWindow'      : MainWindow},
                  {'ui'              : Ui},
                  {'project'         : Project},
                  {'preferences'     : getPreferences()},
-                 {'redo'            : GuiMainWindow.redo},
-                 {'undo'            : GuiMainWindow.undo},
+                 {'redo'            : Framework.redo},
+                 {'undo'            : Framework.undo},
                  {'get'             : Framework.getByPid},
                  {'loadProject'     : Framework.loadProject},
                  {'loadData'        : Framework.loadData},

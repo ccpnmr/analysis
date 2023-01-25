@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-24 13:15:56 +0000 (Tue, January 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-25 16:45:04 +0000 (Wed, January 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,6 @@ from pyqtgraph.dockarea.DockArea import DockArea
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.guiSettings import CCPNMODULELABEL_BACKGROUND, CCPNMODULELABEL_FOREGROUND, \
     CCPNMODULELABEL_BACKGROUND_ACTIVE, CCPNMODULELABEL_FOREGROUND_ACTIVE, CCPNMODULELABEL_BORDER, CCPNMODULELABEL_BORDER_ACTIVE, \
     BORDERNOFOCUS_COLOUR
@@ -1292,6 +1291,8 @@ class CcpnModuleLabel(DockLabel):
         self.module.pid.toClipboard()
 
     def _createContextMenu(self):
+        # avoiding circular imports
+        from ccpn.ui.gui.widgets.Menu import Menu
 
         contextMenu = Menu('', self, isFloatWidget=True)
         contextMenu.setToolTipsVisible(True)
@@ -1320,6 +1321,8 @@ class CcpnModuleLabel(DockLabel):
         return contextMenu
 
     def _modulesMenu(self, menuName, module):
+        # avoiding circular imports
+        from ccpn.ui.gui.widgets.Menu import Menu
 
         menu = Menu(menuName.title(), self, isFloatWidget=True)
         if module and module.area:

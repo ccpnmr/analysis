@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:07 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-25 16:45:04 +0000 (Wed, January 25, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,6 +32,7 @@ from pyqtgraph.dockarea.DockArea import DockArea, DockDrop
 from pyqtgraph.dockarea.Container import Container
 
 from ccpn.core.Spectrum import Spectrum
+
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule, MODULENAME, WIDGETSTATE
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -40,14 +41,17 @@ from ccpn.ui.gui.widgets.SideBar import SideBar, SideBarSearchListView
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
 from ccpn.ui.gui.widgets.Font import Font, getFontHeight, getFont
 from ccpn.ui.gui.widgets.MainWindow import MainWindow
-from ccpn.ui.gui.lib.GuiWindow import GuiWindow
+# from ccpn.ui.gui.lib.GuiWindow import GuiWindow
+from ccpn.ui.gui.lib.Shortcuts import Shortcuts
 from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
-from ccpn.ui.gui.lib.mouseEvents import SELECT
+from ccpn.ui.gui.lib.mouseEvents import SELECT, PICK, MouseModes, \
+    setCurrentMouseMode, getCurrentMouseMode
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.table.TableABC import TableABC
 from ccpn.ui.gui.widgets.Icon import Icon
+
 from ccpn.framework.Application import getApplication
 from ccpn.util.Colour import hexToRgb
 from ccpn.util.Common import incrementName
@@ -62,10 +66,9 @@ Failed = 'Failed'
 MODULEAREA_IGNORELIST = (ToolBar, _StripLabel, GuiTable, TableABC)
 
 
-class TempAreaWindow(GuiWindow, MainWindow):
+class TempAreaWindow(Shortcuts, MainWindow):
     def __init__(self, area, mainWindow=None, **kwargs):
         MainWindow.__init__(self, **kwargs)
-        GuiWindow.__init__(self, mainWindow.application)
         self.setCentralWidget(area)
         self.tempModuleArea = area
         self.mainModuleArea = self.tempModuleArea.home
@@ -75,8 +78,8 @@ class TempAreaWindow(GuiWindow, MainWindow):
         self.project = mainWindow.application.project
         self.current = mainWindow.application.current
 
-        self._setShortcuts()
-        self.setMouseMode(SELECT)
+        self._setShortcuts(mainWindow=mainWindow)
+        self._setMouseMode(SELECT)
 
         # install handler to resize when moving between displays
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
@@ -91,6 +94,16 @@ class TempAreaWindow(GuiWindow, MainWindow):
                             QSplitter::handle:vertical {background-color: transparent; height: %dpx; image: url(%s); }
                             QSplitter::handle:horizontal {background-color: transparent; width: %dpx; image: url(%s); }
                             """ % (_height, path1, _height, path2))
+
+    def _setMouseMode(self, mode):
+        if mode in MouseModes:
+            # self.mouseMode = mode
+            setCurrentMouseMode(mode)
+            for sd in self.project.spectrumDisplays:
+                for strp in sd.strips:
+                    strp.mouseModeAction.setChecked(mode == PICK)
+            mouseModeText = ' Mouse Mode: '
+            self.mainWindow.statusBar().showMessage(mouseModeText + mode)
 
     @pyqtSlot()
     def _screenChangedEvent(self, *args):

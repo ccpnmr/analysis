@@ -524,3 +524,7 @@ for className in _uiImportOrder:
 _allGetters = []
 _coreClassMap['Project']._linkWrapperClasses(_allGetters=_allGetters)
 # print('\n    '.join(sorted(_allGetters)))
+
+# Explicit import to assure registering and class-method activities
+# Do not remove!
+from ccpn.ui.gui.MainWindow import MainWindow

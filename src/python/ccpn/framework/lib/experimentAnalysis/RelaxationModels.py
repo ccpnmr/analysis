@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-23 11:35:50 +0000 (Mon, January 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-25 16:58:49 +0000 (Wed, January 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -40,11 +40,11 @@ from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationOutpu
 ###########        Minimisers        ################
 #####################################################
 
-class _RelaxationBaseMinimiser(MinimiserModel):
+class InversionRecoveryMinimiser(MinimiserModel):
     """
-    A base model for T1/T2
     """
-    FITTING_FUNC = lf.exponentialDecay_func
+    MODELNAME = 'InversionRecoveryMinimiser'
+    FITTING_FUNC = lf.inversionRecovery_func
     AMPLITUDEstr = sv.AMPLITUDE
     DECAYstr = sv.DECAY
     # _defaultParams must be set. They are required. Also Strings must be exactly as they are defined in the FITTING_FUNC arguments!
@@ -54,10 +54,9 @@ class _RelaxationBaseMinimiser(MinimiserModel):
                         DECAYstr:0.5
                       }
 
-
     def __init__(self, independent_vars=['x'], prefix='', nan_policy=sv.RAISE_MODE, **kwargs):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
-        super().__init__(lf.exponentialDecay_func, **kwargs)
+        super().__init__(InversionRecoveryMinimiser.FITTING_FUNC, **kwargs)
         self.name = self.MODELNAME
         self.params = self.make_params(**self.defaultParams)
 
@@ -71,20 +70,70 @@ class _RelaxationBaseMinimiser(MinimiserModel):
         return update_param_vals(params, self.prefix, **kwargs)
 
 
-class InversionRecoveryMinimiser(_RelaxationBaseMinimiser):
+###########################################################
+
+class OnePhaseDecayMinimiser(MinimiserModel):
     """
-    A model based on the T1 fitting function.
     """
-    FITTING_FUNC = lf.inversionRecovery_func
-    MODELNAME = 'InversionRecoveryMinimiser'
+    MODELNAME = 'OnePhaseDecayMinimiser'
+    FITTING_FUNC = lf.onePhaseDecay_func
+    AMPLITUDEstr = sv.AMPLITUDE
+    RATEstr = sv.RATE
+    # _defaultParams must be set. They are required. Also Strings must be exactly as they are defined in the FITTING_FUNC arguments!
+    # There is a clever signature inspection that set the args as class attributes. This was too hard/dangerous to change!
+    defaultParams = {
+                        AMPLITUDEstr:1,
+                        RATEstr:1.5
+                      }
+
+    def __init__(self, independent_vars=['x'], prefix='', nan_policy=sv.RAISE_MODE, **kwargs):
+        kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
+        super().__init__(OnePhaseDecayMinimiser.FITTING_FUNC, **kwargs)
+        self.name = self.MODELNAME
+        self.params = self.make_params(**self.defaultParams)
+
+    def guess(self, data, x, **kwargs):
+        """Estimate initial model parameter values from data."""
+        try:
+            sval, oval = np.polyfit(x, np.log(abs(data)+1.e-15), 1)
+        except TypeError:
+            sval, oval = 1., np.log(abs(max(data)+1.e-9))
+        params = self.make_params(amplitude=np.exp(oval), decay=-1.0/sval)
+        return update_param_vals(params, self.prefix, **kwargs)
+
+################
 
 
-class ExponentialDecayMinimiser(_RelaxationBaseMinimiser):
+class ExpDecayMinimiser(MinimiserModel):
     """
-    A model based on the Exponential Decay fitting function.
+    A model to fit the time constant in a exponential decay
     """
-    FITTING_FUNC = lf.exponentialDecay_func
     MODELNAME = 'ExponentialDecayMinimiser'
+    FITTING_FUNC = lf.exponentialDecay_func
+    AMPLITUDEstr = sv.AMPLITUDE
+    DECAYstr = sv.DECAY
+    # _defaultParams must be set. They are required. Also Strings must be exactly as they are defined in the FITTING_FUNC arguments!
+    # There is a clever signature inspection that set the args as class attributes. This was too hard/dangerous to change!
+    defaultParams = {
+                        AMPLITUDEstr:1,
+                        DECAYstr:0.5
+                      }
+
+    def __init__(self, independent_vars=['x'], prefix='', nan_policy=sv.RAISE_MODE, **kwargs):
+        kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
+        super().__init__(ExpDecayMinimiser.FITTING_FUNC, **kwargs)
+        self.name = self.MODELNAME
+        self.params = self.make_params(**self.defaultParams)
+
+    def guess(self, data, x, **kwargs):
+        """Estimate initial model parameter values from data."""
+        try:
+            sval, oval = np.polyfit(x, np.log(abs(data)+1.e-15), 1)
+        except TypeError:
+            sval, oval = 1., np.log(abs(max(data)+1.e-9))
+        params = self.make_params(amplitude=np.exp(oval), decay=-1.0/sval)
+        return update_param_vals(params, self.prefix, **kwargs)
+
 
 #####################################################
 ###########       FittingModel       ################
@@ -120,7 +169,7 @@ class _RelaxationBaseFittingModel(FittingModelABC):
                 params = minimiser.guess(Ys, Xs)
                 result = minimiser.fit(Ys, params, x=Xs)
             except:
-                getLogger().warning(f'Fitting Failed for collectionId: {collectionId} data.')
+                getLogger().warning(f'Fitting Failed for collectionId: {collectionId} data. Make sure you are using the right model for your data.')
                 params = minimiser.params
                 result = MinimiserResult(minimiser, params)
 
@@ -134,39 +183,58 @@ class _RelaxationBaseFittingModel(FittingModelABC):
 
         return inputData
 
+
+class OnePhaseDecayModel(_RelaxationBaseFittingModel):
+    """
+    FittingModel model class containing fitting equation and fitting information
+    """
+    ModelName   = sv.OnePhaseDecay
+    Info        = '''A model to describe the rate of a decay.  '''
+    Description = '''Model:\nY=amplitude*exp(-rate*X)      
+                 X:the various times values
+                 amplitude: the Y value when X (time) is zero. Same units as Y
+                 rate: the rate constant, expressed in reciprocal of the X axis time units,  e.g.: Second-1.
+                  '''
+    References  = '''
+                  '''
+    Minimiser = OnePhaseDecayMinimiser
+    FullDescription = f'{Info}\n{Description}'
+
+class ExponentialDecayModel(_RelaxationBaseFittingModel):
+    """
+    FittingModel model class containing fitting equation and fitting information
+    """
+    ModelName = sv.ExponentialDecay
+    Info = '''A model to describe the time constant of a decay (also known as Tau). '''
+    Description = '''Model:\nY=amplitude*exp(-X / decay)
+
+                 X:the various times values
+                 amplitude: the Y value when X (time) is zero. Same units as Y
+                 decay: the time constant (Tau), same units as  X axis e.g.: Second.
+                  '''
+    References = '''
+                  '''
+    Minimiser = ExpDecayMinimiser
+    FullDescription = f'{Info}\n{Description}'
+
 class InversionRecoveryFittingModel(_RelaxationBaseFittingModel):
     """
     InversionRecovery model class containing fitting equation and fitting information
     """
-    ModelName   = sv.InversionRecovery
-    Info        = '''Inversion Recovery fitting model.
+    ModelName = sv.InversionRecovery
+    Info = '''Inversion Recovery fitting model. '''
+    Description = '''Model:\nY = amplitude * (1 - e^{-time/decay})
+    
+                 X:the various times values
+                 amplitude: the Y value when X (time) is zero. Same units as Y
+                 decay: the time constant, same units as  X axis.
                   '''
-    Description = '''Model:
-                  Y = amplitude * (1 - e^{-time/decay})
+    References = '''
                   '''
-    References  = '''
-                  NIY
-                  '''
-    # Minimiser = InversionRecoveryMinimiser
+    Minimiser = InversionRecoveryMinimiser
     # MaTex =  r'$amplitude*(1 - e^{-time/decay})$'
     FullDescription = f'{Info}\n{Description}'
 
-class ExponentialDecayFittingModel(_RelaxationBaseFittingModel):
-    """
-    ExponentialDecay FittingModel model class containing fitting equation and fitting information
-    """
-    ModelName   = sv.ExponentialDecay
-    Info        = '''Exponential Decay fitting model
-                  '''
-    Description = '''Model:
-                  Y = amplitude * (e^{-time/decay})
-                  '''
-    References  = '''
-                  NIY
-                  '''
-    Minimiser = ExponentialDecayMinimiser
-    # MaTex = r'$amplitude *(e^{-time/decay})$'
-    FullDescription = f'{Info}\n{Description}'
 
 #####################################################
 ##########  Calculation Models   ####################
@@ -272,6 +340,7 @@ class HetNoeCalculation(CalculationModel):
         outputFrame = HetNoeOutputFrame()
     
         ## Keep only one IsotopeCode as we are using only 15N
+        # TODO remove hardcoded 15N
         inputData = inputData[inputData[sv.ISOTOPECODE] == '15N']
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
         for collectionId, groupDf in grouppedByCollectionsId:
@@ -291,6 +360,7 @@ class HetNoeCalculation(CalculationModel):
             outputFrame.loc[collectionId, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
             outputFrame.loc[collectionId, sv.NMRRESIDUEPID] = groupDf[sv.NMRRESIDUEPID].values[-1]
             outputFrame.loc[collectionId, sv.SERIESUNIT] = seriesUnits[-1]
+            outputFrame.loc[collectionId, sv.EXPERIMENT] = self._experiment
             outputFrame.loc[collectionId,self.modelArgumentNames[0]] = ratio
             outputFrame.loc[collectionId, self.modelArgumentNames[1]] = error
             outputFrame.loc[collectionId, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
@@ -301,7 +371,8 @@ class HetNoeCalculation(CalculationModel):
 ###########      Register models    #################
 #####################################################
 FittingModels            = [
-                    ExponentialDecayFittingModel,
+                    OnePhaseDecayModel,
+                    ExponentialDecayModel,
                     InversionRecoveryFittingModel,
                     ]
 

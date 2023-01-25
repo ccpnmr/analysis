@@ -4,7 +4,7 @@ This module defines base classes for Series Analysis
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:26 +0100 (Wed, October 26, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-01-25 16:58:49 +0000 (Wed, January 25, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,7 +44,7 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
         super().__init__()
         self.fittingModels = self._registerModels([BlankFittingModel] + FittingModels)
         self.calculationModels = self._registerModels([BlankCalculationModel] + CalculationModels)
-        fittingModel = self.getFittingModelByName(sv.ExponentialDecay) or self._getFirstModel(self.fittingModels)
+        fittingModel = self.getFittingModelByName(sv.OnePhaseDecay) or self._getFirstModel(self.fittingModels)
         calculationModel = self._getFirstModel(self.calculationModels)
         if fittingModel:
             self._currentFittingModel = fittingModel()

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-23 11:35:50 +0000 (Mon, January 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-25 16:58:49 +0000 (Wed, January 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -43,8 +43,7 @@ NMRATOMNAME      = 'nmrAtomName'            # -> str   | nmrAtom name (e.g.: 'Hn
 NMRATOMNAMES     = f'{NMRATOMNAME}s'        # -> str   | nmrAtom names comma separated (e.g.: 'Hn, Nh'). Used in OutPut datarames instead of ATOMNAME
 
 NMRRESIDUECODETYPE = f'{NMRRESIDUECODE}-{NMRRESIDUETYPE}'  # -> str   | nmrResidue Sequence Code + Type (e.g.: '1-ALA')
-
-
+EXPERIMENT = 'experiment' # -> str, e.g.: T1, T2, HetNoe, 'Cest', etc
 _ROW_UID         = 'ROW_UID'             # -> str   | Internal. Unique Identifier (e.g.: randomly generated 6 letters UUID)
 ASHTAG           = '#'                   # -> int   | incremental serial
 VALUE            = 'Value'               # -> str   | The column header  prefix in a SeriesTable. Used to store data after the CONSTANT_TABLE_COLUMNS
@@ -92,7 +91,7 @@ ALL_EXCLUDED            = [EXCLUDED_PEAKPID, EXCLUDED_SPECTRUMPID, EXCLUDED_NMRA
 
 # fitting output Stat variables
 MINIMISER        = 'minimiser'
-R2               = 'r2'
+RSQR               = 'Rsqr'
 CHISQR           = 'chisqr'
 REDCHI           = 'redchi'  # DO NOT CHANGE! Hardcoded in dependencies Model
 AIC              = 'aic' # DO NOT CHANGE! Hardcoded in dependencies Model
@@ -131,18 +130,25 @@ DECAY = 'decay'
 AMPLITUDE_ERR = f'{AMPLITUDE}{_ERR}'
 DECAY_ERR = f'{DECAY}{_ERR}'
 
+RATE = 'rate'
+RATE_ERR = f'{RATE}{_ERR}'
+
 HETNOE = 'HetNoe'
 SAT = 'sat'
 UNSAT = 'unSat'
 UNSAT_OPTIONS =  [UNSAT, 'unsaturated', 'nosat', 'noNOE'] # key options to set from a spectrumGroup
 SAT_OPTIONS = [SAT,  'saturated', 'NOE']
 
-
+RX = 'R(x)'
+R1 = 'R1'
+R2 = 'R2'
+R2R1 = 'R2/R1'
+R2R1_ERR = f'{R2R1}{_ERR}'
 FLAG = 'Flag'
 SERIAL = 'Serial'
 
-CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, MINIMISER_MODEL, R2, CHISQR, REDCHI, AIC, BIC]
-SpectrumPropertiesHeaders = [DIMENSION, ISOTOPECODE, SERIES_STEP_X, SERIESUNIT]
+CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, MINIMISER_MODEL, RSQR, CHISQR, REDCHI, AIC, BIC]
+SpectrumPropertiesHeaders = [DIMENSION, ISOTOPECODE, SERIES_STEP_X, SERIESUNIT, EXPERIMENT]
 PeakPropertiesHeaders = [_PPMPOSITION, _HEIGHT, _LINEWIDTH, _VOLUME]
 AssignmentPropertiesHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE, NMRATOMNAME]
 GROUPBYAssignmentHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE]
@@ -224,6 +230,12 @@ ALPHAFACTORS    = 'AlphaFactors'
 HETNOE_VALUE = f'{HETNOE}'
 HETNOE_VALUE_ERR = f'{HETNOE_VALUE}{_ERR}'
 
+R_VALUE = f'{RX}'
+R_VALUE_ERR = f'{RX}{_ERR}'
+
+R1_ERR = f'{R1}{_ERR}'
+R2_ERR = f'{R2}{_ERR}'
+
 ## Fitting models
 FITTING_MODEL = 'fittingModel'
 MODEL_NAME = 'modelName'
@@ -249,6 +261,8 @@ LEASTSQ = 'leastsq'
 
 InversionRecovery = 'InversionRecovery'
 ExponentialDecay = 'ExponentialDecay'
+OnePhaseDecay = 'OnePhaseDecay'
+
 T1 = 'T1'
 T2 = 'T2'
 

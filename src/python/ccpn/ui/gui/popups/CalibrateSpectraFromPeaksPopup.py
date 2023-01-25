@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:44 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-01-25 12:25:43 +0000 (Wed, January 25, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,7 +26,7 @@ __date__ = "$Date: 2020-12-10 12:15:19 +0000 (Thu, December 10, 2020) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from typing import Sequence
 from functools import partial
 from ccpn.ui.gui.widgets.Label import Label
@@ -82,39 +82,38 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialogMainWidget):
         self.setOkButton(callback=self._accept, tipText='Ok')
         self.setCloseButton(callback=self.reject, tipText='Close')
 
-        minSize = self.minimumSizeHint()
-        self.adjustSize()
-
         # set the buttons and the size
+        self.adjustSize()
         self._postInit()
 
         # allow for the scrollbars
-        newSize = self.scrollAreaWidgetContents.minimumSizeHint() + minSize
-        self.setMinimumHeight(newSize.height())
-        self.setFixedWidth(newSize.width())
+        newSize = self._spectrumFrame.minimumSizeHint()
+        self.setMinimumHeight(300)
+        self.setFixedWidth(newSize.width() + 50)
 
     def _setWidgets(self):
         """Add widgets to the popup
         """
-        self.scrollAreaWidgetContents = ScrollableFrame(self.mainWidget, setLayout=True, grid=(0, 0),
-                                                        scrollBarPolicies=('never', 'asNeeded'))
+        topWidget = self.mainWidget
 
         row = 0
-        self.primaryPeakPulldown = PulldownListCompoundWidget(self.scrollAreaWidgetContents, labelText="Fixed Peak",
+        self.primaryPeakPulldown = PulldownListCompoundWidget(topWidget, labelText="Fixed Peak",
                                                               grid=(row, 0), gridSpan=(1, 3), hAlign='l',
                                                               callback=self._setPrimaryPeak)
-        self._fillPreferredWidget()
-
+        row += 1
+        self.scrollAreaWidgetContents = ScrollableFrame(self.mainWidget, setLayout=True, grid=(row, 0), gridSpan=(1, 3),
+                                                        scrollBarPolicies=('never', 'asNeeded'))
         # add the other peaks that will be moved
-        row += 1
-        self._spectrumFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 3))
-
-        self._fillSpectrumFrame()
+        self._spectrumFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, showBorder=False, grid=(0, 0), gridSpan=(1, 3))
+        self._spectrumFrame.getLayout().setAlignment(QtCore.Qt.AlignLeft)
 
         row += 1
-        Spacer(self.scrollAreaWidgetContents, 2, 2,
-               QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+        Spacer(topWidget, 2, 2,
+               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
                grid=(row, 2), gridSpan=(1, 1))
+
+        self._fillPreferredWidget()
+        self._fillSpectrumFrame()
 
     def _fillPreferredWidget(self):
         """Fill the pullDown with the currently available peak ids when the popup is initialised
@@ -133,7 +132,7 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialogMainWidget):
         if not isinstance(self.spectrumCount, dict):
             raise TypeError('spectrumCount is not of type dict')
 
-        self.peaks = [peak for peak in self.spectrumCount.values()]
+        self.peaks = list(self.spectrumCount.values())
 
         # the last item that was clicked
         self._lastClickedObjects = self.strip._lastClickedObjects
@@ -189,7 +188,7 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialogMainWidget):
                 HLine(spectrumFrame, grid=(specRow, 0), gridSpan=(1, FIELDS), colour=getColours()[SOFTDIVIDER], height=10)
 
             specRow += 1
-            Label(spectrumFrame, text='Peak: %s' % str(peak.id), grid=(specRow, 0), gridSpan=(1, FIELDS), bold=True)
+            Label(spectrumFrame, text=f'Peak: {str(peak.id)}', grid=(specRow, 0), gridSpan=(1, FIELDS), bold=True)
             # numDim = peak.peakList.spectrum.dimensionCount
 
             thisSpec = peak.peakList.spectrum
@@ -221,7 +220,7 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialogMainWidget):
                     ppmDelta = Label(spectrumFrame, text='%.3f' % (self.primaryPeak.ppmPositions[dim] - peak.ppmPositions[ind]), grid=(specRow, 6))
 
                     self._matchToAxisPulldowns[str(peak.id) + str(ind)] = (matchToAxis, ppmLabel, ppmDelta, dim, peak, ind)
-                    checked = True if thisSpec.axisCodes[ind] != 'intensity' else False
+                    checked = thisSpec.axisCodes[ind] != 'intensity'
                     self._spectraCheckBoxes[str(peak.id) + str(ind)] = CheckBox(spectrumFrame, grid=(specRow, 0), vAlign='t', hAlign='c', checked=checked)
 
             specRow += 1
@@ -387,7 +386,7 @@ class CalibrateSpectraFromPeaksPopup1d(CalibrateSpectraFromPeaksPopupNd):
                 HLine(spectrumFrame, grid=(specRow, 0), gridSpan=(1, 6), colour=getColours()[SOFTDIVIDER], height=10)
 
             specRow += 1
-            Label(spectrumFrame, text='Peak: %s' % str(peak.id), grid=(specRow, 0), gridSpan=(1, 6), bold=True)
+            Label(spectrumFrame, text=f'Peak: {str(peak.id)}', grid=(specRow, 0), gridSpan=(1, 6), bold=True)
             numDim = peak.peakList.spectrum.dimensionCount
 
             indices = getAxisCodeMatchIndices(self.strip.axisCodes, peak.peakList.spectrum.axisCodes)

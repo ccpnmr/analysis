@@ -2,7 +2,7 @@
 # Licence, Reference and Credits
 #=========================================================================================
 import contextlib
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:07 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-01-25 22:24:05 +0000 (Wed, January 25, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -100,8 +100,8 @@ class ListCompoundWidget(CompoundBaseWidget):
 
     def __init__(self, parent=None, showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
-                 labelText='', texts=None, callback=None, maxItemSelection=None,
-                 defaults=None, uniqueList=True, objectName='', compoundKwds=None,
+                 labelText='', texts=None, callback=None, defaults=None,
+                 uniqueList=True, objectName='', compoundKwds=None,
                  **kwds):
         """
         :param parent: parent widget
@@ -118,14 +118,12 @@ class ListCompoundWidget(CompoundBaseWidget):
         :param texts: (optional) iterable generating text values for the Pulldown
         :param callback: (optional) callback for the Pulldown
         :param defaults: (optional) iterable of initially add elements to the ListWidget (text or index)
-        :param maxItemSelection: (optional) int, limit to a max number of selectable items.
         :param uniqueList: (True) only allow unique elements in the ListWidget
         :param kwds: (optional) keyword, value pairs for the gridding of Frame
         """
 
         CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
                                     showBorder=showBorder, **kwds)
-        self.maxItemSelection = maxItemSelection
         self.label = Label(parent=self, text=labelText, vAlign='center')
         self._addWidget(self.label)
         compoundKwds = compoundKwds or {}
@@ -193,9 +191,6 @@ class ListCompoundWidget(CompoundBaseWidget):
 
     def clearList(self):
         self.listWidget._deleteAll()
-
-    def setMaximumItemSelectionCount(self, value):
-        self.maxItemSelection = value
 
     def setLabelText(self, label):
         """Set the text for the list widget label
@@ -266,16 +261,8 @@ class ListCompoundWidget(CompoundBaseWidget):
     def _addToListWidget(self, item):
         """Callback for Pulldown, adding the selcted item to the listWidget"""
 
-        if self.maxItemSelection is None and item is not None and self.pulldownList.getSelectedIndex() != 0:
+        if item is not None and self.pulldownList.getSelectedIndex() != 0:
             self.addText(item)
-
-        if isinstance(self.maxItemSelection, int):
-            if self.listWidget.count() == self.maxItemSelection:
-                showWarning(f'{self.pulldownList.objectName()}',
-                            'Cannot add more to selection. Please remove any existing item(s) to add new')
-
-            elif item is not None and self.pulldownList.getSelectedIndex() != 0:
-                self.addText(item)
 
         # reset to first > select-to-add < entry
         with self.blockWidgetSignals(recursive=False, additionalWidgets=[self.pulldownList, ]):

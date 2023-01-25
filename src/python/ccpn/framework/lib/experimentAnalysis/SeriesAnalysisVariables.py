@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-25 16:58:49 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-25 22:24:05 +0000 (Wed, January 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -166,6 +166,7 @@ SERIESANALYSISOUTPUTDATA    = 'SeriesAnalysisResultsData'
 SERIESANALYSISINPUTDATA     = 'SeriesAnalysisInputData'
 RELAXATION_OUTPUT_FRAME     = 'RelaxationOutputFrame'
 HetNoe_OUTPUT_FRAME         = 'HetNoeOutputFrame'
+R2R1_OUTPUT_FRAME         = 'R2R1OutputFrame'
 CSM_OUTPUT_FRAME            = 'CSMOutputFrame'
 SERIESFRAMETYPE             = 'SERIESFRAMETYPE'
 _assignmentHeaders          = '_assignmentHeaders'
@@ -262,9 +263,11 @@ LEASTSQ = 'leastsq'
 InversionRecovery = 'InversionRecovery'
 ExponentialDecay = 'ExponentialDecay'
 OnePhaseDecay = 'OnePhaseDecay'
-
+NA = 'N/A'
+NONE = 'None'
 T1 = 'T1'
 T2 = 'T2'
+EXPERIMENTS  = [NA, T1, T2, HETNOE]
 
 ## Warnings
 UNDER_DEVELOPMENT_WARNING = f'''This functionality is currently under active development. Use it at your own risk.'''

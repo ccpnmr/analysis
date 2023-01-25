@@ -4,7 +4,7 @@ This module defines base classes for Series Analysis
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 16:20:48 +0100 (Thu, October 27, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-01-25 22:24:05 +0000 (Wed, January 25, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -76,14 +76,18 @@ class EuclideanCalculationModel(CalculationModel):
     def setAlphaFactors(self, values):
         self._alphaFactors = values
 
-    def calculateValues(self, inputData:TableFrame) -> TableFrame:
+    def calculateValues(self, inputDataTables) -> TableFrame:
         """
         Calculate the DeltaDeltas for an input SeriesTable.
         :param inputData: CSMInputFrame
         :return: outputFrame
         """
+
         outputFrame = CSMOutputFrame()
         outputFrame._buildColumnHeaders()
+
+        inputData = self._getFirstData(inputDataTables)
+
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
         rowIndex = 1
         with warnings.catch_warnings():

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-23 11:35:50 +0000 (Mon, January 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-25 22:24:05 +0000 (Wed, January 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -190,8 +190,6 @@ class GuiInputDataPanel(GuiSettingPanel):
     def __init__(self, guiModule, *args, **Framekwargs):
         GuiSettingPanel.__init__(self, guiModule, *args, **Framekwargs)
 
-        self._limitSelectionOnInputData() ## This constrain might be removed on future implementations
-
     def setWidgetDefinitions(self):
         """ Define the widgets in a dict."""
         backend = self.guiModule.backendHandler
@@ -256,6 +254,31 @@ class GuiInputDataPanel(GuiSettingPanel):
                        'showSelectName': True,
                        'objectName': guiNameSpaces.WidgetVarName_InputCollectionSelection,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
+
+            (guiNameSpaces.WidgetVarName_ExperimentSeparator,
+             {'label': guiNameSpaces.Label_ExperimentSeparator,
+              'type': LabeledHLine,
+              'kwds': {'text': guiNameSpaces.Label_ExperimentSeparator,
+                       'height': 30,
+                       'gridSpan': (1, 2),
+                       'colour': DividerColour,
+                       'tipText': guiNameSpaces.TipText_ExperimentSeparator}}),
+            (guiNameSpaces.WidgetVarName_ExperimentName,
+             {'label': guiNameSpaces.Label_ExperimentOption,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': None,
+              'callBack': None,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_ExperimentOption,
+                       'hAlign': 'l',
+                       'tipText': '',
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds': {'texts': sv.EXPERIMENTS,
+                                        'tipTexts': sv.EXPERIMENTS,
+                                        'direction': 'v',
+                                        'selectedInd': 0,
+                                        }}}),
+
             (guiNameSpaces.WidgetVarName_DataTableSeparator,
              {'label': guiNameSpaces.Label_DataTables,
               'type': LabeledHLine,
@@ -468,16 +491,6 @@ class GuiInputDataPanel(GuiSettingPanel):
                 filteredCollectionPids.append(collection.pid)
         return filteredCollectionPids
 
-    def _limitSelectionOnInputData(self):
-        "Allow only one selection on SpectrumGroups and DataTable. "
-        sgSelectionWidget = self.getWidget(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection)
-        dtSelectionWidget = self.getWidget(guiNameSpaces.WidgetVarName_DataTablesSelection)
-
-        if sgSelectionWidget:
-            sgSelectionWidget.setMaximumItemSelectionCount(1)
-        if dtSelectionWidget:
-            dtSelectionWidget.setMaximumItemSelectionCount(1)
-
     def _createInputDataTableCallback(self, *args):
         """ Create InputDataTable from widget Callback. """
         settingsPanelHandler = self.guiModule.settingsPanelHandler
@@ -488,11 +501,13 @@ class GuiInputDataPanel(GuiSettingPanel):
             return
         spGroup = self.guiModule.project.getByPid(sgPids[-1])
         dataTableName = inputSettings.get(guiNameSpaces.WidgetVarName_DataTableName, None)
+        experimentName = inputSettings.get(guiNameSpaces.WidgetVarName_ExperimentName, sv.NA)
         if not spGroup:
             getLogger().warn('Cannot create an input DataTable without a SpectrumGroup. Select one first')
             return
         backend = self.guiModule.backendHandler
-        newDataTable = backend.newInputDataTableFromSpectrumGroup(spGroup, dataTableName=dataTableName)
+        newDataTable = backend.newInputDataTableFromSpectrumGroup(spGroup, dataTableName=dataTableName,
+                                                                  experimentName=experimentName)
         ## add as first selection in the datatable. clear first.
         dtSelectionWidget = self.getWidget(guiNameSpaces.WidgetVarName_DataTablesSelection)
         if dtSelectionWidget:

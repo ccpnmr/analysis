@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-25 16:58:49 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-25 22:24:05 +0000 (Wed, January 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -29,12 +29,13 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 from ccpn.util.DataEnum import DataEnum
 from lmfit.models import update_param_vals
 import numpy as np
+import pandas as pd
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
 from ccpn.core.DataTable import TableFrame
 from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult, CalculationModel
-from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationOutputFrame, HetNoeOutputFrame
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationOutputFrame, HetNoeOutputFrame, R2R1OutputFrame
 
 #####################################################
 ###########        Minimisers        ################
@@ -298,12 +299,13 @@ class HetNoeCalculation(CalculationModel):
             These names will appear as column headers in the output result frames. """
         return [sv.HETNOE_VALUE, sv.HETNOE_VALUE_ERR]
 
-    def calculateValues(self, inputData:TableFrame) -> TableFrame:
+    def calculateValues(self, inputDataTables) -> TableFrame:
         """
         Calculate the DeltaDeltas for an input SeriesTable.
         :param inputData: CSMInputFrame
         :return: outputFrame
         """
+        inputData = self._getFirstData(inputDataTables)
         outputFrame = self._getHetNoeOutputFrame(inputData)
         return outputFrame
 
@@ -360,11 +362,96 @@ class HetNoeCalculation(CalculationModel):
             outputFrame.loc[collectionId, sv.COLLECTIONPID] = groupDf[sv.COLLECTIONPID].values[-1]
             outputFrame.loc[collectionId, sv.NMRRESIDUEPID] = groupDf[sv.NMRRESIDUEPID].values[-1]
             outputFrame.loc[collectionId, sv.SERIESUNIT] = seriesUnits[-1]
-            outputFrame.loc[collectionId, sv.EXPERIMENT] = self._experiment
             outputFrame.loc[collectionId,self.modelArgumentNames[0]] = ratio
             outputFrame.loc[collectionId, self.modelArgumentNames[1]] = error
             outputFrame.loc[collectionId, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
             outputFrame.loc[collectionId, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''
+        return outputFrame
+
+
+class R2R1RatesCalculation(CalculationModel):
+    """
+    Calculate R2/R1 rates
+    """
+    ModelName = sv.R2R1
+    Info = '''Calculate the ratio R2/R1. Requires two input dataTables with the T1 and T2 experiments'''
+
+    Description = f'''Model:
+                  ratio =  R2/R1
+                  R1 and R2 the decay rate for the T1 and T2 calculated using the {sv.OnePhaseDecay} model.
+                  
+                  Value Error calculated as:
+                  error =  (RE1/R1 + RE2/R2) * R2/R1
+                  RE is the rate error.
+                  '''
+    References = '''
+                '''
+    FullDescription = f'{Info}\n{Description}'
+
+    @property
+    def modelArgumentNames(self):
+        """ The list of parameters as str used in the calculation model.
+            These names will appear as column headers in the output result frames. """
+        return [sv.R2R1, sv.R2R1_ERR]
+
+    def calculateValues(self, inputDataTables) -> TableFrame:
+        """
+        :param inputDataTables:
+        :return: outputFrame
+        """
+        r1Data = None
+        r2Data = None
+        datas = [dt.data for dt in inputDataTables]
+        for data in datas:
+            experiment = data[sv.EXPERIMENT].unique()[-1]
+            if experiment == sv.T1:
+                r1Data = data
+            if experiment == sv.T2:
+                r2Data = data
+        errorMess = 'Cannot compute model. Ensure the input data contains the %s experiment. '
+        if r1Data is None:
+            raise RuntimeError(errorMess %sv.T1)
+        if r2Data is None:
+            raise RuntimeError(errorMess %sv.T2)
+
+        # get the Rates per nmrResidueCode  for each table\
+        r1df = r1Data.groupby(sv.NMRRESIDUEPID).first().reset_index()
+        r1df.set_index(sv.NMRRESIDUECODE, drop=False, inplace=True)
+        r1df.sort_index(inplace=True)
+
+        r2df = r2Data.groupby(sv.NMRRESIDUEPID).first().reset_index()
+        r2df.set_index(sv.NMRRESIDUECODE, drop=False, inplace=True)
+        r2df.sort_index(inplace=True)
+        ## Error = (E1/R1 + E2/R2) * R2/R1
+
+
+
+        suffix1 = f'_{sv.R1}'
+        suffix2 = f'_{sv.R2}'
+        merged = pd.merge(r1df, r2df, on=[sv.NMRRESIDUEPID], how='left', suffixes=(suffix1, suffix2))
+
+        rate1 = f'{sv.RATE}{suffix1}'
+        rate2 = f'{sv.RATE}{suffix2}'
+
+        r1 = merged[rate1]
+        r2 = merged[rate2]
+        er1 = merged[f'{sv.RATE_ERR}{suffix1}']
+        er2 = merged[f'{sv.RATE_ERR}{suffix2}']
+        ratesRatio = r2 / r1
+        ratesErrorRatio = (er1 / r1 + er2 / r2) * r2 / r1
+
+        # clean up suffixes
+        merged.columns = merged.columns.str.rstrip(suffix1)
+        columnsToDrop = [c for c in merged.columns if suffix2 in c]
+        merged.drop(columns=columnsToDrop, inplace=True)
+        merged[sv.R2R1] = ratesRatio
+        merged[sv.R2R1_ERR] = ratesErrorRatio
+        merged[sv.SERIES_STEP_X] = None
+        merged[sv.SERIES_STEP_Y] = None
+
+        outputFrame = R2R1OutputFrame()
+        outputFrame[merged.columns] = merged.values
+
         return outputFrame
 
 #####################################################
@@ -378,7 +465,8 @@ FittingModels            = [
 
 
 CalculationModels = [
-                    HetNoeCalculation
+                    HetNoeCalculation,
+                    R2R1RatesCalculation
                     ]
 
 

@@ -4,7 +4,7 @@ This module defines base classes for Series Analysis
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:26 +0100 (Wed, October 26, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-01-25 22:24:05 +0000 (Wed, January 25, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -208,7 +208,8 @@ class InputSeriesFrameBC(SeriesFrameBC):
                         collectionDict[item].append(subCollection)
         return collectionDict
 
-    def buildFromSpectrumGroup(self, spectrumGroup, parentCollection=None, peakListIndices=None, filteredPeaks=None):
+    def buildFromSpectrumGroup(self, spectrumGroup, parentCollection=None, peakListIndices=None, filteredPeaks=None,
+                               experimentName=None):
         """
         :param spectrumGroup: A core object containg the spectra ans series information
         :param peakListIndices: list of int, same length of spectra. Define which peakList index to use.
@@ -245,6 +246,7 @@ class InputSeriesFrameBC(SeriesFrameBC):
                             self.loc[i, sv.SERIES_STEP_X] = spectrum.getSeriesItem(spectrumGroup)
                             self.loc[i, sv.SERIESUNIT] = spectrumGroup.seriesUnits
                             self.loc[i, sv.SPECTRUMPID] = spectrum.pid
+                            self.loc[i, sv.EXPERIMENT] = experimentName
                             ## build the peak Property Columns
                             collections = collectionDict.get(pk, [])
                             for collection in collections:
@@ -300,6 +302,17 @@ class HetNoeOutputFrame(SeriesFrameBC):
 
     SERIESFRAMENAME = sv.HetNoe_OUTPUT_FRAME
     SERIESFRAMETYPE = sv.HetNoe_OUTPUT_FRAME
+
+
+class R2R1OutputFrame(SeriesFrameBC):
+
+    """
+    A TableData used for the R2R1 Series Analysis,
+
+    """
+
+    SERIESFRAMENAME = sv.R2R1_OUTPUT_FRAME
+    SERIESFRAMETYPE = sv.R2R1_OUTPUT_FRAME
 
 
 ########################################################################################################################

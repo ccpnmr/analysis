@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-25 16:58:49 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-25 22:24:05 +0000 (Wed, January 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -148,6 +148,14 @@ class FittingModelABC(ABC):
 
         return outputFrame
 
+    def _getFirstData(self, inputDataTables):
+        """ _INTERNAL. Used to get the first available
+        data from a dataTable for models that require only one dataFrame as input"""
+
+        if len(inputDataTables) == 0:
+            return None
+        inputDataTable = inputDataTables[0]
+        return inputDataTable.data
 
     @staticmethod
     def getFittingFunc(cls):
@@ -177,12 +185,12 @@ class CalculationModel(FittingModelABC):
     References  = 'References'      ## A list of journal article references that help to identify the employed calculation equations. E.g.: DOIs or title/authors/year/journal; web-pages.
 
     @abstractmethod
-    def calculateValues(self, inputData: TableFrame) -> TableFrame:
+    def calculateValues(self, inputDataTables) -> TableFrame:
         """
         Calculate the required values for an input SeriesTable.
         This method must be overridden in subclass'.
         Return one row for each collection pid. Index by collection pid
-        :param inputData: InputFrame
+        :param inputDataTables: list of DataTables
         :return: outputFrame
         """
         raise RuntimeError('This method must be overridden in subclass')

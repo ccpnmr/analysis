@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:44 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-25 18:56:28 +0000 (Wed, January 25, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -231,6 +231,7 @@ class GuiSpectrumDisplay(CcpnModule):
         self._spectrumDisplaySettings.zPlaneNavigationModeChanged.connect(self._zPlaneNavigationModeChangedInSettings)
 
         # notifier to respond to items being dropped onto the stripFrame
+        self.setAcceptDrops(True)
         self._droppedNotifier = self.setGuiNotifier(self.stripFrame,
                                                    [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                                                    self._processDroppedItems)
@@ -243,6 +244,20 @@ class GuiSpectrumDisplay(CcpnModule):
         self.stripScaleFactor = 1.0
 
         self._registerNotifiers()
+
+        self._fillToolBar()
+
+        #TODO: have SpectrumToolbar own and maintain this
+        self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button); used in SpectrumToolBar
+
+        self.isGrouped = False
+        self.spectrumActionDict = {}
+        self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed
+        # cannot use (wrapper) peak as key because project._data2Obj dict invalidates mapping before deleted callback is called
+        # TBD: this might change so that we can use wrapper peak (GWV:NONO!)  (which would make nicer code in showPeaks and deletedPeak below)
+        # self.inactivePeakItems = set() # contains unused peakItems
+        self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
+
 
     def _setWidgets(self, mainWindow, useScrollArea):
         """Set the widgets for the spectrumDisplay

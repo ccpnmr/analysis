@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-25 18:31:00 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-25 18:56:28 +0000 (Wed, January 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -36,21 +36,6 @@ from ccpn.util.Logging import getLogger
 class SpectrumDisplay1d(GuiSpectrumDisplay):
     MAXPEAKLABELTYPES = 7
     MAXPEAKSYMBOLTYPES = 4
-
-    def __init__(self, mainWindow):
-
-        GuiSpectrumDisplay.__init__(self, mainWindow=mainWindow, useScrollArea=True)
-
-        self._fillToolBar()
-        # self.addSpinSystemSideLabel()
-        self.setAcceptDrops(True)
-        self.isGrouped = False
-        self.spectrumActionDict = {}
-        self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed
-        # cannot use (wrapper) peak as key because project._data2Obj dict invalidates mapping before deleted callback is called
-        # TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)
-        ###self.inactivePeakItems = set() # contains unused peakItems
-        self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
 
     def _fillToolBar(self):
         """

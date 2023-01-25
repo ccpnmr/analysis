@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-25 18:04:11 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-25 18:56:28 +0000 (Wed, January 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -58,7 +58,7 @@ class SpectrumDisplay1d(_coreClassSpectrumDisplay, _SpectrumDisplay1d):
         # hack for now
         self.application = project.application
         self.mainWindow = self.application.ui.mainWindow
-        _SpectrumDisplay1d.__init__(self, mainWindow=self.mainWindow)
+        _SpectrumDisplay1d.__init__(self, mainWindow=self.mainWindow, useScrollArea=True)
 
 
 class SpectrumDisplayNd(_coreClassSpectrumDisplay, _SpectrumDisplayNd):
@@ -72,7 +72,7 @@ class SpectrumDisplayNd(_coreClassSpectrumDisplay, _SpectrumDisplayNd):
         # hack for now;
         self.application = project.application
         self.mainWindow = self.application.ui.mainWindow
-        _SpectrumDisplayNd.__init__(self, mainWindow=self.mainWindow)
+        _SpectrumDisplayNd.__init__(self, mainWindow=self.mainWindow, useScrollArea=True)
 
 
 def _factoryFunction(project: Project, wrappedData):

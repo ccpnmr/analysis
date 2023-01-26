@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-26 11:55:27 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 12:33:36 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -68,6 +68,12 @@ class SeriesAnalysisABC(ABC):
         Add a DataTable as inputData
         """
         self._inputDataTables.add(dataTable)
+
+    def removeInputDataTable(self, dataTable):
+        """
+        Remove a DataTable as inputData
+        """
+        self._inputDataTables.discard(dataTable)
 
     def clearInputDataTables(self):
         """
@@ -127,6 +133,10 @@ class SeriesAnalysisABC(ABC):
     def removeInputSpectrumGroup(self, spectrumGroup):
         """Remove a spectrumGroup to the inputList. Used to create InputDataTables"""
         self._inputSpectrumGroups.discard(spectrumGroup)
+
+    def clearInputSpectrumGroups(self):
+        """Remove  spectrumGroups to the inputList. Used to create InputDataTables"""
+        self._inputSpectrumGroups.clear()
 
     @property
     def exclusionHandler(self):

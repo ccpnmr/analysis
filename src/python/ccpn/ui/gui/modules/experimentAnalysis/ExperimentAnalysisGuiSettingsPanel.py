@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-26 11:55:28 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 12:33:36 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -224,8 +224,8 @@ class GuiInputDataPanel(GuiSettingPanel):
                                 'kwds': {
                                         'labelText': guiNameSpaces.Label_SelectSpectrumGroups,
                                         'tipText': guiNameSpaces.TipText_SpectrumGroupSelectionWidget,
-                                        'pulldownCallback': self._addSpectrumGroupToBackend,
-                                        'objectWidgetChangedCallback': self._addSpectrumGroupToBackend,
+                                        'pulldownCallback': self._spectrumGroupSelectionChanged,
+                                        'objectWidgetChangedCallback': self._spectrumGroupSelectionChanged,
                                         'displayText': [],
                                         'defaults': [],
                                         'standardListItems':[],
@@ -317,12 +317,13 @@ class GuiInputDataPanel(GuiSettingPanel):
               'type': settingWidgets._SeriesInputDataTableSelectionWidget,
               'postInit': self._setFixedHeightPostInit,
               'kwds': {
-                  'objectWidgetChangedCallback':self._addInputDataCallback,
+                  'objectWidgetChangedCallback':self._changedInputDataCallback,
                   'labelText': guiNameSpaces.Label_SelectDataTable,
                   'tipText': guiNameSpaces.TipText_DataTableSelection,
                   'displayText': [],
                   'defaults': [],
                   'standardListItems': [],
+                  'objectWidgetChangedCallback':self._changedInputDataCallback,
                   'objectName': guiNameSpaces.WidgetVarName_DataTablesSelection,
                   'fixedWidths': SettingsWidgetFixedWidths}, }),
 
@@ -377,7 +378,7 @@ class GuiInputDataPanel(GuiSettingPanel):
         widget.setMaximumWidths(SettingsWidgetFixedWidths)
         widget.getLayout().setAlignment(QtCore.Qt.AlignTop)
 
-    def _addInputDataCallback(self, *args):
+    def _changedInputDataCallback(self, *args):
 
         backend = self.guiModule.backendHandler
         dataTablePids = self.getSettingsAsDict().get(guiNameSpaces.WidgetVarName_DataTablesSelection, [])
@@ -385,9 +386,18 @@ class GuiInputDataPanel(GuiSettingPanel):
             self.guiModule.backendHandler.clearInputDataTables()
             getLogger().info(f'{self.guiModule.className}:{self.tabName}. Cleaned inputDataTables')
             return
+        objectDisplayed = []
         for pid in dataTablePids:
             obj = self.guiModule.project.getByPid(pid)
             if obj:
+                objectDisplayed.append(obj)
+        ## remove not needed
+        for currObj in backend.inputDataTables:
+            if currObj not in objectDisplayed:
+                backend.removeInputDataTable(currObj)
+        ## add new
+        for obj in objectDisplayed:
+            if obj not in backend.inputDataTables:
                 backend.addInputDataTable(obj)
                 getLogger().info(f'{self.guiModule.className}:{self.tabName}. {obj} added to inputDataTables')
 
@@ -419,21 +429,30 @@ class GuiInputDataPanel(GuiSettingPanel):
         """Add Input Collection to backend  """
         backend = self.guiModule.backendHandler
         pid = self.getSettingsAsDict().get(guiNameSpaces.WidgetVarName_InputCollectionSelection)
-        obj = self.guiModule.project.getByPid(pid)
-        if obj:
-            backend.inputCollection = obj
+        backend.inputCollection = self.guiModule.project.getByPid(pid)
 
-    def _addSpectrumGroupToBackend(self, *args):
+    def _spectrumGroupSelectionChanged(self, *args):
 
         backend = self.guiModule.backendHandler
         sgPids = self.getSettingsAsDict().get(guiNameSpaces.WidgetVarName_SpectrumGroupsSelection, [])
         if not sgPids:
-            self.guiModule.backendHandler.clearInputDataTables()
+            self.guiModule.backendHandler.clearInputSpectrumGroups()
             getLogger().info(f'{self.guiModule.className}:{self.tabName}. Cleaned inputSpectrumGroups')
             return
+        objectDisplayed = []
         for pid in sgPids:
             obj = self.guiModule.project.getByPid(pid)
             if obj:
+                objectDisplayed.append(obj)
+
+        ## remove not needed
+        for currObj in backend.inputSpectrumGroups:
+            if currObj not in objectDisplayed:
+                backend.removeInputSpectrumGroup(currObj)
+
+        ## add new
+        for obj in objectDisplayed:
+            if obj not in backend.inputSpectrumGroups:
                 backend.addInputSpectrumGroup(obj)
                 getLogger().info(f'{self.guiModule.className}:{self.tabName}. {obj} added to InputSpectrumGroups')
 

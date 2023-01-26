@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 12:48:29 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 12:59:47 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -63,7 +63,6 @@ class GuiWindow( object ):
     #     """
     #     Sets shortcuts for functions not specified in the main window menubar
     #     """
-    #     # TODO:ED test that the shortcuts can be added to the modules
     #     # return
     #
     #     context = QtCore.Qt.WidgetWithChildrenShortcut
@@ -162,7 +161,6 @@ class GuiWindow( object ):
     #
     # def _setUserShortcuts(self, preferences=None, mainWindow=None):
     #
-    #     # TODO:ED fix this circular link
     #     self.application._userShortcuts = UserShortcuts(mainWindow=mainWindow)  # set a new set of shortcuts
     #
     #     context = QtCore.Qt.ApplicationShortcut
@@ -254,7 +252,6 @@ class GuiWindow( object ):
     # # def deleteSelectedPeaks(self, parent=None):
     # #
     # #   # NBNB Moved here from Current
-    # #   # NBNB TODO: more general deletion
     # #
     # #   current = self.application.current
     # #   peaks = current.peaks
@@ -674,7 +671,6 @@ class GuiWindow( object ):
     #         for chemicalShift in chemicalShifts[ii]:
     #             atomId = chemicalShift.nmrAtom.id
     #             atomName = chemicalShift.nmrAtom.name
-    #             # TODO: the below fails, for example, if nmrAtom.name = 'Hn', can that happen?
     #
     #             # colour = colourDict.get(atomName[:min(2,len(atomName))])
     #             colourMarks = guiSettings.getColours().get(guiSettings.MARKS_COLOURS)

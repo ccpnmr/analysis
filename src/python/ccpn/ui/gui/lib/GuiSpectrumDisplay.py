@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-25 18:56:28 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 12:48:29 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -60,6 +60,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.DropBase import DropBase
 # from ccpn.ui.gui.widgets.Label import Label
 # from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, STRIP_MINIMUMWIDTH, STRIP_MINIMUMHEIGHT
@@ -182,6 +183,10 @@ class GuiSpectrumDisplay(CcpnModule):
     MAXPEAKLABELTYPES = 0
     MAXPEAKSYMBOLTYPES = 0
 
+    # Sub-classed in the 1d/nD implementations
+    # NB: 'self' is added to the callback in _fillToolbar using partial
+    _toolbarItems = []
+
     # override in specific module implementations
     includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
@@ -204,6 +209,8 @@ class GuiSpectrumDisplay(CcpnModule):
                               The leftmost strip is full of random garbage if it's not completely visible.
                               So for now add option below to have it turned off (False) or on (True).
         """
+        if self.MAXPEAKLABELTYPES == 0:
+                raise RuntimeError(f'MAXPEAKLABELTYPES == 0: cannot initialise')
 
         moduleTitle = str(self.id)  # the name that appears on the GUI Module
         getLogger().debug('GuiSpectrumDisplay.__init__>> mainWindow %s; name: %s' % (mainWindow, moduleTitle))
@@ -258,6 +265,22 @@ class GuiSpectrumDisplay(CcpnModule):
         # self.inactivePeakItems = set() # contains unused peakItems
         self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
 
+        self._spectrumUtilActions = {}  # Filled by _fillToolBar
+
+    def _fillToolBar(self):
+        """
+        Adds specific icons for 1d spectra to the spectrum utility toolbar.
+        """
+        tb = self.spectrumUtilToolBar
+        self._spectrumUtilActions = {}
+
+        # create the actions from the lists
+        for aName, icon, tooltip, active, callback in self._toolbarItems:
+            action = tb.addAction(tooltip, partial(callback, self))
+            if icon is not None:
+                ic = Icon(icon)
+                action.setIcon(ic)
+            self._spectrumUtilActions[aName] = action
 
     def _setWidgets(self, mainWindow, useScrollArea):
         """Set the widgets for the spectrumDisplay
@@ -1272,7 +1295,7 @@ class GuiSpectrumDisplay(CcpnModule):
     def _handlePeak(self, peak, strip, widths=None):
         """Navigate to the peak position in the strip
         """
-        from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakInStrip
+        from ccpn.ui.gui.lib.SpectrumDisplayLib import navigateToPeakInStrip
 
         # use the library method
         navigateToPeakInStrip(self, strip, peak, widths=None)
@@ -1477,7 +1500,8 @@ class GuiSpectrumDisplay(CcpnModule):
         markNmrAtoms(self.mainWindow, [nmrAtom])
 
     def setScrollbarPolicies(self, horizontal='asNeeded', vertical='asNeeded'):
-        "Set the scrolbar policies; convenience to expose to the user"
+        """Set the scrollbar policies; convenience to expose to the user
+        """
         from ccpn.ui.gui.widgets.ScrollArea import SCROLLBAR_POLICY_DICT
 
         if horizontal not in SCROLLBAR_POLICY_DICT or \
@@ -2584,7 +2608,7 @@ class GuiSpectrumDisplay(CcpnModule):
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
         # from functools import partial
         # from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, navigateToNmrAtomsInStrip
-        from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakInStrip, navigateToNmrResidueInStrip
+        from ccpn.ui.gui.lib.SpectrumDisplayLib import navigateToPeakInStrip, navigateToNmrResidueInStrip
 
         def _updateGl(self, spectrumList):
             GLSignals = GLNotifier(parent=self)
@@ -2733,6 +2757,185 @@ class GuiSpectrumDisplay(CcpnModule):
             for specView in self.spectrumViews:
                 specView.copyContourAttributesFromSpectrum()
 
+    def adjustContours(self):
+        """Initiate a popup to modify  settings
+        """
+        # GWV: Very strange (name for 1D!)
+        # Should it be here?; called from GuiMainWindow TODO: move there?
+        if self.is1D:
+            from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumDisplayPropertiesPopup1d as Popup
+
+        else:
+            from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumDisplayPropertiesPopupNd as Popup
+
+        if self.strips:
+            popup = Popup(parent=self.mainWindow, mainWindow=self.mainWindow,
+                          orderedSpectrumViews=self.strips[0].getSpectrumViews())
+            popup.exec_()
+
+    def _rebuildContours(self):
+        """Rebuild the contours (nD only)
+        """
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+        if self.is1D:
+            return
+
+        GLSignals = GLNotifier(parent=self)
+
+        for specViews in self.spectrumViews:
+            specViews.buildContoursOnly = True
+
+        # repaint
+        GLSignals.emitPaintEvent()
+
+    def _loopOverSpectrumViews(self):
+        """A generator object to loop over all spectrumViews,
+        visiting spectrum only once. Also initiates an undo block
+        :yields SpectrumView instance
+        """
+        modifiedSpectra = set()
+        with undoBlockWithoutSideBar():
+            for spectrumView in self.spectrumViews:
+                if spectrumView.isDisplayed:
+                    spectrum = spectrumView.spectrum
+
+                    # only increase once - duh
+                    if spectrum in modifiedSpectra:
+                        continue
+
+                    else:
+                        yield spectrumView
+
+                    modifiedSpectra.add(spectrum)
+
+    # @logCommand(get='self')
+    def _raiseContourBase(self):
+        """
+        Increases contour base level for all spectra visible in the display (nD Only).
+        """
+        if self.is1D:
+            return
+
+        for spectrumView in self._loopOverSpectrumViews():
+            spectrum = spectrumView.spectrum
+            if spectrum.positiveContourBase == spectrumView.positiveContourBase:
+                # We want to set the base for ALL spectra
+                # and to ensure that any private settings are overridden for this display
+                # setting to None forces the spectrumVIew to access the spectrum attributes
+                spectrumView.positiveContourBase = None
+                spectrumView.positiveContourFactor = None
+                spectrum.positiveContourBase *= spectrum.positiveContourFactor
+            else:
+                # Display has custom contour base - change that one only
+                spectrumView.positiveContourBase *= spectrumView.positiveContourFactor
+
+            if spectrum.negativeContourBase == spectrumView.negativeContourBase:
+                # We want to set the base for ALL spectra
+                # and to ensure that any private settings are overridden for this display
+                spectrumView.negativeContourBase = None
+                spectrumView.negativeContourFactor = None
+                spectrum.negativeContourBase *= spectrum.negativeContourFactor
+            else:
+                # Display has custom contour base - change that one only
+                spectrumView.negativeContourBase *= spectrumView.negativeContourFactor
+
+    # @logCommand(get='self')
+    def _lowerContourBase(self):
+        """
+        Decreases contour base level for all spectra visible in the display (nD only).
+        """
+        if self.is1D:
+            return
+
+        for spectrumView in self._loopOverSpectrumViews():
+            spectrum = spectrumView.spectrum
+
+            if spectrum.positiveContourBase == spectrumView.positiveContourBase:
+                # We want to set the base for ALL spectra
+                # and to ensure that any private settings are overridden for this display
+                spectrumView.positiveContourBase = None
+                spectrumView.positiveContourFactor = None
+                spectrum.positiveContourBase /= spectrum.positiveContourFactor
+            else:
+                # Display has custom contour base - change that one only
+                spectrumView.positiveContourBase /= spectrumView.positiveContourFactor
+
+            if spectrum.negativeContourBase == spectrumView.negativeContourBase:
+                # We want to set the base for ALL spectra
+                # and to ensure that any private settings are overridden for this display
+                spectrumView.negativeContourBase = None
+                spectrumView.negativeContourFactor = None
+                spectrum.negativeContourBase /= spectrum.negativeContourFactor
+            else:
+                # Display has custom contour base - change that one only
+                spectrumView.negativeContourBase /= spectrumView.negativeContourFactor
+
+    # @logCommand(get='self')
+    def _addContourLevel(self):
+        """
+        Increases number of contours by 1 for all spectra visible in the display (nD only).
+        """
+        if self.is1D:
+            return
+
+        for spectrumView in self._loopOverSpectrumViews():
+            spectrum = spectrumView.spectrum
+
+            if spectrum.positiveContourCount == spectrumView.positiveContourCount:
+                # We want to set the base for ALL spectra
+                # and to ensure that any private settings are overridden for this display
+                spectrumView.positiveContourCount = None
+                spectrum.positiveContourCount += 1
+            else:
+                # Display has custom contour count - change that one only
+                spectrumView.positiveContourCount += 1
+
+            if spectrum.negativeContourCount == spectrumView.negativeContourCount:
+                # We want to set the base for ALL spectra
+                # and to ensure that any private settings are overridden for this display
+                spectrumView.negativeContourCount = None
+                spectrum.negativeContourCount += 1
+            else:
+                # Display has custom contour count - change that one only
+                spectrumView.negativeContourCount += 1
+
+    # @logCommand(get='self')
+    def _removeContourLevel(self):
+        """
+        Decreases number of contours by 1 for all spectra visible in the display (nD only).
+        """
+        if self.is1D:
+            return
+
+        for spectrumView in self._loopOverSpectrumViews():
+            spectrum = spectrumView.spectrum
+
+            if spectrum.positiveContourCount == spectrumView.positiveContourCount:
+                # We want to set the base for ALL spectra
+                # and to ensure that any private settings are overridden for this display
+                spectrumView.positiveContourCount = None
+                if spectrum.positiveContourCount:
+                    spectrum.positiveContourCount -= 1
+            else:
+                # Display has custom contour count - change that one only
+                if spectrumView.positiveContourCount:
+                    spectrumView.positiveContourCount -= 1
+
+            if spectrum.negativeContourCount == spectrumView.negativeContourCount:
+                # We want to set the base for ALL spectra
+                # and to ensure that any private settings are overridden for this display
+                spectrumView.negativeContourCount = None
+                if spectrum.negativeContourCount:
+                    spectrum.negativeContourCount -= 1
+            else:
+                # Display has custom contour count - change that one only
+                if spectrumView.negativeContourCount:
+                    spectrumView.negativeContourCount -= 1
+
+    def updateTraces(self):
+        for strip in self.strips:
+            strip._updateTraces()
 
 #=========================================================================================
 

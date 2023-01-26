@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-25 16:45:04 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 12:48:29 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -54,7 +54,7 @@ class Shortcuts( object ):
 
         # avoiding circular imports
         from ccpn.core.lib import AssignmentLib
-        from ccpn.ui.gui.lib.SpectrumDisplay import navigateToCurrentPeakPosition, navigateToCurrentNmrResiduePosition
+        from ccpn.ui.gui.lib import SpectrumDisplayLib
 
         context = QtCore.Qt.WidgetWithChildrenShortcut
         # addShortCut("c, h", self, self.toggleCrosshairAll, context=context)
@@ -78,8 +78,8 @@ class Shortcuts( object ):
         addShortCut("u, y", self, partial(mainWindow.createMultipletAxisMarks, 1), context=context)
         addShortCut("u, z", self, partial(mainWindow.createMultipletAxisMarks, 2), context=context)
         addShortCut("u, w", self, partial(mainWindow.createMultipletAxisMarks, 3), context=context)
-        addShortCut("f, n", self, partial(navigateToCurrentNmrResiduePosition, mainWindow.application), context=context)
-        addShortCut("f, p", self, partial(navigateToCurrentPeakPosition, mainWindow.application), context=context)
+        addShortCut("f, n", self, partial(SpectrumDisplayLib.navigateToCurrentNmrResiduePosition, mainWindow.application), context=context)
+        addShortCut("f, p", self, partial(SpectrumDisplayLib.navigateToCurrentPeakPosition, mainWindow.application), context=context)
         addShortCut("c, a", self, partial(AssignmentLib.propagateAssignments, current=mainWindow.application.current), context=context)
         addShortCut("c, z", self, mainWindow._clearCurrentPeaks, context=context)
         addShortCut("c, o", self, mainWindow.setContourLevels, context=context)

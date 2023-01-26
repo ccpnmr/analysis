@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-25 18:04:11 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 12:48:29 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -2247,6 +2247,7 @@ class MainWindow(Window, GuiMainWindow):
         # logger.debug('MainWindow>> application.project: %s' % application.project)
         # logger.debug('MainWindow>> application._mainWindow: %s' % application._mainWindow)
         # logger.debug('MainWindow>> application.ui.mainWindow: %s' % application.ui.mainWindow)
+
 
 # insert the factory function to create a mainWindow object
 def _factoryFunction(project: Project, wrappedData):

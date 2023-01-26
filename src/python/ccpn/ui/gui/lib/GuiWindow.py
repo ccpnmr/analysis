@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-25 16:45:04 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 12:48:29 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -29,19 +29,19 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtCore
 from functools import partial
 
-from ccpn.core.lib import AssignmentLib
-from ccpn.core.lib.peakUtils import estimateVolumes, updateHeight
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
-from ccpn.ui.gui import guiSettings
-from ccpn.ui.gui.widgets.MessageDialog import showWarning, progressManager
-from ccpn.ui.gui.popups.ShortcutsPopup import UserShortcuts
-from ccpn.ui.gui.lib.SpectrumDisplay import navigateToCurrentPeakPosition, navigateToCurrentNmrResiduePosition
-from ccpn.ui.gui.lib.Shortcuts import addShortCut
-from ccpn.ui.gui.lib.mouseEvents import MouseModes, setCurrentMouseMode, getCurrentMouseMode, PICK
-from ccpn.util.decorators import logCommand
-from ccpn.util.Colour import colorSchemeTable
-
-from ccpn.util.Logging import getLogger
+# from ccpn.core.lib import AssignmentLib
+# from ccpn.core.lib.peakUtils import estimateVolumes, updateHeight
+# from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
+# from ccpn.ui.gui import guiSettings
+# from ccpn.ui.gui.widgets.MessageDialog import showWarning, progressManager
+# from ccpn.ui.gui.popups.ShortcutsPopup import UserShortcuts
+# from ccpn.ui.gui.lib.SpectrumDisplay import navigateToCurrentPeakPosition, navigateToCurrentNmrResiduePosition
+# from ccpn.ui.gui.lib.Shortcuts import addShortCut
+# from ccpn.ui.gui.lib.mouseEvents import MouseModes, setCurrentMouseMode, getCurrentMouseMode, PICK
+# from ccpn.util.decorators import logCommand
+# from ccpn.util.Colour import colorSchemeTable
+#
+# from ccpn.util.Logging import getLogger
 
 
 _PEAKS = 1

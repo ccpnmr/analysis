@@ -6,3 +6,4 @@ import ccpn.core.Project
 
 import ccpn.ui.gui.MainWindow
 import ccpn.ui.gui.modules.SpectrumDisplay
+import ccpn.ui.gui.lib.Strip

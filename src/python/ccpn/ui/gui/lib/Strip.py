@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 15:32:46 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 16:35:00 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -44,46 +44,6 @@ class Strip1d(_CoreClassStrip, _GuiStrip1d):
         getLogger().debug('Strip1d>> spectrumDisplay: %s' % self.spectrumDisplay)
         _GuiStrip1d.__init__(self, self.spectrumDisplay)
 
-        # cannot add the Frame until fully done
-        strips = self.spectrumDisplay.orderedStrips
-        if self in strips:
-            stripIndex = strips.index(self)
-        else:
-            stripIndex = len(strips)
-            getLogger().warning('Strip ordering not defined for %s in %s' % (str(self.pid), str(self.spectrumDisplay.pid)))
-
-        tilePosition = self.tilePosition
-
-        if self.spectrumDisplay.stripArrangement == 'Y':
-
-            # strips are arranged in a row
-            # self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
-
-            if True:  #tilePosition is None:
-                self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
-                self.tilePosition = (0, stripIndex)
-            else:
-                self.spectrumDisplay.stripFrame.layout().addWidget(self, tilePosition[0], tilePosition[1])
-
-        elif self.spectrumDisplay.stripArrangement == 'X':
-
-            # strips are arranged in a column
-            # self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
-
-            if True:  #tilePosition is None:
-                self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
-                self.tilePosition = (0, stripIndex)
-            else:
-                self.spectrumDisplay.stripFrame.layout().addWidget(self, tilePosition[1], tilePosition[0])
-
-        elif self.spectrumDisplay.stripArrangement == 'T':
-
-            # NOTE:ED - Tiled plots not fully implemented yet
-            getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
-
-        else:
-            getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
-
 
 class StripNd(_CoreClassStrip, _GuiStripNd):
     """ND strip """
@@ -96,46 +56,9 @@ class StripNd(_CoreClassStrip, _GuiStripNd):
         getLogger().debug('StripNd>> spectrumDisplay=%s' % self.spectrumDisplay)
         _GuiStripNd.__init__(self, self.spectrumDisplay)
 
-        # cannot add the Frame until fully done
-        strips = self.spectrumDisplay.orderedStrips
-        if self in strips:
-            stripIndex = strips.index(self)
-        else:
-            stripIndex = len(strips)
-            getLogger().warning('Strip ordering not defined for %s in %s' % (str(self.pid), str(self.spectrumDisplay.pid)))
-
-        tilePosition = self.tilePosition
-
-        if self.spectrumDisplay.stripArrangement == 'Y':
-
-            # strips are arranged in a row
-            # self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
-
-            if True:  #tilePosition is None:
-                self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
-                self.tilePosition = (0, stripIndex)
-            else:
-                self.spectrumDisplay.stripFrame.layout().addWidget(self, tilePosition[0], tilePosition[1])
-
-        elif self.spectrumDisplay.stripArrangement == 'X':
-
-            # strips are arranged in a column
-            # self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
-
-            if True:  #tilePosition is None:
-                self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
-                self.tilePosition = (0, stripIndex)
-            else:
-                self.spectrumDisplay.stripFrame.layout().addWidget(self, tilePosition[1], tilePosition[0])
-
-        elif self.spectrumDisplay.stripArrangement == 'T':
-
-            # NOTE:ED - Tiled plots not fully implemented yet
-            getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
-
-        else:
-            getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
-
+#=========================================================================================
+# Registering
+#=========================================================================================
 
 def _factoryFunction(project: Project, wrappedData):
     """create SpectrumDisplay, dispatching to subtype depending on wrappedData

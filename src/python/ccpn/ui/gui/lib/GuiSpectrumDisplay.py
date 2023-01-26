@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 12:48:29 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 16:35:00 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -483,6 +483,17 @@ class GuiSpectrumDisplay(CcpnModule):
         else:
             # read from the preferences
             self._updateStateFromPreferences()
+
+    def _addStrip(self, strip, tilePosition):
+        """Add a Strip instance using tilePosition
+        :param strip: Strip instance
+        :param tilePosition: an (x,y) tuple
+
+        CPPNINTERNAL: used in GuiStrip to insert itself at the right spot
+        """
+        if not isinstance(tilePosition, (tuple, list)) or len(tilePosition) != 2:
+            raise ValueError(f'Invalid tilePosition: {tilePosition}')
+        self.stripFrame.layout().addWidget(strip, tilePosition[0], tilePosition[1])
 
     def _updateStateFromPreferences(self):
         """Update the state of spectrumDisplay from the preferences

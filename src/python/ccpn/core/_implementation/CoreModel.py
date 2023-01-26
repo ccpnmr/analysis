@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 18:06:41 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 21:30:31 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -58,17 +58,28 @@ class CoreModel(object):
         if cls.shortClassName is None:
             raise RuntimeError(f'{cls.__name__}: className class-attribute is undefined')
 
-        if cls._parentClassName is not None:
-            if (parentKlass := cls._coreClassDict.get(cls._parentClassName)) is None:
-                raise RuntimeError(f'{cls.__name__}: cannot get class for "{cls._parentClassName}"')
-            # Just for the transition period
-            if cls not in parentKlass._childClasses:
-                parentKlass._childClasses.append(cls)
-
         cls._coreClassDict[cls.className] = cls
         cls._coreClassDict[cls.shortClassName] = cls
 
+        cls._linkCoreClass()
+
         cls._factoryFunction = factoryFunction
+
+    @classmethod
+    def _linkCoreClass(cls):
+        """Defines the model-linkages for cls
+        """
+        # if cls._parentClassName is not None:
+        #     if (parentKlass := cls._coreClassDict.get(cls._parentClassName)) is None:
+        #         raise RuntimeError(f'{cls.__name__}: cannot get class for "{cls._parentClassName}"')
+        #     # Just for the transition period
+        #     if cls not in parentKlass._childClasses:
+        #         parentKlass._childClasses.append(cls)
+        if cls._parentClass is not None:
+            parentKlass = cls._parentClass
+            # Just for the transition period
+            if cls not in parentKlass._childClasses:
+                parentKlass._childClasses.append(cls)
 
     @classmethod
     def _getChildClasses(cls, recursion: bool = False) -> list:

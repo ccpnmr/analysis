@@ -503,24 +503,20 @@ for className in _coreImportOrder:
     _coreClassMap[cls.className] = cls
     _coreClassMap[cls.shortClassName] = cls
 
-# Wrapped graphics data classes
-from ccpn.ui._implementation import _uiImportOrder
 
+# _uiImportOrder = ('Window', 'Mark', 'SpectrumDisplay', 'Strip',
+#                   'Axis', 'SpectrumView', 'PeakListView', 'MultipletListView', 'IntegralListView')
 
-_importOrder.extend(_uiImportOrder)
-for className in _uiImportOrder:
-    cls = getattr(importlib.import_module(f'ccpn.ui._implementation.{className}'), className)
+import ccpn.ui.gui.MainWindow
+import ccpn.ui._implementation.Mark
+import ccpn.ui.gui.modules.SpectrumDisplay
+import ccpn.ui.gui.lib.Strip
+import ccpn.ui._implementation.Axis
+import ccpn.ui.gui.lib.SpectrumView
+import ccpn.ui.gui.lib.PeakListView
+import ccpn.ui.gui.lib.MultipletListView
+import ccpn.ui.gui.lib.IntegralListView
 
-    parentClass = cls._parentClass
-    if parentClass is not None and cls not in parentClass._childClasses:
-        # Should not be necessary to check, but apparently this code can be executed twice
-        parentClass._childClasses.append(cls)
-    _coreClassMap[cls.className] = cls
-    _coreClassMap[cls.shortClassName] = cls
-
-# connect classes to project
-# NB - customisation for different UIs is done by inserting _factoryFunctions
-# from the UI class setUp
 _allGetters = []
 _coreClassMap['Project']._linkWrapperClasses(_allGetters=_allGetters)
 # print('\n    '.join(sorted(_allGetters)))

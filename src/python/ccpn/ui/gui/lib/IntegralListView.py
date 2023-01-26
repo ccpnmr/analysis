@@ -1,5 +1,6 @@
 """
-Module Documentation here
+Get the regions between two peak Limits and fill the area under the curve.
+
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -20,36 +21,35 @@ __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: Ed Brooksbank $"
-__date__ = "$Date: 2018-12-20 15:44:34 +0000 (Thu, December 20, 2018) $"
+__author__ = "$Author: Luca Mureddu $"
+__date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
 from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
 from ccpn.core.Project import Project
-from ccpn.ui._implementation.MultipletListView import MultipletListView as _CoreClassMultipletListView
+from ccpn.ui._implementation.IntegralListView import IntegralListView as _CoreClassIntegralListView
 
 
-class GuiMultipletListView(GuiListViewABC):
-    """multipletList is the CCPN wrapper object
+class GuiIntegralListView(GuiListViewABC):
+    """integralList is the CCPN wrapper object
     """
 
     def __init__(self):
         super().__init__()
 
 
-class MultipletListView(_CoreClassMultipletListView, GuiMultipletListView):
-    """Multiplet List View for 1D or nD MultipletList
-    """
+class IntegralListView(_CoreClassIntegralListView, GuiIntegralListView):
+    """Integral List View for 1D or nD IntegralList"""
 
-    def __init__(self, project: Project, wrappedData: 'ApiStripMultipletListView'):
+    def __init__(self, project: Project, wrappedData: 'ApiStripIntegralListView'):
         """Local override init for Qt subclass"""
-        _CoreClassMultipletListView.__init__(self, project, wrappedData)
+        _CoreClassIntegralListView.__init__(self, project, wrappedData)
 
         # hack for now
         self.application = project.application
-        GuiMultipletListView.__init__(self)
+        GuiIntegralListView.__init__(self)
         self._init()
 
 #=========================================================================================
@@ -57,8 +57,8 @@ class MultipletListView(_CoreClassMultipletListView, GuiMultipletListView):
 #=========================================================================================
 
 def _factoryFunction(project: Project, wrappedData):
-    """create MultipletListView
+    """create IntegralListView
     """
-    return MultipletListView(project, wrappedData)
+    return IntegralListView(project, wrappedData)
 
-_CoreClassMultipletListView._registerCoreClass(factoryFunction=_factoryFunction)
+_CoreClassIntegralListView._registerCoreClass(factoryFunction=_factoryFunction)

@@ -1,5 +1,5 @@
 """
-Module Documentation here
+The top-level Gui class for all user interactions
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 18:24:12 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 21:30:31 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,6 @@ import typing
 import re
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
 
 from ccpn.framework.Application import getApplication
@@ -133,8 +132,6 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
 class Gui(Ui):
     """Top class for the GUI interface
     """
-    # Factory functions for UI-specific instantiation of wrapped graphics classes
-    _factoryFunctions = {}
 
     def __init__(self, application):
 
@@ -820,56 +817,3 @@ def _getSaveDirectory(mainWindow):
         return None
 
     return newPath
-
-
-#######################################################################################
-#
-#  Ui classes that map ccpn.ui._implementation
-#
-#######################################################################################
-
-
-
-## IntegralListView class
-_coreClassIntegralListView = _coreClassMap['IntegralListView']
-from ccpn.ui.gui.lib.GuiIntegralListView import GuiIntegralListView as _GuiIntegralListView
-
-
-class _IntegralListView(_coreClassIntegralListView, _GuiIntegralListView):
-    """Integral List View for 1D or nD IntegralList"""
-
-    def __init__(self, project: Project, wrappedData: 'ApiStripIntegralListView'):
-        """Local override init for Qt subclass"""
-        _coreClassIntegralListView.__init__(self, project, wrappedData)
-
-        # hack for now
-        self.application = project.application
-        _GuiIntegralListView.__init__(self)
-        self._init()
-
-
-Gui._factoryFunctions[_coreClassIntegralListView.className] = _IntegralListView
-
-# ## MultipletListView class
-# _coreClassMultipletListView = _coreClassMap['MultipletListView']
-# from ccpn.ui.gui.lib.GuiMultipletListView import GuiMultipletListView as _GuiMultipletListView
-#
-
-# class _MultipletListView(_coreClassMultipletListView, _GuiMultipletListView):
-#     """Multiplet List View for 1D or nD MultipletList"""
-#
-#     def __init__(self, project: Project, wrappedData: 'ApiStripMultipletListView'):
-#         """Local override init for Qt subclass"""
-#         _coreClassMultipletListView.__init__(self, project, wrappedData)
-#
-#         # hack for now
-#         self.application = project.application
-#         _GuiMultipletListView.__init__(self)
-#         self._init()
-
-
-# Gui._factoryFunctions[_coreClassMultipletListView.className] = _MultipletListView
-
-# # Delete what we do not want in namespace
-# del _factoryFunction
-# # del coreClass

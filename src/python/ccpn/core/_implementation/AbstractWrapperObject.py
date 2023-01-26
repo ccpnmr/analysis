@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 18:02:20 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 21:30:31 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -234,7 +234,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         # A bit inelegant, but Nmrresidue is handled specially,
         # with a _ccpnSortKey property
         if className != 'NmrResidue':
-            self._ccpnSortKey = (id(project), _importOrder.index(className)) + sortKey
+            # self._ccpnSortKey = (id(project), _importOrder.index(className)) + sortKey
+            self._ccpnSortKey = (id(project), list(project._className2Class.keys()).index(className)) + sortKey
 
         # update pid:object mapping dictionary
         dd = project._pid2Obj.get(className)

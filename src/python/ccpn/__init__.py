@@ -9,3 +9,4 @@ import ccpn.ui.gui.modules.SpectrumDisplay
 import ccpn.ui.gui.lib.Strip
 import ccpn.ui.gui.lib.SpectrumView
 import ccpn.ui.gui.lib.PeakListView
+import ccpn.ui.gui.lib.MultipletListView

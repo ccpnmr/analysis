@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 17:40:00 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 18:24:12 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -830,77 +830,6 @@ def _getSaveDirectory(mainWindow):
 
 
 
-
-# Any Factory function to _implementation or abstractWrapper
-#
-## SpectrumView class
-# _coreClassSpectrumView = _coreClassMap['SpectrumView']
-# from ccpn.ui.gui.lib.GuiSpectrumView1d import GuiSpectrumView1d as _GuiSpectrumView1d
-#
-#
-# class _SpectrumView1d(_coreClassSpectrumView, _GuiSpectrumView1d):
-#     """1D Spectrum View"""
-#
-#     def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
-#         """Local override init for Qt subclass"""
-#         _coreClassSpectrumView.__init__(self, project, wrappedData)
-#
-#         # hack for now
-#         self.application = project.application
-#
-#         Logging.getLogger().debug('SpectrumView1d>> %s' % self)
-#         _GuiSpectrumView1d.__init__(self)
-#
-#
-# from ccpn.ui.gui.lib.GuiSpectrumViewNd import GuiSpectrumViewNd as _GuiSpectrumViewNd
-#
-#
-# class _SpectrumViewNd(_coreClassSpectrumView, _GuiSpectrumViewNd):
-#     """ND Spectrum View"""
-#
-#     def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
-#         """Local override init for Qt subclass"""
-#         _coreClassSpectrumView.__init__(self, project, wrappedData)
-#
-#         # hack for now
-#         self.application = project.application
-#
-#         Logging.getLogger().debug('SpectrumViewNd>> self=%s strip=%s' % (self, self.strip))
-#         _GuiSpectrumViewNd.__init__(self)
-#
-#
-# def _factoryFunction(project: Project, wrappedData):
-#     """create SpectrumView, dispatching to subtype depending on wrappedData"""
-#     if 'intensity' in wrappedData.strip.spectrumDisplay.axisCodes:
-#         # 1D display
-#         return _SpectrumView1d(project, wrappedData)
-#     else:
-#         # ND display
-#         return _SpectrumViewNd(project, wrappedData)
-#
-#
-# Gui._factoryFunctions[_coreClassSpectrumView.className] = _factoryFunction
-
-## PeakListView class
-# _coreClassPeakListView = _coreClassMap['PeakListView']
-# from ccpn.ui.gui.lib.GuiPeakListView import GuiPeakListView as _GuiPeakListView
-#
-#
-# class _PeakListView(_coreClassPeakListView, _GuiPeakListView):
-#     """Peak List View for 1D or nD PeakList"""
-#
-#     def __init__(self, project: Project, wrappedData: 'ApiStripPeakListView'):
-#         """Local override init for Qt subclass"""
-#         _coreClassPeakListView.__init__(self, project, wrappedData)
-#
-#         # hack for now
-#         self.application = project.application
-#         _GuiPeakListView.__init__(self)
-#         self._init()
-#
-#
-# Gui._factoryFunctions[_coreClassPeakListView.className] = _PeakListView
-
 ## IntegralListView class
 _coreClassIntegralListView = _coreClassMap['IntegralListView']
 from ccpn.ui.gui.lib.GuiIntegralListView import GuiIntegralListView as _GuiIntegralListView
@@ -921,25 +850,25 @@ class _IntegralListView(_coreClassIntegralListView, _GuiIntegralListView):
 
 Gui._factoryFunctions[_coreClassIntegralListView.className] = _IntegralListView
 
-## MultipletListView class
-_coreClassMultipletListView = _coreClassMap['MultipletListView']
-from ccpn.ui.gui.lib.GuiMultipletListView import GuiMultipletListView as _GuiMultipletListView
+# ## MultipletListView class
+# _coreClassMultipletListView = _coreClassMap['MultipletListView']
+# from ccpn.ui.gui.lib.GuiMultipletListView import GuiMultipletListView as _GuiMultipletListView
+#
+
+# class _MultipletListView(_coreClassMultipletListView, _GuiMultipletListView):
+#     """Multiplet List View for 1D or nD MultipletList"""
+#
+#     def __init__(self, project: Project, wrappedData: 'ApiStripMultipletListView'):
+#         """Local override init for Qt subclass"""
+#         _coreClassMultipletListView.__init__(self, project, wrappedData)
+#
+#         # hack for now
+#         self.application = project.application
+#         _GuiMultipletListView.__init__(self)
+#         self._init()
 
 
-class _MultipletListView(_coreClassMultipletListView, _GuiMultipletListView):
-    """Multiplet List View for 1D or nD MultipletList"""
-
-    def __init__(self, project: Project, wrappedData: 'ApiStripMultipletListView'):
-        """Local override init for Qt subclass"""
-        _coreClassMultipletListView.__init__(self, project, wrappedData)
-
-        # hack for now
-        self.application = project.application
-        _GuiMultipletListView.__init__(self)
-        self._init()
-
-
-Gui._factoryFunctions[_coreClassMultipletListView.className] = _MultipletListView
+# Gui._factoryFunctions[_coreClassMultipletListView.className] = _MultipletListView
 
 # # Delete what we do not want in namespace
 # del _factoryFunction

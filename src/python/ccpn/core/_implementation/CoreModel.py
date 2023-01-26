@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 18:02:20 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 18:06:41 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -113,6 +113,8 @@ class CoreModel(object):
         s = '\t' * tabs + '%s' % (node.className)
         if node._isGuiClass:
             s += '  (GuiClass)'
+        if node.className in cls._coreClassDict:
+            s += '    --> (done)'
         print(s)
         for child in node._childClasses:
             cls._printClassTree(child, tabs=tabs + 1)

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-16 13:35:21 +0000 (Mon, January 16, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-26 14:54:56 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -36,12 +36,14 @@ from copy import deepcopy
 import pandas as pd
 from decorator import decorator
 
-import ccpn.core._implementation.resetSerial
 from ccpn.core import _importOrder
-from ccpn.core.lib import Pid
+import ccpn.core._implementation.resetSerial
+from ccpn.core._implementation.CoreModel import CoreModel
 from ccpn.core._implementation.Updater import Updater, \
     UPDATE_POST_OBJECT_INITIALISATION, UPDATE_POST_PROJECT_INITIALISATION, \
     UPDATE_PRE_OBJECT_INITIALISATION
+
+from ccpn.core.lib import Pid
 
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
@@ -57,7 +59,7 @@ _RENAME_SENTINEL = Pid.Pid('Dummy:_rename')
 
 
 @functools.total_ordering
-class AbstractWrapperObject(NotifierBase):
+class AbstractWrapperObject(CoreModel, NotifierBase):
     """Abstract class containing common functionality for subclasses.
 
     **Rules for subclasses:**
@@ -114,19 +116,25 @@ class AbstractWrapperObject(NotifierBase):
     necessary to do so.
     """
 
-    #: Short class name, for PID. Must be overridden for each subclass
-    shortClassName = None
+    # In CoreModel:
 
-    # Class name - necessary since the actual objects may be of a subclass.
-    className = 'AbstractWrapperObject'
+    # # Short class name, for PID. Must be overridden for each subclass
+    # shortClassName = None
+    #
+    # # Class name - necessary since the actual objects may be of a subclass.
+    # className = None
+    #
+    # # Name of the parent class; used to make model linkages
+    # _parentClassName = None
+    #
+    # # List of child classes. Will be filled by child-classes registering.
+    # _childClasses = []
 
+    # Old defs
     _parentClass = None
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'abstractWrapperClasses'
-
-    #: List of child classes. Must be overridden for each subclass.
-    _childClasses = []
 
     _isGuiClass = False  # Overridden by Gui classes
     _isPandasTableClass = False  # Overridden by classes with panda DataFrame tables
@@ -1179,34 +1187,34 @@ class AbstractWrapperObject(NotifierBase):
         for cc in cls._childClasses:
             cc._linkWrapperClasses(newAncestors, Project=Project, _allGetters=_allGetters)
 
-    @classmethod
-    def _getChildClasses(cls, recursion: bool = False) -> list:
-        """
-        :param recursion: use recursion to also add child objects
-        :return: list of valid child classes of cls
+    # @classmethod
+    # def _getChildClasses(cls, recursion: bool = False) -> list:
+    #     """
+    #     :param recursion: use recursion to also add child objects
+    #     :return: list of valid child classes of cls
+    #
+    #     NB: Depth-first ordering
+    #
+    #     CCPNINTERNAL: Notifier class
+    #     """
+    #     result = []
+    #     for klass in cls._childClasses:
+    #         result.append(klass)
+    #         if recursion:
+    #             result = result + klass._getChildClasses(recursion=recursion)
+    #     return result
 
-        NB: Depth-first ordering
-
-        CCPNINTERNAL: Notifier class
-        """
-        result = []
-        for klass in cls._childClasses:
-            result.append(klass)
-            if recursion:
-                result = result + klass._getChildClasses(recursion=recursion)
-        return result
-
-    @classmethod
-    def _getParentClasses(cls) -> list:
-        """Return a list of parent classes, staring with the root (i.e. Project)
-        """
-        result = []
-        klass = cls
-        while klass._parentClass is not None:
-            result.append(klass._parentClass)
-            klass = klass._parentClass
-        result.reverse()
-        return result
+    # @classmethod
+    # def _getParentClasses(cls) -> list:
+    #     """Return a list of parent classes, staring with the root (i.e. Project)
+    #     """
+    #     result = []
+    #     klass = cls
+    #     while klass._parentClass is not None:
+    #         result.append(klass._parentClass)
+    #         klass = klass._parentClass
+    #     result.reverse()
+    #     return result
 
     @classmethod
     def _getDescendant(cls, self, relativeId: str):
@@ -1321,75 +1329,6 @@ class AbstractWrapperObject(NotifierBase):
                 undo.decreaseBlocking()
 
     # Notifiers and related functions:
-
-    #GWV 20181123:
-    # @classmethod
-    # def _setupCoreNotifier(cls, target: str, func: typing.Callable,
-    #                        parameterDict: dict = {}, onceOnly: bool = False):
-    #     """Set up notifiers for class cls that do not depend on individual objects -
-    #     These will be registered whenever a new project is initialised.
-    #     Parameters are eventually passed to the project.registerNotifier() function
-    #     (with cls converted to cls.className). Please see the Project.registerNotifier
-    #     documentation for a precise parameter description
-    #
-    #     Note that these notifiers are NOT cleared once set up.
-    #     """
-    #
-    #     # CCPNINTERNAL - used in top level class definitions, Current (ONLY)
-    #
-    #     # NB _coreNotifiers is a class attribute of AbstractWrapperObject
-    #     # So all tuples are appended to the same list, living in AbstractWrapperObject
-    #     cls._coreNotifiers.append((cls.className, target, func, parameterDict, onceOnly))
-
-    # def _finaliseRename(self):
-    #   """Reset internal attributes after values determining PID have changed
-    #   """
-    #
-    #   # reset id
-    #   project = self._project
-    #   oldId = self._id
-    #   parent = self._parent
-    #   if parent is None:
-    #     _id = ''
-    #   elif parent is project:
-    #     _id = str(self._key)
-    #   else:
-    #     _id = '%s%s%s'% (parent._id, Pid.IDSEP, self._key)
-    #   self._id = _id
-    #
-    #   # update pid:object mapping dictionary
-    #   dd = project._pid2Obj[self.className]
-    #   del dd[oldId]
-    #   dd[_id] = self
-
-    # def _finaliseRelatedObjectFromRename(self, oldPid, pathToObject: str, action: str):
-    #     """Finalise related objects after rename
-    #     Alternative to _finaliseRelatedObject for calling from rename notifier.
-    #     """
-    #     target = operator.attrgetter(pathToObject)(self)
-    #     if not target:
-    #         pass
-    #     elif isinstance(target, AbstractWrapperObject):
-    #         target._finaliseAction(action)
-    #     else:
-    #         # This must be an iterable
-    #         for obj in target:
-    #             obj._finaliseAction(action)
-    #
-    # def _finaliseRelatedObject(self, pathToObject: str, action: str):
-    #     """ Finalise 'action' type notifiers for getattribute(pathToObject)(self)
-    #     pathToObject is a navigation path (may contain dots) and must yield an object
-    #     or an iterable of objects. Can NOT be called from a rename notifier"""
-    #
-    #     target = operator.attrgetter(pathToObject)(self)
-    #     if not target:
-    #         pass
-    #     elif isinstance(target, AbstractWrapperObject):
-    #         target._finaliseAction(action)
-    #     else:
-    #         # This must be an iterable
-    #         for obj in target:
-    #             obj._finaliseAction(action)
 
     def _finaliseAction(self, action: str, **actionKwds):
         """Do wrapper level finalisation, and execute all notifiers

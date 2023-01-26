@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 12:48:29 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 14:54:56 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -41,8 +41,7 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 
 ## MainWindow class
-from ccpn.ui._implementation.Window import Window
-# from ccpn.ui.gui.lib.GuiMainWindow import GuiMainWindow
+from ccpn.ui._implementation.Window import Window as _CoreClassMainWindow
 
 
 from ccpn.ui.gui import guiSettings
@@ -81,9 +80,6 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
 
 
-# For readability there should be a class:
-# _MainWindowShortCuts which (Only!) has the shortcut definitions and the callbacks to initiate them.
-# The latter should all be private methods!
 # For readability there should be a class:
 # _MainWindowMenus which (Only!) has menu instantiations, the callbacks to initiate them, + relevant methods
 # The latter should all be private methods!
@@ -168,7 +164,6 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         # blank display opened later by the _initLayout if there is nothing to show otherwise
         self.statusBar().showMessage('Ready')
         setCurrentMouseMode(SELECT)
-        self.show()
 
         self._project._undo.undoChanged.add(self._undoChangeCallback)
 
@@ -177,6 +172,9 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         # self.setUnifiedTitleAndToolBarOnMac(True) #uncomment this to remove the extra title bar on osx 10.14+
 
         self._setKeyTimer()
+
+        # hide the window here and make visible later
+        self.hide()
 
     def _setKeyTimer(self):
         """
@@ -1397,30 +1395,6 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 # don't show the popup
                 self.project.deleteObjects(*(obj for _name, itms, _check in deleteItems for obj in itms))
 
-    # def deleteSelectedPeaks(self, parent=None):
-    #
-    #   # NBNB Moved here from Current
-    #   # NBNB TODO: more general deletion
-    #
-    #   current = self.application.current
-    #   peaks = current.peaks
-    #   if peaks:
-    #     n = len(peaks)
-    #     title = 'Delete Peak%s' % ('' if n == 1 else 's')
-    #     msg ='Delete %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
-    #     if MessageDialog.showYesNo(title, msg, parent):
-    #       current.project.deleteObjects(*peaks)
-    #
-    # def deleteSelectedMultiplets(self, parent=None):
-    #   current = self.application.current
-    #   multiplets = current.multiplets
-    #   if multiplets:
-    #     n = len(multiplets)
-    #     title = 'Delete Multiplet%s' % ('' if n == 1 else 's')
-    #     msg ='Delete %sselected multiplet%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
-    #     if MessageDialog.showYesNo(title, msg, parent):
-    #       current.project.deleteObjects(*multiplets)
-
     def _openCopySelectedPeaks(self):
         from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
 
@@ -2221,7 +2195,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             showWarning('Make Strip Plot', 'No selected spectrumDisplay')
 
 
-class MainWindow(Window, GuiMainWindow):
+class MainWindow(_CoreClassMainWindow, GuiMainWindow):
     """GUI main window, corresponds to OS window"""
 
     def __init__(self, project: Project, wrappedData: 'ApiWindow'):
@@ -2230,23 +2204,15 @@ class MainWindow(Window, GuiMainWindow):
         logger.debug('MainWindow>> project: %s' % project)
         logger.debug('MainWindow>> project.application: %s' % project.application)
 
-        Window.__init__(self, project, wrappedData)
+        _CoreClassMainWindow.__init__(self, project, wrappedData)
 
         application = project.application
         GuiMainWindow.__init__(self, application=application)
-
-        # hide the window here and make visible later
-        self.hide()
 
         # patches for now:
         project._mainWindow = self
         application._mainWindow = self
         application.ui.mainWindow = self
-        # logger.debug('MainWindow>> project._mainWindow: %s' % project._mainWindow)
-        # logger.debug('MainWindow>> application: %s' % application)
-        # logger.debug('MainWindow>> application.project: %s' % application.project)
-        # logger.debug('MainWindow>> application._mainWindow: %s' % application._mainWindow)
-        # logger.debug('MainWindow>> application.ui.mainWindow: %s' % application.ui.mainWindow)
 
 
 # insert the factory function to create a mainWindow object
@@ -2254,4 +2220,4 @@ def _factoryFunction(project: Project, wrappedData):
     """create Window, dispatching to subtype depending on wrappedData"""
     return MainWindow(project, wrappedData)
 
-Window._factoryFunction = _factoryFunction
+_CoreClassMainWindow._registerCoreClass(factoryFunction=_factoryFunction)

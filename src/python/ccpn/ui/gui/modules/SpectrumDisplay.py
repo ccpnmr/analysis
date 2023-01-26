@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 12:48:29 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 14:54:56 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -84,7 +84,6 @@ class SpectrumDisplay1d(_CoreClassSpectrumDisplay, GuiSpectrumDisplay):
         self.application = project.application
         self.mainWindow = self.application.ui.mainWindow
         GuiSpectrumDisplay.__init__(self, mainWindow=self.mainWindow, useScrollArea=True)
-        i = 0
 
     def setVisibleAxes(self):
         # Not implemented for 1D
@@ -139,7 +138,6 @@ class SpectrumDisplayNd(_CoreClassSpectrumDisplay, GuiSpectrumDisplay):
         self.application = project.application
         self.mainWindow = self.application.ui.mainWindow
         GuiSpectrumDisplay.__init__(self, mainWindow=self.mainWindow, useScrollArea=True)
-        i = 0
 
     # Expose some methods for the nD case
 
@@ -182,4 +180,4 @@ def _factoryFunction(project: Project, wrappedData):
     else:
         return SpectrumDisplayNd(project, wrappedData)
 
-_CoreClassSpectrumDisplay._factoryFunction = _factoryFunction
+_CoreClassSpectrumDisplay._registerCoreClass(factoryFunction=_factoryFunction)

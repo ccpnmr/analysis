@@ -1,5 +1,5 @@
 """
-This file contains the Strip classes (1D and nD versions).
+This file contains the SpectrumView classes (1D and nD versions)
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -25,46 +25,57 @@ __date__ = "$Date: 2023-01-24 10:28:48 +0000 (Tue, January 24, 2023) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.ui._implementation.Strip import Strip as _CoreClassStrip
-from ccpn.ui.gui.lib.GuiStrip1d import GuiStrip1d as _GuiStrip1d
-from ccpn.ui.gui.lib.GuiStripNd import GuiStripNd as _GuiStripNd
+
+from ccpn.ui._implementation.SpectrumView import SpectrumView as _CoreClassSpectrumView
+from ccpn.ui.gui.lib.GuiSpectrumView1d import GuiSpectrumView1d as _GuiSpectrumView1d
+from ccpn.ui.gui.lib.GuiSpectrumViewNd import GuiSpectrumViewNd as _GuiSpectrumViewNd
 
 from ccpn.core.Project import Project
 from ccpn.util.Logging import getLogger
 
 
-class Strip1d(_CoreClassStrip, _GuiStrip1d):
-    """1D strip"""
+class SpectrumView1d(_CoreClassSpectrumView, _GuiSpectrumView1d):
+    """1D Spectrum View
+    """
 
-    def __init__(self, project: Project, wrappedData: 'ApiBoundStrip'):
+    def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
+        _CoreClassSpectrumView.__init__(self, project, wrappedData)
 
-        _CoreClassStrip.__init__(self, project, wrappedData)
+        # hack for now
+        self.application = project.application
 
-        getLogger().debug('Strip1d>> spectrumDisplay: %s' % self.spectrumDisplay)
-        _GuiStrip1d.__init__(self, self.spectrumDisplay)
+        getLogger().debug('SpectrumView1d>> %s' % self)
+        _GuiSpectrumView1d.__init__(self)
 
 
-class StripNd(_CoreClassStrip, _GuiStripNd):
-    """ND strip """
+class SpectrumViewNd(_CoreClassSpectrumView, _GuiSpectrumViewNd):
+    """nD Spectrum View
+    """
 
-    def __init__(self, project: Project, wrappedData: 'ApiBoundStrip'):
+    def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
 
-        _CoreClassStrip.__init__(self, project, wrappedData)
+        _CoreClassSpectrumView.__init__(self, project, wrappedData)
 
-        getLogger().debug('StripNd>> spectrumDisplay=%s' % self.spectrumDisplay)
-        _GuiStripNd.__init__(self, self.spectrumDisplay)
+        # hack for now
+        self.application = project.application
+
+        getLogger().debug('SpectrumViewNd>> self=%s strip=%s' % (self, self.strip))
+        _GuiSpectrumViewNd.__init__(self)
+
 
 #=========================================================================================
 # Registering
 #=========================================================================================
 
 def _factoryFunction(project: Project, wrappedData):
-    """create Strip, dispatching to subtype depending on wrappedData
+    """create SpectrumView, dispatching to subtype depending on wrappedData
     """
-    apiSpectrumDisplay = wrappedData.spectrumDisplay
-    if apiSpectrumDisplay.is1d:
-        return Strip1d(project, wrappedData)
+    if 'intensity' in wrappedData.strip.spectrumDisplay.axisCodes:
+        # 1D display
+        return SpectrumView1d(project, wrappedData)
     else:
-        return StripNd(project, wrappedData)
+        # ND display
+        return SpectrumViewNd(project, wrappedData)
 
-_CoreClassStrip._registerCoreClass(factoryFunction=_factoryFunction)
+
+_CoreClassSpectrumView._registerCoreClass(factoryFunction=_factoryFunction)

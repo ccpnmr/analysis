@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 14:54:56 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 18:02:20 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -73,18 +73,23 @@ class CoreModel(object):
     @classmethod
     def _getChildClasses(cls, recursion: bool = False) -> list:
         """
-        :param recursion: use recursion to also add child objects
+        :param recursion: use recursion to also add child-classes of cls
         :return: list of valid child classes of cls
 
         NB: Depth-first ordering
 
         CCPNINTERNAL: Notifier class
         """
-        result = []
-        for klass in cls._childClasses:
-            result.append(klass)
-            if recursion:
-                result = result.extend(klass._getChildClasses(recursion=recursion))
+        if not recursion:
+            result = cls._childClasses
+
+        else:
+            result = []
+            for klass in cls._childClasses:
+                result.append(klass)
+                if recursion:
+                    result = result.extend(klass._getChildClasses(recursion=recursion))
+
         return result
 
     @classmethod
@@ -98,3 +103,16 @@ class CoreModel(object):
             klass = klass._parentClass
         result.reverse()
         return result
+
+    @classmethod
+    def _printClassTree(cls, node=None, tabs=0):
+        """Simple Class-tree printing method
+         """
+        if node is None:
+            node = cls
+        s = '\t' * tabs + '%s' % (node.className)
+        if node._isGuiClass:
+            s += '  (GuiClass)'
+        print(s)
+        for child in node._childClasses:
+            cls._printClassTree(child, tabs=tabs + 1)

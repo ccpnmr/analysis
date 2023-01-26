@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 14:54:56 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 18:02:20 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -680,17 +680,17 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     # Abstract /Api methods
     #=========================================================================================
 
-    def _printClassTree(self, node=None, tabs=0):
-        """Simple Class-tree printing method
-         """
-        if node is None:
-            node = self
-        s = '\t' * tabs + '%s' % (node.className)
-        if node._isGuiClass:
-            s += '  (GuiClass)'
-        print(s)
-        for child in node._childClasses:
-            self._printClassTree(child, tabs=tabs + 1)
+    # def _printClassTree(self, node=None, tabs=0):
+    #     """Simple Class-tree printing method
+    #      """
+    #     if node is None:
+    #         node = self
+    #     s = '\t' * tabs + '%s' % (node.className)
+    #     if node._isGuiClass:
+    #         s += '  (GuiClass)'
+    #     print(s)
+    #     for child in node._childClasses:
+    #         self._printClassTree(child, tabs=tabs + 1)
 
     def _getAllDecendants(self) -> list:
         """Get all objects descending from self; i.e. children, grandchildren, etc

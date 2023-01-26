@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-25 22:24:05 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 11:55:27 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -387,6 +387,7 @@ class R2R1RatesCalculation(CalculationModel):
     References = '''
                 '''
     FullDescription = f'{Info}\n{Description}'
+    _disableFittingModels = True  # Don't apply any fitting models to this output frame
 
     @property
     def modelArgumentNames(self):
@@ -422,9 +423,6 @@ class R2R1RatesCalculation(CalculationModel):
         r2df = r2Data.groupby(sv.NMRRESIDUEPID).first().reset_index()
         r2df.set_index(sv.NMRRESIDUECODE, drop=False, inplace=True)
         r2df.sort_index(inplace=True)
-        ## Error = (E1/R1 + E2/R2) * R2/R1
-
-
 
         suffix1 = f'_{sv.R1}'
         suffix2 = f'_{sv.R2}'
@@ -438,19 +436,33 @@ class R2R1RatesCalculation(CalculationModel):
         er1 = merged[f'{sv.RATE_ERR}{suffix1}']
         er2 = merged[f'{sv.RATE_ERR}{suffix2}']
         ratesRatio = r2 / r1
+
+        ## Error calculated as = (E1/R1 + E2/R2) * R2/R1
         ratesErrorRatio = (er1 / r1 + er2 / r2) * r2 / r1
 
         # clean up suffixes
         merged.columns = merged.columns.str.rstrip(suffix1)
         columnsToDrop = [c for c in merged.columns if suffix2 in c]
         merged.drop(columns=columnsToDrop, inplace=True)
-        merged[sv.R2R1] = ratesRatio
-        merged[sv.R2R1_ERR] = ratesErrorRatio
-        merged[sv.SERIES_STEP_X] = None
-        merged[sv.SERIES_STEP_Y] = None
 
+        # keep these columns: MERGINGHEADERS, ROW_UID
+
+        # empty these columns:
+
+
+        # make the merged dataFrame the correct output type
         outputFrame = R2R1OutputFrame()
-        outputFrame[merged.columns] = merged.values
+        # add the new calculated values
+        outputFrame[sv.MERGINGHEADERS] = merged[sv.MERGINGHEADERS]
+        outputFrame[sv.R2R1] = ratesRatio
+        outputFrame[sv.R2R1_ERR] = ratesErrorRatio
+        outputFrame[sv._ROW_UID] = merged[sv._ROW_UID]
+        outputFrame[sv.PEAKPID] = merged[sv.PEAKPID]
+        outputFrame[sv.SERIES_STEP_X] = None
+        outputFrame[sv.SERIES_STEP_Y] = None
+        outputFrame[sv.CONSTANT_STATS_OUTPUT_TABLE_COLUMNS] = None
+        outputFrame[sv.SpectrumPropertiesHeaders] = None
+        outputFrame[sv.PeakPropertiesHeaders] = None
 
         return outputFrame
 

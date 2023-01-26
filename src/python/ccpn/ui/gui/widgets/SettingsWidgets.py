@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-25 22:24:05 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 11:55:28 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1686,7 +1686,6 @@ class _SeriesInputDataTableSelectionWidget(ObjectSelectionWidget):
             for obj in getattr(self.project, self.KLASS._pluralLinkName, []):
                 dataTable = obj
                 dataTypeStr = dataTable.metadata.get(sv.SERIESFRAMETYPE, None)
-                print(dataTypeStr,'dataTypeStr')
                 if dataTypeStr is not None:
                     allowedDTs.append(obj.pid)
         complete = ll + list(allowedDTs)

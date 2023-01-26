@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-25 22:24:05 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 11:55:28 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -340,7 +340,7 @@ class GuiInputDataPanel(GuiSettingPanel):
             (guiNameSpaces.WidgetVarName_FitInputData,
              {'label': guiNameSpaces.Label_FitInput,
               'tipText': guiNameSpaces.TipText_createOutputdataTableWidget,
-              'callBack': self._fitAndFecthOutputData,
+              'callBack': self._fitAndFetchOutputData,
               'type': compoundWidget.ButtonCompoundWidget,
               '_init': None,
               'kwds': {'labelText': guiNameSpaces.Label_FitInput,
@@ -437,7 +437,7 @@ class GuiInputDataPanel(GuiSettingPanel):
                 backend.addInputSpectrumGroup(obj)
                 getLogger().info(f'{self.guiModule.className}:{self.tabName}. {obj} added to InputSpectrumGroups')
 
-    def _fitAndFecthOutputData(self, *args):
+    def _fitAndFetchOutputData(self, *args):
         getLogger().info('Starting fit')
         backend = self.guiModule.backendHandler
         name = self.getSettingsAsDict().get(guiNameSpaces.WidgetVarName_OutPutDataTableName, sv.SERIESANALYSISOUTPUTDATA)

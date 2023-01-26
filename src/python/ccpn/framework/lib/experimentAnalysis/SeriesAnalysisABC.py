@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-25 22:24:05 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 11:55:27 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -161,9 +161,8 @@ class SeriesAnalysisABC(ABC):
             raise RuntimeError('Cannot run any fitting models. Add a valid inputData first')
 
         calculationFrame = self.currentCalculationModel.calculateValues(self.inputDataTables)
-        if self.currentCalculationModel.ModelName == sv.R2R1:
+        if self.currentCalculationModel._disableFittingModels:
             merged = calculationFrame
-            print(merged, merged.columns, 'TTTTT')
         else:
             # merge the frames on CollectionPid/id, Assignment, model-results/statistics and calculation
             # keep only minimal info and not duplicates to the fitting frame (except the collectionPid)

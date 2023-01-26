@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-25 22:24:05 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-26 11:55:27 +0000 (Thu, January 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -153,8 +153,14 @@ class FittingModelABC(ABC):
         data from a dataTable for models that require only one dataFrame as input"""
 
         if len(inputDataTables) == 0:
+            getLogger().warning(f'''No valid dataTable given as InputData. ''')
             return None
-        inputDataTable = inputDataTables[0]
+        if len(inputDataTables) == 1:
+            inputDataTable = inputDataTables[0]
+        else:
+            inputDataTable = inputDataTables[-1]
+            getLogger().warning(f'''Multiple dataTable given as InputData.  Using last added: {inputDataTable.pid}''')
+
         return inputDataTable.data
 
     @staticmethod
@@ -183,6 +189,8 @@ class CalculationModel(FittingModelABC):
     Description = 'Description'     ## A simplified representation of the used equation(s).
     MaTex       = r''               ## MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
     References  = 'References'      ## A list of journal article references that help to identify the employed calculation equations. E.g.: DOIs or title/authors/year/journal; web-pages.
+    _disableFittingModels = False  # If True, a fitting models are not applied to the resulting calculation mode. E.g. for R2/R1 Model
+
 
     @abstractmethod
     def calculateValues(self, inputDataTables) -> TableFrame:

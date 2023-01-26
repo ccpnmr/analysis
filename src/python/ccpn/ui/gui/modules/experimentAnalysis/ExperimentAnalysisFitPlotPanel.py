@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:44 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-01-26 11:55:27 +0000 (Thu, January 26, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -338,7 +338,10 @@ class FitPlotPanel(GuiPanel):
         self.labels = []
 
     def updatePanel(self, *args, **kwargs):
-        self.plotCurrentData()
+        try:
+            self.plotCurrentData()
+        except Exception as error:
+            getLogger().warning(f'Cannot plot fitted data. {error}')
 
     def plotCurrentData(self, *args):
         """ Plot a curve based on Current Collection.
@@ -372,7 +375,7 @@ class FitPlotPanel(GuiPanel):
         objs = [self.project.getByPid(pid) for pid in peakPids]
 
         ## Grab the Fitting Model, to recreate the fitted Curve from the fitting results.
-        modelNames = filteredDf[sv.MODEL_NAME].values
+        modelNames = filteredDf.get(sv.MODEL_NAME) or []
         if len(modelNames) > 0:
             modelName = modelNames[0]
         else:
@@ -383,6 +386,8 @@ class FitPlotPanel(GuiPanel):
         else:
             model = model()
 
+        if model.ModelName == sv.BLANKMODELNAME:
+            return
         ## Grab the columns to plot the raw data, the header name from the model
         Xs = filteredDf[model.xSeriesStepHeader].values
         Ys = filteredDf[model.ySeriesStepHeader].values
@@ -477,7 +482,7 @@ class FitPlotPanel(GuiPanel):
         pids = [co.pid for co in self.current.collections]
         filtered = df.getByHeader(sv.COLLECTIONPID, pids)
         if not filtered.empty:
-            self.plotCurrentData()
+            self.updatePanel()
 
     def plotCurve(self, xs, ys):
         self.clearData()

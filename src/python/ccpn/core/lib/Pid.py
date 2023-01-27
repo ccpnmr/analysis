@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-27 12:51:26 +0000 (Fri, January 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-27 13:11:18 +0000 (Fri, January 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,7 @@ remapSeparators = str.maketrans(IDSEP, altCharacter)
 unmapSeparators = str.maketrans(altCharacter, IDSEP)
 
 
-def createPid(head: str, *args: str) -> 'Pid':
+def createPid(head: str, *args: str) -> Pid:
     """make pid from head and list of successive keys.
     Head may be an existing pid, or a naked string
     Keys are converted to string, and illegal characters are converted to altCharacter

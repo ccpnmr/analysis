@@ -281,189 +281,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-#=========================================================================================
-# current list of getters for core objects - inserted by _linkWrapperClasses
-#     Chain.atoms
-#     Chain.getAtom
-#     Chain.getResidue
-#     Chain.residues
-#     ChemicalShiftList._oldChemicalShifts
-#     ChemicalShiftList.get_OldChemicalShift
-#     IntegralList.getIntegral
-#     IntegralList.integrals
-#     MultipletList.getMultiplet
-#     MultipletList.multiplets
-#     NmrChain.getNmrAtom
-#     NmrChain.getNmrResidue
-#     NmrChain.nmrAtoms
-#     NmrChain.nmrResidues
-#     NmrResidue.getNmrAtom
-#     NmrResidue.nmrAtoms
-#     PeakList.getPeak
-#     PeakList.peaks
-#     Project._oldChemicalShifts
-#     Project.atoms
-#     Project.axes
-#     Project.calculationSteps
-#     Project.chains
-#     Project.chemicalShiftLists
-#     Project.collections
-#     Project.complexes
-#     Project.data
-#     Project.dataTables
-#     Project.getAtom
-#     Project.getAxis
-#     Project.getCalculationStep
-#     Project.getChain
-#     Project.getChemicalShiftList
-#     Project.getCollection
-#     Project.getComplex
-#     Project.getData
-#     Project.getDataTable
-#     Project.getIntegral
-#     Project.getIntegralList
-#     Project.getIntegralListView
-#     Project.getMark
-#     Project.getModel
-#     Project.getMultiplet
-#     Project.getMultipletList
-#     Project.getMultipletListView
-#     Project.getNmrAtom
-#     Project.getNmrChain
-#     Project.getNmrResidue
-#     Project.getNote
-#     Project.getPeak
-#     Project.getPeakList
-#     Project.getPeakListView
-#     Project.getPseudoDimension
-#     Project.getResidue
-#     Project.getRestraint
-#     Project.getRestraintContribution
-#     Project.getRestraintTable
-#     Project.getSample
-#     Project.getSampleComponent
-#     Project.getSpectrum
-#     Project.getSpectrumDisplay
-#     Project.getSpectrumGroup
-#     Project.getSpectrumHit
-#     Project.getSpectrumReference
-#     Project.getSpectrumView
-#     Project.getStrip
-#     Project.getStructureData
-#     Project.getStructureEnsemble
-#     Project.getSubstance
-#     Project.getWindow
-#     Project.get_OldChemicalShift
-#     Project.integralListViews
-#     Project.integralLists
-#     Project.integrals
-#     Project.marks
-#     Project.models
-#     Project.multipletListViews
-#     Project.multipletLists
-#     Project.multiplets
-#     Project.nmrAtoms
-#     Project.nmrChains
-#     Project.nmrResidues
-#     Project.notes
-#     Project.peakListViews
-#     Project.peakLists
-#     Project.peaks
-#     Project.pseudoDimensions
-#     Project.residues
-#     Project.restraintContributions
-#     Project.restraintTables
-#     Project.restraints
-#     Project.sampleComponents
-#     Project.samples
-#     Project.spectra
-#     Project.spectrumDisplays
-#     Project.spectrumGroups
-#     Project.spectrumHits
-#     Project.spectrumReferences
-#     Project.spectrumViews
-#     Project.strips
-#     Project.structureData
-#     Project.structureEnsembles
-#     Project.substances
-#     Project.violationTables
-#     Project.windows
-#     Residue.atoms
-#     Residue.getAtom
-#     Restraint.getRestraintContribution
-#     Restraint.restraintContributions
-#     RestraintTable.getRestraint
-#     RestraintTable.getRestraintContribution
-#     RestraintTable.restraintContributions
-#     RestraintTable.restraints
-#     Sample.getSampleComponent
-#     Sample.sampleComponents
-#     Spectrum.getIntegral
-#     Spectrum.getIntegralList
-#     Spectrum.getMultiplet
-#     Spectrum.getMultipletList
-#     Spectrum.getPeak
-#     Spectrum.getPeakList
-#     Spectrum.getPseudoDimension
-#     Spectrum.getSpectrumHit
-#     Spectrum.getSpectrumReference
-#     Spectrum.integralLists
-#     Spectrum.integrals
-#     Spectrum.multipletLists
-#     Spectrum.multiplets
-#     Spectrum.peakLists
-#     Spectrum.peaks
-#     Spectrum.pseudoDimensions
-#     Spectrum.spectrumHits
-#     Spectrum.spectrumReferences
-#     SpectrumDisplay.axes
-#     SpectrumDisplay.getAxis
-#     SpectrumDisplay.getIntegralListView
-#     SpectrumDisplay.getMultipletListView
-#     SpectrumDisplay.getPeakListView
-#     SpectrumDisplay.getSpectrumView
-#     SpectrumDisplay.getStrip
-#     SpectrumDisplay.integralListViews
-#     SpectrumDisplay.multipletListViews
-#     SpectrumDisplay.peakListViews
-#     SpectrumDisplay.spectrumViews
-#     SpectrumDisplay.strips
-#     SpectrumView.getIntegralListView
-#     SpectrumView.getMultipletListView
-#     SpectrumView.getPeakListView
-#     SpectrumView.integralListViews
-#     SpectrumView.multipletListViews
-#     SpectrumView.peakListViews
-#     Strip.axes
-#     Strip.getAxis
-#     Strip.getIntegralListView
-#     Strip.getMultipletListView
-#     Strip.getPeakListView
-#     Strip.getSpectrumView
-#     Strip.integralListViews
-#     Strip.multipletListViews
-#     Strip.peakListViews
-#     Strip.spectrumViews
-#     StructureData.calculationSteps
-#     StructureData.data
-#     StructureData.getCalculationStep
-#     StructureData.getData
-#     StructureData.getRestraint
-#     StructureData.getRestraintContribution
-#     StructureData.getRestraintTable
-#     StructureData.getViolationTable
-#     StructureData.restraintContributions
-#     StructureData.restraintTables
-#     StructureData.restraints
-#     StructureData.violationTables
-#     StructureEnsemble.getModel
-#     StructureEnsemble.models
-#=========================================================================================
-
-import importlib
-import collections
-
-
 # Import classes and set to this module
 # All classes must be imported in correct order for subsequent code
 # to work
@@ -508,28 +325,6 @@ _coreImportOrder = (
         'Note',
         '_PeakCluster',
     )
-
-# # This list includes ui classes (added below)
-# _importOrder = list(_coreImportOrder)
-
-# # {className:class, shortClassName:class} dictionary in import order for all wrapper classes
-# _coreClassMap = collections.OrderedDict()
-
-# # Main data classes
-# for className in _coreImportOrder:
-#     try:
-#         impModule = importlib.import_module(f'ccpn.core.{className}')
-#     except Exception:
-#         # _OldChemicalShift and _PeakCluster have been moved to _implementation
-#         impModule = importlib.import_module(f'ccpn.core._implementation.{className}')
-#     cls = getattr(impModule, className)
-#     parentClass = cls._parentClass
-#     if parentClass is not None and cls not in parentClass._childClasses:
-#         # Should not be necessary to check, but apparently this code can be executed twice
-#         parentClass._childClasses.append(cls)
-#     _coreClassMap[cls.className] = cls
-#     _coreClassMap[cls.shortClassName] = cls
-
 
 # Register the classes
 from ccpn.core.Project import Project
@@ -645,8 +440,17 @@ Note._registerCoreClass()
 
 
 # GUI classes
-# _uiImportOrder = ('Window', 'Mark', 'SpectrumDisplay', 'Strip',
-#                   'Axis', 'SpectrumView', 'PeakListView', 'MultipletListView', 'IntegralListView')
+_uiImportOrder = (
+    'Window',
+    'SpectrumDisplay',
+        'Strip',
+            'Axis',
+            'SpectrumView',
+                'PeakListView',
+                'MultipletListView',
+                'IntegralListView'
+    'Mark',
+)
 
 import ccpn.ui.gui.MainWindow
 import ccpn.ui._implementation.Mark
@@ -660,4 +464,185 @@ import ccpn.ui.gui.lib.IntegralListView
 
 _allGetters = []
 Project._linkWrapperClasses(_allGetters=_allGetters)
+
 # print('\n    '.join(sorted(_allGetters)))
+
+#=========================================================================================
+# current list of getters for core objects - inserted by _linkWrapperClasses
+#     Chain.atoms
+#     Chain.getAtom
+#     Chain.getResidue
+#     Chain.residues
+#     ChemicalShiftList._oldChemicalShifts
+#     ChemicalShiftList.get_OldChemicalShift
+#     IntegralList.getIntegral
+#     IntegralList.integrals
+#     MultipletList.getMultiplet
+#     MultipletList.multiplets
+#     NmrChain.getNmrAtom
+#     NmrChain.getNmrResidue
+#     NmrChain.nmrAtoms
+#     NmrChain.nmrResidues
+#     NmrResidue.getNmrAtom
+#     NmrResidue.nmrAtoms
+#     PeakList.getPeak
+#     PeakList.peaks
+#     Project._oldChemicalShifts
+#     Project._peakClusters
+#     Project.atoms
+#     Project.axes
+#     Project.calculationSteps
+#     Project.chains
+#     Project.chemicalShiftLists
+#     Project.complexes
+#     Project.data
+#     Project.dataTables
+#     Project.getAtom
+#     Project.getAxis
+#     Project.getCalculationStep
+#     Project.getChain
+#     Project.getChemicalShiftList
+#     Project.getComplex
+#     Project.getData
+#     Project.getDataTable
+#     Project.getIntegral
+#     Project.getIntegralList
+#     Project.getIntegralListView
+#     Project.getMark
+#     Project.getModel
+#     Project.getMultiplet
+#     Project.getMultipletList
+#     Project.getMultipletListView
+#     Project.getNmrAtom
+#     Project.getNmrChain
+#     Project.getNmrResidue
+#     Project.getNote
+#     Project.getPeak
+#     Project.getPeakList
+#     Project.getPeakListView
+#     Project.getPseudoDimension
+#     Project.getResidue
+#     Project.getRestraint
+#     Project.getRestraintContribution
+#     Project.getRestraintTable
+#     Project.getSample
+#     Project.getSampleComponent
+#     Project.getSpectrum
+#     Project.getSpectrumDisplay
+#     Project.getSpectrumGroup
+#     Project.getSpectrumHit
+#     Project.getSpectrumReference
+#     Project.getSpectrumView
+#     Project.getStrip
+#     Project.getStructureData
+#     Project.getStructureEnsemble
+#     Project.getSubstance
+#     Project.getViolationTable
+#     Project.getWindow
+#     Project.get_OldChemicalShift
+#     Project.get_PeakCluster
+#     Project.integralListViews
+#     Project.integralLists
+#     Project.integrals
+#     Project.marks
+#     Project.models
+#     Project.multipletListViews
+#     Project.multipletLists
+#     Project.multiplets
+#     Project.nmrAtoms
+#     Project.nmrChains
+#     Project.nmrResidues
+#     Project.notes
+#     Project.peakListViews
+#     Project.peakLists
+#     Project.peaks
+#     Project.pseudoDimensions
+#     Project.residues
+#     Project.restraintContributions
+#     Project.restraintTables
+#     Project.restraints
+#     Project.sampleComponents
+#     Project.samples
+#     Project.spectra
+#     Project.spectrumDisplays
+#     Project.spectrumGroups
+#     Project.spectrumHits
+#     Project.spectrumReferences
+#     Project.spectrumViews
+#     Project.strips
+#     Project.structureData
+#     Project.structureEnsembles
+#     Project.substances
+#     Project.violationTables
+#     Project.windows
+#     Residue.atoms
+#     Residue.getAtom
+#     Restraint.getRestraintContribution
+#     Restraint.restraintContributions
+#     RestraintTable.getRestraint
+#     RestraintTable.getRestraintContribution
+#     RestraintTable.restraintContributions
+#     RestraintTable.restraints
+#     Sample.getSampleComponent
+#     Sample.sampleComponents
+#     Spectrum.getIntegral
+#     Spectrum.getIntegralList
+#     Spectrum.getMultiplet
+#     Spectrum.getMultipletList
+#     Spectrum.getPeak
+#     Spectrum.getPeakList
+#     Spectrum.getPseudoDimension
+#     Spectrum.getSpectrumHit
+#     Spectrum.getSpectrumReference
+#     Spectrum.integralLists
+#     Spectrum.integrals
+#     Spectrum.multipletLists
+#     Spectrum.multiplets
+#     Spectrum.peakLists
+#     Spectrum.peaks
+#     Spectrum.pseudoDimensions
+#     Spectrum.spectrumHits
+#     Spectrum.spectrumReferences
+#     SpectrumDisplay.axes
+#     SpectrumDisplay.getAxis
+#     SpectrumDisplay.getIntegralListView
+#     SpectrumDisplay.getMultipletListView
+#     SpectrumDisplay.getPeakListView
+#     SpectrumDisplay.getSpectrumView
+#     SpectrumDisplay.getStrip
+#     SpectrumDisplay.integralListViews
+#     SpectrumDisplay.multipletListViews
+#     SpectrumDisplay.peakListViews
+#     SpectrumDisplay.spectrumViews
+#     SpectrumDisplay.strips
+#     SpectrumView.getIntegralListView
+#     SpectrumView.getMultipletListView
+#     SpectrumView.getPeakListView
+#     SpectrumView.integralListViews
+#     SpectrumView.multipletListViews
+#     SpectrumView.peakListViews
+#     Strip.axes
+#     Strip.getAxis
+#     Strip.getIntegralListView
+#     Strip.getMultipletListView
+#     Strip.getPeakListView
+#     Strip.getSpectrumView
+#     Strip.integralListViews
+#     Strip.multipletListViews
+#     Strip.peakListViews
+#     Strip.spectrumViews
+#     StructureData.calculationSteps
+#     StructureData.data
+#     StructureData.getCalculationStep
+#     StructureData.getData
+#     StructureData.getRestraint
+#     StructureData.getRestraintContribution
+#     StructureData.getRestraintTable
+#     StructureData.getViolationTable
+#     StructureData.restraintContributions
+#     StructureData.restraintTables
+#     StructureData.restraints
+#     StructureData.violationTables
+#     StructureEnsemble.getModel
+#     StructureEnsemble.models
+#=========================================================================================

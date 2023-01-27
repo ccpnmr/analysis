@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 21:30:31 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-27 11:07:01 +0000 (Fri, January 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,7 @@ class CoreModel(object):
     className = None
 
     # Name of the parent class; used to make model linkages
-    _parentClassName = None
+    _parentClass = None
 
     # List of child classes. Will be filled by child-classes registering.
     _childClasses = []
@@ -46,17 +46,26 @@ class CoreModel(object):
     # the dict of (className, class) and (shortClassName, class) pairs
     _coreClassDict = {}
 
+    _isRegistered = False
+
+    def __init__(self):
+        # if not self._isRegistered:
+        #     raise RuntimeError(f'{self.className}: not registered')
+        pass
 
     @classmethod
     def _registerCoreClass(cls, factoryFunction=None):
         """Registers class; defines the model-linkages
-        optionally sets _factoryFunction attribute
+        sets _factoryFunction attribute (defaults to None)
         """
         if cls.className is None:
             raise RuntimeError(f'{cls.__name__}: className class-attribute is undefined')
 
         if cls.shortClassName is None:
-            raise RuntimeError(f'{cls.__name__}: className class-attribute is undefined')
+            raise RuntimeError(f'{cls.__name__}: shortClassName class-attribute is undefined')
+
+        if cls._parentClass is None and cls.className != 'Project':
+            raise RuntimeError(f'{cls.__name__}: _parentClass class-attribute is undefined')
 
         cls._coreClassDict[cls.className] = cls
         cls._coreClassDict[cls.shortClassName] = cls
@@ -65,19 +74,15 @@ class CoreModel(object):
 
         cls._factoryFunction = factoryFunction
 
+        cls._isRegistered = True
+
     @classmethod
     def _linkCoreClass(cls):
         """Defines the model-linkages for cls
         """
-        # if cls._parentClassName is not None:
-        #     if (parentKlass := cls._coreClassDict.get(cls._parentClassName)) is None:
-        #         raise RuntimeError(f'{cls.__name__}: cannot get class for "{cls._parentClassName}"')
-        #     # Just for the transition period
-        #     if cls not in parentKlass._childClasses:
-        #         parentKlass._childClasses.append(cls)
         if cls._parentClass is not None:
             parentKlass = cls._parentClass
-            # Just for the transition period
+            # Just to be save
             if cls not in parentKlass._childClasses:
                 parentKlass._childClasses.append(cls)
 
@@ -124,8 +129,8 @@ class CoreModel(object):
         s = '\t' * tabs + '%s' % (node.className)
         if node._isGuiClass:
             s += '  (GuiClass)'
-        if node.className in cls._coreClassDict:
-            s += '    --> (done)'
+        if hasattr(node, '_isRegistered') and node._isRegistered:
+            s += '    --> (registered)'
         print(s)
         for child in node._childClasses:
             cls._printClassTree(child, tabs=tabs + 1)

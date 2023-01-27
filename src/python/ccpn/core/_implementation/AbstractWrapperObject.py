@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 21:30:31 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-27 11:07:01 +0000 (Fri, January 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -174,6 +174,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         # NB wrappedData must be globally unique. CCPN objects all are,
         # but for non-CCPN objects this must be ensured.
 
+        CoreModel.__init__(self)
         NotifierBase.__init__(self)
 
         # Check if object is already wrapped

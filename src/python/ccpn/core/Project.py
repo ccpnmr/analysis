@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 14:54:56 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-27 11:07:01 +0000 (Fri, January 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -2225,7 +2225,6 @@ class Project(AbstractWrapperObject):
             return f"<PR:{self.name}>"
 
 #End class Project
-Project._registerCoreClass()
 
 #=========================================================================================
 # Code adapted from prior _implementation/Io.py

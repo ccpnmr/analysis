@@ -13,7 +13,7 @@ Examples of import usage:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -23,9 +23,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:03 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-27 11:07:01 +0000 (Fri, January 27, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,7 +42,6 @@ __date__ = "$Date: 2021-06-23 18:02:28 +0100 (Wed, June 23, 2021) $"
 
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
-from ccpn.core.SpectrumReference import SpectrumReference
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
@@ -57,6 +56,7 @@ from ccpn.core.Residue import Residue
 from ccpn.core.Atom import Atom
 from ccpn.core.Complex import Complex
 from ccpn.core.NmrChain import NmrChain
+from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.ChemicalShift import ChemicalShift
@@ -64,6 +64,7 @@ from ccpn.core.StructureData import StructureData
 from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.Restraint import Restraint
 from ccpn.core.RestraintContribution import RestraintContribution
+from ccpn.core.ViolationTable import ViolationTable
 from ccpn.core.CalculationStep import CalculationStep
 from ccpn.core.Data import Data
 from ccpn.core.DataTable import DataTable

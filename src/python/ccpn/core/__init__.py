@@ -472,14 +472,44 @@ import collections
 # NB this list will be added to from other modules that also add to _coreClassMap
 # in practice ccpn.ui.gui.Gui
 _coreImportOrder = (
-    'Project', 'Spectrum', 'SpectrumReference', 'SpectrumGroup', 'PeakList', 'Peak',
-    'IntegralList', 'Integral', 'PseudoDimension', 'SpectrumHit', 'Sample', 'SampleComponent',
-    'Substance', 'Chain', 'Residue', 'Atom', 'Complex', 'NmrChain', 'NmrResidue', 'NmrAtom',
-    'ChemicalShiftList', '_OldChemicalShift',
-    'StructureData', 'RestraintTable', 'Restraint',
-    'RestraintContribution', 'CalculationStep', 'Data', 'StructureEnsemble', 'Model', 'Note',
-    '_PeakCluster', 'MultipletList', 'Multiplet', 'DataTable', 'ViolationTable',
-    'ChemicalShift', 'Collection'
+    'Project',
+        'Spectrum',
+            'SpectrumReference',
+            'PseudoDimension',
+            'PeakList',
+                'Peak',
+            'IntegralList',
+                'Integral',
+            'MultipletList',
+                'Multiplet',
+            'SpectrumHit',
+        'SpectrumGroup',
+        'Sample',
+            'SampleComponent',
+        'Substance',
+        'Chain',
+            'Residue',
+                'Atom',
+        'Complex',
+        'NmrChain',
+            'NmrResidue',
+                'NmrAtom',
+        'ChemicalShiftList',
+            '_OldChemicalShift',
+            'ChemicalShift',
+        'StructureData',
+            'RestraintTable',
+                'Restraint',
+                    'RestraintContribution',
+            'ViolationTable',
+            'CalculationStep',
+            'Data',
+        'StructureEnsemble',
+            'Model',
+        'DataTable',
+        'Collection',
+        'Note',
+        '_PeakCluster',
     )
 
 # This list includes ui classes (added below)
@@ -504,6 +534,118 @@ for className in _coreImportOrder:
     _coreClassMap[cls.shortClassName] = cls
 
 
+# Register the classes
+from ccpn.core.Project import Project
+Project._registerCoreClass()
+
+from ccpn.core.Spectrum import Spectrum
+Spectrum._registerCoreClass()
+
+from ccpn.core.SpectrumReference import SpectrumReference
+SpectrumReference._registerCoreClass()
+
+from ccpn.core.PseudoDimension import PseudoDimension
+PseudoDimension._registerCoreClass()
+
+from ccpn.core.PeakList import PeakList
+PeakList._registerCoreClass()
+
+from ccpn.core.Peak import Peak
+Peak._registerCoreClass()
+
+from ccpn.core.IntegralList import IntegralList
+IntegralList._registerCoreClass()
+
+from ccpn.core.Integral import Integral
+Integral._registerCoreClass()
+
+from ccpn.core.MultipletList import MultipletList
+MultipletList._registerCoreClass()
+
+from ccpn.core.Multiplet import Multiplet
+Multiplet._registerCoreClass()
+
+from ccpn.core.SpectrumHit import SpectrumHit
+SpectrumHit._registerCoreClass()
+
+from ccpn.core.SpectrumGroup import SpectrumGroup
+SpectrumGroup._registerCoreClass()
+
+from ccpn.core.Sample import Sample
+Sample._registerCoreClass()
+
+from ccpn.core.SampleComponent import SampleComponent
+SampleComponent._registerCoreClass()
+
+from ccpn.core.Substance import Substance
+Substance._registerCoreClass()
+
+from ccpn.core.Chain import Chain
+Chain._registerCoreClass()
+
+from ccpn.core.Residue import Residue
+Residue._registerCoreClass()
+
+from ccpn.core.Atom import Atom
+Atom._registerCoreClass()
+
+from ccpn.core.Complex import Complex
+Complex._registerCoreClass()
+
+from ccpn.core.NmrChain import NmrChain
+NmrChain._registerCoreClass()
+
+from ccpn.core.NmrResidue import NmrResidue
+NmrResidue._registerCoreClass()
+
+from ccpn.core.NmrAtom import NmrAtom
+NmrAtom._registerCoreClass()
+
+from ccpn.core.ChemicalShiftList import ChemicalShiftList
+ChemicalShiftList._registerCoreClass()
+
+from ccpn.core._implementation._OldChemicalShift import _OldChemicalShift
+_OldChemicalShift._registerCoreClass()
+
+from ccpn.core.ChemicalShift import ChemicalShift
+
+from ccpn.core.StructureData import StructureData
+StructureData._registerCoreClass()
+
+from ccpn.core.RestraintTable import RestraintTable
+RestraintTable._registerCoreClass()
+
+from ccpn.core.Restraint import Restraint
+Restraint._registerCoreClass()
+
+from ccpn.core.RestraintContribution import RestraintContribution
+RestraintContribution._registerCoreClass()
+
+from ccpn.core.ViolationTable import ViolationTable
+ViolationTable._registerCoreClass()
+
+from ccpn.core.CalculationStep import CalculationStep
+CalculationStep._registerCoreClass()
+
+from ccpn.core.Data import Data
+Data._registerCoreClass()
+
+from ccpn.core.DataTable import DataTable
+DataTable._registerCoreClass()
+
+from ccpn.core.StructureEnsemble import StructureEnsemble
+StructureEnsemble._registerCoreClass()
+
+from ccpn.core.Model import Model
+Model._registerCoreClass()
+
+from ccpn.core.Collection import Collection
+
+from ccpn.core.Note import Note
+Note._registerCoreClass()
+
+
+# GUI classes
 # _uiImportOrder = ('Window', 'Mark', 'SpectrumDisplay', 'Strip',
 #                   'Axis', 'SpectrumView', 'PeakListView', 'MultipletListView', 'IntegralListView')
 
@@ -518,5 +660,5 @@ import ccpn.ui.gui.lib.MultipletListView
 import ccpn.ui.gui.lib.IntegralListView
 
 _allGetters = []
-_coreClassMap['Project']._linkWrapperClasses(_allGetters=_allGetters)
+Project._linkWrapperClasses(_allGetters=_allGetters)
 # print('\n    '.join(sorted(_allGetters)))

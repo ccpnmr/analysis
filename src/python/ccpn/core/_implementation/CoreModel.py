@@ -2,6 +2,8 @@
 This file contains the methods and data to initialise and maintain
 the model-related aspects of the V3 core object
 """
+from __future__ import annotations  # pycharm still highlights as errors
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -16,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-27 11:07:01 +0000 (Fri, January 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-27 12:51:26 +0000 (Fri, January 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -43,9 +45,11 @@ class CoreModel(object):
     # List of child classes. Will be filled by child-classes registering.
     _childClasses = []
 
-    # the dict of (className, class) and (shortClassName, class) pairs
+    # the dict of (className, class) pairs
     _coreClassDict = {}
 
+    # the dict of (shortClassName, class) pairs
+    _coreClassShortNameDict = {}
     _isRegistered = False
 
     def __init__(self):
@@ -68,7 +72,7 @@ class CoreModel(object):
             raise RuntimeError(f'{cls.__name__}: _parentClass class-attribute is undefined')
 
         cls._coreClassDict[cls.className] = cls
-        cls._coreClassDict[cls.shortClassName] = cls
+        cls._coreClassShortNameDict[cls.shortClassName] = cls
 
         cls._linkCoreClass()
 
@@ -119,6 +123,19 @@ class CoreModel(object):
             klass = klass._parentClass
         result.reverse()
         return result
+
+    @classmethod
+    def _getClassIndex(cls, className:str) -> int:
+        """:return an ordering index for the className; used for "uniqueId" stuff
+        """
+        _classList = list(cls._coreClassDict.keys())
+        return _classList.index(className)
+
+    @classmethod
+    def _getClass(cls, className:str) -> (CoreModel, None):
+        """:return coreClass corresponding to className (either long or short versions)
+        """
+        return cls._coreClassDict.get(className) or cls._coreClassShortNameDict.get(className)
 
     @classmethod
     def _printClassTree(cls, node=None, tabs=0):

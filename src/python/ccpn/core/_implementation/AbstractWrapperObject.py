@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-27 11:07:01 +0000 (Fri, January 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-27 12:51:25 +0000 (Fri, January 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,6 @@ from copy import deepcopy
 import pandas as pd
 from decorator import decorator
 
-from ccpn.core import _importOrder
 import ccpn.core._implementation.resetSerial
 from ccpn.core._implementation.CoreModel import CoreModel
 from ccpn.core._implementation.Updater import Updater, \

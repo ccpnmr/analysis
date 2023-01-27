@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-25 16:45:03 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-27 12:51:26 +0000 (Fri, January 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,6 @@ import collections
 import inspect
 from typing import Optional
 from ccpn.core.lib import Pid
-from ccpn.core import _coreClassMap
 
 
 # def pid2PluralName(pid: str) -> str:
@@ -45,23 +44,23 @@ from ccpn.core import _coreClassMap
 #     else:
 #         return cls._pluralLinkName
 
-
-def getParentPid(childPid) -> Pid.Pid:
-    """Get the pid of parent of childPid; only uses Pid definitions (i.e. does not involve the actual objects)
-    :returns Pid instance defining parent
-    """
-    if not isinstance(childPid, (str, Pid.Pid)):
-        raise ValueError('Invalid pid "%s"' % childPid)
-    childPid = Pid.Pid(childPid)
-    if childPid.type not in _coreClassMap:
-        raise ValueError('Invalid pid "%s"' % childPid)
-
-    klass = _coreClassMap[childPid.type]
-    parentClass = klass._parentClass
-    offset = klass._numberOfIdFields
-    fields = [parentClass.shortClassName] + list(childPid.fields[:-offset])
-    parentPid = Pid.Pid.new(*fields)
-    return parentPid
+#GWV 27Jan2023: now a method of Pid class
+# def getParentPid(childPid) -> Pid.Pid:
+#     """Get the pid of parent of childPid; only uses Pid definitions (i.e. does not involve the actual objects)
+#     :returns Pid instance defining parent
+#     """
+#     if not isinstance(childPid, (str, Pid.Pid)):
+#         raise ValueError('Invalid pid "%s"' % childPid)
+#     childPid = Pid.Pid(childPid)
+#     if childPid.type not in _coreClassMap:
+#         raise ValueError('Invalid pid "%s"' % childPid)
+#
+#     klass = _coreClassMap[childPid.type]
+#     parentClass = klass._parentClass
+#     offset = klass._numberOfIdFields
+#     fields = [parentClass.shortClassName] + list(childPid.fields[:-offset])
+#     parentPid = Pid.Pid.new(*fields)
+#     return parentPid
 
 
 def getParentObjectFromPid(project, pid):
@@ -79,15 +78,17 @@ def getParentObjectFromPid(project, pid):
     obj = None
     # First try if the object defined by pid still exists
     try:
-        obj = project.getByPid(pid)
-        if obj is not None:
+        if (obj := project.getByPid(pid)) is not None:
             return obj._parent
     except:
         pass
 
     if obj is None:
-        parentPid = getParentPid(pid)
+        # Assure pid to be a Pid object
+        pid = Pid.Pid(pid)
+        parentPid = pid.getParentPid()
         obj = project.getByPid(parentPid)
+
     return obj
 
 

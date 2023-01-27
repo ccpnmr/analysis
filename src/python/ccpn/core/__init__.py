@@ -466,11 +466,8 @@ import collections
 
 # Import classes and set to this module
 # All classes must be imported in correct order for subsequent code
-# to work, as connections between classes are set when child class is imported
-# _wrappedClassNames gives import order
-#
-# NB this list will be added to from other modules that also add to _coreClassMap
-# in practice ccpn.ui.gui.Gui
+# to work
+
 _coreImportOrder = (
     'Project',
         'Spectrum',
@@ -512,26 +509,26 @@ _coreImportOrder = (
         '_PeakCluster',
     )
 
-# This list includes ui classes (added below)
-_importOrder = list(_coreImportOrder)
+# # This list includes ui classes (added below)
+# _importOrder = list(_coreImportOrder)
 
-# {className:class, shortClassName:class} dictionary in import order for all wrapper classes
-_coreClassMap = collections.OrderedDict()
+# # {className:class, shortClassName:class} dictionary in import order for all wrapper classes
+# _coreClassMap = collections.OrderedDict()
 
-# Main data classes
-for className in _coreImportOrder:
-    try:
-        impModule = importlib.import_module(f'ccpn.core.{className}')
-    except Exception:
-        # _OldChemicalShift and _PeakCluster have been moved to _implementation
-        impModule = importlib.import_module(f'ccpn.core._implementation.{className}')
-    cls = getattr(impModule, className)
-    parentClass = cls._parentClass
-    if parentClass is not None and cls not in parentClass._childClasses:
-        # Should not be necessary to check, but apparently this code can be executed twice
-        parentClass._childClasses.append(cls)
-    _coreClassMap[cls.className] = cls
-    _coreClassMap[cls.shortClassName] = cls
+# # Main data classes
+# for className in _coreImportOrder:
+#     try:
+#         impModule = importlib.import_module(f'ccpn.core.{className}')
+#     except Exception:
+#         # _OldChemicalShift and _PeakCluster have been moved to _implementation
+#         impModule = importlib.import_module(f'ccpn.core._implementation.{className}')
+#     cls = getattr(impModule, className)
+#     parentClass = cls._parentClass
+#     if parentClass is not None and cls not in parentClass._childClasses:
+#         # Should not be necessary to check, but apparently this code can be executed twice
+#         parentClass._childClasses.append(cls)
+#     _coreClassMap[cls.className] = cls
+#     _coreClassMap[cls.shortClassName] = cls
 
 
 # Register the classes
@@ -608,6 +605,7 @@ from ccpn.core._implementation._OldChemicalShift import _OldChemicalShift
 _OldChemicalShift._registerCoreClass()
 
 from ccpn.core.ChemicalShift import ChemicalShift
+ChemicalShift._registerCoreClass()
 
 from ccpn.core.StructureData import StructureData
 StructureData._registerCoreClass()
@@ -640,6 +638,7 @@ from ccpn.core.Model import Model
 Model._registerCoreClass()
 
 from ccpn.core.Collection import Collection
+Collection._registerCoreClass()
 
 from ccpn.core.Note import Note
 Note._registerCoreClass()

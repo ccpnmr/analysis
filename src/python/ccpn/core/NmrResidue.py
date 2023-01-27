@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-24 13:15:55 +0000 (Tue, January 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-27 12:51:25 +0000 (Fri, January 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,6 @@ from ccpn.core._implementation.AbsorbResonance import absorbResonance
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
-from ccpn.core import _importOrder
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, \
     renameObject, undoBlock, deleteObject
@@ -159,7 +158,8 @@ class NmrResidue(AbstractWrapperObject):
          we need to set it dynamically, as a property"""
 
         sortKey = self.nmrChain._ccpnSortKey[2:] + self._localCcpnSortKey
-        result = (id(self._project), _importOrder.index(self.className)) + sortKey
+        idx = self._getClassIndex(self.className)
+        result = (id(self._project), idx) + sortKey
         #
         return result
 

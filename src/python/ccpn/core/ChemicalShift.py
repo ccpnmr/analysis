@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:42 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-01-27 12:51:25 +0000 (Fri, January 27, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,7 +31,6 @@ from typing import Optional, Union
 from collections import namedtuple
 import pandas as pd
 
-from ccpn.core import _importOrder
 from ccpn.core.Project import Project
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
@@ -471,10 +470,9 @@ class ChemicalShift(V3CoreObjectABC):
         """Reset the uniqueId
         CCPN Internal - although not sure whether actually required here
         """
-        # if self._wrapperList._searchChemicalShifts(uniqueId=value):
-        #     raise ValueError(f'{self.className}._resetUniqueId: uniqueId {value} already exists')
         self._uniqueId = int(value)
-        self._ccpnSortKey = (id(self.project), _importOrder.index(self._oldClassName), self._uniqueId)
+        idx = self._getClassIndex(self._oldClassName)
+        self._ccpnSortKey = (id(self.project), idx, self._uniqueId)
 
     def delete(self):
         """Delete the shift

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-29 12:33:54 +0000 (Sun, January 29, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-29 12:59:45 +0000 (Sun, January 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1248,7 +1248,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         """get all descendants of type decendantClasses[-1] of self,
         following descendantClasses down the data tree.
 
-        E.g. if called on a chain with descendantClass == [Residue,Atom] the function returns
+        E.g. if called on a chain with descendantClasses == [Residue,Atom] the function returns
         a list of all Atoms in a Chain
 
         NB: the returned list of NmrResidues is sorted; if not: breaks the programme
@@ -1259,32 +1259,42 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             # we should never be here
             raise RuntimeError('Error getting all descendants from %s; decendants tree is empty' % self)
 
+        # get and check the children of type of first decendantClasses
+        if descendantClasses[0] not in self._childClasses:
+            raise RuntimeError('Invalid descendantClass %s for %s' % (descendantClasses[0], self))
+        className = descendantClasses[0].className
+        # Passing the 'classes' argument limits the dict to className only (for speed)
+        children = self._getChildren(classes=[className])[className]
+        # NB: the returned list of NmrResidues is sorted; if not: breaks the programme
+        if descendantClasses[0].className == NmrResidue.className:
+            children.sort()
+
+        objs = []
         if len(descendantClasses) == 1:
+            # we are at the end of the recursion tree;
+            # The objects are the children of type descendantClass[0] of self
 
             # Debugging
             # if descendantClasses[0].className in 'SpectrumView Strip'.split():
             #     ii=0
 
-            # we are at the end of the recursion tree; return the children of type descendantClass[0] of self
-            if descendantClasses[0] not in self._childClasses:
-                raise RuntimeError('Invalid descendantClass %s for %s' % (descendantClasses[0], self))
-            className = descendantClasses[0].className
-            # Passing the 'classes' argument limits the dict to className only (for speed)
-            objs = self._getChildren(classes=[className])[className]
-            # NB: the returned list of NmrResidues is sorted; if not: breaks the programme
-            if descendantClasses[0].className == NmrResidue.className:
-                objs.sort()
-            # print('_allDescendants for %-30s of class %-20r: %s' % \
-            #       (self, descendantClasses[0].__name__, objs))
-            return objs
+            objs = children
 
-        # we are not at the end; traverse down the tree
-        objs = []
-        className = descendantClasses[0].className
-        # Passing the 'classes' argument limits the dict to className only (for speed)
-        for obj in self._getChildren(classes=className)[className]:
-            children = AbstractWrapperObject._allDescendants(obj, descendantClasses=descendantClasses[1:])
-            objs.extend(children)
+        else:
+            # we are not at the end; traverse down the tree for each child
+
+            # objs = []
+            # className = descendantClasses[0].className
+            # # Passing the 'classes' argument limits the dict to className only (for speed)
+            # for obj in self._getChildren(classes=className)[className]:
+            #     children = AbstractWrapperObject._allDescendants(obj, descendantClasses=descendantClasses[1:])
+            #     objs.extend(children)
+
+            for child in children:
+                objs.extend(child._allDescendants(descendantClasses=descendantClasses[1:]))
+
+        # print('_allDescendants for %-30s of class %-20r: %s' % \
+        #       (self, descendantClasses[0].__name__, objs))
         return objs
 
     def _unwrapAll(self):

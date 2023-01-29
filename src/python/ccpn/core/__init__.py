@@ -459,8 +459,8 @@ from ccpn.ui._implementation.Mark import Mark
 Mark._registerCoreClass()
 
 from ccpn.ui.gui.modules.SpectrumDisplay import SpectrumDisplay, _CoreClassSpectrumDisplay, _factoryFunction
-# SpectrumDisplay._registerCoreClass()
-_CoreClassSpectrumDisplay._registerCoreClass()
+SpectrumDisplay._registerCoreClass()
+# _CoreClassSpectrumDisplay._registerCoreClass()
 
 from ccpn.ui.gui.lib.Strip import Strip, _CoreClassStrip, _factoryFunction
 # Strip._registerCoreClass()

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-29 12:33:54 +0000 (Sun, January 29, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-29 19:10:22 +0000 (Sun, January 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -89,7 +89,7 @@ class SpectrumDisplay(AbstractWrapperObject):
     @property
     def strips(self) -> list:
         """STUB: hot-fixed later"""
-        return list(self.orderedStrips)
+        return []
 
     @property
     def orderedStrips(self):
@@ -115,23 +115,29 @@ class SpectrumDisplay(AbstractWrapperObject):
         """
         result = super()._restoreObject(project, apiObj)
 
+        # debug
+        _strips = result.strips
+
         # getting value will induce an update in the internal parameters
         _tmp = result.isotopeCodes
         _tmp2 = result.dimensionTypes
 
         # update the plane axes settings
-        for strip in result.strips:
+        for strip in _strips:
             strip._updatePlaneAxes()
 
+        if not result.is1D:
+            result.setVisibleAxes()
+
         # check that the spectrumView indexing has been set, or is populated correctly
-        if len(result.strips) > 0 and \
-           (specViews := result.strips[0].getSpectrumViews()):
+        if len(_strips) > 0 and \
+           (specViews := _strips[0].getSpectrumViews()):
             indexing = [v._index for v in specViews]
             if None in indexing or len(indexing) != len(set(indexing)):
                 # set new indexing
                 for ind, sv in enumerate(specViews):
                     sv._index = ind
-        result._spectrumViewVisibleChanged()
+            result._spectrumViewVisibleChanged()
 
         return result
 

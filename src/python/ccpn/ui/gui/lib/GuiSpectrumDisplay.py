@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 16:35:00 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-29 19:10:22 +0000 (Sun, January 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -439,10 +439,12 @@ class GuiSpectrumDisplay(CcpnModule):
         self.qtParent.getLayout().setContentsMargins(1, 0, 1, 0)
         self.qtParent.getLayout().setSpacing(0)
         self.lastAxisOnly = mainWindow.application.preferences.general.lastAxisOnly
-        if not self.is1D:
-            self.setVisibleAxes()
-        from ccpn.ui.gui.widgets.PlaneToolbar import ZPlaneToolbar
 
+        # GWV moved post init
+        # if not self.is1D:
+        #     self.setVisibleAxes()
+
+        from ccpn.ui.gui.widgets.PlaneToolbar import ZPlaneToolbar
         self._stripToolBarWidget = Frame(parent=self.qtParent, setLayout=True, grid=(axisRow, 0), gridSpan=(1, 7),
                                          hAlign='c', hPolicy='ignored')
         self.zPlaneFrame = ZPlaneToolbar(self._stripToolBarWidget, mainWindow, self, showHeader=True, showLabels=True,

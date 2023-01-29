@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-29 12:33:54 +0000 (Sun, January 29, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-29 20:36:03 +0000 (Sun, January 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -40,9 +40,20 @@ from ccpn.util.Logging import getLogger
 # GWV any coreClass 'name' property creates conflicts as pyqtgraph descendents need name()
 # GWV 26Jan2023: Remark still valid??
 
-# Can remove the _SpectrumDisplay1d/Nd intermediate classes as they do very little
 
-class SpectrumDisplay1d(_CoreClassSpectrumDisplay, GuiSpectrumDisplay):
+class SpectrumDisplay(_CoreClassSpectrumDisplay):
+
+    @classmethod
+    def _newInstanceFromApiData(cls, project, apiObj):
+        """Return a new instance of cls, initialised with data from apiObj
+        """
+        if apiObj.is1d:
+            return SpectrumDisplay1d(project, apiObj)
+        else:
+            return SpectrumDisplayNd(project, apiObj)
+
+
+class SpectrumDisplay1d(SpectrumDisplay, GuiSpectrumDisplay):
     """1D SpectrumDisplay
     """
 
@@ -78,7 +89,8 @@ class SpectrumDisplay1d(_CoreClassSpectrumDisplay, GuiSpectrumDisplay):
         """
         getLogger().debug('SpectrumDisplay1d>> project: %s, project.application: %s' %
                                   (project, project.application))
-        _CoreClassSpectrumDisplay.__init__(self, project, wrappedData)
+        # _CoreClassSpectrumDisplay.__init__(self, project, wrappedData)
+        SpectrumDisplay.__init__(self, project, wrappedData)
 
         # hack for now
         self.application = project.application
@@ -96,7 +108,7 @@ class SpectrumDisplay1d(_CoreClassSpectrumDisplay, GuiSpectrumDisplay):
         pass
 
 
-class SpectrumDisplayNd(_CoreClassSpectrumDisplay, GuiSpectrumDisplay):
+class SpectrumDisplayNd(SpectrumDisplay, GuiSpectrumDisplay):
     """nD SpectrumDisplay
     """
     # NB: inherits from AbstractWrapper (and more):
@@ -132,7 +144,8 @@ class SpectrumDisplayNd(_CoreClassSpectrumDisplay, GuiSpectrumDisplay):
         Handles CoreClass SpectrumDisplay and GuiSpectrumDisplay
         """
         getLogger().debug('SpectrumDisplayNd>> project: %s, project.application: %s' % (project, project.application))
-        _CoreClassSpectrumDisplay.__init__(self, project, wrappedData)
+        # _CoreClassSpectrumDisplay.__init__(self, project, wrappedData)
+        SpectrumDisplay.__init__(self, project, wrappedData)
 
         # hack for now;
         self.application = project.application
@@ -173,16 +186,7 @@ class SpectrumDisplayNd(_CoreClassSpectrumDisplay, GuiSpectrumDisplay):
 # For Registering
 #=========================================================================================
 
-class SpectrumDisplay(_CoreClassSpectrumDisplay):
 
-    @classmethod
-    def _newInstanceFromApiData(cls, project, apiObj):
-        """Return a new instance of cls, initialised with data from apiObj
-        """
-        if apiObj.is1d:
-            return SpectrumDisplay1d(project, apiObj)
-        else:
-            return SpectrumDisplayNd(project, apiObj)
 
 
 def _factoryFunction(project: Project, wrappedData):

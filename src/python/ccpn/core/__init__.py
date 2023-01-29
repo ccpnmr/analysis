@@ -463,27 +463,27 @@ SpectrumDisplay._registerCoreClass()
 # _CoreClassSpectrumDisplay._registerCoreClass()
 
 from ccpn.ui.gui.lib.Strip import Strip, _CoreClassStrip, _factoryFunction
-# Strip._registerCoreClass()
-_CoreClassStrip._registerCoreClass(_factoryFunction)
+Strip._registerCoreClass()
+# _CoreClassStrip._registerCoreClass(_factoryFunction)
 
 from ccpn.ui._implementation.Axis import Axis
 Axis._registerCoreClass()
 
 from ccpn.ui.gui.lib.SpectrumView import SpectrumView, _CoreClassSpectrumView, _factoryFunction
-# SpectrumView._registerCoreClass()
-_CoreClassSpectrumView._registerCoreClass(_factoryFunction)
+SpectrumView._registerCoreClass()
+# _CoreClassSpectrumView._registerCoreClass(_factoryFunction)
 
 from ccpn.ui.gui.lib.PeakListView import PeakListView, _CoreClassPeakListView, _factoryFunction
-# PeakListView._registerCoreClass()
-_CoreClassPeakListView._registerCoreClass(_factoryFunction)
+PeakListView._registerCoreClass()
+# _CoreClassPeakListView._registerCoreClass(_factoryFunction)
 
 from ccpn.ui.gui.lib.MultipletListView import MultipletListView, _CoreClassMultipletListView, _factoryFunction
-# MultipletListView._registerCoreClass()
-_CoreClassMultipletListView._registerCoreClass(_factoryFunction)
+MultipletListView._registerCoreClass()
+# _CoreClassMultipletListView._registerCoreClass(_factoryFunction)
 
 from ccpn.ui.gui.lib.IntegralListView import IntegralListView, _CoreClassIntegralListView, _factoryFunction
-# IntegralListView._registerCoreClass()
-_CoreClassIntegralListView._registerCoreClass(_factoryFunction)
+IntegralListView._registerCoreClass()
+# _CoreClassIntegralListView._registerCoreClass(_factoryFunction)
 
 
 _allGetters = []

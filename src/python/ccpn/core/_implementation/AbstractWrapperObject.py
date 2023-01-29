@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-29 19:10:22 +0000 (Sun, January 29, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-29 20:36:02 +0000 (Sun, January 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1086,8 +1086,9 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     # CCPN Implementation methods
     #=========================================================================================
 
-    def getByRelativeId(self, newName: str):
-        return self._getDescendant(self.project, newName)
+    # GWV: not used
+    # def getByRelativeId(self, newName: str):
+    #     return self._getDescendant(self.project, newName)
 
     @classmethod
     def _linkWrapperClasses(cls, ancestors: list = None, Project: 'Project' = None, _allGetters=None):
@@ -1264,10 +1265,10 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         # get and check the children of type of first decendantClasses
         if descendantClasses[0] not in self._childClasses:
             raise RuntimeError('Invalid descendantClass %s for %s' % (descendantClasses[0], self))
+
         className = descendantClasses[0].className
         # Passing the 'classes' argument limits the dict to className only (for speed)
         children = self._getChildren(classes=[className])[className]
-
 
         objs = []
         if len(descendantClasses) == 1:

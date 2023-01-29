@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-29 12:33:54 +0000 (Sun, January 29, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-29 20:36:02 +0000 (Sun, January 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -34,39 +34,6 @@ from ccpn.core.Project import Project
 from ccpn.util.Logging import getLogger
 
 
-class SpectrumView1d(_CoreClassSpectrumView, _GuiSpectrumView1d):
-    """1D Spectrum View
-    """
-
-    def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
-        _CoreClassSpectrumView.__init__(self, project, wrappedData)
-
-        # hack for now
-        self.application = project.application
-
-        getLogger().debug('SpectrumView1d>> %s' % self)
-        _GuiSpectrumView1d.__init__(self)
-
-
-class SpectrumViewNd(_CoreClassSpectrumView, _GuiSpectrumViewNd):
-    """nD Spectrum View
-    """
-
-    def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
-
-        _CoreClassSpectrumView.__init__(self, project, wrappedData)
-
-        # hack for now
-        self.application = project.application
-
-        getLogger().debug('SpectrumViewNd>> self=%s strip=%s' % (self, self.strip))
-        _GuiSpectrumViewNd.__init__(self)
-
-
-#=========================================================================================
-# For Registering
-#=========================================================================================
-
 class SpectrumView(_CoreClassSpectrumView):
 
     @classmethod
@@ -80,6 +47,45 @@ class SpectrumView(_CoreClassSpectrumView):
         else:
             # ND display
             return SpectrumViewNd(project, apiObj)
+
+
+class SpectrumView1d(SpectrumView, _GuiSpectrumView1d):
+    """1D Spectrum View
+    """
+
+    def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
+
+        # _CoreClassSpectrumView.__init__(self, project, wrappedData)
+        SpectrumView.__init__(self, project, wrappedData)
+
+        # hack for now
+        self.application = project.application
+
+        getLogger().debug('SpectrumView1d>> %s' % self)
+        _GuiSpectrumView1d.__init__(self)
+
+
+class SpectrumViewNd(SpectrumView, _GuiSpectrumViewNd):
+    """nD Spectrum View
+    """
+
+    def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
+
+        # _CoreClassSpectrumView.__init__(self, project, wrappedData)
+        SpectrumView.__init__(self, project, wrappedData)
+
+        # hack for now
+        self.application = project.application
+
+        getLogger().debug('SpectrumViewNd>> self=%s strip=%s' % (self, self.strip))
+        _GuiSpectrumViewNd.__init__(self)
+
+
+#=========================================================================================
+# For Registering
+#=========================================================================================
+
+
 
 def _factoryFunction(project: Project, wrappedData):
     """create SpectrumView, dispatching to subtype depending on wrappedData

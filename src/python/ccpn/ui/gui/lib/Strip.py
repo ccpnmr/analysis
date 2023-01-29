@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-29 12:33:54 +0000 (Sun, January 29, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-29 20:36:02 +0000 (Sun, January 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -32,32 +32,6 @@ from ccpn.ui.gui.lib.GuiStripNd import GuiStripNd as _GuiStripNd
 from ccpn.core.Project import Project
 from ccpn.util.Logging import getLogger
 
-
-class Strip1d(_CoreClassStrip, _GuiStrip1d):
-    """1D strip"""
-
-    def __init__(self, project: Project, wrappedData: 'ApiBoundStrip'):
-
-        _CoreClassStrip.__init__(self, project, wrappedData)
-
-        getLogger().debug('Strip1d>> spectrumDisplay: %s' % self.spectrumDisplay)
-        _GuiStrip1d.__init__(self, self.spectrumDisplay)
-
-
-class StripNd(_CoreClassStrip, _GuiStripNd):
-    """ND strip """
-
-    def __init__(self, project: Project, wrappedData: 'ApiBoundStrip'):
-
-        _CoreClassStrip.__init__(self, project, wrappedData)
-
-        getLogger().debug('StripNd>> spectrumDisplay=%s' % self.spectrumDisplay)
-        _GuiStripNd.__init__(self, self.spectrumDisplay)
-
-#=========================================================================================
-# For Registering
-#=========================================================================================
-
 class Strip(_CoreClassStrip):
 
     @classmethod
@@ -69,6 +43,36 @@ class Strip(_CoreClassStrip):
             return Strip1d(project, apiObj)
         else:
             return StripNd(project, apiObj)
+
+
+class Strip1d(Strip, _GuiStrip1d):
+    """1D strip"""
+
+    def __init__(self, project: Project, wrappedData: 'ApiBoundStrip'):
+
+        # _CoreClassStrip.__init__(self, project, wrappedData)
+        Strip.__init__(self, project, wrappedData)
+
+        getLogger().debug('Strip1d>> spectrumDisplay: %s' % self.spectrumDisplay)
+        _GuiStrip1d.__init__(self, self.spectrumDisplay)
+
+
+class StripNd(Strip, _GuiStripNd):
+    """ND strip """
+
+    def __init__(self, project: Project, wrappedData: 'ApiBoundStrip'):
+
+        # _CoreClassStrip.__init__(self, project, wrappedData)
+        Strip.__init__(self, project, wrappedData)
+
+        getLogger().debug('StripNd>> spectrumDisplay=%s' % self.spectrumDisplay)
+        _GuiStripNd.__init__(self, self.spectrumDisplay)
+
+#=========================================================================================
+# For Registering
+#=========================================================================================
+
+
 
 
 def _factoryFunction(project: Project, wrappedData):

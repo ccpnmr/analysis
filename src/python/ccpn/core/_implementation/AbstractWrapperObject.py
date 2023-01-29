@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-27 12:51:25 +0000 (Fri, January 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-29 12:33:54 +0000 (Sun, January 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -115,7 +115,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     necessary to do so.
     """
 
-    # In CoreModel:
+    # Defined in CoreModel:
 
     # # Short class name, for PID. Must be overridden for each subclass
     # shortClassName = None
@@ -124,13 +124,11 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     # className = None
     #
     # # Name of the parent class; used to make model linkages
-    # _parentClassName = None
+    # _parentClass = None
     #
     # # List of child classes. Will be filled by child-classes registering.
     # _childClasses = []
 
-    # Old defs
-    _parentClass = None
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'abstractWrapperClasses'
@@ -146,6 +144,9 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     # Set to False if multiple wrapper classes wrap the same API class (e.g. PeakList, IntegralList;
     # Peak, Integral) so that API level notifiers are only registered once.
     _registerClassNotifiers = True
+
+    # flag to ignore _newApiObject callback function; GWV: used to gradually remove this aspect
+    _ignoreNewApiObjectCallback = False
 
     # Function to generate custom subclass instances -= overridden in some subclasses
     _factoryFunction = None
@@ -322,17 +323,17 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     # CcpNmr Properties
     #=========================================================================================
 
-    @property
-    def className(self) -> str:
-        """Class name - necessary since the actual objects may be of a subclass.
-        """
-        return self.__class__.className
-
-    @property
-    def shortClassName(self) -> str:
-        """Short class name, for PID. Must be overridden for each subclass.
-        """
-        return self.__class__.shortClassName
+    # @property
+    # def className(self) -> str:
+    #     """Class name - necessary since the actual objects may be of a subclass.
+    #     """
+    #     return self.__class__.className
+    #
+    # @property
+    # def shortClassName(self) -> str:
+    #     """Short class name, for PID. Must be overridden for each subclass.
+    #     """
+    #     return self.__class__.shortClassName
 
     @property
     def project(self) -> 'Project':
@@ -928,10 +929,13 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         # # call any pre-initialisation updates
         # cls._updater.update(UPDATE_PRE_OBJECT_INITIALISATION, apiObj, cls)
 
-        if (factoryFunction := cls._factoryFunction) is None:
-            obj = cls(project, apiObj)
-        else:
-            obj = factoryFunction(project, apiObj)
+        # if (factoryFunction := cls._factoryFunction) is None:
+        #     # obj = cls(project, apiObj)
+        #     obj = cls._newInstanceFromApiData(project=project, apiObj=apiObj)
+        # else:
+        #     obj = factoryFunction(project, apiObj)
+
+        obj = cls._newInstanceFromApiData(project=project, apiObj=apiObj)
         if obj is None:
             raise RuntimeError('Error restoring object encoded by %s' % apiObj)
 
@@ -958,12 +962,13 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
         for childClass in self._childClasses:
             # recursively create children
-            for apiObj in childClass._getAllWrappedData(self):
+            apiObjs = childClass._getAllWrappedData(self)
+            for apiObj in apiObjs:
                 obj = data2Obj.get(apiObj)
 
                 if obj is None:
                     try:
-                        obj = childClass._restoreObject(project, apiObj)
+                        obj = childClass._restoreObject(project=project, apiObj=apiObj)
 
                     except RuntimeError as es:
                         _text = 'Error restoring api-child %r of %s (%s)' % (apiObj.qualifiedName, self, es)
@@ -999,25 +1004,25 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     #             # recursively do the children of newInstance
     #             newInstance._restoreChildren(classes=classes)
     #
-    # def _newInstanceWithApiData(self, cls, apiData):
-    #     """Return a new instance of cls, initialised with apiData
-    #     For restore 3.2 branch
-    #     """
-    #     if apiData in self._project._data2Obj:
-    #         # This happens with Window, as it get initialised by the Windowstore and then once
-    #         # more as child of Project
-    #         newInstance = self._project._data2Obj[apiData]
-    #
-    #     elif hasattr(cls, '_factoryFunction') and getattr(cls, '_factoryFunction') is not None:
-    #         newInstance = cls._factoryFunction(self._project, apiData)
-    #
-    #     else:
-    #         newInstance = cls(self._project, apiData)
-    #
-    #     if newInstance is None:
-    #         raise RuntimeError('Error creating new instance of class "%s"' % cls.className)
-    #
-    #     return newInstance
+    @classmethod
+    def _newInstanceFromApiData(cls, project, apiObj):
+        """Return a new instance of cls, initialised with data from apiObj
+        """
+        if apiObj in project._data2Obj:
+            # This happens with Window, as it get initialised by the Windowstore and then once
+            # more as child of Project
+            newInstance = project._data2Obj[apiObj]
+
+        elif (_factoryFunction := cls._factoryFunction) is not None:
+            newInstance = _factoryFunction(project, apiObj)
+
+        else:
+             newInstance = cls(project, apiObj)
+
+        if newInstance is None:
+            raise RuntimeError(f'Error creating new instance of class "{cls.className}"')
+
+        return newInstance
 
     # def _newInstance(self, *kwds):
     #     """Instantiate a new instance, including the wrappedData
@@ -1114,6 +1119,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                 linkName = cls._pluralLinkName
                 for ii in range(len(newAncestors) - 1):
                     ancestor = newAncestors[ii]
+
                     func = functools.partial(AbstractWrapperObject._allDescendants,
                                              descendantClasses=newAncestors[ii + 1:])
                     # func.__annotations__['return'] = typing.Tuple[cls, ...]
@@ -1150,7 +1156,13 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                         docTemplate = ("\- *(%s,)*  - contained %s objects in order of underlying key. "
                                        + "This may differ from the standard sorting order")
 
-                    prop = property(func, None, None, docTemplate % (classFullName, cls.className))
+                    _doc = docTemplate % (classFullName, cls.className)
+                    prop = property(func, None, None, _doc)
+
+                    # if f'{ancestor.__name__}.{linkName}' in \
+                    #         'SpectrumDisplay.strips Strip.spectrumViews'.split():
+                    #     continue
+
                     setattr(ancestor, linkName, prop)
                     _allGetters.append(f'{ancestor.__name__}.{linkName}')
 
@@ -1248,6 +1260,11 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             raise RuntimeError('Error getting all descendants from %s; decendants tree is empty' % self)
 
         if len(descendantClasses) == 1:
+
+            # Debugging
+            # if descendantClasses[0].className in 'SpectrumView Strip'.split():
+            #     ii=0
+
             # we are at the end of the recursion tree; return the children of type descendantClass[0] of self
             if descendantClasses[0] not in self._childClasses:
                 raise RuntimeError('Invalid descendantClass %s for %s' % (descendantClasses[0], self))

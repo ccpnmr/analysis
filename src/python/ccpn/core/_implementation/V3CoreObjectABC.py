@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-27 12:51:26 +0000 (Fri, January 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-29 12:33:54 +0000 (Sun, January 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -67,6 +67,9 @@ class V3CoreObjectABC(CoreModel, NotifierBase):
     #: List of child classes.
     _childClasses = []
     _isGuiClass = False
+
+    # flag to ignore _newApiObject callback function; GWV: used to gradually remove this aspect
+    _ignoreNewApiObjectCallback = False
 
     # the attribute name used by current
     _currentAttributeName = 'v3CoreObjectABCs'

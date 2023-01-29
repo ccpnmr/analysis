@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 14:54:56 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-29 12:33:54 +0000 (Sun, January 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -64,7 +64,6 @@ class SpectrumDisplay(AbstractWrapperObject):
     # Attribute it necessary as subclasses must use superclass className
     className = 'SpectrumDisplay'
 
-    _parentClassName = 'Project'
     _parentClass = Project
 
     #: Name of plural link to instances of class
@@ -90,7 +89,7 @@ class SpectrumDisplay(AbstractWrapperObject):
     @property
     def strips(self) -> list:
         """STUB: hot-fixed later"""
-        return []
+        return list(self.orderedStrips)
 
     @property
     def orderedStrips(self):
@@ -545,7 +544,15 @@ class SpectrumDisplay(AbstractWrapperObject):
 
         return _copyStrip(self, strip=strip, newIndex=newIndex)
 
-
+    @classmethod
+    def _newInstanceFromApiData(cls, project, apiObj):
+        """Return a new instance of cls, initialised with data from apiObj
+        """
+        from ccpn.ui.gui.modules.SpectrumDisplay import SpectrumDisplay1d, SpectrumDisplayNd
+        if apiObj.is1d:
+            return SpectrumDisplay1d(project, apiObj)
+        else:
+            return SpectrumDisplayNd(project, apiObj)
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================

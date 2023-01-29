@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-27 12:51:26 +0000 (Fri, January 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-29 12:33:54 +0000 (Sun, January 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -50,6 +50,7 @@ class CoreModel(object):
 
     # the dict of (shortClassName, class) pairs
     _coreClassShortNameDict = {}
+
     _isRegistered = False
 
     def __init__(self):
@@ -62,14 +63,17 @@ class CoreModel(object):
         """Registers class; defines the model-linkages
         sets _factoryFunction attribute (defaults to None)
         """
+        if cls._isRegistered:
+            raise RuntimeError(f'Class "{cls.__name__}": class has been registered before')
+
         if cls.className is None:
-            raise RuntimeError(f'{cls.__name__}: className class-attribute is undefined')
+            raise RuntimeError(f'Class "{cls.__name__}": className class-attribute is undefined')
 
         if cls.shortClassName is None:
-            raise RuntimeError(f'{cls.__name__}: shortClassName class-attribute is undefined')
+            raise RuntimeError(f'Class "{cls.__name__}": shortClassName class-attribute is undefined')
 
         if cls._parentClass is None and cls.className != 'Project':
-            raise RuntimeError(f'{cls.__name__}: _parentClass class-attribute is undefined')
+            raise RuntimeError(f'Class "{cls.__name__}": _parentClass class-attribute is undefined')
 
         cls._coreClassDict[cls.className] = cls
         cls._coreClassShortNameDict[cls.shortClassName] = cls

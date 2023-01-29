@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-27 11:07:01 +0000 (Fri, January 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-29 12:33:54 +0000 (Sun, January 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1229,25 +1229,33 @@ class Project(AbstractWrapperObject):
 
     def _newApiObject(self, wrappedData, cls: AbstractWrapperObject):
         """Create new wrapper object of class cls, associated with wrappedData.
-        and call creation notifiers
+        and call creation notifiers.
+        This method is called from the api upon creation of a corresponding api object
         """
         # See AbstractWrapperObject:1145
 
-        factoryFunction = cls._factoryFunction
-        if factoryFunction is None:
-            result = cls(self, wrappedData)
-        else:
-            # Necessary for classes where you need to instantiate a subclass instead
-
-            result = self._data2Obj.get(wrappedData)
-            # There are cases where _newApiObject is registered twice,
-            # when two wrapper classes share the same API class
-            # (Peak,Integral; PeakList, IntegralList)
-            # In those cases only the notifiers are done the second time
-            if result is None:
-                result = factoryFunction(self, wrappedData)
+        # factoryFunction = cls._factoryFunction
+        # if factoryFunction is None:
+        #     result = cls(self, wrappedData)
+        # else:
+        #     # Necessary for classes where you need to instantiate a subclass instead
         #
-        result._finaliseAction('create')
+        #     result = self._data2Obj.get(wrappedData)
+        #     # There are cases where _newApiObject is registered twice,
+        #     # when two wrapper classes share the same API class
+        #     # (Peak,Integral; PeakList, IntegralList)
+        #     # In those cases only the notifiers are done the second time
+        #     if result is None:
+        #         result = factoryFunction(self, wrappedData)
+        #
+        if (result := self._data2Obj.get(wrappedData)) is not None:
+            raise RuntimeError(f'Project._newApiObject: {result} already exists; Cannot create again and this should not happen!')
+
+        if not cls._ignoreNewApiObjectCallback:
+            result = cls._newInstanceFromApiData(project=self, apiObj=wrappedData)
+
+        # GWV: duplicate; done by newObject decorator
+        # result._finaliseAction('create')
 
     def _modifiedApiObject(self, wrappedData):
         """ call object-has-changed notifiers

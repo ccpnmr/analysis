@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-01-26 21:30:31 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-01-29 12:33:54 +0000 (Sun, January 29, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -203,7 +203,7 @@ class Axis(AbstractWrapperObject):
 #=========================================================================================
 # Registering
 #=========================================================================================
-Axis._registerCoreClass()
+# Axis._registerCoreClass()
 
 #=========================================================================================
 # Connections to parents:

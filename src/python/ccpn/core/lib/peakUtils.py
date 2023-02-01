@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-02-01 11:43:41 +0000 (Wed, February 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -830,10 +830,10 @@ def snap1DPeaksByGroup(peaks, ppmLimit=0.05, figOfMeritLimit=1,
                        doNeg=doNeg)
 
     for newLimit in np.arange(ppmLimit, unsnappedLimit+increaseLimitStep, increaseLimitStep):
-        unsnappedPeaks = [p for p in peaks if p.heightError is not None]
+        unsnappedPeaks = [p for p in peaks if p.heightError is not None and p.figureOfMerit >= figOfMeritLimit  ]
+        print(f'Iterating unsnapped Peaks at a new limit: {newLimit}. Peaks:  {unsnappedPeaks}'  )
         if len(unsnappedPeaks) == 0:
             return
-        print('RESNAPPING at', newLimit, unsnappedPeaks)
         _snap1DPeaksByGroup(unsnappedPeaks, ppmLimit=newLimit, figOfMeritLimit=figOfMeritLimit,
                        doNeg=doNeg)
 
@@ -902,7 +902,7 @@ def _snap1DPeaksByGroup(peaks, ppmLimit=0.05, figOfMeritLimit=1,
                         peak.heightError = None
                 else:
                     ## found different count of new coords and peaks. Order by distanceMatrix and snap to best fit.
-                    snap1DPeaksByGroup(peaks, ppmLimit=ppmLimit / 2)
+                    _snap1DPeaksByGroup(peaks, ppmLimit=ppmLimit / 2)
 
 
 

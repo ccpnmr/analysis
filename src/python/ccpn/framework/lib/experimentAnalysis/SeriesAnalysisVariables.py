@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-25 22:24:05 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-02 17:01:13 +0000 (Thu, February 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -144,6 +144,15 @@ R1 = 'R1'
 R2 = 'R2'
 R2R1 = 'R2/R1'
 R2R1_ERR = f'{R2R1}{_ERR}'
+RSDM = 'RSDM'
+J0 = 'J0'
+JwX = 'JwX'
+JwH = 'JwH'
+J0_ERR = f'{J0}{_ERR}'
+JwX_ERR = f'{JwX}{_ERR}'
+JwH_ERR = f'{JwH}{_ERR}'
+
+
 FLAG = 'Flag'
 SERIAL = 'Serial'
 
@@ -167,6 +176,7 @@ SERIESANALYSISINPUTDATA     = 'SeriesAnalysisInputData'
 RELAXATION_OUTPUT_FRAME     = 'RelaxationOutputFrame'
 HetNoe_OUTPUT_FRAME         = 'HetNoeOutputFrame'
 R2R1_OUTPUT_FRAME         = 'R2R1OutputFrame'
+RSDM_OUTPUT_FRAME         = 'RSDMOutputFrame'
 CSM_OUTPUT_FRAME            = 'CSMOutputFrame'
 SERIESFRAMETYPE             = 'SERIESFRAMETYPE'
 _assignmentHeaders          = '_assignmentHeaders'

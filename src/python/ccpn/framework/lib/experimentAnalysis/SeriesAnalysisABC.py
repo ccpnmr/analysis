@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-26 12:33:36 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-02 17:01:13 +0000 (Thu, February 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -172,17 +172,18 @@ class SeriesAnalysisABC(ABC):
 
         calculationFrame = self.currentCalculationModel.calculateValues(self.inputDataTables)
         if self.currentCalculationModel._disableFittingModels:
-            merged = calculationFrame
+            data = calculationFrame
+
         else:
             # merge the frames on CollectionPid/id, Assignment, model-results/statistics and calculation
             # keep only minimal info and not duplicates to the fitting frame (except the collectionPid)
             inputFrame = self.inputDataTables[-1].data
             fittingFrame = self.currentFittingModel.fitSeries(inputFrame)
-            fittingFrame.joinNmrResidueCodeType()
             cdf = calculationFrame[[ sv.COLLECTIONPID] + self.currentCalculationModel.modelArgumentNames]
-            merged = pd.merge(fittingFrame, cdf, on=[sv.COLLECTIONPID], how='left')
+            data = pd.merge(fittingFrame, cdf, on=[sv.COLLECTIONPID], how='left')
+        data.joinNmrResidueCodeType()
         outputDataTable = self._fetchOutputDataTable(name=self._outputDataTableName)
-        outputDataTable.data = merged
+        outputDataTable.data = data
         return outputDataTable
 
     def _rebuildInputData(self):

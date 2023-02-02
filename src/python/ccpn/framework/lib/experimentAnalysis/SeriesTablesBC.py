@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-25 22:24:05 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-02 17:01:13 +0000 (Thu, February 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -314,6 +314,16 @@ class R2R1OutputFrame(SeriesFrameBC):
     SERIESFRAMENAME = sv.R2R1_OUTPUT_FRAME
     SERIESFRAMETYPE = sv.R2R1_OUTPUT_FRAME
 
+
+class RSDMOutputFrame(SeriesFrameBC):
+
+    """
+    A TableData used for the RSDM Series Analysis,
+
+    """
+
+    SERIESFRAMENAME = sv.RSDM_OUTPUT_FRAME
+    SERIESFRAMETYPE = sv.RSDM_OUTPUT_FRAME
 
 ########################################################################################################################
 ################################   Chemical Shift Mapping  I/O Series Output Table      ################################

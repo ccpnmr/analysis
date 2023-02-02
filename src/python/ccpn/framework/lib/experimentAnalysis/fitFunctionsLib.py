@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-25 16:58:49 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-02 17:01:13 +0000 (Thu, February 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,7 @@ from lmfit import lineshapes as ls
 import numpy as np
 from ccpn.util.Logging import getLogger
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from math import pi
 
 ## Common built-in functions.
 gaussian_func    = ls.gaussian
@@ -340,14 +341,43 @@ def _formatValue(value, maxInt=3, floatPrecision=3, expDigits=1):
         getLogger().debug2(f'Impossible to format {value}. Error:{ex}')
     return value
 
+############################################################
+############### Spectral density mapping functions ################
+############################################################
 
 
 
-# import matplotlib.pyplot as plt
-# x = np.arange(1, 1000)
-# Kd, BMax, P = 56, 0.18, 1
-# ys = oneSiteBinding_func(x, Kd, BMax )
-# yns = oneSiteNonSpecBinding_func(x, -0.01 )
-# plt.plot(ys)
-# plt.plot(yns)
-# plt.show()
+def calculateSigmaNOE(noe, r1, gx, gh):
+    """Calculate the sigma NOE value.
+    Eq. 16 Backbone dynamics of Barstar: A 15N NMR relaxation study.
+    Udgaonkar et al 2000. Proteins: 41:460-474"""
+
+    return (noe - 1.0) * r1 * (gx / gh)
+
+def calculateJ0(noe, r1, r2, d, c, gx, gh):
+    """Calculate J(0).
+     Eq. 13 Backbone dynamics of Barstar: A 15N NMR relaxation study.
+    Udgaonkar et al 2000. Proteins: 41:460-474
+    """
+    sigmaNOE = calculateSigmaNOE(noe, r1, gx, gh)
+    j0 = 3/(2*(3*d + c)) * (-(1/2)*r1 + r2 - (3/5)*sigmaNOE)
+    return j0
+
+def calculateJWx(noe, r1, r2, d, c, gx, gh):
+    """Calculate J(wx).
+     Eq. 14 Backbone dynamics of Barstar: A 15N NMR relaxation study.
+    Udgaonkar et al 2000. Proteins: 41:460-474
+    """
+    sigmaNOE = calculateSigmaNOE(noe, r1, gx, gh)
+    jwx = 1.0 / (3.0 * d + c) * (r1 - (7/5) * sigmaNOE)
+    return jwx
+
+def calculateJWH(noe, r1, r2, d, c, gx, gh):
+    """Calculate J(wH).
+     Eq. 15 Backbone dynamics of Barstar: A 15N NMR relaxation study.
+    Udgaonkar et al 2000. Proteins: 41:460-474
+    """
+    sigmaNOE = calculateSigmaNOE(noe, r1, gx, gh)
+    jwh = sigmaNOE / (5.0*d)
+    return jwh
+

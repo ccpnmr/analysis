@@ -458,32 +458,26 @@ MainWindow._registerCoreClass()
 from ccpn.ui._implementation.Mark import Mark
 Mark._registerCoreClass()
 
-from ccpn.ui.gui.modules.SpectrumDisplay import SpectrumDisplay, _CoreClassSpectrumDisplay, _factoryFunction
+from ccpn.ui.gui.modules.SpectrumDisplay import SpectrumDisplay
 SpectrumDisplay._registerCoreClass()
-# _CoreClassSpectrumDisplay._registerCoreClass()
 
-from ccpn.ui.gui.lib.Strip import Strip, _CoreClassStrip, _factoryFunction
+from ccpn.ui.gui.lib.Strip import Strip
 Strip._registerCoreClass()
-# _CoreClassStrip._registerCoreClass(_factoryFunction)
 
 from ccpn.ui._implementation.Axis import Axis
 Axis._registerCoreClass()
 
-from ccpn.ui.gui.lib.SpectrumView import SpectrumView, _CoreClassSpectrumView, _factoryFunction
+from ccpn.ui.gui.lib.SpectrumView import SpectrumView
 SpectrumView._registerCoreClass()
-# _CoreClassSpectrumView._registerCoreClass(_factoryFunction)
 
-from ccpn.ui.gui.lib.PeakListView import PeakListView, _CoreClassPeakListView, _factoryFunction
+from ccpn.ui.gui.lib.PeakListView import PeakListView
 PeakListView._registerCoreClass()
-# _CoreClassPeakListView._registerCoreClass(_factoryFunction)
 
-from ccpn.ui.gui.lib.MultipletListView import MultipletListView, _CoreClassMultipletListView, _factoryFunction
+from ccpn.ui.gui.lib.MultipletListView import MultipletListView
 MultipletListView._registerCoreClass()
-# _CoreClassMultipletListView._registerCoreClass(_factoryFunction)
 
-from ccpn.ui.gui.lib.IntegralListView import IntegralListView, _CoreClassIntegralListView, _factoryFunction
+from ccpn.ui.gui.lib.IntegralListView import IntegralListView
 IntegralListView._registerCoreClass()
-# _CoreClassIntegralListView._registerCoreClass(_factoryFunction)
 
 
 _allGetters = []

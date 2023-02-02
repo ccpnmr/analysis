@@ -15,49 +15,50 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:41 +0000 (Thu, February 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
-__date__ = "$Date: 2022-02-15 14:34:15 +0000 (Tue, February 15, 2022) $"
+__date__ = "$Date: 2018-12-20 15:44:34 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.core.lib.SpectrumLib import _getDefaultOrdering, getDefaultSpectrumColours
-from ccpn.util.Logging import getLogger
-from ccpn.core.lib.ContextManagers import inactivity
 
-def updateProject_fromV2(project):
-    """Update actions for a V2 project
+from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
+from ccpn.core.Project import Project
+from ccpn.ui._implementation.MultipletListView import MultipletListView as _CoreClassMultipletListView
+
+
+class GuiMultipletListView(GuiListViewABC):
+    """multipletList is the CCPN wrapper object
     """
 
-    if project._isUpgradedFromV2:
-        # Regrettably this V2 upgrade operation must be done at the V3 level.
-        # No good place except here
-        for structureEnsemble in project.structureEnsembles:
-            data = structureEnsemble.data
-            if data is None:
-                getLogger().warning("%s has no data. This should never happen")
-            else:
-                data._containingObject = structureEnsemble
-
-        getLogger().debug('initialising v2 noise and contour levels')
-
-        for spectrum in project.spectra:
-            # calculate the new noise level
-            spectrum.noiseLevel = spectrum.estimateNoise()
-
-            # Check  contourLevels, contourColours
-            spectrum._setDefaultContourValues()
-
-            # set the initial contour colours
-            (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-            spectrum.sliceColour = spectrum.positiveContourColour
-
-            # set the initial axis ordering
-            _getDefaultOrdering(spectrum)
+    def __init__(self):
+        super().__init__()
 
 
-    project._objectVersion = '3.0.4'
+class MultipletListView(_CoreClassMultipletListView, GuiMultipletListView):
+    """Multiplet List View for 1D or nD MultipletList
+    """
+
+    def __init__(self, project: Project, wrappedData: 'ApiStripMultipletListView'):
+        """Local override init for Qt subclass"""
+        _CoreClassMultipletListView.__init__(self, project, wrappedData)
+
+        # hack for now
+        self.application = project.application
+        GuiMultipletListView.__init__(self)
+        self._init()
+
+#=========================================================================================
+# Registering
+#=========================================================================================
+
+def _factoryFunction(project: Project, wrappedData):
+    """create MultipletListView
+    """
+    return MultipletListView(project, wrappedData)
+
+# _CoreClassMultipletListView._registerCoreClass(factoryFunction=_factoryFunction)

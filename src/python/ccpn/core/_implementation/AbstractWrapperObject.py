@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-16 13:35:21 +0000 (Mon, January 16, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:38 +0000 (Thu, February 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -37,11 +37,12 @@ import pandas as pd
 from decorator import decorator
 
 import ccpn.core._implementation.resetSerial
-from ccpn.core import _importOrder
-from ccpn.core.lib import Pid
+from ccpn.core._implementation.CoreModel import CoreModel
 from ccpn.core._implementation.Updater import Updater, \
     UPDATE_POST_OBJECT_INITIALISATION, UPDATE_POST_PROJECT_INITIALISATION, \
     UPDATE_PRE_OBJECT_INITIALISATION
+
+from ccpn.core.lib import Pid
 
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
@@ -57,7 +58,7 @@ _RENAME_SENTINEL = Pid.Pid('Dummy:_rename')
 
 
 @functools.total_ordering
-class AbstractWrapperObject(NotifierBase):
+class AbstractWrapperObject(CoreModel, NotifierBase):
     """Abstract class containing common functionality for subclasses.
 
     **Rules for subclasses:**
@@ -114,19 +115,23 @@ class AbstractWrapperObject(NotifierBase):
     necessary to do so.
     """
 
-    #: Short class name, for PID. Must be overridden for each subclass
-    shortClassName = None
+    # Defined in CoreModel:
 
-    # Class name - necessary since the actual objects may be of a subclass.
-    className = 'AbstractWrapperObject'
+    # # Short class name, for PID. Must be overridden for each subclass
+    # shortClassName = None
+    #
+    # # Class name - necessary since the actual objects may be of a subclass.
+    # className = None
+    #
+    # # Name of the parent class; used to make model linkages
+    # _parentClass = None
+    #
+    # # List of child classes. Will be filled by child-classes registering.
+    # _childClasses = []
 
-    _parentClass = None
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'abstractWrapperClasses'
-
-    #: List of child classes. Must be overridden for each subclass.
-    _childClasses = []
 
     _isGuiClass = False  # Overridden by Gui classes
     _isPandasTableClass = False  # Overridden by classes with panda DataFrame tables
@@ -139,6 +144,9 @@ class AbstractWrapperObject(NotifierBase):
     # Set to False if multiple wrapper classes wrap the same API class (e.g. PeakList, IntegralList;
     # Peak, Integral) so that API level notifiers are only registered once.
     _registerClassNotifiers = True
+
+    # flag to ignore _newApiObject callback function; GWV: used to gradually remove this aspect
+    _ignoreNewApiObjectCallback = False
 
     # Function to generate custom subclass instances -= overridden in some subclasses
     _factoryFunction = None
@@ -166,6 +174,7 @@ class AbstractWrapperObject(NotifierBase):
         # NB wrappedData must be globally unique. CCPN objects all are,
         # but for non-CCPN objects this must be ensured.
 
+        CoreModel.__init__(self)
         NotifierBase.__init__(self)
 
         # Check if object is already wrapped
@@ -226,7 +235,8 @@ class AbstractWrapperObject(NotifierBase):
         # A bit inelegant, but Nmrresidue is handled specially,
         # with a _ccpnSortKey property
         if className != 'NmrResidue':
-            self._ccpnSortKey = (id(project), _importOrder.index(className)) + sortKey
+            # self._ccpnSortKey = (id(project), _importOrder.index(className)) + sortKey
+            self._ccpnSortKey = (id(project), list(project._className2Class.keys()).index(className)) + sortKey
 
         # update pid:object mapping dictionary
         dd = project._pid2Obj.get(className)
@@ -313,17 +323,17 @@ class AbstractWrapperObject(NotifierBase):
     # CcpNmr Properties
     #=========================================================================================
 
-    @property
-    def className(self) -> str:
-        """Class name - necessary since the actual objects may be of a subclass.
-        """
-        return self.__class__.className
-
-    @property
-    def shortClassName(self) -> str:
-        """Short class name, for PID. Must be overridden for each subclass.
-        """
-        return self.__class__.shortClassName
+    # @property
+    # def className(self) -> str:
+    #     """Class name - necessary since the actual objects may be of a subclass.
+    #     """
+    #     return self.__class__.className
+    #
+    # @property
+    # def shortClassName(self) -> str:
+    #     """Short class name, for PID. Must be overridden for each subclass.
+    #     """
+    #     return self.__class__.shortClassName
 
     @property
     def project(self) -> 'Project':
@@ -672,17 +682,17 @@ class AbstractWrapperObject(NotifierBase):
     # Abstract /Api methods
     #=========================================================================================
 
-    def _printClassTree(self, node=None, tabs=0):
-        """Simple Class-tree printing method
-         """
-        if node is None:
-            node = self
-        s = '\t' * tabs + '%s' % (node.className)
-        if node._isGuiClass:
-            s += '  (GuiClass)'
-        print(s)
-        for child in node._childClasses:
-            self._printClassTree(child, tabs=tabs + 1)
+    # def _printClassTree(self, node=None, tabs=0):
+    #     """Simple Class-tree printing method
+    #      """
+    #     if node is None:
+    #         node = self
+    #     s = '\t' * tabs + '%s' % (node.className)
+    #     if node._isGuiClass:
+    #         s += '  (GuiClass)'
+    #     print(s)
+    #     for child in node._childClasses:
+    #         self._printClassTree(child, tabs=tabs + 1)
 
     def _getAllDecendants(self) -> list:
         """Get all objects descending from self; i.e. children, grandchildren, etc
@@ -919,10 +929,13 @@ class AbstractWrapperObject(NotifierBase):
         # # call any pre-initialisation updates
         # cls._updater.update(UPDATE_PRE_OBJECT_INITIALISATION, apiObj, cls)
 
-        if (factoryFunction := cls._factoryFunction) is None:
-            obj = cls(project, apiObj)
-        else:
-            obj = factoryFunction(project, apiObj)
+        # if (factoryFunction := cls._factoryFunction) is None:
+        #     # obj = cls(project, apiObj)
+        #     obj = cls._newInstanceFromApiData(project=project, apiObj=apiObj)
+        # else:
+        #     obj = factoryFunction(project, apiObj)
+
+        obj = cls._newInstanceFromApiData(project=project, apiObj=apiObj)
         if obj is None:
             raise RuntimeError('Error restoring object encoded by %s' % apiObj)
 
@@ -949,12 +962,13 @@ class AbstractWrapperObject(NotifierBase):
 
         for childClass in self._childClasses:
             # recursively create children
-            for apiObj in childClass._getAllWrappedData(self):
+            apiObjs = childClass._getAllWrappedData(self)
+            for apiObj in apiObjs:
                 obj = data2Obj.get(apiObj)
 
                 if obj is None:
                     try:
-                        obj = childClass._restoreObject(project, apiObj)
+                        obj = childClass._restoreObject(project=project, apiObj=apiObj)
 
                     except RuntimeError as es:
                         _text = 'Error restoring api-child %r of %s (%s)' % (apiObj.qualifiedName, self, es)
@@ -990,25 +1004,25 @@ class AbstractWrapperObject(NotifierBase):
     #             # recursively do the children of newInstance
     #             newInstance._restoreChildren(classes=classes)
     #
-    # def _newInstanceWithApiData(self, cls, apiData):
-    #     """Return a new instance of cls, initialised with apiData
-    #     For restore 3.2 branch
-    #     """
-    #     if apiData in self._project._data2Obj:
-    #         # This happens with Window, as it get initialised by the Windowstore and then once
-    #         # more as child of Project
-    #         newInstance = self._project._data2Obj[apiData]
-    #
-    #     elif hasattr(cls, '_factoryFunction') and getattr(cls, '_factoryFunction') is not None:
-    #         newInstance = cls._factoryFunction(self._project, apiData)
-    #
-    #     else:
-    #         newInstance = cls(self._project, apiData)
-    #
-    #     if newInstance is None:
-    #         raise RuntimeError('Error creating new instance of class "%s"' % cls.className)
-    #
-    #     return newInstance
+    @classmethod
+    def _newInstanceFromApiData(cls, project, apiObj):
+        """Return a new instance of cls, initialised with data from apiObj
+        """
+        if apiObj in project._data2Obj:
+            # This happens with Window, as it get initialised by the Windowstore and then once
+            # more as child of Project
+            newInstance = project._data2Obj[apiObj]
+
+        elif (_factoryFunction := cls._factoryFunction) is not None:
+            newInstance = _factoryFunction(project, apiObj)
+
+        else:
+             newInstance = cls(project, apiObj)
+
+        if newInstance is None:
+            raise RuntimeError(f'Error creating new instance of class "{cls.className}"')
+
+        return newInstance
 
     # def _newInstance(self, *kwds):
     #     """Instantiate a new instance, including the wrappedData
@@ -1072,8 +1086,9 @@ class AbstractWrapperObject(NotifierBase):
     # CCPN Implementation methods
     #=========================================================================================
 
-    def getByRelativeId(self, newName: str):
-        return self._getDescendant(self.project, newName)
+    # GWV: not used
+    # def getByRelativeId(self, newName: str):
+    #     return self._getDescendant(self.project, newName)
 
     @classmethod
     def _linkWrapperClasses(cls, ancestors: list = None, Project: 'Project' = None, _allGetters=None):
@@ -1105,6 +1120,7 @@ class AbstractWrapperObject(NotifierBase):
                 linkName = cls._pluralLinkName
                 for ii in range(len(newAncestors) - 1):
                     ancestor = newAncestors[ii]
+
                     func = functools.partial(AbstractWrapperObject._allDescendants,
                                              descendantClasses=newAncestors[ii + 1:])
                     # func.__annotations__['return'] = typing.Tuple[cls, ...]
@@ -1141,7 +1157,13 @@ class AbstractWrapperObject(NotifierBase):
                         docTemplate = ("\- *(%s,)*  - contained %s objects in order of underlying key. "
                                        + "This may differ from the standard sorting order")
 
-                    prop = property(func, None, None, docTemplate % (classFullName, cls.className))
+                    _doc = docTemplate % (classFullName, cls.className)
+                    prop = property(func, None, None, _doc)
+
+                    # if f'{ancestor.__name__}.{linkName}' in \
+                    #         'SpectrumDisplay.strips Strip.spectrumViews'.split():
+                    #     continue
+
                     setattr(ancestor, linkName, prop)
                     _allGetters.append(f'{ancestor.__name__}.{linkName}')
 
@@ -1179,34 +1201,36 @@ class AbstractWrapperObject(NotifierBase):
         for cc in cls._childClasses:
             cc._linkWrapperClasses(newAncestors, Project=Project, _allGetters=_allGetters)
 
-    @classmethod
-    def _getChildClasses(cls, recursion: bool = False) -> list:
-        """
-        :param recursion: use recursion to also add child objects
-        :return: list of valid child classes of cls
+    # GWV: Moved to CoreModel
+    # @classmethod
+    # def _getChildClasses(cls, recursion: bool = False) -> list:
+    #     """
+    #     :param recursion: use recursion to also add child objects
+    #     :return: list of valid child classes of cls
+    #
+    #     NB: Depth-first ordering
+    #
+    #     CCPNINTERNAL: Notifier class
+    #     """
+    #     result = []
+    #     for klass in cls._childClasses:
+    #         result.append(klass)
+    #         if recursion:
+    #             result = result + klass._getChildClasses(recursion=recursion)
+    #     return result
 
-        NB: Depth-first ordering
-
-        CCPNINTERNAL: Notifier class
-        """
-        result = []
-        for klass in cls._childClasses:
-            result.append(klass)
-            if recursion:
-                result = result + klass._getChildClasses(recursion=recursion)
-        return result
-
-    @classmethod
-    def _getParentClasses(cls) -> list:
-        """Return a list of parent classes, staring with the root (i.e. Project)
-        """
-        result = []
-        klass = cls
-        while klass._parentClass is not None:
-            result.append(klass._parentClass)
-            klass = klass._parentClass
-        result.reverse()
-        return result
+    # GWV: Moved to CoreModel
+    # @classmethod
+    # def _getParentClasses(cls) -> list:
+    #     """Return a list of parent classes, staring with the root (i.e. Project)
+    #     """
+    #     result = []
+    #     klass = cls
+    #     while klass._parentClass is not None:
+    #         result.append(klass._parentClass)
+    #         klass = klass._parentClass
+    #     result.reverse()
+    #     return result
 
     @classmethod
     def _getDescendant(cls, self, relativeId: str):
@@ -1223,11 +1247,11 @@ class AbstractWrapperObject(NotifierBase):
         else:
             return None
 
-    def _allDescendants(self, descendantClasses):
-        """get all descendants of type decendantClasses[-1] of self,
+    def _allDescendants(self, descendantClasses:(list,tuple)) -> list:
+        """get all descendant objects of type decendantClasses[-1] of self,
         following descendantClasses down the data tree.
 
-        E.g. if called on a chain with descendantClass == [Residue,Atom] the function returns
+        E.g. if called on a chain with descendantClasses == [Residue,Atom] the function returns
         a list of all Atoms in a Chain
 
         NB: the returned list of NmrResidues is sorted; if not: breaks the programme
@@ -1238,27 +1262,36 @@ class AbstractWrapperObject(NotifierBase):
             # we should never be here
             raise RuntimeError('Error getting all descendants from %s; decendants tree is empty' % self)
 
-        if len(descendantClasses) == 1:
-            # we are at the end of the recursion tree; return the children of type descendantClass[0] of self
-            if descendantClasses[0] not in self._childClasses:
-                raise RuntimeError('Invalid descendantClass %s for %s' % (descendantClasses[0], self))
-            className = descendantClasses[0].className
-            # Passing the 'classes' argument limits the dict to className only (for speed)
-            objs = self._getChildren(classes=[className])[className]
-            # NB: the returned list of NmrResidues is sorted; if not: breaks the programme
-            if descendantClasses[0].className == NmrResidue.className:
-                objs.sort()
-            # print('_allDescendants for %-30s of class %-20r: %s' % \
-            #       (self, descendantClasses[0].__name__, objs))
-            return objs
+        # get and check the children of type of first decendantClasses
+        if descendantClasses[0] not in self._childClasses:
+            raise RuntimeError('Invalid descendantClass %s for %s' % (descendantClasses[0], self))
 
-        # we are not at the end; traverse down the tree
-        objs = []
         className = descendantClasses[0].className
         # Passing the 'classes' argument limits the dict to className only (for speed)
-        for obj in self._getChildren(classes=className)[className]:
-            children = AbstractWrapperObject._allDescendants(obj, descendantClasses=descendantClasses[1:])
-            objs.extend(children)
+        children = self._getChildren(classes=[className])[className]
+
+        objs = []
+        if len(descendantClasses) == 1:
+            # we are at the end of the recursion tree;
+            # The objects are the children of type descendantClass[0] of self
+            objs = children
+
+            # # Debugging
+            # if className in 'SpectrumView Strip'.split():
+            #     ii=0
+
+        else:
+            # we are not at the end; traverse down the tree for each child
+            for child in children:
+                objs.extend(child._allDescendants(descendantClasses=descendantClasses[1:]))
+
+        # NB: the returned list of NmrResidues is sorted; if not: breaks the programme
+        # GWV: WHY??
+        if className == NmrResidue.className:
+                objs.sort()
+
+        # print('_allDescendants for %-30s of class %-20r: %s' % \
+        #       (self, descendantClasses[0].__name__, objs))
         return objs
 
     def _unwrapAll(self):
@@ -1321,75 +1354,6 @@ class AbstractWrapperObject(NotifierBase):
                 undo.decreaseBlocking()
 
     # Notifiers and related functions:
-
-    #GWV 20181123:
-    # @classmethod
-    # def _setupCoreNotifier(cls, target: str, func: typing.Callable,
-    #                        parameterDict: dict = {}, onceOnly: bool = False):
-    #     """Set up notifiers for class cls that do not depend on individual objects -
-    #     These will be registered whenever a new project is initialised.
-    #     Parameters are eventually passed to the project.registerNotifier() function
-    #     (with cls converted to cls.className). Please see the Project.registerNotifier
-    #     documentation for a precise parameter description
-    #
-    #     Note that these notifiers are NOT cleared once set up.
-    #     """
-    #
-    #     # CCPNINTERNAL - used in top level class definitions, Current (ONLY)
-    #
-    #     # NB _coreNotifiers is a class attribute of AbstractWrapperObject
-    #     # So all tuples are appended to the same list, living in AbstractWrapperObject
-    #     cls._coreNotifiers.append((cls.className, target, func, parameterDict, onceOnly))
-
-    # def _finaliseRename(self):
-    #   """Reset internal attributes after values determining PID have changed
-    #   """
-    #
-    #   # reset id
-    #   project = self._project
-    #   oldId = self._id
-    #   parent = self._parent
-    #   if parent is None:
-    #     _id = ''
-    #   elif parent is project:
-    #     _id = str(self._key)
-    #   else:
-    #     _id = '%s%s%s'% (parent._id, Pid.IDSEP, self._key)
-    #   self._id = _id
-    #
-    #   # update pid:object mapping dictionary
-    #   dd = project._pid2Obj[self.className]
-    #   del dd[oldId]
-    #   dd[_id] = self
-
-    # def _finaliseRelatedObjectFromRename(self, oldPid, pathToObject: str, action: str):
-    #     """Finalise related objects after rename
-    #     Alternative to _finaliseRelatedObject for calling from rename notifier.
-    #     """
-    #     target = operator.attrgetter(pathToObject)(self)
-    #     if not target:
-    #         pass
-    #     elif isinstance(target, AbstractWrapperObject):
-    #         target._finaliseAction(action)
-    #     else:
-    #         # This must be an iterable
-    #         for obj in target:
-    #             obj._finaliseAction(action)
-    #
-    # def _finaliseRelatedObject(self, pathToObject: str, action: str):
-    #     """ Finalise 'action' type notifiers for getattribute(pathToObject)(self)
-    #     pathToObject is a navigation path (may contain dots) and must yield an object
-    #     or an iterable of objects. Can NOT be called from a rename notifier"""
-    #
-    #     target = operator.attrgetter(pathToObject)(self)
-    #     if not target:
-    #         pass
-    #     elif isinstance(target, AbstractWrapperObject):
-    #         target._finaliseAction(action)
-    #     else:
-    #         # This must be an iterable
-    #         for obj in target:
-    #             obj._finaliseAction(action)
 
     def _finaliseAction(self, action: str, **actionKwds):
         """Do wrapper level finalisation, and execute all notifiers

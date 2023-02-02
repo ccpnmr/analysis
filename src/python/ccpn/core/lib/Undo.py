@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-06 11:14:30 +0000 (Fri, January 06, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -498,16 +498,19 @@ class Undo(deque):
             try:
                 self._processUndos(undoTo)
 
-            except Exception as e:
+            except Exception as es:
                 from ccpn.util.Logging import getLogger
 
-                getLogger().warning(f'Error while undoing ({e}). Undo stack is cleared.')
+                getLogger().warning(f'Error while undoing ({es}): aborting undo-operation.')
                 if self.application and self.application._ccpnLogging:
                     self._logObjects()
                 if self._debug:
                     sys.stderr.write(f'UNDO DEBUG: error in undo. Last undo function was: {self._lastFuncCall}\n')
-                    raise
-                self.clear()
+                    raise es
+
+                # self.clear()
+                # Skipping undo-block
+                self.nextIndex = undoTo + 1
 
             finally:
                 # Added by Rasmus March 2015. Surely we need to reset self._blocked?
@@ -577,16 +580,17 @@ class Undo(deque):
             try:
                 self._processRedos(redoTo)
 
-            except Exception as e:
+            except Exception as es:
                 from ccpn.util.Logging import getLogger
 
-                getLogger().warning(f'Error while redoing ({e}). Undo stack is cleared.')
+                getLogger().warning(f'Error while redoing ({es}). Aborting redo operation.')
                 if self.application and self.application._ccpnLogging:
                     self._logObjects()
                 if self._debug:
                     sys.stderr.write(f'REDO DEBUG: error in redo. Last redo call was: {self._lastFuncCall}\n')
-                    raise
-                self.clear()
+                    raise es
+                # self.clear()
+                self.nextIndex = redoTo + 1
 
             finally:
                 # Added by Rasmus March 2015. Surely we need to reset self._blocked?

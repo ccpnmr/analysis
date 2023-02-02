@@ -7,7 +7,7 @@ See SpectrumDataSourceABC for a description of the methods
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -17,9 +17,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:06 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,6 +37,7 @@ from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
 
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
+from ccpn.util.traits.CcpNmrTraits import CPath
 
 
 XEASY_PARAM_DICT = {
@@ -81,6 +82,7 @@ class XeasySpectrumDataSource(SpectrumDataSourceABC):
     suffixes = ['.param', '.16']
     openMethod = open
     defaultOpenReadMode = 'rb'
+
     #=========================================================================================
 
     @property
@@ -88,28 +90,45 @@ class XeasySpectrumDataSource(SpectrumDataSourceABC):
         "Path of the parameter file"
         return self.path.with_suffix('.param')
 
-    def setPath(self, path, substituteSuffix=False):
-        """Set the path, optionally change .par in .spc suffix and do some checks by calling the super class
+    def setPath(self, path, checkSuffix=False):
+        """Set the path, optionally change suffix and do some checks by calling the super class
         Return self or None on error
         """
-        if path is not None:
-            path = aPath(path)
-            if path.suffix == '.param':
-                path = path.with_suffix('.16')
-            path = str(path)
-        return super().setPath(path, substituteSuffix=substituteSuffix)
+        if path is None:
+            self._path = None
+            _path = None
+
+        else:
+            _path = aPath(path)
+            self._path = path
+
+            if _path.is_file() and path.suffix == '.param':
+                self._parameterFile = _path
+                self._binaryFile = _path.with_suffix('.16')
+                self.shouldBeValid = True
+
+            elif _path.is_file() and path.suffix == '.16':
+                self._binaryFile = _path
+                self._parameterFile = _path.with_suffix('.param')
+                self.shouldBeValid = True
+
+            else:
+                self.shouldBeValid = False
+                return None
+
+        return super().setPath(self._binaryFile, checkSuffix=False)
 
     def readParameters(self):
         """Read the parameters from the Xeasy parameter file
         Returns self
         """
-        if not self.parameterPath.exists():
-            raise RuntimeError('Cannot find Xeasy parameter file "%s"' % self.parameterPath)
+        if not self._parameterFile.exists():
+            raise RuntimeError('Cannot find Xeasy parameter file "%s"' % self._parameterFile)
 
         self.setDefaultParameters()
 
         # Parse the parameter file
-        with open(str(self.parameterPath), mode='rU', encoding='utf-8') as fp:
+        with open(self._parameterFile, mode='rU', encoding='utf-8') as fp:
             self._parseDict = {}
             for lineIndx, line in enumerate(fp.readlines()):
                 key = line[:32].replace('.', '').strip()
@@ -118,11 +137,11 @@ class XeasySpectrumDataSource(SpectrumDataSourceABC):
 
         version = self._getValue('version', None, int)
         if version != 1:
-            raise ValueError('Invalid Xeasy parameter file "%s"' % self.parameterPath)
+            raise ValueError('Invalid Xeasy parameter file "%s"' % self._parameterFile)
 
         self.dimensionCount = self._getValue('ndim', None, int)
         if self.dimensionCount is None:
-            raise ValueError('decoding "%s"' % self.parameterPath)
+            raise ValueError('decoding "%s"' % self._parameterFile)
 
         for dim in self.dimensions:
             # There is a mapping defined in the parameter file
@@ -150,9 +169,37 @@ class XeasySpectrumDataSource(SpectrumDataSourceABC):
         else:
             paramKey = XEASY_PARAM_DICT[key]
         if paramKey not in self._parseDict:
-            getLogger().debug2('parameterKey "%s" not present in "%s"' % (paramKey, self.parameterPath))
+            getLogger().debug2('parameterKey "%s" not present in "%s"' % (paramKey, self._parameterFile))
             return None
         return func(self._parseDict[paramKey])
+
+    def checkValid(self) -> bool:
+        """check if valid format corresponding to dataFormat by:
+        - checking parameter and binary files are defined
+
+        call super class for:
+        - checking suffix and existence of path
+        - reading (and checking dimensionCount) parameters
+
+        :return: True if ok, False otherwise
+        """
+        if not self._checkValidExtra():
+            return False
+
+        return super().checkValid()
+
+    def getAllFilePaths(self) -> list:
+        """
+        Get all the files handled by this dataSource: i.e. the binary and a parameter file.
+
+        :return: list of Path instances
+        """
+        result = []
+        if self._binaryFile is not None:
+            result.append(self._binaryFile)
+        if self._parameterFile is not None:
+            result.append(self._parameterFile)
+        return result
 
     @property
     def dtype(self):

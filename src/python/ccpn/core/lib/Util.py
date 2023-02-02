@@ -4,18 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:30 +0000 (Thu, February 04, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,38 +30,37 @@ import collections
 import inspect
 from typing import Optional
 from ccpn.core.lib import Pid
-from ccpn.core import _coreClassMap
 
 
-def pid2PluralName(pid: str) -> str:
-    """Get plural class name, (e.g. 'peaks', 'spectra' from short-form or long-form, Pid string
-    Unrecognised strings are returned unchanged"""
-    from ccpn.core.Project import Project
+# def pid2PluralName(pid: str) -> str:
+#     """Get plural class name, (e.g. 'peaks', 'spectra' from short-form or long-form, Pid string
+#     Unrecognised strings are returned unchanged"""
+#     from ccpn.core.Project import Project
+#
+#     tag = pid.split(Pid.PREFIXSEP, 1)[0]
+#     cls = Project._className2Class.get(tag)
+#     if cls is None:
+#         return tag
+#     else:
+#         return cls._pluralLinkName
 
-    tag = pid.split(Pid.PREFIXSEP, 1)[0]
-    cls = Project._className2Class.get(tag)
-    if cls is None:
-        return tag
-    else:
-        return cls._pluralLinkName
-
-
-def getParentPid(childPid) -> Pid.Pid:
-    """Get the pid of parent of childPid; only uses Pid definitions (i.e. does not involve the actual objects)
-    :returns Pid instance defining parent
-    """
-    if not isinstance(childPid, (str, Pid.Pid)):
-        raise ValueError('Invalid pid "%s"' % childPid)
-    childPid = Pid.Pid(childPid)
-    if childPid.type not in _coreClassMap:
-        raise ValueError('Invalid pid "%s"' % childPid)
-
-    klass = _coreClassMap[childPid.type]
-    parentClass = klass._parentClass
-    offset = klass._numberOfIdFields
-    fields = [parentClass.shortClassName] + list(childPid.fields[:-offset])
-    parentPid = Pid.Pid.new(*fields)
-    return parentPid
+#GWV 27Jan2023: now a method of Pid class
+# def getParentPid(childPid) -> Pid.Pid:
+#     """Get the pid of parent of childPid; only uses Pid definitions (i.e. does not involve the actual objects)
+#     :returns Pid instance defining parent
+#     """
+#     if not isinstance(childPid, (str, Pid.Pid)):
+#         raise ValueError('Invalid pid "%s"' % childPid)
+#     childPid = Pid.Pid(childPid)
+#     if childPid.type not in _coreClassMap:
+#         raise ValueError('Invalid pid "%s"' % childPid)
+#
+#     klass = _coreClassMap[childPid.type]
+#     parentClass = klass._parentClass
+#     offset = klass._numberOfIdFields
+#     fields = [parentClass.shortClassName] + list(childPid.fields[:-offset])
+#     parentPid = Pid.Pid.new(*fields)
+#     return parentPid
 
 
 def getParentObjectFromPid(project, pid):
@@ -78,15 +78,17 @@ def getParentObjectFromPid(project, pid):
     obj = None
     # First try if the object defined by pid still exists
     try:
-        obj = project.getByPid(pid)
-        if obj is not None:
+        if (obj := project.getByPid(pid)) is not None:
             return obj._parent
     except:
         pass
 
     if obj is None:
-        parentPid = getParentPid(pid)
+        # Assure pid to be a Pid object
+        pid = Pid.Pid(pid)
+        parentPid = pid.getParentPid()
         obj = project.getByPid(parentPid)
+
     return obj
 
 

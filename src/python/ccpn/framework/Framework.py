@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:42 +0000 (Thu, January 05, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ import os
 import sys
 import subprocess
 import platform
+import tempfile
 
 import faulthandler
 
@@ -76,7 +77,7 @@ from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.core.lib.Pid import Pid
 from ccpn.core.lib.ContextManagers import \
-    logCommandManager, undoBlockWithSideBar, rebuildSidebar
+    logCommandManager, undoBlockWithSideBar, rebuildSidebar, inactivity
 
 from ccpn.framework.Application import Arguments
 from ccpn.framework import Version
@@ -89,7 +90,8 @@ from ccpn.framework.Preferences import Preferences
 from ccpn.framework.PathsAndUrls import \
     userCcpnMacroPath, \
     tipOfTheDayConfig, \
-    ccpnCodePath
+    ccpnCodePath, \
+    CCPN_DIRECTORY_SUFFIX
 
 from ccpn.ui.gui.Gui import Gui
 from ccpn.ui.gui.GuiBase import GuiBase
@@ -104,7 +106,7 @@ from ccpn.ui.gui import Layout
 from ccpn.util import Logging
 from ccpn.util.Path import Path, aPath, fetchDir
 from ccpn.util.AttrDict import AttrDict
-from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
+from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable, getProcess
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 
@@ -200,6 +202,9 @@ class Framework(NotifierBase, GuiBase):
         self._enableLoggingToConsole = True
         logger.disabled = getattr(self.args, 'noEchoLogging', False)  # overrides noDebugLogging
 
+        # Process info
+        self._process = getProcess()
+
         self._backupTimerQ = None
         self._autoBackupThread = None
 
@@ -218,14 +223,16 @@ class Framework(NotifierBase, GuiBase):
         self._disableQueueException = getattr(self.args, 'disableQueueException', False)
         self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 
+        # Create a temporary directory; Need to hold on to the original tempfile object, as otherwise
+        # gets garbage collected. Access path name by using the "name" attribute.
+        self._temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpNmr_')
+
         # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
-
         self._dataLoaders = getDataLoaders()
 
         # register SpectrumDataSource formats for the first and only time
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
-
         self._spectrumDataSourceFormats = getDataFormats()
 
         # get a user interface; nb. ui.start() is called by the application
@@ -380,12 +387,10 @@ class Framework(NotifierBase, GuiBase):
         """
         if self.args.interface == 'Gui':
             from ccpn.ui.gui.Gui import Gui
-
             ui = Gui(application=self)
 
         else:
             from ccpn.ui.Ui import NoUi
-
             ui = NoUi(application=self)
 
         return ui
@@ -400,11 +405,17 @@ class Framework(NotifierBase, GuiBase):
         #   logCommand has no self.project.application, and requires getApplication() instead
         #   There is NoUi instantiated yet, so temporarily added loadProject to Ui class called by loadProject below)
 
-        # Load / create project on start
+        # Load / create project on start; this also initiates the ui/gui (unfortunately), so it meed to
+        # be here before any other things can happen
         if (projectPath := self.args.projectPath) is not None:
             project = self.loadProject(projectPath)
         else:
             project = self._newProject()
+
+        # Needed in case project load failed
+        if not project:
+            sys.stderr.write('==> No project, aborting ...\n')
+            return
 
         if self.preferences.general.checkUpdatesAtStartup and not getattr(self.args, '_skipUpdates', False):
             self.ui._checkForUpdates()
@@ -412,12 +423,7 @@ class Framework(NotifierBase, GuiBase):
         if not self.ui._checkRegistration():
             return
 
-        # Needed in case project load failed
-        if not project:
-            sys.stderr.write('==> No project, aborting ...\n')
-            return
-
-        self._experimentClassifications = project.getExperimentClassifications()
+        self._experimentClassifications = project._getExperimentClassifications()
         # self._updateAutoBackup()
 
         sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
@@ -431,17 +437,17 @@ class Framework(NotifierBase, GuiBase):
         self._setAutoBackupTime('kill')
 
     #-----------------------------------------------------------------------------------------
-    # Backup (TODO: need refactoring)
+    # Backup (TODO: need refactoring in AutoBackupManager)
     #-----------------------------------------------------------------------------------------
 
     def _updateAutoBackup(self):
         # CCPNINTERNAL: also called from preferences popup
         raise NotImplementedError('AutoBackup is not available in the current release')
 
-        if self.preferences.general.autoBackupEnabled:
-            self._setAutoBackupTime(self.preferences.general.autoBackupFrequency)
-        else:
-            self._setAutoBackupTime(None)
+        # if self.preferences.general.autoBackupEnabled:
+        #     self._setAutoBackupTime(self.preferences.general.autoBackupFrequency)
+        # else:
+        #     self._setAutoBackupTime(None)
 
     def _setAutoBackupTime(self, time):
         raise NotImplementedError('AutoBackup is not available in the current release')
@@ -486,11 +492,13 @@ class Framework(NotifierBase, GuiBase):
     def _initialiseProject(self, newProject: Project):
         """Initialise a project and set up links and objects that involve it
         """
-        from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise, getDefaultSpectrumColours, _getDefaultOrdering
 
         # # Linkages; need to be here as downstream code depends on it
         self._project = newProject
         newProject._application = self
+
+        newProject._resetUndo(debug=self._debugLevel <= Logging.DEBUG2,
+                              application=self)
 
         # Logging
         logger = getLogger()
@@ -503,23 +511,25 @@ class Framework(NotifierBase, GuiBase):
         # This wraps the underlying data, including the wrapped graphics data
         newProject._initialiseProject()
 
-        if newProject._isUpgradedFromV2:
-            getLogger().debug('initialising v2 noise and contour levels')
-            for spectrum in newProject.spectra:
-                # calculate the new noise level
-                spectrum.noiseLevel = spectrum.estimateNoise()
+        # GWV: this really should not be here; moved to the_update_v2 method
+        #      that already existed and gets called
+        # if newProject._isUpgradedFromV2:
+        #     getLogger().debug('initialising v2 noise and contour levels')
+        #     with inactivity(application=self):
+        #         for spectrum in newProject.spectra:
+        #             # calculate the new noise level
+        #             spectrum.noiseLevel = spectrum.estimateNoise()
+        #
+        #             # Check  contourLevels, contourColours
+        #             spectrum._setDefaultContourValues()
+        #
+        #             # set the initial contour colours
+        #             (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
+        #             spectrum.sliceColour = spectrum.positiveContourColour
+        #
+        #             # set the initial axis ordering
+        #             _getDefaultOrdering(spectrum)
 
-                # Check  contourLevels, contourColours
-                spectrum._setDefaultContourValues()
-
-                # set the initial contour colours
-                (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-                spectrum.sliceColour = spectrum.positiveContourColour
-
-                # set the initial axis ordering
-                _getDefaultOrdering(spectrum)
-
-        newProject._updateApiDataUrl(self.preferences.general.dataPath)
         # the project is now ready to use
 
         # Now that all objects, including the graphics are there, restore current
@@ -537,7 +547,7 @@ class Framework(NotifierBase, GuiBase):
     # Utilities
     #-----------------------------------------------------------------------------------------
 
-    def setDebug(self, level: int):
+    def setDebug(self, level:int):
         """Set the debugging level
         :param level: 0: off, 1-3: debug level 1-3
         """
@@ -583,7 +593,7 @@ class Framework(NotifierBase, GuiBase):
         sys.stderr.write('==> Language set to "%s"\n' % translator._language)
 
     @staticmethod
-    def cleanGarbageCollector():
+    def _cleanGarbageCollector():
         """ Force the garbageCollector to clean. See more at
         https://docs.python.org/3/library/gc.html"""
         import gc
@@ -876,22 +886,53 @@ class Framework(NotifierBase, GuiBase):
     # Project related methods
     #-----------------------------------------------------------------------------------------
 
+    def _getTemporaryPath(self, prefix, suffix=None) -> Path:
+        """Return a temporary path in _temporaryDirectory with prefix and optional suffix.
+        Use tempfile.NamedTemporyFile, but closing and deleting the file
+        instantly, while returning the generated path name as a Path instance.
+        :param prefix: prefix appended to the name
+        :param suffix: suffix of the name
+        """
+        dir = self._temporaryDirectory.name
+        with tempfile.NamedTemporaryFile(prefix=prefix, suffix=suffix, dir=dir) as tFile:
+            path = tFile.name
+        return Path(path)
+
+    def _cleanTemporaryDirectory(self):
+        """Remove all files in the temporary path.
+        the cleanup() method of the _temporaryDirectory instance seems not to do the job
+        """
+        for _path in [Path(p) for p in Path(self._temporaryDirectory.name).glob('*')]:
+            if _path.is_dir():
+                _path.removeDir()
+            else:
+                _path.removeFile()
+
     def _newProject(self, name: str = 'default') -> Project:
         """Create new, empty project with name
+        All new projects are created as temporary, to be saved later at another location
         :return a Project instance
         """
         # local import to avoid cycles
         from ccpn.core.Project import _newProject
+        from ccpn.core.lib.ProjectLib import checkProjectName
 
-        name = name or 'default'
-
-        if Project._checkName(name, correctName=False) is None:
+        if name is None:
+            raise ValueError(f'Undefined name for new project')
+        if checkProjectName(name, correctName=False) is None:
             raise ValueError(f'Invalid project name "{name}"; check log/console for details')
+
+        # Get a path in the temporary directory
+        path = self._getTemporaryPath(prefix=f'{name}_', suffix=CCPN_DIRECTORY_SUFFIX)
+
         # NB _closeProject includes a gui cleanup call
         self._closeProject()
-        newProject = _newProject(self, name=name)
-        self._initialiseProject(newProject)  # This also set the linkages
-        return newProject
+        result = _newProject(self, name=name, path=path, isTemporary=True)
+        self._initialiseProject(result)  # This also set the linkages
+
+        getLogger().debug(f'Opened project "{name}" at {result.path}')
+
+        return result
 
     # @logCommand('application.')  # decorated in ui class
     def newProject(self, name: str = 'default') -> Project:
@@ -907,28 +948,42 @@ class Framework(NotifierBase, GuiBase):
         """
         return self.ui.loadProject(path)
 
-    def _saveProject(self, newPath=None, createFallback=True, overwriteExisting=False) -> bool:
+    def _saveProjectAs(self, newPath=None, overwrite=False) -> bool:
+        """Save project to newPath (optionally overwrite)
+        :return True if successful
+        """
+        if self.preferences.general.keepSpectraInsideProject:
+            self.project.copySpectraToProject()
+
+        try:
+            self.project.saveAs(newPath=newPath, overwrite=overwrite)
+            Layout.saveLayoutToJson(self.ui.mainWindow)
+            self.current._dumpStateToFile(self.statePath)
+            self._getUndo().markSave()
+
+        except Exception as es:
+            failMessage = f'saveAs error: {es}'
+            getLogger().warning(failMessage)
+            return False
+
+        return True
+
+    def _saveProject(self) -> bool:
         """Save project to newPath and return True if successful
         """
         if self.preferences.general.keepSpectraInsideProject:
-            self._cloneSpectraToProjectDir()
-
-        successful = self.project.save(newPath=newPath, createFallback=createFallback,
-                                       overwriteExisting=overwriteExisting)
-        if not successful:
-            failMessage = '==> Project save failed'
-            getLogger().warning(failMessage)
-            self.ui.mainWindow.statusBar().showMessage(failMessage)
-            return False
-
-        self._getUndo().markSave()
+            self.project.copySpectraToProject()
 
         try:
+            self.project.save()
             Layout.saveLayoutToJson(self.ui.mainWindow)
-        except Exception as e:
-            getLogger().warning('Unable to save Layout %s' % e)
+            self.current._dumpStateToFile(self.statePath)
+            self._getUndo().markSave()
 
-        self.current._dumpStateToFile(self.statePath)
+        except Exception as es:
+            failMessage = f'saveAs: unable to save {es}'
+            getLogger().warning(failMessage)
+            return False
 
         return True
 
@@ -969,7 +1024,8 @@ class Framework(NotifierBase, GuiBase):
             self._project = None
             del (_project)
 
-        self.cleanGarbageCollector()
+        self._cleanTemporaryDirectory()
+        self._cleanGarbageCollector()
 
     #-----------------------------------------------------------------------------------------
     # Data loaders
@@ -1038,11 +1094,11 @@ class Framework(NotifierBase, GuiBase):
         return objs
 
     # @logCommand('application.') # eventually decorated by  _loadData()
-    def loadData(self, *paths, pathFilter=None) -> list:
+    def loadData(self, *paths, formatFilter=None) -> list:
         """Loads data from paths.
         Optionally filter for dataFormat(s)
         :param *paths: argument list of path's (str or Path instances)
-        :param pathFilter: keyword argument: list/tuple of dataFormat strings
+        :param formatFilter: keyword argument: list/tuple of dataFormat strings
         :returns list of loaded objects
         """
         return self.ui.loadData(*paths)
@@ -1067,7 +1123,7 @@ class Framework(NotifierBase, GuiBase):
         project = _loadProject(application=self, path=str(path))
         self._initialiseProject(project)  # This also sets the linkages
 
-        # Save the result
+        # Now that all has been restored and updated: save the result
         try:
             project.save()
             getLogger().info('==> Saved %s as "%s"' % (project, project.path))
@@ -1149,48 +1205,6 @@ class Framework(NotifierBase, GuiBase):
         self._showHtmlFile('', str(path))
         return []
 
-    def _cloneSpectraToProjectDir(self):
-        """ Keep a copy of spectra inside the project directory "myproject.ccpn/data/spectra".
-        This is useful when saving the project in an external driver and want to keep the spectra together with the project.
-        """
-        from shutil import copyfile
-
-        try:
-            for spectrum in self.project.spectra:
-                oldPath = spectrum.filePath
-                # For Bruker need to keep all the tree structure.
-                # Uses the fact that there is a folder called "pdata" and start to copy from the dir before.
-                ss = oldPath.split('/')
-                if 'pdata' in ss:
-                    brukerDir = os.path.join(os.sep, *ss[:ss.index('pdata')])
-                    brukerName = brukerDir.split('/')[-1]
-                    os.mkdir(os.path.join(self.spectraPath, brukerName))
-                    destinationPath = os.path.join(self.spectraPath, brukerName)
-                    copy_tree(brukerDir, destinationPath)
-                    clonedPath = os.path.join(destinationPath, *ss[ss.index('pdata'):])
-                    # needs to repoint the path but doesn't seem to work!! troubles with $INSIDE!!
-                    # spectrum.filePath = clonedPath
-                else:
-                    # copy the file and or other files containing params
-                    from ntpath import basename
-
-                    pathWithoutFileName = os.path.join(os.sep, *ss[:ss.index(basename(oldPath))])
-                    fullpath = os.path.join(pathWithoutFileName, basename(oldPath))
-                    import glob
-
-                    otherFilesWithSameName = glob.glob(fullpath + ".*")
-                    clonedPath = os.path.join(self.spectraPath, basename(oldPath))
-                    for otherFileTocopy in otherFilesWithSameName:
-                        otherFilePath = os.path.join(self.spectraPath, basename(otherFileTocopy))
-                        copyfile(otherFileTocopy, otherFilePath)
-                    if oldPath != clonedPath:
-                        copyfile(oldPath, clonedPath)
-                        # needs to repoint the path but doesn't seem to work!! troubles with $INSIDE!!
-                        # spectrum.filePath = clonedPath
-
-        except Exception as e:
-            getLogger().debug(str(e))
-
     #-----------------------------------------------------------------------------------------
     # NEF-related code
     #-----------------------------------------------------------------------------------------
@@ -1202,11 +1216,13 @@ class Framework(NotifierBase, GuiBase):
         CCPNINTERNAL: called from NefDataLoader.load()
         """
         from ccpn.core.Project import DEFAULT_CHEMICALSHIFTLIST
+        from ccpn.core.lib.ProjectLib import checkProjectName
 
         TOBEDELETED = '_toBeDeleted'
 
         if _newProject := dataLoader.createNewProject:
-            project = self._newProject(dataLoader.nefImporter.getName())
+            name = checkProjectName(dataLoader.nefImporter.getName(), correctName=True)
+            project = self._newProject(name=name)
         else:
             project = self.project
 

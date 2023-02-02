@@ -4,18 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-12 18:51:55 +0100 (Tue, May 12, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:41 +0000 (Thu, February 02, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,11 +32,13 @@ from PyQt5 import QtGui, QtWidgets
 from ccpn.util.Path import aPath
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 
+from ccpn.ui.gui.guiSettings import COLOUR_BLIND_LIGHTGREEN, COLOUR_BLIND_MEDIUM, COLOUR_BLIND_DARKGREEN, \
+    COLOUR_BLIND_RED, COLOUR_BLIND_ORANGE
 
-VALIDROWCOLOUR = QtGui.QColor('palegreen')
-ACCEPTROWCOLOUR = QtGui.QColor('darkseagreen')
-REJECTROWCOLOUR = QtGui.QColor('orange')
-INVALIDROWCOLOUR = QtGui.QColor('lightpink')
+VALIDROWCOLOUR = COLOUR_BLIND_LIGHTGREEN
+ACCEPTROWCOLOUR = COLOUR_BLIND_DARKGREEN
+REJECTROWCOLOUR = COLOUR_BLIND_ORANGE
+INVALIDROWCOLOUR = COLOUR_BLIND_RED
 
 
 def _validPath(path) -> bool:

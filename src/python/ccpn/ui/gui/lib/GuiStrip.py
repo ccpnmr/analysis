@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:04 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:41 +0000 (Thu, February 02, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -266,6 +266,40 @@ class GuiStrip(Frame):
         self._queuePending = UpdateQueue()
         self._queueActive = None
         self._lock = QtCore.QMutex()
+
+    def _setStripTiling(self):
+        """Set the tiling of the strip
+        For now: only horizontal or vertical
+        CCPNINTERNAL: called from GuiStripNd/1d after __init__ completion
+        """
+
+        # cannot add the Frame until fully done
+        strips = self.spectrumDisplay.orderedStrips
+        if self in strips:
+            stripIndex = strips.index(self)
+        else:
+            stripIndex = len(strips)
+            getLogger().warning('Strip ordering not defined for %s in %s' % (str(self.pid), str(self.spectrumDisplay.pid)))
+
+        if self.spectrumDisplay.stripArrangement == 'Y':
+            # strips are arranged in a row
+            tilePosition = (0, stripIndex)
+
+        elif self.spectrumDisplay.stripArrangement == 'X':
+            # strips are arranged in a column
+            tilePosition = (stripIndex, 0)
+
+        elif self.spectrumDisplay.stripArrangement == 'T':
+            # NOTE:ED - Tiled plots not fully implemented yet
+            tilePosition = self.tilePosition
+            getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
+            return
+
+        else:
+            getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
+            return
+
+        self.spectrumDisplay._addStrip(self, tilePosition)
 
     def resizeEvent(self, ev):
         super().resizeEvent(ev)

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-18 12:37:42 +0000 (Wed, January 18, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -33,8 +33,6 @@ import os
 
 from ccpn.framework.Version import applicationVersion
 
-from ccpn.ui._implementation import _uiImportOrder
-from ccpn.core import _coreClassMap
 from ccpn.core.lib.Notifiers import NotifierBase
 
 from ccpn.util import Register
@@ -55,20 +53,9 @@ class Ui(NotifierBase):
         self.mainWindow = None
         self.pluginModules = []
 
-        self._setUpGraphicsDataClasses()
-
     @property
     def project(self):
         return self.application.project
-
-    @classmethod
-    def _setUpGraphicsDataClasses(cls):
-        """Set up graphics data classes, cleaning up previous settings
-        GWV: This is daft and will be refactored in 3.2.x
-        """
-        for className in _uiImportOrder:
-            # Remove ui-specific settings. Will be reset as necessary in subclasses
-            _coreClassMap[className]._factoryFunction = cls._factoryFunctions.get(className)
 
     def initialize(self, mainWindow):
         """UI operations done after every project load/create"""

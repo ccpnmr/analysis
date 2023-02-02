@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:09 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:43 +0000 (Thu, February 02, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -125,35 +125,32 @@ def _message(MESSAGE, logger, msg, includeInspection=True, *args, **kwargs):
     logger.log(MESSAGE, _msg, stacklevel=2)
 
 
-def createLogger(loggerName, memopsRoot, stream=None, level=None, mode='a',
+def createLogger(loggerName,
+                 logDirectory,
+                 stream=None,
+                 level=None,
+                 mode='a',
                  removeOldLogsDays=MAX_LOG_FILE_DAYS):
     """Return a (unique) logger for this memopsRoot and with given programName, if any.
        Puts log output into a log file but also optionally can have output go to
        another, specified, stream (e.g. a console)
     """
+    from ccpn.util.Path import aPath
 
     global logger
 
     assert mode in ('a', 'w'), 'for now mode must be "a" or "w"'
 
-    #TODO: remove Api calls
-    from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-
-    repositoryPath = apiIo.getRepositoryPath(memopsRoot, 'userData')
-    logDirectory = os.path.join(repositoryPath, 'logs')
+    _logDirectory = aPath(logDirectory)
+    if not _logDirectory.exists():
+        _logDirectory.mkdir(parents=False, exist_ok=False)
 
     today = datetime.date.today()
     fileName = 'log_%s_%02d%02d%02d.txt' % (loggerName, today.year, today.month, today.day)
 
-    logPath = os.path.join(logDirectory, fileName)
+    logPath = _logDirectory / fileName
 
-    if os.path.exists(logDirectory):
-        if os.path.exists(logPath) and os.path.isdir(logPath):
-            raise Exception('log file "%s" is a directory' % logPath)
-    else:
-        os.makedirs(logDirectory)
-
-    _removeOldLogFiles(logPath, removeOldLogsDays)
+    # _removeOldLogFiles(logPath, removeOldLogsDays)
 
     if logger:
         # there seems no way to close the logger itself
@@ -197,18 +194,28 @@ def createLogger(loggerName, memopsRoot, stream=None, level=None, mode='a',
 
 
 def _setupHandler(handler, level):
-    """Add a stream handler for this logger.
+    """Add a stream handler for the logger.
     """
 
-    handler.setLevel(level)
+    if logger is not None:
+        handler.setLevel(level)
 
-    # define a simple logging message, extra information is inserted in _logCaller
-    _format = '%(levelname)-7s: %(message)s'
+        # define a simple logging message, extra information is inserted in _logCaller
+        _format = '%(levelname)-7s: %(message)s'
 
-    formatter = logging.Formatter(_format)
-    handler.setFormatter(formatter)
+        formatter = logging.Formatter(_format)
+        handler.setFormatter(formatter)
 
-    logger.addHandler(handler)
+        logger.addHandler(handler)
+
+
+def _clearLogHandlers():
+    """clear all log handlers
+    """
+    if logger is not None:
+
+        for handler in logger.handlers[:]:
+          logger.removeHandler(handler)
 
 
 def _removeOldLogFiles(logPath, removeOldLogsDays=MAX_LOG_FILE_DAYS):

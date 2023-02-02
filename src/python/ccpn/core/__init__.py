@@ -281,6 +281,216 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+# Import classes and set to this module
+# All classes must be imported in correct order for subsequent code
+# to work
+
+_coreImportOrder = (
+    'Project',
+        'Spectrum',
+            'SpectrumReference',
+            'PseudoDimension',
+            'PeakList',
+                'Peak',
+            'IntegralList',
+                'Integral',
+            'MultipletList',
+                'Multiplet',
+            'SpectrumHit',
+        'SpectrumGroup',
+        'Sample',
+            'SampleComponent',
+        'Substance',
+        'Chain',
+            'Residue',
+                'Atom',
+        'Complex',
+        'NmrChain',
+            'NmrResidue',
+                'NmrAtom',
+        'ChemicalShiftList',
+            '_OldChemicalShift',
+            'ChemicalShift',
+        'StructureData',
+            'RestraintTable',
+                'Restraint',
+                    'RestraintContribution',
+            'ViolationTable',
+            'CalculationStep',
+            'Data',
+        'StructureEnsemble',
+            'Model',
+        'DataTable',
+        'Collection',
+        'Note',
+        '_PeakCluster',
+    )
+
+# Register the classes
+from ccpn.core.Project import Project
+Project._registerCoreClass()
+
+from ccpn.core.Spectrum import Spectrum
+Spectrum._registerCoreClass()
+
+from ccpn.core.SpectrumReference import SpectrumReference
+SpectrumReference._registerCoreClass()
+
+from ccpn.core.PseudoDimension import PseudoDimension
+PseudoDimension._registerCoreClass()
+
+from ccpn.core.PeakList import PeakList
+PeakList._registerCoreClass()
+
+from ccpn.core.Peak import Peak
+Peak._registerCoreClass()
+
+from ccpn.core.IntegralList import IntegralList
+IntegralList._registerCoreClass()
+
+from ccpn.core.Integral import Integral
+Integral._registerCoreClass()
+
+from ccpn.core.MultipletList import MultipletList
+MultipletList._registerCoreClass()
+
+from ccpn.core.Multiplet import Multiplet
+Multiplet._registerCoreClass()
+
+from ccpn.core.SpectrumHit import SpectrumHit
+SpectrumHit._registerCoreClass()
+
+from ccpn.core.SpectrumGroup import SpectrumGroup
+SpectrumGroup._registerCoreClass()
+
+from ccpn.core.Sample import Sample
+Sample._registerCoreClass()
+
+from ccpn.core.SampleComponent import SampleComponent
+SampleComponent._registerCoreClass()
+
+from ccpn.core.Substance import Substance
+Substance._registerCoreClass()
+
+from ccpn.core.Chain import Chain
+Chain._registerCoreClass()
+
+from ccpn.core.Residue import Residue
+Residue._registerCoreClass()
+
+from ccpn.core.Atom import Atom
+Atom._registerCoreClass()
+
+from ccpn.core.Complex import Complex
+Complex._registerCoreClass()
+
+from ccpn.core.NmrChain import NmrChain
+NmrChain._registerCoreClass()
+
+from ccpn.core.NmrResidue import NmrResidue
+NmrResidue._registerCoreClass()
+
+from ccpn.core.NmrAtom import NmrAtom
+NmrAtom._registerCoreClass()
+
+from ccpn.core.ChemicalShiftList import ChemicalShiftList
+ChemicalShiftList._registerCoreClass()
+
+from ccpn.core._implementation._OldChemicalShift import _OldChemicalShift
+_OldChemicalShift._registerCoreClass()
+
+from ccpn.core.ChemicalShift import ChemicalShift
+ChemicalShift._registerCoreClass()
+
+from ccpn.core.StructureData import StructureData
+StructureData._registerCoreClass()
+
+from ccpn.core.RestraintTable import RestraintTable
+RestraintTable._registerCoreClass()
+
+from ccpn.core.Restraint import Restraint
+Restraint._registerCoreClass()
+
+from ccpn.core.RestraintContribution import RestraintContribution
+RestraintContribution._registerCoreClass()
+
+from ccpn.core.ViolationTable import ViolationTable
+ViolationTable._registerCoreClass()
+
+from ccpn.core.CalculationStep import CalculationStep
+CalculationStep._registerCoreClass()
+
+from ccpn.core.Data import Data
+Data._registerCoreClass()
+
+from ccpn.core.DataTable import DataTable
+DataTable._registerCoreClass()
+
+from ccpn.core.StructureEnsemble import StructureEnsemble
+StructureEnsemble._registerCoreClass()
+
+from ccpn.core.Model import Model
+Model._registerCoreClass()
+
+from ccpn.core.Collection import Collection
+Collection._registerCoreClass()
+
+from ccpn.core.Note import Note
+Note._registerCoreClass()
+
+
+# GUI classes
+_uiImportOrder = (
+    'Window',
+    'SpectrumDisplay',
+        'Strip',
+            'Axis',
+            'SpectrumView',
+                'PeakListView',
+                'MultipletListView',
+                'IntegralListView'
+    'Mark',
+)
+
+from ccpn.ui.gui.MainWindow import MainWindow
+MainWindow._registerCoreClass()
+
+from ccpn.ui._implementation.Mark import Mark
+Mark._registerCoreClass()
+
+from ccpn.ui.gui.modules.SpectrumDisplay import SpectrumDisplay, _CoreClassSpectrumDisplay, _factoryFunction
+SpectrumDisplay._registerCoreClass()
+# _CoreClassSpectrumDisplay._registerCoreClass()
+
+from ccpn.ui.gui.lib.Strip import Strip, _CoreClassStrip, _factoryFunction
+Strip._registerCoreClass()
+# _CoreClassStrip._registerCoreClass(_factoryFunction)
+
+from ccpn.ui._implementation.Axis import Axis
+Axis._registerCoreClass()
+
+from ccpn.ui.gui.lib.SpectrumView import SpectrumView, _CoreClassSpectrumView, _factoryFunction
+SpectrumView._registerCoreClass()
+# _CoreClassSpectrumView._registerCoreClass(_factoryFunction)
+
+from ccpn.ui.gui.lib.PeakListView import PeakListView, _CoreClassPeakListView, _factoryFunction
+PeakListView._registerCoreClass()
+# _CoreClassPeakListView._registerCoreClass(_factoryFunction)
+
+from ccpn.ui.gui.lib.MultipletListView import MultipletListView, _CoreClassMultipletListView, _factoryFunction
+MultipletListView._registerCoreClass()
+# _CoreClassMultipletListView._registerCoreClass(_factoryFunction)
+
+from ccpn.ui.gui.lib.IntegralListView import IntegralListView, _CoreClassIntegralListView, _factoryFunction
+IntegralListView._registerCoreClass()
+# _CoreClassIntegralListView._registerCoreClass(_factoryFunction)
+
+
+_allGetters = []
+Project._linkWrapperClasses(_allGetters=_allGetters)
+
+# print('\n    '.join(sorted(_allGetters)))
+
 #=========================================================================================
 # current list of getters for core objects - inserted by _linkWrapperClasses
 #     Chain.atoms
@@ -302,12 +512,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #     PeakList.getPeak
 #     PeakList.peaks
 #     Project._oldChemicalShifts
+#     Project._peakClusters
 #     Project.atoms
 #     Project.axes
 #     Project.calculationSteps
 #     Project.chains
 #     Project.chemicalShiftLists
-#     Project.collections
 #     Project.complexes
 #     Project.data
 #     Project.dataTables
@@ -316,7 +526,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #     Project.getCalculationStep
 #     Project.getChain
 #     Project.getChemicalShiftList
-#     Project.getCollection
 #     Project.getComplex
 #     Project.getData
 #     Project.getDataTable
@@ -352,8 +561,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #     Project.getStructureData
 #     Project.getStructureEnsemble
 #     Project.getSubstance
+#     Project.getViolationTable
 #     Project.getWindow
 #     Project.get_OldChemicalShift
+#     Project.get_PeakCluster
 #     Project.integralListViews
 #     Project.integralLists
 #     Project.integrals
@@ -459,68 +670,3 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #     StructureEnsemble.getModel
 #     StructureEnsemble.models
 #=========================================================================================
-
-import importlib
-import collections
-
-
-# Import classes and set to this module
-# All classes must be imported in correct order for subsequent code
-# to work, as connections between classes are set when child class is imported
-# _wrappedClassNames gives import order
-#
-# NB this list will be added to from other modules that also add to _coreClassMap
-# in practice ccpn.ui.gui.Gui
-_coreImportOrder = (
-    'Project', 'Spectrum', 'SpectrumReference', 'SpectrumGroup', 'PeakList', 'Peak',
-    'IntegralList', 'Integral', 'PseudoDimension', 'SpectrumHit', 'Sample', 'SampleComponent',
-    'Substance', 'Chain', 'Residue', 'Atom', 'Complex', 'NmrChain', 'NmrResidue', 'NmrAtom',
-    'ChemicalShiftList', '_OldChemicalShift',
-    'StructureData', 'RestraintTable', 'Restraint',
-    'RestraintContribution', 'CalculationStep', 'Data', 'StructureEnsemble', 'Model', 'Note',
-    '_PeakCluster', 'MultipletList', 'Multiplet', 'DataTable', 'ViolationTable',
-    'ChemicalShift', 'Collection'
-    )
-
-# This list includes ui classes (added below)
-_importOrder = list(_coreImportOrder)
-
-# {className:class, shortClassName:class} dictionary in import order for all wrapper classes
-_coreClassMap = collections.OrderedDict()
-
-# Main data classes
-for className in _coreImportOrder:
-    try:
-        impModule = importlib.import_module(f'ccpn.core.{className}')
-    except Exception:
-        # _OldChemicalShift and _PeakCluster have been moved to _implementation
-        impModule = importlib.import_module(f'ccpn.core._implementation.{className}')
-    cls = getattr(impModule, className)
-    parentClass = cls._parentClass
-    if parentClass is not None and cls not in parentClass._childClasses:
-        # Should not be necessary to check, but apparently this code can be executed twice
-        parentClass._childClasses.append(cls)
-    _coreClassMap[cls.className] = cls
-    _coreClassMap[cls.shortClassName] = cls
-
-# Wrapped graphics data classes
-from ccpn.ui._implementation import _uiImportOrder
-
-
-_importOrder.extend(_uiImportOrder)
-for className in _uiImportOrder:
-    cls = getattr(importlib.import_module(f'ccpn.ui._implementation.{className}'), className)
-
-    parentClass = cls._parentClass
-    if parentClass is not None and cls not in parentClass._childClasses:
-        # Should not be necessary to check, but apparently this code can be executed twice
-        parentClass._childClasses.append(cls)
-    _coreClassMap[cls.className] = cls
-    _coreClassMap[cls.shortClassName] = cls
-
-# connect classes to project
-# NB - customisation for different UIs is done by inserting _factoryFunctions
-# from the UI class setUp
-_allGetters = []
-_coreClassMap['Project']._linkWrapperClasses(_allGetters=_allGetters)
-# print('\n    '.join(sorted(_allGetters)))

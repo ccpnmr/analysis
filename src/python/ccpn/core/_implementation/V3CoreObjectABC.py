@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-16 13:35:21 +0000 (Mon, January 16, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:38 +0000 (Thu, February 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -31,12 +31,13 @@ from typing import Optional
 from collections import OrderedDict
 from functools import partial
 
-from ccpn.core import _importOrder
+from ccpn.core._implementation.CoreModel import CoreModel
 from ccpn.core.lib.ContextManagers import renameObject, ccpNmrV3CoreSetter, deleteV3Object, undoStackBlocking
 from ccpn.core.lib.Pid import Pid, altCharacter
 from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.util.decorators import logCommand
 from ccpn.framework.Version import VersionString
+
 from ccpn.util.Logging import getLogger
 
 
@@ -47,7 +48,7 @@ _COMMENT = 'comment'
 _RENAME_SENTINEL = Pid('Dummy:_rename')  # should match definition in AbstractWrapperObject, but don't want to import
 
 
-class V3CoreObjectABC(NotifierBase):
+class V3CoreObjectABC(CoreModel, NotifierBase):
     """V3 core object object, contained in _wrapperList.
     Does not have an api equivalent
     """
@@ -67,6 +68,9 @@ class V3CoreObjectABC(NotifierBase):
     _childClasses = []
     _isGuiClass = False
 
+    # flag to ignore _newApiObject callback function; GWV: used to gradually remove this aspect
+    _ignoreNewApiObjectCallback = False
+
     # the attribute name used by current
     _currentAttributeName = 'v3CoreObjectABCs'
 
@@ -76,6 +80,9 @@ class V3CoreObjectABC(NotifierBase):
         _unique Id links the core object to the dataFrame storage and MUST be specified
         before the V3CoreObjectABC can be used
         """
+        CoreModel.__init__(self)
+        NotifierBase.__init__(self)
+
         if self._parentClass is None:
             raise RuntimeError(f'{self.className}._parentClass must be defined')
 
@@ -318,10 +325,9 @@ class V3CoreObjectABC(NotifierBase):
         """Reset the uniqueId
         CCPN Internal - although not sure whether actually required here
         """
-        # if self._chemicalShiftList._searchChemicalShifts(uniqueId=value):
-        #     raise ValueError(f'{self.className}._resetUniqueId: uniqueId {value} already exists')
         self._uniqueId = int(value)
-        self._ccpnSortKey = (id(self.project), _importOrder.index(self.className), self._uniqueId)
+        idx = self._getClassIndex(self.className)
+        self._ccpnSortKey = (id(self.project), idx, self._uniqueId)
 
     def _resetIds(self, oldId):
         """Reset the pids in the project lists

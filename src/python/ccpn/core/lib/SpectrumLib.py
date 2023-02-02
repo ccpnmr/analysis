@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:03 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,7 +30,7 @@ import math
 import random
 import numpy as np
 import decorator
-from typing import Tuple, Optional, Sequence
+from typing import Tuple, Optional, Sequence, Any
 from itertools import permutations
 
 from ccpn.framework.Application import getApplication
@@ -323,8 +323,61 @@ def checkSpectrumPropertyValue(iterable: bool, unique: bool = False, allowNone: 
 
     return theDecorator
 
+#------------------------------------------------------------------------------------------------------
+# Routines dealing with getting data sources
+#------------------------------------------------------------------------------------------------------
 
-#=========================================================================================
+def getSpectrumDataSource(path, dataFormat):
+    """Get a SpectrumDataSource instance of type dataFormat for path
+    :param path: a path as string or Path instance, optionally with redirect ($DATA, $INSIDE, $ALONGSIDE)
+    :param dataFormat: a dataFormat identifier or None (denoting auto-detect)
+    :return A (DataStore, SpectrumDataSource) tuple.
+            The DataStore instance is None in case of zero-length path (except EmptySpectrum)
+            The SpectrumDataSource instance might not be valid (for dataFormat; check isValid!)
+            or can be None if auto-detect failed
+
+    raises ValueError if path is None or dataFormat is inValid
+    """
+    # avoiding cyclic import
+    from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import \
+        getDataSourceClass, getDataFormats, SpectrumDataSourceSuffixDict
+    from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+    from ccpn.core.lib.DataStore import DataStore
+
+    if path is None:
+        raise ValueError(f'Undefined path')
+
+    if len(path) == 0 and dataFormat != EmptySpectrumDataSource.dataFormat:
+        return (None, None)
+    dataStore = DataStore.newFromPath(path=path, dataFormat=dataFormat)
+    _path = dataStore.aPath()  # The path without optional redirections
+
+    if dataFormat is not None:
+        # Get the corresponding class
+        if (klass := getDataSourceClass(dataFormat=dataFormat)) is None:
+            validFormats = tuple(getDataFormats().keys())
+            raise ValueError(f'invalid dataFormat "{dataFormat}"; should be one of {validFormats}')
+
+        dataSource = klass(path=_path)
+        dataStore.dataFormat = dataFormat
+        return (dataStore, dataSource)
+
+    else:
+        dataSource = None
+        # Auto detect dataFormat from path; limit options using suffix dict
+        _suffixDict = SpectrumDataSourceSuffixDict()
+        klasses = _suffixDict.get(_path.suffix)
+        for klass in klasses:
+            dataSource = klass(path=_path)
+            if dataSource.isValid or dataSource.shouldBeValid:
+                # we found a valid one, or one that should be valid (but had errors)
+                dataStore.dataFormat = klass.dataFormat
+                return (dataStore, dataSource)
+        # haven't found a valid class; either none matched, or isValid/shouldBeValid of the
+        # last one we tried is False
+        return (dataStore, dataSource)
+
+#------------------------------------------------------------------------------------------------------
 
 
 # def _oldEstimateNoiseLevel1D(x, y, factor=3):

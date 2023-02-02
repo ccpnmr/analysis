@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-27 16:30:59 +0000 (Fri, January 27, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1283,3 +1283,114 @@ def _getPeakSNRatio(peak, factor=2.5):
 
     snr = estimateSNR(noiseLevels=[noiseLevel, negativeNoiseLevel], signalPoints=[peak.height], factor=factor)
     return snr[0]  ## estimateSNR return a list with a length always > 0
+
+def _getPeakId(peak):
+    """Get the current id for the peak
+    """
+    return peak.id
+
+def _getPeakAnnotation(peak):
+    """Get the current annotation for the peak
+    """
+    return peak.annotation
+
+def _getPeakClusterId(peak):
+    """Get the current clusterId for the peak
+    """
+    v = peak.clusterId
+    return str(v) if v else None
+
+def _getPeakLabelling(peak):
+    """Create the labelling for Pids method
+    """
+    peakLabel = []
+
+    for dimension in range(peak.peakList.spectrum.dimensionCount):
+        pdNA = peak.dimensionNmrAtoms
+
+        pdNADim = [atom for atom in pdNA[dimension] if not atom.isDeleted]
+
+        if not pdNADim:  # len(pdNA[dimension]) == 0:
+            if len(pdNA) == 1:
+                peakLabel.append(peak.id)
+            else:
+                peakLabel.append('-')
+        else:
+            peakNmrResidues = [atom[0].nmrResidue.id for atom in pdNA if len(atom) != 0 and not atom[0].isDeleted]
+            if all(x == peakNmrResidues[0] for x in peakNmrResidues):
+
+                for item in pdNADim:  # pdNA[dimension]:
+                    if len(peakLabel) > 0:
+                        peakLabel.append(item.name)
+                    else:
+                        peakLabel.append(item.pid.id)
+
+            else:
+                pdNADim = [atom for atom in pdNA[dimension] if not atom.isDeleted]
+                for item in pdNADim:  # pdNA[dimension]:
+                    label = '.'.join((item.nmrResidue.id, item.name))
+                    # label = item.nmrResidue.id + '.' + item.name
+                    peakLabel.append(label)
+
+    text = ', '.join(peakLabel)
+    return text
+
+# GWV 26Jan2023: Moved here from GuiPeakListView
+
+def _getScreenPeakAnnotation(peak, useShortCode=False, useMinimalCode=False, usePid=False):
+    """Create labelling for short, long, minimal
+    """
+
+    def chainLabel(item):
+        try:
+            chainLabel = item.nmrResidue.nmrChain.id
+            assignedOnlyOneChain = len(peak.project.chains) == 1 and item.nmrResidue.residue
+
+            if assignedOnlyOneChain or chainLabel == '@-':
+                return ''
+            elif chainLabel:
+                chainLabel += '_'
+        except:
+            chainLabel = ''
+        return chainLabel
+
+    def shortCode(item):
+        try:
+            shortCode = item.nmrResidue.residue.shortName
+        except:
+            shortCode = ''
+        return shortCode
+
+    peakLabel = []
+    pdNA = peak.dimensionNmrAtoms
+    numDims = peak.peakList.spectrum.dimensionCount
+
+    # list all the unique nmrResidues in the peakList
+
+    # ids = [OrderedDict((atom.nmrResidue.id, []) for atom in pdNAs) for pdNAs in pdNA]
+    ids = OrderedDict((atom.nmrResidue.id, []) for pdNAs in pdNA for atom in pdNAs)
+
+    for dimension in range(peak.peakList.spectrum.dimensionCount):
+        pdNADim = [atom for atom in pdNA[dimension] if not atom.isDeleted]
+
+        for atom in pdNADim:
+            nmrRes = ids[atom.nmrResidue.id]
+
+            if nmrRes and (useShortCode or usePid):
+
+                if useMinimalCode:
+                    continue
+
+                label = atom.name
+            else:
+                if useMinimalCode:
+                    label = shortCode(atom) + atom.nmrResidue.sequenceCode
+                elif usePid:
+                    label = '.'.join((atom.nmrResidue.id, atom.name))
+                else:
+                    label = chainLabel(atom) + shortCode(atom) + atom.nmrResidue.sequenceCode + atom.name
+
+            nmrRes.append(label)
+
+    text = '; '.join(', '.join(atoms) for atoms in ids.values())
+    return text if text else ','.join(['_'] * numDims)

@@ -8,7 +8,7 @@ See SpectrumDataSourceABC for a description of the methods
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:06 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -68,6 +68,20 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         """
         return None
 
+    def getAllFilePaths(self) -> list:
+        """
+        :return An empty list, as EmptySpectrumDataSource does not have a physical/binary file.
+        """
+        return []
+
+    def checkValid(self) -> bool:
+        """check if valid format
+        :return: Always return True
+        """
+        self.isValid = True
+        self.errorString = ''
+        return True
+
     @classmethod
     def checkForValidFormat(cls, path):
         """check if valid format corresponding to dataFormat by;
@@ -75,9 +89,9 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         """
         return None
 
-    def setPath(self, path, substituteSuffix=False):
+    def setPath(self, path, checkSuffix=False):
         """define valid path: always set to None for EmptySpectrumDataSource"""
-        super().setPath(None)
+        super().setPath(None, checkSuffix=False)
         return self
 
     @property

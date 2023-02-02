@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:07 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:42 +0000 (Thu, February 02, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -121,11 +121,11 @@ class ButtonBoxList(QtWidgets.QDialogButtonBox, Base, ButtonListMixin):
         self.buttonNames = {}
 
         if commands:
-            print("qtgui.ButtonList.commands is deprecated; use .callbacks")
+            getLogger().warning("qtgui.ButtonList.commands is deprecated; use .callbacks")
             callbacks = commands
 
         if images:
-            print("qtgui.ButtonList.images is deprecated; use .icons")
+            getLogger().warning("qtgui.ButtonList.images is deprecated; use .icons")
             icons = images
 
         if texts is None:
@@ -214,11 +214,11 @@ class ButtonList(Widget, ButtonListMixin):
         self.buttonNames = {}
 
         if commands:
-            print("qtgui.ButtonList.commands is deprecated; use .callbacks")
+            getLogger().warning("qtgui.ButtonList.commands is deprecated; use .callbacks")
             callbacks = commands
 
         if images:
-            print("qtgui.ButtonList.images is deprecated; use .icons")
+            getLogger().warning("qtgui.ButtonList.images is deprecated; use .icons")
             icons = images
 
         if texts is None:

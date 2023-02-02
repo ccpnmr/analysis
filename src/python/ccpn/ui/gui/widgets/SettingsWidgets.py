@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-26 11:55:28 +0000 (Thu, January 26, 2023) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:43 +0000 (Thu, February 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -409,7 +409,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                          contourThickness, zPlaneNavigationMode):
         """Populate the widgets
         """
-        with self.blockWidgetSignals():
+        with self._parent.blockWidgetSignals():
 
             # put the values into the correct widgets
 

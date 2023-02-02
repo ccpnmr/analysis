@@ -6,7 +6,7 @@ of different flavours (e.g. Bruker, NmrPipe, Azara, Felix, Varian/Agilent, Hdf5 
 
 the core methods are:
 
-checkForValidFormat()       classmethod; check if valid format corresponding to dataFormat;
+checkValid()                check if valid corresponding to dataFormat;
                             returns True/False
 
 readParameters()            read paramters from spectral data format
@@ -82,7 +82,7 @@ Example 3 (using Spectrum instance to make a hdf5 duplicate):
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -92,9 +92,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:03 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -122,10 +122,11 @@ from ccpn.core.lib.Cache import cached, Cache
 from ccpn.util.Common import isIterable
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
+from ccpn.util.decorators import singleton
 
 from ccpn.util.isotopes import findNucleiFromSpectrometerFrequencies, Nucleus
 from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, Bool, List, \
-    CString, CList
+    CString, CList, CPath
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 
 from ccpn.framework.constants import CCPNMR_PREFIX, NO_SUFFIX, ANY_SUFFIX
@@ -139,7 +140,7 @@ MB = 1024 * 1024
 def getDataFormats() -> OrderedDict:
     """Get spectrum datasource formats
 
-    :return: a dictonary of (format-identifier-strings, SpectrumDataSource classes) as (key, value) pairs
+    :return: a dictionary of (format-identifier-strings, SpectrumDataSource classes) as (key, value) pairs
     """
     # The following imports are just to assure that all the classes have been imported
     # It is local to prevent circular imports
@@ -156,35 +157,66 @@ def getDataFormats() -> OrderedDict:
     return SpectrumDataSourceABC._spectrumDataFormats
 
 
-def getSpectrumDataSource(path, dataFormat):
-    """Get a SpectrumDataSource instance of type dataFormat for path
-    :param path: a Path instance
-    :param dataFormat: a valid dataFormat indentifier
-    :return The SpectrumDataSource instance or None if incorrect
-    """
-    dataFormats = getDataFormats()
+@singleton
+class SpectrumDataSourceSuffixDict(dict):
+    """A class to contain a dict of (suffix, [SpectrumDataSource class]-list)
+    (key, value) pairs; exclude EmptySpectrum
 
+    The get(suffix) returns a list of klasses for suffix; its maps None or zero-length to NO_SUFFIX
+    and any non-existing suffix in the dict to ANY_SUFFIX
+
+    NB: Only to be used internally
+    """
+
+    def __init__(self):
+        # local import to avoid cycles
+        # from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+        from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+
+        super().__init__(self)
+
+        # Fill the dict
+        for dataFormat, klass in getDataFormats().items():
+            if dataFormat != EmptySpectrumDataSource.dataFormat:
+                suffixes =  [NO_SUFFIX, ANY_SUFFIX] if len(klass.suffixes) == 0 else klass.suffixes
+                for suffix in suffixes:
+                    suffix = NO_SUFFIX if suffix is None else suffix
+                    self[suffix].append(klass)
+
+    def __getitem__(self, item):
+        """Can't get subclassed defaultdict to work
+        Always assure a list for item
+        """
+        if not item in self:
+            super().__setitem__(item, [])
+        return super().__getitem__(item)
+
+    def get(self, suffix) -> list:
+        """get a list of klasses for suffix;
+        map None or zero-length to NO_SUFFIX and
+        map non existing suffix to ANY_SUFFIX
+        """
+        if suffix is None or len(suffix) == 0:
+            return self[NO_SUFFIX]
+        elif suffix not in self:
+            return self[ANY_SUFFIX]
+        else:
+            return self[suffix]
+
+
+def getDataSourceClass(dataFormat):
+    """Get a dataSource class from the dataFormat string;
+    Implements the name mapping issue; e.g. the 'NmrView'
+    :param dataFormat: a (valid) dataFormat string
+    :return a class corresponding to dataFormat, or None if invalid
+    """
     # Test for optional mapping of the dataFormat name (e.g. for the 'NmrView') issue
     dataFormatDict = SpectrumDataSourceABC._dataFormatDict
-    _dataFormat = dataFormatDict.get(dataFormat)
-    #
-    if _dataFormat is None or (cls := dataFormats.get(_dataFormat)) is None:
-        raise ValueError('getSpectrumDataSource: invalid format "%s"; must be one of %s' %
-                         (dataFormat, [k for k in dataFormats.keys()])
-                         )
-    instance = cls.checkForValidFormat(path)
-    return instance
-
-
-def checkPathForSpectrumFormats(path):
-    """Check path if it corresponds to any spectrum data format
-    :return a SpectrumDataSource instance with parameters read or None if there was no match
-    """
-    for fmt, cls in getDataFormats().items():
-        instance = cls.checkForValidFormat(path)
-        if instance is not None:
-            return instance  # we found a valid format for path
-    return None
+    dataFormat = dataFormatDict.get(dataFormat, None)
+    if dataFormat is None:
+        return None
+    else:
+        return getDataFormats()[dataFormat]
 
 
 class SpectrumDataSourceABC(CcpNmrJson):
@@ -193,6 +225,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
     """
 
     classVersion = 1.0  # For json saving
+    saveAllTraitsToJson = True
+    keysInOrder = True  # maintain the definition order
 
     # 'local' definition of MAXDIM; defining defs in SpectrumLib to prevent circular imports
     MAXDIM = specLib.MAXDIM  # 8  # Maximum dimensionality
@@ -226,7 +260,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
     # data formats
     #=========================================================================================
-    dataType = numpy.float32   # numpy data format of the resulting slice, plane, region data
+    _dtype = numpy.float32   # numpy data format of the resulting slice, plane, region data
 
     # A dict of registered spectrum data formats: filled by _registerFormat classmethod, called
     # once after each definition of a new derived class (e.g. Hdf5SpectrumDataSource)
@@ -251,13 +285,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
     # parameter definitions and mappings onto the Spectrum class
     #=========================================================================================
-    keysInOrder = True  # maintain the definition order
 
     _bigEndian = (sys.byteorder == 'big')
 
-    saveAllTraitsToJson = True
-    classVersion = 1.0  # for json saving
-
+    # isDimensional: bool: defines a spectral parameter, either as dimensional or not
+    # doCopy: bool: copy parameter to/from spectra and between dataSource instances
+    # spectrumAttribute: name of corresponding attribute in Spectrum class
+    # hasSetterInSpectrumClass: bool: corresponding attribute in Spectrum class can be set
     date = CString(allow_none=True, default_value=None).tag(isDimensional=False,
                                                             doCopy=True,
                                                             spectrumAttribute=None,
@@ -294,12 +328,14 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                               spectrumAttribute=None,
                                               hasSetterInSpectrumClass=False
                                               )
-    sampledValues = List(default_value=[]).tag(isDimensional=False,
+    sampledValues = List(default_value=[None for dim in range(0, MAXDIM)]).tag(
+                                               isDimensional=True,
                                                doCopy=True,
                                                spectrumAttribute=None,
                                                hasSetterInSpectrumClass=False
                                                )
-    sampledSigmas = List(default_value=[]).tag(isDimensional=False,
+    sampledSigmas = List(default_value=[None for dim in range(0, MAXDIM)]).tag(
+                                               isDimensional=True,
                                                doCopy=True,
                                                spectrumAttribute=None,
                                                hasSetterInSpectrumClass=False
@@ -340,7 +376,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             hasSetterInSpectrumClass=True
             )
     dataTypes = CList(trait=CString(), default_value=[specLib.DATA_TYPE_REAL] * MAXDIM, maxlen=MAXDIM).tag(
-            info='Data type identifier (real, complex, pn) along each dimension',
+            info='Data type identifier (nR, (nR)(nI), n(RI), n(PN)) along each dimension',
             isDimensional=True,
             doCopy=True,
             spectrumAttribute=None,
@@ -456,6 +492,27 @@ class SpectrumDataSourceABC(CcpNmrJson):
             )
 
     #=========================================================================================
+    # new implementation, using newFromPath method and validity testing later on
+    #=========================================================================================
+    isValid = Bool(default_value=False).tag(info='flag to indicate if path denotes a valid dataType')
+    shouldBeValid = Bool(default_value=False).tag(info='flag to indicate that path should denotes a valid dataType, but some elements are missing')
+    errorString = CString(default_value='').tag(info='error description for validity testing')
+
+    #=========================================================================================
+    # Attributes for more complicated dataFormats that have separate binaries and parameter
+    # files; e.g. Azara, Bruker, Xeasy
+    #=========================================================================================
+    _parameterFile = CPath(default_value=None, allow_none=True).tag(info =
+                                        'an attribute to store the (parsed) path to a parameter file'
+                                                                    )
+    _binaryFile = CPath(default_value=None, allow_none=True).tag(info =
+                                        'an attribute to store the path to a binary file; used during parsing'
+                                                                 )
+    _path = CPath(default_value=None, allow_none=True).tag(info =
+                                        'an attribute to store the initial path used to define binary/parameter files; used during parsing'
+                                                           )
+
+    #=========================================================================================
     # some default data
     #=========================================================================================
 
@@ -472,6 +529,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
     # Convenience properties and methods
     #=========================================================================================
+
+    @property
+    def isNotValid(self) -> bool:
+        """:return not self.isValid
+        """
+        return not self.isValid
 
     @classmethod
     def _documentClass(cls) -> str:
@@ -504,6 +567,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """Return a OrderedDict of (parameterName, values) for non-dimensional parameters"""
         items = [i for i in self.items(isDimensional=lambda i: not i)]
         return OrderedDict(items)
+
+    def parameterKeys(self):
+        """Those keys that define the spectrum parameters
+        """
+        return self.keys(isDimensional=False) + self.keys(isDimensional=True)
 
     @property
     def dimensions(self) -> tuple:
@@ -598,10 +666,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
         # if not self.hasBlockCached:
         #     self.disableCache()
 
+        self.checkValid()
+
     def setDefaultParameters(self, nDim=MAXDIM):
         """Set default values for all parameters
         """
-        for par in self.keys():
+        for par in self.parameterKeys():
             self.setTraitDefaultValue(par)
 
     def _assureProperDimensionality(self):
@@ -643,7 +713,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             return True
         return False
 
-    def setPath(self, path, substituteSuffix=False):
+    def setPath(self, path, checkSuffix=False):
         """define valid path to a (binary) data file, if needed appends or substitutes
         the suffix (if defined).
 
@@ -654,11 +724,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
             return self
 
         _p = aPath(path)
-        if not (validSuffix := self.checkSuffix(path)):
-            if substituteSuffix:
-                _p = _p.with_suffix(self.suffixes[0])
-            else:
-                _p = _p + self.suffixes[0]
+        validSuffix = self.checkSuffix(path)
+
+        if not validSuffix and checkSuffix:
+            _p = _p.with_suffix(self.suffixes[0])
+
         self.dataFile = str(_p)
         return self
 
@@ -704,7 +774,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def _copyParametersFromSpectrum(self, spectrum):
         """Copy parameters values from a Spectrum instance
         """
-        for param in self.keys():
+        for param in self.parameterKeys():
             doCopy = self.getMetadata(param, 'doCopy')
             spectrumAttribute = self.getMetadata(param, 'spectrumAttribute')
             if spectrumAttribute is not None and doCopy:
@@ -714,7 +784,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def _copyParametersToSpectrum(self, spectrum):
         """Copy parameter values to a Spectrum instance
         """
-        for param in self.keys():
+        for param in self.parameterKeys():
             doCopy = self.getMetadata(param, 'doCopy')
             spectrumAttribute = self.getMetadata(param, 'spectrumAttribute')
             hasSetter = self.getMetadata(param, 'hasSetterInSpectrumClass')
@@ -738,7 +808,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self._copyParametersFromSpectrum(spectrum)
         self._assureProperDimensionality()
         if spectrum.filePath is not None and includePath:
-            self.setPath(spectrum.filePath, substituteSuffix=True)
+            self.setPath(spectrum.filePath, checkSuffix=True)
         self.spectrum = spectrum
         return self
 
@@ -773,7 +843,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self.copyParametersFrom(dataSource)
         self._assureProperDimensionality()
         if dataSource.path is not None:
-            self.setPath(dataSource.path, substituteSuffix=True)
+            self.setPath(dataSource.path, checkSuffix=True)
         return self
 
     def copyParametersTo(self, target):
@@ -784,7 +854,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             raise TypeError('%s.copyDataTo: Wrong target class type; got %s' %
                             (self.__class__.__name__, target))
 
-        for param in self.keys():
+        for param in self.parameterKeys():
             doCopy = self.getMetadata(param, 'doCopy') and target.hasTrait(param)
             if doCopy:
                 values = self.getTraitValue(param)
@@ -835,7 +905,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if self.dimensionCount != source.dimensionCount:
             raise RuntimeError('%s.copyDataFrom: incompatible dimensionCount with source' %
                                self.__class__.__name__)
-        source.copyParametersTo(self)
+        source.copyDataTo(self)
         return self
 
     def _mapDimensionalParameters(self, dimensionsMap: dict):
@@ -1043,8 +1113,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def _convertBlockData(self, blockdata):
         """Convert the blockdata array if dtype is not self.dataType (ie. currently float32)
         """
-        if blockdata.dtype != self.dataType:
-            blockdata = numpy.array(blockdata, self.dataType)
+        if blockdata.dtype != self._dtype:
+            blockdata = numpy.array(blockdata, self._dtype)
         return blockdata
 
     @property
@@ -1208,57 +1278,156 @@ class SpectrumDataSourceABC(CcpNmrJson):
     # data access functions
     #=========================================================================================
 
+    def _returnFalse(self, errMsg) -> False:
+        """
+        Helper function to set self.errorString, write to debug2 and return False
+        :param errMsg:
+        :return: False
+        """
+        getLogger().debug2(errMsg)
+        self.errorString = errMsg
+        return False
+
+    def _checkValidExtra(self) -> bool:
+        """Helper code to avoid code duplication:
+        check the extra attributes _path, _binaryFile, and_parameterFile.
+        Used for Azara, Bruker, Xeasy
+        """
+        self.isValid = False
+        self.errorString = 'Checking validity'
+
+        _iniTxt = f'{self.dataFormat} spectrum, path "{self._path}"'
+        # checking original path and its suffix
+        if self._path is None or not self._path.exists():
+            errorMsg = f'{_iniTxt}: does not exist'
+            return self._returnFalse(errorMsg)
+
+        if not self.checkSuffix(self._path):
+            txt = f'{_iniTxt}: invalid suffix for {self.dataFormat}'
+            return self._returnFalse(txt)
+
+        # checking parameter file
+        if self._parameterFile is None:
+            errorMsg = f'{_iniTxt}: parameter file is undefined'
+            return self._returnFalse(errorMsg)
+
+        if not self._parameterFile.exists():
+            errorMsg = f'{_iniTxt}: parameter file does not exist'
+            return self._returnFalse(errorMsg)
+
+        if not self._parameterFile.is_file():
+            errorMsg = f'{_iniTxt}: parameter file is not a file'
+            return self._returnFalse(errorMsg)
+
+        if self._binaryFile is None:
+            errorMsg = f'{_iniTxt}: binary file is undefined'
+            return self._returnFalse(errorMsg)
+
+        if not self._binaryFile.exists():
+            errorMsg = f'{_iniTxt}: binary file does not exist'
+            return self._returnFalse(errorMsg)
+
+        if not self._binaryFile.is_file():
+            errorMsg = f'{_iniTxt}: binary file is not a file'
+            return self._returnFalse(errorMsg)
+
+        # if not self.shouldBeValid:
+        #     errorMsg = f'{_iniTxt}: should have defined a valid {self.dataFormat} file, but did not'
+        #     return self._returnFalse(errorMsg)
+
+        self.isValid = True
+        self.errorString = ''
+
+        return True
+
+    def checkValid(self) -> bool:
+        """check if valid format corresponding to dataFormat by:
+        - checking suffix and existence of path
+        - reading (and checking dimensionCount) parameters
+
+        :return: True if ok, False otherwise
+        """
+        self.isValid = False
+        self.errorString = 'Checking validity'
+
+        # checking path
+        _p = self.path
+        _iniTxt = f'{self.dataFormat} spectrum, path "{_p}"'
+
+        if _p is None:
+            txt = f'{_iniTxt}: undefined'
+            return self._returnFalse(txt)
+
+        if not self.checkSuffix(_p):
+            txt = f'{_iniTxt}: invalid suffix'
+            return self._returnFalse(txt)
+
+        if not self.hasValidPath():
+            txt = f'{_iniTxt}: does not exist'
+            return self._returnFalse(txt)
+
+        if not self.allowDirectory and self.path.is_dir():
+            txt = f'{_iniTxt}: is directory and not valid'
+            return self._returnFalse(txt)
+
+        # checking opening file and reading parameters
+        try:
+            with self.openExistingFile():  # This will also read the parameters
+                pass
+                # self.readParameters()
+        except RuntimeError as es:
+            txt = f'{_iniTxt}: Reading parameters failed with error: "{es}"'
+            return self._returnFalse(txt)
+
+        # Check dimensionality; should be > 0
+        if self.dimensionCount == 0:
+            txt = f'{_iniTxt}: dimensionCount = 0'
+            return self._returnFalse(txt)
+
+        self.isValid = True
+        self.errorString =''
+        return True
+
+    def checkParameters(self, spectrum) -> bool:
+        """Check parameters of self to establish if it matches with spectrum
+        :param spectrum: a Spectrum instance
+        :return True if matches
+        """
+        _p = self.path
+        _iniTxt = f'{self.dataFormat} spectrum, path "{_p}"'
+
+        # check some fundamental parameters
+        if self.dimensionCount != spectrum.dimensionCount:
+            txt = f'{_iniTxt}: Incompatible dimensionCounts (spectrum: {spectrum.dimensionCount}, dataSource: {self.dimensionCount})'
+            return self._returnFalse(txt)
+
+        for np_spectrum, np_dataSource in zip(spectrum.pointCounts, self.pointCounts):
+            if np_spectrum != np_dataSource:
+                txt = f'{_iniTxt}: Incompatible pointCounts (spectrum: {spectrum.pointCounts}, dataSource: {self.pointCounts})'
+                return self._returnFalse(txt)
+
+        for isC_spectrum, isC_dataSource in zip(spectrum.isComplex, self.isComplex):
+            if isC_spectrum != isC_dataSource:
+                txt = f'{_iniTxt}: Incompatible isComplex definitions (spectrum: {spectrum.isComplex}, dataSource: {self.isComplex})'
+                return self._returnFalse(txt)
+
+        return True
+
     @classmethod
     def checkForValidFormat(cls, path):
         """check if valid format corresponding to dataFormat by:
         - creating an instance of the class
-        - setting and checking path
-        - reading (and checking dimensionCount) parameters
+        - calling checkValid method
 
         :return: None or instance of the class
+
+        depricated: initate an instance and use the isValid attribute
         """
-        logger = getLogger()
-
-        instance = cls()
-
-        # checking path
-        if instance.setPath(path, substituteSuffix=False) is None:
-            logger.debug2('path "%s" is not valid for SpectrumDataSource dataFormat "%s"' %
-                         (path, instance.dataFormat))
+        instance = cls(path = path)
+        if not instance.isValid:
             return None
-
-        if (_p := instance.path) is None or not _p.exists():
-            logger.debug2('path "%s" is not valid for reading SpectrumDataSource dataFormat "%s"' %
-                         (path, instance.dataFormat))
-            return None
-
-        if not instance.allowDirectory and instance.path.is_dir():
-            logger.debug2('path "%s" is directory and not valid for reading SpectrumDataSource dataFormat "%s"' %
-                         (path, instance.dataFormat))
-            return None
-
-        # checking opening file and reading parameters
-        try:
-            with instance.openExistingFile():  # This will also read the parameters
-                pass
-                # instance.readParameters()
-        except RuntimeError as es:
-            logger.debug2('path "%s", SpectrumDataSource dataFormat "%s": bailing on reading with error: "%s"' %
-                         (path, instance.dataFormat, es))
-            return None
-
-        # Check dimensionality; should be > 0
-        if instance.dimensionCount == 0:
-            logger.debug2('path "%s": reading parameters in SpectrumDataSource dataFormat "%s" yielded dimensionCount 0' %
-                         (path, instance.dataFormat))
-            return None
-
-        elif instance.dimensionCount > 0:
-            logger.debug2('path "%s" is valid for SpectrumDataSource dataFormat "%s"' %
-                         (path, instance.dataFormat))
-            return instance  # found the file with right attributes
-
-        return None
+        else:
+            return instance
 
     def _checkFilePath(self, newFile, mode):
         """Helper function to do checks on path"""
@@ -1271,9 +1440,21 @@ class SpectrumDataSourceABC(CcpNmrJson):
             raise FileNotFoundError('path "%s" does not exist' % _path)
 
         if newFile and not _path.parent.exists():
-            raise FileNotFoundError('parent of "%s" does not exist' % _path)
+            raise FileNotFoundError(f'parent path "{_path.parent}" does not exist')
+
         if newFile and _path.exists() and mode != self.defaultAppendMode:
             raise FileExistsError('path "%s" exists (mode=%s)' % (_path, mode))
+
+    def getAllFilePaths(self) -> list:
+        """
+        Get all the files handles by this dataSource. Generally, this will be the path that
+        the dataSource represents, but sometimes there might be more; i.e. for certain spectrum
+        dataFormats that handle more files; like a binary and a parameter file.
+        To be subclassed for those instances
+
+        :return: list of Path instances
+        """
+        return [self.path]
 
     def openFile(self, mode, **kwds):
         """open self.path, set self.fp,
@@ -1347,7 +1528,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             ds.writeSliceData(data)
         """
         if path is not None:
-            self.setPath(path, substituteSuffix=True)
+            self.setPath(path, checkSuffix=True)
 
         if mode is None:
             mode = self.defaultOpenWriteMode
@@ -1360,14 +1541,18 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         except Exception as es:
             self.closeFile()
-            getLogger().error('%s.openNewFile: %s' % (self.__class__.__name__, str(es)))
+            txt = f'openNewFile: {es}'
+            self.isValid = False
+            self.errorString = txt
+            getLogger().error(txt)
             raise es
 
-        finally:
-            getLogger().debug('%s.openNewFile: writing parameters and calling closeFile' %
-                              self.__class__.__name__)
-            self.writeParameters()
-            self.closeFile()
+        getLogger().debug('%s.openNewFile: writing parameters and calling closeFile' %
+                          self.__class__.__name__)
+        self.isValid = True
+        self.errorString = ''
+        self.writeParameters()
+        self.closeFile()
 
     def closeFile(self):
         """Close the file and clear the cache
@@ -1407,6 +1592,29 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def writeParameters(self):
         """to be subclassed"""
         raise NotImplementedError('Not implemented')
+
+    def copyFiles(self, destinationDirectory, overwrite=False) -> list:
+        """Copy all data files to a new destination directory
+        :param destinationDirectory: a string or Path instance defining the destination directory
+        :param overwrite: Overwrite any existing files
+        :return A list of files copied
+        """
+        import shutil
+        _destination = aPath(destinationDirectory)
+        if not _destination.is_dir():
+            raise ValueError(f'"{_destination}" is not a valid directory')
+
+        result = []
+        for _p in self.getAllFilePaths():
+            _newPath = _p.copyFile(_destination, overwrite=overwrite)
+            result.append(_newPath)
+
+        return result
+
+
+    #=========================================================================================
+    # Data access methods
+    #=========================================================================================
 
     def checkForValidPosition(self, position):
         """Checks if position (1-based) is valid, expand if None and append if necessay
@@ -1939,22 +2147,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if not self._bufferFilled:
             self.fillHdf5Buffer()
 
-    def _getTemporaryPath(self, prefix, suffix=None):
-        """Return a temporary path with prefix and suffix (autogenerated from self.suffixes)
-        generated tempfile, but closing and deleting the file
-        instantly, while returning the generated path name.
-        """
-        if suffix is None and len(self.suffixes) > 0:
-            suffix = self.suffixes[0]
-        with tempfile.NamedTemporaryFile(prefix=prefix, suffix=suffix) as tFile:
-            path = tFile.name
-        return path
-
     def initialiseHdf5Buffer(self):
         """Initialise a Hdf5SpectrumBuffer instance.
         :return: Hdf5SpectrumBuffer instance
         """
         from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
+        from ccpn.framework.Application import getApplication
 
         if not self.isBuffered:
             raise RuntimeError('initialiseHdf5Buffer: buffering not active, use setBuffering() method first')
@@ -1962,12 +2160,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self.closeHdf5Buffer()
 
         if self._bufferIsTemporary:
-            # Construct a path for temporary buffer using the tempfile methods
-            # However, tempfile.NamedTemporyFile already opens it, so grab the name, and close it (which will delete it)
-            prefix = 'CcpNmr_hdf5buffer_%s_' % self.path.basename
-            path = self._getTemporaryPath(prefix=prefix, suffix=Hdf5SpectrumDataSource.suffixes[0])
-            # with tempfile.NamedTemporaryFile(prefix=prefix, suffix=Hdf5SpectrumDataSource.suffixes[0]) as tFile:
-            #     path = tFile.name
+            # Construct a path for temporary buffer using the tempfile methods in _getTemporaryPath
+            prefix = 'hdf5buffer_%s_' % self.nameFromPath()
+            path = getApplication()._getTemporaryPath(prefix=prefix, suffix=Hdf5SpectrumDataSource.suffixes[0])
 
         else:
             # take path as defined in _bufferPath, or construct from self.path if None
@@ -2060,7 +2255,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     def __str__(self):
         if self.dimensionCount == 0:
-            return '<%s: _D (), %s>' % (self.__class__.__name__, self.path.name)
+            fName = self.path.name if self.path is not None else str(None)
+            return '<%s: _D (), %s>' % (self.__class__.__name__, fName)
         else:
             if self.isBuffered:
                 fpStatus = '%r' % 'buffered'

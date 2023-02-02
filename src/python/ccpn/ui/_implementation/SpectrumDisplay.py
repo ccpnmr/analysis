@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:39 +0100 (Tue, July 05, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,12 +36,13 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDispl
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
-import ccpn.core.lib.SpectrumLib as specLib
+
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.lib import Pid
-from ccpn.core.lib.OrderedSpectrumViews import OrderedSpectrumViews
-from ccpn.core.lib.AxisCodeLib import doAxisCodesMatch, _axisCodeMapIndices
 from ccpn.ui._implementation.Window import Window
+
+import ccpn.core.lib.SpectrumLib as specLib
+from ccpn.core.lib import Pid
+
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, undoBlockWithoutSideBar, deleteObject, renameObject
@@ -114,23 +115,29 @@ class SpectrumDisplay(AbstractWrapperObject):
         """
         result = super()._restoreObject(project, apiObj)
 
+        # debug
+        _strips = result.strips
+
         # getting value will induce an update in the internal parameters
         _tmp = result.isotopeCodes
         _tmp2 = result.dimensionTypes
 
         # update the plane axes settings
-        for strip in result.strips:
+        for strip in _strips:
             strip._updatePlaneAxes()
 
+        if not result.is1D:
+            result.setVisibleAxes()
+
         # check that the spectrumView indexing has been set, or is populated correctly
-        if len(result.strips) > 0 and \
-           (specViews := result.strips[0].getSpectrumViews()):
+        if len(_strips) > 0 and \
+           (specViews := _strips[0].getSpectrumViews()):
             indexing = [v._index for v in specViews]
             if None in indexing or len(indexing) != len(set(indexing)):
                 # set new indexing
                 for ind, sv in enumerate(specViews):
                     sv._index = ind
-        result._spectrumViewVisibleChanged()
+            result._spectrumViewVisibleChanged()
 
         return result
 
@@ -542,7 +549,6 @@ class SpectrumDisplay(AbstractWrapperObject):
         from ccpn.ui._implementation.Strip import _copyStrip
 
         return _copyStrip(self, strip=strip, newIndex=newIndex)
-
 
 #=========================================================================================
 # Connections to parents:

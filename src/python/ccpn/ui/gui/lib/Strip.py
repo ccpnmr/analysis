@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:41 +0000 (Thu, February 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-02 13:48:27 +0000 (Thu, February 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -68,20 +68,20 @@ class StripNd(Strip, _GuiStripNd):
         getLogger().debug('StripNd>> spectrumDisplay=%s' % self.spectrumDisplay)
         _GuiStripNd.__init__(self, self.spectrumDisplay)
 
-#=========================================================================================
-# For Registering
-#=========================================================================================
-
-
-
-
-def _factoryFunction(project: Project, wrappedData):
-    """create Strip, dispatching to subtype depending on wrappedData
-    """
-    apiSpectrumDisplay = wrappedData.spectrumDisplay
-    if apiSpectrumDisplay.is1d:
-        return Strip1d(project, wrappedData)
-    else:
-        return StripNd(project, wrappedData)
-
-# _CoreClassStrip._registerCoreClass(factoryFunction=_factoryFunction)
+# #=========================================================================================
+# # For Registering
+# #=========================================================================================
+#
+#
+#
+#
+# def _factoryFunction(project: Project, wrappedData):
+#     """create Strip, dispatching to subtype depending on wrappedData
+#     """
+#     apiSpectrumDisplay = wrappedData.spectrumDisplay
+#     if apiSpectrumDisplay.is1d:
+#         return Strip1d(project, wrappedData)
+#     else:
+#         return StripNd(project, wrappedData)
+#
+# # _CoreClassStrip._registerCoreClass(factoryFunction=_factoryFunction)

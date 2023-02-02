@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:41 +0000 (Thu, February 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-02 13:48:27 +0000 (Thu, February 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -60,18 +60,18 @@ class PeakListView(_CoreClassPeakListView, GuiPeakListView):
         GuiPeakListView.__init__(self)
         self._init()
 
-#=========================================================================================
-# Registering
-#=========================================================================================
-
-def _factoryFunction(project: Project, wrappedData):
-    """create PeakListView
-    """
-    return PeakListView(project, wrappedData)
-
-# _CoreClassPeakListView._registerCoreClass(factoryFunction=_factoryFunction)
-
-#=========================================================================================
+# #=========================================================================================
+# # Registering
+# #=========================================================================================
+#
+# def _factoryFunction(project: Project, wrappedData):
+#     """create PeakListView
+#     """
+#     return PeakListView(project, wrappedData)
+#
+# # _CoreClassPeakListView._registerCoreClass(factoryFunction=_factoryFunction)
+#
+# #=========================================================================================
 
 #GWV: moved to core.lib.peakUtils
 

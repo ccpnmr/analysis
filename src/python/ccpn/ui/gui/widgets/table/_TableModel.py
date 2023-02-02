@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:48 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-02-02 17:34:14 +0000 (Thu, February 02, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -376,10 +376,19 @@ class _TableModel(QtCore.QAbstractTableModel):
 
             if role == DISPLAY_ROLE:
                 # need to discard columns that include check-boxes
-                data = self._df.iat[row, col]
+                v = self._df.iat[row, col]
 
                 # float/np.float - round to 3 decimal places
-                return f'{data:.3f}' if isinstance(data, (float, np.floating)) else str(data)
+                if isinstance(v, (float, np.floating)):
+                    # make it scientific annotation if a huge/tiny number
+                    try:
+                        value = f'{v:.3e}' if  v> 1e6  or v <1e-6 else f'{v:.3f}'
+                    except Exception as ex:
+                        value = str(v)
+                else:
+                    value = str(v)
+
+                return value
 
             elif role == VALUE_ROLE:
                 val = self._df.iat[row, col]

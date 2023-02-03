@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-26 11:55:27 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-03 13:41:36 +0000 (Fri, February 03, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -59,6 +59,7 @@ class FittingModelABC(ABC):
     FullDescription = f'{Info} \n {Description}\nSee References: {References}'
     PeakProperty    = sv._HEIGHT        # The peak property to fit. One of ['height', 'lineWidth', 'volume', 'ppmPosition']
     isEnabled       = True              # True to enable on the GUI and be selected/used
+    RequiredInputData = 1  # ensure there is the correct amount of input data. Should also check the types (?)
 
     def __init__(self, *args, **kwargs):
 
@@ -190,7 +191,7 @@ class CalculationModel(FittingModelABC):
     MaTex       = r''               ## MaTex representation of the used equation(s). see https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
     References  = 'References'      ## A list of journal article references that help to identify the employed calculation equations. E.g.: DOIs or title/authors/year/journal; web-pages.
     _disableFittingModels = False  # If True, a fitting models are not applied to the resulting calculation mode. E.g. for R2/R1 Model
-
+    RequiredInputData = 1
 
     @abstractmethod
     def calculateValues(self, inputDataTables) -> TableFrame:

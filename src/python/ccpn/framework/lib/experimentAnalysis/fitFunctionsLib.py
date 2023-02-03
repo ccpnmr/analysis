@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-02 17:01:13 +0000 (Thu, February 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-03 13:41:36 +0000 (Fri, February 03, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -381,3 +381,12 @@ def calculateJWH(noe, r1, r2, d, c, gx, gh):
     jwh = sigmaNOE / (5.0*d)
     return jwh
 
+def calculateUncertaintiesError(v1,v2, ev1, ev2):
+    """
+    Calculate the Uncertainties errors for a ratio of two values and their original errors
+    :return:  float. the ratio error
+    """
+    try:
+        return (ev1 / v1 + ev2 / v2) * v2 / v1
+    except Exception:
+        return

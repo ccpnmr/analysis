@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-02 17:01:13 +0000 (Thu, February 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-03 13:41:36 +0000 (Fri, February 03, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -375,15 +375,15 @@ class R2R1RatesCalculation(CalculationModel):
     Calculate R2/R1 rates
     """
     ModelName = sv.R2R1
-    Info = '''Calculate the ratio R2/R1.  Requires two input dataTables: the T1, T2 with calculated rates.'''
+    Info = '''Calculate the ratio R2/R1.  Requires two input dataTables: the T1, T2 with calculated rates (R1, and R2).'''
 
     Description = f'''Model:
                   ratio =  R2/R1
                   R1 and R2 the decay rate for the T1 and T2 calculated using the {sv.OnePhaseDecay} model.
                   
                   Value Error calculated as:
-                  error =  (RE1/R1 + RE2/R2) * R2/R1
-                  RE is the rate error.
+                  error =  (Re1/R1 + Re2/R2) * R2/R1
+                  Re1/Re2 are the respective rate errors for R1 and R2.
                   '''
     References = '''
                 '''
@@ -447,10 +447,6 @@ class R2R1RatesCalculation(CalculationModel):
         merged.drop(columns=columnsToDrop, inplace=True)
 
         # keep these columns: MERGINGHEADERS, ROW_UID
-
-        # empty these columns:
-
-
         # make the merged dataFrame the correct output type
         outputFrame = R2R1OutputFrame()
         # add the new calculated values
@@ -468,7 +464,7 @@ class R2R1RatesCalculation(CalculationModel):
         return outputFrame
 
 
-# SDM
+#####  Reduced Spectral Density Mapping (SDM ) ####
 
 
 class SDMCalculation(CalculationModel):
@@ -479,6 +475,7 @@ class SDMCalculation(CalculationModel):
     Info = '''Calculate the Reduced Spectral Density Mapping (SDM). Requires three input dataTables: the T1, T2 with calculated rates and NOE values'''
     Description = f'''Model:
                   Calculates J0, J(ѠX) and J(ѠH) using the R1, R2 and NOE values.
+                  Values in sec/rad
                   See references for details
                   '''
     References = '''
@@ -570,6 +567,15 @@ class SDMCalculation(CalculationModel):
         outputFrame[sv.J0_ERR] = j0_ERR
         outputFrame[sv.JwX_ERR] = jwx_ERR
         outputFrame[sv.JwH_ERR] = jwh_ERR
+
+        # include also initial R1,R2,NOE data used in the calculations
+        outputFrame[sv.R1] = R1.values
+        outputFrame[sv.R1_ERR] = R1_err.values
+        outputFrame[sv.R2] = R2.values
+        outputFrame[sv.R2_ERR] = R2_err.values
+        outputFrame[sv.HETNOE_VALUE] = NOE.values
+        outputFrame[sv.HETNOE_VALUE_ERR] = NOE_err.values
+
         outputFrame[sv.PEAKPID] = merged[sv.PEAKPID]
         outputFrame[sv.SERIES_STEP_X] = None
         outputFrame[sv.SERIES_STEP_Y] = None

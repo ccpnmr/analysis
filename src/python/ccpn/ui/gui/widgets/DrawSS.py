@@ -5,11 +5,6 @@ As seen in https://gist.github.com/JoaoRodrigues/f9906b343d3acb38e39f2b982b02ecb
 
 """
 
-#!/usr/bin/env python
-
-
-
-
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -40,7 +35,7 @@ def createBlocksFromSequence(ss_sequence):
     return ss_blocks
 
 
-def plotSS(ss_blocks, sequence, startingResidueCode=1, helix_as_cylinder = True, figure=None, axis = None):
+def plotSS(ss_blocks, sequence, startingResidueCode=1, helix_as_cylinder = True, figure=None, axis = None, showExtraXTicks=2):
     if figure is None:
         figure = plt.figure()
     if axis is None:
@@ -60,7 +55,7 @@ def plotSS(ss_blocks, sequence, startingResidueCode=1, helix_as_cylinder = True,
     fc_coil = 'black'
     ec = 'none'
 
-    width = 1.0  # General width controller
+    width = 2.0  # General width controller
     helix_arc_width = 4.0
     coil_thickness_factor = 1/12
     edge_thickness = 1.0
@@ -68,7 +63,7 @@ def plotSS(ss_blocks, sequence, startingResidueCode=1, helix_as_cylinder = True,
     turn_thickness_factor = 1/2
 
     # Draw artists
-    width = 1.0
+    width = 2.0
     for blk_idx, ss_blk in enumerate(ss_blocks, ):
         ss_type, start, last = ss_blk
         start, last = start+startRC, last+startRC
@@ -136,6 +131,7 @@ def plotSS(ss_blocks, sequence, startingResidueCode=1, helix_as_cylinder = True,
                                        facecolor=fc_sheet,
                                        edgecolor=ec,
                                        linewidth=edge_thickness)
+
             axis.add_patch(e)
 
         elif ss_type == 'T':
@@ -180,42 +176,42 @@ def plotSS(ss_blocks, sequence, startingResidueCode=1, helix_as_cylinder = True,
                                       edgecolor=ec, facecolor=fc_coil)
             axis.add_patch(e)
 
-    # Set tick formatting
-    # axis.set_ylim([-2, 1.15])
-    # axis.set_xticks(x_axis_ticks)
 
-    # axis.xaxis.set_major_formatter(ticker.NullFormatter())  # remove the major ticks
-    # minorLocator = ticker.AutoMinorLocator(2)  # minor in between two majors
-    # axis.xaxis.set_minor_locator(minorLocator)
-    # axis.xaxis.set_minor_formatter(ticker.FixedFormatter(sequence))
 
 
     for i, txt in enumerate(sequence):
-        axis.annotate(str(txt), (x_axis_ticks[i], -0.5), fontsize=10)
+        axis.annotate(str(txt), (x_axis_ticks[i], 5 ), fontsize=5)
 
-    # for tick in axis.xaxis.get_minor_ticks():
-    #     tick.tick1line.set_markersize(0)
-    #     tick.tick2line.set_markersize(0)
-    #     tick.label1.set_horizontalalignment('center')
+    # Set tick formatting
+    axis.set_ylim([-1, 5])
+    # axis.set_xticks(x_axis_ticks)
+    for tick in axis.xaxis.get_minor_ticks():
+        # tick.tick1line.set_markersize(0)
+        # tick.tick2line.set_markersize(0)
+        tick.label1.set_horizontalalignment('center')
 
+    axis.set_xlim(startRC - showExtraXTicks, endRC + showExtraXTicks)
     # axis.set_xticklabels(resn_labels, rotation=90)
 
     # Set axis labels
-    axis.set_xlabel('Residue Number')
-
+    # axis.set_xlabel('Residue Number')
     # Overall plot formatting
-    # axis.set_aspect(10)
-    # axis.spines['left'].set_visible(False)
-    # axis.spines['right'].set_visible(False)
-    # axis.spines['top'].set_visible(False)
-    # axis.get_yaxis().set_visible(False)
+    axis.set_aspect(0.5)
+    axis.spines['left'].set_visible(False)
+    axis.spines['right'].set_visible(False)
+    axis.spines['top'].set_visible(False)
+    axis.get_yaxis().set_visible(False)
     # plt.show()
     return axis
 
-ss_sequence   =  'BBBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
-sequence  = 'YKLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
 
-startingResidueCode = 17
+if __name__ == '__main__':
+    ss_sequence   =  'BBBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
+    sequence  = 'YKLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
+    startingResidueCode = 17
+    blocks = createBlocksFromSequence(ss_sequence=ss_sequence)
 
-# blocks = createBlocksFromSequence(ss_sequence=ss_sequence)
-# plotSS(blocks, sequence, startingResidueCode=startingResidueCode)
+    axss = plotSS(blocks, sequence, startingResidueCode=startingResidueCode)
+    plt.show()
+
+

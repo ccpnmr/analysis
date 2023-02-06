@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-03 13:41:08 +0000 (Fri, February 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-06 17:20:18 +0000 (Mon, February 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -39,25 +39,34 @@ import datetime
 from matplotlib.backends.backend_pdf import PdfPages
 from ccpn.util.Logging import getLogger
 from matplotlib.ticker import MultipleLocator
-from adjustText import adjust_text
+from ccpn.ui.gui.widgets.DrawSS import createBlocksFromSequence, plotSS
 
-fileName = 'RelaxationAnalysisResults'
+
+
+# #########
+
+###################
+
+
+fileName = 'RelaxationAnalysisResults2'
 filePath = f'/Users/luca/Documents/V3-testings/{fileName}'
 
-RSDMResultsDataTable = get('DT:RSDMResults')
+RSDMResultsDataTable = get('DT:RSDM_results')
 
 if RSDMResultsDataTable is None:
     errorMess = 'Cannot display results. Ensure you have the RSDMResults dataTable in the project or you inserted the correct pid in the macro'
     raise RuntimeError(errorMess)
 
+ss_sequence   =  'BBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
+sequence  = 'KLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
+
 
 data =  RSDMResultsDataTable.data
-# just for testing
-todrop = data.index[-1]
-data.drop(todrop, inplace=True)
-
 x = data[sv.NMRRESIDUECODE]
 x = x.astype(int)
+startSequenceCode = x.values[0]
+endSequenceCode = startSequenceCode + len(ss_sequence)
+
 R1 = data[sv.R1]
 R2 = data[sv.R2]
 NOE = data[sv.HETNOE_VALUE]
@@ -77,31 +86,29 @@ JWH_ERR = data[sv.JwH_ERR]
 JWN = data[sv.JwX]
 JWN_ERR = data[sv.JwX_ERR]
 
+blocks = createBlocksFromSequence(ss_sequence=ss_sequence)
+
 # init pdf
 with PdfPages(f'{filePath}.pdf') as pdf:
-
-    fig = plt.figure(dpi=300)
-    axR1 = plt.subplot(311)
-    axR2 = plt.subplot(312)
-    axNOE = plt.subplot(313)
-
+    fig = plt.figure(dpi=400)
+    axss = fig.add_subplot(411)
+    plotSS(blocks, sequence, startingResidueCode=startSequenceCode, figure=fig, axis = axss)
+    axR1 = plt.subplot(412)
+    axR2 = plt.subplot(413)
+    axNOE = plt.subplot(414)
     axR1.bar(x, R1, yerr=R1_ERR, color='black',  ecolor='red', error_kw=dict(lw=1, capsize=2, capthick=0.5))
     axR2.bar(x, R2,  yerr=R2_ERR, color='black',  ecolor='red', error_kw=dict(lw=1, capsize=2, capthick=0.5))
     axNOE.bar(x, NOE, yerr=NOE_ERR, color='black',  ecolor='red', error_kw=dict(lw=1, capsize=2, capthick=0.5))
-
     axR1.set_title('R1', fontsize=8)
     axR2.set_title('R2', fontsize=8)
     axNOE.set_title('HetNOE', fontsize=8)
-
     axR1.set_ylabel('R$_{1}$ (sec$^{-1}$)', fontsize=8)
     axR2.set_ylabel('R$_{2}$ (sec$^{-1}$)', fontsize=8)
     axNOE.set_ylabel('het-NOE ratio', fontsize=8)
     axNOE.set_xlabel('Residue Number', fontsize=5, )
-
     axR1.get_shared_x_axes().join(axR1, axR2, axNOE)
-
     ml = MultipleLocator(1)
-    for ax in [axR1, axR2, axNOE]:
+    for ax in [axss, axR1, axR2, axNOE]:
         ax.spines[['right', 'top']].set_visible(False)
         ax.minorticks_on()
         ax.xaxis.set_minor_locator(ml)
@@ -110,16 +117,19 @@ with PdfPages(f'{filePath}.pdf') as pdf:
     plt.tight_layout()
     plt.subplots_adjust( hspace=1.4)
     pdf.savefig()  # saves the current figure into a pdf page
-    plt.close()
+    plt.close(fig)
 
     #page two R2/R1 Ratio
-    fig2 = plt.figure(dpi=300)
-    axR2R1 = plt.subplot(311)
+    fig = plt.figure(dpi=300)
+    axss = fig.add_subplot(411)
+    plotSS(blocks, sequence, startingResidueCode=startSequenceCode, figure=fig, axis = axss)
+
+    axR2R1 = plt.subplot(412)
     axR2R1.bar(x, R2R1, yerr=R2R1_ERR, color='black', ecolor='red', error_kw=dict(lw=1, capsize=2, capthick=0.5))
     axR2R1.set_title('R2/R1', fontsize=8)
     axR2R1.set_ylabel('R$_{2}$/R$_{1}$', fontsize=8)
     axR2R1.set_xlabel('Residue Number', fontsize=5, )
-    axR1R2 = plt.subplot(312)
+    axR1R2 = plt.subplot(413)
     t1v = 1/R1.values
     t2v = 1/R2.values
     axR1R2.scatter(t2v, t1v, s=1, color='black', )
@@ -138,14 +148,17 @@ with PdfPages(f'{filePath}.pdf') as pdf:
     plt.tight_layout()
     plt.subplots_adjust(hspace=1.4)
     pdf.savefig()
-    plt.close()
+    plt.close(fig)
 
     # page three RSDM
 
-    fig3 = plt.figure(dpi=300)
-    j0 = plt.subplot(311)
-    jwh = plt.subplot(312)
-    jwx = plt.subplot(313)
+    fig = plt.figure(dpi=300)
+    axss = fig.add_subplot(411)
+    plotSS(blocks, sequence, startingResidueCode=startSequenceCode, figure=fig, axis = axss)
+
+    j0 = plt.subplot(412)
+    jwh = plt.subplot(413)
+    jwx = plt.subplot(414)
 
     j0.errorbar(x, J0, yerr=J0_ERR, fmt="o", color='black',  ms=2, ecolor='red', elinewidth=1, capsize=2,)
     jwh.errorbar(x, JWH, yerr=JWH_ERR, fmt="o", color='black', ms=2, ecolor='red', elinewidth=1, capsize=2,)
@@ -160,7 +173,7 @@ with PdfPages(f'{filePath}.pdf') as pdf:
     jwx.set_ylabel('$J(\omega_{N})$ (sec/rad)',  fontsize=8)
 
     ml = MultipleLocator(1)
-    for ax in [j0, jwh, jwx]:
+    for ax in [axss, j0, jwh, jwx]:
         ax.spines[['right', 'top']].set_visible(False)
         ax.minorticks_on()
         ax.xaxis.set_minor_locator(ml)
@@ -176,3 +189,4 @@ with PdfPages(f'{filePath}.pdf') as pdf:
     plt.subplots_adjust(hspace=1.4)
     pdf.savefig()
     plt.close()
+    plt.close(fig)

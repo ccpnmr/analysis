@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-03 13:41:36 +0000 (Fri, February 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-06 16:07:59 +0000 (Mon, February 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -432,10 +432,10 @@ class R2R1RatesCalculation(CalculationModel):
         rate1 = f'{sv.RATE}{suffix1}'
         rate2 = f'{sv.RATE}{suffix2}'
 
-        r1 = merged[rate1]
-        r2 = merged[rate2]
-        er1 = merged[f'{sv.RATE_ERR}{suffix1}']
-        er2 = merged[f'{sv.RATE_ERR}{suffix2}']
+        r1 = merged[rate1].values
+        r2 = merged[rate2].values
+        er1 = merged[f'{sv.RATE_ERR}{suffix1}'].values
+        er2 = merged[f'{sv.RATE_ERR}{suffix2}'].values
         ratesRatio = r2 / r1
 
         ## Error calculated as = (E1/R1 + E2/R2) * R2/R1
@@ -450,11 +450,12 @@ class R2R1RatesCalculation(CalculationModel):
         # make the merged dataFrame the correct output type
         outputFrame = R2R1OutputFrame()
         # add the new calculated values
-        outputFrame[sv.MERGINGHEADERS] = merged[sv.MERGINGHEADERS]
+        for hh in sv.MERGINGHEADERS:
+            outputFrame[hh] = merged[hh].values
         outputFrame[sv.R2R1] = ratesRatio
         outputFrame[sv.R2R1_ERR] = ratesErrorRatio
-        outputFrame[sv._ROW_UID] = merged[sv._ROW_UID]
-        outputFrame[sv.PEAKPID] = merged[sv.PEAKPID]
+        outputFrame[sv._ROW_UID] = merged[sv._ROW_UID].values
+        outputFrame[sv.PEAKPID] = merged[sv.PEAKPID].values
         outputFrame[sv.SERIES_STEP_X] = None
         outputFrame[sv.SERIES_STEP_Y] = None
         outputFrame[sv.CONSTANT_STATS_OUTPUT_TABLE_COLUMNS] = None
@@ -541,12 +542,12 @@ class SDMCalculation(CalculationModel):
         noeHeder = sv.HETNOE_VALUE
         noeHederErr = sv.HETNOE_VALUE_ERR
 
-        R1 = merged[rate1]
-        R2 = merged[rate2]
-        NOE = merged[noeHeder]
-        R1_err = merged[f'{sv.RATE_ERR}{suffix1}']
-        R2_err = merged[f'{sv.RATE_ERR}{suffix2}']
-        NOE_err = merged[noeHederErr]
+        R1 = merged[rate1].values
+        R2 = merged[rate2].values
+        NOE = merged[noeHeder].values
+        R1_err = merged[f'{sv.RATE_ERR}{suffix1}'].values
+        R2_err = merged[f'{sv.RATE_ERR}{suffix2}'].values
+        NOE_err = merged[noeHederErr].values
 
         j0 = lf.calculateJ0(NOE, R1, R2, D1, C1, N15gyromagneticRatio, HgyromagneticRatio)
         jwx = lf.calculateJWx(NOE, R1, R2, D1, C1, N15gyromagneticRatio, HgyromagneticRatio)
@@ -560,7 +561,9 @@ class SDMCalculation(CalculationModel):
         # make the merged dataFrame the correct output type
         outputFrame = RSDMOutputFrame()
         # add the new calculated values
-        outputFrame[sv.MERGINGHEADERS] = merged[sv.MERGINGHEADERS]
+
+        outputFrame[sv.JwX] = jwx
+        outputFrame[sv.JwH] = jwh
         outputFrame[sv.J0] = j0
         outputFrame[sv.JwX] = jwx
         outputFrame[sv.JwH] = jwh
@@ -569,20 +572,21 @@ class SDMCalculation(CalculationModel):
         outputFrame[sv.JwH_ERR] = jwh_ERR
 
         # include also initial R1,R2,NOE data used in the calculations
-        outputFrame[sv.R1] = R1.values
-        outputFrame[sv.R1_ERR] = R1_err.values
-        outputFrame[sv.R2] = R2.values
-        outputFrame[sv.R2_ERR] = R2_err.values
-        outputFrame[sv.HETNOE_VALUE] = NOE.values
-        outputFrame[sv.HETNOE_VALUE_ERR] = NOE_err.values
-
-        outputFrame[sv.PEAKPID] = merged[sv.PEAKPID]
+        outputFrame[sv.R1] = R1
+        outputFrame[sv.R1_ERR] = R1_err
+        outputFrame[sv.R2] = R2
+        outputFrame[sv.R2_ERR] = R2_err
+        outputFrame[sv.HETNOE_VALUE] = NOE
+        outputFrame[sv.HETNOE_VALUE_ERR] = NOE_err
+        for hh in sv.MERGINGHEADERS:
+            outputFrame[hh] = merged[hh].values #use .values otherwise is wrongly done
+        outputFrame[sv._ROW_UID] = merged[sv._ROW_UID].values
+        outputFrame[sv.PEAKPID] = merged[sv.PEAKPID].values
         outputFrame[sv.SERIES_STEP_X] = None
         outputFrame[sv.SERIES_STEP_Y] = None
         outputFrame[sv.CONSTANT_STATS_OUTPUT_TABLE_COLUMNS] = None
         outputFrame[sv.SpectrumPropertiesHeaders] = None
         outputFrame[sv.PeakPropertiesHeaders] = None
-
         return outputFrame
 
 #####################################################

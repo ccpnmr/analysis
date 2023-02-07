@@ -35,7 +35,7 @@ def createBlocksFromSequence(ss_sequence):
     return ss_blocks
 
 
-def plotSS(ss_blocks, sequence, startingResidueCode=1, helix_as_cylinder = True, figure=None, axis = None, showExtraXTicks=2):
+def plotSS(ss_blocks, sequence, startingResidueCode=1, helix_as_cylinder = True, figure=None, axis = None, showExtraXTicks=2, showBottomAxis=False):
     if figure is None:
         figure = plt.figure()
     if axis is None:
@@ -180,7 +180,7 @@ def plotSS(ss_blocks, sequence, startingResidueCode=1, helix_as_cylinder = True,
 
 
     for i, txt in enumerate(sequence):
-        axis.annotate(str(txt), (x_axis_ticks[i], 5 ), fontsize=5)
+        axis.annotate(str(txt), (x_axis_ticks[i], 5 ), fontsize=5, ha='center')
 
     # Set tick formatting
     axis.set_ylim([-1, 5])
@@ -201,6 +201,8 @@ def plotSS(ss_blocks, sequence, startingResidueCode=1, helix_as_cylinder = True,
     axis.spines['right'].set_visible(False)
     axis.spines['top'].set_visible(False)
     axis.get_yaxis().set_visible(False)
+    axis.get_xaxis().set_visible(showBottomAxis)
+    axis.spines['bottom'].set_visible(showBottomAxis)
     # plt.show()
     return axis
 

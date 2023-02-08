@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:47 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-02-08 19:52:33 +0000 (Wed, February 08, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,7 +44,8 @@ class ColumnViewSettingsPopup(CcpnDialogMainWidget):
     def __init__(self, table, dataFrameObject=None, parent=None, hiddenColumns=None, title='Column Settings', **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title, minimumSize=(250, 250), **kwds)
 
-        self.table = table
+        self.tableHandler = table
+
         # self.dataFrameObject = dataFrameObject
         self.widgetColumnViewSettings = ColumnViewSettings(self.mainWidget, table=table,
                                                            dfObject=dataFrameObject,
@@ -67,10 +68,14 @@ class ColumnViewSettingsPopup(CcpnDialogMainWidget):
         """
         hiddenColumns = self.getHiddenColumns()
         # self.dataFrameObject.hiddenColumns = hiddenColumns
-        self.table.setHiddenColumns(hiddenColumns, False)
+        self.tableHandler.setHiddenColumns(hiddenColumns, False)
         self.reject()
         return hiddenColumns
 
+
+#=========================================================================================
+# ColumnViewSettings
+#=========================================================================================
 
 SEARCH_MODES = ['Literal', 'Case Sensitive Literal', 'Regular Expression']
 CheckboxTipText = 'Select column to be visible on the table.'
@@ -90,9 +95,9 @@ class ColumnViewSettings(Frame):
         elif isinstance(dfObject, pd.DataFrame):
             self._df = dfObject
         else:
-            raise ValueError('dfObject is the wrong type')
+            raise ValueError(f'dfObject is the wrong type - {type(dfObject)}')
 
-        self.table = table
+        self.tableHandler = table
         self.checkBoxes = []
         self._hideColumnWidths = {}
         self.filterLabel = Label(self, text='Display Columns', grid=(0, 0))
@@ -103,24 +108,24 @@ class ColumnViewSettings(Frame):
 
     def initCheckBoxes(self):
 
-        # columns = self._dfObject.headings  #   self.table._columns
-        columns = list(self._df.columns)
-        hiddenColumns = self._hiddenColumns or []
+        if columns := list(self._df.columns):
+            hiddenColumns = self._hiddenColumns or []
 
-        if columns:
             for i, colum in enumerate(columns):
 
                 # always ignore the _internal columns
-                if colum not in self.table._internalColumns:
+                if colum not in self.tableHandler._internalColumns:
                     if self.direction == 'v':
                         i += 1
                         cb = CheckBox(self.widgetFrame, text=colum, grid=(i, 1), callback=self.checkBoxCallBack,
-                                      checked=True if colum not in hiddenColumns else False,
-                                      hAlign='l', tipText=CheckboxTipText, )
+                                      checked=colum not in hiddenColumns,
+                                      hAlign='l', tipText=CheckboxTipText)
+
                     else:
                         cb = CheckBox(self.widgetFrame, text=colum, grid=(1, i), callback=self.checkBoxCallBack,
-                                      checked=True if colum not in hiddenColumns else False,
-                                      hAlign='l', tipText=CheckboxTipText, )
+                                      checked=colum not in hiddenColumns,
+                                      hAlign='l', tipText=CheckboxTipText)
+
 
                     self.checkBoxes.append(cb)
 
@@ -139,7 +144,7 @@ class ColumnViewSettings(Frame):
             checkBox.setEnabled(True)
             if checkBox.isChecked():
                 checkedBoxes.append(checkBox)
-        if len(checkedBoxes) > 0:
+        if checkedBoxes:
             if currentCheckBox.isChecked():
                 self._showColumn(i, name)
             else:
@@ -150,7 +155,7 @@ class ColumnViewSettings(Frame):
             currentCheckBox.setChecked(True)
 
     def updateWidgets(self, table):
-        self.table = table
+        self.tableHandler = table
         if self.checkBoxes:
             for cb in self.checkBoxes:
                 cb.deleteLater()
@@ -158,19 +163,19 @@ class ColumnViewSettings(Frame):
         self.initCheckBoxes()
 
     def _hideColumn(self, i, name):
-        self.table.hideColumn(i)
-        if not name in self._hiddenColumns:
+        self.tableHandler.hideColumn(i)
+        if name not in self._hiddenColumns:
             self._hiddenColumns.append(name)
 
     def _showColumn(self, i, name):
-        self.table.showColumn(i)
-        self.table.resizeColumnToContents(i)
+        self.tableHandler.showColumn(i)
+        self.tableHandler.resizeColumnToContents(i)
         if name in self._hiddenColumns:
             self._hiddenColumns.remove(name)
 
     def showColumns(self):
         # show/hide the columns in the list
-        columns = self.table.columnTexts
+        columns = self.tableHandler.columnTexts
 
         for i, colName in enumerate(columns):
             if colName in self._hiddenColumns:

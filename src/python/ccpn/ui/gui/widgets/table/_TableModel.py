@@ -85,7 +85,7 @@ _EDITOR_GETTER = ('get', 'value', 'text', 'getFile')
 #=========================================================================================
 
 class _TableModel(QtCore.QAbstractTableModel):
-    """A simple table-model to view pandas DataFrames
+    """A simple table-model to view pandas DataFrames.
     """
 
     _defaultForegroundColour = None
@@ -99,20 +99,15 @@ class _TableModel(QtCore.QAbstractTableModel):
     defaultFlags = ENABLED | SELECTABLE  # add CHECKABLE to enable check-boxes
     _defaultEditable = True
 
-    _colour = None
+    _guiState = None
 
-    def __init__(self, data, view=None):
+    def __init__(self, df, parent=None, view=None):
         """Initialise the pandas model.
         Allocates space for foreground/background colours.
-
-        :param data: pandas DataFrame
+        :param df: pandas DataFrame
         """
-        if not isinstance(data, pd.DataFrame):
-            raise ValueError('data must be of type pd.DataFrame')
-
-        super().__init__()
-
-        self.df = data
+        super().__init__(parent)
+        self.df = df
         self._view = view
         if view:
             fontMetric = QtGui.QFontMetricsF(view.font())
@@ -135,7 +130,7 @@ class _TableModel(QtCore.QAbstractTableModel):
 
     @property
     def df(self):
-        """Return the underlying pandas dataFrame
+        """Return the underlying Pandas-dataFrame.
         """
         return self._df
 
@@ -151,15 +146,15 @@ class _TableModel(QtCore.QAbstractTableModel):
         # set the initial sort-order
         self._oldSortIndex = list(range(value.shape[0]))
         self._sortIndex = list(range(value.shape[0]))
-        self._filterIndex = list(range(value.shape[0]))
+        self._filterIndex = None
 
-        # create numpy arrays to match the data that will hold background colour
-        self._colour = np.empty(value.shape, dtype=np.object)
-        self._headerToolTips = {orient: np.empty(value.shape[ii], dtype=np.object)
+        # create numpy arrays to match the data that will hold fore/background-colour, and other info
+        self._guiState = np.empty(value.shape, dtype=object)
+        self._headerToolTips = {orient: np.empty(value.shape[ii], dtype=object)
                                 for ii, orient in enumerate([QtCore.Qt.Vertical, QtCore.Qt.Horizontal])}
 
+        # set the dataFrame
         self._df = value
-        self._filterIndex = None
 
         # notify that the data has changed
         self.endResetModel()
@@ -241,7 +236,7 @@ class _TableModel(QtCore.QAbstractTableModel):
 
             # sLoc = self._sortIndex[iLoc]  # signals?
             # self.beginInsertRows(QtCore.QModelIndex(), sLoc, sLoc)
-            self._colour = np.insert(self._colour, iLoc, np.empty((self.columnCount()), dtype=np.object), axis=0)
+            self._guiState = np.insert(self._guiState, iLoc, np.empty((self.columnCount()), dtype=np.object), axis=0)
             self._setSortOrder(self._sortColumn, self._sortOrder)
             # self.endInsertRows()
 
@@ -257,7 +252,7 @@ class _TableModel(QtCore.QAbstractTableModel):
             # self._df.loc[row] = newRow
             # iLoc = self._df.index.get_loc(row)
             # self.beginInsertRows(QtCore.QModelIndex(), iLoc, iLoc)
-            # self._colour = np.insert(self._colour, iLoc, np.empty((self.columnCount()), dtype=np.object), axis=0)
+            # self._guiState = np.insert(self._guiState, iLoc, np.empty((self.columnCount()), dtype=np.object), axis=0)
             # self.endInsertRows()
             # indexA = model.index(0, 0)
             # indexB = model.index(n - 1, c - 1)
@@ -349,11 +344,11 @@ class _TableModel(QtCore.QAbstractTableModel):
 
                 self._df.drop([row], inplace=True)
 
-            self._colour = np.delete(self._colour, iLoc, axis=0)
+            self._guiState = np.delete(self._guiState, iLoc, axis=0)
             self.endRemoveRows()
 
     def rowCount(self, parent=None):
-        """Return the row count for the dataFrame
+        """Return the row-count for the dataFrame.
         """
         if self._filterIndex is not None:
             return len(self._filterIndex)
@@ -361,12 +356,12 @@ class _TableModel(QtCore.QAbstractTableModel):
             return self._df.shape[0]
 
     def columnCount(self, parent=None):
-        """Return the column count for the dataFrame
+        """Return the column-count for the dataFrame.
         """
         return 1 if type(self._df) == pd.Series else self._df.shape[1]
 
     def data(self, index, role=DISPLAY_ROLE):
-        """Process the data callback for the model
+        """Return the data/roles for the model.
         """
         if not index.isValid():
             return None
@@ -384,7 +379,7 @@ class _TableModel(QtCore.QAbstractTableModel):
                 if isinstance(v, (float, np.floating)):
                     # make it scientific annotation if a huge/tiny number
                     try:
-                        value = f'{v:.3e}' if  v> 1e6  or v <1e-6 else f'{v:.3f}'
+                        value = f'{v:.3e}' if v > 1e6 or v < 1e-6 else f'{v:.3f}'
                     except Exception as ex:
                         value = str(v)
                 else:
@@ -401,22 +396,22 @@ class _TableModel(QtCore.QAbstractTableModel):
                     return val
 
             elif role == BACKGROUND_ROLE:
-                if (colourDict := self._colour[row, col]):
+                if (indexGui := self._guiState[row, col]):
                     # get the colour from the dict
-                    return colourDict.get(role)
+                    return indexGui.get(role)
 
             elif role == FOREGROUND_ROLE:
-                if (colourDict := self._colour[row, col]):
+                if (indexGui := self._guiState[row, col]):
                     # get the colour from the dict
-                    return colourDict.get(role)
+                    return indexGui.get(role)
 
                 # return the default foreground colour
                 return self._defaultForegroundColour
 
             elif role == BORDER_ROLE:
-                if (colourDict := self._colour[row, col]):
+                if (indexGui := self._guiState[row, col]):
                     # get the colour from the dict
-                    return bool(colourDict.get(BACKGROUND_ROLE))
+                    return bool(indexGui.get(BACKGROUND_ROLE))
 
             elif role == TOOLTIP_ROLE:
                 data = self._df.iat[row, col]
@@ -441,9 +436,9 @@ class _TableModel(QtCore.QAbstractTableModel):
                 return (row, col)
 
             elif role == FONT_ROLE:
-                if (colourDict := self._colour[row, col]):
+                if (indexGui := self._guiState[row, col]):
                     # get the font from the dict
-                    return colourDict.get(role)
+                    return indexGui.get(role)
 
             # if role == CHECK_ROLE and col == 0:
             #     # need flags to include CHECKABLE and return QtCore.Qt.checked/unchecked/PartiallyChecked here
@@ -596,12 +591,12 @@ class _TableModel(QtCore.QAbstractTableModel):
         if not (0 <= row < self.rowCount() and 0 <= column < self.columnCount()):
             raise ValueError(f'({row}, {column}) must be less than ({self.rowCount()}, {self.columnCount()})')
 
-        if not (colourDict := self._colour[row, column]):
-            colourDict = self._colour[row, column] = {}
+        if not (indexGui := self._guiState[row, column]):
+            indexGui = self._guiState[row, column] = {}
         if colour:
-            colourDict[FOREGROUND_ROLE] = QtGui.QColor(colour)
+            indexGui[FOREGROUND_ROLE] = QtGui.QColor(colour)
         else:
-            colourDict.pop(FOREGROUND_ROLE, None)
+            indexGui.pop(FOREGROUND_ROLE, None)
 
     def setBackground(self, row, column, colour):
         """Set the background colour for dataFrame cell at position (row, column).
@@ -614,12 +609,12 @@ class _TableModel(QtCore.QAbstractTableModel):
         if not (0 <= row < self.rowCount() and 0 <= column < self.columnCount()):
             raise ValueError(f'({row}, {column}) must be less than ({self.rowCount()}, {self.columnCount()})')
 
-        if not (colourDict := self._colour[row, column]):
-            colourDict = self._colour[row, column] = {}
+        if not (indexGui := self._guiState[row, column]):
+            indexGui = self._guiState[row, column] = {}
         if colour:
-            colourDict[BACKGROUND_ROLE] = QtGui.QColor(colour)
+            indexGui[BACKGROUND_ROLE] = QtGui.QColor(colour)
         else:
-            colourDict.pop(BACKGROUND_ROLE, None)
+            indexGui.pop(BACKGROUND_ROLE, None)
 
     def setCellFont(self, row, column, font):
         """Set the font for dataFrame cell at position (row, column).
@@ -632,16 +627,16 @@ class _TableModel(QtCore.QAbstractTableModel):
         if not (0 <= row < self.rowCount() and 0 <= column < self.columnCount()):
             raise ValueError(f'({row}, {column}) must be less than ({self.rowCount()}, {self.columnCount()})')
 
-        if not (colourDict := self._colour[row, column]):
-            colourDict = self._colour[row, column] = {}
+        if not (indexGui := self._guiState[row, column]):
+            indexGui = self._guiState[row, column] = {}
         if font:
-            colourDict[FONT_ROLE] = font
+            indexGui[FONT_ROLE] = font
         else:
-            colourDict.pop(FONT_ROLE, None)
+            indexGui.pop(FONT_ROLE, None)
 
     @staticmethod
     def _universalSort(values):
-        """Method to apply sorting
+        """Method to apply sorting.
         """
         # generate the universal sort key values for the column
         return pd.Series(universalSortKey(val) for val in values)
@@ -652,6 +647,7 @@ class _TableModel(QtCore.QAbstractTableModel):
         self._oldSortIndex = self._sortIndex
         col = self._df.columns[column]
         newData = self._universalSort(self._df[col])
+
         self._sortIndex = list(newData.sort_values(ascending=(order == QtCore.Qt.AscendingOrder)).index)
 
         # map the old sort-order to the new sort-order
@@ -660,8 +656,8 @@ class _TableModel(QtCore.QAbstractTableModel):
             self._filterIndex = sorted([self._sortIndex.index(self._oldSortIndex[fi]) for fi in self._filterIndex])
 
     def sort(self, column: int, order: QtCore.Qt.SortOrder = ...) -> None:
-        """Sort the underlying pandas DataFrame
-        Required as there is no proxy model to handle the sorting
+        """Sort the underlying pandas DataFrame.
+        Required as there is no proxy model to handle the sorting.
         """
         # remember the current sort settings
         self._sortColumn = column
@@ -679,7 +675,15 @@ class _TableModel(QtCore.QAbstractTableModel):
         """Map the cell index to the co-ordinates in the pandas dataFrame.
         Return list of tuples of dataFrame positions.
         """
-        return [(self._sortIndex[idx.row()], idx.column()) if idx.isValid() else (None, None) for idx in indexes]
+        mapped = []
+        for idx in indexes:
+            if not idx.isValid():
+                mapped.append((None, None))
+            else:
+                fRow = self._filterIndex[idx.row()] if self._filterIndex is not None and 0 <= idx.row() < len(self._filterIndex) else idx.row()
+                mapped.append((self._sortIndex[fRow], idx.column()))
+
+        return mapped
 
     def flags(self, index):
         # Set the table to be editable - need the editable columns here
@@ -786,3 +790,105 @@ class _TableObjectModel(_TableModel):
                 return True
 
         return False
+
+
+def main():
+    # Create a Pandas DataFrame.
+    import pandas as pd
+    import numpy as np
+
+    technologies = {
+        'Courses': ['a', 'b', 'b', 'c', 'd', 'c', 'a', 'b', 'd', 'd', 'a', 'c', 'e', 'f'],
+        'Fee'    : [1, 8, 3, 6, 12, 89, 12, 5, 9, 34, 15, 65, 60, 20],
+        }
+    df = pd.DataFrame(technologies)
+    print(df)
+
+    # print('Group by: Courses, Fee')
+    # df2=df.sort_values(['Courses','Fee'], ascending=False).groupby('Courses').head()
+    # print(df2)
+
+    print('Group by: Courses, Fee  -  max->min by max of each group')
+    # max->min by max of each group
+    df2 = df.copy()
+    df2['max'] = df2.groupby('Courses')['Fee'].transform('max')
+    df2 = df2.sort_values(['max', 'Fee'], ascending=False).drop('max', axis=1)
+    print(df2)
+
+    print('Group by: Courses, Fee  -  min->max by min of each group')
+    # min->max by min of each group
+    df2 = df.copy()
+    df2['min'] = df2.groupby('Courses')['Fee'].transform('min')
+    df2 = df2.sort_values(['min', 'Fee'], ascending=True).drop('min', axis=1)
+    print(df2)
+
+    print('Group by: Courses, Fee  -  min->max of each group / max->min within group')
+    # min->max of each group / max->min within group
+    df2 = df.copy()
+    df2['max'] = df2.groupby('Courses')['Fee'].transform('max')
+    df2['diff'] = df2['max'] - df2['Fee']
+    df2 = df2.sort_values(['max', 'diff'], ascending=True)  # .drop(['max', 'diff'], axis=1)
+    print(df2)
+
+    print('Group by: Courses, Fee  -  max->min of each group / min->max within group')
+    # max->min of each group / min->max within group
+    df2 = df.copy()
+    df2['min'] = df2.groupby('Courses')['Fee'].transform('min')
+    df2['diff'] = df2['min'] - df2['Fee']
+    df2 = df2.sort_values(['min', 'diff'], ascending=False).drop(['min', 'diff'], axis=1)
+    print(df2)
+
+
+if __name__ == '__main__':
+    main()
+
+
+def main():
+    # Create a Pandas DataFrame.
+    import pandas as pd
+    import numpy as np
+
+    technologies = {
+        'Courses': ['a', 'b', 'b', 'c', 'd', 'c', 'a', 'b', 'd', 'd', 'a', 'c', 'e', 'f'],
+        'Fee'    : [1, 8, 3, 6, 12, 89, 12, 5, 9, 34, 15, 65, 60, 20],
+        }
+    df = pd.DataFrame(technologies)
+    print(df)
+
+    # print('Group by: Courses, Fee')
+    # df2=df.sort_values(['Courses','Fee'], ascending=False).groupby('Courses').head()
+    # print(df2)
+
+    print('Group by: Courses, Fee  -  max->min by max of each group')
+    # max->min by max of each group
+    df2 = df.copy()
+    df2['max'] = df2.groupby('Courses')['Fee'].transform('max')
+    df2 = df2.sort_values(['max', 'Fee'], ascending=False).drop('max', axis=1)
+    print(df2)
+
+    print('Group by: Courses, Fee  -  min->max by min of each group')
+    # min->max by min of each group
+    df2 = df.copy()
+    df2['min'] = df2.groupby('Courses')['Fee'].transform('min')
+    df2 = df2.sort_values(['min', 'Fee'], ascending=True).drop('min', axis=1)
+    print(df2)
+
+    print('Group by: Courses, Fee  -  min->max of each group / max->min within group')
+    # min->max of each group / max->min within group
+    df2 = df.copy()
+    df2['max'] = df2.groupby('Courses')['Fee'].transform('max')
+    df2['diff'] = df2['max'] - df2['Fee']
+    df2 = df2.sort_values(['max', 'diff'], ascending=True)  # .drop(['max', 'diff'], axis=1)
+    print(df2)
+
+    print('Group by: Courses, Fee  -  max->min of each group / min->max within group')
+    # max->min of each group / min->max within group
+    df2 = df.copy()
+    df2['min'] = df2.groupby('Courses')['Fee'].transform('min')
+    df2['diff'] = df2['min'] - df2['Fee']
+    df2 = df2.sort_values(['min', 'diff'], ascending=False).drop(['min', 'diff'], axis=1)
+    print(df2)
+
+
+if __name__ == '__main__':
+    main()

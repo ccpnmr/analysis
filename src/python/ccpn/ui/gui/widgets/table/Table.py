@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:48 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-02-08 19:52:33 +0000 (Wed, February 08, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,8 +26,8 @@ __date__ = "$Date: 2022-09-08 17:12:59 +0100 (Thu, September 08, 2022) $"
 # Start of code
 #=========================================================================================
 
-import numpy as np
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtCore
+
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.table.TableABC import TableABC
 from ccpn.util.Common import NOTHING
@@ -65,7 +65,7 @@ _TABLE_KWDS = ('parent', 'df',
 
 
 #=========================================================================================
-# TableABC
+# Table
 #=========================================================================================
 
 class Table(TableABC, Base):
@@ -76,10 +76,10 @@ class Table(TableABC, Base):
     _enableSelectionCallback = True
     _enableActionCallback = True
 
-    def __init__(self, parent, df=None,
+    def __init__(self, parent, *, df=None,
                  multiSelect=True, selectRows=True,
                  showHorizontalHeader=True, showVerticalHeader=True,
-                 borderWidth=2, cellPadding=2, focusBorderWidth=0, gridColour=None,
+                 borderWidth=2, cellPadding=2, focusBorderWidth=2, gridColour=None,
                  _resize=False, setWidthToColumns=False, setHeightToRows=False,
                  setOnHeaderOnly=False, showGrid=False, wordWrap=False,
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
@@ -115,7 +115,8 @@ class Table(TableABC, Base):
         :param enableDelete:
         :param enableSearch:
         :param enableCopyCell:
-        :param ignoreStyleSheet:
+        :param enableCopyCell:
+        :param tableMenuEnabled:
         :param kwds:
         """
         super().__init__(parent, df=df,
@@ -140,11 +141,14 @@ class Table(TableABC, Base):
 def main():
     """Show the test-table
     """
-    MAX_ROWS = 5
+    MAX_ROWS = 7
+
+    import pandas as pd
+    import numpy as np
+    import random
+    from PyQt5 import QtGui, QtWidgets
 
     from ccpn.ui.gui.widgets.Application import TestApplication
-    import pandas as pd
-    import random
 
     data = [[1, 150, 300, 900, float('nan'), 80.1, 'delta'],
             [2, 200, 500, 300, float('nan'), 34.2, ['help', 'more', 'chips']],
@@ -155,7 +159,7 @@ def main():
 
     # multiIndex columnHeaders
     cols = ("No", "Toyota", "Ford", "Tesla", "Nio", "Other", "NO")
-    rowIndex = ["AAA", "BBB", "CCC", "DDD", "EEE"]
+    rowIndex = ["AAA", "BBB", "CCC", "DDD", "EEE"]  # duplicate index
 
     for ii in range(MAX_ROWS):
         chrs = ''.join(chr(random.randint(65, 68)) for _ in range(5))
@@ -166,7 +170,7 @@ def main():
                      450 + random.randint(-100, 400),
                      700 + random.randint(-MAX_ROWS, MAX_ROWS),
                      150.3 + random.random() * 1e2,
-                     f'bravo{chrs[3:]}'])
+                     f'bravo{chrs[3:]}' if ii % 2 else f'delta{chrs[3:]}'])
 
     df = pd.DataFrame(data, columns=cols, index=rowIndex)
 
@@ -177,7 +181,39 @@ def main():
     layout = QtWidgets.QGridLayout()
     frame.setLayout(layout)
 
-    table = Table(None, df=df)
+    table = TableABC(None, df=df, focusBorderWidth=2, cellPadding=11,
+                     showGrid=True, gridColour='white',
+                     setWidthToColumns=False, setHeightToRows=False, _resize=True)
+
+    for row in range(table.rowCount()):
+        for col in range(table.columnCount()):
+            table.setBackground(row, col, QtGui.QColor(random.randint(0, 256**3) & 0x3f3f3f | 0x404040))
+
+    # set some background colours
+    cells = ((0, 0, '#80C0FF'),
+             (1, 1, '#fe83cc'), (1, 2, '#fe83cc'),
+             (2, 3, '#83fbcc'),
+             (3, 2, '#e0ff87'), (3, 3, '#e0ff87'), (3, 4, '#e0ff87'), (3, 5, '#e0ff87'),
+             (4, 2, '#e0f08a'), (4, 3, '#e0f08a'), (4, 4, '#e0f08a'), (4, 5, '#e0f08a'),
+             (6, 2, '#70a04f'), (6, 6, '#70a04f'),
+             (7, 1, '#eebb43'), (7, 2, '#eebb43'),
+             (8, 4, '#7090ef'), (8, 5, '#7090ef'),
+             (9, 0, '#30f06f'), (9, 1, '#30f06f'),
+             (10, 2, '#e0d0e6'), (10, 3, '#e0d0e6'), (10, 4, '#e0d0e6'),
+             (11, 2, '#e0d0e6'), (11, 3, '#e0d0e6'), (11, 4, '#e0d0e6'),
+             )
+
+    for row, col, colour in cells:
+        if 0 <= row < table.rowCount() and 0 <= col < table.columnCount():
+            table.setBackground(row, col, colour)
+
+    # set the horizontalHeader information
+    header = table.horizontalHeader()
+    # test a single stretching column
+    header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+    header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
+    header.setStretchLastSection(False)
+
     win.setCentralWidget(frame)
     frame.layout().addWidget(table, 0, 0)
 

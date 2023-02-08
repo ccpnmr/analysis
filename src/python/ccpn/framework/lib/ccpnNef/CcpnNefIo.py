@@ -1223,7 +1223,7 @@ class CcpnNefWriter:
                             cols = list(val.columns)
 
                             # NOTE:ED - need to modify the headers somewhere more sensible
-                            from ccpn.ui.gui.modules.RestraintAnalysisTable import nefHeaders, Headers
+                            from ccpn.ui.gui.modules.lib.RestraintAITableCommon import Headers, nefHeaders
 
                             # list of header types that need swapping - need the opposite to load
                             _headers = [(nefHeaders, Headers),
@@ -7818,7 +7818,7 @@ class CcpnNefReader(CcpnNefContent):
             if _df is not None:
 
                 # NOTE:ED - need to modify the headers somewhere more sensible
-                from ccpn.ui.gui.modules.RestraintAnalysisTable import nefHeaders, Headers
+                from ccpn.ui.gui.modules.lib.RestraintAITableCommon import Headers, nefHeaders
 
                 # list of header types that need swapping - need the opposite to save
                 _headers = [(nefHeaders, Headers),

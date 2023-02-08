@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:48 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-02-08 19:52:33 +0000 (Wed, February 08, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -82,7 +82,6 @@ class _ProjectTableABC(TableABC, Base):
     INDEXCOLUMN = 'index'
     _INDEX = None
 
-    defaultHidden = []
     columnHeaders = {}
     tipTexts = ()
 
@@ -261,44 +260,40 @@ class _ProjectTableABC(TableABC, Base):
     def deleteSelectionFromTable(self):
         """Delete all objects in the selection from the project
         """
-        if (selected := self.getSelectedObjects()):
-            n = len(selected)
+        if not (selected := self.getSelectedObjects()):
+            return
 
-            # make a list of the types of objects to delete
-            objNames = OrderedSet()
-            for obj in selected:
-                if hasattr(obj, 'pid'):
-                    objNames.add('%s%s' % (obj.className, '' if n == 1 else 's'))
-            objStr = ', '.join(objNames)
+        n = len(selected)
 
-            # put into the dialog message
-            title = 'Delete Item%s' % ('' if n == 1 else 's')
-            if objStr:
-                msg = 'Delete %s %s from the project?' % ('' if n == 1 else '%d' % n, objStr)
-            else:
-                msg = 'Delete %sselected item%s from the project?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
-            if MessageDialog.showYesNo(title, msg):
+        # make a list of the types of objects to delete
+        objNames = OrderedSet(f"{obj.className}{'' if n == 1 else 's'}" for obj in selected if hasattr(obj, 'pid'))
 
-                with catchExceptions(application=self.application,
-                                     errorStringTemplate='Error deleting objects from table; "%s"'):
-                    if hasattr(selected[0], 'project'):
-                        thisProject = selected[0].project
+        # put into the dialog message
+        title = f"Delete Item{'' if n == 1 else 's'}"
+        if objStr := ', '.join(objNames):
+            msg = f"Delete {'' if n == 1 else '%d' % n} {objStr} from the project?"
+        else:
+            msg = f"Delete {'' if n == 1 else '%d ' % n}selected item{'' if n == 1 else 's'} from the project?"
 
-                        with undoBlockWithoutSideBar():
-                            # echo [sI.pid for sI in selected])
-                            for obj in selected:
-                                if hasattr(obj, 'pid'):
-                                    obj.delete()
+        if MessageDialog.showYesNo(title, msg):
 
-                    else:
-
-                        # TODO:ED this is deleting from PandasTable, check for another way to get project
+            with catchExceptions(application=self.application,
+                                 errorStringTemplate='Error deleting objects from table; "%s"'):
+                if hasattr(selected[0], 'project'):
+                    with undoBlockWithoutSideBar():
+                        # echo [sI.pid for sI in selected]
                         for obj in selected:
                             if hasattr(obj, 'pid'):
                                 obj.delete()
 
-                self.clearSelection()
-                return True
+                else:
+                    # TODO:ED this is deleting from PandasTable, check for another way to get project
+                    for obj in selected:
+                        if hasattr(obj, 'pid'):
+                            obj.delete()
+
+            self.clearSelection()
+            return True
 
     #=========================================================================================
     # Header context menu
@@ -373,7 +368,7 @@ class _ProjectTableABC(TableABC, Base):
 
         try:
             self._dataFrameObject = self.buildTableDataFrame()
-            self._df = self._dataFrameObject.dataFrame
+            _df = self._dataFrameObject.dataFrame
 
             # remember the old values
             sortColumn, sortOrder = 0, 0
@@ -382,7 +377,7 @@ class _ProjectTableABC(TableABC, Base):
                 sortOrder = oldModel._sortOrder
 
             # update model to the new _df
-            model = self.updateDf(self._df)
+            model = self.updateDf(_df)
 
             self.resizeColumnsToContents()
 
@@ -392,7 +387,7 @@ class _ProjectTableABC(TableABC, Base):
                 model._sortOrder = sortOrder
                 self.sortByColumn(sortColumn, sortOrder)
 
-            self.showColumns(None)
+            self.headerColumnMenu.showColumns(None)
             self._highLightObjs(objs)
 
             # set the tipTexts
@@ -412,15 +407,15 @@ class _ProjectTableABC(TableABC, Base):
         """Populate with an empty dataFrame containing the correct column headers.
         """
         self._dataFrameObject = None
-        self._df = pd.DataFrame({val: [] for val in self.columnHeaders.keys()})
+        _df = pd.DataFrame({val: [] for val in self.columnHeaders.keys()})
 
-        if self.OBJECTCOLUMN in self._df.columns:
+        if self.OBJECTCOLUMN in _df.columns:
             # use the object as the index, object always exists even if isDeleted
-            self._df.set_index(self._df[self.OBJECTCOLUMN], inplace=True, )
+            _df.set_index(_df[self.OBJECTCOLUMN], inplace=True, )
 
-        self.updateDf(self._df, resize=True)
+        self.updateDf(_df, resize=True)
 
-        self.showColumns(None)
+        self.headerColumnMenu.showColumns(None)
 
     #=========================================================================================
     # Build the dataFrame for the table
@@ -527,7 +522,7 @@ class _ProjectTableABC(TableABC, Base):
 
     def _close(self):
         self._clearTableNotifiers()
-        super(_ProjectTableABC, self)._close()
+        super()._close()
 
     def clearCurrentCallback(self):
         """Clear the callback function for current object/list change
@@ -609,7 +604,7 @@ class _ProjectTableABC(TableABC, Base):
         """Return the selected core objects
         :param fromSelection:
         :return: get a list of table objects. If the table has a header called pid, the object is a ccpn Core obj like Peak,
-        otherwise is a Pandas series object corresponding to the selected row(s).
+        otherwise is a Pandas-series object corresponding to the selected row(s).
         """
         model = self.selectionModel()
 
@@ -654,8 +649,7 @@ class _ProjectTableABC(TableABC, Base):
             # remove from the current list
             multiple = self.callBackClass._pluralLinkName if self.callBackClass else None
             if (self._df is not None and not self._df.empty) and multiple:
-                multipleAttr = getattr(self.current, multiple, [])
-                if len(multipleAttr) > 0:
+                if multipleAttr := getattr(self.current, multiple, []):
                     # need to remove objList from multipleAttr - fires only one current change
                     setattr(self.current, multiple, tuple(set(multipleAttr) - set(objList)))
 
@@ -678,17 +672,15 @@ class _ProjectTableABC(TableABC, Base):
             selectionModel.clearSelection()
 
             if selection:
-                if len(selection) > 0:
-                    if isinstance(selection[0], pd.Series):
-                        # not sure how to handle this
-                        return
+                if len(selection) > 0 and isinstance(selection[0], pd.Series):
+                    # not sure how to handle this
+                    return
                 uniqObjs = set(selection)
 
                 _sortIndex = model._sortIndex
                 dfTemp = self._df.reset_index(drop=True)
                 data = [dfTemp[dfTemp[self._OBJECT] == obj] for obj in uniqObjs]
-                rows = [_sortIndex.index(_dt.index[0]) for _dt in data if not _dt.empty]
-                if rows:
+                if rows := [_sortIndex.index(_dt.index[0]) for _dt in data if not _dt.empty]:
                     minInd = model.index(min(rows), 0)
                     for row in rows:
                         rowIndex = model.index(row, 0)
@@ -740,11 +732,8 @@ class _ProjectTableABC(TableABC, Base):
         CCPN-INTERNAL: Get a comment from GuiTable
         """
         try:
-            if obj.comment == '' or not obj.comment:
-                return ''
-            else:
-                return obj.comment
-        except:
+            return '' if obj.comment == '' or not obj.comment else obj.comment
+        except Exception:
             return ''
 
     @staticmethod
@@ -752,7 +741,7 @@ class _ProjectTableABC(TableABC, Base):
         """
         CCPN-INTERNAL: Insert a comment into object
         """
-        obj.comment = value if value else None
+        obj.comment = value or None
 
     @staticmethod
     def _getAnnotation(obj):
@@ -760,11 +749,8 @@ class _ProjectTableABC(TableABC, Base):
         CCPN-INTERNAL: Get an annotation from GuiTable
         """
         try:
-            if obj.annotation == '' or not obj.annotation:
-                return ''
-            else:
-                return obj.annotation
-        except:
+            return '' if obj.annotation == '' or not obj.annotation else obj.annotation
+        except Exception:
             return ''
 
     @staticmethod
@@ -772,4 +758,4 @@ class _ProjectTableABC(TableABC, Base):
         """
         CCPN-INTERNAL: Insert an annotation into object
         """
-        obj.annotation = value if value else None
+        obj.annotation = value or None

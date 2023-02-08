@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-31 18:50:34 +0000 (Mon, October 31, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-02-08 19:52:32 +0000 (Wed, February 08, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,7 +42,7 @@ from ccpn.ui.gui.lib.GuiStripContextMenus import _selectedPeaksMenuItem, _addMen
     _getNdPeakMenuItems, _setEnabledAllItems
 from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget
 from ccpn.ui.gui.lib._CoreTableFrame import _CoreTableWidgetABC, _CoreTableFrameABC
-from ccpn.ui.gui.widgets.table._TableAdditions import _TableMenuABC
+from ccpn.ui.gui.widgets.table._TableAdditions import TableMenuABC
 from ccpn.util.Common import makeIterableList
 from ccpn.util.Logging import getLogger
 
@@ -92,12 +92,12 @@ class PeakTableModule(CcpnModule):
         self._settings = None
         if self.activePulldownClass:
             # add to settings widget - see sequenceGraph for more detailed example
-            settingsDict = OrderedDict(((LINKTOPULLDOWNCLASS, {'label': f'Link to current {self.activePulldownClass.className}',
-                                                               'tipText': f'Set/update current {self.activePulldownClass.className} when selecting from pulldown',
+            settingsDict = OrderedDict(((LINKTOPULLDOWNCLASS, {'label'   : f'Link to current {self.activePulldownClass.className}',
+                                                               'tipText' : f'Set/update current {self.activePulldownClass.className} when selecting from pulldown',
                                                                'callBack': None,
-                                                               'enabled': True,
-                                                               'checked': False,
-                                                               '_init': None}),
+                                                               'enabled' : True,
+                                                               'checked' : False,
+                                                               '_init'   : None}),
                                         ))
 
             self._settings = ModuleSettingsWidget(parent=settingsWidget, mainWindow=self.mainWindow,
@@ -168,38 +168,38 @@ class PeakTableModule(CcpnModule):
         return widgetsState
 
 
-
 #=========================================================================================
 # Peak table menu
 #=========================================================================================
 
 
-class _PeakTableOptions(_TableMenuABC):
+class _PeakTableOptions(TableMenuABC):
     """Class to handle peak-table options from a right-mouse menu.
     """
 
-    def addTableMenuOptions(self, menu):
+    def addMenuOptions(self, menu):
         """Add options to the right-mouse menu
         """
-        super().addTableMenuOptions(menu)
+        parent = self._parent
 
         menu.addSeparator()
         _peakItem = _selectedPeaksMenuItem(None)
-        _addMenuItems(self, menu, [_peakItem])
+        _addMenuItems(parent, menu, [_peakItem])
 
         # _selectedPeaksMenu submenu - add to Strip._selectedPeaksMenu
         items = _getNdPeakMenuItems(menuId='Main')
         # attach to the _selectedPeaksMenu submenu
-        _addMenuItems(self, self._selectedPeaksMenu, items)
+        _addMenuItems(parent, parent._selectedPeaksMenu, items)
 
-    def setTableMenuOptions(self, menu):
+    def setMenuOptions(self, menu):
         """Update options in the right-mouse menu
         """
-        super().setTableMenuOptions(menu)
+        parent = self._parent
+        submenu = parent._selectedPeaksMenu
 
         # Enable/disable menu items as required
-        self._navigateToPeakMenuMain.setEnabled(False)
-        _setEnabledAllItems(self._selectedPeaksMenu, True if self.current.peaks else False)
+        parent._navigateToPeakMenuMain.setEnabled(False)
+        _setEnabledAllItems(submenu, bool(parent.current.peaks))
 
     #=========================================================================================
     # Properties
@@ -224,7 +224,7 @@ class _PeakTableOptions(_TableMenuABC):
 # _NewPeakTableWidget
 #=========================================================================================
 
-class _NewPeakTableWidget(_PeakTableOptions, _CoreTableWidgetABC):
+class _NewPeakTableWidget(_CoreTableWidgetABC):
     """Class to present a peakList Table
     """
     className = 'PeakTable'
@@ -374,10 +374,7 @@ class _NewPeakTableWidget(_PeakTableOptions, _CoreTableWidgetABC):
             getLogger().debug2(f'{self.__class__.__name__}.actionCallback: No selection\n{es}')
             return
 
-        if isinstance(objs, (tuple, list)):
-            peak = objs[0]
-        else:
-            peak = objs
+        peak = objs[0] if isinstance(objs, (tuple, list)) else objs
 
         if self.current.strip is not None:
             validPeakListViews = [pp.peakList for pp in self.current.strip.peakListViews if isinstance(pp.peakList, PeakList)]
@@ -415,6 +412,12 @@ class _NewPeakTableWidget(_PeakTableOptions, _CoreTableWidgetABC):
 
     # currently in _PeakTableOptions
 
+    def addTableMenuOptions(self, menu):
+        self.peakMenu = _PeakTableOptions(self, True)
+        self._tableMenuOptions.append(self.peakMenu)
+
+        super().addTableMenuOptions(menu)
+
     #=========================================================================================
     # Table functions
     #=========================================================================================
@@ -438,10 +441,8 @@ class _NewPeakTableWidget(_PeakTableOptions, _CoreTableWidgetABC):
         if peakList and peakList.spectrum:
             # Assignment column
             for i in range(peakList.spectrum.dimensionCount):
-                assignTipText = 'NmrAtom assignments of peak in dimension %s' % str(i + 1)
-                columnDefs.append(
-                        ('Assign F%s' % str(i + 1), lambda pk, dim=i: getPeakAnnotation(pk, dim), assignTipText, None, None)
-                        )
+                assignTipText = f'NmrAtom assignments of peak in dimension {str(i + 1)}'
+                columnDefs.append((f'Assign F{str(i + 1)}', lambda pk, dim=i: getPeakAnnotation(pk, dim), assignTipText, None, None))
 
             # # Expanded Assignment columns
             # for i in range(peakList.spectrum.dimensionCount):
@@ -453,31 +454,24 @@ class _NewPeakTableWidget(_PeakTableOptions, _CoreTableWidgetABC):
 
             # Peak positions column
             for i in range(peakList.spectrum.dimensionCount):
-                positionTipText = 'Peak position in dimension %s' % str(i + 1)
-                columnDefs.append(
-                        ('Pos F%s' % str(i + 1),
-                         lambda pk, dim=i, unit=self.positionsUnit: getPeakPosition(pk, dim, unit),
-                         positionTipText, None, '%0.3f')
-                        )
+                positionTipText = f'Peak position in dimension {str(i + 1)}'
+                columnDefs.append((f'Pos F{str(i + 1)}', lambda pk, dim=i, unit=self.positionsUnit: getPeakPosition(pk, dim, unit), positionTipText, None, '%0.3f'))
 
             # line-width column TODO remove hardcoded Hz unit
             for i in range(peakList.spectrum.dimensionCount):
-                linewidthTipTexts = 'Peak line width %s' % str(i + 1)
-                columnDefs.append(
-                        ('LW F%s (Hz)' % str(i + 1), lambda pk, dim=i: getPeakLinewidth(pk, dim), linewidthTipTexts,
-                         None, '%0.3f')
-                        )
+                linewidthTipTexts = f'Peak line width {str(i + 1)}'
+                columnDefs.append((f'LW F{str(i + 1)} (Hz)', lambda pk, dim=i: getPeakLinewidth(pk, dim), linewidthTipTexts, None, '%0.3f'))
 
         # height column
         heightTipText = 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited'
-        columnDefs.append(('Height', lambda pk: pk.height if pk.height else 'None', heightTipText, None, None))
-        columnDefs.append(('HeightError', lambda pk: pk.heightError, 'Error of the height', None, None))
-        columnDefs.append(('S/N', lambda pk: pk.signalToNoiseRatio, 'Signal to Noise Ratio', None, None))
+        columnDefs.extend([('Height', lambda pk: pk.height or 'None', heightTipText, None, None),
+                           ('HeightError', lambda pk: pk.heightError, 'Error of the height', None, None),
+                           ('S/N', lambda pk: pk.signalToNoiseRatio, 'Signal to Noise Ratio', None, None)])
 
         # volume column
         volumeTipText = 'Integral of spectrum intensity around peak location, according to chosen volume method'
-        columnDefs.append(('Volume', lambda pk: pk.volume if pk.volume else 'None', volumeTipText, None, None))
-        columnDefs.append(('VolumeError', lambda pk: pk.volumeError, 'Error of the volume', None, None))
+        columnDefs.extend([('Volume', lambda pk: pk.volume or 'None', volumeTipText, None, None),
+                           ('VolumeError', lambda pk: pk.volumeError, 'Error of the volume', None, None)])
 
         # ClusterId column
         clusterIdTipText = 'The peak clusterId. ClusterIds are used for grouping peaks in fitting routines.'

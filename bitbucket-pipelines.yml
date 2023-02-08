@@ -14,7 +14,8 @@ definitions:
           - docker
         caches:
           - docker
-#        script:
+        script:
+          -
 #          - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis.git"
 #          - git push --force github main
 
@@ -24,7 +25,8 @@ definitions:
           - docker
         caches:
           - docker
-#        script:
+        script:
+          -
 #          - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis.git"
 #          - git push --force github updates
 
@@ -34,7 +36,8 @@ definitions:
           - docker
         caches:
           - docker
-#        script:
+        script:
+          -
 #          - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis-private.git"
 #          - git push --force github $BITBUCKET_BRANCH
 

@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-07 17:08:14 +0000 (Tue, February 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-08 17:28:44 +0000 (Wed, February 08, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,6 @@ from matplotlib.ticker import MultipleLocator
 from ccpn.ui.gui.widgets.DrawSS import createBlocksFromSequence, plotSS
 from ccpn.util.floatUtils import fExp, fMan
 
-
 # #########
 
 ###################
@@ -64,7 +63,8 @@ sequence  = 'KLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
 data =  RSDMResultsDataTable.data
 x = data[sv.NMRRESIDUECODE]
 x = x.astype(int)
-startSequenceCode = x.values[0]
+x = x.values
+startSequenceCode = x[0]
 endSequenceCode = startSequenceCode + len(ss_sequence)
 startOffsetExtraXTicks = 3 # used to allign the ss to the plots
 
@@ -87,6 +87,11 @@ JWH_ERR = data[sv.JwH_ERR].values
 JWN = data[sv.JwX].values
 JWN_ERR = data[sv.JwX_ERR].values
 
+# fit aJN + b
+alphaN, betaN, YcoefJ0JWN = lf._polifitJs(J0, JWN)
+# fit aJH + b
+alphaH, betaH, YcoefJ0JWH = lf._polifitJs(J0, JWH)
+
 ## lax labels
 L_JWN = '$J(\omega_{N})$'
 L_JWH = '$J(\omega_{H})$'
@@ -104,12 +109,24 @@ labelMajorSize=6
 labelMinorSize=5
 titleColor = 'blue'
 hspace= 0.5
-def _plotRates_page1():
+
+
+
+def _prettyFormat4Legend(value, rounding=3):
+    """ Format mantissa to (rounding) round  and exponent for matplotlib """
+    return '$%s^{%s}$' %(round(fMan(value),rounding),  fExp(value))
+
+
+def _closeFig(fig, pdf, plt):
+    pdf.savefig()
+    plt.close()
+    plt.close(fig)
+
+def _plotRates_page1(pdf):
     """ Plot the  SS -  R1  - R2 - NOE """
     fig = plt.figure(dpi=400)
     axss = fig.add_subplot(414)
-    plotSS(blocks, sequence, startingResidueCode=startSequenceCode, figure=fig, axis=axss)
-    axss.set_xlim(startSequenceCode - startOffsetExtraXTicks, endSequenceCode + 2)
+    plotSS(axss, x, blocks, sequence, startSequenceCode=startSequenceCode, fontsize=5)
     axR1 = plt.subplot(411)
     axR2 = plt.subplot(412)
     axNOE = plt.subplot(413)
@@ -123,7 +140,7 @@ def _plotRates_page1():
     axR2.set_ylabel('R$_{2}$ (sec$^{-1}$)', fontsize=fontYSize)
     axNOE.set_ylabel('het-NOE ratio', fontsize=fontYSize)
     axNOE.set_xlabel('Residue Number', fontsize=fontXSize, )
-    axR1.get_shared_x_axes().join(axR1, axR2, axNOE)
+    axss.get_shared_x_axes().join(axss, axR1, axR2, axNOE)
     ml = MultipleLocator(1)
     for ax in [axss, axR1, axR2, axNOE]:
         ax.spines[['right', 'top']].set_visible(False)
@@ -135,14 +152,14 @@ def _plotRates_page1():
 
     plt.tight_layout()
     plt.subplots_adjust(hspace=hspace)
-    pdf.savefig()  # saves the current figure into a pdf page
-    plt.close(fig)
+    _closeFig(fig, pdf, plt)
 
-def _plotR2R1_page2():
+
+def _plotR2R1_page2(pdf):
     # page two R2/R1 Ratio
     fig = plt.figure(dpi=300)
     axss = fig.add_subplot(312)
-    plotSS(blocks, sequence, startingResidueCode=startSequenceCode, figure=fig, axis=axss)
+    plotSS(axss, x, blocks, sequence, startSequenceCode=startSequenceCode, fontsize=5)
     axR2R1 = plt.subplot(311)
     axR2R1.bar(x, R2R1, yerr=R2R1_ERR, color='black', ecolor='red', error_kw=dict(lw=1, capsize=2, capthick=0.5))
     axR2R1.set_title('R2/R1',  fontsize=fontTitleSize, color=titleColor)
@@ -156,19 +173,18 @@ def _plotR2R1_page2():
     axR2R1.tick_params(axis='both', which='minor', labelsize=labelMinorSize)
     plt.tight_layout()
     plt.subplots_adjust(hspace=hspace)
-    pdf.savefig()
-    plt.close(fig)
+    _closeFig(fig, pdf, plt)
 
-def _plotSDM_page3():
+
+def _plotSDM_page3(pdf):
     # page three RSDM
 
     fig = plt.figure(dpi=300)
-
     axJ0 = plt.subplot(411)
     axJwh = plt.subplot(412)
     axJwx = plt.subplot(413)
     axss = fig.add_subplot(414)
-    plotSS(blocks, sequence, startingResidueCode=startSequenceCode, figure=fig, axis=axss)
+    plotSS(axss, x, blocks, sequence, startSequenceCode=startSequenceCode, fontsize=5)
 
     axJ0.errorbar(x, J0, yerr=J0_ERR, fmt="o", color='black', ms=2, ecolor='red', elinewidth=1, capsize=2, )
     axJwh.errorbar(x, JWH, yerr=JWH_ERR, fmt="o", color='black', ms=2, ecolor='red', elinewidth=1, capsize=2, )
@@ -197,18 +213,16 @@ def _plotSDM_page3():
         ax.yaxis.get_offset_text().set_size(5)
         ax.yaxis.set_label_coords(-0.05, 0.5)  # align the labels to vcenter and middle
 
-    axJ0.get_shared_x_axes().join(axJ0, axJwh, axJwx)
-
+    axss.get_shared_x_axes().join(axss, axJ0, axJwh, axJwx)
     axJwx.set_xlabel('Residue Number', fontsize=fontXSize, )
     plt.tight_layout()
     plt.subplots_adjust(hspace=hspace)
-    pdf.savefig()
-    plt.close()
-    plt.close(fig)
+    _closeFig(fig, pdf, plt)
 
 
-def _plotScatters_page4():
-    # page two R2/R1 Ratio
+
+def _plotScatters_page4(pdf):
+
     fig = plt.figure(dpi=300)
 
     axj0_jwh = plt.subplot(221)
@@ -218,34 +232,34 @@ def _plotScatters_page4():
 
     ##  jwH vs J0
     axj0_jwh.scatter(J0, JWH, s=1, color='black', )
-    for i, txt in enumerate(x.values):
+    for i, txt in enumerate(x):
         axj0_jwh.annotate(str(txt), (J0[i], JWH[i]), fontsize=3)
     axj0_jwh.set_title(f'{L_JWH} vs J0',  fontsize=fontTitleSize, color=titleColor)
     axj0_jwh.set_xlabel(f'J0 {L_SR}', fontsize=fontYSize, )
     axj0_jwh.set_ylabel(f'{L_JWH} {L_SR}', fontsize=fontYSize)
 
-    # fit aJ + b
-    coef = a, b = np.polyfit(J0, JWH, 1)
-    poly1d_fn = np.poly1d(coef)
-    aVal = '$%s^{%s}$' %(round(fMan(a),3),  fExp(a))
-    bVal =  '$%s^{%s}$' %(round(fMan(b),3),  fExp(b))
-    axj0_jwh.plot(J0, poly1d_fn(J0), color='blue', linewidth=0.2, label=f'y = {aVal}x + {bVal}')
+    aVal =  _prettyFormat4Legend(alphaH) # slope
+    bVal =  _prettyFormat4Legend(betaH) # intercept
+    axj0_jwh.plot(J0, YcoefJ0JWH, color='blue', linewidth=0.2, label=f'y = {aVal}x + {bVal}')
     axj0_jwh.legend(prop={'size': 6})
-    # ##   jwN vs J0
-    axj0_jwx.scatter(J0, JWN, s=1, color='black', )
 
-    for i, txt in enumerate(x.values):
+    ###   jwN vs J0
+    axj0_jwx.scatter(J0, JWN, s=1, color='black', )
+    for i, txt in enumerate(x):
         axj0_jwx.annotate(str(txt), (J0[i], JWN[i]), fontsize=3)
     axj0_jwx.set_title(f'{L_JWN} vs J0', fontsize=fontTitleSize, color=titleColor)
     axj0_jwx.set_xlabel(f'J0 {L_SR}', fontsize=fontYSize, )
     axj0_jwx.set_ylabel(f'{L_JWN} {L_SR}', fontsize=fontYSize)
     axj0_jwh.get_shared_x_axes().join(axj0_jwh, axj0_jwx)
 
-
+    aVal =  _prettyFormat4Legend(alphaN)
+    bVal =  _prettyFormat4Legend(betaN)
+    axj0_jwx.plot(J0, YcoefJ0JWN, color='blue', linewidth=0.2, label=f'y = {aVal}x + {bVal}')
+    axj0_jwx.legend(prop={'size': 6})
 
     ##  jwN vs  jwH
     axjwh_jwx.scatter(JWH, JWN, s=1, color='black', )
-    for i, txt in enumerate(x.values):
+    for i, txt in enumerate(x):
         axjwh_jwx.annotate(str(txt), (JWH[i], JWN[i]), fontsize=3)
     axjwh_jwx.set_title(f'{L_JWN} vs {L_JWH}',  fontsize=fontTitleSize, color=titleColor)
     axjwh_jwx.set_xlabel(f'{L_JWH} {L_SR}', fontsize=fontYSize, )
@@ -253,7 +267,7 @@ def _plotScatters_page4():
 
     ## R1 vs R2
     axR1R2.scatter(R2, R1, s=1, color='black', )
-    for i, txt in enumerate(x.values):
+    for i, txt in enumerate(x):
         axR1R2.annotate(str(txt), (R2[i], R1[i]), fontsize=2)
     axR1R2.set_title('R1 vs R2',  fontsize=fontTitleSize, color=titleColor)
     axR1R2.set_xlabel('R$_{2} (s^{-1})$', fontsize=fontYSize, )
@@ -273,18 +287,65 @@ def _plotScatters_page4():
 
     plt.tight_layout()
     plt.subplots_adjust(hspace=hspace)
-    pdf.savefig()
-    plt.close()
-    plt.close(fig)
+    _closeFig(fig, pdf, plt)
 
 
+def _plotCorrTimes_page5(pdf):
+
+    fig = plt.figure(dpi=300)
+    ax1 = plt.subplot(411)
+    ax2 = plt.subplot(412)
+    ax3 = plt.subplot(413)
+    axss = fig.add_subplot(414)
+    plotSS(axss, x, blocks, sequence, startSequenceCode=startSequenceCode, fontsize=5)
+    rr = []
+    for v in JWN:
+        pass
+        jj = lf._calculateMolecularTumblingCorrelationTime(v, alphaN, betaN)
+        rr.append(list(jj))
+    concArray = np.array(rr)
+    sol1, sol2, sol3 = concArray.transpose()
+    ax1.plot(x, sol1, 'r',)
+    ax2.plot(x, sol2, 'g',)
+    ax3.plot(x, sol3, 'b', )
+
+
+    # ax1.set_ylim(ymin=0)
+    # ax2.set_ylim(ymin=0)
+    # ax3.set_ylim(ymin=0)
+    #
+    ax1.set_title('Solution 1 _ Correlation Time', fontsize=fontTitleSize, color=titleColor)
+    ax2.set_title('Solution 2 _ Correlation Time', fontsize=fontTitleSize, color=titleColor)
+    ax3.set_title('Solution 3 _ Correlation Time', fontsize=fontTitleSize, color=titleColor)
+    
+    ax1.set_ylabel(f'{L_SR}?', fontsize=fontYSize)
+    ax2.set_ylabel(f' {L_SR}?', fontsize=fontYSize)
+    ax3.set_ylabel(f'{L_SR}?', fontsize=fontYSize)
+    
+    ml = MultipleLocator(1)
+    for ax in [axss, ax1, ax2, ax3]:
+        ax.spines[['right', 'top']].set_visible(False)
+        ax.minorticks_on()
+        ax.xaxis.set_minor_locator(ml)
+        ax.tick_params(axis='both', which='major', labelsize=labelMajorSize)
+        ax.tick_params(axis='both', which='minor', labelsize=labelMinorSize)
+        ax.yaxis.get_offset_text().set_x(-0.02)
+        ax.yaxis.get_offset_text().set_size(5)
+        ax.yaxis.set_label_coords(-0.05, 0.5)  # align the labels to vcenter and middle
+    
+    axss.get_shared_x_axes().join(axss, ax1, ax2, ax3)
+    ax3.set_xlabel('Residue Number', fontsize=fontXSize, )
+    plt.tight_layout()
+    plt.subplots_adjust(hspace=hspace)
+    _closeFig(fig, pdf, plt)
 
 # init pdf
 with PdfPages(f'{filePath}.pdf') as pdf:
-    _plotRates_page1()
-    _plotR2R1_page2()
-    _plotSDM_page3()
-    _plotScatters_page4()
+    _plotRates_page1(pdf)
+    _plotR2R1_page2(pdf)
+    _plotSDM_page3(pdf)
+    _plotScatters_page4(pdf)
+    _plotCorrTimes_page5(pdf)
 
 
 

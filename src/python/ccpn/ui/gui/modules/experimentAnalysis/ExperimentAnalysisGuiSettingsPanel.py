@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-26 12:33:36 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-08 17:27:29 +0000 (Wed, February 08, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -107,7 +107,7 @@ class GuiSettingPanel(Frame):
         self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
         Spacer(self, 0, 2, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                grid=(1, 0), gridSpan=(1, 1))
-        self.postInitWidgets()
+        # self.postInitWidgets()
 
     def postInitWidgets(self):
         """ Override to apply preselection of widgets after creation"""

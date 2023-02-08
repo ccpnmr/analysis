@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-06 16:07:59 +0000 (Mon, February 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-08 17:27:29 +0000 (Wed, February 08, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -562,8 +562,6 @@ class SDMCalculation(CalculationModel):
         outputFrame = RSDMOutputFrame()
         # add the new calculated values
 
-        outputFrame[sv.JwX] = jwx
-        outputFrame[sv.JwH] = jwh
         outputFrame[sv.J0] = j0
         outputFrame[sv.JwX] = jwx
         outputFrame[sv.JwH] = jwh

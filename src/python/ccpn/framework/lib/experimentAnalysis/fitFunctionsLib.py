@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-03 13:41:36 +0000 (Fri, February 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-08 17:27:29 +0000 (Wed, February 08, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,6 @@ import numpy as np
 from ccpn.util.Logging import getLogger
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from math import pi
-
 ## Common built-in functions.
 gaussian_func    = ls.gaussian
 lorentzian_func  = ls.lorentzian
@@ -390,3 +389,32 @@ def calculateUncertaintiesError(v1,v2, ev1, ev2):
         return (ev1 / v1 + ev2 / v2) * v2 / v1
     except Exception:
         return
+
+
+def _polifitJs(j0, jw, order=1):
+    """ Fit J0 and Jw(H or N) to a first order polynomial, Return the slope  and intercept  from the fit, and the new fitted Y  """
+
+    coef = slope, intercept = np.polyfit(j0, jw, order)
+    poly1d_fn_coefJ0JWH = np.poly1d(coef)
+    fittedY = poly1d_fn_coefJ0JWH(j0)
+    return slope, intercept, fittedY
+
+
+def _calculateMolecularTumblingCorrelationTime(JWN, alpha, beta):
+    """
+    solve the Polynomial Structure -> ax^3 + bx^2 + cx + d = 0
+    from eq. 18  Backbone dynamics of Barstar: A 15N NMR relaxation study.
+    Udgaonkar et al 2000. Proteins: 41:460-474
+    :param JWN:
+    :param alpha: the slope for the fitting J0 vs JwN
+    :param beta: the intercept for the fitting J0 vs JwN
+    :return:
+    """
+    a = 2 * alpha * (JWN**2)
+    b = 5 * beta * (JWN**2)
+    c = 2 * (alpha-1)
+    d = 5 * beta
+
+    values = np.roots([a,b,c,d])
+
+    return values

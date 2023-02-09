@@ -26,9 +26,6 @@ __date__ = "$Date: 2017-11-28 10:28:42 +0000 (Tue, Nov 28, 2017) $"
 
 import os, copy, json, pprint, math, shutil, pandas, operator, numpy
 from collections import OrderedDict as OD
-
-import pandas as pd
-from math import log10
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.framework.lib.Plugin import Plugin
 from ccpn.ui.gui.modules.PluginModule import PluginModule
@@ -49,18 +46,11 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Slider import Slider
-from ccpn.ui.gui.widgets.GuiTable import GuiTable
-from ccpn.ui.gui.widgets.table.Table import Table
 from ccpn.util.nef import GenericStarParser, StarIo
 from ccpn.util.nef.GenericStarParser import SaveFrame, DataBlock, DataExtent, Loop, LoopRow
 from functools import partial
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.util.decorators import logCommand
-from Classes.Simulator import Simulator
-from Classes.DatabaseCaller import DatabaseCaller
-from .pluginAddons import _addRow, _addColumn, _addVerticalSpacer, _setWidth, _setWidgetProperties
-from ccpn.util.Colour import hexToRgbRatio
-from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySelectionWidget
 
 
 ############
@@ -72,10 +62,11 @@ from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySelectionWidget
 columnWidths = [300]
 
 # Set some tooltip texts
-help = {'SpectrumGroup' : 'Select spectrum group',
-        'Spectrum'      : 'Select spectrum',
-        'MetaboliteList': 'Select the database to reference from',
-        'Metabolite'    : 'Select the metabolite to add to the overlay',
+help = {'Spectrum'        : 'Select spectrum',
+        'Peak list'       : 'Peak list to filter noise',
+        'Reference peaks' : 'Estimated number of peaks to use as reference. Minimum 10. Set to about 50% of expected real peaks in the spectrum.',
+        'Threshold factor': 'Standard deviations from average noise score derivative for noise score threshold calculation. Typically between 4-8',
+        'Filter'          : 'Filters noise from the current peak list.',
         }
 
 
@@ -103,10 +94,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         # Create ORDERED dictionary to store all parameters for the run
         # deepcopy doesn't work on dictionaries with the qt widgets, so to get a separation of gui widgets and values for storage
         # it is needed to create the two dictionaries alongside each other
-        self.guiDict = OD([('Spectra', OD()), ('CoreWidgets', OD()), ('TemporaryWidgets', OD())])
-        self.settings = OD([('Spectra', OD()), ('Current', OD()), ('Databases', OD()), ('Simulators', OD()), ('ResultsTables', OD())])
-        self.metaboliteSimulations = OD()
-        self.sumSpectra = OD()
+        self.guiDict = OD([('Spectrum', OD())])
+        self.settings = OD([('Spectrum', OD())])
 
         # # Input check
         # validInput = self._inputDataCheck()
@@ -114,435 +103,184 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         #     return
 
         # setup database metabolite tables
-        self.simulator = Simulator(self.project)
-        self.caller = DatabaseCaller('/Users/mh653/Documents/PhD/Database/Merged_Databases/merged_database.db')
+        hmdb_validated = pandas.read_csv('/home/mh491/Database/Validation_scores/hmdb_validated.csv', index_col=0)
+        hmdb_validation_table = self.project.newDataTable(name='hmdb_validation_table', data=hmdb_validated)
 
-        metabolites = self.caller.execute_query('select * from metabolites')
+        bmrb_validated = pandas.read_csv('/home/mh491/Database/Validation_scores/bmrb_validated.csv', index_col=0)
+        bmrb_validation_table = self.project.newDataTable(name='bmrb_validation_table', data=bmrb_validated)
 
-        if 'DT:metabolites_table' not in [dataTable.pid for dataTable in self.project.dataTables]:
-            self.metabolites = self.project.newDataTable(name='metabolites_table', data=metabolites)
+        gissmo_validated = pandas.read_csv('/home/mh491/Database/Validation_scores/gissmo_validated.csv', index_col=0)
+        gissmo_validation_table = self.project.newDataTable(name='gissmo_validation_table', data=gissmo_validated)
 
-        grid = (0, 4)
+        # Set peak list, use pulldown, FilterNoisePeaks only allows one list at a time
 
-        # pull down list for selecting the spectrum group to overlay on
-        grid = _addRow(grid)
-        widget = Label(self.scrollAreaLayout, text='Spectrum Group', grid=grid)
+        grid = (0, 0)
+
+        self.simspec = self.project.simspec
+
+        '''widget = Label(self.scrollAreaLayout, text='Multiplet Shift', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
-        grid = _addColumn(grid)
-        widget = PulldownList(self.scrollAreaLayout, grid=grid, gridSpan=(1, 2),
-                              callback=self._selectSpectrumGroup, tipText=help['SpectrumGroup'])
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+        self.sliderwidget = Slider(self.scrollAreaLayout, startVal=-2000, endVal=2000, value=0, step=1)
+        _setWidgetProperties(self.sliderwidget, _setWidth(columnWidths, (0, 2)))
+        self.sliderwidget.valueChanged.connect(self.valueChange)'''
 
-        self.spectrumGroups = [spectrumGroup.id for spectrumGroup in sorted(self.project.spectrumGroups)]
-        widget.setData(self.spectrumGroups)
-        self.guiDict['CoreWidgets']['SpectrumGroupId'] = widget
-        self.settings['Current']['SpectrumGroupId'] = f'SG:{self._getValue(widget)}'
-
-        if self.spectrumGroups:
-            self._selectSpectrumGroup(self.spectrumGroups[0])
-
-        # pull down list for selecting the spectrum to overlay on
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text='Spectrum', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
         grid = _addColumn(grid)
         widget = PulldownList(self.scrollAreaLayout, grid=grid, gridSpan=(1, 2),
-                              callback=self._selectSpectrum, tipText=help['Spectrum'])
+                              callback=self._selectPeaklist, tipText=help['Spectrum'])
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
-
-        try:
-            self.spectra = [spectrum.id for spectrum in self.project.getByPid(self.settings['Current']['SpectrumGroupId']).spectra]
-        except:
-            raise Exception("Please create a spectrum group first.")
+        self.spectra = [spectrum.id for spectrum in sorted(self.project.spectra)]
         widget.setData(self.spectra)
-        self.guiDict['CoreWidgets']['SpectrumId'] = widget
-        self.settings['Current']['SpectrumId'] = self._getValue(widget)
+        self.guiDict['Spectrum']['SpectrumId'] = widget
+        self.settings['Spectrum']['SpectrumId'] = self._getValue(widget)
 
+        '''grid = _addRow(grid)
+        widget = Label(self.scrollAreaLayout, text='Peak list', grid=grid)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+
+        grid = _addColumn(grid)
+        widget = PulldownList(self.scrollAreaLayout, grid=grid, tipText=help['Peak list'], gridSpan=(1, 2))
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+        self.guiDict['Spectrum']['Peak list'] = widget
+        self.settings['Spectrum']['Peak list'] = self._getValue(widget)
+
+        # Invoke the callback function to catch the selection in case only one spectrum is available
         if self.spectra:
-            self._selectSpectrum(self.spectra[0])
+            self._selectPeaklist(self.spectra[0])'''
 
-        # table widget for selecting the current metabolite by name
+        # Add a widget for the simulated spectrum scale
         grid = _addRow(grid)
-        widget = Label(self.scrollAreaLayout, text='Metabolite', grid=grid)
+        widget = Label(self.scrollAreaLayout, text=f'Scale', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
         grid = _addColumn(grid)
-        df = self.metabolites.data.sort_values('name')[['name', 'hmdb_accession', 'bmrb_id', 'chemical_formula', 'average_molecular_weight', 'smiles', 'inchi', 'metabolite_id', 'description']]
-        widget = Table(self.scrollAreaLayout, df=df, grid=grid, gridSpan=(1, 2), selectionCallback=self._selectMetabolite, borderWidth=4)
-        _setWidgetProperties(widget, _setWidth([500], grid), 300)
-        self.guiDict['CoreWidgets']['Metabolite'] = widget
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=1, decimals=1, step=1, grid=grid, gridSpan=(1, 2))
+        widget.setRange(0, 10000000)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
+        widget.setButtonSymbols(2)
+        widget.valueChanged.connect(self.scaleChange)
+        self.guiDict[f'Spectrum']['Scale'] = widget
+        self.settings['Spectrum']['Scale'] = self._getValue(widget)
 
-        grid = _addColumn(_addColumn(grid))
-        widget = Button(self.scrollAreaLayout, text='Add Unknown Signal', grid=grid, gridSpan=(1, 2), callback=self._addUnknownSignal)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-        self.guiDict['CoreWidgets']['AddUnknownSignalButton'] = widget
-        self.settings['Current']['UnknownSignalCount'] = 0
-
-        # table widget for selecting the simulation of the metabolite
+        # Add a widget for the simulated spectrum frequency
         grid = _addRow(grid)
-        widget = Label(self.scrollAreaLayout, text='Simulation', grid=grid)
+        widget = Label(self.scrollAreaLayout, text=f'Frequency', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
         grid = _addColumn(grid)
-        df = pd.DataFrame(columns=['pH', 'amount', 'reference', 'sample_id', 'metabolite_id', 'frequency',
-                                   'temperature', 'data_source', 'validation_scores', 'methods', 'spectrum_id',
-                                   'origin'])
-        widget = Table(self.scrollAreaLayout, df=df, grid=grid, gridSpan=(1, 2), selectionCallback=self._setupSimulatedSpectrum, borderWidth=4)
-        _setWidgetProperties(widget, _setWidth([500], grid), 300)
-        self.guiDict['CoreWidgets']['Simulation'] = widget
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=self.simspec.frequency, decimals=1, step=10, grid=grid,
+                               gridSpan=(1, 2))
+        widget.setRange(100, 1200)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
+        widget.setButtonSymbols(2)
+        widget.valueChanged.connect(self.frequencyChange)
+        self.guiDict[f'Spectrum']['Frequency'] = widget
+        self.settings['Spectrum']['Frequency'] = self._getValue(widget)
 
-        self.settings['Current']['MultipletUpdateStatus'] = True
+        for index in range(len(self.project.simspec.spinSystemMatrix)):
+            self.addDoubleSpinbox(index)
+
+        '''# Number of reference peaks to use initially for estimating the noise factor threshold
+        grid = _addRow(grid)
+        widget = Label(self.scrollAreaLayout, text='Multiplet 1 Chemical Shift', grid=grid, tipText=help['Reference peaks'])
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+
+        grid = _addColumn(grid)
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=3.4, decimals=4, step=0.0001, grid=grid, gridSpan=(1, 2),
+                               tipText=help['Reference peaks'])
+        widget.setRange(0, 10)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
+        widget.setButtonSymbols(2)
+
+        self.guiDict['Spectrum']['Reference peaks'] = widget
+        self.settings['Spectrum']['Reference peaks'] = self._getValue(widget)'''
+
+        '''# Action buttons: Filter creates a new filtered peak list
+        grid = _addVerticalSpacer(self.scrollAreaLayout, grid)
+        grid = _addColumn(grid)
+        grid = _addColumn(grid)
+        texts = ['Filter']
+        tipTexts = [help['Filter']]
+        callbacks = [self.filterNoiseButton]
+        widget = ButtonList(parent=self.scrollAreaLayout, texts=texts, callbacks=callbacks, tipTexts=tipTexts, grid=grid)
+        _setWidgetProperties(widget, heightType='Minimum')'''
 
         '''Spacer(self.scrollAreaLayout, 5, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                grid=(grid[0] + 1, 10),
                gridSpan=(1, 1))'''
 
-    def addDoubleSpinbox(self, index, multipletId):
+    def addDoubleSpinbox(self, index):
         def valueChange():
             shift = widget.value()
-            update = self.settings['Current']['MultipletUpdateStatus']
-            self.simspec.moveMultiplet(multipletId, shift, update)
-            self.refreshSumSpectrum()
-        def lineValueChange():
-            shift = lineWidget.values
-            widget.setValue(shift)
-        def resetMultiplet():
-            widget.setValue(self.simspec.originalMultiplets[multipletId]['center'] + self.simspec.globalShift)
-        def navigateToMultiplet():
-            target = widget.value()
-            # todo code here to move the view to the target value above
-        grid = (index+8, index+8)
+            self.project.simspec.moveSpinSystemMultiplet(index, shift)
+        grid = (index+3, index+3)
+        from .pluginAddons import _addRow, _addColumn, _addVerticalSpacer, _setWidth, _setWidgetProperties
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Multiplet {index+1} Chemical Shift', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-        self.guiDict['TemporaryWidgets'][f'Multiplet{index}Label'] = widget
 
         grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=self.simspec.multiplets[multipletId]['center'], decimals=4,
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=self.simspec.spinSystemMatrix[index][index], decimals=4,
                                step=0.0001, grid=grid, gridSpan=(1, 2), suffix='ppm')
         widget.setRange(0, 10)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(valueChange)
-        self.guiDict['TemporaryWidgets'][f'Multiplet{index+1}ChemicalShift'] = widget
-        self.settings['Current'][f'Multiplet {index+1} Chemical Shift'] = self._getValue(widget)
 
-        grid = _addColumn(grid)
-        buttonWidget = Button(parent=self.scrollAreaLayout, text='Reset', grid=grid)
-        _setWidgetProperties(buttonWidget, heightType='Minimum')
-        buttonWidget.clicked.connect(resetMultiplet)
-        self.guiDict['TemporaryWidgets'][f'Multiplet{index+1}Reset'] = buttonWidget
-
-        grid = _addColumn(grid)
-        buttonWidget = Button(parent=self.scrollAreaLayout, text='Navigate-to', grid=grid)
-        _setWidgetProperties(buttonWidget, heightType='Minimum')
-        buttonWidget.clicked.connect(navigateToMultiplet)
-        self.guiDict['TemporaryWidgets'][f'Multiplet{index+1}NavigateTo'] = buttonWidget
-
-        brush = hexToRgbRatio(self.simspec.spectrum.sliceColour) + (0.3,)
-        lineWidget = self.display.strips[0]._CcpnGLWidget.addInfiniteLine(values=self.simspec.multiplets[multipletId]['center'], colour=brush, movable=True, lineStyle='dashed',
-                                                   lineWidth=2.0, obj=self.simspec.spectrum, orientation='v',)
-        lineWidget.valuesChanged.connect(lineValueChange)
-        self.guiDict['TemporaryWidgets'][f'Multiplet{index + 1}Line'] = lineWidget
-
-    def widthChange(self):
-        width = self.guiDict['TemporaryWidgets']['Width'].value()
-        integration = self.simspec.scale * width
-        self.settings['ResultsTables']['currentTable'].data.at[self.settings['Current']['currentSpectrumId'], self.settings['Current']['currentMetaboliteName']] = integration
-        self.simspec.setWidth(width)
-        self.refreshSumSpectrum()
+        self.guiDict[f'Spectrum'][f'Multiplet {index+1} Chemical Shift'] = widget
+        self.settings['Spectrum'][f'Multiplet {index+1} Chemical Shift'] = self._getValue(widget)
 
     def scaleChange(self):
-        scale = 10**self.guiDict['TemporaryWidgets']['Scale'].value()
-        integration = scale * self.simspec.width
-        self.settings['ResultsTables']['currentTable'].data.at[self.settings['Current']['currentSpectrumId'], self.settings['Current']['currentMetaboliteName']] = integration
-        self.simspec.scaleSpectrum(scale)
-        self.refreshSumSpectrum()
+        scale = self.guiDict['Spectrum']['Scale'].value()
+        self.project.simspec.scaleSpectrum(scale)
 
     def frequencyChange(self):
-        frequency = self.guiDict['TemporaryWidgets']['Frequency'].value()
-        self.simspec.setFrequency(frequency)
-        self.refreshSumSpectrum()
+        frequency = self.guiDict['Spectrum']['Frequency'].value()
+        self.project.simspec.setFrequency(frequency)
 
-    def globalShiftChange(self):
-        shift = self.guiDict['TemporaryWidgets']['GlobalShift'].value()
-        difference = shift - self.simspec.globalShift
-        multipletWidgetList = [widget for widget in self.guiDict['TemporaryWidgets'] if widget.endswith('ChemicalShift')]
-        if len(multipletWidgetList) > 0:
-            self.settings['Current']['MultipletUpdateStatus'] = False
-            for widgetNum, widget in enumerate(multipletWidgetList):
-                if widgetNum+1 == len(multipletWidgetList):
-                    self.settings['Current']['MultipletUpdateStatus'] = True
-                self.guiDict['TemporaryWidgets'][widget].setValue(self.guiDict['TemporaryWidgets'][widget].value() + difference)
+    def _spectrumId2Spectrum(self, spectrumId):
+        return self.project.getByPid('SP:' + spectrumId)
+
+    def _selectPeaklist(self, spectrumId):
+        spectrum = self._spectrumId2Spectrum(spectrumId)
+        widget = self.guiDict['Spectrum']['Peak list']
+        widget.setData([str(PL.serial) for PL in spectrum.peakLists])
+        self.settings['Spectrum']['Peak list'] = self._getValue(widget)
+
+    def _inputDataCheck(self):
+        # Checks available input data at plugin start
+        inputWarning = ''
+        if len(self.project.chains) == 0:
+            inputWarning += 'No molecular chains found in the project\n'
+        if len(self.project.chemicalShiftLists) == 0:
+            inputWarning += 'No chemical shift lists found in the project\n'
+        if inputWarning != '':
+            showWarning('Warning', inputWarning)
+            #self._closeModule()
+            self.deleteLater()
+            return False
+        return True
+
+    def _runDataCheck(self):
+        # Checks data before run time
+        inputWarning = ''
+
+        if len(self.settings['General']['Run name'].strip()) == 0:
+            inputWarning += 'No run name specified\n'
+        if len(self.settings['General']['Run name'].split()) > 1:
+            inputWarning += 'Run name may not contain spaces\n'
+
+        if inputWarning != '':
+            showWarning('Warning', inputWarning)
+            setupComplete = False
         else:
-            self.simspec.globalShift(difference)
-        self.simspec.globalShift = shift
-        self.refreshSumSpectrum()
-
-    def _selectSpectrumGroup(self, spectrumGroupID):
-        spectrumGroup = self.project.getByPid('SG:' + spectrumGroupID)
-        tableName = f'deconv_{spectrumGroupID}'
-        if tableName not in self.settings['ResultsTables']:
-            spectra = [spectrum.name for spectrum in spectrumGroup.spectra]
-            tableData = pd.DataFrame(spectra, columns=['spectrum'], index=spectra)
-            resultsTable = self.project.newDataTable(name=tableName, data=tableData)
-            self.settings['ResultsTables'][tableName] = resultsTable
-        self.settings['ResultsTables']['currentTable'] = resultsTable
-        # create the simulated spectrum group
-        if 'Reference_Spectra' not in self.project.spectrumGroups:
-            self.settings['Current']['referenceSpectrumGroup'] = self.project.newSpectrumGroup(
-                name='Reference_Spectra')
-
-    def _selectSpectrum(self, spectrumID):
-        spectrum = self.project.getByPid('SP:' + spectrumID)
-        limits = (max(spectrum.positions), min(spectrum.positions))
-        points = len(spectrum.positions)
-        frequency = spectrum.spectrometerFrequencies[0]
-        self.settings['Current']['ActiveSpectrum'] = spectrum
-        self.settings['Current']['referenceSumSpectrumLimits'] = limits
-        self.settings['Current']['referenceSumSpectrumPoints'] = points
-        self.settings['Current']['currentSpectrumId'] = spectrumID
-        self.settings['Current']['referenceSumSpectrumFrequency'] = frequency
-        x = numpy.linspace(limits[0], limits[1], points)
-        y = numpy.zeros(points)
-        if spectrumID not in self.sumSpectra:
-            self.sumSpectra[spectrumID] = self.project.newEmptySpectrum(['1H'], name=f'Reference_Sum_{spectrumID}', intensities=y, positions=x)
-            self.settings['Current']['referenceSumSpectrum'] = self.sumSpectra[spectrumID]
-            self.settings['Current']['referenceSpectrumGroup'].addSpectrum(self.settings['Current']['referenceSumSpectrum'])
-
-    def _selectMetabolite(self, newRow, previousRow, selectedRow, lastRow):
-        metaboliteName = selectedRow.name.iloc[0]
-        self.settings['Current']['metabolite'] = metaboliteName
-        self.settings['Current']['metaboliteData'] = selectedRow
-        metabolite_id = selectedRow.metabolite_id.iloc[0]
-        widget = self.guiDict['CoreWidgets']['Simulation']
-        data = self.caller.getSpectra(metabolite_id)
-        widget.updateDf(data)
-
-    def _addUnknownSignal(self):
-        self.settings["Current"]["UnknownSignalCount"] += 1
-        self.settings['Current']['metabolite'] = f'Unknown_Signal_{self.settings["Current"]["UnknownSignalCount"]}'
-        widget = self.guiDict['CoreWidgets']['Simulation']
-        data = pd.DataFrame({'name': self.settings['Current']['metabolite'],
-                             'metabolite_id': None,
-                             'spectrum_id': None,
-                             'origin': 'unknown_signal'}, index=[len(self.metabolites.data)])
-        widget.updateDf(data)
-        data = {'name': self.settings['Current']['metabolite']}
-        row = pd.DataFrame(data, columns=self.metabolites.data.columns, index=[len(self.metabolites.data)])
-        self.metabolites.data = pd.concat([self.metabolites.data, row])
-        df = self.metabolites.data.sort_values('name')[
-            ['name', 'hmdb_accession', 'bmrb_id', 'chemical_formula', 'average_molecular_weight', 'smiles', 'inchi',
-             'metabolite_id', 'description']]
-        self.guiDict['CoreWidgets']['Metabolite'].updateDf(df)
-        self.settings['Current']['metaboliteData'] = row
-
-    def _setupSimulatedSpectrum(self, newRow, previousRow, selectedRow, lastRow):
-        metaboliteData = self.settings['Current']['metaboliteData']
-        metaboliteID = selectedRow.metabolite_id.iloc[0]
-        spectrumId = selectedRow.spectrum_id.iloc[0]
-        origin = selectedRow.origin.iloc[0]
-        metaboliteName = metaboliteData.name.iloc[0]
-        self.settings['Current']['currentSimulatedSpectrumId'] = spectrumId
-        self.settings['Current']['currentMetaboliteName'] = metaboliteName
-        if spectrumId not in self.metaboliteSimulations:
-            width = 1
-            scale = 1
-            globalShift = 0
-            frequency = round(self.settings['Current']['referenceSumSpectrumFrequency']/10)*10
-            if origin != 'unknown_signal':
-                simulationData = self.caller.getSimulationData(spectrumId)
-                sampleData = self.caller.getSampleData(simulationData['SpectrumData'].sample_id.iloc[0])
-                spectrumData = simulationData['SpectrumData']
-                synonyms = ([synonym for synonym in self.caller.getSynonymData(metaboliteID).synonym])
-                self.simspec = self.simulator.spectrumFromDatabase(simulationData, points=self.settings['Current']['referenceSumSpectrumPoints'], limits=self.settings['Current']['referenceSumSpectrumLimits'])
-                self.simulator.buildCcpnObjects(self.simspec, metaboliteName=f"{metaboliteName}_{origin}_{simulationData['SpectrumData'].spectrum_type.iloc[0]}",
-                                                frequency=spectrumData.frequency.iloc[0],
-                                                temperature=spectrumData.temperature.iloc[0], pH=sampleData.pH.iloc[0],
-                                                smiles=metaboliteData.smiles.iloc[0],
-                                                inChi=metaboliteData.inchi.iloc[0],
-                                                empiricalFormula=metaboliteData.chemical_formula.iloc[0],
-                                                molecularMass=metaboliteData.average_molecular_weight.iloc[0],
-                                                synonyms=synonyms, description=metaboliteData.description.iloc[0])
-                if simulationData['SpectrumData'].spectrum_type.iloc[0] == 'spin_system':
-                    self.simspec.setFrequency(frequency)
-            else:
-                self.simspec = self.simulator.spectrumFromScratch(frequency=frequency, points=self.settings['Current']['referenceSumSpectrumPoints'], limits=self.settings['Current']['referenceSumSpectrumLimits'])
-                self.simspec.scale = 10
-                self.simulator.buildCcpnObjects(self.simspec, metaboliteName, frequency)
-            self.metaboliteSimulations[spectrumId] = self.simspec
-            self.addSimSpectrumToList(self.simspec)
-            self.settings['Current']['referenceSpectrumGroup'].addSpectrum(self.simspec.spectrum)
-            self.refreshSumSpectrum()
-        else:
-            self.simspec = self.metaboliteSimulations[spectrumId]
-            scale = log10(self.simspec.scale)
-            width = self.simspec.width
-            frequency = self.simspec.frequency
-            globalShift = self.simspec.globalShift
-        if metaboliteName not in self.settings['ResultsTables']['currentTable'].data.columns.to_list():
-            column = [None] * len(self.settings['ResultsTables']['currentTable'].data)
-            self.settings['ResultsTables']['currentTable'].data[metaboliteName] = column
-            self.settings['ResultsTables']['currentTable'].data.at[self.settings['Current']['currentSpectrumId'], metaboliteName] = 1
-        else:
-            integration = scale * width
-            self.settings['ResultsTables']['currentTable'].data.at[self.settings['Current']['currentSpectrumId'], metaboliteName] = integration
-
-        for key in self.guiDict['TemporaryWidgets']:
-            if 'Line' in key:
-                self.display.strips[0]._CcpnGLWidget.removeInfiniteLine(self.guiDict['TemporaryWidgets'][key])
-            else:
-                self.guiDict['TemporaryWidgets'][key].deleteLater()
-        self.guiDict['TemporaryWidgets'] = OD()
-
-        grid = (4, 1)
-        # Add a widget for the simulated spectrum peak width
-        grid = _addRow(grid)
-        widget = Label(self.scrollAreaLayout, text=f'Width', grid=grid)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-        self.guiDict['TemporaryWidgets']['WidthLabel'] = widget
-
-        grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=width, decimals=1, step=0.1, grid=grid, gridSpan=(1, 2), suffix='Hz')
-        widget.setRange(0.1, 5)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
-        widget.setButtonSymbols(2)
-        widget.valueChanged.connect(self.widthChange)
-        self.guiDict['TemporaryWidgets']['Width'] = widget
-        self.settings['Current']['Width'] = self._getValue(widget)
-
-        # Add a widget for the simulated spectrum scale
-        grid = _addRow(grid)
-        widget = Label(self.scrollAreaLayout, text=f'Scale (10^n)', grid=grid)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-        self.guiDict['TemporaryWidgets']['ScaleLabel'] = widget
-
-        grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=scale, decimals=3, step=0.001, grid=grid, gridSpan=(1, 2))
-        widget.setRange(-7, 7)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
-        widget.setButtonSymbols(2)
-        widget.valueChanged.connect(self.scaleChange)
-        self.guiDict['TemporaryWidgets']['Scale'] = widget
-        self.settings['Current']['Scale'] = self._getValue(widget)
-
-        # Add a widget for the simulated spectrum frequency
-        if origin != 'bmrb':
-            grid = _addRow(grid)
-            widget = Label(self.scrollAreaLayout, text=f'Frequency', grid=grid)
-            _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-            self.guiDict['TemporaryWidgets']['FrequencyLabel'] = widget
-
-            grid = _addColumn(grid)
-            widget = DoubleSpinbox(self.scrollAreaLayout, value=frequency, decimals=1, step=10,
-                                   grid=grid, gridSpan=(1, 2), suffix='MHz')
-            widget.setRange(10, 1200)
-            _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
-            widget.setButtonSymbols(2)
-            widget.valueChanged.connect(self.frequencyChange)
-            self.guiDict['TemporaryWidgets']['Frequency'] = widget
-            self.settings['Current']['Frequency'] = self._getValue(widget)
-
-        # Add a widget for the simulated spectrum global shift
-        grid = _addRow(grid)
-        widget = Label(self.scrollAreaLayout, text=f'Global Shift', grid=grid)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-        self.guiDict['TemporaryWidgets']['GlobalShiftLabel'] = widget
-
-        grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=globalShift, decimals=4, step=0.0001,
-                               grid=grid, gridSpan=(1, 2), suffix='ppm')
-        widget.setRange(-1, 1)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
-        widget.setButtonSymbols(2)
-        widget.valueChanged.connect(self.globalShiftChange)
-        self.guiDict['TemporaryWidgets']['GlobalShift'] = widget
-        self.settings['Current']['GlobalShift'] = self._getValue(widget)
-
-        if self.simspec.multiplets and origin != 'unknown_signal':
-            for index, multipletId in enumerate(self.simspec.multiplets):
-                self.addDoubleSpinbox(index, multipletId)
-            if origin == 'bmrb':
-                for widget in [widget for widget in self.guiDict['TemporaryWidgets'] if 'Multiplet' in widget]:
-                    self.guiDict['TemporaryWidgets'][widget].setUpdatesEnabled(False)
-                    self.guiDict['TemporaryWidgets'][widget].setEnabled(False)
-        else:
-            grid = _addColumn(grid)
-            self.settings['Current']['Grid'] = grid
-            self.settings['Current']['SignalCount'] = 0
-            buttonWidget = Button(parent=self.scrollAreaLayout, text='Add Signal From Scratch', grid=grid, callback=self._addSignalFromScratch)
-            _setWidgetProperties(buttonWidget, heightType='Minimum')
-            self.guiDict['TemporaryWidgets'][f'AddSignal'] = buttonWidget
-
-            grid = _addColumn(grid)
-            buttonWidget = Button(parent=self.scrollAreaLayout, text='Add Signal From Peaks', grid=grid,
-                                  callback=self._addSignalFromPeaks)
-            _setWidgetProperties(buttonWidget, heightType='Minimum')
-            self.guiDict['TemporaryWidgets'][f'AddSignal'] = buttonWidget
-        self.project.widgetDict = self.guiDict['TemporaryWidgets']
-
-    def _addSignalFromScratch(self):
-        def shiftChange():
-            shift = shiftWidget.value()
-            self.simspec.moveMultiplet(str(count), shift)
-            self.refreshSumSpectrum()
-        def heightChange():
-            height = 10 ** heightWidget.value()
-            self.simspec.scaleMultiplet(str(count), height)
-            self.refreshSumSpectrum()
-        grid = self.settings['Current']['Grid']
-        grid = _addRow(grid)
-        self.settings['Current']['Grid'] = grid
-        count = self.settings['Current']['SignalCount'] + 1
-        self.settings['Current']['SignalCount'] = count
-        self.simspec.multiplets[f'{count}'] = {'center': 0, 'indices': [count-1]}
-        self.simspec.peakList.append((0, 1, self.simspec.width/self.simspec.frequency, str(count)))
-
-        labelWidget = Label(self.scrollAreaLayout, text=f'Signal_{count}', grid=grid)
-        _setWidgetProperties(labelWidget, _setWidth(columnWidths, grid))
-        self.guiDict['TemporaryWidgets'][f'Signal_{count}_label'] = labelWidget
-
-        grid = _addColumn(grid)
-        shiftWidget = DoubleSpinbox(self.scrollAreaLayout, value=0, decimals=4, step=0.0001, grid=grid, gridSpan=(1, 1))
-        shiftWidget.setRange(0, 10)
-        _setWidgetProperties(shiftWidget, _setWidth(columnWidths, grid), hAlign='r')
-        shiftWidget.valueChanged.connect(shiftChange)
-        self.settings['Current'][f'Signal_{count}_Shift'] = self._getValue(shiftWidget)
-        self.guiDict['TemporaryWidgets'][f'Signal_{count}_Shift'] = shiftWidget
-
-        grid = _addColumn(grid)
-        heightWidget = DoubleSpinbox(self.scrollAreaLayout, value=0, decimals=3, step=0.001, grid=grid, gridSpan=(1, 1))
-        heightWidget.setRange(-7, 7)
-        _setWidgetProperties(heightWidget, _setWidth(columnWidths, grid), hAlign='r')
-        heightWidget.valueChanged.connect(heightChange)
-        self.settings['Current'][f'Signal_{count}_Height'] = self._getValue(heightWidget)
-        self.guiDict['TemporaryWidgets'][f'Signal_{count}_Height'] = heightWidget
-
-    def _addSignalFromPeaks(self):
-        if len(self.settings['Current']['ActiveSpectrum'].multiplets) > 0:
-            peakList = []
-            for i, multiplet in enumerate(self.settings['Current']['ActiveSpectrum'].multiplets):
-                for peak in multiplet.peaks:
-                    peakList.append((peak.position[0], peak.height/(10**self.settings['Current']['Scale']), self.simspec.width/self.simspec.frequency, str(i)))
-        else:
-            peakList = [(peak.position[0], peak.height/(10**self.settings['Current']['Scale']), self.simspec.width/self.simspec.frequency, '1') for peak in self.settings['Current']['ActiveSpectrum'].peaks]
-        self.simspec.peakList = peakList
-        self.simspec.setSpectrumLineshape()
-
-    def addSimSpectrumToList(self, spectrum):
-        if 'SimulatedSpectra' not in self.settings['Spectra']:
-            self.settings['Spectra']['SimulatedSpectra'] = [spectrum]
-        else:
-            self.settings['Spectra']['SimulatedSpectra'].append(spectrum)
-
-    def refreshSumSpectrum(self):
-        sumIntensities = numpy.zeros(self.settings['Current']['referenceSumSpectrumPoints'])
-        for spectrum in self.settings['Spectra']['SimulatedSpectra']:
-            sumIntensities += spectrum.spectrum.intensities
-        self.settings['Current']['referenceSumSpectrum'].intensities = sumIntensities
+            setupComplete = True
+        return setupComplete
 
     def _getValue(self, widget):
         # Get the current value of the widget:
@@ -557,8 +295,237 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                 value = widget.value()
         return value
 
+    def _updateSettings(self, inputDict, outputDict):
+        # Gets all the values from a dictionary that contains widgets
+        # and writes values to the dictionary with the same structure
+        for k, v in inputDict.items():
+            if isinstance(v, dict):
+                self._updateSettings(v, outputDict[k])
+            else:
+                outputDict[k] = self._getValue(v)
+        return outputDict
 
-class ProfileByReference(Plugin):
+    def _calcFirstNoiseScore(self, peak):
+
+        if not None in peak.lineWidths:
+            lws = list(peak.lineWidths)
+            for i in range(len(lws)):
+                lws[i] = abs(lws[i])
+
+            lws = sorted(lws, reverse=True)
+            shapeFactor = lws[0]
+            areaFactor = lws[0]
+            for lw in lws[1:]:
+                shapeFactor = abs(shapeFactor / lw)
+                areaFactor = abs(areaFactor * lw)
+
+            return (shapeFactor / abs(peak.height)) / areaFactor
+        else:
+            return 1e100
+
+    def _gauss(self, mean, value, sd):
+        gauss = 1 / (math.sqrt(2 * math.pi) * sd) * math.e ** (-0.5 * (float(value - mean) / sd) ** 2)
+        return gauss
+
+    def _normalisedGauss(self, mean, value, sd):
+        gauss = math.e ** (-0.5 * (float(value - mean) / sd) ** 2)
+        return gauss
+
+    def _calcLwDevFactor(self, peak, lwReferences):
+        # Replace with Gaussian weighted dev factor.
+        # lwReferences = [(avg,sd),(avg,sd), .... ]
+        lwDevFactor = 1
+        for i in range(len(lwReferences)):
+            try:
+                # lwDevFactor = lwDevFactor * abs(peak.lineWidths[i] - lwReferences[i])
+                lwDevFactor = lwDevFactor / self._gauss(lwReferences[i][0], peak.lineWidths[i], lwReferences[i][0])
+            except TypeError:
+                pass
+
+        return lwDevFactor
+
+    @logCommand(get='self')
+    def filterNoiseButton(self, *args, **kwds):
+        """Call the filter function from the button
+        """
+        with undoBlock():
+            self._filterNoisePeaks()
+
+    def _filterNoisePeaks(self):
+        # Get values from the GUI widgets and save in the settings
+        self._updateSettings(self.guiDict, self.settings)
+
+        minPeaks = self.settings['Spectrum']['Reference peaks']
+        thresholdFactor = self.settings['Spectrum']['Threshold factor']
+
+        spectrumId = self.settings['Spectrum']['SpectrumId']
+        spectrum = self._spectrumId2Spectrum(spectrumId)
+        nDims = spectrum.dimensionCount
+
+        peakListId = 'PL:{0}.{1}'.format(spectrumId, self.settings['Spectrum']['Peak list'])
+        peakList = self.project.getByPid(peakListId)
+
+        # First sort the peaks on the first noise score factor.
+        peakScores = []
+        for peak in peakList.peaks:
+            firstNoiseScore = self._calcFirstNoiseScore(peak)
+            peakScores.append([peak, firstNoiseScore])
+
+        sortedPeakScores = sorted(peakScores, key=operator.itemgetter(1))
+        # for peak in sortedPeakScores:
+        #     # print(peak[0].lineWidths, peak[0].height, peak[1])
+        #     print(peak[1])
+        # for peak in sortedPeakScores:
+        #     print(peak[0].lineWidths, peak[0].height, peak[1])
+
+        # Reference average linewidths can be best obtained by two step sorting and analysing:
+        # - Sort with firstNoiseScore
+        # - Calculate reference lineWidths and 2nd Noise Score
+        # - Sort on 2nd Noise Score
+        # - Calculate reference lineWidths again, and calculate 3rd Noise score
+
+        # Calculate the linewidth averages of the first minPeaks ranking peaks
+
+        lwReferences = []
+        for i in range(nDims):
+            lwReferences.append([])
+
+        for peak in sortedPeakScores[:minPeaks]:
+            # print (peak[0].lineWidths)
+            for lwi in range(len(peak[0].lineWidths)):
+                lwReferences[lwi].append(peak[0].lineWidths[lwi])
+
+        # Calculate the average and sd
+        for i in range(len(lwReferences)):
+            lwReferences[i] = (numpy.mean(lwReferences[i]), numpy.std(lwReferences[i]))
+            # print (lwReferences[i])
+
+        # Add the 2nd noise score
+        for peak in sortedPeakScores:
+            peak.append(peak[1] * self._calcLwDevFactor(peak[0], lwReferences))
+
+        # Sort on 2ndNoiseScore
+        sortedPeakScores = sorted(sortedPeakScores, key=operator.itemgetter(2))
+
+        # for peak in sortedPeakScores:
+        #     print(peak[0].lineWidths, peak[0].height, peak[1], peak[2])
+
+        # Calculate new line width averages and SD
+        lwReferences = []
+        for i in range(nDims):
+            lwReferences.append([])
+
+        for peak in sortedPeakScores[:minPeaks]:
+            # print (peak[0].lineWidths)
+            for lwi in range(len(peak[0].lineWidths)):
+                lwReferences[lwi].append(peak[0].lineWidths[lwi])
+
+        # Calculate the average and sd
+        for i in range(len(lwReferences)):
+            lwReferences[i] = (numpy.mean(lwReferences[i]), numpy.std(lwReferences[i]))
+            # print (lwReferences[i])
+
+        # Add the 3rd noise score
+        for peak in sortedPeakScores:
+            peak.append(peak[1] * self._calcLwDevFactor(peak[0], lwReferences))
+
+        # Sort on 3rdNoiseScore
+        sortedPeakScores = sorted(sortedPeakScores, key=operator.itemgetter(3))
+
+        # for peak in sortedPeakScores:
+        #     print(peak[0].lineWidths, peak[0].height, peak[1], peak[2], peak[3])
+
+        #
+        # # Sort again
+        # sortedPeakScores = sorted(sortedPeakScores, key=operator.itemgetter(1))
+
+        # Determine cutoff for noise/peak separation.
+        # Calculate the noise score average and sd for the 20 first ranking peaks
+
+        nTrainingPeaks = 20
+        noiseScoreReferenceList = []
+        for peak in sortedPeakScores[1:nTrainingPeaks]:
+            noiseScoreReferenceList.append(peak[1])
+            print(peak[0], peak[1])
+
+        # For all peaks in the sorted peak list, calculate the derivative
+        # and update the average and standard deviation of the derivatives
+        # The transition from peaks to noise peaks is where the derivative suddenly changes.
+        # If the derivative changes more than n*SD of the average of the previous, this becomes the noise threshold.
+
+        noiseScoreThreshold = None
+        derivatives = []
+
+        for i in range(1, len(sortedPeakScores) - 1):
+            derivative = (sortedPeakScores[i - 1][3] + sortedPeakScores[i + 1][3]) / 2
+            if len(derivatives) > minPeaks:
+                avg = numpy.mean(derivatives)
+                std = numpy.std(derivatives)
+                if derivative > avg + thresholdFactor * std:
+                    noiseScoreThreshold = sortedPeakScores[i][3]
+                    break
+            derivatives.append(derivative)
+
+        if not noiseScoreThreshold:
+            print('>> No threshold calculated')
+            return
+
+        npnoiseScoreThreshold = numpy.mean(noiseScoreReferenceList) + 4 * numpy.std(noiseScoreReferenceList)
+
+        print(">>>noiseScoreThreshold", noiseScoreThreshold)
+        print(">>>npnoiseScoreThreshold", npnoiseScoreThreshold)
+        print(">>>numPeakScores", len(sortedPeakScores))
+        #spectrum = self._spectrumId2Spectrum(self.settings['Spectrum']['SpectrumId'])
+        #spectrum.newPeakList()
+        #newPeakList = spectrum.peakLists[-1]
+
+        for peak in sortedPeakScores:
+            #print(peak[0], peak[1])
+            # if peak[1] < noiseScoreThreshold or peak[1] == 1e100:
+            #     print (peak[0].lineWidths,peak[0].height, peak[1])
+            #     #PyQt5
+            # else:
+            #     peakId = 'PK:{0}.{1}.{2}'.format(self.settings['Spectrum']['SpectrumId'],
+            #                                      self.settings['Spectrum']['Peak list'],peak[0].serial)
+            #     self.project.deleteObjects(peakId)
+            # if peak[3] > noiseScoreThreshold and peak[3] != 1e100:
+            if peak[3] > noiseScoreThreshold:
+                print(peak[0].lineWidths, peak[0].height, peak[1])
+                peakId = 'PK:{0}.{1}.{2}'.format(self.settings['Spectrum']['SpectrumId'],
+                                                 self.settings['Spectrum']['Peak list'], peak[0].serial)
+                self.project.deleteObjects(peakId)
+
+        # Now copy any peaks with noise lower than the threshold to a new peak list
+
+    # # Check if all input requirements are met
+    # setupComplete = self._runDataCheck()
+    #
+    # if setupComplete == True:
+    #     # Check if tree exists, and if to overwrite
+    #     overwrite = False
+    #     if os.path.exists(self.runPath):
+    #         overwrite = showYesNo('Warning', 'Run {0} exists. Overwrite?'.format(self.settings['General']['Run name']))
+    #         if overwrite == False:
+    #             showMessage('Message', 'Project set up aborted')
+    #             return
+    #
+    #     if overwrite == True:
+    #         shutil.rmtree(self.runPath)
+    #
+    #     # Create a (new) directory tree
+    #     self._createRunTree()
+    #     self._writeFilterNoisePeaks()
+    #     showMessage('Message', 'Filter Noise Peaks complete')
+
+    def _createRunTree(self):
+        if not os.path.exists(self.pluginPath):
+            os.makedirs(self.pluginPath)
+
+        if not os.path.exists(self.runPath):
+            os.makedirs(self.runPath)
+
+
+class FilterNoisePeaksPlugin(Plugin):
     PLUGINNAME = 'Profile by Reference'
     guiModule = ProfileByReferenceGuiPlugin
     CCPNPLUGIN = True
@@ -568,5 +535,5 @@ class ProfileByReference(Plugin):
         print('Filtering noise peaks', kwargs)
 
 
-ProfileByReference.register()  # Registers the pipe in the pluginList
+FilterNoisePeaksPlugin.register()  # Registers the pipe in the pluginList
 # Set tolerances from project.spectrum.tolerances by default

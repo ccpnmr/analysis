@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-08 17:28:44 +0000 (Wed, February 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-09 11:13:38 +0000 (Thu, February 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -86,6 +86,10 @@ JWH = data[sv.JwH].values
 JWH_ERR = data[sv.JwH_ERR].values
 JWN = data[sv.JwX].values
 JWN_ERR = data[sv.JwX_ERR].values
+
+
+N_LarmorFrequency_600_1spin = 43.367
+N_LarmorFrequency_600_halfSpin = 60.834
 
 # fit aJN + b
 alphaN, betaN, YcoefJ0JWN = lf._polifitJs(J0, JWN)
@@ -298,16 +302,9 @@ def _plotCorrTimes_page5(pdf):
     ax3 = plt.subplot(413)
     axss = fig.add_subplot(414)
     plotSS(axss, x, blocks, sequence, startSequenceCode=startSequenceCode, fontsize=5)
-    rr = []
-    for v in JWN:
-        pass
-        jj = lf._calculateMolecularTumblingCorrelationTime(v, alphaN, betaN)
-        rr.append(list(jj))
-    concArray = np.array(rr)
-    sol1, sol2, sol3 = concArray.transpose()
-    ax1.plot(x, sol1, 'r',)
-    ax2.plot(x, sol2, 'g',)
-    ax3.plot(x, sol3, 'b', )
+
+    jj = lf._calculateMolecularTumblingCorrelationTime(N_LarmorFrequency_600_halfSpin, alphaN, betaN)
+    print('MolecularTumblingCorrelationTime:  ', jj)
 
 
     # ax1.set_ylim(ymin=0)

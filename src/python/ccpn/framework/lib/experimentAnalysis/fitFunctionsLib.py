@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-08 17:27:29 +0000 (Wed, February 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-09 11:13:38 +0000 (Thu, February 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -400,18 +400,18 @@ def _polifitJs(j0, jw, order=1):
     return slope, intercept, fittedY
 
 
-def _calculateMolecularTumblingCorrelationTime(JWN, alpha, beta):
+def _calculateMolecularTumblingCorrelationTime(omega, alpha, beta):
     """
     solve the Polynomial Structure -> ax^3 + bx^2 + cx + d = 0
     from eq. 18  Backbone dynamics of Barstar: A 15N NMR relaxation study.
     Udgaonkar et al 2000. Proteins: 41:460-474
-    :param JWN:
+    :param omega:
     :param alpha: the slope for the fitting J0 vs JwN
     :param beta: the intercept for the fitting J0 vs JwN
     :return:
     """
-    a = 2 * alpha * (JWN**2)
-    b = 5 * beta * (JWN**2)
+    a = 2 * alpha * (omega**2)
+    b = 5 * beta * (omega**2)
     c = 2 * (alpha-1)
     d = 5 * beta
 

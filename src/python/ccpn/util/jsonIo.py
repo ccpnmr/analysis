@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-09 11:58:06 +0000 (Thu, February 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-09 15:09:09 +0000 (Thu, February 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -168,7 +168,7 @@ def _ccpnObjectPairHook(pairs):
                 # return pandas.DataFrame(data=data.get('data'), index=data.get('index'),
                 #                         columns=data.get('columns'))
                 # return pandas.read_json(data, orient='split')
-                result = pandas.DataFrame(**json.loads(data))
+                return pandas.DataFrame(**json.loads(data))
 
             elif typ == 'pandas.Panel':
                 # NBNB NOT TESTED

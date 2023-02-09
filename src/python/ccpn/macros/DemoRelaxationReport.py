@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-09 12:01:15 +0000 (Thu, February 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-09 15:08:52 +0000 (Thu, February 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,7 @@ import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 import pandas as pd
 import matplotlib.pyplot as plt
+import math
 import time
 import datetime
 from matplotlib.backends.backend_pdf import PdfPages
@@ -67,6 +68,7 @@ x = x.values
 startSequenceCode = x[0]
 endSequenceCode = startSequenceCode + len(ss_sequence)
 startOffsetExtraXTicks = 3 # used to allign the ss to the plots
+xSequence = np.arange(startSequenceCode, endSequenceCode)
 
 R1 = data[sv.R1].values
 R2 = data[sv.R2].values
@@ -130,7 +132,7 @@ def _plotRates_page1(pdf):
     """ Plot the  SS -  R1  - R2 - NOE """
     fig = plt.figure(dpi=400)
     axss = fig.add_subplot(414)
-    plotSS(axss, x, blocks, sequence, startSequenceCode=startSequenceCode, fontsize=5)
+    plotSS(axss, xSequence, blocks, sequence, startSequenceCode=startSequenceCode, fontsize=5, )
     axR1 = plt.subplot(411)
     axR2 = plt.subplot(412)
     axNOE = plt.subplot(413)
@@ -144,6 +146,7 @@ def _plotRates_page1(pdf):
     axR2.set_ylabel('R$_{2}$ (sec$^{-1}$)', fontsize=fontYSize)
     axNOE.set_ylabel('het-NOE ratio', fontsize=fontYSize)
     axNOE.set_xlabel('Residue Number', fontsize=fontXSize, )
+
     axss.get_shared_x_axes().join(axss, axR1, axR2, axNOE)
     ml = MultipleLocator(1)
     for ax in [axss, axR1, axR2, axNOE]:
@@ -153,6 +156,9 @@ def _plotRates_page1(pdf):
         ax.tick_params(axis='both', which='major', labelsize=labelMajorSize)
         ax.tick_params(axis='both', which='minor', labelsize=labelMinorSize)
         ax.yaxis.set_label_coords(-0.05, 0.5) #align the labels to vcenter and middle
+        if ax != axss:
+            minY, maxY = ax.get_ylim()
+            ax.set_ylim(0, math.ceil(maxY)) #increase the yLim
 
     plt.tight_layout()
     plt.subplots_adjust(hspace=hspace)
@@ -163,7 +169,7 @@ def _plotR2R1_page2(pdf):
     # page two R2/R1 Ratio
     fig = plt.figure(dpi=300)
     axss = fig.add_subplot(312)
-    plotSS(axss, x, blocks, sequence, startSequenceCode=startSequenceCode, fontsize=5)
+    plotSS(axss, xSequence, blocks, sequence, startSequenceCode=startSequenceCode, fontsize=5)
     axR2R1 = plt.subplot(311)
     axR2R1.bar(x, R2R1, yerr=R2R1_ERR, color='black', ecolor='red', error_kw=dict(lw=1, capsize=2, capthick=0.5))
     axR2R1.set_title('R2/R1',  fontsize=fontTitleSize, color=titleColor)
@@ -175,6 +181,7 @@ def _plotR2R1_page2(pdf):
     axR2R1.xaxis.set_minor_locator(ml)
     axR2R1.tick_params(axis='both', which='major', labelsize=labelMajorSize)
     axR2R1.tick_params(axis='both', which='minor', labelsize=labelMinorSize)
+    axss.get_shared_x_axes().join(axss, axR2R1)
     plt.tight_layout()
     plt.subplots_adjust(hspace=hspace)
     _closeFig(fig, pdf, plt)
@@ -188,7 +195,7 @@ def _plotSDM_page3(pdf):
     axJwh = plt.subplot(412)
     axJwx = plt.subplot(413)
     axss = fig.add_subplot(414)
-    plotSS(axss, x, blocks, sequence, startSequenceCode=startSequenceCode, fontsize=5)
+    plotSS(axss, xSequence, blocks, sequence, startSequenceCode=startSequenceCode, fontsize=5)
 
     axJ0.errorbar(x, J0, yerr=J0_ERR, fmt="o", color='black', ms=2, ecolor='red', elinewidth=1, capsize=2, )
     axJwh.errorbar(x, JWH, yerr=JWH_ERR, fmt="o", color='black', ms=2, ecolor='red', elinewidth=1, capsize=2, )

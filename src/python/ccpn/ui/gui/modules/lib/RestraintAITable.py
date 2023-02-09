@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-09 18:53:19 +0000 (Thu, February 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-09 19:12:04 +0000 (Thu, February 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -222,7 +222,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
     applySortToGroups = False
 
     def __init__(self, *args, **kwds):
-        super(_NewRestraintWidget, self).__init__(*args, **kwds)
+        super().__init__(showVerticalHeader=False, showGrid=True, *args, **kwds)
 
         delegate = _ExpandVerticalCellDelegate(parent=self.verticalHeader(), table=self)
         for col in self.SPANCOLUMNS:
@@ -767,7 +767,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
     #=========================================================================================
 
     def _postChangeSelectionOrderCallback(self, *args):
-        super(_NewRestraintWidget, self)._postChangeSelectionOrderCallback(*args)
+        super()._postChangeSelectionOrderCallback(*args)
 
         print('_postChangeSelectionOrderCallback')
         self.updateTableExpanders()

@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-09 11:13:38 +0000 (Thu, February 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-09 12:01:15 +0000 (Thu, February 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -294,47 +294,6 @@ def _plotScatters_page4(pdf):
     _closeFig(fig, pdf, plt)
 
 
-def _plotCorrTimes_page5(pdf):
-
-    fig = plt.figure(dpi=300)
-    ax1 = plt.subplot(411)
-    ax2 = plt.subplot(412)
-    ax3 = plt.subplot(413)
-    axss = fig.add_subplot(414)
-    plotSS(axss, x, blocks, sequence, startSequenceCode=startSequenceCode, fontsize=5)
-
-    jj = lf._calculateMolecularTumblingCorrelationTime(N_LarmorFrequency_600_halfSpin, alphaN, betaN)
-    print('MolecularTumblingCorrelationTime:  ', jj)
-
-
-    # ax1.set_ylim(ymin=0)
-    # ax2.set_ylim(ymin=0)
-    # ax3.set_ylim(ymin=0)
-    #
-    ax1.set_title('Solution 1 _ Correlation Time', fontsize=fontTitleSize, color=titleColor)
-    ax2.set_title('Solution 2 _ Correlation Time', fontsize=fontTitleSize, color=titleColor)
-    ax3.set_title('Solution 3 _ Correlation Time', fontsize=fontTitleSize, color=titleColor)
-    
-    ax1.set_ylabel(f'{L_SR}?', fontsize=fontYSize)
-    ax2.set_ylabel(f' {L_SR}?', fontsize=fontYSize)
-    ax3.set_ylabel(f'{L_SR}?', fontsize=fontYSize)
-    
-    ml = MultipleLocator(1)
-    for ax in [axss, ax1, ax2, ax3]:
-        ax.spines[['right', 'top']].set_visible(False)
-        ax.minorticks_on()
-        ax.xaxis.set_minor_locator(ml)
-        ax.tick_params(axis='both', which='major', labelsize=labelMajorSize)
-        ax.tick_params(axis='both', which='minor', labelsize=labelMinorSize)
-        ax.yaxis.get_offset_text().set_x(-0.02)
-        ax.yaxis.get_offset_text().set_size(5)
-        ax.yaxis.set_label_coords(-0.05, 0.5)  # align the labels to vcenter and middle
-    
-    axss.get_shared_x_axes().join(axss, ax1, ax2, ax3)
-    ax3.set_xlabel('Residue Number', fontsize=fontXSize, )
-    plt.tight_layout()
-    plt.subplots_adjust(hspace=hspace)
-    _closeFig(fig, pdf, plt)
 
 # init pdf
 with PdfPages(f'{filePath}.pdf') as pdf:
@@ -342,7 +301,6 @@ with PdfPages(f'{filePath}.pdf') as pdf:
     _plotR2R1_page2(pdf)
     _plotSDM_page3(pdf)
     _plotScatters_page4(pdf)
-    _plotCorrTimes_page5(pdf)
 
 
 

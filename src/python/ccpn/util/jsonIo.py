@@ -7,7 +7,7 @@ pandas.Panel is deprecated and will be loaded as a pandas.DataFrame
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -17,9 +17,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:09 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-02-09 11:58:06 +0000 (Thu, February 09, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -55,6 +55,20 @@ def dumps(obj: object, indent: int = 2, **kwds):
     """Dump object to json string with extended object type support"""
     return json.dumps(obj, indent=indent, cls=_CcpnMultiEncoder, **kwds)
 
+def _dataFrameToDict(df) -> dict:
+    """
+    Ensure a dataframe is  properly converted to a dict
+    so that can be dumped correctly to a Json.
+    Note has to be done this way to avoid data-loss with tiny/large floats.
+    Cannot  use simply dataframe.to_dict(), won't restore correctly.
+    :param df:
+    :return: data
+    """
+    index = list(df.index)
+    columns = list(df.columns)
+    values = df.values.tolist()
+    data = {'index': index, 'columns': columns, 'data': values}
+    return data
 
 class _CcpnMultiEncoder(json.JSONEncoder):
     """Overrides normal JSON encoder, supporting additional types.
@@ -79,14 +93,18 @@ class _CcpnMultiEncoder(json.JSONEncoder):
                 # in-case of any undefined/unregistered subclasses
                 typ = DataFrameABC.registeredDefaultJsonType
 
-            data = obj.to_json(orient='split')
+            dataDict = _dataFrameToDict(obj)
+            data = json.dumps(dataDict)
+            # data = obj.to_json(orient='split')
 
         elif isinstance(obj, pandas.DataFrame):
             # NB this converts both None and NaN to 'null'
             # We assume that pandas will get back the correct value from the type of the array
             # (NaN in numeric data, None in object data).
             typ = 'pandas.DataFrame'
-            data = obj.to_json(orient='split')
+            dataDict = _dataFrameToDict(obj)
+            data = json.dumps(dataDict)
+            # data = obj.to_json(orient='split')
 
         elif isinstance(obj, pandas.Series):
             # NB this converts both None and NaN to 'null'
@@ -138,7 +156,8 @@ def _ccpnObjectPairHook(pairs):
                 # check for registered subclasses of DataFrameABC
                 result = None
                 try:
-                    result = pandas.read_json(data, orient='split')
+                    # result = pandas.read_json(data, orient='split')
+                    result = pandas.DataFrame(**json.loads(data))
                     if klass := DataFrameABC.fromJsonType(typ):
                         # SHOULD always be a defined json-type
                         result = klass(result)
@@ -148,12 +167,12 @@ def _ccpnObjectPairHook(pairs):
             elif typ == 'pandas.DataFrame':
                 # return pandas.DataFrame(data=data.get('data'), index=data.get('index'),
                 #                         columns=data.get('columns'))
-                return pandas.read_json(data, orient='split')
+                # return pandas.read_json(data, orient='split')
+                result = pandas.DataFrame(**json.loads(data))
 
             elif typ == 'pandas.Panel':
                 # NBNB NOT TESTED
                 # return pandas.read_json(data, orient='split').to_panel()
-
                 # pandas.Panel is deprecated so return as a DataFrame
                 return pandas.read_json(data, orient='split')
 

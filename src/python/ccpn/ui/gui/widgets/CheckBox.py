@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-02 10:56:13 +0000 (Thu, February 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-09 18:53:19 +0000 (Thu, February 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -47,7 +47,7 @@ class CheckBox(QtWidgets.QCheckBox, Base):
         if callback:
             self.setCallback(callback)
         if not self.objectName():
-            self.setObjectName(text)
+            self.setObjectName(str(text))
 
         self.setEnabled(checkable)
 

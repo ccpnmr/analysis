@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-08 19:52:33 +0000 (Wed, February 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-09 18:53:19 +0000 (Thu, February 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -103,54 +103,57 @@ class ColumnViewSettings(Frame):
         self.filterLabel = Label(self, text='Display Columns', grid=(0, 0))
         self.widgetFrame = Frame(self, setLayout=True, margins=(5, 5, 5, 5), grid=(1, 0))
         Spacer(self, 5, 5, 'fixed', 'expanding', grid=(2, 0))
-        self._hiddenColumns = hiddenColumns or []
+
+        # NOTE:ED - check, shouldn't need to pass this in
+        # self._hiddenColumns = hiddenColumns or []
+
         self.initCheckBoxes()
 
     def initCheckBoxes(self):
 
         if columns := list(self._df.columns):
-            hiddenColumns = self._hiddenColumns or []
+            hiddenColumns = self.tableHandler._hiddenColumns or []
 
             for i, colum in enumerate(columns):
 
                 # always ignore the _internal columns
                 if colum not in self.tableHandler._internalColumns:
+                    chcked = colum not in hiddenColumns
+
                     if self.direction == 'v':
                         i += 1
                         cb = CheckBox(self.widgetFrame, text=colum, grid=(i, 1), callback=self.checkBoxCallBack,
-                                      checked=colum not in hiddenColumns,
+                                      checked=chcked,
                                       hAlign='l', tipText=CheckboxTipText)
 
                     else:
                         cb = CheckBox(self.widgetFrame, text=colum, grid=(1, i), callback=self.checkBoxCallBack,
-                                      checked=colum not in hiddenColumns,
+                                      checked=chcked,
                                       hAlign='l', tipText=CheckboxTipText)
-
 
                     self.checkBoxes.append(cb)
 
     def _getHiddenColumns(self):
-        return self._hiddenColumns
+        return self.tableHandler._hiddenColumns
 
     def checkBoxCallBack(self):
         currentCheckBox = self.sender()
         name = currentCheckBox.text()
         # i = self._dfObject.headings.index(name)
-        i = list(self._df.columns).index(name)
+        i = [str(col) for col in self._df.columns].index(name)
 
         checkedBoxes = []
-
         for checkBox in self.checkBoxes:
             checkBox.setEnabled(True)
             if checkBox.isChecked():
                 checkedBoxes.append(checkBox)
         if checkedBoxes:
             if currentCheckBox.isChecked():
-                self._showColumn(i, name)
+                self.tableHandler._showColumn(self._df.columns[i])
             else:
-                self._hideColumn(i, name)
+                self.tableHandler._hideColumn(self._df.columns[i])
         else:
-            # always display at least one columns, disables the last checkbox
+            # always display at least one column, disables the last checkbox
             currentCheckBox.setEnabled(False)
             currentCheckBox.setChecked(True)
 
@@ -162,23 +165,23 @@ class ColumnViewSettings(Frame):
         self.checkBoxes = []
         self.initCheckBoxes()
 
-    def _hideColumn(self, i, name):
-        self.tableHandler.hideColumn(i)
-        if name not in self._hiddenColumns:
-            self._hiddenColumns.append(name)
-
-    def _showColumn(self, i, name):
-        self.tableHandler.showColumn(i)
-        self.tableHandler.resizeColumnToContents(i)
-        if name in self._hiddenColumns:
-            self._hiddenColumns.remove(name)
+    # def _hideColumn(self, i, name):
+    #     self.tableHandler.hideColumn(i)
+    #     if name not in self.tableHandler._hiddenColumns:
+    #         self.tableHandler._hiddenColumns.append(name)
+    #
+    # def _showColumn(self, i, name):
+    #     self.tableHandler.showColumn(i)
+    #     self.tableHandler.resizeColumnToContents(i)
+    #     if name in self.tableHandler._hiddenColumns:
+    #         self.tableHandler._hiddenColumns.remove(name)
 
     def showColumns(self):
         # show/hide the columns in the list
         columns = self.tableHandler.columnTexts
 
         for i, colName in enumerate(columns):
-            if colName in self._hiddenColumns:
-                self._hideColumn(i, colName)
+            if colName in self.tableHandler._hiddenColumns:
+                self.tableHandler._hideColumn(colName)
             else:
-                self._showColumn(i, colName)
+                self.tableHandler._showColumn(colName)

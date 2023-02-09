@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-08 19:52:32 +0000 (Wed, February 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-09 18:53:19 +0000 (Thu, February 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ from functools import partial
 
 import numpy as np
 import pandas as pd
+import warnings
 from PyQt5 import QtCore
 
 from ccpn.core.Peak import Peak
@@ -60,6 +61,7 @@ from ccpn.util.Path import joinPath
 # NOTE:ED - this needs moving
 from sandbox.Ed._MITableDelegates import _ExpandVerticalCellDelegate
 
+
 #=========================================================================================
 # _MultiSort
 #=========================================================================================
@@ -75,50 +77,55 @@ class _MultiSort(_TableModel):
         col = self._df.columns[column]
 
         if self._view.enableMultiColumnSort:
-            try:
-                vp = self._df[self._df.columns[self._view.PIDCOLUMN]].apply(lambda val: universalSortKey(val))
-                vVal = self._df[col]  # .apply(lambda val: universalSortKey(val)) <- fails new[DIFF] calculation
-                newDf = pd.DataFrame([vp, vVal]).T
-                newDf.reset_index(drop=True, inplace=True)
+            with warnings.catch_warnings():
+                warnings.filterwarnings(action='error', category=FutureWarning)
 
-                groupCol = newDf.columns[0]  # first column should be the grouped column from source dataFrame
-                MAX, MIN, DIFF = 'max', 'min', 'diff'
+                try:
+                    vp = self._df[self._df.columns[self._view.PIDCOLUMN]].apply(lambda val: universalSortKey(val))
+                    vVal = self._df[col]  # .apply(lambda val: universalSortKey(val)) <- fails new[DIFF] calculation
+                    newDf = pd.DataFrame([vp, vVal]).T
+                    newDf.reset_index(drop=True, inplace=True)
 
-                if self._view.applySortToGroups:
-                    # ascending/descending - group and subgroup
-                    if self._view.horizontalHeader().sortIndicatorOrder() == QtCore.Qt.AscendingOrder:
-                        newDf[MIN] = newDf.groupby(groupCol)[col].transform(MIN)
-                        newDf = newDf.sort_values([MIN, groupCol, col], ascending=True).drop(MIN, axis=1)
+                    groupCol = newDf.columns[0]  # first column should be the grouped column from source dataFrame
+                    MAX, MIN, DIFF = 'max', 'min', 'diff'
+
+                    if self._view.applySortToGroups:
+                        # ascending/descending - group and subgroup
+                        if self._view.horizontalHeader().sortIndicatorOrder() == QtCore.Qt.AscendingOrder:
+                            newDf[MIN] = newDf.groupby([groupCol])[[col]].transform(MIN)
+                            newDf = newDf.sort_values([MIN, groupCol, col], ascending=True).drop(MIN, axis=1)
+
+                        else:
+                            newDf[MAX] = newDf.groupby([groupCol])[[col]].transform(MAX)
+                            newDf = newDf.sort_values([MAX, groupCol, col], ascending=False).drop(MAX, axis=1)
+
+                    elif self._view.horizontalHeader().sortIndicatorOrder() == QtCore.Qt.AscendingOrder:
+                        # ascending - min->max of each group / subgroup always max->min
+                        newDf[MAX] = newDf.groupby([groupCol])[[col]].transform(MAX)
+                        newDf[DIFF] = newDf[MAX] - newDf[col]
+                        newDf = newDf.sort_values([MAX, groupCol, DIFF], ascending=True).drop([MAX, DIFF], axis=1)
 
                     else:
-                        newDf[MAX] = newDf.groupby(groupCol)[col].transform(MAX)
+                        print(f'sorting    {groupCol}    {col}    {MAX}')
+
+                        # descending - max->min of each group / subgroup always max->min
+                        newDf[MAX] = newDf.groupby([groupCol])[[col]].transform(MAX)
                         newDf = newDf.sort_values([MAX, groupCol, col], ascending=False).drop(MAX, axis=1)
 
-                elif self._view.horizontalHeader().sortIndicatorOrder() == QtCore.Qt.AscendingOrder:
-                    # ascending - min->max of each group / subgroup always max->min
-                    newDf[MAX] = newDf.groupby(groupCol)[col].transform(MAX)
-                    newDf[DIFF] = newDf[MAX] - newDf[col]
-                    newDf = newDf.sort_values([MAX, groupCol, DIFF], ascending=True).drop([MAX, DIFF], axis=1)
+                        # KEEP THIS BIT! this is the opposite of the min->max / max->min (3rd option above)
+                        # max->min of each group / min->max within group
+                        # newDf[MIN] = newDf.groupby([groupCol])[[col]].transform(MIN)
+                        # newDf[DIFF] = newDf[MIN] - newDf[col]
+                        # newDf = newDf.sort_values([MIN, groupCol, DIFF], ascending=False).drop([MIN, DIFF], axis=1)
 
-                else:
-                    # descending - max->min of each group / subgroup always max->min
-                    newDf[MAX] = newDf.groupby(groupCol)[col].transform(MAX)
-                    newDf = newDf.sort_values([MAX, groupCol, col], ascending=False).drop(MAX, axis=1)
+                    self._sortIndex = list(newDf.index)
 
-                    # KEEP THIS BIT! this is the opposite of the min->max / max->min (3rd option above)
-                    # max->min of each group / min->max within group
-                    # newDf[MIN] = newDf.groupby(groupCol)[col].transform(MIN)
-                    # newDf[DIFF] = newDf[MIN] - newDf[col]
-                    # newDf = newDf.sort_values([MIN, groupCol, DIFF], ascending=False).drop([MIN, DIFF], axis=1)
+                except Exception as es:
+                    # log warning and drop-out to default sorting
+                    getLogger().debug2(f'issue sorting table: probably unsortable column - {es}')
 
-                self._sortIndex = list(newDf.index)
-
-            except Exception as es:
-                # log warning and drop-out to default sorting
-                getLogger().debug(f'error sorting table: {es}')
-
-                newDf = self._universalSort(self._df[col])
-                self._sortIndex = list(newDf.sort_values(ascending=(order == QtCore.Qt.AscendingOrder)).index)
+                    newDf = self._universalSort(self._df[col])
+                    self._sortIndex = list(newDf.sort_values(ascending=(order == QtCore.Qt.AscendingOrder)).index)
 
         else:
             # single column sort on the specified column
@@ -143,11 +150,11 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
     className = 'PeakTable'
     attributeName = 'peakLists'
 
-    _OBJECT = str(('_object', '_object'))
-    OBJECTCOLUMN = str(('_object', '_object'))
+    _OBJECT = ('_object', '_object')
+    OBJECTCOLUMN = ('_object', '_object')
 
-    defaultHidden = [str((HeaderIndex, HeaderIndex)), OBJECTCOLUMN]
-    _internalColumns = ['isDeleted', str((HeaderIndex, HeaderIndex)), OBJECTCOLUMN]  # columns that are always hidden
+    defaultHidden = [(HeaderIndex, HeaderIndex), OBJECTCOLUMN]
+    _internalColumns = ['isDeleted', (HeaderIndex, HeaderIndex), OBJECTCOLUMN]  # columns that are always hidden
 
     #     defaultHidden = ['#',
     #                      'Restraint Pid_1', 'Restraint Pid_2', 'Restraint Pid_3', 'Restraint Pid_4', 'Restraint Pid_5',
@@ -221,8 +228,6 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
         for col in self.SPANCOLUMNS:
             # add delegates to show expand/collapse icon
             self.setItemDelegateForColumn(col, delegate)
-
-        self.horizontalHeader().sectionClicked.connect(self.onSectionClicked)
 
     #=========================================================================================
     # Properties
@@ -384,25 +389,25 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
         format of column = ( Header Name, value, tipText, editOption)
         editOption allows the user to modify the value content by doubleclick
         """
-        _restraintColumns = [(str((HeaderRestraint, HeaderRestraint)), lambda rt: ''),
-                             (str((HeaderAtoms, HeaderAtoms)), lambda rt: ''),
-                             (str((HeaderTarget, HeaderTarget)), lambda rt: 0.0),
-                             (str((HeaderLowerLimit, HeaderLowerLimit)), lambda rt: 0.0),
-                             (str((HeaderUpperLimit, HeaderUpperLimit)), lambda rt: 0.0),
-                             (str((HeaderMin, HeaderMin)), lambda rt: 0.0),
-                             (str((HeaderMax, HeaderMax)), lambda rt: 0.0),
-                             (str((HeaderMean, HeaderMean)), lambda rt: 0.0),
-                             (str((HeaderStd, HeaderStd)), lambda rt: 0.0),
-                             (str((HeaderStd, HeaderStd)), lambda rt: 0.0),
-                             (str((HeaderCount2, HeaderCount2)), lambda rt: 0.0),
+        _restraintColumns = [((HeaderRestraint, HeaderRestraint), lambda rt: ''),
+                             ((HeaderAtoms, HeaderAtoms), lambda rt: ''),
+                             ((HeaderTarget, HeaderTarget), lambda rt: 0.0),
+                             ((HeaderLowerLimit, HeaderLowerLimit), lambda rt: 0.0),
+                             ((HeaderUpperLimit, HeaderUpperLimit), lambda rt: 0.0),
+                             ((HeaderMin, HeaderMin), lambda rt: 0.0),
+                             ((HeaderMax, HeaderMax), lambda rt: 0.0),
+                             ((HeaderMean, HeaderMean), lambda rt: 0.0),
+                             ((HeaderStd, HeaderStd), lambda rt: 0.0),
+                             ((HeaderStd, HeaderStd), lambda rt: 0.0),
+                             ((HeaderCount2, HeaderCount2), lambda rt: 0.0),
                              ]
 
         # define self._columns here
         # create the column objects
         _cols = [
-            (str((HeaderIndex, HeaderIndex)), lambda row: _getValueByHeader(row, HeaderIndex), 'TipTex1', None, None),
-            (str((HeaderPeak, HeaderPeak)), lambda row: _getValueByHeader(row, HeaderPeak), 'TipTex2', None, None),
-            (str((HeaderObject, HeaderObject)), lambda row: _getValueByHeader(row, HeaderObject), 'TipTex3', None, None),
+            ((HeaderIndex, HeaderIndex), lambda row: _getValueByHeader(row, HeaderIndex), 'TipTex1', None, None),
+            ((HeaderPeak, HeaderPeak), lambda row: _getValueByHeader(row, HeaderPeak), 'TipTex2', None, None),
+            ((HeaderObject, HeaderObject), lambda row: _getValueByHeader(row, HeaderObject), 'TipTex3', None, None),
             ]
 
         resLists = self._restraintTables
@@ -410,7 +415,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
         # if len(resLists) > 0:
         #     # _buildColumns.append((HeaderExpand, lambda pk, rt: self._downIcon))
-        #     _cols.append((str((HeaderExpand, HeaderExpand)), lambda row: None, 'TipTex4', None, None))
+        #     _cols.append(((HeaderExpand, HeaderExpand)), lambda row: None, 'TipTex4', None, None))
 
         # get the dataSets that contain data with a matching 'result' name - should be violations
         violationResults = {resList: viols.data.copy() if viols is not None else None
@@ -470,9 +475,9 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
         pks = (self._table and self._table.peaks) or []  # ._sourcePeaks
         resLists = self._restraintTables
 
-        INDEXCOL = str(('index', 'index'))
-        PEAKSERIALCOL = str(('PeakSerial', 'PeakSerial'))
-        OBJCOL = str(('_object', '_object'))
+        INDEXCOL = ('index', 'index')
+        PEAKSERIALCOL = ('PeakSerial', 'PeakSerial')
+        OBJCOL = ('_object', '_object')
 
         # need to remove the 'str' and use pd.MultiIndex.from_tuples(list[tuple, ...])
 
@@ -524,8 +529,8 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
                     head += maxcc
 
-                COLS = [str((rl.id, f'{HeaderRestraint}')),
-                        str((rl.id, 'Atoms'))]
+                COLS = [(rl.id, f'{HeaderRestraint}'),
+                        (rl.id, 'Atoms')]
 
                 # put the serial and atoms into another table to be concatenated to the right, lCount = index in resLists
                 dfs[rl] = pd.concat([allPkSerials,
@@ -550,7 +555,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                     newCols = [_OLDHEADERS.get(cc, None) or cc for cc in resViol.columns]
                     # resViol.columns = [vv + f'_{ind + 1}' for vv in resViol.columns]
                     # resViol.columns = [vv + f'_{ind + 1}' for vv in newCols]
-                    resViol.columns = [str((rl.id, vv)) for vv in newCols]
+                    resViol.columns = [(rl.id, vv) for vv in newCols]
 
                 # merge all the tables for each restraintTable
                 _out = [index, allPks]
@@ -558,9 +563,9 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                 for ii, resList in enumerate(resLists):
                     if resList in violationResults:
 
-                        HEADERSCOL = str((resList.id, f'{HeaderRestraint}'))
-                        ATOMSCOL = str((resList.id, 'Atoms'))
-                        HEADERMEANCOL = str((resList.id, f'{HeaderMean}'))
+                        HEADERSCOL = (resList.id, f'{HeaderRestraint}')
+                        ATOMSCOL = (resList.id, 'Atoms')
+                        HEADERMEANCOL = (resList.id, f'{HeaderMean}')
 
                         _left = dfs[resList]
 
@@ -592,10 +597,10 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                                        HeaderTarget, HeaderLowerLimit, HeaderUpperLimit,
                                        HeaderMin, HeaderMax, HeaderMean, HeaderStd,
                                        HeaderCount1, HeaderCount2):
-                            if str((resList.id, _colID)) in list(_right.columns):
+                            if (resList.id, _colID) in list(_right.columns):
                                 # check whether all the columns exist - discard otherwise
                                 # columns should have been renamed and post-fixed with _<num>. above
-                                _cols.append((str((resList.id, _colID)), lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'), f'{_colID}_Tip{ii + 1}', None, None))
+                                _cols.append(((resList.id, _colID), lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'), f'{_colID}_Tip{ii + 1}', None, None))
 
                     else:
                         # lose the PeakSerial column for each
@@ -621,7 +626,6 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                 _out = [index, allPks]
                 # no results - just show the table
                 for ii, resList in enumerate(resLists):
-
                     # lose the PeakSerial column for each
                     _new = dfs[resList].drop(columns=[PEAKSERIALCOL]).fillna(0.0)
                     _out.append(_new)
@@ -639,6 +643,8 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
             allPks = pd.DataFrame([(pk.serial, pk) for pk in pks], columns=[PEAKSERIALCOL, OBJCOL])
 
             _table = pd.concat([index, allPks], axis=1)
+
+        _table.columns = pd.MultiIndex.from_tuples(_table.columns)
 
         # # set the table _columns
         # self._columns = ColumnClass(_cols)
@@ -754,14 +760,21 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
     # Widgets callbacks
     #=========================================================================================
 
+    ...
+
+    #=========================================================================================
+    # Signal responses
+    #=========================================================================================
+
+    def _postChangeSelectionOrderCallback(self, *args):
+        super(_NewRestraintWidget, self)._postChangeSelectionOrderCallback(*args)
+
+        print('_postChangeSelectionOrderCallback')
+        self.updateTableExpanders()
+
     #=========================================================================================
     # object properties
     #=========================================================================================
-
-    def onSectionClicked(self, *args):
-        """Respond to reordering the table
-        """
-        self.updateTableExpanders()
 
     def updateTableExpanders(self, expandState=None):
         """Update the state of the expander buttons

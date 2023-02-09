@@ -103,7 +103,6 @@ class TableABC(QtWidgets.QTableView):
     defaultTableDelegate = _TableDelegateABC
 
     _droppedNotifier = None
-    _gridOffset = 0
 
     def __init__(self, parent, *, df=None,
                  multiSelect=True, selectRows=True,
@@ -156,7 +155,6 @@ class TableABC(QtWidgets.QTableView):
         self._setMenuProperties(enableCopyCell, enableDelete, enableExport, enableSearch)
 
         self.setShowGrid(showGrid)
-        self._gridOffset = int(showGrid) * 5
 
         # set stylesheet
         colours = getColours()

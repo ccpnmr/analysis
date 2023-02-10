@@ -129,13 +129,6 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         simspec = gissmo_simulator.pure_spectrum(metabolite_id='SU:96', width=0.002, frequency=700, plotting='spin_system')[0]
         self.simspec = simspec
 
-        '''widget = Label(self.scrollAreaLayout, text='Multiplet Shift', grid=grid)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-
-        self.sliderwidget = Slider(self.scrollAreaLayout, startVal=-2000, endVal=2000, value=0, step=1)
-        _setWidgetProperties(self.sliderwidget, _setWidth(columnWidths, (0, 2)))
-        self.sliderwidget.valueChanged.connect(self.valueChange)'''
-
         # pull down list for selecting the spectrum group to overlay on
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text='Spectrum Group', grid=grid)
@@ -177,20 +170,6 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['Spectrum']['metabolite'] = widget
         self.settings['Spectrum']['metabolite'] = self._getValue(widget)
 
-        '''grid = _addRow(grid)
-        widget = Label(self.scrollAreaLayout, text='Peak list', grid=grid)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-
-        grid = _addColumn(grid)
-        widget = PulldownList(self.scrollAreaLayout, grid=grid, tipText=help['Peak list'], gridSpan=(1, 2))
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-        self.guiDict['Spectrum']['Peak list'] = widget
-        self.settings['Spectrum']['Peak list'] = self._getValue(widget)
-
-        # Invoke the callback function to catch the selection in case only one spectrum is available
-        if self.spectra:
-            self._selectPeaklist(self.spectra[0])'''
-
         # Add a widget for the simulated spectrum scale
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Scale', grid=grid)
@@ -222,21 +201,6 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
         for index in range(len(self.simspec.spinSystemMatrix)):
             self.addDoubleSpinbox(index)
-
-        '''# Number of reference peaks to use initially for estimating the noise factor threshold
-        grid = _addRow(grid)
-        widget = Label(self.scrollAreaLayout, text='Multiplet 1 Chemical Shift', grid=grid, tipText=help['Reference peaks'])
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-
-        grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=3.4, decimals=4, step=0.0001, grid=grid, gridSpan=(1, 2),
-                               tipText=help['Reference peaks'])
-        widget.setRange(0, 10)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
-        widget.setButtonSymbols(2)
-
-        self.guiDict['Spectrum']['Reference peaks'] = widget
-        self.settings['Spectrum']['Reference peaks'] = self._getValue(widget)'''
 
         '''# Action buttons: Filter creates a new filtered peak list
         grid = _addVerticalSpacer(self.scrollAreaLayout, grid)

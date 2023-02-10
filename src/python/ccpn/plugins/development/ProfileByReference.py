@@ -103,20 +103,31 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         #     return
 
         # setup database metabolite tables
-        hmdb_validated = pandas.read_csv('/home/mh491/Database/Validation_scores/hmdb_validated.csv', index_col=0)
-        hmdb_validation_table = self.project.newDataTable(name='hmdb_validation_table', data=hmdb_validated)
+        from Classes.Simulator_rework import Simulator
+        hmdb_simulator = Simulator(self.project, '/home/mh491/Database/Remediated_Databases/ccpn_metabolites_hmdb.db')
+        bmrb_simulator = Simulator(self.project, '/home/mh491/Database/Remediated_Databases/ccpn_metabolites_bmrb.db')
+        gissmo_simulator = Simulator(self.project, '/home/mh491/Database/Remediated_Databases/ccpn_metabolites_gissmo.db')
 
-        bmrb_validated = pandas.read_csv('/home/mh491/Database/Validation_scores/bmrb_validated.csv', index_col=0)
-        bmrb_validation_table = self.project.newDataTable(name='bmrb_validation_table', data=bmrb_validated)
+        hmdb_metabolites = hmdb_simulator.caller.execute_query('select metabolite_id, name, hmdb_accession, '
+                                                               'chemical_formula, average_molecular_weight, smiles, '
+                                                               'inchi from metabolites')
+        bmrb_metabolites = bmrb_simulator.caller.execute_query('select distinct metabolite_id, name, accession, '
+                                                               'chemical_formula, average_molecular_weight, smiles, '
+                                                               'inchi from metabolites natural join samples')
+        gissmo_metabolites = gissmo_simulator.caller.execute_query('select metabolite_id, name, inchi from metabolites')
 
-        gissmo_validated = pandas.read_csv('/home/mh491/Database/Validation_scores/gissmo_validated.csv', index_col=0)
-        gissmo_validation_table = self.project.newDataTable(name='gissmo_validation_table', data=gissmo_validated)
+        hmdb_metabolites_table = self.project.newDataTable(name='hmdb_metabolites_table', data=hmdb_metabolites)
+        bmrb_metabolites_table = self.project.newDataTable(name='bmrb_metabolites_table', data=bmrb_metabolites)
+        gissmo_metabolites_table = self.project.newDataTable(name='gissmo_metabolites_table', data=gissmo_metabolites)
+        self.settings['Spectrum']['databaseTables'] = [hmdb_metabolites_table, bmrb_metabolites_table, gissmo_metabolites_table]
 
-        # Set peak list, use pulldown, FilterNoisePeaks only allows one list at a time
+        # create the simulated spectrum group
+        if 'Reference_Spectra' not in self.project.spectrumGroups:
+            self.settings['Spectrum']['referenceSpectrumGroup'] = self.project.newSpectrumGroup(name='Reference_Spectra')
 
         grid = (0, 0)
-
-        self.simspec = self.project.simspec
+        simspec = gissmo_simulator.pure_spectrum(metabolite_id='SU:96', width=0.002, frequency=700, plotting='spin_system')[0]
+        self.simspec = simspec
 
         '''widget = Label(self.scrollAreaLayout, text='Multiplet Shift', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
@@ -125,19 +136,46 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(self.sliderwidget, _setWidth(columnWidths, (0, 2)))
         self.sliderwidget.valueChanged.connect(self.valueChange)'''
 
+        # pull down list for selecting the spectrum group to overlay on
         grid = _addRow(grid)
-        widget = Label(self.scrollAreaLayout, text='Spectrum', grid=grid)
+        widget = Label(self.scrollAreaLayout, text='Spectrum Group', grid=grid)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+
+        grid = _addColumn(grid)
+        widget = PulldownList(self.scrollAreaLayout, grid=grid, gridSpan=(1, 2), tipText=help['Spectrum'])
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+
+        self.spectrumGroups = [spectrumGroup.id for spectrumGroup in sorted(self.project.spectrumGroups)]
+        widget.setData(self.spectrumGroups)
+        self.guiDict['Spectrum']['SpectrumGroupId'] = widget
+        self.settings['Spectrum']['SpectrumGroupId'] = self._getValue(widget)
+
+        # pull down list for selecting the database to reference from
+        grid = _addRow(grid)
+        widget = Label(self.scrollAreaLayout, text='Database', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
         grid = _addColumn(grid)
         widget = PulldownList(self.scrollAreaLayout, grid=grid, gridSpan=(1, 2),
-                              callback=self._selectPeaklist, tipText=help['Spectrum'])
+                              callback=self._selectMetaboliteList, tipText=help['Spectrum'])
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
-        self.spectra = [spectrum.id for spectrum in sorted(self.project.spectra)]
-        widget.setData(self.spectra)
-        self.guiDict['Spectrum']['SpectrumId'] = widget
-        self.settings['Spectrum']['SpectrumId'] = self._getValue(widget)
+        databaseTables = [str(dataTable.id) for dataTable in self.settings['Spectrum']['databaseTables']]
+        widget.setData(databaseTables)
+        self.guiDict['Spectrum']['dataTableID'] = widget
+        self.settings['Spectrum']['dataTableID'] = self._getValue(widget)
+
+        # pull down list for selecting the current metabolite from the database
+        grid = _addRow(grid)
+        widget = Label(self.scrollAreaLayout, text='Metabolite', grid=grid)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+
+        grid = _addColumn(grid)
+        widget = PulldownList(self.scrollAreaLayout, grid=grid, gridSpan=(1, 2), tipText=help['Spectrum'])
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+
+        self.guiDict['Spectrum']['metabolite'] = widget
+        self.settings['Spectrum']['metabolite'] = self._getValue(widget)
 
         '''grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text='Peak list', grid=grid)
@@ -182,7 +220,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict[f'Spectrum']['Frequency'] = widget
         self.settings['Spectrum']['Frequency'] = self._getValue(widget)
 
-        for index in range(len(self.project.simspec.spinSystemMatrix)):
+        for index in range(len(self.simspec.spinSystemMatrix)):
             self.addDoubleSpinbox(index)
 
         '''# Number of reference peaks to use initially for estimating the noise factor threshold
@@ -217,8 +255,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
     def addDoubleSpinbox(self, index):
         def valueChange():
             shift = widget.value()
-            self.project.simspec.moveSpinSystemMultiplet(index, shift)
-        grid = (index+3, index+3)
+            self.simspec.moveSpinSystemMultiplet(index, shift)
+        grid = (index+4, index+4)
         from .pluginAddons import _addRow, _addColumn, _addVerticalSpacer, _setWidth, _setWidgetProperties
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Multiplet {index+1} Chemical Shift', grid=grid)
@@ -237,20 +275,21 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
     def scaleChange(self):
         scale = self.guiDict['Spectrum']['Scale'].value()
-        self.project.simspec.scaleSpectrum(scale)
+        self.simspec.scaleSpectrum(scale)
 
     def frequencyChange(self):
         frequency = self.guiDict['Spectrum']['Frequency'].value()
-        self.project.simspec.setFrequency(frequency)
+        self.simspec.setFrequency(frequency)
 
-    def _spectrumId2Spectrum(self, spectrumId):
-        return self.project.getByPid('SP:' + spectrumId)
+    def _databaseTableID2DatabaseTable(self, databaseTableID):
+        return self.project.getByPid('DT:' + databaseTableID)
 
-    def _selectPeaklist(self, spectrumId):
-        spectrum = self._spectrumId2Spectrum(spectrumId)
-        widget = self.guiDict['Spectrum']['Peak list']
-        widget.setData([str(PL.serial) for PL in spectrum.peakLists])
-        self.settings['Spectrum']['Peak list'] = self._getValue(widget)
+    def _selectMetaboliteList(self, databaseTableID):
+        databaseTable = self._databaseTableID2DatabaseTable(databaseTableID)
+        widget = self.guiDict['Spectrum']['metabolite']
+        metaboliteNames = databaseTable.data.sort_values('name').name.tolist()
+        widget.setData(metaboliteNames)
+        self.settings['Spectrum']['metabolite'] = self._getValue(widget)
 
     def _inputDataCheck(self):
         # Checks available input data at plugin start

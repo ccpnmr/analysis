@@ -52,6 +52,7 @@ from functools import partial
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.util.decorators import logCommand
 from Classes.Simulator_rework import Simulator
+from .pluginAddons import _addRow, _addColumn, _addVerticalSpacer, _setWidth, _setWidgetProperties
 
 
 ############
@@ -125,8 +126,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             self.settings['Spectrum']['referenceSpectrumGroup'] = self.project.newSpectrumGroup(name='Reference_Spectra')
 
         grid = (0, 0)
-        simspec = self.settings['Simulators']['GISSMO'].pure_spectrum(metabolite_id='SU:96', width=0.002, frequency=700, plotting='spin_system')[0]
-        self.simspec = simspec
+        self.guiDict['Spectrum']['SimulatedSpectrumAttributes'] = []
 
         # pull down list for selecting the spectrum group to overlay on
         grid = _addRow(grid)
@@ -170,38 +170,6 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['Spectrum']['metabolite'] = widget
         self.settings['Spectrum']['metabolite'] = self._getValue(widget)
 
-        # Add a widget for the simulated spectrum scale
-        grid = _addRow(grid)
-        widget = Label(self.scrollAreaLayout, text=f'Scale', grid=grid)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-
-        grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=1, decimals=1, step=1, grid=grid, gridSpan=(1, 2))
-        widget.setRange(0, 10000000)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
-        widget.setButtonSymbols(2)
-        widget.valueChanged.connect(self.scaleChange)
-        self.guiDict[f'Spectrum']['Scale'] = widget
-        self.settings['Spectrum']['Scale'] = self._getValue(widget)
-
-        # Add a widget for the simulated spectrum frequency
-        grid = _addRow(grid)
-        widget = Label(self.scrollAreaLayout, text=f'Frequency', grid=grid)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-
-        grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=self.simspec.frequency, decimals=1, step=10, grid=grid,
-                               gridSpan=(1, 2))
-        widget.setRange(100, 1200)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
-        widget.setButtonSymbols(2)
-        widget.valueChanged.connect(self.frequencyChange)
-        self.guiDict[f'Spectrum']['Frequency'] = widget
-        self.settings['Spectrum']['Frequency'] = self._getValue(widget)
-
-        for index in range(len(self.simspec.spinSystemMatrix)):
-            self.addDoubleSpinbox(index)
-
         '''# Action buttons: Filter creates a new filtered peak list
         grid = _addVerticalSpacer(self.scrollAreaLayout, grid)
         grid = _addColumn(grid)
@@ -221,10 +189,10 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             shift = widget.value()
             self.simspec.moveSpinSystemMultiplet(index, shift)
         grid = (index+5, index+5)
-        from .pluginAddons import _addRow, _addColumn, _addVerticalSpacer, _setWidth, _setWidgetProperties
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Multiplet {index+1} Chemical Shift', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+        self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
 
         grid = _addColumn(grid)
         widget = DoubleSpinbox(self.scrollAreaLayout, value=self.simspec.spinSystemMatrix[index][index], decimals=4,
@@ -234,7 +202,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(valueChange)
 
-        self.guiDict[f'Spectrum'][f'Multiplet {index+1} Chemical Shift'] = widget
+        self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
         self.settings['Spectrum'][f'Multiplet {index+1} Chemical Shift'] = self._getValue(widget)
 
     def scaleChange(self):
@@ -260,8 +228,48 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         currentDatabase = self.settings['Spectrum']['currentDatabase']
         metabolitesData = self.settings['Databases'][currentDatabase].data
         metaboliteID = metabolitesData.loc[metabolitesData['name'] == metaboliteName].metabolite_id.iloc[0]
-        print(metaboliteID)
         self.simspec = self.settings['Simulators'][currentDatabase].pure_spectrum(metabolite_id=metaboliteID, width=0.002, frequency=700, plotting='spin_system')[0]
+        if self.guiDict['Spectrum']['SimulatedSpectrumAttributes']:
+            for widget in self.guiDict['Spectrum']['SimulatedSpectrumAttributes']:
+                widget.deleteLater()
+            self.guiDict['Spectrum']['SimulatedSpectrumAttributes'] = []
+
+        grid = (3, 1)
+        # Add a widget for the simulated spectrum scale
+        grid = _addRow(grid)
+        widget = Label(self.scrollAreaLayout, text=f'Scale', grid=grid)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+        self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
+
+        grid = _addColumn(grid)
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=1, decimals=1, step=1, grid=grid, gridSpan=(1, 2))
+        widget.setRange(0, 10000000)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
+        widget.setButtonSymbols(2)
+        widget.valueChanged.connect(self.scaleChange)
+        self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
+        self.settings['Spectrum']['Scale'] = self._getValue(widget)
+
+        # Add a widget for the simulated spectrum frequency
+        grid = _addRow(grid)
+        widget = Label(self.scrollAreaLayout, text=f'Frequency', grid=grid)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+        self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
+
+        grid = _addColumn(grid)
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=self.simspec.frequency, decimals=1, step=10,
+                               grid=grid,
+                               gridSpan=(1, 2))
+        widget.setRange(100, 1200)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
+        widget.setButtonSymbols(2)
+        widget.valueChanged.connect(self.frequencyChange)
+        self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
+        self.settings['Spectrum']['Frequency'] = self._getValue(widget)
+
+        for index in range(len(self.simspec.spinSystemMatrix)):
+            self.addDoubleSpinbox(index)
+        self.project.widgetList = self.guiDict['Spectrum']['SimulatedSpectrumAttributes']
 
     def _inputDataCheck(self):
         # Checks available input data at plugin start

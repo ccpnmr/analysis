@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-09 15:08:52 +0000 (Thu, February 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-14 14:59:57 +0000 (Tue, February 14, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -32,11 +32,11 @@ __date__ = "$Date: 2023-02-03 10:04:03 +0000 (Fri, February 03, 2023) $"
 import numpy as np
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
+import ccpn.framework.lib.experimentAnalysis.spectralDensityLib as sdl
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
-import time
-import datetime
 from matplotlib.backends.backend_pdf import PdfPages
 from ccpn.util.Logging import getLogger
 from matplotlib.ticker import MultipleLocator
@@ -48,7 +48,7 @@ from ccpn.util.floatUtils import fExp, fMan
 ###################
 
 
-fileName = 'RelaxationAnalysisResults2'
+fileName = 'RelaxationAnalysisRatesResults'
 filePath = f'/Users/luca/Documents/V3-testings/{fileName}'
 
 RSDMResultsDataTable = get('DT:RSDM_results')
@@ -60,7 +60,7 @@ if RSDMResultsDataTable is None:
 ss_sequence   =  'BBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
 sequence  = 'KLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
 
-
+spectrometerFrequency=600.130
 data =  RSDMResultsDataTable.data
 x = data[sv.NMRRESIDUECODE]
 x = x.astype(int)
@@ -94,9 +94,15 @@ N_LarmorFrequency_600_1spin = 43.367
 N_LarmorFrequency_600_halfSpin = 60.834
 
 # fit aJN + b
-alphaN, betaN, YcoefJ0JWN = lf._polifitJs(J0, JWN)
+alphaN, betaN, YcoefJ0JWN = sdl._polifitJs(J0, JWN)
 # fit aJH + b
-alphaH, betaH, YcoefJ0JWH = lf._polifitJs(J0, JWH)
+alphaH, betaH, YcoefJ0JWH = sdl._polifitJs(J0, JWH)
+
+w = sdl.calculateOmegaN(spectrometerFrequency)
+gct = sdl._calculateMolecularTumblingCorrelationTime(w, alphaN, betaN)
+gct = gct*1e9
+bestGct = gct[1]
+print(f'Global Molecular Tumbling CorrelationTime  options: {gct} ns')
 
 ## lax labels
 L_JWN = '$J(\omega_{N})$'
@@ -104,7 +110,6 @@ L_JWH = '$J(\omega_{H})$'
 L_SR = '(sec/rad)'
 
 blocks = createBlocksFromSequence(ss_sequence=ss_sequence)
-
 
 # graphics
 fontTitleSize = 8
@@ -116,12 +121,9 @@ labelMinorSize=5
 titleColor = 'blue'
 hspace= 0.5
 
-
-
 def _prettyFormat4Legend(value, rounding=3):
     """ Format mantissa to (rounding) round  and exponent for matplotlib """
     return '$%s^{%s}$' %(round(fMan(value),rounding),  fExp(value))
-
 
 def _closeFig(fig, pdf, plt):
     pdf.savefig()
@@ -295,9 +297,10 @@ def _plotScatters_page4(pdf):
         ax.yaxis.get_offset_text().set_size(5)
         ax.xaxis.get_offset_text().set_size(5)
 
-
     plt.tight_layout()
     plt.subplots_adjust(hspace=hspace)
+    plt.figtext(0.5, 0.01, f'Global Molecular Tumbling CorrelationTime Tm: {round(bestGct, 3)} ns',
+                ha="center", fontsize=6,)
     _closeFig(fig, pdf, plt)
 
 

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-02 17:01:13 +0000 (Thu, February 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-14 14:59:57 +0000 (Tue, February 14, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -34,18 +34,34 @@ from math import pi
 ############################################################
 ############### Spectral density mapping functions ################
 ############################################################
+MS_UNIT_MULTIPLIERS = {'s': 1000.0, 'ms': 1.0, 'us': 1e-3, 'ns': 1e-6, }
 
 PlanckConstant                = 6.62606876 * 1e-34
 DiracConstant                  = PlanckConstant / (2.0 * pi)
 MagneticConstant            = 4.0 * pi * 1e-7                      # permeability of vacuum (free space)
 BoltzmannConstant          = 1.380650424 * 1e-23        #  in SI units of J.K^-1
 
-# CSA and bond lengths.
-N15_CSA = -172 * 1e-6
-NH_BOND_LENGTH = 1.02 * 1e-10
 
-# default Constants
-C1 = 1.25 * 1e9         # = c^2 in (rad/s)2  --- at 14.1T  see Eq. 13-16 Backbone dynamics of Barstar: A 15N NMR relaxation study. Udgaonkar et al 2000. Proteins: 41:460-474
+REDUCED_PLANK = 1.05457162853e-34
+GAMMA_H = 42.576 * 1e6 * 2 * pi  # Hz/T
+GAMMA_N = -4.3156 * 1e6 * 2 * pi  # Hz/T
+GAMMA_C =  6.728 * 1e7  # Hz/T
+REDUCED_PERM_VACUUM = 1e-7
+
+# Chemical shift anisotropy (CSA) and bond lengths.
+N15_CSA = -172 * 1e-6 # ppm
+NH_BOND_LENGTH = 1.02 * 1e-10
+InternalCorrelationTime = 50 # double check
+
+"""
+The default c and d Constants at 14.1T   in  (rad/s)2
+C1 = 1.25 * 1e9  and D1 = 1.35 * 1e9 
+see Eq. 13-16 Backbone dynamics of Barstar: A 15N NMR relaxation study. Udgaonkar et al 2000. Proteins: 41:460-474
+and spectralDensityLib.py for the calculations
+"""
+
+
+C1 = 1.25 * 1e9         # = c^2 in (rad/s)2  --- at 14.1T
 D1 = 1.35 * 1e9         # = (d^2)/4 in (rad/s)2 --- at 14.1T
 
 HgyromagneticRatio = 26.7522212 * 1e7 #rad s^-1*T^-1
@@ -53,27 +69,3 @@ N15gyromagneticRatio = -2.7126 * 1e7
 C13gyromagneticRatio = 6.728 * 1e7
 
 
-
-def calculateDipolarConstant(gx, gh, r):
-    """
-    :param gx: gyromagnetic ratio for the heteronucleus. e.g.: N
-    :param gh: gyromagnetic ratio for the proton
-    :param r: The distance between the two nuclei
-    :return:  float: the dipolar constant.
-    """
-    if r == 0:
-        return np.nan
-    return - MagneticConstant / (4.0*pi) * gx * gh * DiracConstant / r**3
-
-
-
-def pcs_constant(T, Bo, r):
-    """
-    :param T: temperature in kelvin
-    :param Bo: The magnetic field strength
-    :param r: distance between the two nuclei
-    :return: pseudocontact shift constant
-    """
-    if r == 0:
-        return np.nan
-    return MagneticConstant / (4.0*pi) * 15.0 * BoltzmannConstant * T / Bo**2 / r**3

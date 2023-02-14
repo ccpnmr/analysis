@@ -1,6 +1,6 @@
 """
 This module defines the various fitting functions for Series Analysis.
-When employed, they are called recursively by the Minimiser (see Minimiser Object)
+Some functions are vectorised and called recursively by the Minimiser (see Minimiser Object)
 
 """
 #=========================================================================================
@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-09 11:13:38 +0000 (Thu, February 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-14 14:59:57 +0000 (Tue, February 14, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,12 @@ from lmfit import lineshapes as ls
 import numpy as np
 from ccpn.util.Logging import getLogger
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+import ccpn.framework.lib.experimentAnalysis.experimentConstants as constants
 from math import pi
+from random import random, randint
+from math import sqrt, exp
+import pandas as pd
+
 ## Common built-in functions.
 gaussian_func    = ls.gaussian
 lorentzian_func  = ls.lorentzian
@@ -302,6 +307,17 @@ def peakErrorBySNRs(snrs, factor=1, power=-2, method='sum'):
     error = abs(factor) * np.sqrt(inner)
     return error
 
+def calculateUncertaintiesError(v1,v2, ev1, ev2):
+    """
+    Calculate the Uncertainties errors for a ratio of two values and their original errors
+    :return:  float. the ratio error
+    """
+    try:
+        return (ev1 / v1 + ev2 / v2) * v2 / v1
+    except Exception:
+        return
+
+
 def _scaleMinMaxData(data, minMaxRange=(1.e-5, 1)):
     """
     :param data: 1d Array
@@ -343,78 +359,4 @@ def _formatValue(value, maxInt=3, floatPrecision=3, expDigits=1):
 ############################################################
 ############### Spectral density mapping functions ################
 ############################################################
-
-
-
-def calculateSigmaNOE(noe, r1, gx, gh):
-    """Calculate the sigma NOE value.
-    Eq. 16 Backbone dynamics of Barstar: A 15N NMR relaxation study.
-    Udgaonkar et al 2000. Proteins: 41:460-474"""
-
-    return (noe - 1.0) * r1 * (gx / gh)
-
-def calculateJ0(noe, r1, r2, d, c, gx, gh):
-    """Calculate J(0).
-     Eq. 13 Backbone dynamics of Barstar: A 15N NMR relaxation study.
-    Udgaonkar et al 2000. Proteins: 41:460-474
-    """
-    sigmaNOE = calculateSigmaNOE(noe, r1, gx, gh)
-    j0 = 3/(2*(3*d + c)) * (-(1/2)*r1 + r2 - (3/5)*sigmaNOE)
-    return j0
-
-def calculateJWx(noe, r1, r2, d, c, gx, gh):
-    """Calculate J(wx).
-     Eq. 14 Backbone dynamics of Barstar: A 15N NMR relaxation study.
-    Udgaonkar et al 2000. Proteins: 41:460-474
-    """
-    sigmaNOE = calculateSigmaNOE(noe, r1, gx, gh)
-    jwx = 1.0 / (3.0 * d + c) * (r1 - (7/5) * sigmaNOE)
-    return jwx
-
-def calculateJWH(noe, r1, r2, d, c, gx, gh):
-    """Calculate J(wH).
-     Eq. 15 Backbone dynamics of Barstar: A 15N NMR relaxation study.
-    Udgaonkar et al 2000. Proteins: 41:460-474
-    """
-    sigmaNOE = calculateSigmaNOE(noe, r1, gx, gh)
-    jwh = sigmaNOE / (5.0*d)
-    return jwh
-
-def calculateUncertaintiesError(v1,v2, ev1, ev2):
-    """
-    Calculate the Uncertainties errors for a ratio of two values and their original errors
-    :return:  float. the ratio error
-    """
-    try:
-        return (ev1 / v1 + ev2 / v2) * v2 / v1
-    except Exception:
-        return
-
-
-def _polifitJs(j0, jw, order=1):
-    """ Fit J0 and Jw(H or N) to a first order polynomial, Return the slope  and intercept  from the fit, and the new fitted Y  """
-
-    coef = slope, intercept = np.polyfit(j0, jw, order)
-    poly1d_fn_coefJ0JWH = np.poly1d(coef)
-    fittedY = poly1d_fn_coefJ0JWH(j0)
-    return slope, intercept, fittedY
-
-
-def _calculateMolecularTumblingCorrelationTime(omega, alpha, beta):
-    """
-    solve the Polynomial Structure -> ax^3 + bx^2 + cx + d = 0
-    from eq. 18  Backbone dynamics of Barstar: A 15N NMR relaxation study.
-    Udgaonkar et al 2000. Proteins: 41:460-474
-    :param omega:
-    :param alpha: the slope for the fitting J0 vs JwN
-    :param beta: the intercept for the fitting J0 vs JwN
-    :return:
-    """
-    a = 2 * alpha * (omega**2)
-    b = 5 * beta * (omega**2)
-    c = 2 * (alpha-1)
-    d = 5 * beta
-
-    values = np.roots([a,b,c,d])
-
-    return values
+# see experimentAnalysis/spectralDensityLib.py

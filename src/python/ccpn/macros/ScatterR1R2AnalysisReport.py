@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-14 14:59:57 +0000 (Tue, February 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-14 16:55:18 +0000 (Tue, February 14, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -106,8 +106,6 @@ CLUSTER_SYMBOLS = ('circle', 'square', 'triangle')
 RSDMResultsDataTable = get('DT:RSDM_results')
 
 
-# errorMess = 'Cannot display results. Ensure you have the RSDMResults dataTable in the project or you inserted the correct pid in the macro'
-# raise RuntimeError(errorMess)
 data =  RSDMResultsDataTable.data
 x = data[sv.NMRRESIDUECODE]
 x = x.astype(int)
@@ -117,121 +115,73 @@ R1 = data[sv.R1].values
 R2 = data[sv.R2].values
 NOE = data[sv.HETNOE_VALUE]
 
-R1_ERR = data[sv.R1_ERR]
-R2_ERR  = data[sv.R2_ERR]
-NOE_ERR = data[sv.HETNOE_VALUE_ERR]
-
-# recalculate the ratio here
-R2R1 = R2/R1
-R2R1_ERR = lf.calculateUncertaintiesError(R1, R2, R1_ERR, R2_ERR)
-
-blocks = createBlocksFromSequence(ss_sequence=ss_sequence)
 
 def findNearestIndex(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 
-def _findYforXcountour(x, xdata, ydata):
-    ip = 1
-    for i in range(len(xdata)):
-        if x < xdata[i]:
-            ip = i
-            break
-
-    y = ydata[ip-1] + (ydata[ip]-ydata[ip-1])*(x-xdata[ip-1])/(xdata[ip]-xdata[ip-1])
-    return y
 
 def labelLine(line,x,label=None,align=True,**kwargs):
-
     ax = line.axes
     xdata = line.get_xdata()
     ydata = line.get_ydata()
-
     if (x < xdata[0]) or (x > xdata[-1]):
         print('x label location is outside data range!')
         return
-
     #Find corresponding y co-ordinate and angle of the line
     ip = 1
     for i in range(len(xdata)):
         if x < xdata[i]:
             ip = i
             break
-
     y = ydata[ip-1] + (ydata[ip]-ydata[ip-1])*(x-xdata[ip-1])/(xdata[ip]-xdata[ip-1])
-    print(label,i, ip,  x, y,)
-
     if not label:
         label = line.get_label()
-
     if align:
         #Compute the slope
         dx = xdata[ip] - xdata[ip-1]
         dy = ydata[ip] - ydata[ip-1]
         ang = degrees(atan2(dy,dx))
-
         #Transform to screen co-ordinates
         pt = np.array([x,y]).reshape((1,2))
         trans_angle = ax.transData.transform_angles(np.array((ang,)),pt)[0]
-
     else:
         trans_angle = 0
-
-    #Set a bunch of keyword arguments
     if 'color' not in kwargs:
         kwargs['color'] = line.get_color()
-
     if ('horizontalalignment' not in kwargs) and ('ha' not in kwargs):
         kwargs['ha'] = 'center'
-
     if ('verticalalignment' not in kwargs) and ('va' not in kwargs):
         kwargs['va'] = 'center'
-
     if 'backgroundcolor' not in kwargs:
         kwargs['backgroundcolor'] = ax.get_facecolor()
-
     if 'clip_on' not in kwargs:
         kwargs['clip_on'] = True
-
     if 'zorder' not in kwargs:
         kwargs['zorder'] = 2.5
-
     color = kwargs.get('color', )
     fontsize = kwargs.get('fontsize', 5)
     ax.text(x, y, label, rotation=0, color=color, fontsize=fontsize, )
     # ax.text(x,y,label,rotation=trans_angle,**kwargs)
 
 def labelLines(lines, align=True,xvals=None,**kwargs):
-    print(kwargs, 'kwargs')
     ax = lines[0].axes
     labLines = []
     labels = []
-
-    #Take only the lines which have labels other than the default ones
     for line in lines:
         label = line.get_label()
         if "_line" not in label:
             labLines.append(line)
             label = label.lstrip('_')
             labels.append(label)
-
     if xvals is None:
         xmin,xmax = ax.get_xlim()
         xvals = np.linspace(xmin,xmax,len(labLines)+2)[1:-1]
-
     for line,x,label in zip(labLines,xvals,labels):
         labelLine(line,x,label,align,**kwargs)
 
-def _prettyFormat4Legend(value, rounding=3):
-    """ Format mantissa to (rounding) round  and exponent for matplotlib """
-    return '$%s^{%s}$' %(round(fMan(value),rounding),  fExp(value))
 
-def _closeFig(fig, pdf, plt):
-    pdf.savefig()
-    plt.close()
-    plt.close(fig)
-
-def _plotClusters(pdf, xMaxLim=1000):
+def _plotClusters(pdf, xMaxLim=800):
     fig = plt.figure(dpi=300)
     fig.suptitle(' R2 vs R1 Isotropic Analysis Scatter', fontsize=10)
 
@@ -254,21 +204,19 @@ def _plotClusters(pdf, xMaxLim=1000):
     ax.xaxis.get_offset_text().set_size(5)
     plt.tight_layout()
 
-    rctLines, s2Lines = sdl.calculateSpectralDensityContourLines()
+    rctLines, s2Lines = sdl.calculateSpectralDensityContourLines(minRct = 3.0,
+                                         maxRct=8, stepRct=0.5)
     for i in rctLines:
         n, lines = i
         rctArray = np.array(lines)
         rct = rctArray.transpose()
         xRct, yRct = rct
-        ax.plot(xRct, yRct, 'blue', linewidth=0.5, label='_'+str(int(n)))
+        n = float(n)
+        if n.is_integer():
+            ax.plot(xRct, yRct, 'blue', linewidth=0.5, label='_'+str(round(n, 2)))
+        else:
+            ax.plot(xRct, yRct, 'blue', linewidth=0.2, label='_' + str(round(n, 2)))
         # add labels
-        ixMinxSe = findNearestIndex(xRct, xMaxLim)
-        lxRct = xMaxLim -10
-        # lyRct = yRct[ixMinxSe]
-        lyRct =  _findYforXcountour(n, xRct, yRct)
-        # print(n, lxRct, lyRct )
-        # ax.annotate(str(round(n, 2)), (lxRct, lyRct), color='blue', fontsize=5)
-
     labelLines(plt.gca().get_lines(), xvals=[xMaxLim+10]*len(rctLines), color='blue', align=False, clip_on=False, fontsize=4, zorder=None)
 
     for j in s2Lines:
@@ -286,21 +234,17 @@ def _plotClusters(pdf, xMaxLim=1000):
     ax.plot([],[],  'r', linewidth=0.5, label='$S^2$ order parameter')
 
     ax.set_xlim(300, xMaxLim+10)
-    ax.set_ylim(0, 700)
+    ax.set_ylim(0, 500)
     ax.legend(prop={'size': 6})
 
-                # bbox={"facecolor": "white", "alpha": 0.5, "pad": 5})
-    _closeFig(fig, pdf, plt)
-
-# plt.ylim(0, 700)
-# plt.xlim(300, 1000)
+    pdf.savefig()
+    plt.close()
 
 
 # init pdf
 with PdfPages(f'{filePath}.pdf') as pdf:
     _plotClusters(pdf)
 
-plt.show()
 
 
 

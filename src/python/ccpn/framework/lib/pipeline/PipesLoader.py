@@ -13,6 +13,7 @@ def loadPipeSysModules(paths):
     import traceback
     from ccpn.util.Logging import getLogger
     import sys
+    from ccpn import core # keeps this . It prevents circular imports [started after refactorings]
 
     modules = []
     name = None

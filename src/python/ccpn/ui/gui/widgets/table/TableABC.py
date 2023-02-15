@@ -61,6 +61,8 @@ class TableABC(QtWidgets.QTableView):
 
     The view defines the communication between the display and the model.
     """
+    tableChanged = QtCore.pyqtSignal()
+
     styleSheet = """QTableView {
                         background-color: %(GUITABLE_BACKGROUND)s;
                         alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
@@ -99,7 +101,7 @@ class TableABC(QtWidgets.QTableView):
     _tableMenuEnabled = True
 
     # define the default TableModel class
-    defaultTableModel = _TableModel
+    tableModelClass = _TableModel
     defaultTableDelegate = _TableDelegateABC
 
     _droppedNotifier = None
@@ -107,7 +109,7 @@ class TableABC(QtWidgets.QTableView):
     def __init__(self, parent, *, df=None,
                  multiSelect=True, selectRows=True,
                  showHorizontalHeader=True, showVerticalHeader=True,
-                 borderWidth=2, cellPadding=2, focusBorderWidth=2, gridColour=None,
+                 borderWidth=2, cellPadding=2, focusBorderWidth=1, gridColour=None,
                  _resize=False, setWidthToColumns=False, setHeightToRows=False,
                  setOnHeaderOnly=False, showGrid=False, wordWrap=False,
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
@@ -220,7 +222,7 @@ class TableABC(QtWidgets.QTableView):
         if actionCallbackEnabled is not NOTHING:
             self.setActionCallbackEnabled(actionCallbackEnabled)
 
-        self.setItemDelegate(self.defaultTableDelegate(focusBorderWidth=focusBorderWidth))
+        self.setItemDelegate(self.defaultTableDelegate(parent=self, focusBorderWidth=focusBorderWidth))
 
     def _setMenuProperties(self, enableCopyCell, enableDelete, enableExport, enableSearch):
         """Add the required menus to the table
@@ -249,7 +251,7 @@ class TableABC(QtWidgets.QTableView):
             # set the model
             if newModel or not (model := self.model()):
                 # create a new model if required
-                model = self.defaultTableModel(df, view=self)
+                model = self.tableModelClass(df, view=self)
                 self.setModel(model)
             else:
                 model.df = df
@@ -273,7 +275,7 @@ class TableABC(QtWidgets.QTableView):
             df = pd.DataFrame({})
             if newModel or not (model := self.model()):
                 # create a new model if required
-                model = self.defaultTableModel(df, view=self)
+                model = self.tableModelClass(df, view=self)
                 self.setModel(model)
             else:
                 model.df = df

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-08 19:52:32 +0000 (Wed, February 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-15 19:22:57 +0000 (Wed, February 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -36,10 +36,10 @@ from ccpn.ui.gui.widgets.table._TableAdditions import TableMenuABC
 
 UNITS = ['ppm', 'Hz', 'point']
 HeaderIndex = '#'
-HeaderPeak = 'Peak Serial'
+HeaderMatch = 'Match'
 HeaderObject = '_object'
 HeaderExpand = 'Expand'
-HeaderRestraint = 'Restraint Pid'
+HeaderRestraint = 'Restraint Pid'  # NOTE:ED - needs to match the column-heading in the violation-table
 HeaderAtoms = 'Atoms'
 HeaderTarget = 'Target Value'
 HeaderLowerLimit = 'Lower Limit'

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-08 19:52:33 +0000 (Wed, February 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-15 19:22:57 +0000 (Wed, February 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2022-09-08 17:12:59 +0100 (Thu, September 08, 2022) $"
 
 from PyQt5 import QtCore
 
+import ccpn.core  # MUST be imported here for correct import-order
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.table.TableABC import TableABC
 from ccpn.util.Common import NOTHING
@@ -79,7 +80,7 @@ class Table(TableABC, Base):
     def __init__(self, parent, *, df=None,
                  multiSelect=True, selectRows=True,
                  showHorizontalHeader=True, showVerticalHeader=True,
-                 borderWidth=2, cellPadding=2, focusBorderWidth=2, gridColour=None,
+                 borderWidth=2, cellPadding=2, focusBorderWidth=1, gridColour=None,
                  _resize=False, setWidthToColumns=False, setHeightToRows=False,
                  setOnHeaderOnly=False, showGrid=False, wordWrap=False,
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
@@ -181,7 +182,7 @@ def main():
     layout = QtWidgets.QGridLayout()
     frame.setLayout(layout)
 
-    table = TableABC(None, df=df, focusBorderWidth=2, cellPadding=11,
+    table = TableABC(None, df=df, focusBorderWidth=1, cellPadding=11,
                      showGrid=True, gridColour='white',
                      setWidthToColumns=False, setHeightToRows=False, _resize=True)
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-08 19:52:32 +0000 (Wed, February 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-15 19:22:57 +0000 (Wed, February 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -2106,7 +2106,7 @@ class RestraintAnalysisTableModule(CcpnModule):
 #
 #         # building...
 #         # _buildColumns = [(HeaderIndex, lambda pk, rt: pk.serial),
-#         #                  (HeaderPeak, lambda pk, rt: pk.pid),
+#         #                  (HeaderMatch, lambda pk, rt: pk.pid),
 #         #                  (HeaderObject, lambda pk, rt: (pk, rt)),
 #         #                  ]
 #         _restraintColumns = [(HeaderRestraint, lambda rt: ''),
@@ -2126,7 +2126,7 @@ class RestraintAnalysisTableModule(CcpnModule):
 #         # create the column objects
 #         _cols = [
 #             (HeaderIndex, lambda row: _getValueByHeader(row, HeaderIndex), 'TipTex1', None, None),
-#             (HeaderPeak, lambda row: _getValueByHeader(row, HeaderPeak), 'TipTex2', None, None),
+#             (HeaderMatch, lambda row: _getValueByHeader(row, HeaderMatch), 'TipTex2', None, None),
 #             (HeaderObject, lambda row: _getValueByHeader(row, HeaderObject), 'TipTex3', None, None),
 #             ]
 #

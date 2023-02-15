@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:47 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-02-15 19:22:57 +0000 (Wed, February 15, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,158 +37,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.table.TableABC import TableABC
 from ccpn.util.Logging import getLogger
 
-
-#=========================================================================================
-# MagnetisationTransferTable
-#=========================================================================================
-
-class MagnetisationTransferTable(TableABC):
-    """A table to contain the list of magnetisation-transfers for a spectrum.
-    Transfers are set for a particular experiment-type or user defined.
-    """
-    tableChanged = QtCore.pyqtSignal()
-
-    def __init__(self, parent, spectrum=None, *args, **kwds):
-        """Initialise the table
-
-        :param parent: parent widget.
-        :param spectrum: target spectrum.
-        :param args: additional arguments to pass to table-initialisation.
-        :param kwds: additional keywords to pass to table-initialisation.
-        """
-        super().__init__(parent, *args, **kwds)
-
-        # set the spectrum-specific information
-        self.spectrum = spectrum
-        self.dimensions = self.spectrum and self.spectrum.dimensionCount or 0
-        self._magTransfers = self.spectrum and self.spectrum.magnetisationTransfers or None
-
-        # define the column definitions
-        colDefs = ((int, [val + 1 for val in range(self.dimensions)]),
-                   (int, [val + 1 for val in range(self.dimensions)]),
-                   (str, MagnetisationTransferTypes),
-                   (bool, [True, False]),
-                   )
-
-        # create the column objects
-        _cols = [
-            (MagnetisationTransferTypes[ii], lambda row: True, None, None, None)
-            for ii, col in enumerate(MagnetisationTransferParameters)
-            ]
-
-        # set the table _columns
-        self._columnDefs = ColumnClass(_cols)
-
-        for ii, (colType, options) in enumerate(colDefs):
-            # define the edit widget for each column
-            col = self._columnDefs.columns[ii]
-            col.editClass = _SmallPulldown
-            col.editKw = {'texts': options}
-
-        # set the delegate for editing
-        delegate = _SimplePulldownTableDelegate(self, objectColumn=None)
-        self.setItemDelegate(delegate)
-
-        self._rightClickedTableIndex = None  # last selected item in a table before raising the context menu. Enabled with mousePress event filter
-
-    @property
-    def _df(self):
-        """Return the Pandas-dataFrame holding the data.
-        """
-        return self.model().df
-
-    #=========================================================================================
-    # methods
-    #=========================================================================================
-
-    def getMagnetisationTransfers(self):
-        """Get the magnetisation-transfers from the table.
-        """
-        return tuple(MagnetisationTransferTuple(*row) for row in self._df.itertuples(index=False))
-
-    def populateTable(self, magnetisationTransfers=None, editable=True):
-        """Populate the table from the current spectrum.
-        If magnetisation-transfers are not specified, then existing values are used.
-
-        :param magnetisationTransfers: tuple/list of MagnetisationTransferTuples.
-        :param editable: True/False, for enabling/disabling editing, defaults to True.
-        :return:
-        """
-        if magnetisationTransfers is not None:
-            self._magTransfers = magnetisationTransfers
-
-        if self._magTransfers is not None:
-            df = pd.DataFrame(self._magTransfers, columns=MagnetisationTransferParameters)
-
-        else:
-            df = pd.DataFrame(columns=MagnetisationTransferParameters)
-
-        self.updateDf(df, resize=True, setHeightToRows=True, setWidthToColumns=True, setOnHeaderOnly=True)
-
-        self.setTableEnabled(editable)
-        self.model().dataChanged.connect(self._dataChanged)
-
-    def _dataChanged(self, *args):
-        """Emit tableChanged signal if the table has been edited.
-
-        :param args: catch optional arguments from event.
-        :return:
-        """
-        self.tableChanged.emit()
-
-    def setTableEnabled(self, value):
-        """Enable/Disable the table.
-
-        :param value: True/False.
-        :return:
-        """
-        self.setEnabled(value)
-        # not sure whether to disable the table or just disable the editing and menu items
-        self.setEditable(value)
-        for action in self._actions:
-            action.setEnabled(value)
-
-    #=========================================================================================
-    # Table context menu
-    #=========================================================================================
-
-    def addTableMenuOptions(self, menu):
-        """Add options to the right-mouse menu
-        """
-        menu = self._thisTableMenu
-
-        # no options from the super-class are required
-        self._actions = [menu.addAction('New', self._newTransfer),
-                         menu.addAction('Remove selected', self._removeTransfer)
-                         ]
-
-        return menu
-
-    def _newTransfer(self):
-        """Add new magnetisation-transfer to the table.
-        """
-        mt = list(self._magTransfers)
-        mt.append(MagnetisationTransferTuple(1, 2, 'onebond', False))
-        self._magTransfers = tuple(mt)
-        self.populateTable(self._magTransfers)
-        self._dataChanged()
-
-    def _removeTransfer(self):
-        """Remove the selected magnetisation-transfer from the table.
-        """
-        model = self.selectionModel()
-        if selection := (model and model.selectedRows()):
-            _sortIndex = self.model()._sortIndex
-            for idx in selection:
-                row = _sortIndex[idx.row()]
-
-                mt = list(self._magTransfers)
-                del mt[row]
-
-                self._magTransfers = tuple(mt)
-                self.populateTable(self._magTransfers)
-                self._dataChanged()
-                return
+EDIT_ROLE = QtCore.Qt.EditRole
 
 
 #=========================================================================================
@@ -229,21 +78,19 @@ class _SmallPulldown(PulldownList):
 # Table delegate to handle editing
 #=========================================================================================
 
-EDIT_ROLE = QtCore.Qt.EditRole
-
-
 class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
     """Handle the setting of data when editing the table
     """
     modelDataChanged = QtCore.pyqtSignal()
 
-    def __init__(self, parent, objectColumn=None):
+    def __init__(self, parent, *, objectColumn=None, focusBorderWidth=None):
         """Initialise the delegate.
 
         :param parent: link to the handling table.
         :param objectColumn: name of the column containing the objects for referencing.
         """
         super().__init__(parent)
+
         self.customWidget = None
         self._parent = parent
         self._objectColumn = objectColumn
@@ -351,3 +198,158 @@ class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
         """
         # stop the closed-pulldownList from staying visible after selection
         widget.close()
+
+
+#=========================================================================================
+# MagnetisationTransferTable
+#=========================================================================================
+
+class MagnetisationTransferTable(TableABC):
+    """A table to contain the list of magnetisation-transfers for a spectrum.
+    Transfers are set for a particular experiment-type or user defined.
+    """
+    # tableChanged = QtCore.pyqtSignal()
+
+    defaultTableDelegate = _SimplePulldownTableDelegate
+
+    def __init__(self, parent, spectrum=None, *args, **kwds):
+        """Initialise the table
+
+        :param parent: parent widget.
+        :param spectrum: target spectrum.
+        :param args: additional arguments to pass to table-initialisation.
+        :param kwds: additional keywords to pass to table-initialisation.
+        """
+        super().__init__(parent, *args, **kwds)
+
+        # set the spectrum-specific information
+        self.spectrum = spectrum
+        self.dimensions = self.spectrum and self.spectrum.dimensionCount or 0
+        self._magTransfers = self.spectrum and self.spectrum.magnetisationTransfers or None
+
+        # define the column definitions
+        colDefs = ((int, [val + 1 for val in range(self.dimensions)]),
+                   (int, [val + 1 for val in range(self.dimensions)]),
+                   (str, MagnetisationTransferTypes),
+                   (bool, [True, False]),
+                   )
+
+        # create the column objects
+        _cols = [
+            (MagnetisationTransferTypes[ii], lambda row: True, None, None, None)
+            for ii, col in enumerate(MagnetisationTransferParameters)
+            ]
+
+        # set the table _columns
+        self._columnDefs = ColumnClass(_cols)
+
+        for ii, (colType, options) in enumerate(colDefs):
+            # define the edit widget for each column
+            col = self._columnDefs.columns[ii]
+            col.editClass = _SmallPulldown
+            col.editKw = {'texts': options}
+
+        # # set the delegate for editing
+        # delegate = _SimplePulldownTableDelegate(self, objectColumn=None)
+        # self.setItemDelegate(delegate)
+
+        self._rightClickedTableIndex = None  # last selected item in a table before raising the context menu. Enabled with mousePress event filter
+
+    @property
+    def _df(self):
+        """Return the Pandas-dataFrame holding the data.
+        """
+        return self.model().df
+
+    #=========================================================================================
+    # methods
+    #=========================================================================================
+
+    def getMagnetisationTransfers(self):
+        """Get the magnetisation-transfers from the table.
+        """
+        return tuple(MagnetisationTransferTuple(*row) for row in self._df.itertuples(index=False))
+
+    def populateTable(self, magnetisationTransfers=None, editable=True):
+        """Populate the table from the current spectrum.
+        If magnetisation-transfers are not specified, then existing values are used.
+
+        :param magnetisationTransfers: tuple/list of MagnetisationTransferTuples.
+        :param editable: True/False, for enabling/disabling editing, defaults to True.
+        :return:
+        """
+        if magnetisationTransfers is not None:
+            self._magTransfers = magnetisationTransfers
+
+        if self._magTransfers is not None:
+            df = pd.DataFrame(self._magTransfers, columns=MagnetisationTransferParameters)
+
+        else:
+            df = pd.DataFrame(columns=MagnetisationTransferParameters)
+
+        self.updateDf(df, resize=True, setHeightToRows=True, setWidthToColumns=True, setOnHeaderOnly=True)
+
+        self.setTableEnabled(editable)
+        self.model().dataChanged.connect(self._dataChanged)
+
+    def _dataChanged(self, *args):
+        """Emit tableChanged signal if the table has been edited.
+
+        :param args: catch optional arguments from event.
+        :return:
+        """
+        self.tableChanged.emit()
+
+    def setTableEnabled(self, value):
+        """Enable/Disable the table.
+
+        :param value: True/False.
+        :return:
+        """
+        self.setEnabled(value)
+        # not sure whether to disable the table or just disable the editing and menu items
+        self.setEditable(value)
+        for action in self._actions:
+            action.setEnabled(value)
+
+    #=========================================================================================
+    # Table context menu
+    #=========================================================================================
+
+    def addTableMenuOptions(self, menu):
+        """Add options to the right-mouse menu
+        """
+        menu = self._thisTableMenu
+
+        # no options from the super-class are required
+        self._actions = [menu.addAction('New', self._newTransfer),
+                         menu.addAction('Remove selected', self._removeTransfer)
+                         ]
+
+        return menu
+
+    def _newTransfer(self):
+        """Add new magnetisation-transfer to the table.
+        """
+        mt = list(self._magTransfers)
+        mt.append(MagnetisationTransferTuple(1, 2, 'onebond', False))
+        self._magTransfers = tuple(mt)
+        self.populateTable(self._magTransfers)
+        self._dataChanged()
+
+    def _removeTransfer(self):
+        """Remove the selected magnetisation-transfer from the table.
+        """
+        model = self.selectionModel()
+        if selection := (model and model.selectedRows()):
+            _sortIndex = self.model()._sortIndex
+            for idx in selection:
+                row = _sortIndex[idx.row()]
+
+                mt = list(self._magTransfers)
+                del mt[row]
+
+                self._magTransfers = tuple(mt)
+                self.populateTable(self._magTransfers)
+                self._dataChanged()
+                return

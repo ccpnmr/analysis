@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:47 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-02-15 19:22:57 +0000 (Wed, February 15, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,7 +25,6 @@ __date__ = "$Date: 2022-11-24 12:32:46 +0100 (Thu, November 24, 2022) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
 
 from PyQt5 import QtCore, QtWidgets
 from functools import partial
@@ -38,105 +37,7 @@ from ccpn.util.Logging import getLogger
 
 
 METADATACOLUMNS = ['name', 'parameter']
-
-
-#=========================================================================================
-# MetadataTable
-#=========================================================================================
-
-class MetadataTable(TableABC):
-    """A table to contain metadata of a core object.
-    """
-    tableChanged = QtCore.pyqtSignal()
-
-    def __init__(self, parent, obj=None, *args, **kwds):
-        """Initialise the table
-
-        :param parent: parent widget.
-        :param spectrum: target spectrum.
-        :param args: additional arguments to pass to table-initialisation.
-        :param kwds: additional keywords to pass to table-initialisation.
-        """
-        super().__init__(parent, *args, **kwds)
-
-        # set the core-object specific information
-        self.obj = obj
-
-        # set the table _columns
-        self._columnDefs = ColumnClass([])
-        self._columnDefs._columns = [Column(col, lambda row: True) for col in METADATACOLUMNS]
-
-        # set the delegate for editing
-        delegate = _SimplePulldownTableDelegate(self, objectColumn=None)
-        self.setItemDelegate(delegate)
-
-        self._rightClickedTableIndex = None  # last selected item in a table before raising the context menu. Enabled with mousePress event filter
-
-    @property
-    def _df(self):
-        """Return the Pandas-dataFrame holding the data.
-        """
-        return self.model().df
-
-    #=========================================================================================
-    # methods
-    #=========================================================================================
-
-    def getMetadata(self):
-        """Get the metadata from the table.
-        """
-        return tuple(self._df.itertuples(index=False))
-
-    def populateTable(self, metadata=None, editable=True):
-        """Populate the table from the current core-object.
-        If metadata are not specified, then existing values are used.
-
-        :param metadata: dict of metadata.
-        :param editable: True/False, for enabling/disabling editing, defaults to True.
-        :return:
-        """
-        if metadata is not None:
-            self._metadata = metadata
-
-        if self._metadata is not None:
-            df = pd.DataFrame(self._metadata, columns=METADATACOLUMNS)
-
-        else:
-            df = pd.DataFrame(columns=METADATACOLUMNS)
-
-        self.updateDf(df, resize=True, setHeightToRows=True, setWidthToColumns=True, setOnHeaderOnly=True)
-
-        self.setTableEnabled(editable)
-        self.model().dataChanged.connect(self._dataChanged)
-
-    def _dataChanged(self, *args):
-        """Emit tableChanged signal if the table has been edited.
-
-        :param args: catch optional arguments from event.
-        :return:
-        """
-        self.tableChanged.emit()
-
-    def setTableEnabled(self, value):
-        """Enable/Disable the table.
-
-        :param value: True/False.
-        :return:
-        """
-        self.setEnabled(value)
-        # not sure whether to disable the table or just disable the editing and menu items
-        self.setEditable(value)
-        for action in self._actions:
-            action.setEnabled(value)
-
-    #=========================================================================================
-    # Table context menu
-    #=========================================================================================
-
-    def addTableMenuOptions(self, menu):
-        """Add options to the right-mouse menu
-        """
-        return self._thisTableMenu
+EDIT_ROLE = QtCore.Qt.EditRole
 
 
 #=========================================================================================
@@ -177,21 +78,19 @@ class _SmallPulldown(PulldownList):
 # Table delegate to handle editing
 #=========================================================================================
 
-EDIT_ROLE = QtCore.Qt.EditRole
-
-
 class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
     """Handle the setting of data when editing the table
     """
     modelDataChanged = QtCore.pyqtSignal()
 
-    def __init__(self, parent, objectColumn=None):
+    def __init__(self, parent, *, objectColumn=None, focusBorderWidth=None):
         """Initialise the delegate.
 
         :param parent: link to the handling table.
         :param objectColumn: name of the column containing the objects for referencing.
         """
         super().__init__(parent)
+
         self.customWidget = None
         self._parent = parent
         self._objectColumn = objectColumn
@@ -299,3 +198,104 @@ class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
         """
         # stop the closed-pulldownList from staying visible after selection
         widget.close()
+
+
+#=========================================================================================
+# MetadataTable
+#=========================================================================================
+
+class MetadataTable(TableABC):
+    """A table to contain metadata of a core object.
+    """
+    # tableChanged = QtCore.pyqtSignal()
+
+    defaultTableDelegate = _SimplePulldownTableDelegate
+
+    def __init__(self, parent, obj=None, *args, **kwds):
+        """Initialise the table
+
+        :param parent: parent widget.
+        :param spectrum: target spectrum.
+        :param args: additional arguments to pass to table-initialisation.
+        :param kwds: additional keywords to pass to table-initialisation.
+        """
+        super().__init__(parent, *args, **kwds)
+
+        # set the core-object specific information
+        self.obj = obj
+
+        # set the table _columns
+        self._columnDefs = ColumnClass([])
+        self._columnDefs._columns = [Column(col, lambda row: True) for col in METADATACOLUMNS]
+
+        # # set the delegate for editing
+        # delegate = _SimplePulldownTableDelegate(self, objectColumn=None)
+        # self.setItemDelegate(delegate)
+
+        self._rightClickedTableIndex = None  # last selected item in a table before raising the context menu. Enabled with mousePress event filter
+
+    @property
+    def _df(self):
+        """Return the Pandas-dataFrame holding the data.
+        """
+        return self.model().df
+
+    #=========================================================================================
+    # methods
+    #=========================================================================================
+
+    def getMetadata(self):
+        """Get the metadata from the table.
+        """
+        return tuple(self._df.itertuples(index=False))
+
+    def populateTable(self, metadata=None, editable=True):
+        """Populate the table from the current core-object.
+        If metadata are not specified, then existing values are used.
+
+        :param metadata: dict of metadata.
+        :param editable: True/False, for enabling/disabling editing, defaults to True.
+        :return:
+        """
+        if metadata is not None:
+            self._metadata = metadata
+
+        if self._metadata is not None:
+            df = pd.DataFrame(self._metadata, columns=METADATACOLUMNS)
+
+        else:
+            df = pd.DataFrame(columns=METADATACOLUMNS)
+
+        self.updateDf(df, resize=True, setHeightToRows=True, setWidthToColumns=True, setOnHeaderOnly=True)
+
+        self.setTableEnabled(editable)
+        self.model().dataChanged.connect(self._dataChanged)
+
+    def _dataChanged(self, *args):
+        """Emit tableChanged signal if the table has been edited.
+
+        :param args: catch optional arguments from event.
+        :return:
+        """
+        self.tableChanged.emit()
+
+    def setTableEnabled(self, value):
+        """Enable/Disable the table.
+
+        :param value: True/False.
+        :return:
+        """
+        self.setEnabled(value)
+        # not sure whether to disable the table or just disable the editing and menu items
+        self.setEditable(value)
+        for action in self._actions:
+            action.setEnabled(value)
+
+    #=========================================================================================
+    # Table context menu
+    #=========================================================================================
+
+    def addTableMenuOptions(self, menu):
+        """Add options to the right-mouse menu
+        """
+        return self._thisTableMenu

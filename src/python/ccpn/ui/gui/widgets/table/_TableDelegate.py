@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-20 20:04:00 +0000 (Tue, December 20, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-02-15 19:22:58 +0000 (Wed, February 15, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -58,14 +58,48 @@ class _TableDelegate(QtWidgets.QStyledItemDelegate):
     """handle the setting of data when editing the table
     """
 
-    def __init__(self, parent=None, objectColumn=None):
+    _focusBorderWidth = 1
+    _focusPen = None
+    _noFocusPen = None
+
+    def __init__(self, parent, *, objectColumn=None, focusBorderWidth=1):
         """Initialise the delegate
         :param parent - link to the handling table
         """
         super().__init__(parent)
+
         self.customWidget = None
         self._parent = parent
         self._objectColumn = objectColumn
+
+        # set the colours
+        self._focusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERFOCUS]))
+        self._noFocusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERNOFOCUS]))
+
+        # double the line-widths accounts for the device-pixel-ratio
+        self._focusBorderWidth = focusBorderWidth
+        self._focusPen.setWidthF(focusBorderWidth * 2.0)
+        self._focusPen.setJoinStyle(QtCore.Qt.MiterJoin)  # square ends
+        self._noFocusPen.setWidthF(2.0)
+
+        # set the required alternative colour
+        self._replaceAlternativeColor = QtGui.QColor(getColours()[BORDERFOCUS])
+
+    def paint(self, painter: QtGui.QPainter, option: 'QStyleOptionViewItem', index: QtCore.QModelIndex) -> None:
+        """Paint the contents of the cell.
+        """
+        painter.save()
+        focus = (option.state & QtWidgets.QStyle.State_HasFocus)
+        option.state = option.state & ~QtWidgets.QStyle.State_HasFocus
+
+        super().paint(painter, option, index)
+
+        if focus and self._focusBorderWidth:
+            painter.setClipRect(option.rect)
+            painter.setPen(self._focusPen)
+            painter.drawRect(option.rect)
+
+        painter.restore()
 
     def createEditor(self, parentWidget, itemStyle, index):  # returns the edit widget
         """Create the editor widget
@@ -179,12 +213,15 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
     # NOTE:ED - this is required as setting the borders in the styleSheet disables the use of BackgroundRole in the table-model
     #   so need this alternative to add padding to the left of the cell :|
     _leftPadding = '  '  # 2 spaces should be enough
+
     _focusBorderWidth = 1
     _focusPen = None
     _noFocusPen = None
 
-    def __init__(self, focusBorderWidth=1, *args, **kwds):
-        super(_TableDelegateABC, self).__init__(*args, *kwds)
+    def __init__(self, parent, focusBorderWidth=1):
+        super().__init__(parent)
+
+        self._parent = parent
 
         # set the colours
         self._focusPen = QtGui.QPen(QtGui.QColor(getColours()[BORDERFOCUS]))
@@ -209,9 +246,13 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
     def paint(self, painter, option, index):
         """Paint the contents of the cell.
         """
+        painter.save()
+
         # Remove dotted border on cell focus.  https://stackoverflow.com/a/55252650/3620725
         #   or put 'outline: 0px;' into the QTableView stylesheet
         focus = (option.state & QtWidgets.QStyle.State_HasFocus)
+        option.state = option.state & ~QtWidgets.QStyle.State_HasFocus
+
         super().paint(painter, option, index)
 
         # alternative method to add selection border to the focussed cell
@@ -219,7 +260,6 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
             # fade the background and paint over the top of selected cell
             # - ensures that different coloured backgrounds are still visible
             # - does, however, modify the foreground colour :|
-            painter.save()
             painter.setClipRect(option.rect)
             brush.setAlphaF(0.20)
             painter.setCompositionMode(painter.CompositionMode_SourceOver)
@@ -234,23 +274,20 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
                 painter.setPen(self._noFocusPen)
                 painter.setRenderHint(QtGui.QPainter.Antialiasing)
                 painter.drawRoundedRect(option.rect, 4, 4)
-            painter.restore()
 
         elif focus:
-            painter.save()
             painter.setClipRect(option.rect)
             painter.setPen(self._focusPen)
             painter.drawRect(option.rect)
-            painter.restore()
 
         elif not focus and index.data(BORDER_ROLE):
             # move the focus rectangle drawing to after, otherwise, alternative-background-color is used
-            painter.save()
             painter.setClipRect(option.rect)
             painter.setPen(self._noFocusPen)
             painter.setRenderHint(QtGui.QPainter.Antialiasing)
             painter.drawRoundedRect(option.rect, 4, 4)
-            painter.restore()
+
+        painter.restore()
 
     def updateEditorGeometry(self, widget, itemStyle, index):
         """Fit editor geometry to the index

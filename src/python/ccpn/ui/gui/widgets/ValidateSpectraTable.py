@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-14 19:31:36 +0000 (Wed, December 14, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-02-15 19:22:57 +0000 (Wed, February 15, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -100,7 +100,7 @@ class _ValidateModel(_TableModel):
 class ValidateSpectraTable(Table):
     """A table to contain the list of spectra and associated spectrum filePaths
     """
-    tableChanged = QtCore.pyqtSignal()
+    # tableChanged = QtCore.pyqtSignal()
 
     styleSheet = """QTableView {
                         background-color: transparent;
@@ -121,7 +121,7 @@ class ValidateSpectraTable(Table):
                     }
                     """
 
-    defaultTableModel = _ValidateModel
+    tableModelClass = _ValidateModel
 
     def __init__(self, parent, *args, **kwds):
         """Initialise the table

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-26 11:55:27 +0000 (Thu, January 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-15 15:46:07 +0000 (Wed, February 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -375,7 +375,9 @@ class FitPlotPanel(GuiPanel):
         objs = [self.project.getByPid(pid) for pid in peakPids]
 
         ## Grab the Fitting Model, to recreate the fitted Curve from the fitting results.
-        modelNames = filteredDf.get(sv.MODEL_NAME) or []
+        if sv.MODEL_NAME not in filteredDf.columns:
+            return
+        modelNames = filteredDf[sv.MODEL_NAME].values
         if len(modelNames) > 0:
             modelName = modelNames[0]
         else:

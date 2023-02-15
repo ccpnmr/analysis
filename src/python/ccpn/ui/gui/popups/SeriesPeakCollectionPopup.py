@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-15 14:17:20 +0000 (Wed, February 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-15 15:17:07 +0000 (Wed, February 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -140,7 +140,7 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         self.usePeakListLabelRB = RadioButtons(self.mainWidget, texts=[LAST, NEW], grid=(row, 1))
         row += 1
         self.refitLabel = Label(self.mainWidget, text='Refitting', grid=(row, 0))
-        self.refitOption = CheckBox(self.mainWidget, text='Refit peaks in place',
+        self.refitOption = CheckBox(self.mainWidget, text='Refit Peaks At Position',
                                     tipText = 'Recalculate the peak height and linewidths preserving the original peak position',
                                     checked=False, grid=(row, 1))
         row += 1

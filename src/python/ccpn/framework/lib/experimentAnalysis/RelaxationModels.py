@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-08 17:27:29 +0000 (Wed, February 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-15 12:25:03 +0000 (Wed, February 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ from lmfit.models import update_param_vals
 import numpy as np
 import pandas as pd
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
+import ccpn.framework.lib.experimentAnalysis.spectralDensityLib as sdl
 from ccpn.framework.lib.experimentAnalysis.experimentConstants import D1, C1, N15gyromagneticRatio, HgyromagneticRatio
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
@@ -549,13 +550,13 @@ class SDMCalculation(CalculationModel):
         R2_err = merged[f'{sv.RATE_ERR}{suffix2}'].values
         NOE_err = merged[noeHederErr].values
 
-        j0 = lf.calculateJ0(NOE, R1, R2, D1, C1, N15gyromagneticRatio, HgyromagneticRatio)
-        jwx = lf.calculateJWx(NOE, R1, R2, D1, C1, N15gyromagneticRatio, HgyromagneticRatio)
-        jwh = lf.calculateJWH(NOE, R1, R2, D1, C1, N15gyromagneticRatio, HgyromagneticRatio)
+        j0 = sdl.calculateJ0(NOE, R1, R2, D1, C1, N15gyromagneticRatio, HgyromagneticRatio)
+        jwx = sdl.calculateJWx(NOE, R1, R2, D1, C1, N15gyromagneticRatio, HgyromagneticRatio)
+        jwh = sdl.calculateJWH(NOE, R1, R2, D1, C1, N15gyromagneticRatio, HgyromagneticRatio)
 
-        j0_ERR = lf.calculateJ0(NOE_err, R1_err, R2_err, D1, C1, N15gyromagneticRatio, HgyromagneticRatio)
-        jwx_ERR = lf.calculateJWx(NOE_err, R1_err, R2_err, D1, C1, N15gyromagneticRatio, HgyromagneticRatio)
-        jwh_ERR = lf.calculateJWH(NOE_err, R1_err, R2_err, D1, C1, N15gyromagneticRatio, HgyromagneticRatio)
+        j0_ERR = sdl.calculateJ0(NOE_err, R1_err, R2_err, D1, C1, N15gyromagneticRatio, HgyromagneticRatio)
+        jwx_ERR = sdl.calculateJWx(NOE_err, R1_err, R2_err, D1, C1, N15gyromagneticRatio, HgyromagneticRatio)
+        jwh_ERR = sdl.calculateJWH(NOE_err, R1_err, R2_err, D1, C1, N15gyromagneticRatio, HgyromagneticRatio)
 
         # keep these columns: MERGINGHEADERS, ROW_UID
         # make the merged dataFrame the correct output type

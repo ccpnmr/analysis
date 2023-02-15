@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-14 14:59:57 +0000 (Tue, February 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-15 12:25:30 +0000 (Wed, February 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -81,6 +81,8 @@ NOE_ERR = data[sv.HETNOE_VALUE_ERR]
 # recalculate the ratio here so don't need to use another dataTable
 R2R1 = R2/R1
 R2R1_ERR = lf.calculateUncertaintiesError(R1, R2, R1_ERR, R2_ERR)
+R1R2 = R1*R2
+R1R2_ERR = lf.calculateUncertaintiesError(R1, R2, R1_ERR, R2_ERR)
 
 J0 = data[sv.J0].values
 J0_ERR = data[sv.J0_ERR].values
@@ -130,7 +132,7 @@ def _closeFig(fig, pdf, plt):
     plt.close()
     plt.close(fig)
 
-def _plotRates_page1(pdf):
+def _plotRates(pdf):
     """ Plot the  SS -  R1  - R2 - NOE """
     fig = plt.figure(dpi=400)
     axss = fig.add_subplot(414)
@@ -167,29 +169,7 @@ def _plotRates_page1(pdf):
     _closeFig(fig, pdf, plt)
 
 
-def _plotR2R1_page2(pdf):
-    # page two R2/R1 Ratio
-    fig = plt.figure(dpi=300)
-    axss = fig.add_subplot(312)
-    plotSS(axss, xSequence, blocks, sequence, startSequenceCode=startSequenceCode, fontsize=5)
-    axR2R1 = plt.subplot(311)
-    axR2R1.bar(x, R2R1, yerr=R2R1_ERR, color='black', ecolor='red', error_kw=dict(lw=1, capsize=2, capthick=0.5))
-    axR2R1.set_title('R2/R1',  fontsize=fontTitleSize, color=titleColor)
-    axR2R1.set_ylabel('R$_{2}$/R$_{1}$', fontsize=fontYSize)
-    axR2R1.set_xlabel('Residue Number', fontsize=fontXSize, )
-    ml = MultipleLocator(1)
-    axR2R1.spines[['right', 'top']].set_visible(False)
-    axR2R1.minorticks_on()
-    axR2R1.xaxis.set_minor_locator(ml)
-    axR2R1.tick_params(axis='both', which='major', labelsize=labelMajorSize)
-    axR2R1.tick_params(axis='both', which='minor', labelsize=labelMinorSize)
-    axss.get_shared_x_axes().join(axss, axR2R1)
-    plt.tight_layout()
-    plt.subplots_adjust(hspace=hspace)
-    _closeFig(fig, pdf, plt)
-
-
-def _plotSDM_page3(pdf):
+def _plotSDM(pdf):
     # page three RSDM
 
     fig = plt.figure(dpi=300)
@@ -307,9 +287,8 @@ def _plotScatters_page4(pdf):
 
 # init pdf
 with PdfPages(f'{filePath}.pdf') as pdf:
-    _plotRates_page1(pdf)
-    _plotR2R1_page2(pdf)
-    _plotSDM_page3(pdf)
+    _plotRates(pdf)
+    _plotSDM(pdf)
     _plotScatters_page4(pdf)
 
 

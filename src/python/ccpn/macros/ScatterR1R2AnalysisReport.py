@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-14 16:55:18 +0000 (Tue, February 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-15 12:25:30 +0000 (Wed, February 15, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -48,6 +48,17 @@ from math import atan2,degrees
 ####### User's Settings  ###################
 fileName = 'RelaxClustersAnalysisResults'
 filePath = f'/Users/luca/Documents/V3-testings/{fileName}'
+
+#### Data #####
+RSDMResultsDataTable = get('DT:RSDM_results')
+data =  RSDMResultsDataTable.data
+x = data[sv.NMRRESIDUECODE]
+x = x.astype(int)
+x = x.values
+R1 = data[sv.R1].values
+R2 = data[sv.R2].values
+NOE = data[sv.HETNOE_VALUE]
+
 
 ####### S2_contours
 ##  Order Parameter Lines
@@ -87,33 +98,8 @@ labelMinorSize=5
 titleColor = 'blue'
 hspace= 0.5
 
-CLUSTER_COLORS = (
-                  '#800000',
-                  '#000080',
-                  '#008000',
-                  '#808000',
-                  '#800080',
-                  '#008080',
-                  '#808080',
-                  '#000000',
-                  '#804000',
-                  '#004080'
-                )
-
-CLUSTER_SYMBOLS = ('circle', 'square', 'triangle')
 
 
-RSDMResultsDataTable = get('DT:RSDM_results')
-
-
-data =  RSDMResultsDataTable.data
-x = data[sv.NMRRESIDUECODE]
-x = x.astype(int)
-x = x.values
-
-R1 = data[sv.R1].values
-R2 = data[sv.R2].values
-NOE = data[sv.HETNOE_VALUE]
 
 
 def findNearestIndex(array, value):

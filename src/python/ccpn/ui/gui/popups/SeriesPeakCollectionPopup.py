@@ -5,7 +5,7 @@ Used for ExperimentAnalysis
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:46 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-02-15 14:17:20 +0000 (Wed, February 15, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -140,7 +140,9 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         self.usePeakListLabelRB = RadioButtons(self.mainWidget, texts=[LAST, NEW], grid=(row, 1))
         row += 1
         self.refitLabel = Label(self.mainWidget, text='Refitting', grid=(row, 0))
-        self.refitOption = CheckBox(self.mainWidget, text='Refit Peaks', checked=False, grid=(row, 1))
+        self.refitOption = CheckBox(self.mainWidget, text='Refit peaks in place',
+                                    tipText = 'Recalculate the peak height and linewidths preserving the original peak position',
+                                    checked=False, grid=(row, 1))
         row += 1
         self.coloursLabel = Label(self.mainWidget, text='Colouring', grid=(row, 0))
         self.coloursOption = CheckBox(self.mainWidget, text='Use colour from contours', checked=True,

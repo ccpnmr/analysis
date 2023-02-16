@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-14 14:59:57 +0000 (Tue, February 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-16 17:44:59 +0000 (Thu, February 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -100,6 +100,66 @@ def _calculateMolecularTumblingCorrelationTime(omega, alpha, beta):
     d = 5 * beta
     values = np.roots([a,b,c,d])
     return values
+
+
+############################################################
+############      Estimate S2 and Tc  analysis         #################
+############################################################
+
+def _filterLowNoeFromR1R2(r1, r2, noe, noeExclusionLimit=0.65):
+    mask = np.argwhere(noe > noeExclusionLimit).flatten()
+    r1 = r1[mask]
+    r2 = r2[mask]
+    return r1, r2
+
+def estimateAverageS2(r1, r2, func=np.median, noe=None, noeExclusionLimit=0.65):
+    """
+    Estimate the average generalized order parameters Sav2
+    from experimentally observed R1R2.
+    If Noe are given, filter out residues with Noes < noeExclusionLimit
+    Eq 3. from  Effective Method for the Discrimination of
+    Motional Anisotropy and Chemical Exchange Kneller et al. 2001.
+    10.1021/ja017461k
+
+    s2Av = sqRoot [ median(r1*r2) / max(r1*r2)  ]
+
+    :param r1: array of R1 values
+    :param r2: array of R2 values
+    :param noe: array of  NOE values
+    :param func: a calculation function to compute the  r1*r2. One of np.mean or np.median.
+                            default: median
+    :return: float: S2
+    """
+    if func not in [np.mean, np.median]:
+        func =  np.median
+    if noe is not None:
+        r1, r2 = _filterLowNoeFromR1R2(r1, r2, noe, noeExclusionLimit)
+    _pr = r1*r2
+    _func = func(_pr)
+    _max = np.max(_pr)
+    sAv = np.sqrt(_func/_max)
+    return sAv
+
+def estimateOverallCorrelationTimeFromR1R2(r1, r2, spectrometerFrequency):
+    """
+    Ref:  Equation 6 from Fushman. Backbone dynamics of ribonuclease
+    T1 and its complex with   2'GMP studied by
+    two-dimensional heteronuclear N M R
+    spectroscopy. Journal of Biomolecular NMR, 4 (1994) 61-78 .
+
+    tc = [1 / (2omegaN) ]  * sqRoot[ (6*T1/ T2 ) -7 ]
+
+    :param r1: array of R1 values
+    :param r2: array of R2 values
+    :return:  float.:  an estimation of the Overall Correlation Time Tc
+    """
+    t1 = 1/r1
+    t2 = 1/r2
+    omegaN = calculateOmegaN(spectrometerFrequency, scalingFactor=1e6)
+    part1 =  1/(2*omegaN)
+    part2 = np.sqrt( ((6*t1)/t2) - 7 )
+
+    return  part1 * part2
 
 ############################################################
 ############   Lipari-Szabo (Model Free) analysis   #################

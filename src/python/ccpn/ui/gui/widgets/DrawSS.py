@@ -33,14 +33,16 @@ def createBlocksFromSequence(ss_sequence):
     return blocks
 
 
-def plotSS(ax, x, blocks, sequence, startSequenceCode=1, fontsize=10,
+def plotSS(ax, x, sequence, ss_sequence, startSequenceCode=1, fontsize=10,
            sheetColour='blue', helixColour='red', baselineColour='black',
-            loopColour='yellow', showBottomAxis = False,
+            loopColour='yellow', showBottomAxis = False,showLeftAxis = False,
            centerY_SS = 1, arrowWidth = 0.05,   Helix_width = 0.025,
             arrowHeadWidth=0.1, arrowHeadLength=0.5,
            showSequenceNumber = True, sequenceNumberFont=5,
-           sequenceNumberOffset=0.02, sequenceSeparatorSymbol='.',
+           sequenceNumberOffset=0.01, sequenceSeparatorSymbol='.',
            sequenceNumberColour='gray'):
+
+    blocks = createBlocksFromSequence(ss_sequence=ss_sequence)
 
     maxSSWidth = np.max([arrowWidth, Helix_width, arrowHeadWidth])
     sequenceLetterYcoord =  centerY_SS - maxSSWidth
@@ -87,7 +89,7 @@ def plotSS(ax, x, blocks, sequence, startSequenceCode=1, fontsize=10,
     ax.spines['left'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
-    ax.get_yaxis().set_visible(False)
+    ax.get_yaxis().set_visible(showLeftAxis)
     ax.get_xaxis().set_visible(showBottomAxis)
     ax.spines['bottom'].set_visible(showBottomAxis)
 

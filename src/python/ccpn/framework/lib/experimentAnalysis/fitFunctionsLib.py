@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-14 14:59:57 +0000 (Tue, February 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-16 17:44:59 +0000 (Thu, February 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -317,6 +317,15 @@ def calculateUncertaintiesError(v1,v2, ev1, ev2):
     except Exception:
         return
 
+def calculateUncertaintiesProductError(v1,v2, ev1, ev2):
+    """
+    Calculate the Uncertainties errors for a product of two values and their original errors
+    :return:  float. the ratio error
+    """
+    try:
+        return (ev1 * v1 + ev2* v2) / v2 * v1
+    except Exception:
+        return
 
 def _scaleMinMaxData(data, minMaxRange=(1.e-5, 1)):
     """

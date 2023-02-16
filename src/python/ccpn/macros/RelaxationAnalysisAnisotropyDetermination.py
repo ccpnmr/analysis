@@ -1,12 +1,14 @@
 """
-A macro to plot R1*R2 and R2/R1 for the Discrimination of motional Anisotropy and Chemical Exchange
-in a Relaxation Analysis
+A macro for creating plots of R1*R2 and R2/R1 for helping in the differentiation of Anisotropy and Chemical Exchange studies.
+
+Reference:
+    - An Effective Method for the Discrimination of Motional Anisotropy and Chemical Exchange. Julie M. Kneller, Min Lu, and Clay Bracken.
+    American Chemical Society. 2002.  10.1021/ja017461k .
 
 This macro requires a  dataset  created after performing  the Reduced Spectral density Mapping calculation model
 on the Relaxation Analysis Module (alpha)
-
-Which is a dataset that contains the following (mandatory) columns:
-    - nmrResidueCode
+Which is a dataset that contains a table with the following (mandatory) columns:
+    -  nmrResidueCode
     -  R1 and  R1_err
     - R2 and  R2_err
     - HetNoe and  HetNoe_err
@@ -29,7 +31,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-16 17:44:59 +0000 (Thu, February 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-16 19:15:47 +0000 (Thu, February 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -64,7 +66,7 @@ sequence  = 'KLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
 ss_sequence   =  'BBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
 
 ## Some Graphics Settings
-showInteractivePlot = True # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
+showInteractivePlot = False # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
 scatterColor = 'navy'
 scatterColorError = 'darkred'
 scatterExcludedByNOEColor = 'orange'
@@ -131,7 +133,6 @@ xScatterMedianLine = np.linspace(0, np.max(R2R1), len(yMedianR1R2))
 
 ####################     end data preparation     ##################
 
-
 def _setXTicks(ax):
     ml = MultipleLocator(1)
     ax.minorticks_on()
@@ -139,14 +140,13 @@ def _setXTicks(ax):
     ax.tick_params(axis='both', which='major', labelsize=labelMajorSize)
     ax.tick_params(axis='both', which='minor', labelsize=labelMinorSize)
 
-
-
 def _setCommonYLim(ax, ys):
     extraY = np.ceil(percentage(30, np.max(ys)))
     ylim = np.max(ys) + extraY
     ax.set_ylim([0, ylim])
 
 def _ploteRates(pdf):
+    """ Plot R1*R2 and R2/R1 with the Sequence """
     fig = plt.figure(figsize=(5, 3.5), dpi=300, layout="constrained")
     maxRows = 3
     maxCols = 1
@@ -161,30 +161,23 @@ def _ploteRates(pdf):
     axR2R1.set_title('R2/R1', fontsize=fontTitleSize, color=titleColor)
     axR2R1.set_ylabel('R$_{2}$/R$_{1}$', fontsize=fontYSize)
     _setXTicks(axR2R1)
-    # _setYTicks(axR2R1, R2R1)
-    axR2R1.legend(prop={'size': 6})
-    extraY = np.ceil(percentage(30, np.max(R2R1)))
-    ylim = np.max(R2R1)+extraY
-    axR2R1.set_ylim([0, ylim])
+    _setCommonYLim(axR2R1, R2R1)
+    axR2R1.legend(loc='lower right', prop={'size': 4})
     axR2R1.spines[['right', 'top']].set_visible(False)
-
     # R1 x R2
     axR1R2 = fig.add_subplot(spec[row, 0])
     row+=1
-
     axR1R2.errorbar(x, R1R2,  yerr=R1R2_ERR, ms=scatterSize, color = scatterColor, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize, )
     axR1R2.errorbar(x[eind], R1R2[eind], yerr=R1R2_ERR[eind], color=scatterExcludedByNOEColor, ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize,  label = f'NOE < {NOE_limitExclusion}')
     axR1R2.plot(xSequence, yMedianR1R2, medianLineColour, linewidth=0.5, label ='R1R2 median')
     axR1R2.set_title('R1*R2', fontsize=fontTitleSize, color=titleColor)
     axR1R2.set_ylabel('R$_{1}$ * R$_{2}$', fontsize=fontYSize)
     axR1R2.set_xlabel('Residue Number', fontsize=fontXSize, )
-    axR1R2.legend(prop={'size': 6})
+    axR1R2.legend(loc='lower right', prop={'size': 4})
     axR1R2.spines[['right', 'top']].set_visible(False)
     _setCommonYLim(axR1R2, R1R2)
     _setXTicks(axR1R2)
 
-
-    # axss = fig.add_subplot(313)
     axss = fig.add_subplot(spec[row, 0])
     plotSS(axss, xSequence, sequence, ss_sequence=ss_sequence, startSequenceCode=startSequenceCode, fontsize=5,
            showSequenceNumber=False, )
@@ -194,15 +187,13 @@ def _ploteRates(pdf):
 
 def _plotScatterRates(pdf):
     fig = plt.figure( figsize=(5, 3.5), dpi=300)
-
     #  Scatter
     axRscatter = plt.subplot(111)
-    # axRscatter.scatter(R2R1, R1R2)
     axRscatter.errorbar(R2R1, R1R2,
                         yerr=R1R2_ERR/2,
                         xerr=R2R1_ERR/2,
                         color=scatterColor,
-                        alpha=0.7, #to see better the labels
+                        alpha=0.7, #t o see better the labels
                         ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize, )
     for i, txt in enumerate(x):
         extraY = percentage(0.5, R1R2[i])
@@ -215,12 +206,9 @@ def _plotScatterRates(pdf):
     axRscatter.set_title('R$_{1}$R$_{2}$ vs R$_{2}$/R$_{1}$ ', fontsize=fontTitleSize, color=titleColor)
     axRscatter.set_xlabel('R$_{2}$/R$_{1}$', fontsize=fontYSize, )
     axRscatter.set_ylabel('R$_{1}$*R$_{2}$', fontsize=fontYSize)
-    ml = MultipleLocator(1)
     axRscatter.spines[['right', 'top']].set_visible(False)
-    axRscatter.minorticks_on()
-    axRscatter.xaxis.set_minor_locator(ml)
-    axRscatter.tick_params(axis='both', which='major', labelsize=labelMajorSize)
-    axRscatter.tick_params(axis='both', which='minor', labelsize=labelMinorSize)
+    _setXTicks(axRscatter)
+
     axRscatter.yaxis.get_offset_text().set_x(-0.02)
     axRscatter.yaxis.get_offset_text().set_size(5)
     axRscatter.xaxis.get_offset_text().set_size(5)
@@ -231,7 +219,6 @@ def _plotScatterRates(pdf):
     pdf.savefig()
     return fig
 
-
 # init pdf
 with PdfPages(f'{filePath}.pdf') as pdf:
     fig1 = _ploteRates(pdf)
@@ -240,8 +227,9 @@ with PdfPages(f'{filePath}.pdf') as pdf:
 if showInteractivePlot:
     plt.show()
 else:
-    fig1.close()
-    fig2.close()
+    plt.close(fig1)
+    plt.close(fig2)
+
 ###################      end macro        #########################
 
 

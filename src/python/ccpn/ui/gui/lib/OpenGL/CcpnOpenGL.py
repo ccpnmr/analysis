@@ -45,7 +45,7 @@ By Mouse button:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -56,8 +56,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:44 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-02-16 11:55:36 +0000 (Thu, February 16, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2606,13 +2606,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         keyModifiers = QApplication.keyboardModifiers()
 
-        currentPos = self.mapFromGlobal(QtGui.QCursor.pos())
-        dx = currentPos.x() - self.lastPos.x()
-        dy = currentPos.y() - self.lastPos.y()
-        self.lastPos = currentPos
-        cursorCoordinate = self.getCurrentCursorCoordinate()
-
-        mouseMovedDict = self._updateMouseDict(cursorCoordinate)
+        cursorCoordinate, dx, dy, mouseMovedDict = self._updateMouseEvent()
 
         if int(event.buttons() & (Qt.LeftButton | Qt.RightButton)):
             # do the complicated key-presses first
@@ -2760,6 +2754,18 @@ class CcpnGLWidget(QOpenGLWidget):
             self.updateTraces()
 
         self.update()
+
+    def _updateMouseEvent(self):
+        """Update the current mouse dict
+        """
+        currentPos = self.mapFromGlobal(QtGui.QCursor.pos())
+        dx = currentPos.x() - self.lastPos.x()
+        dy = currentPos.y() - self.lastPos.y()
+        self.lastPos = currentPos
+        cursorCoordinate = self.getCurrentCursorCoordinate()
+        mouseMovedDict = self._updateMouseDict(cursorCoordinate)
+
+        return cursorCoordinate, dx, dy, mouseMovedDict
 
     # def _updateMouseDict(self, cursorCoordinate):
     #     try:
@@ -6256,76 +6262,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
             mouseInAxis = self._mouseInAxis(event.pos())
 
-            if mouseInAxis == GLDefs.MAINVIEW:
-
-                # strip should handle the selection of correct menu
-                selectedDict = self.getObjectsUnderMouse()
-                if PEAKSELECT in selectedDict:
-
-                    # Search if the event is in a range of a selected peak.
-                    peaks = list(self.current.peaks)
-
-                    if self.is1D:
-                        ii = strip._contextMenus.get(PeakMenu)
-                        if len(peaks) > 1:
-                            _hidePeaksSingleActionItems(ii)
-                        else:
-                            _setEnabledAllItems(ii, True)
-
-                    # will only work for self.current.peak
-                    strip._addItemsToNavigateToPeakMenu(selectedDict[PEAKSELECT])
-                    strip._addItemsToMarkInPeakMenu(selectedDict[PEAKSELECT])
-
-                    strip.contextMenuMode = PeakMenu
-                    menu = strip._contextMenus.get(strip.contextMenuMode)
-                    strip._lastClickedObjects = selectedDict[PEAKSELECT]
-
-                elif INTEGRALSELECT in selectedDict:
-                    strip.contextMenuMode = IntegralMenu
-                    menu = strip._contextMenus.get(strip.contextMenuMode)
-                    strip._lastClickedObjects = selectedDict[INTEGRALSELECT]
-
-                elif MULTIPLETSELECT in selectedDict:
-                    strip.contextMenuMode = MultipletMenu
-                    menu = strip._contextMenus.get(strip.contextMenuMode)
-                    strip._lastClickedObjects = selectedDict[MULTIPLETSELECT]
-
-                strip._navigateToPeakMenuMain.menuAction().setVisible(False)  # created from stripMethodName
-                strip._makeStripPlotItemMain.setVisible(False)
-                strip._estimateVolumesItemMain.setVisible(False)
-                strip._estimateVolumesItemSelected.setVisible(False)
-                if PEAKSELECT not in selectedDict:
-                    _setEnabledAllItems(strip._selectedPeaksMenu, True if self.current.peaks else False)
-
-                # check other menu items before raising menus
-                strip._addItemsToNavigateToCursorPosMenu()
-                strip._addItemsToMarkInCursorPosMenu()
-
-                # this isn't as nice as below, could be cleaned up a little
-                strip.markAxesMenu.clear()
-                strip._addItemsToMarkAxesMenuMainView()
-
-                strip._addItemsToCopyAxisFromMenusMainView()
-                if not self.is1D:
-                    strip._addItemsToMatchAxisCodesFromMenusMainView()
-                strip._checkMenuItems()
-
-            elif mouseInAxis in [GLDefs.BOTTOMAXIS, GLDefs.RIGHTAXIS, GLDefs.AXISCORNER]:
-                strip.contextMenuMode = AxisMenu
-                menu = strip._contextMenus.get(strip.contextMenuMode)
-
-                # create a dynamic menu based on the available axisCodes
-                menu.clear()
-                strip._addItemsToMarkAxesMenuAxesView(mouseInAxis, menu)
-                strip._addItemsToCopyAxisFromMenusAxes(mouseInAxis, menu, self.is1D)
-
-            if menu is not None:
-                strip.viewStripMenu = menu
-            else:
-                strip.viewStripMenu = self._getCanvasContextMenu()
-
-            for _ in self._mouseUnderMenu():
-                strip._raiseContextMenu(event)
+            self._updateMouseEvent()
+            self._raiseRightMouseMenu(event.screenPos(), menu, mouseInAxis, strip)
 
         elif controlRightMouse(event) and axis is None:
             # control-right-mouse click: reset the zoom
@@ -6340,6 +6278,76 @@ class CcpnGLWidget(QOpenGLWidget):
             event.ignore()
 
         self.update()
+
+    def _raiseRightMouseMenu(self, position, menu, mouseInAxis, strip):
+        if mouseInAxis == GLDefs.MAINVIEW:
+
+            # strip should handle the selection of correct menu
+            selectedDict = self.getObjectsUnderMouse()
+            if PEAKSELECT in selectedDict:
+
+                # Search if the event is in a range of a selected peak.
+                peaks = list(self.current.peaks)
+
+                if self.is1D:
+                    ii = strip._contextMenus.get(PeakMenu)
+                    if len(peaks) > 1:
+                        _hidePeaksSingleActionItems(ii)
+                    else:
+                        _setEnabledAllItems(ii, True)
+
+                # will only work for self.current.peak
+                strip._addItemsToNavigateToPeakMenu(selectedDict[PEAKSELECT])
+                strip._addItemsToMarkInPeakMenu(selectedDict[PEAKSELECT])
+
+                strip.contextMenuMode = PeakMenu
+                menu = strip._contextMenus.get(strip.contextMenuMode)
+                strip._lastClickedObjects = selectedDict[PEAKSELECT]
+
+            elif INTEGRALSELECT in selectedDict:
+                strip.contextMenuMode = IntegralMenu
+                menu = strip._contextMenus.get(strip.contextMenuMode)
+                strip._lastClickedObjects = selectedDict[INTEGRALSELECT]
+
+            elif MULTIPLETSELECT in selectedDict:
+                strip.contextMenuMode = MultipletMenu
+                menu = strip._contextMenus.get(strip.contextMenuMode)
+                strip._lastClickedObjects = selectedDict[MULTIPLETSELECT]
+
+            strip._navigateToPeakMenuMain.menuAction().setVisible(False)  # created from stripMethodName
+            strip._makeStripPlotItemMain.setVisible(False)
+            strip._estimateVolumesItemMain.setVisible(False)
+            strip._estimateVolumesItemSelected.setVisible(False)
+            if PEAKSELECT not in selectedDict:
+                _setEnabledAllItems(strip._selectedPeaksMenu, True if self.current.peaks else False)
+
+            # check other menu items before raising menus
+            strip._addItemsToNavigateToCursorPosMenu()
+            strip._addItemsToMarkInCursorPosMenu()
+
+            # this isn't as nice as below, could be cleaned up a little
+            strip.markAxesMenu.clear()
+            strip._addItemsToMarkAxesMenuMainView()
+
+            strip._addItemsToCopyAxisFromMenusMainView()
+            if not self.is1D:
+                strip._addItemsToMatchAxisCodesFromMenusMainView()
+            strip._checkMenuItems()
+
+        elif mouseInAxis in [GLDefs.BOTTOMAXIS, GLDefs.RIGHTAXIS, GLDefs.AXISCORNER]:
+            strip.contextMenuMode = AxisMenu
+            menu = strip._contextMenus.get(strip.contextMenuMode)
+
+            # create a dynamic menu based on the available axisCodes
+            menu.clear()
+            strip._addItemsToMarkAxesMenuAxesView(mouseInAxis, menu)
+            strip._addItemsToCopyAxisFromMenusAxes(mouseInAxis, menu, self.is1D)
+        if menu is not None:
+            strip.viewStripMenu = menu
+        else:
+            strip.viewStripMenu = self._getCanvasContextMenu()
+        for _ in self._mouseUnderMenu():
+            strip._raiseContextMenu(position=position)
 
     def _mouseInAxis(self, mousePos):
         h = self.h

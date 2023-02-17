@@ -339,7 +339,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         return value
 
 
-class FilterNoisePeaksPlugin(Plugin):
+class ProfileByReference(Plugin):
     PLUGINNAME = 'Profile by Reference'
     guiModule = ProfileByReferenceGuiPlugin
     CCPNPLUGIN = True
@@ -349,5 +349,5 @@ class FilterNoisePeaksPlugin(Plugin):
         print('Filtering noise peaks', kwargs)
 
 
-FilterNoisePeaksPlugin.register()  # Registers the pipe in the pluginList
+ProfileByReference.register()  # Registers the pipe in the pluginList
 # Set tolerances from project.spectrum.tolerances by default

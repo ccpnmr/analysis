@@ -139,6 +139,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['Spectrum']['SpectrumGroupId'] = widget
         self.settings['Spectrum']['SpectrumGroupId'] = self._getValue(widget)
 
+        if self.spectrumGroups:
+            self._selectSpectrumGroup(self.spectrumGroups[0])
+
         # pull down list for selecting the database to reference from
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text='Database', grid=grid)
@@ -204,12 +207,14 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.settings['Spectrum'][f'Multiplet {index+1} Chemical Shift'] = self._getValue(widget)
 
     def scaleChange(self):
-        scale = self.guiDict['Spectrum']['Scale'].value()
+        scale = 10**self.guiDict['Spectrum']['Scale'].value()
         self.simspec.scaleSpectrum(scale)
+        self.refreshSumSpectrum()
 
     def frequencyChange(self):
         frequency = self.guiDict['Spectrum']['Frequency'].value()
         self.simspec.setFrequency(frequency)
+        self.refreshSumSpectrum()
 
     def _selectSpectrumGroup(self, spectrumGroupID):
         spectrumGroup = self.project.getByPid('SG:' + spectrumGroupID)
@@ -256,12 +261,13 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
 
         grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=1, decimals=1, step=1, grid=grid, gridSpan=(1, 2))
-        widget.setRange(0, 10000000)
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=1, decimals=3, step=0.001, grid=grid, gridSpan=(1, 2))
+        widget.setRange(-7, 7)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(self.scaleChange)
-        self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
+        self.guiDict['Spectrum']['SimulatedSpectrumAttributes'].append(widget)
+        self.guiDict['Spectrum']['Scale'] = widget
         self.settings['Spectrum']['Scale'] = self._getValue(widget)
 
         # Add a widget for the simulated spectrum frequency
@@ -278,7 +284,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(self.frequencyChange)
-        self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
+        self.guiDict['Spectrum']['SimulatedSpectrumAttributes'].append(widget)
+        self.guiDict['Spectrum']['Frequency'] = widget
         self.settings['Spectrum']['Frequency'] = self._getValue(widget)
 
         for index in range(len(self.simspec.spinSystemMatrix)):

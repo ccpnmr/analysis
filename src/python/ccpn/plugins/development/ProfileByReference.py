@@ -64,11 +64,9 @@ from .pluginAddons import _addRow, _addColumn, _addVerticalSpacer, _setWidth, _s
 columnWidths = [300]
 
 # Set some tooltip texts
-help = {'Spectrum'        : 'Select spectrum',
-        'Peak list'       : 'Peak list to filter noise',
-        'Reference peaks' : 'Estimated number of peaks to use as reference. Minimum 10. Set to about 50% of expected real peaks in the spectrum.',
-        'Threshold factor': 'Standard deviations from average noise score derivative for noise score threshold calculation. Typically between 4-8',
-        'Filter'          : 'Filters noise from the current peak list.',
+help = {'SpectrumGroup' : 'Select spectrum group',
+        'MetaboliteList': 'Select the database to reference from',
+        'Metabolite'    : 'Select the metabolite to add to the overlay',
         }
 
 
@@ -131,7 +129,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
         grid = _addColumn(grid)
         widget = PulldownList(self.scrollAreaLayout, grid=grid, gridSpan=(1, 2),
-                              callback=self._selectSpectrumGroup, tipText=help['Spectrum'])
+                              callback=self._selectSpectrumGroup, tipText=help['SpectrumGroup'])
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
         self.spectrumGroups = [spectrumGroup.id for spectrumGroup in sorted(self.project.spectrumGroups)]
@@ -149,7 +147,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
         grid = _addColumn(grid)
         widget = PulldownList(self.scrollAreaLayout, grid=grid, gridSpan=(1, 2),
-                              callback=self._selectMetaboliteList, tipText=help['Spectrum'])
+                              callback=self._selectMetaboliteList, tipText=help['MetaboliteList'])
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
         databaseTables = list(self.settings['Simulators'].keys())
@@ -164,7 +162,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
         grid = _addColumn(grid)
         widget = PulldownList(self.scrollAreaLayout, grid=grid, gridSpan=(1, 2),
-                              callback=self._setupNewMetabolite, tipText=help['Spectrum'])
+                              callback=self._setupNewMetabolite, tipText=help['Metabolite'])
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
         self.guiDict['Spectrum']['metabolite'] = widget

@@ -31,7 +31,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-16 19:15:47 +0000 (Thu, February 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-17 17:35:26 +0000 (Fri, February 17, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -42,31 +42,21 @@ __date__ = "$Date: 2023-02-03 10:04:03 +0000 (Fri, February 03, 2023) $"
 # Start of code
 #=========================================================================================
 
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MultipleLocator
-from matplotlib.ticker import FormatStrFormatter
-from matplotlib.backends.backend_pdf import PdfPages
-from ccpn.util.Common import percentage
-import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
-import ccpn.framework.lib.experimentAnalysis.spectralDensityLib as sdl
-from ccpn.ui.gui.widgets.DrawSS import plotSS
+
 
 ############################################################
-#####################    User data      ##########################
+#####################    User Settings      #######################
 ############################################################
 
-fileName = 'RelaxationAnalysisAnisotropyDetermination'
-filePath = f'/Users/luca/Documents/V3-testings/{fileName}'
+dataTableName = 'RSDM_results'
 
-##  demo sequence for the GB1 protein
+##  demo sequence for the GB1 protein . Replace with an empty str if not available, e.g.: sequence  = ''
 sequence  = 'KLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
-##  secondary structure  for the above sequence  using the DSSP nomenclature
+##  secondary structure  for the above sequence  using the DSSP nomenclature.  Replace with an empty str if not available. e.g.: ss_sequence  = ''
 ss_sequence   =  'BBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
 
 ## Some Graphics Settings
-showInteractivePlot = False # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
+showInteractivePlot = True # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
 scatterColor = 'navy'
 scatterColorError = 'darkred'
 scatterExcludedByNOEColor = 'orange'
@@ -83,16 +73,37 @@ labelMinorSize=5
 titleColor = 'darkblue'
 hspace= 0.5
 
+
+
 ############################################################
-##################   End User data     ##########################
-###########################################################
+##################   End User Settings     ########################
+############################################################
+
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
+from ccpn.util.Path import aPath
+from matplotlib.backends.backend_pdf import PdfPages
+from ccpn.util.Common import percentage
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
+import ccpn.framework.lib.experimentAnalysis.spectralDensityLib as sdl
+from ccpn.ui.gui.widgets.DrawSS import plotSS
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 
 ###################      start macro       #########################
 
-RSDMResultsDataTable = get('DT:RSDM_results')
+
+
+
+RSDMResultsDataTable = get(f'DT:{dataTableName}')
 if RSDMResultsDataTable is None:
-    errorMess = 'Cannot display results. Ensure you have the RSDMResults dataTable in the project or you inserted the correct pid in the macro'
+    errorMess = f'''\nCannot find the datatable named:  "{dataTableName}" . 
+    \n
+    Ensure you have the correct dataTable in the project and set the same name in the macro. 
+    (See the User-Data section and general documentation on this macro). '''
+    showWarning('Datatable not found', errorMess)
     raise RuntimeError(errorMess)
 
 
@@ -130,6 +141,15 @@ yMedianR1R2 = np.array([medianfR1R2]*len(xSequence))
 yMedianR2R1 = np.array([medianfR2R1]*len(xSequence))
 yScatterMedianR1R2 = np.linspace(0, np.max(R1R2), len(yMedianR1R2))
 xScatterMedianLine = np.linspace(0, np.max(R2R1), len(yMedianR1R2))
+
+# calculate the S2 average eq.3
+
+avS2 = sdl.estimateAverageS2(R1, R2, NOE,  noeExclusionLimit=NOE_limitExclusion, proportiontocut=0.1)
+Ct = sdl.estimateOverallCorrelationTimeFromR1R2(R1, R2, spectrometerFrequency=600.13)
+avCt = np.average(Ct)
+
+info(f'Average S2 = {avS2}')
+
 
 ####################     end data preparation     ##################
 
@@ -219,8 +239,13 @@ def _plotScatterRates(pdf):
     pdf.savefig()
     return fig
 
-# init pdf
-with PdfPages(f'{filePath}.pdf') as pdf:
+# save to pdf
+thisFilePath = aPath(__file__)
+exportingFileName =f'{thisFilePath.basename}.pdf'
+exportingDirectoryPath = thisFilePath.filepath
+filePath = aPath(exportingDirectoryPath).joinpath(exportingFileName)
+
+with PdfPages(filePath) as pdf:
     fig1 = _ploteRates(pdf)
     fig2 = _plotScatterRates(pdf)
 

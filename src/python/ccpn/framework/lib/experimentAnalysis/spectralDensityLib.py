@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-16 17:44:59 +0000 (Thu, February 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-17 17:35:25 +0000 (Fri, February 17, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from math import pi
 from random import random, randint
 from math import sqrt, exp
 import pandas as pd
-
+from scipy import stats
 
 ############################################################
 ########## Reduced Spectral Density Mapping analysis   #############
@@ -89,7 +89,7 @@ def _calculateMolecularTumblingCorrelationTime(omega, alpha, beta):
     solve the Polynomial Structure -> ax^3 + bx^2 + cx + d = 0
     from eq. 18  Backbone dynamics of Barstar: A 15N NMR relaxation study.
     Udgaonkar et al 2000. Proteins: 41:460-474
-    :param omega:
+    :param omega: omegaN
     :param alpha: the slope for the fitting J0 vs JwN
     :param beta: the intercept for the fitting J0 vs JwN
     :return:
@@ -112,7 +112,7 @@ def _filterLowNoeFromR1R2(r1, r2, noe, noeExclusionLimit=0.65):
     r2 = r2[mask]
     return r1, r2
 
-def estimateAverageS2(r1, r2, func=np.median, noe=None, noeExclusionLimit=0.65):
+def estimateAverageS2(r1, r2, noe=None, noeExclusionLimit=0.65, proportiontocut=.1 ):
     """
     Estimate the average generalized order parameters Sav2
     from experimentally observed R1R2.
@@ -126,18 +126,16 @@ def estimateAverageS2(r1, r2, func=np.median, noe=None, noeExclusionLimit=0.65):
     :param r1: array of R1 values
     :param r2: array of R2 values
     :param noe: array of  NOE values
-    :param func: a calculation function to compute the  r1*r2. One of np.mean or np.median.
-                            default: median
+    :param proportiontocut:  float, cut value to calculate the trim average. default 0.1 for a 10%  left/right cut
     :return: float: S2
     """
-    if func not in [np.mean, np.median]:
-        func =  np.median
+
     if noe is not None:
         r1, r2 = _filterLowNoeFromR1R2(r1, r2, noe, noeExclusionLimit)
     _pr = r1*r2
-    _func = func(_pr)
+    _trimMean = stats.trim_mean(_pr,  proportiontocut= proportiontocut)
     _max = np.max(_pr)
-    sAv = np.sqrt(_func/_max)
+    sAv = np.sqrt(_trimMean/_max)
     return sAv
 
 def estimateOverallCorrelationTimeFromR1R2(r1, r2, spectrometerFrequency):
@@ -157,7 +155,7 @@ def estimateOverallCorrelationTimeFromR1R2(r1, r2, spectrometerFrequency):
     t2 = 1/r2
     omegaN = calculateOmegaN(spectrometerFrequency, scalingFactor=1e6)
     part1 =  1/(2*omegaN)
-    part2 = np.sqrt( ((6*t1)/t2) - 7 )
+    part2 = np.sqrt( ((6*t1)/t2)- 7 )
 
     return  part1 * part2
 

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-14 14:59:57 +0000 (Tue, February 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-17 17:35:26 +0000 (Fri, February 17, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2023-02-03 10:04:03 +0000 (Fri, February 03, 2023) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+import os.path
 
 import numpy as np
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
@@ -48,8 +49,8 @@ from ccpn.util.floatUtils import fExp, fMan
 ###################
 
 
-fileName = 'RelaxationIsotropicAnalysisResults'
-filePath = f'/Users/luca/Documents/V3-testings/{fileName}'
+exportingFileName = 'RelaxationIsotropicAnalysisResults'
+exportingDirectoryPath = '/Users/luca/Documents/V3-testings/'
 
 RSDMResultsDataTable = get('DT:RSDM_results')
 
@@ -160,6 +161,7 @@ def _plotIsotropicAnalysisPage1(pdf):
     _closeFig(fig, pdf, plt)
 
 # init pdf
+filePath = os.path.join(exportingDirectoryPath, exportingFileName)
 with PdfPages(f'{filePath}.pdf') as pdf:
     _plotIsotropicAnalysisPage1(pdf)
 

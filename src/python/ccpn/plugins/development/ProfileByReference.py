@@ -96,6 +96,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         # it is needed to create the two dictionaries alongside each other
         self.guiDict = OD([('Spectrum', OD())])
         self.settings = OD([('Spectrum', OD()), ('Databases', OD()), ('Simulators', OD())])
+        self.metaboliteSimulations = OD()
 
         # # Input check
         # validInput = self._inputDataCheck()
@@ -221,6 +222,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
     def _selectSpectrumGroup(self, spectrumGroupID):
         spectrumGroup = self.project.getByPid('SG:' + spectrumGroupID)
+        valuesColumns = ['Metabolite Name', 'Database'] + [spectrum.name for spectrum in spectrumGroup.spectra]
+        self.values = pandas.DataFrame(columns=valuesColumns)
         limits = (max(spectrumGroup.spectra[0].positions), min(spectrumGroup.spectra[0].positions))
         points = len(spectrumGroup.spectra[0].positions)
         self.settings['Spectrum']['referenceSumSpectrumLimits'] = limits
@@ -246,10 +249,14 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         currentDatabase = self.settings['Spectrum']['currentDatabase']
         metabolitesData = self.settings['Databases'][currentDatabase].data
         metaboliteID = metabolitesData.loc[metabolitesData['name'] == metaboliteName].metabolite_id.iloc[0]
-        self.simspec = self.settings['Simulators'][currentDatabase].pure_spectrum(metabolite_id=metaboliteID, width=0.002, frequency=700, points=self.settings['Spectrum']['referenceSumSpectrumPoints'], limits=self.settings['Spectrum']['referenceSumSpectrumLimits'], plotting='spin_system')[0]
-        self.addSimSpectrumToList(self.simspec)
-        #self.settings['Spectrum']['referenceSpectrumGroup'].addSpectrum(self.simspec.spectrum)
-        self.refreshSumSpectrum()
+        if metaboliteName not in self.metaboliteSimulations:
+            self.simspec = self.settings['Simulators'][currentDatabase].pure_spectrum(metabolite_id=metaboliteID, width=0.002, frequency=700, points=self.settings['Spectrum']['referenceSumSpectrumPoints'], limits=self.settings['Spectrum']['referenceSumSpectrumLimits'], plotting='spin_system')[0]
+            self.metaboliteSimulations[metaboliteName] = self.simspec
+            self.addSimSpectrumToList(self.simspec)
+            self.settings['Spectrum']['referenceSpectrumGroup'].addSpectrum(self.simspec.spectrum)
+            self.refreshSumSpectrum()
+        else:
+            self.simspec = self.metaboliteSimulations[metaboliteName]
 
         if self.guiDict['Spectrum']['SimulatedSpectrumAttributes']:
             for widget in self.guiDict['Spectrum']['SimulatedSpectrumAttributes']:

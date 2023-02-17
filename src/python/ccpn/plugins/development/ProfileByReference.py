@@ -185,6 +185,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         def valueChange():
             shift = widget.value()
             self.simspec.moveSpinSystemMultiplet(index, shift)
+            self.refreshSumSpectrum()
         grid = (index+5, index+5)
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Multiplet {index+1} Chemical Shift', grid=grid)
@@ -238,8 +239,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         metabolitesData = self.settings['Databases'][currentDatabase].data
         metaboliteID = metabolitesData.loc[metabolitesData['name'] == metaboliteName].metabolite_id.iloc[0]
         self.simspec = self.settings['Simulators'][currentDatabase].pure_spectrum(metabolite_id=metaboliteID, width=0.002, frequency=700, points=self.settings['Spectrum']['referenceSumSpectrumPoints'], limits=self.settings['Spectrum']['referenceSumSpectrumLimits'], plotting='spin_system')[0]
-        self.settings['Spectrum']['referenceSpectrumGroup'].addSpectrum(self.simspec.spectrum)
-        self.settings['Spectrum']['referenceSumSpectrum'].intensities += self.simspec.spectrum.intensities
+        self.addSimSpectrumToList(self.simspec)
+        #self.settings['Spectrum']['referenceSpectrumGroup'].addSpectrum(self.simspec.spectrum)
+        self.refreshSumSpectrum()
 
         if self.guiDict['Spectrum']['SimulatedSpectrumAttributes']:
             for widget in self.guiDict['Spectrum']['SimulatedSpectrumAttributes']:
@@ -282,6 +284,18 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         for index in range(len(self.simspec.spinSystemMatrix)):
             self.addDoubleSpinbox(index)
         self.project.widgetList = self.guiDict['Spectrum']['SimulatedSpectrumAttributes']
+
+    def addSimSpectrumToList(self, spectrum):
+        if 'SimulatedSpectra' not in self.settings['Spectrum']:
+            self.settings['Spectrum']['SimulatedSpectra'] = [spectrum]
+        else:
+            self.settings['Spectrum']['SimulatedSpectra'].append(spectrum)
+
+    def refreshSumSpectrum(self):
+        sumIntensities = numpy.zeros(self.settings['Spectrum']['referenceSumSpectrumPoints'])
+        for spectrum in self.settings['Spectrum']['SimulatedSpectra']:
+            sumIntensities += spectrum.spectrum.intensities
+        self.settings['Spectrum']['referenceSumSpectrum'].intensities = sumIntensities
 
     def _inputDataCheck(self):
         # Checks available input data at plugin start

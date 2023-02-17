@@ -189,7 +189,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             shift = widget.value()
             self.simspec.moveSpinSystemMultiplet(index, shift)
             self.refreshSumSpectrum()
-        grid = (index+5, index+5)
+        grid = (index+6, index+6)
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Multiplet {index+1} Chemical Shift', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
@@ -205,6 +205,11 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
         self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
         self.settings['Spectrum'][f'Multiplet {index+1} Chemical Shift'] = self._getValue(widget)
+
+    def widthChange(self):
+        width = self.guiDict['Spectrum']['Width'].value()/self.guiDict['Spectrum']['Frequency'].value()
+        self.simspec.setWidth(width)
+        self.refreshSumSpectrum()
 
     def scaleChange(self):
         scale = 10**self.guiDict['Spectrum']['Scale'].value()
@@ -254,6 +259,22 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             self.guiDict['Spectrum']['SimulatedSpectrumAttributes'] = []
 
         grid = (3, 1)
+        # Add a widget for the simulated spectrum peak width
+        grid = _addRow(grid)
+        widget = Label(self.scrollAreaLayout, text=f'Width', grid=grid)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+        self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
+
+        grid = _addColumn(grid)
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=1, decimals=1, step=0.1, grid=grid, gridSpan=(1, 2))
+        widget.setRange(0.1, 5)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
+        widget.setButtonSymbols(2)
+        widget.valueChanged.connect(self.widthChange)
+        self.guiDict['Spectrum']['SimulatedSpectrumAttributes'].append(widget)
+        self.guiDict['Spectrum']['Width'] = widget
+        self.settings['Spectrum']['Width'] = self._getValue(widget)
+
         # Add a widget for the simulated spectrum scale
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Scale', grid=grid)

@@ -121,10 +121,6 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.settings['Databases']['BMRB'] = self.project.newDataTable(name='bmrb_metabolites_table', data=bmrb_metabolites)
         self.settings['Databases']['GISSMO'] = self.project.newDataTable(name='gissmo_metabolites_table', data=gissmo_metabolites)
 
-        # create the simulated spectrum group
-        if 'Reference_Spectra' not in self.project.spectrumGroups:
-            self.settings['Spectrum']['referenceSpectrumGroup'] = self.project.newSpectrumGroup(name='Reference_Spectra')
-
         grid = (0, 0)
         self.guiDict['Spectrum']['SimulatedSpectrumAttributes'] = []
 
@@ -134,7 +130,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
         grid = _addColumn(grid)
-        widget = PulldownList(self.scrollAreaLayout, grid=grid, gridSpan=(1, 2), tipText=help['Spectrum'])
+        widget = PulldownList(self.scrollAreaLayout, grid=grid, gridSpan=(1, 2),
+                              callback=self._selectSpectrumGroup, tipText=help['Spectrum'])
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
         self.spectrumGroups = [spectrumGroup.id for spectrumGroup in sorted(self.project.spectrumGroups)]
@@ -213,8 +210,20 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         frequency = self.guiDict['Spectrum']['Frequency'].value()
         self.simspec.setFrequency(frequency)
 
-    '''def _databaseTableID2DatabaseTable(self, databaseTableID):
-        return self.project.getByPid('DT:' + databaseTableID)'''
+    def _selectSpectrumGroup(self, spectrumGroupID):
+        spectrumGroup = self.project.getByPid('SG:' + spectrumGroupID)
+        limits = (max(spectrumGroup.spectra[0].positions), min(spectrumGroup.spectra[0].positions))
+        points = len(spectrumGroup.spectra[0].positions)
+        self.settings['Spectrum']['referenceSumSpectrumLimits'] = limits
+        self.settings['Spectrum']['referenceSumSpectrumPoints'] = points
+        x = numpy.linspace(limits[0], limits[1], points)
+        y = numpy.zeros(points)
+        # create the simulated spectrum group
+        if 'Reference_Spectra' not in self.project.spectrumGroups:
+            self.settings['Spectrum']['referenceSpectrumGroup'] = self.project.newSpectrumGroup(
+                name='Reference_Spectra')
+            self.settings['Spectrum']['referenceSumSpectrum'] = self.project.newEmptySpectrum(['1H'], name=f'Sum_Spectrum', intensities=y, positions=x)
+            self.settings['Spectrum']['referenceSpectrumGroup'].addSpectrum(self.settings['Spectrum']['referenceSumSpectrum'])
 
     def _selectMetaboliteList(self, databaseName):
         databaseTable = self.settings['Databases'][databaseName]
@@ -228,7 +237,10 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         currentDatabase = self.settings['Spectrum']['currentDatabase']
         metabolitesData = self.settings['Databases'][currentDatabase].data
         metaboliteID = metabolitesData.loc[metabolitesData['name'] == metaboliteName].metabolite_id.iloc[0]
-        self.simspec = self.settings['Simulators'][currentDatabase].pure_spectrum(metabolite_id=metaboliteID, width=0.002, frequency=700, plotting='spin_system')[0]
+        self.simspec = self.settings['Simulators'][currentDatabase].pure_spectrum(metabolite_id=metaboliteID, width=0.002, frequency=700, points=self.settings['Spectrum']['referenceSumSpectrumPoints'], limits=self.settings['Spectrum']['referenceSumSpectrumLimits'], plotting='spin_system')[0]
+        self.settings['Spectrum']['referenceSpectrumGroup'].addSpectrum(self.simspec.spectrum)
+        self.settings['Spectrum']['referenceSumSpectrum'].intensities += self.simspec.spectrum.intensities
+
         if self.guiDict['Spectrum']['SimulatedSpectrumAttributes']:
             for widget in self.guiDict['Spectrum']['SimulatedSpectrumAttributes']:
                 widget.deleteLater()

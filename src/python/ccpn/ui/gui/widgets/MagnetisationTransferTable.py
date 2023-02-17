@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-15 19:22:57 +0000 (Wed, February 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-17 15:38:09 +0000 (Fri, February 17, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -26,178 +26,17 @@ __date__ = "$Date: 2022-08-17 13:51:55 +0100 (Wed, August 17, 2022) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore, QtWidgets
-from functools import partial
+from PyQt5 import QtCore
 import pandas as pd
-import time
+
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTypes, \
     MagnetisationTransferParameters, MagnetisationTransferTuple
 from ccpn.ui.gui.widgets.Column import ColumnClass
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.table.TableABC import TableABC
-from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.widgets.table._TableDelegates import _SmallPulldown, _SimplePulldownTableDelegate
+
 
 EDIT_ROLE = QtCore.Qt.EditRole
-
-
-#=========================================================================================
-# _SmallPulldown
-#=========================================================================================
-
-class _SmallPulldown(PulldownList):
-    """Pulldown popup to hold the pulldown lists for editing the table cell,
-    modified to block closing until after the double-click interval has elapsed.
-    This make the table editing cleaner.
-    """
-
-    def __init__(self, parent, mainWindow=None, project=None, *args, **kwds):
-        super().__init__(parent, *args, **kwds)
-
-        self.mainWindow = mainWindow
-        self.project = project
-        self._popupTimer = time.perf_counter()
-        self._interval = QtWidgets.QApplication.instance().doubleClickInterval() / 1e3
-
-    def showPopup(self):
-        """Show the popup and store the popup time.
-        """
-        self._popupTimer = time.perf_counter()
-        super().showPopup()
-
-    def hidePopup(self) -> None:
-        """Hide the popup if event occurs after the double-click interval
-        """
-        diff = time.perf_counter() - self._popupTimer
-        if diff > self._interval:
-            # disable the hidePopup until after the double-click interval
-            # prevents the popup showing/hiding when double-clicked
-            return super().hidePopup()
-
-
-#=========================================================================================
-# Table delegate to handle editing
-#=========================================================================================
-
-class _SimplePulldownTableDelegate(QtWidgets.QStyledItemDelegate):
-    """Handle the setting of data when editing the table
-    """
-    modelDataChanged = QtCore.pyqtSignal()
-
-    def __init__(self, parent, *, objectColumn=None, focusBorderWidth=None):
-        """Initialise the delegate.
-
-        :param parent: link to the handling table.
-        :param objectColumn: name of the column containing the objects for referencing.
-        """
-        super().__init__(parent)
-
-        self.customWidget = None
-        self._parent = parent
-        self._objectColumn = objectColumn
-
-    def createEditor(self, parentWidget, itemStyle, index):
-        """Returns the edit widget.
-
-        :param parentWidget: the table widget.
-        :param itemStyle: style to apply to the editor.
-        :param index: QModelIndex of the cell in the table.
-        :return: editor widget defined by the editClass.
-        """
-        col = index.column()
-        objCol = self._parent._columnDefs.columns[col]
-
-        if objCol.editClass:
-            widget = objCol.editClass(None, *objCol.editArgs, **objCol.editKw)
-            widget.setParent(parentWidget)
-            widget.activated.connect(partial(self._pulldownActivated, widget))
-            widget.closeOnLineEditClick = False
-
-            self.customWidget = widget
-            return widget
-
-        self.customWidget = None
-
-        return super().createEditor(parentWidget, itemStyle, index)
-
-    def setEditorData(self, widget, index) -> None:
-        """Populate the editor widget when the cell is edited.
-
-        :param widget: the editor widget.
-        :param index: QModelIndex of the cell in the table.
-        :return:
-        """
-        if self.customWidget:
-            model = index.model()
-            value = model.data(index, EDIT_ROLE)
-
-            if not isinstance(value, (list, tuple)):
-                value = (value,)
-
-            if hasattr(widget, 'selectValue'):
-                widget.selectValue(*value)
-            else:
-                raise RuntimeError(f'Widget {widget} does not expose a set method; required for table editing')
-
-        else:
-            super().setEditorData(widget, index)
-
-    def setModelData(self, widget, mode, index):
-        """Set the object to the new value.
-
-        :param widget: the editor widget.
-        :param mode: editing mode.
-        :param index: QModelIndex of the cell in the table.
-        """
-        if self.customWidget:
-            if hasattr(widget, 'get'):
-                value = widget.get()
-            else:
-                raise RuntimeError(f'Widget {widget} does not expose a get method; required for table editing')
-
-            try:
-                model = index.model()
-                model.setData(index, value)
-
-            except Exception as es:
-                getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - {es}  {self._parent.model()._sortIndex}  {value}')
-
-        else:
-            super(_SimplePulldownTableDelegate, self).setModelData(widget, mode, index)
-
-    def updateEditorGeometry(self, widget, itemStyle, index):
-        """Ensures that the editor is displayed correctly.
-
-        :param widget: the editor widget.
-        :param itemStyle: style to apply to the editor.
-        :param index: QModelIndex of the cell in the table.
-        :return:
-        """
-        if self.customWidget:
-            cellRect = itemStyle.rect
-            pos = widget.mapToGlobal(cellRect.topLeft())
-            x, y = pos.x(), pos.y()
-            hint = widget.sizeHint()
-            width = max(hint.width(), cellRect.width())
-            height = max(hint.height(), cellRect.height())
-
-            # force the pulldownList to be a popup - will always close when clicking outside
-            widget.setParent(self._parent, QtCore.Qt.Popup)
-            widget.setGeometry(x, y, width, height)
-            # QT delay to popup ensures that focus is correct when opening
-            QtCore.QTimer.singleShot(0, widget.showPopup)
-
-        else:
-            super().updateEditorGeometry(widget, itemStyle, index)
-
-    @staticmethod
-    def _pulldownActivated(widget):
-        """Close the editor widget.
-
-        :param widget: editor widget.
-        :return:
-        """
-        # stop the closed-pulldownList from staying visible after selection
-        widget.close()
 
 
 #=========================================================================================
@@ -208,7 +47,6 @@ class MagnetisationTransferTable(TableABC):
     """A table to contain the list of magnetisation-transfers for a spectrum.
     Transfers are set for a particular experiment-type or user defined.
     """
-    # tableChanged = QtCore.pyqtSignal()
 
     defaultTableDelegate = _SimplePulldownTableDelegate
 
@@ -248,10 +86,6 @@ class MagnetisationTransferTable(TableABC):
             col = self._columnDefs.columns[ii]
             col.editClass = _SmallPulldown
             col.editKw = {'texts': options}
-
-        # # set the delegate for editing
-        # delegate = _SimplePulldownTableDelegate(self, objectColumn=None)
-        # self.setItemDelegate(delegate)
 
         self._rightClickedTableIndex = None  # last selected item in a table before raising the context menu. Enabled with mousePress event filter
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-15 19:22:57 +0000 (Wed, February 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-17 15:38:10 +0000 (Fri, February 17, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -31,9 +31,9 @@ import pandas as pd
 from ccpn.ui.gui.widgets.Column import ColumnClass, Column
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.table.Table import Table
-from ccpn.ui.gui.widgets.table._TableModel import _TableModel, DISPLAY_ROLE, CHECK_ROLE, \
-    BACKGROUND_ROLE, CHECKED, UNCHECKED, ENABLED, CHECKABLE, SELECTABLE, EDIT_ROLE, \
-    ICON_ROLE, TOOLTIP_ROLE, ALIGNMENT_ROLE
+from ccpn.ui.gui.widgets.table._TableModel import _TableModel
+from ccpn.ui.gui.widgets.table._TableCommon import EDIT_ROLE, DISPLAY_ROLE, TOOLTIP_ROLE, \
+    BACKGROUND_ROLE, CHECK_ROLE, ICON_ROLE, ALIGNMENT_ROLE, CHECKABLE, ENABLED, SELECTABLE, CHECKED, UNCHECKED
 from ccpn.util.Common import NOTHING
 
 
@@ -100,7 +100,6 @@ class _ValidateModel(_TableModel):
 class ValidateSpectraTable(Table):
     """A table to contain the list of spectra and associated spectrum filePaths
     """
-    # tableChanged = QtCore.pyqtSignal()
 
     styleSheet = """QTableView {
                         background-color: transparent;

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-15 19:22:58 +0000 (Wed, February 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-17 15:38:10 +0000 (Fri, February 17, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -37,8 +37,9 @@ from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptio
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.table.TableABC import TableABC, INDEX_ROLE
-from ccpn.ui.gui.widgets.table._TableDelegate import _TableDelegate
+from ccpn.ui.gui.widgets.table.TableABC import TableABC
+from ccpn.ui.gui.widgets.table._TableCommon import INDEX_ROLE
+from ccpn.ui.gui.widgets.table._TableDelegates import _TableDelegate
 from ccpn.ui._implementation.QueueHandler import QueueHandler
 from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet

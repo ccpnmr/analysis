@@ -6,7 +6,7 @@ import pandas as pd
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.Column import Column
 from ccpn.ui.gui.widgets.table.Table import Table
-from ccpn.ui.gui.widgets.table._TableModel import  INDEX_ROLE
+from ccpn.ui.gui.widgets.table._TableCommon import INDEX_ROLE
 from ccpn.util.OrderedSet import OrderedSet
 
 class CustomDataFrameTable(Table):

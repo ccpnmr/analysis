@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-15 19:22:57 +0000 (Wed, February 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-17 15:38:09 +0000 (Fri, February 17, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -230,8 +230,8 @@ GUITABLEHEADER_SELECTED_BACKGROUND = 'GUITABLEHEADER_SELECTED_BACKGROUND'
 GUITABLEHEADER_GROUP_GRIDLINES = 'GUITABLEHEADER_GROUP_GRIDLINES'
 
 # strip header colours
-STRIPHEADER_FOREGROUND = 'STRIPHEADER_FOREGROUND'
-STRIPHEADER_BACKGROUND = 'STRIPHEADER_BACKGROUND'
+GUITABLEHEADER_FOREGROUND = 'GUITABLEHEADER_FOREGROUND'
+GUITABLEHEADER_BACKGROUND = 'GUITABLEHEADER_BACKGROUND'
 
 # border for focus/noFocus - QPlainTextEdit
 BORDERNOFOCUS = 'BORDER_NOFOCUS'
@@ -350,8 +350,8 @@ colourSchemes = {
         GUITABLEHEADER_SELECTED_BACKGROUND: 'gainsboro',
         GUITABLEHEADER_GROUP_GRIDLINES    : 'darkgrey',
 
-        STRIPHEADER_FOREGROUND            : TEXT_COLOUR,
-        STRIPHEADER_BACKGROUND            : '#ebebeb',
+        GUITABLEHEADER_FOREGROUND            : TEXT_COLOUR,
+        GUITABLEHEADER_BACKGROUND            : '#ebebeb',
 
         BORDERFOCUS                       : BORDERFOCUS_COLOUR,
         BORDERNOFOCUS                     : BORDERNOFOCUS_COLOUR,

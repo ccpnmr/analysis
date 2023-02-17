@@ -36,10 +36,11 @@ from ccpn.ui.gui.guiSettings import getColours, GUITABLE_GRIDLINES
 from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.table._TableModel import _TableModel, VALUE_ROLE, INDEX_ROLE
+from ccpn.ui.gui.widgets.table._TableModel import _TableModel
+from ccpn.ui.gui.widgets.table._TableCommon import INDEX_ROLE
 from ccpn.ui.gui.widgets.table._TableAdditions import TableHeaderColumns, \
     TableCopyCell, TableExport, TableSearchMenu, TableDelete, TableMenuABC, TableHeaderABC
-from ccpn.ui.gui.widgets.table._TableDelegate import _TableDelegateABC
+from ccpn.ui.gui.widgets.table._TableDelegates import _TableDelegateABC
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import NOTHING

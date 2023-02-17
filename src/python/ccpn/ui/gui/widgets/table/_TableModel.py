@@ -34,50 +34,11 @@ from contextlib import suppress
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
 from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.table._TableCommon import EDIT_ROLE, DISPLAY_ROLE, TOOLTIP_ROLE, \
+    BACKGROUND_ROLE, FOREGROUND_ROLE, CHECK_ROLE, ICON_ROLE, SIZE_ROLE, ALIGNMENT_ROLE, \
+    FONT_ROLE, CHECKABLE, ENABLED, SELECTABLE, EDITABLE, CHECKED, UNCHECKED, VALUE_ROLE, \
+    INDEX_ROLE, BORDER_ROLE, ORIENTATIONS
 from ccpn.util.Logging import getLogger
-
-
-ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
-                'horizontal'        : QtCore.Qt.Horizontal,
-                'v'                 : QtCore.Qt.Vertical,
-                'vertical'          : QtCore.Qt.Vertical,
-                QtCore.Qt.Horizontal: QtCore.Qt.Horizontal,
-                QtCore.Qt.Vertical  : QtCore.Qt.Vertical,
-                }
-
-# standard definitions for roles applicable to QTableModel
-USER_ROLE = QtCore.Qt.UserRole
-EDIT_ROLE = QtCore.Qt.EditRole
-DISPLAY_ROLE = QtCore.Qt.DisplayRole
-TOOLTIP_ROLE = QtCore.Qt.ToolTipRole
-STATUS_ROLE = QtCore.Qt.StatusTipRole
-BACKGROUND_ROLE = QtCore.Qt.BackgroundRole
-BACKGROUNDCOLOR_ROLE = QtCore.Qt.BackgroundColorRole
-FOREGROUND_ROLE = QtCore.Qt.ForegroundRole
-CHECK_ROLE = QtCore.Qt.CheckStateRole
-ICON_ROLE = QtCore.Qt.DecorationRole
-SIZE_ROLE = QtCore.Qt.SizeHintRole
-ALIGNMENT_ROLE = QtCore.Qt.TextAlignmentRole
-FONT_ROLE = QtCore.Qt.FontRole
-NO_PROPS = QtCore.Qt.NoItemFlags
-CHECKABLE = QtCore.Qt.ItemIsUserCheckable
-ENABLED = QtCore.Qt.ItemIsEnabled
-SELECTABLE = QtCore.Qt.ItemIsSelectable
-EDITABLE = QtCore.Qt.ItemIsEditable
-CHECKED = QtCore.Qt.Checked
-UNCHECKED = QtCore.Qt.Unchecked
-PARTIALLYECHECKED = QtCore.Qt.PartiallyChecked
-
-# define roles to return cell-values
-DTYPE_ROLE = QtCore.Qt.UserRole + 1000
-VALUE_ROLE = QtCore.Qt.UserRole + 1001
-
-# a role to map the table-index to the cell in the df
-INDEX_ROLE = QtCore.Qt.UserRole + 1002
-BORDER_ROLE = QtCore.Qt.UserRole + 1003
-
-_EDITOR_SETTER = ('setColor', 'selectValue', 'setData', 'set', 'setValue', 'setText', 'setFile')
-_EDITOR_GETTER = ('get', 'value', 'text', 'getFile')
 
 
 #=========================================================================================
@@ -94,6 +55,7 @@ class _TableModel(QtCore.QAbstractTableModel):
     _MAXCHARS = 100
     _chrWidth = 12
     _chrHeight = 12
+    _chrPadding = 8
 
     showEditIcon = False
     defaultFlags = ENABLED | SELECTABLE  # add CHECKABLE to enable check-boxes
@@ -114,8 +76,9 @@ class _TableModel(QtCore.QAbstractTableModel):
             bbox = fontMetric.boundingRect
 
             # get an estimate for an average character width/height - must be floats for estimate-column-widths
-            self._chrWidth = 1 + bbox('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789').width() / 36
-            self._chrHeight = bbox('A').height() + 6
+            test = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,./;\<>?:|!@£$%^&*()'
+            self._chrWidth = 1 + bbox(test).width() / len(test)
+            self._chrHeight = bbox('A').height() + self._chrPadding
 
         # set default colours
         self._defaultForegroundColour = QtGui.QColor(getColours()[GUITABLE_ITEM_FOREGROUND])
@@ -371,19 +334,19 @@ class _TableModel(QtCore.QAbstractTableModel):
             fRow = self._filterIndex[index.row()] if self._filterIndex is not None and 0 <= index.row() < len(self._filterIndex) else index.row()
             row, col = self._sortIndex[fRow], index.column()
 
-            if role == DISPLAY_ROLE:
-                # need to discard columns that include check-boxes
-                v = self._df.iat[row, col]
+        if role == DISPLAY_ROLE:
+            # need to discard columns that include check-boxes
+            val = self._df.iat[row, col]
 
-                # float/np.float - round to 3 decimal places
-                if isinstance(v, (float, np.floating)):
-                    # make it scientific annotation if a huge/tiny number
-                    try:
-                        value = f'{v:.3e}' if v > 1e6 or v < 1e-6 else f'{v:.3f}'
-                    except Exception as ex:
-                        value = str(v)
-                else:
-                    value = str(v)
+            # float/np.float - round to 3 decimal places
+            if isinstance(val, (float, np.floating)):
+                # make it scientific annotation if a huge/tiny number
+                try:
+                    value = f'{val:.3f}' if (1e-6 < val < 1e6) or val == 0.0 else f'{val:.3e}'
+                except Exception:
+                    value = str(val)
+            else:
+                value = str(val)
 
                 return value
 
@@ -508,31 +471,18 @@ class _TableModel(QtCore.QAbstractTableModel):
             # process the heights/widths of the headers
             if orientation == QtCore.Qt.Horizontal:
                 try:
-                    txt = str(self.headerData(col, orientation, role=DISPLAY_ROLE))
-                    height = len(txt.split('\n')) * int(self._chrHeight)
-
-                    # get the estimated width of the column, also for the last visible column\
+                    # get the estimated width of the column, also for the last visible column
                     if (self._view._columnDefs and self._view._columnDefs._columns):
                         colObj = self._view._columnDefs._columns[col]
                         width = colObj.columnWidth
                         if width is not None:
-                            return QtCore.QSize(width, height)
+                            # use the fixed-column width
+                            return QtCore.QSize(width, self._chrHeight)
 
                     width = self._estimateColumnWidth(col)
 
-                    # header = self._view.horizontalHeader()
-                    # if visibleCols := [col for col in range(self.columnCount()) if not header.isSectionHidden(col)]:
-                    #     # get the width of all the previous visible columns
-                    #     lastCol = visibleCols[-1]
-                    #     if col == lastCol and self._view is not None:
-                    #         # stretch the last column to fit the table - sum the previous columns
-                    #         # I think setStretchLastSection automatically does this
-                    #         colWidths = sum(self._estimateColumnWidth(cc) for cc in visibleCols[:-1])
-                    #         viewWidth = self._view.viewport().size().width()
-                    #         width = max(width, viewWidth - colWidths)
-
                     # return the size
-                    return QtCore.QSize(width, height)
+                    return QtCore.QSize(width, self._chrHeight)
 
                 except Exception:
                     # return the default QSize
@@ -553,11 +503,17 @@ class _TableModel(QtCore.QAbstractTableModel):
         # get the width of the header
         try:
             # quickest way to get the column
-            colName = self._df.columns[col]
-        except Exception:
-            colName = None
+            if type(self._df.columns) is pd.MultiIndex:
+                txts = list(self._df.columns)[col][-1].split('\n')
+            else:
+                txts = list(self._df.columns)[col].split('\n')
 
-        maxLen = max(len(colName) if colName else 0, self._MINCHARS)  # never smaller than 4 characters
+            maxLen = max(len(txt) for txt in txts)
+        except Exception:
+            maxLen = 0
+
+        # need to check for edit-symbol
+        maxLen = max(maxLen + 3, self._MINCHARS)  # never smaller than _MINCHARS characters
 
         # iterate over a few rows to get an estimate
         for row in range(min(self.rowCount(), self._CHECKROWS)):
@@ -731,7 +687,7 @@ class _TableObjectModel(_TableModel):
 
     Objects are defined as a list, and table is populated with information from the Column classes.
     """
-    # NOTE:ED - not tested
+    # NOTE:ED - not properly tested
 
     defaultFlags = ENABLED | SELECTABLE | CHECKABLE
 
@@ -792,61 +748,11 @@ class _TableObjectModel(_TableModel):
         return False
 
 
-def main():
-    # Create a Pandas DataFrame.
-    import pandas as pd
-    import numpy as np
-
-    technologies = {
-        'Courses': ['a', 'b', 'b', 'c', 'd', 'c', 'a', 'b', 'd', 'd', 'a', 'c', 'e', 'f'],
-        'Fee'    : [1, 8, 3, 6, 12, 89, 12, 5, 9, 34, 15, 65, 60, 20],
-        }
-    df = pd.DataFrame(technologies)
-    print(df)
-
-    # print('Group by: Courses, Fee')
-    # df2=df.sort_values(['Courses','Fee'], ascending=False).groupby('Courses').head()
-    # print(df2)
-
-    print('Group by: Courses, Fee  -  max->min by max of each group')
-    # max->min by max of each group
-    df2 = df.copy()
-    df2['max'] = df2.groupby('Courses')['Fee'].transform('max')
-    df2 = df2.sort_values(['max', 'Fee'], ascending=False).drop('max', axis=1)
-    print(df2)
-
-    print('Group by: Courses, Fee  -  min->max by min of each group')
-    # min->max by min of each group
-    df2 = df.copy()
-    df2['min'] = df2.groupby('Courses')['Fee'].transform('min')
-    df2 = df2.sort_values(['min', 'Fee'], ascending=True).drop('min', axis=1)
-    print(df2)
-
-    print('Group by: Courses, Fee  -  min->max of each group / max->min within group')
-    # min->max of each group / max->min within group
-    df2 = df.copy()
-    df2['max'] = df2.groupby('Courses')['Fee'].transform('max')
-    df2['diff'] = df2['max'] - df2['Fee']
-    df2 = df2.sort_values(['max', 'diff'], ascending=True)  # .drop(['max', 'diff'], axis=1)
-    print(df2)
-
-    print('Group by: Courses, Fee  -  max->min of each group / min->max within group')
-    # max->min of each group / min->max within group
-    df2 = df.copy()
-    df2['min'] = df2.groupby('Courses')['Fee'].transform('min')
-    df2['diff'] = df2['min'] - df2['Fee']
-    df2 = df2.sort_values(['min', 'diff'], ascending=False).drop(['min', 'diff'], axis=1)
-    print(df2)
-
-
-if __name__ == '__main__':
-    main()
-
+#=========================================================================================
 
 def main():
     # Create a Pandas DataFrame.
     import pandas as pd
-    import numpy as np
 
     technologies = {
         'Courses': ['a', 'b', 'b', 'c', 'd', 'c', 'a', 'b', 'd', 'd', 'a', 'c', 'e', 'f'],

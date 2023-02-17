@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-15 19:22:57 +0000 (Wed, February 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-17 15:39:18 +0000 (Fri, February 17, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -76,6 +76,9 @@ _RESTRAINTTABLES = 'RestraintTables'
 _VIOLATIONTABLES = 'ViolationTables'
 _RESTRAINTTABLE = 'restraintTable'
 _VIOLATIONRESULT = 'violationResult'
+_CLEARBUTTON = 'ClearButton'
+_COMPARISONSETS = 'ComparisonSets'
+
 _DEFAULTMEANTHRESHOLD = 0.0
 
 ALL = '<Use all>'
@@ -114,6 +117,8 @@ class _ModuleHandler(QtWidgets.QWidget):
     _outputTableFilter = {}
     _modulePulldownFilter = []
 
+    comparisonSets = []
+
 
 #=========================================================================================
 # _RestraintOptions - additions to the right-mouse menu
@@ -151,16 +156,16 @@ class _RestraintOptions(TableMenuABC):
     # Properties
     #=========================================================================================
 
-    pass
+    ...
 
     #=========================================================================================
     # Class methods
     #=========================================================================================
 
-    pass
+    ...
 
     #=========================================================================================
     # Implementation
     #=========================================================================================
 
-    pass
+    ...

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-15 19:22:57 +0000 (Wed, February 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-17 15:39:18 +0000 (Fri, February 17, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -40,10 +40,9 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.lib.RestraintAITableCommon import _ModuleHandler, \
     _COLLECTION, _COLLECTIONBUTTON, _SPECTRUMDISPLAYS, _RESTRAINTTABLES, \
-    _VIOLATIONTABLES, _VIOLATIONRESULT, _DEFAULTMEANTHRESHOLD, ALL
+    _VIOLATIONTABLES, _VIOLATIONRESULT, _DEFAULTMEANTHRESHOLD, ALL, _CLEARBUTTON, _COMPARISONSETS
 from ccpn.ui.gui.modules.lib.RestraintAITable import RestraintFrame
 from ccpn.ui.gui.widgets.PulldownListsForObjects import CollectionPulldown, SELECT
-# from ccpn.ui.gui.widgets.GuiTable import GuiTable, _getValueByHeader
 from ccpn.ui.gui.widgets.CompoundWidgets import DoubleSpinBoxCompoundWidget, ButtonCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -51,10 +50,16 @@ from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget, \
     RestraintTableSelectionWidget, SpectrumDisplaySelectionWidget, ViolationTableSelectionWidget, SelectToAdd
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.HLine import HLine
+from ccpn.ui.gui.widgets.Frame import ScrollableFrame
+from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.lib.alignWidgets import alignWidgets
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import fetchDir
 from ccpn.util.OrderedSet import OrderedSet
+from ccpn.framework.Application import getProject
+
+from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ProjectTreeCheckBoxes, _StoredTreeWidgetItem
 
 
 logger = getLogger()
@@ -63,7 +68,139 @@ LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 DEFAULT_COLOR = QtGui.QColor('black')
 
 
-# small object to facilitate passing data between classes/widgets in the module
+#=========================================================================================
+# _ComparisonTree
+#=========================================================================================
+
+class _ComparisonTree(ProjectTreeCheckBoxes):
+    """Class to handle restraint/violation-tables assocaated with a comparison set.
+    - restraint-tables that are in the same column if the restraint inspector
+    """
+    def __init__(self, parent, *, resources=None, **kwds):
+        project = getProject()
+
+        super().__init__(parent, project=project, **kwds)
+
+        self.resources = resources
+
+        # allow drops of items
+        self.setAcceptDrops(True)
+        self.setDropEventCallback(self._processDroppedItems)
+
+    def _populateTreeView(self, project=None):
+        if project:
+            # set the new project if required
+            self.project = project
+
+        checkable = QtCore.Qt.ItemIsUserCheckable  # single or none
+
+        top = self.comparisonItem = _StoredTreeWidgetItem(self.invisibleRootItem(), depth=0)
+        top.setText(0, 'Comparison Set')
+        top.setFlags(top.flags() & ~checkable)
+
+        for name in ['Restraint Set 1', 'Restraint Set 2', 'Restraint Set 3']:
+            # add the restraint-tables
+
+            item = _StoredTreeWidgetItem(top, depth=1)
+            item.setText(0, name)
+            # item.setData(1, 0, restraintTable-object)
+            if self._enableCheckBoxes:
+                item.setFlags(item.flags() | checkable)
+                item.setCheckState(0, QtCore.Qt.Checked)
+            else:
+                item.setFlags(item.flags() & ~checkable)
+
+            for subname in ['violation 1', 'violation 2']:
+                # add the violation-tables
+                #   - search for the violationTables that are associated with the restraint-tables
+
+                child = _StoredTreeWidgetItem(item, depth=2)
+                if self._enableCheckBoxes:
+                    child.setFlags(child.flags() | checkable)
+                    child.setCheckState(0, QtCore.Qt.Unchecked)
+                else:
+                    child.setFlags(child.flags() & ~checkable)
+                child.setText(0, subname)
+                # child.setData(1, 0, violationTable-object)
+
+            if item.childCount():
+                item.child(0).setCheckState(0, QtCore.Qt.Checked)
+
+        self.expandAll()
+        self.setItemsExpandable(False)
+
+    def _clicked(self, item, *args):
+        """Respond to a click in the tree
+        """
+        if item.isDisabled():
+            return
+
+        if item.depth == 1:
+            # restraint-table level
+            disabled = not bool(item.checkState(0))
+
+            with self.blockWidgetSignals(self):
+                for cc in range(item.childCount()):
+                    child = item.child(cc)
+                    child.setDisabled(disabled)
+
+            self.update()
+            return
+
+        if (parent := item.parent()) and item.depth == 2:
+
+            with self.blockWidgetSignals(self):
+                # uncheck the other items
+                for cc in range(parent.childCount()):
+                    child = parent.child(cc)
+                    if child is not item:
+                        child.setCheckState(0, QtCore.Qt.Unchecked)
+
+        self.update()
+
+    def _itemChanged(self, item, column: int) -> None:
+        super()._itemChanged(item, column)
+
+    #=========================================================================================
+    # Handle dropped items
+    #=========================================================================================
+
+    def _processDroppedItems(self, data):
+        """CallBack for Drop-events
+        """
+        if not data:
+            return
+
+        pids = data.get('pids', [])
+        print(f'dropped {pids}')
+
+    #=========================================================================================
+    # Menu
+    #=========================================================================================
+
+    def raiseContextMenu(self, event: QtGui.QMouseEvent):
+        """Creates and raises a context menu enabling items to be deleted from the sidebar.
+        """
+        if menu := self._getContextMenu():
+            menu.move(event.globalPos().x(), event.globalPos().y() + 10)
+            menu.exec_()
+
+    def _getContextMenu(self) -> Menu:
+        """Build a menu for renaming tree items
+        """
+        contextMenu = Menu('', self, isFloatWidget=True)
+
+        contextMenu.addItem('Remove Comparison Set', callback=self._removeComparisonSet, enabled=True)
+        contextMenu.addItem('Duplicate Comparison Set', callback=self._duplicateComparisonSet, enabled=True)
+        contextMenu.addSeparator()
+
+        return contextMenu
+
+    def _removeComparisonSet(self):
+        ...
+
+    def _duplicateComparisonSet(self):
+        ...
 
 
 #=========================================================================================
@@ -143,7 +280,8 @@ class RestraintAnalysisTableModule(CcpnModule):
                                     (_COLLECTION, {'label'   : '',
                                                    'tipText' : '',
                                                    'callBack': self._collectionPulldownCallback,
-                                                   'enabled' : True,
+                                                   'enabled' : False,
+                                                   'visible' : False,
                                                    '_init'   : None,
                                                    'type'    : CollectionPulldown,
                                                    'kwds'    : {'showSelectName': True,
@@ -153,7 +291,8 @@ class RestraintAnalysisTableModule(CcpnModule):
                                     (_COLLECTIONBUTTON, {'label'   : '',
                                                          'tipText' : 'Refresh the module from the first peakList in the collection',
                                                          'callBack': self._collectionPulldownReset,
-                                                         'enabled' : True,
+                                                         'enabled' : False,
+                                                         'visible' : False,
                                                          '_init'   : None,
                                                          'type'    : ButtonCompoundWidget,
                                                          'kwds'    : {'text'           : ' Refresh ',
@@ -167,6 +306,7 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                         'tipText' : '',
                                                         'callBack': None,  # self.restraintTablePulldown,
                                                         'enabled' : True,
+                                                        'visible' : False,
                                                         '_init'   : None,
                                                         'type'    : RestraintTableSelectionWidget,
                                                         'kwds'    : {'texts'        : [],
@@ -179,6 +319,7 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                         'tipText' : '',
                                                         'callBack': None,
                                                         'enabled' : True,
+                                                        'visible' : False,
                                                         '_init'   : None,
                                                         'type'    : ViolationTableSelectionWidget,
                                                         'kwds'    : {'texts'        : [],
@@ -187,6 +328,29 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                                      'objectName'   : 'RestraintTablesSelection',
                                                                      'minimumWidths': (180, 100, 100)},
                                                         }),
+                                    ('_label1', {'label': '',
+                                                  'type' : Label,
+                                                  'kwds' : {'text': 'Comparison Sets',
+                                                      'gridSpan'  : (1, 2),
+                                                            'height'    : 15,
+                                                            'objectName': '_label1'},
+                                                  }),
+                                    (_COMPARISONSETS, {'label'   : 'Comparison Sets',
+                                                       'enabled' : True,
+                                                       'type'    : ScrollableFrame,
+                                                       }),
+                                    (_CLEARBUTTON, {'label'   : '',
+                                                    'tipText' : 'Clear the comparison sets',
+                                                    'callBack': self._clearComparisons,
+                                                    'enabled' : True,
+                                                    '_init'   : None,
+                                                    'type'    : ButtonCompoundWidget,
+                                                    'kwds'    : {'text'           : ' Clear ',
+                                                                 'buttonAlignment': 'right',
+                                                                 'objectName'     : 'CollectionSelect',
+                                                                 'enabled'        : True,
+                                                                 'minimumWidths'  : (180, 100, 100)},
+                                                    }),
                                     # ('autoExpand', {'label'   : '',
                                     #                 'tipText' : '',
                                     #                 'callBack': self._updateAutoExpand,
@@ -283,6 +447,17 @@ class RestraintAnalysisTableModule(CcpnModule):
         rss._modulePulldown = self._mainFrame._modulePulldown
         rss.guiFrame = self._mainFrame
 
+        fr = self.comparisonFrame = settings.getWidget(_COMPARISONSETS)
+        self._scrollAreaWidget = fr._scrollArea
+        # set if only one?
+        # self._scrollAreaWidget.setStyleSheet('ScrollArea { border-right: 1px solid %s;'
+        #                                      'background: transparent; }' % BORDERNOFOCUS_COLOUR)
+        fr.insertCornerWidget()
+        self._scrollAreaWidget.setScrollBarPolicies(('asNeeded', 'never'))
+
+        for ii in range(3):
+            _ComparisonTree(fr, grid=(0, ii), enableMouseMenu=True, resources=rss)
+
         alignWidgets(settings)
 
     @property
@@ -334,7 +509,7 @@ class RestraintAnalysisTableModule(CcpnModule):
         self.mainWidget._dropEventCallback = self._processDroppedItems
 
         self.settingsWidget.setAcceptDrops(True)
-        self.settingsWidget._dropEventCallback = self._processDroppedItems
+        # self.settingsWidget._dropEventCallback = self._processDroppedItems
 
         # dicts for the filters on the lists and modulePulldown - referenced by peakLists in the collection
         # rss._restraintTableFilter = {}
@@ -699,6 +874,9 @@ class RestraintAnalysisTableModule(CcpnModule):
         """
         value = self.resources._collectionPulldown.getText()
         self._collectionPulldownCallback(value)
+
+    def _clearComparisons(self):
+        ...
 
     @property
     def collectionSelected(self) -> bool:

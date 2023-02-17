@@ -1377,6 +1377,8 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
                     # newItem.setCallback(data['callBack'] if 'callBack' in data else None)
                 if 'enabled' in data:
                     newItem.setEnabled(data['enabled'])
+                if 'visible' in data:
+                    newItem.setVisible(data['visible'])
                 self.widgetsDict[item] = newItem
 
                 # need to check this - is confusing mix of widgets

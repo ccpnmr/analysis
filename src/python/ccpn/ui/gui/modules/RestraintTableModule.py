@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:05 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-02-17 15:39:18 +0000 (Fri, February 17, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtWidgets
+
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.Restraint import Restraint
@@ -362,7 +363,7 @@ class GuiRestraintTable(GuiTable):
         Notifier Callback for selecting a row in the table
         """
         restraints = self.getSelectedObjects()
-        self.current.restraints = restraints
+        self.current.restraints = restraints or []
         RestraintTableModule.currentCallback = {'object': self.restraintTable, 'table': self}
 
     def _actionCallback(self, data, *args):
@@ -372,10 +373,7 @@ class GuiRestraintTable(GuiTable):
         objs = data[CallBack.OBJECT]
         if not objs:
             return
-        if isinstance(objs, (tuple, list)):
-            restraint = objs[0]
-        else:
-            restraint = objs
+        restraint = objs[0] if isinstance(objs, (tuple, list)) else objs
 
         from ccpn.ui.gui.widgets.MessageDialog import showWarning
         from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
@@ -444,11 +442,11 @@ class GuiRestraintTable(GuiTable):
     def getFirstRestraintAtomsPair(restraint):
         """ Get the first pair of atoms from the first restraintContribution of a restraint."""
         atomPair = []
-        if len(restraint.restraintContributions) > 0:
-            if len(restraint.restraintContributions[0].restraintItems) > 0:
-                atomPair = [restraint.project.getAtom(x) for x in restraint.restraintContributions[0].restraintItems[0]]
-                if all(atomPair):
-                    return atomPair
+        if len(restraint.restraintContributions) > 0 and len(restraint.restraintContributions[0].restraintItems) > 0:
+            atomPair = [restraint.project.getAtom(x) for x in restraint.restraintContributions[0].restraintItems[0]]
+            if all(atomPair):
+                return atomPair
+
         return atomPair
 
     @staticmethod
@@ -457,11 +455,7 @@ class GuiRestraintTable(GuiTable):
         CCPN-INTERNAL: Return number of peaks assigned to NmrAtom in Experiments and PeakLists
         using ChemicalShiftList
         """
-        peaks = restraint.peaks
-        if peaks:
-            return len(peaks)
-        else:
-            return 0
+        return len(peaks) if (peaks := restraint.peaks) else 0
 
     def _callback(self):
         """

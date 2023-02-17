@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-15 19:22:57 +0000 (Wed, February 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-17 15:39:18 +0000 (Fri, February 17, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,6 @@ __date__ = "$Date: 2023-01-20 16:18:53 +0100 (Fri, January 20, 2023) $"
 #=========================================================================================
 
 from functools import partial
-
 import numpy as np
 import pandas as pd
 import warnings
@@ -39,7 +38,7 @@ from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.lib._CoreMITableFrame import _CoreMITableWidgetABC  # _CoreMITableFrameABC
+from ccpn.ui.gui.lib._CoreMITableFrame import _CoreMITableWidgetABC
 from ccpn.ui.gui.lib._CoreTableFrame import _CoreTableFrameABC
 import ccpn.ui.gui.modules.PyMolUtil as pyMolUtil
 from ccpn.ui.gui.modules.lib.RestraintAITableCommon import _RestraintOptions, UNITS, \
@@ -54,11 +53,10 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.table._TableModel import _TableModel
-from ccpn.util.Common import flattenLists, makeIterableList
+from ccpn.util.Common import flattenLists
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import joinPath
 
-# NOTE:ED - this needs moving
 from sandbox.Ed._MITableDelegates import _ExpandVerticalCellDelegate
 
 
@@ -113,11 +111,13 @@ class _MultiSort(_TableModel):
                         newDf[MAX] = newDf.groupby([groupCol])[[col]].transform(MAX)
                         newDf = newDf.sort_values([MAX, groupCol, col], ascending=False).drop(MAX, axis=1)
 
+                        """
                         # KEEP THIS BIT! this is the opposite of the min->max / max->min (3rd option above)
-                        # max->min of each group / min->max within group
-                        # newDf[MIN] = newDf.groupby([groupCol])[[col]].transform(MIN)
-                        # newDf[DIFF] = newDf[MIN] - newDf[col]
-                        # newDf = newDf.sort_values([MIN, groupCol, DIFF], ascending=False).drop([MIN, DIFF], axis=1)
+                        max->min of each group / min->max within group
+                        newDf[MIN] = newDf.groupby([groupCol])[[col]].transform(MIN)
+                        newDf[DIFF] = newDf[MIN] - newDf[col]
+                        newDf = newDf.sort_values([MIN, groupCol, DIFF], ascending=False).drop([MIN, DIFF], axis=1)
+                        """
 
                     self._sortIndex = list(newDf.index)
 
@@ -144,7 +144,6 @@ class _MultiSort(_TableModel):
 #=========================================================================================
 
 
-# class _NewRestraintWidget(_CoreTableWidgetABC):
 class _NewRestraintWidget(_CoreMITableWidgetABC):
     """Class to present a peak-driven Restraint Analysis Inspector Table
     """
@@ -697,18 +696,6 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
         """
         return [sorted(ri) for rc in restraint.restraintContributions for ri in rc.restraintItems if ri]
 
-    # def _updateGroups(self, df):
-    #     self._groups = {}
-    #     # collate max/min information
-    #     for row in df.itertuples(index=False):
-    #         name = str(row[self.PIDCOLUMN])
-    #         if name not in self._groups:
-    #             _row = tuple(universalSortKey(x) for x in row)
-    #             self._groups[name] = {'min': _row, 'max': _row}
-    #         else:
-    #             self._groups[name]['min'] = tuple(map(lambda x, y: min(universalSortKey(x), y), row, self._groups[name]['min']))
-    #             self._groups[name]['max'] = tuple(map(lambda x, y: max(universalSortKey(x), y), row, self._groups[name]['max']))
-
     def _update(self):
         """Display the objects on the table for the selected list.
         """
@@ -834,10 +821,6 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
         self.resizeRowsToContents()
 
-    #=========================================================================================
-    # Subclass MITable
-    #=========================================================================================
-
 
 #=========================================================================================
 # Core Table for peak-list driven restraints
@@ -866,9 +849,18 @@ class RestraintFrame(_CoreTableFrameABC):
                                          callback=self._showOnMolecularViewer,
                                          hAlign='l')
 
+        self.refreshButton = Button(self, text=' Refresh',
+                                    tipText='Refresh the table from the selected comparison sets',
+                                    icon = Icon('icons/redo'),
+                                    callback = self._refreshAll)
+
         # move to the correct positions
-        self.addWidgetToTop(self.expandButtons, 2)
-        self.addWidgetToTop(self.showOnViewerButton, 3)
+        self.addWidgetToTop(self.refreshButton, 2)
+        self.addWidgetToTop(self.expandButtons, 3)
+        self.addWidgetToTop(self.showOnViewerButton, 4)
+
+        self._modulePulldown.setDisabled(True)
+        self._modulePulldown.setVisible(False)
 
         # NOTE:ED - bit of a hack for the minute
         self.resources = resources
@@ -929,3 +921,6 @@ class RestraintFrame(_CoreTableFrameABC):
             self.aboutToUpdate.emit(self._modulePulldown.getText())
 
         super(RestraintFrame, self)._selectionPulldownCallback(item)
+
+    def _refreshAll(self):
+        ...

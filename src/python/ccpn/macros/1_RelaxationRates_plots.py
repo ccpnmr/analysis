@@ -28,7 +28,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-20 10:58:29 +0000 (Mon, February 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-20 12:00:40 +0000 (Mon, February 20, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -122,6 +122,7 @@ def _plotRates(pdf):
     plt.subplots_adjust(hspace=hspace)
     plt.subplots_adjust(top=0.85,) # space title and plots
     pdf.savefig()
+    return fig
 
 ###################      start inline macro       #####################
 
@@ -155,6 +156,8 @@ if showInteractivePlot:
     plt.show()
 else:
     plt.close(fig1)
+
+application._showHtmlFile("Show Plots", filePath)
 
 # if interactive plot
 # the figure has to be closed manually after  finished with the popup plot  or will stay hanging around in memory!  Cannot close here or you don't see the interactive plot!

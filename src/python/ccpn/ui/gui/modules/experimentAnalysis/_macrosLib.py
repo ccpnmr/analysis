@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-20 10:58:29 +0000 (Mon, February 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-20 12:00:40 +0000 (Mon, February 20, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,11 @@ import matplotlib.pyplot as plt
 import math
 from matplotlib.ticker import MultipleLocator
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.util.floatUtils import fExp, fMan
 
+def _prettyFormat4Legend(value, rounding=3):
+    """ Format mantissa to (rounding) round  and exponent for matplotlib """
+    return '$%s^{%s}$' %(round(fMan(value),rounding),  fExp(value))
 
 def _makeFigureLayoutWithOneColumn(numberOfRows,  height_ratios, figsize=(5, 3.5), dpi=300):
     fig = plt.figure(figsize=figsize, dpi=dpi)

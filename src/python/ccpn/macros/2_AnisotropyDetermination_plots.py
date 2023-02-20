@@ -31,7 +31,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-20 10:58:29 +0000 (Mon, February 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-20 12:00:40 +0000 (Mon, February 20, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -59,7 +59,7 @@ NOE_limitExclusion = 0.65
 spectrometerFrequency=600.13
 
 ## Some Graphics Settings
-titlePdf  = 'Anisotropy and Chemical Exchange determination of GB1'
+titlePdf  = 'Anisotropy and Chemical Exchange Determination of GB1'
 figureTitleFontSize = 8
 showInteractivePlot = False # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
 scatterColor = 'navy'
@@ -222,7 +222,7 @@ xScatterTrimmedLine = np.linspace(0, np.max(R2R1), len(yTrimmedR1R2))
 avS2 = sdl.estimateAverageS2(R1, R2, NOE,  noeExclusionLimit=NOE_limitExclusion, proportiontocut=0.1)
 # Ct = sdl.estimateOverallCorrelationTimeFromR1R2(R1, R2, spectrometerFrequency=spectrometerFrequency)
 # avCt = np.average(Ct)
-info(f'Average S2 = {avS2}')
+
 
 ####################     end data preparation     ##################
 
@@ -232,12 +232,15 @@ filePath = macrosLib._getExportingPath(__file__, exportingFilePath)
 with PdfPages(filePath) as pdf:
     fig1 = _ploteRates(pdf)
     fig2 = _plotScatterRates(pdf)
+    info(f'Report saved in {filePath}')
 
 if showInteractivePlot:
     plt.show()
 else:
     plt.close(fig1)
     plt.close(fig2)
+
+application._showHtmlFile("Show Plots", filePath)
 
 ###################      end macro        #########################
 

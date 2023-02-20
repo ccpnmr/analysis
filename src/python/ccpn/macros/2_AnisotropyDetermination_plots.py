@@ -31,7 +31,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-17 17:35:26 +0000 (Fri, February 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-20 10:58:29 +0000 (Mon, February 20, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -55,33 +55,43 @@ sequence  = 'KLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
 ##  secondary structure  for the above sequence  using the DSSP nomenclature.  Replace with an empty str if not available. e.g.: ss_sequence  = ''
 ss_sequence   =  'BBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
 
+NOE_limitExclusion = 0.65
+spectrometerFrequency=600.13
+
 ## Some Graphics Settings
-showInteractivePlot = True # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
+titlePdf  = 'Anisotropy and Chemical Exchange determination of GB1'
+figureTitleFontSize = 8
+showInteractivePlot = False # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
 scatterColor = 'navy'
 scatterColorError = 'darkred'
 scatterExcludedByNOEColor = 'orange'
 scatterSize = 3
 scatterErrorLinewidth=0.1
 scatterErrorCapSize=0.8
-medianLineColour = 'black'
-fontTitleSize = 8
-fontXSize = 6
-fontYSize = 6
+TrimmedLineColour = 'black'
+fontTitleSize = 6
+fontXSize = 4
+fontYSize = 4
 scatterFontSize = 5
-labelMajorSize=6
-labelMinorSize=5
+labelMajorSize = 4
+labelMinorSize = 3
 titleColor = 'darkblue'
 hspace= 0.5
 
-
+# exporting to pdf: Default save to same location and name.pdf as this macro
+#  alternatively, provide a full valid path
+exportingFilePath = None
 
 ############################################################
 ##################   End User Settings     ########################
 ############################################################
 
+
+###################      start macro       #########################
+
 import numpy as np
+from scipy import stats
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MultipleLocator
 from ccpn.util.Path import aPath
 from matplotlib.backends.backend_pdf import PdfPages
 from ccpn.util.Common import percentage
@@ -89,28 +99,89 @@ import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 import ccpn.framework.lib.experimentAnalysis.spectralDensityLib as sdl
 from ccpn.ui.gui.widgets.DrawSS import plotSS
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
+import  ccpn.ui.gui.modules.experimentAnalysis._macrosLib as macrosLib
 
 
-###################      start macro       #########################
+def _ploteRates(pdf):
+    """ Plot R1*R2 and R2/R1 with the Sequence """
+    fig, axes  = macrosLib._makeFigureLayoutWithOneColumn(3, height_ratios=[3, 3, 1])
+    axR2R1, axR1R2, axss = axes
+    ## plot R2 / R1
+    axR2R1.errorbar(x, R2R1,  yerr=R2R1_ERR, color = scatterColor, ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize )
+    # overlay excludeFrom Trimmed calculation on a different colour
+    axR2R1.errorbar(x[eind], R2R1[eind], yerr=R2R1_ERR[eind], color=scatterExcludedByNOEColor, ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize,  label = f'NOE < {NOE_limitExclusion}')
+    axR2R1.plot(xTrimmedR2R1, yTrimmedR2R1, TrimmedLineColour, linewidth=0.5, label ='R2/R1 10%-trimmed mean')
+    axR2R1.set_title('R2/R1', fontsize=fontTitleSize, color=titleColor, pad=1)
+    axR2R1.set_ylabel('R$_{2}$/R$_{1}$', fontsize=fontYSize)
+    macrosLib._setXTicks(axR2R1, labelMajorSize, labelMinorSize)
+    macrosLib._setCommonYLim(axR2R1,R2R1)
+    axR2R1.legend(loc='lower right', prop={'size': 4})
+    axR2R1.spines[['right', 'top']].set_visible(False)
+    ## plot R1 x R2
+    axR1R2.errorbar(x, R1R2,  yerr=R1R2_ERR, ms=scatterSize, color = scatterColor, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize, )
+    axR1R2.errorbar(x[eind], R1R2[eind], yerr=R1R2_ERR[eind], color=scatterExcludedByNOEColor, ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize,  label = f'NOE < {NOE_limitExclusion}')
+    axR1R2.plot(xTrimmedR1R2, yTrimmedR1R2, TrimmedLineColour, linewidth=0.5, label ='R1R2 10%-trimmed mean')
+    axR1R2.set_title('R1*R2', fontsize=fontTitleSize, color=titleColor)
+    axR1R2.set_ylabel('R$_{1}$ * R$_{2}$', fontsize=fontYSize)
+    axR1R2.set_xlabel('Residue Number', fontsize=fontXSize, )
+    axR1R2.legend(loc='lower right', prop={'size': 4})
+    axR1R2.spines[['right', 'top']].set_visible(False)
+    macrosLib._setCommonYLim(axR1R2, R1R2)
+    macrosLib._setXTicks(axR1R2, labelMajorSize, labelMinorSize)
+    ## plot Secondary structure
+    plotSS(axss, xSequence, sequence, ss_sequence=ss_sequence, startSequenceCode=startSequenceCode, fontsize=5,
+           showSequenceNumber=False, )
+    axss.get_shared_x_axes().join(axss, axR2R1, axR1R2,)
+    plt.tight_layout()
+    fig.suptitle(titlePdf, fontsize=figureTitleFontSize, )
+    plt.subplots_adjust(top=0.85)
+    pdf.savefig()
+    return fig
 
+def _plotScatterRates(pdf):
+    fig = plt.figure( figsize=(5, 3.5), dpi=300)
+    #  Plot Scatter R1*R2 vs R2/R1
+    axRscatter = plt.subplot(111)
+    axRscatter.errorbar(R2R1, R1R2,
+                        yerr=R1R2_ERR/2,
+                        xerr=R2R1_ERR/2,
+                        color=scatterColor,
+                        alpha=0.7, #t o see better the labels
+                        ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize, )
+    for i, txt in enumerate(x):
+        extraY = percentage(0.5, R1R2[i])
+        yPos = R1R2[i] + extraY
+        extraX = percentage(0.5, R2R1[i])
+        xPos = R2R1[i] + extraX
+        axRscatter.annotate(str(txt), xy=(R2R1[i], R1R2[i]), xytext=(xPos, yPos), fontsize=3.5, arrowprops=dict(facecolor='grey',arrowstyle="-",lw=0.3  ))
+    # axRscatter.plot(yTrimmedR2R1, yScatterTrimmedR1R2, TrimmedLineColour, linewidth=0.5, label ='R1R2 median')
+    axRscatter.plot(xScatterTrimmedLine, yTrimmedR1R2, TrimmedLineColour, linewidth=0.5, label ='R1R2 10%-trimmed mean')
+    axRscatter.set_title('R$_{1}$R$_{2}$ vs R$_{2}$/R$_{1}$ ', fontsize=fontTitleSize, color=titleColor)
+    axRscatter.set_xlabel('R$_{2}$/R$_{1}$', fontsize=fontYSize, )
+    axRscatter.set_ylabel('R$_{1}$*R$_{2}$', fontsize=fontYSize)
+    axRscatter.spines[['right', 'top']].set_visible(False)
+    macrosLib._setXTicks(axRscatter, labelMajorSize, labelMinorSize)
+    axRscatter.yaxis.get_offset_text().set_x(-0.02)
+    axRscatter.yaxis.get_offset_text().set_size(5)
+    axRscatter.xaxis.get_offset_text().set_size(5)
+    axRscatter.set_xlim(xmin=0)
+    axRscatter.set_ylim(ymin=0)
+    plt.tight_layout()
+    plt.subplots_adjust(hspace=hspace) # space between plots
+    # plt.subplots_adjust(top=0.85,)# space title and plots
 
+    plt.figtext(0.5, 0.01, f'Average Order Parameter $S^2$: {round(avS2, 3)}', ha="center", fontsize=6,)
+    pdf.savefig()
+    return fig
 
+###################      start inline macro       #####################
 
-RSDMResultsDataTable = get(f'DT:{dataTableName}')
-if RSDMResultsDataTable is None:
-    errorMess = f'''\nCannot find the datatable named:  "{dataTableName}" . 
-    \n
-    Ensure you have the correct dataTable in the project and set the same name in the macro. 
-    (See the User-Data section and general documentation on this macro). '''
-    showWarning('Datatable not found', errorMess)
-    raise RuntimeError(errorMess)
-
-
-######################      data preparation   ## ##################
+## data preparation
 ## get the various values  and perform the needed calculations
 
-data =  RSDMResultsDataTable.data
+dataTable = macrosLib._getDataTableForMacro(dataTableName)
+data =  dataTable.data
+
 x = data[sv.NMRRESIDUECODE]
 x = x.astype(int)
 x = x.values
@@ -128,122 +199,35 @@ R2R1_ERR = lf.calculateUncertaintiesError(R1, R2, R1_ERR, R2_ERR)
 R1R2 = R1*R2
 R1R2_ERR = lf.calculateUncertaintiesProductError(R1, R2, R1_ERR, R2_ERR)
 
-NOE_limitExclusion = 0.65
-eind =np.argwhere(NOE < NOE_limitExclusion).flatten()
-
+# calculate NOE-filtered data
 fR1, fR2 = sdl._filterLowNoeFromR1R2(R1, R2, NOE, NOE_limitExclusion)
 fR1R2 = fR1*fR2
 fR2R1 = fR2/fR1
-medianfR1R2 = np.median(fR1R2)
-medianfR2R1 = np.median(fR2R1)
-maxR1R2 = np.max(fR1R2)
-yMedianR1R2 = np.array([medianfR1R2]*len(xSequence))
-yMedianR2R1 = np.array([medianfR2R1]*len(xSequence))
-yScatterMedianR1R2 = np.linspace(0, np.max(R1R2), len(yMedianR1R2))
-xScatterMedianLine = np.linspace(0, np.max(R2R1), len(yMedianR1R2))
+eind =np.argwhere(NOE < NOE_limitExclusion).flatten()
+
+# calculate R1*R2  10%  trimmed mean line
+trimmedLineR1R2 = stats.trim_mean(fR1R2,  proportiontocut= 0.1)
+xTrimmedR1R2 = xSequence
+yTrimmedR1R2 = np.array([trimmedLineR1R2]*len(xTrimmedR1R2))
+yScatterTrimmedR1R2 = np.linspace(0, np.max(R1R2), len(yTrimmedR1R2))
+
+# calculate R2/R1  10%  trimmed mean line
+trimmedLineR2R1 = stats.trim_mean(fR2R1,  proportiontocut= 0.1)
+xTrimmedR2R1 = xSequence
+yTrimmedR2R1 = np.array([trimmedLineR2R1]*len(xTrimmedR2R1))
+xScatterTrimmedLine = np.linspace(0, np.max(R2R1), len(yTrimmedR1R2))
+
 
 # calculate the S2 average eq.3
-
 avS2 = sdl.estimateAverageS2(R1, R2, NOE,  noeExclusionLimit=NOE_limitExclusion, proportiontocut=0.1)
-Ct = sdl.estimateOverallCorrelationTimeFromR1R2(R1, R2, spectrometerFrequency=600.13)
-avCt = np.average(Ct)
-
+# Ct = sdl.estimateOverallCorrelationTimeFromR1R2(R1, R2, spectrometerFrequency=spectrometerFrequency)
+# avCt = np.average(Ct)
 info(f'Average S2 = {avS2}')
-
 
 ####################     end data preparation     ##################
 
-def _setXTicks(ax):
-    ml = MultipleLocator(1)
-    ax.minorticks_on()
-    ax.xaxis.set_minor_locator(ml)
-    ax.tick_params(axis='both', which='major', labelsize=labelMajorSize)
-    ax.tick_params(axis='both', which='minor', labelsize=labelMinorSize)
-
-def _setCommonYLim(ax, ys):
-    extraY = np.ceil(percentage(30, np.max(ys)))
-    ylim = np.max(ys) + extraY
-    ax.set_ylim([0, ylim])
-
-def _ploteRates(pdf):
-    """ Plot R1*R2 and R2/R1 with the Sequence """
-    fig = plt.figure(figsize=(5, 3.5), dpi=300, layout="constrained")
-    maxRows = 3
-    maxCols = 1
-    spec = fig.add_gridspec(maxRows, maxCols, height_ratios=[4, 4, 1])
-    row = 0
-    axR2R1 = fig.add_subplot(spec[row, 0 ])
-    row+=1
-    axR2R1.errorbar(x, R2R1,  yerr=R2R1_ERR, color = scatterColor, ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize )
-    # overlay excludeFrom Median calculation on a different colour
-    axR2R1.errorbar(x[eind], R2R1[eind], yerr=R2R1_ERR[eind], color=scatterExcludedByNOEColor, ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize,  label = f'NOE < {NOE_limitExclusion}')
-    axR2R1.plot(xSequence, yMedianR2R1, medianLineColour, linewidth=0.5, label ='R2/R1 median')
-    axR2R1.set_title('R2/R1', fontsize=fontTitleSize, color=titleColor)
-    axR2R1.set_ylabel('R$_{2}$/R$_{1}$', fontsize=fontYSize)
-    _setXTicks(axR2R1)
-    _setCommonYLim(axR2R1, R2R1)
-    axR2R1.legend(loc='lower right', prop={'size': 4})
-    axR2R1.spines[['right', 'top']].set_visible(False)
-    # R1 x R2
-    axR1R2 = fig.add_subplot(spec[row, 0])
-    row+=1
-    axR1R2.errorbar(x, R1R2,  yerr=R1R2_ERR, ms=scatterSize, color = scatterColor, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize, )
-    axR1R2.errorbar(x[eind], R1R2[eind], yerr=R1R2_ERR[eind], color=scatterExcludedByNOEColor, ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize,  label = f'NOE < {NOE_limitExclusion}')
-    axR1R2.plot(xSequence, yMedianR1R2, medianLineColour, linewidth=0.5, label ='R1R2 median')
-    axR1R2.set_title('R1*R2', fontsize=fontTitleSize, color=titleColor)
-    axR1R2.set_ylabel('R$_{1}$ * R$_{2}$', fontsize=fontYSize)
-    axR1R2.set_xlabel('Residue Number', fontsize=fontXSize, )
-    axR1R2.legend(loc='lower right', prop={'size': 4})
-    axR1R2.spines[['right', 'top']].set_visible(False)
-    _setCommonYLim(axR1R2, R1R2)
-    _setXTicks(axR1R2)
-
-    axss = fig.add_subplot(spec[row, 0])
-    plotSS(axss, xSequence, sequence, ss_sequence=ss_sequence, startSequenceCode=startSequenceCode, fontsize=5,
-           showSequenceNumber=False, )
-    axss.get_shared_x_axes().join(axss, axR2R1, axR1R2,)
-    pdf.savefig()
-    return fig
-
-def _plotScatterRates(pdf):
-    fig = plt.figure( figsize=(5, 3.5), dpi=300)
-    #  Scatter
-    axRscatter = plt.subplot(111)
-    axRscatter.errorbar(R2R1, R1R2,
-                        yerr=R1R2_ERR/2,
-                        xerr=R2R1_ERR/2,
-                        color=scatterColor,
-                        alpha=0.7, #t o see better the labels
-                        ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize, )
-    for i, txt in enumerate(x):
-        extraY = percentage(0.5, R1R2[i])
-        yPos = R1R2[i] + extraY
-        extraX = percentage(0.5, R2R1[i])
-        xPos = R2R1[i] + extraX
-        axRscatter.annotate(str(txt), xy=(R2R1[i], R1R2[i]), xytext=(xPos, yPos), fontsize=3.5, arrowprops=dict(facecolor='grey',arrowstyle="-",lw=0.3  ))
-    axRscatter.plot(yMedianR2R1, yScatterMedianR1R2, medianLineColour, linewidth=0.5, label ='R1R2 median')
-    axRscatter.plot(xScatterMedianLine, yMedianR1R2, medianLineColour, linewidth=0.5, label ='R2/R1 median')
-    axRscatter.set_title('R$_{1}$R$_{2}$ vs R$_{2}$/R$_{1}$ ', fontsize=fontTitleSize, color=titleColor)
-    axRscatter.set_xlabel('R$_{2}$/R$_{1}$', fontsize=fontYSize, )
-    axRscatter.set_ylabel('R$_{1}$*R$_{2}$', fontsize=fontYSize)
-    axRscatter.spines[['right', 'top']].set_visible(False)
-    _setXTicks(axRscatter)
-
-    axRscatter.yaxis.get_offset_text().set_x(-0.02)
-    axRscatter.yaxis.get_offset_text().set_size(5)
-    axRscatter.xaxis.get_offset_text().set_size(5)
-    axRscatter.set_xlim(xmin=0)
-    axRscatter.set_ylim(ymin=0)
-    plt.tight_layout()
-    plt.subplots_adjust(hspace=hspace)
-    pdf.savefig()
-    return fig
-
-# save to pdf
-thisFilePath = aPath(__file__)
-exportingFileName =f'{thisFilePath.basename}.pdf'
-exportingDirectoryPath = thisFilePath.filepath
-filePath = aPath(exportingDirectoryPath).joinpath(exportingFileName)
+##  init the plot and save to pdf
+filePath = macrosLib._getExportingPath(__file__, exportingFilePath)
 
 with PdfPages(filePath) as pdf:
     fig1 = _ploteRates(pdf)

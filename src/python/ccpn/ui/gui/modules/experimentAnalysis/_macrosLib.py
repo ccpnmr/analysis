@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-17 17:35:26 +0000 (Fri, February 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-20 10:58:29 +0000 (Mon, February 20, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -33,9 +33,7 @@ import numpy as np
 from ccpn.util.Path import aPath
 import matplotlib.pyplot as plt
 import math
-from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.ticker import MultipleLocator
-from ccpn.ui.gui.widgets.DrawSS import plotSS
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 
@@ -71,7 +69,6 @@ def _setCommonYLim(ax, ys):
 
 def _setJoinedX(mainAxis, otherAxes):
     mainAxis.get_shared_x_axes().join(mainAxis, *otherAxes)
-
 
 def _getExportingPath(macroPath, exportingFilePath=None, suffix='.pdf'):
 

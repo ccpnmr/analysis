@@ -28,7 +28,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-17 17:35:25 +0000 (Fri, February 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-20 10:58:29 +0000 (Mon, February 20, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -51,7 +51,9 @@ sequence  = 'KLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
 ##  secondary structure  for the above sequence  using the DSSP nomenclature.  Replace with an empty str if not available. e.g.: ss_sequence  = ''
 ss_sequence   =  'BBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
 
-# graphics
+## Some Graphics Settings
+
+titlePdf  = 'GB1 Relaxation Rates Results'
 showInteractivePlot = False # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
 barColour='black'
 barErrorColour='red'
@@ -77,17 +79,15 @@ exportingFilePath = None
 
 import numpy as np
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.util.Path import aPath
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from ccpn.ui.gui.widgets.DrawSS import plotSS
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
 import  ccpn.ui.gui.modules.experimentAnalysis._macrosLib as macrosLib
 
 
 def _plotRates(pdf):
     """ Plot the  SS -  R1  - R2 - NOE """
-    fig, axes  = macrosLib._makeFigureLayoutWithOneColumn(4, height_ratios=[3, 3, 3, 1])
+    fig, axes  = macrosLib._makeFigureLayoutWithOneColumn(4, height_ratios=[2, 2, 2, 1])
     axR1, axR2, axNOE, axss = axes
 
     # plot the data
@@ -117,9 +117,10 @@ def _plotRates(pdf):
         axNOE.set_ylim([0, 1])
     else:
         axNOE.set_ylim([-1, 1])
-    fig.suptitle('Relaxation Rates Results', fontsize=figureTitleFontSize)
+    fig.suptitle(titlePdf, fontsize=figureTitleFontSize)
     plt.tight_layout()
     plt.subplots_adjust(hspace=hspace)
+    plt.subplots_adjust(top=0.85,) # space title and plots
     pdf.savefig()
 
 ###################      start inline macro       #####################

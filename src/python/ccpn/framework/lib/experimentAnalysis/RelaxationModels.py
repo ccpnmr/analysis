@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-15 12:25:03 +0000 (Wed, February 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-21 19:34:43 +0000 (Tue, February 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,7 @@ import numpy as np
 import pandas as pd
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 import ccpn.framework.lib.experimentAnalysis.spectralDensityLib as sdl
-from ccpn.framework.lib.experimentAnalysis.experimentConstants import D1, C1, N15gyromagneticRatio, HgyromagneticRatio
+from ccpn.framework.lib.experimentAnalysis.experimentConstants import N15gyromagneticRatio, HgyromagneticRatio
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
 from ccpn.core.DataTable import TableFrame
@@ -486,12 +486,16 @@ class SDMCalculation(CalculationModel):
                 '''
     FullDescription = f'{Info}\n{Description}'
     _disableFittingModels = True  # Don't apply any fitting models to this output frame
+    _spectrometerFrequency = 600.130  # hardcoded for development only. default will be taken from 1st spectrum in a series . todo need a way to set options model specific
 
     @property
     def modelArgumentNames(self):
         """ The list of parameters as str used in the calculation model.
             These names will appear as column headers in the output result frames. """
         return [sv.J0, sv.JwX, sv.JwH]
+
+
+
 
     def calculateValues(self, inputDataTables) -> TableFrame:
         """
@@ -549,7 +553,11 @@ class SDMCalculation(CalculationModel):
         R1_err = merged[f'{sv.RATE_ERR}{suffix1}'].values
         R2_err = merged[f'{sv.RATE_ERR}{suffix2}'].values
         NOE_err = merged[noeHederErr].values
-
+        scalingFactor=1e6
+        wN = sdl.calculateOmegaN(self._spectrometerFrequency, scalingFactor)
+        csaN = -160 / scalingFactor
+        C1 = sdl.calculate_c_factor(wN, csaN)
+        D1 = sdl.calculate_d_factor()
         j0 = sdl.calculateJ0(NOE, R1, R2, D1, C1, N15gyromagneticRatio, HgyromagneticRatio)
         jwx = sdl.calculateJWx(NOE, R1, R2, D1, C1, N15gyromagneticRatio, HgyromagneticRatio)
         jwh = sdl.calculateJWH(NOE, R1, R2, D1, C1, N15gyromagneticRatio, HgyromagneticRatio)

@@ -4,6 +4,8 @@ A macro for creating plots of R1*R2 and R2/R1 for helping in the differentiation
 Reference:
     - An Effective Method for the Discrimination of Motional Anisotropy and Chemical Exchange. Julie M. Kneller, Min Lu, and Clay Bracken.
     American Chemical Society. 2002.  10.1021/ja017461k .
+    - Fast evaluation of protein dynamics from deficient 15N relaxation data. Jaremko et all , 2018,  Journal of Biomolecular NMR (2018) 70:219–228
+        https://doi.org/10.1007/s10858-018-0176-3
 
 This macro requires a  dataset  created after performing  the Reduced Spectral density Mapping calculation model
 on the Relaxation Analysis Module (alpha)
@@ -31,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-20 12:00:40 +0000 (Mon, February 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-21 19:34:43 +0000 (Tue, February 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -102,6 +104,7 @@ from ccpn.ui.gui.widgets.DrawSS import plotSS
 import  ccpn.ui.gui.modules.experimentAnalysis._macrosLib as macrosLib
 
 
+
 def _ploteRates(pdf):
     """ Plot R1*R2 and R2/R1 with the Sequence """
     fig, axes  = macrosLib._makeFigureLayoutWithOneColumn(3, height_ratios=[3, 3, 1])
@@ -121,6 +124,8 @@ def _ploteRates(pdf):
     axR1R2.errorbar(x, R1R2,  yerr=R1R2_ERR, ms=scatterSize, color = scatterColor, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize, )
     axR1R2.errorbar(x[eind], R1R2[eind], yerr=R1R2_ERR[eind], color=scatterExcludedByNOEColor, ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize,  label = f'NOE < {NOE_limitExclusion}')
     axR1R2.plot(xTrimmedR1R2, yTrimmedR1R2, TrimmedLineColour, linewidth=0.5, label ='R1R2 10%-trimmed mean')
+    axR1R2.plot(xTrimmedR1R2, yMedianR1R2, 'green', linewidth=0.5, label ='R1R2 median')
+
     axR1R2.set_title('R1*R2', fontsize=fontTitleSize, color=titleColor)
     axR1R2.set_ylabel('R$_{1}$ * R$_{2}$', fontsize=fontYSize)
     axR1R2.set_xlabel('Residue Number', fontsize=fontXSize, )
@@ -168,9 +173,12 @@ def _plotScatterRates(pdf):
     axRscatter.set_ylim(ymin=0)
     plt.tight_layout()
     plt.subplots_adjust(hspace=hspace) # space between plots
-    # plt.subplots_adjust(top=0.85,)# space title and plots
+    plt.subplots_adjust(bottom=0.15,)# space title and plots
 
-    plt.figtext(0.5, 0.01, f'Average Order Parameter $S^2$: {round(avS2, 3)}', ha="center", fontsize=6,)
+    txt =  f'''Average Order Parameter $S^2$: {round(avS2, 3)}
+    Overall Correlation Time $T_m$: {round(avCt, 3)} ns'''
+    plt.figtext(0.5, 0.01, txt, ha="center", fontsize=fontXSize,)
+
     pdf.savefig()
     return fig
 
@@ -207,8 +215,10 @@ eind =np.argwhere(NOE < NOE_limitExclusion).flatten()
 
 # calculate R1*R2  10%  trimmed mean line
 trimmedLineR1R2 = stats.trim_mean(fR1R2,  proportiontocut= 0.1)
+medianLineR1R2 = np.median(fR1R2)
 xTrimmedR1R2 = xSequence
 yTrimmedR1R2 = np.array([trimmedLineR1R2]*len(xTrimmedR1R2))
+yMedianR1R2 = np.array([medianLineR1R2]*len(xTrimmedR1R2))
 yScatterTrimmedR1R2 = np.linspace(0, np.max(R1R2), len(yTrimmedR1R2))
 
 # calculate R2/R1  10%  trimmed mean line
@@ -219,9 +229,14 @@ xScatterTrimmedLine = np.linspace(0, np.max(R2R1), len(yTrimmedR1R2))
 
 
 # calculate the S2 average eq.3
-avS2 = sdl.estimateAverageS2(R1, R2, NOE,  noeExclusionLimit=NOE_limitExclusion, proportiontocut=0.1)
-# Ct = sdl.estimateOverallCorrelationTimeFromR1R2(R1, R2, spectrometerFrequency=spectrometerFrequency)
-# avCt = np.average(Ct)
+avS2 = sdl.estimateAverageS2(R1, R2, NOE, noeExclusionLimit=NOE_limitExclusion, proportiontocut=0.1)
+# calculate the OverallCorrelation Time, remove residues over the R1R2 threshold and low NOE
+mask = (R1R2 < trimmedLineR1R2) & (NOE > NOE_limitExclusion)
+r1f = R1[mask]
+r2f = R2[mask]
+noef = NOE[mask]
+Ct = sdl.estimateOverallCorrelationTimeFromR1R2(r1f, r2f, spectrometerFrequency=spectrometerFrequency)
+avCt = abs(np.average(Ct)*1e9) #in nanoSec
 
 
 ####################     end data preparation     ##################

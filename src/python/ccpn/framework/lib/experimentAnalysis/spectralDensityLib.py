@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-17 17:35:25 +0000 (Fri, February 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-21 19:34:43 +0000 (Tue, February 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -58,6 +58,7 @@ def calculateJ0(noe, r1, r2, d, c, gx, gh):
     j0 = 3/(2*(3*d + c)) * (-(1/2)*r1 + r2 - (3/5)*sigmaNOE)
     return j0
 
+
 def calculateJWx(noe, r1, r2, d, c, gx, gh):
     """Calculate J(wx).
      Eq. 14 Backbone dynamics of Barstar: A 15N NMR relaxation study.
@@ -75,6 +76,19 @@ def calculateJWH(noe, r1, r2, d, c, gx, gh):
     sigmaNOE = calculateSigmaNOE(noe, r1, gx, gh)
     jwh = sigmaNOE / (5.0*d)
     return jwh
+
+def calculateSingleMotionSpectralDensityFunction(J0, omega):
+    """
+    Calculate the JW from a single Lorentzian.
+    Eq. 10  from Temperature-dependent spectral density analysis applied
+    to monitoring backbone dynamics of major urinary protein-I complexed with the pheromone 2-sec-butyl-4,5-dihydrothiazole.
+    Journal of Biomolecular NMR 28: 369–384, 2004.
+
+    :return:
+    """
+    ll = 6.25 * ((omega * J0)**2)
+    jomega = J0 / (1+ll )
+    return jomega
 
 def _polifitJs(j0, jw, order=1):
     """ Fit J0 and Jw(H or N) to a first order polynomial, Return the slope  and intercept  from the fit, and the new fitted Y  """
@@ -112,31 +126,38 @@ def _filterLowNoeFromR1R2(r1, r2, noe, noeExclusionLimit=0.65):
     r2 = r2[mask]
     return r1, r2
 
-def estimateAverageS2(r1, r2, noe=None, noeExclusionLimit=0.65, proportiontocut=.1 ):
+def estimateAverageS2(r1, r2, noe=None, noeExclusionLimit=0.65, method='median', proportiontocut=.1):
     """
     Estimate the average generalized order parameters Sav2
-    from experimentally observed R1R2.
+    from experimentally observed R1R2 using the trimmed mean method.
     If Noe are given, filter out residues with Noes < noeExclusionLimit
-    Eq 3. from  Effective Method for the Discrimination of
-    Motional Anisotropy and Chemical Exchange Kneller et al. 2001.
-    10.1021/ja017461k
+    - Trimmed mean usage from Eq 3. from  Effective Method for the Discrimination of
+        Motional Anisotropy and Chemical Exchange Kneller et al. 2001.
+        10.1021/ja017461k
+    - median usage from Eq. 7: Fast evaluation of protein dynamics from deficient 15N relaxation data.
+        Jaremko et all, 2018,  Journal of Biomolecular NMR (2018) 70:219–228
+        https://doi.org/10.1007/s10858-018-0176-3
 
-    s2Av = sqRoot [ median(r1*r2) / max(r1*r2)  ]
-
+    s2Av = sqRoot [ func(r1*r2) / max(r1*r2)  ]
     :param r1: array of R1 values
     :param r2: array of R2 values
     :param noe: array of  NOE values
     :param proportiontocut:  float, cut value to calculate the trim average. default 0.1 for a 10%  left/right cut
+    :param method: mean or median
     :return: float: S2
     """
 
     if noe is not None:
         r1, r2 = _filterLowNoeFromR1R2(r1, r2, noe, noeExclusionLimit)
     _pr = r1*r2
-    _trimMean = stats.trim_mean(_pr,  proportiontocut= proportiontocut)
+    if method=='median':
+        p1 = np.median(_pr)
+    else:
+        p1 = stats.trim_mean(_pr,  proportiontocut= proportiontocut)
     _max = np.max(_pr)
-    sAv = np.sqrt(_trimMean/_max)
+    sAv = np.sqrt(p1/_max)
     return sAv
+
 
 def estimateOverallCorrelationTimeFromR1R2(r1, r2, spectrometerFrequency):
     """
@@ -247,13 +268,14 @@ def calculateIsotropicSpectralDensityExtended(s2, rct, w, s2f=1.0, ictfast=0, ic
     
     return j
 
-def calculate_d_factor(rNH,  cubicAngstromFactor=1e30):
+def calculate_d_factor(rNH=1.0150,  cubicAngstromFactor=1e30):
     A = constants.REDUCED_PERM_VACUUM * constants.REDUCED_PLANK * constants.GAMMA_N * constants.GAMMA_H * cubicAngstromFactor
     A /= rNH ** 3.0
     A = A * A / 4.0
     return A
 
-def calculate_c_factor(omegaN, csaN):
+def calculate_c_factor(omegaN, csaN=-160.0):
+    """ Calculate the c2 factor"""
     C = omegaN * omegaN * csaN * csaN
     C /= 3.0
     return C

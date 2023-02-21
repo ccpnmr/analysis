@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-14 14:59:57 +0000 (Tue, February 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-21 19:34:43 +0000 (Tue, February 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -53,16 +53,10 @@ N15_CSA = -172 * 1e-6 # ppm
 NH_BOND_LENGTH = 1.02 * 1e-10
 InternalCorrelationTime = 50 # double check
 
-"""
-The default c and d Constants at 14.1T   in  (rad/s)2
-C1 = 1.25 * 1e9  and D1 = 1.35 * 1e9 
-see Eq. 13-16 Backbone dynamics of Barstar: A 15N NMR relaxation study. Udgaonkar et al 2000. Proteins: 41:460-474
-and spectralDensityLib.py for the calculations
-"""
 
 
-C1 = 1.25 * 1e9         # = c^2 in (rad/s)2  --- at 14.1T
-D1 = 1.35 * 1e9         # = (d^2)/4 in (rad/s)2 --- at 14.1T
+# C1 = 1.25 * 1e9         # = c^2 in (rad/s)2  --- at 14.1T
+# D1 = 1.35 * 1e9         # = (d^2)/4 in (rad/s)2 --- at 14.1T
 
 HgyromagneticRatio = 26.7522212 * 1e7 #rad s^-1*T^-1
 N15gyromagneticRatio = -2.7126 * 1e7

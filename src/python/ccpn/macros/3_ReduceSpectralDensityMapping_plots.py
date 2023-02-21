@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-20 12:00:40 +0000 (Mon, February 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-21 19:34:43 +0000 (Tue, February 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -87,7 +87,7 @@ import  ccpn.ui.gui.modules.experimentAnalysis._macrosLib as macrosLib
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from ccpn.ui.gui.widgets.DrawSS import plotSS
-
+import ccpn.framework.lib.experimentAnalysis.spectralDensityLib as sdl
 
 def _plotSDM(pdf):
     # page  RSDM
@@ -135,17 +135,11 @@ def _plotSDM(pdf):
 
 def _plotScatters(pdf):
     fig = plt.figure(dpi=300)
-    axj0_jwh = plt.subplot(221)
-    axj0_jwx = plt.subplot(223)
+    axj0_jwx = plt.subplot(221)
+    axj0_jwh = plt.subplot(223)
     axjwh_jwx = plt.subplot(222)
 
-    ##  jwH vs J0
-    axj0_jwh.scatter(J0, JWH, s=1, color=lineColour, )
-    for i, txt in enumerate(x):
-        axj0_jwh.annotate(str(txt), (J0[i], JWH[i]), fontsize=3)
-    axj0_jwh.set_title(f'{L_JWH} vs J0', fontsize=fontTitleSize, color=titleColor)
-    axj0_jwh.set_xlabel(f'J0 {L_SR}', fontsize=fontYSize, )
-    axj0_jwh.set_ylabel(f'{L_JWH} {L_SR}', fontsize=fontYSize)
+    maxX = np.max(J0) * 2
 
     ###   jwN vs J0
     axj0_jwx.scatter(J0, JWN, s=1, color=lineColour, )
@@ -154,6 +148,20 @@ def _plotScatters(pdf):
     axj0_jwx.set_title(f'{L_JWN} vs J0', fontsize=fontTitleSize, color=titleColor)
     axj0_jwx.set_xlabel(f'J0 {L_SR}', fontsize=fontYSize, )
     axj0_jwx.set_ylabel(f'{L_JWN} {L_SR}', fontsize=fontYSize)
+    maxY = np.max(JWN) * 2
+    axj0_jwx.set_xlim(xmin=0, xmax=maxX)
+    axj0_jwx.set_ylim(ymin=0, ymax=maxY)
+
+    ##  jwH vs J0
+    axj0_jwh.scatter(J0, JWH, s=1, color=lineColour, )
+    for i, txt in enumerate(x):
+        axj0_jwh.annotate(str(txt), (J0[i], JWH[i]), fontsize=3)
+    axj0_jwh.set_title(f'{L_JWH} vs J0', fontsize=fontTitleSize, color=titleColor)
+    axj0_jwh.set_xlabel(f'J0 {L_SR}', fontsize=fontYSize, )
+    axj0_jwh.set_ylabel(f'{L_JWH} {L_SR}', fontsize=fontYSize)
+    maxY = np.max(JWH) * 2
+    axj0_jwh.set_xlim(xmin=0, xmax=maxX)
+    axj0_jwh.set_ylim(ymin=0, ymax=maxY)
     axj0_jwh.get_shared_x_axes().join(axj0_jwh, axj0_jwx)
 
     ##  jwN vs  jwH
@@ -200,17 +208,20 @@ R1_ERR = data[sv.R1_ERR]
 R2_ERR  = data[sv.R2_ERR]
 NOE_ERR = data[sv.HETNOE_VALUE_ERR]
 
-J0 = data[sv.J0].values
+scalingFactor = 1e9
+J0 = data[sv.J0].values * scalingFactor
 J0_ERR = data[sv.J0_ERR].values
-JWH = data[sv.JwH].values
+JWH = data[sv.JwH].values * scalingFactor
 JWH_ERR = data[sv.JwH_ERR].values
-JWN = data[sv.JwX].values
+JWH087 = JWH*0.87
+JWN = data[sv.JwX].values * scalingFactor
 JWN_ERR = data[sv.JwX_ERR].values
+JWN087 = JWN*0.87
 
 ## matex  labels
 L_JWN = '$J(\omega_{N})$'
 L_JWH = '$J(\omega_{H})$'
-L_SR = '(sec/rad)'
+L_SR = '(nsec/rad)'
 
 
 ##  init the plot and save to pdf

@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-21 20:33:03 +0000 (Tue, February 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-21 22:18:12 +0000 (Tue, February 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -46,6 +46,17 @@ These macros require a DataTable containing the results of a Reduced Spectral de
 See the Dynamics tutorial to learn how to create such a  dataTable. '''
 
 thisDirPath = aPath(__file__).filepath
+SEQUENCE = 'KLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
+SS_SEQUENCE = 'BBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
+
+MINIMUMWIDTHS = (150, 300)
+
+MACROS_DICT = {
+                            'Rates': '1_RelaxationRates_plots.py',
+                            'Anisotropy Determination': '2_AnisotropyDetermination_plots.py',
+                            'Reduced Spectral Density Mapping': '3_ReduceSpectralDensityMapping_plots.py',
+                            'T1 vs T2 Contoured Scatter': '4_T1T2_contourScatter_plot.py',
+                            }
 
 class RelaxationPlotsPopup(CcpnDialogMainWidget):
     """
@@ -54,9 +65,10 @@ class RelaxationPlotsPopup(CcpnDialogMainWidget):
     FIXEDHEIGHT = False
 
     title = 'Relaxation Plots Popup (Alpha)'
-    def __init__(self, parent=None, mainWindow=None, title=title,  **kwds):
+    def __init__(self, parent=None, mainWindow=None,
+                 title=title,  **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title,
-                         size=(315, 200), minimumSize=None, **kwds)
+                         size=(500, 200), minimumSize=None, **kwds)
 
         if mainWindow:
             self.mainWindow = mainWindow
@@ -81,6 +93,7 @@ class RelaxationPlotsPopup(CcpnDialogMainWidget):
         # initialise the buttons and dialog size
         self._postInit()
         self._okButton = self.dialogButtons.button(self.OKBUTTON)
+        # self.dialogButtons.hide()
 
     def _createWidgets(self):
 
@@ -90,33 +103,84 @@ class RelaxationPlotsPopup(CcpnDialogMainWidget):
                                          mainWindow=self.mainWindow,
                                          grid=(row, 0),
                                          showSelectName=True,
-                                         minimumWidths=(0, 100),
-                                         sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+                                         minimumWidths=MINIMUMWIDTHS,
+                                         # sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+                                          gridSpan=(1, 2),
                                          callback=None)
         row += 1
-        self.intensityTypeW = cw.EntryPathCompoundWidget(self.mainWidget, labelText='Output Dir Path',
-                                                           entryText=str(thisDirPath),
+        self.filePathW = cw.EntryPathCompoundWidget(self.mainWidget, labelText='Output Dir Path',
+                                                     entryText=str(thisDirPath),
+                                                    lineEditMinimumWidth=300,
+                                                    minimumWidths=MINIMUMWIDTHS,
+                                                    compoundKwds = {'fileMode': 'directory'},
+                                                    gridSpan=(1, 1),
                                                            grid=(row, 0))
+        self.filePathW.entry.lineEdit.setMinimumWidth(MINIMUMWIDTHS[1])
+
         row += 1
-        self.seWidget = cw.EntryCompoundWidget(self.mainWidget, labelText='SE',
-                                                 entryText='SE',
-                                                 grid=(row, 0))
+        self.seWidget = cw.EntryCompoundWidget(self.mainWidget, labelText='Sequence',
+                                               tipText='One letter code sequence without spaces. Leave empty if not available',
+                                               entryText=SEQUENCE,
+                                               minimumWidths=MINIMUMWIDTHS,
+                                               gridSpan=(1, 1),
+                                               grid=(row, 0))
         row += 1
-        self.ssWidget = cw.EntryCompoundWidget(self.mainWidget, labelText='SS',
-                                                 entryText='SS',
-                                                 grid=(row, 0))
+        self.ssWidget = cw.EntryCompoundWidget(self.mainWidget, labelText='Secondary Structure',
+                                               tipText='One letter code secondary structure sequence without spaces.  DSSP nomenclature. Leave empty if not available',
+                                               entryText=SS_SEQUENCE,
+                                               minimumWidths=MINIMUMWIDTHS,
+                                               gridSpan=(1, 1),
+                                               grid=(row, 0))
+        row += 1
+        self.optionsCB = cw.CheckBoxesCompoundWidget(self.mainWidget, labelText='Reports',
+                                               tipText='',
+                                               texts=list(MACROS_DICT.keys()),
+                                                compoundKwds= {'direction': 'v',
+                                                                      'selectAll': True,
+                                                                      'hAlign': 'left'
+                                                                      },
+                                               minimumWidths=MINIMUMWIDTHS,
+                                               gridSpan=(1, 1),
+                                               grid=(row, 0))
+
+        self.optionsCB.getLayout().setAlignment(QtCore.Qt.AlignLeft)
 
         self.mainWidget.getLayout().setAlignment(QtCore.Qt.AlignTop)
 
 
     def _okCallback(self):
-        print('Generate')
+        dataTableName = None
+        if self.project:
+            dataTable = self.project.getByPid(self.dtwidget.getText())
+            if dataTable is not None:
+                dataTableName = dataTable.name
+
+        outputPath = self.filePathW.getText()
+
+        sequence = self.seWidget.getText()
+        ss = self.ssWidget.getText()
+        selectedOptions = self.optionsCB.getTexts()
+
+        for selectedOption in selectedOptions:
+            macroPathName = MACROS_DICT.get(selectedOption, None)
+            if macroPathName is not None:
+
+                macroPath = aPath(joinPath(thisDirPath, macroPathName))
+                macroName = macroPath.basename
+                filePath = aPath(joinPath(outputPath, macroName))
+                filePath = filePath.assureSuffix('.pdf')
+                commands = [
+                                    f'-d {dataTableName}',
+                                    f'-o {filePath}',
+                                    f'-se {sequence}',
+                                    f'-ss {ss}'
+                            ]
+                if self.application is not None:
+                    self.application.runMacro(macroPath, commands)
+
         self.accept()
 
 if __name__ == '__main__':
-    from ccpn.ui.gui.widgets.Application import TestApplication
-    app = TestApplication()
-    popup = RelaxationPlotsPopup()
+    popup = RelaxationPlotsPopup(mainWindow=mainWindow)
     popup.show()
     popup.raise_()
-    app.start()

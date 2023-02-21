@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-02-21 22:18:12 +0000 (Tue, February 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -2131,7 +2131,7 @@ class Framework(NotifierBase, GuiBase):
 
         ShortcutsPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow).exec_()
 
-    def runMacro(self, macroFile: str = None):
+    def runMacro(self, macroFile: str = None, extraCommands=None):
         """
         Runs a macro if a macro is specified, or opens a dialog box for selection of a macro file and then
         runs the selected macro.
@@ -2145,8 +2145,9 @@ class Framework(NotifierBase, GuiBase):
                 return
 
         if not macroFile in self.preferences.recentMacros:
-            self.preferences.recentMacros.append(macroFile)
-        self.ui.mainWindow.pythonConsole._runMacro(macroFile)
+            if extraCommands is None:
+                self.preferences.recentMacros.append(macroFile)
+        self.ui.mainWindow.pythonConsole._runMacro(macroFile, extraCommands=extraCommands)
 
     #################################################################################################
 

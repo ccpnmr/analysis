@@ -5,7 +5,7 @@ Alpha release and called from a macro.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:45 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-02-21 22:18:12 +0000 (Tue, February 21, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,6 +28,7 @@ __date__ = "$Date: 2021-03-05 11:01:32 +0000 (Fri, March 05, 2021) $"
 #=========================================================================================
 
 
+import ccpn.core #this is needed it to avoid circular imports
 from PyQt5 import QtCore, QtGui, QtWidgets
 import ccpn.ui.gui.widgets.CompoundWidgets as cw
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
@@ -207,10 +208,10 @@ class CalculateDistanceRestraintsPopup(CcpnDialogMainWidget):
                 drl._deleteTempResonanceAndAtomSets(self.project, resonanceSets, atomSets)
         self.accept()
 
-# if __name__ == '__main__':
-#     from ccpn.ui.gui.widgets.Application import TestApplication
-#     app = TestApplication()
-#     popup = CalculateDistanceRestraintsPopup()
-#     popup.show()
-#     popup.raise_()
-#     app.start()
+if __name__ == '__main__':
+    from ccpn.ui.gui.widgets.Application import TestApplication
+    app = TestApplication()
+    popup = CalculateDistanceRestraintsPopup()
+    popup.show()
+    popup.raise_()
+    app.start()

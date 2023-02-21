@@ -65,6 +65,7 @@ columnWidths = [300]
 
 # Set some tooltip texts
 help = {'SpectrumGroup' : 'Select spectrum group',
+        'Spectrum'      : 'Select spectrum',
         'MetaboliteList': 'Select the database to reference from',
         'Metabolite'    : 'Select the metabolite to add to the overlay',
         }
@@ -97,6 +98,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict = OD([('Spectrum', OD())])
         self.settings = OD([('Spectrum', OD()), ('Databases', OD()), ('Simulators', OD())])
         self.metaboliteSimulations = OD()
+        self.sumSpectra = OD()
 
         # # Input check
         # validInput = self._inputDataCheck()
@@ -136,7 +138,26 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.spectrumGroups = [spectrumGroup.id for spectrumGroup in sorted(self.project.spectrumGroups)]
         widget.setData(self.spectrumGroups)
         self.guiDict['Spectrum']['SpectrumGroupId'] = widget
-        self.settings['Spectrum']['SpectrumGroupId'] = self._getValue(widget)
+        self.settings['Spectrum']['SpectrumGroupId'] = f'SG:{self._getValue(widget)}'
+
+        if self.spectrumGroups:
+            self._selectSpectrumGroup(self.spectrumGroups[0])
+
+        # pull down list for selecting the spectrum to overlay on
+        grid = _addRow(grid)
+        widget = Label(self.scrollAreaLayout, text='Spectrum', grid=grid)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+
+        grid = _addColumn(grid)
+        widget = PulldownList(self.scrollAreaLayout, grid=grid, gridSpan=(1, 2),
+                              callback=self._selectSpectrum, tipText=help['Spectrum'])
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+
+        self.spectrumGroups = [spectrumGroup.id for spectrumGroup in sorted(self.project.spectrumGroups)]
+        self.spectra = [spectrum.id for spectrum in self.project.getByPid(self.settings['Spectrum']['SpectrumGroupId']).spectra]
+        widget.setData(self.spectrumGroups)
+        self.guiDict['Spectrum']['SpectrumId'] = widget
+        self.settings['Spectrum']['SpectrumId'] = self._getValue(widget)
 
         if self.spectrumGroups:
             self._selectSpectrumGroup(self.spectrumGroups[0])
@@ -224,17 +245,21 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         spectrumGroup = self.project.getByPid('SG:' + spectrumGroupID)
         valuesColumns = ['Metabolite Name', 'Database'] + [spectrum.name for spectrum in spectrumGroup.spectra]
         self.values = pandas.DataFrame(columns=valuesColumns)
-        limits = (max(spectrumGroup.spectra[0].positions), min(spectrumGroup.spectra[0].positions))
-        points = len(spectrumGroup.spectra[0].positions)
-        self.settings['Spectrum']['referenceSumSpectrumLimits'] = limits
-        self.settings['Spectrum']['referenceSumSpectrumPoints'] = points
-        x = numpy.linspace(limits[0], limits[1], points)
-        y = numpy.zeros(points)
         # create the simulated spectrum group
         if 'Reference_Spectra' not in self.project.spectrumGroups:
             self.settings['Spectrum']['referenceSpectrumGroup'] = self.project.newSpectrumGroup(
                 name='Reference_Spectra')
-            self.settings['Spectrum']['referenceSumSpectrum'] = self.project.newEmptySpectrum(['1H'], name=f'Sum_Spectrum', intensities=y, positions=x)
+
+    def _selectSpectrum(self, spectrumID):
+        spectrum = self.project.getByPid('SP:' + spectrumID)
+        limits = (max(spectrum.positions), min(spectrum.positions))
+        points = len(spectrum.positions)
+        self.settings['Spectrum']['referenceSumSpectrumLimits'] = limits
+        self.settings['Spectrum']['referenceSumSpectrumPoints'] = points
+        x = numpy.linspace(limits[0], limits[1], points)
+        y = numpy.zeros(points)
+        if spectrumID not in self.sumSpectra:
+            self.sumSpectra[spectrumID] = self.project.newEmptySpectrum(['1H'], name=f'Reference_Sum_{spectrumID}', intensities=y, positions=x)
             self.settings['Spectrum']['referenceSpectrumGroup'].addSpectrum(self.settings['Spectrum']['referenceSumSpectrum'])
 
     def _selectMetaboliteList(self, databaseName):

@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-21 19:34:43 +0000 (Tue, February 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-21 20:12:08 +0000 (Tue, February 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -75,7 +75,7 @@ figureTitleFontSize = 10
 
 # exporting to pdf: Default save to same location and name.pdf as this macro
 #  alternatively, provide a full valid path
-exportingFilePath = None
+outputPath = None
 
 ############################################################
 ##################   End User Settings     ########################
@@ -83,7 +83,7 @@ exportingFilePath = None
 
 import numpy as np
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-import  ccpn.ui.gui.modules.experimentAnalysis._macrosLib as macrosLib
+import ccpn.macros.relaxation._macrosLib as macrosLib
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from ccpn.ui.gui.widgets.DrawSS import plotSS
@@ -187,6 +187,8 @@ def _plotScatters(pdf):
 
 
 ###################      start inline macro       #####################
+args = macrosLib.getArgs().parse_args()
+globals().update(args.__dict__)
 
 ## get the data
 dataTable = macrosLib._getDataTableForMacro(dataTableName)
@@ -225,7 +227,8 @@ L_SR = '(nsec/rad)'
 
 
 ##  init the plot and save to pdf
-filePath = macrosLib._getExportingPath(__file__, exportingFilePath)
+filePath = macrosLib._getExportingPath(__file__, outputPath)
+
 with PdfPages(filePath) as pdf:
     fig1 = _plotSDM(pdf)
     fig2 = _plotScatters(pdf)
@@ -236,9 +239,6 @@ if showInteractivePlot:
 else:
     plt.close(fig1)
     plt.close(fig2)
-
-application._showHtmlFile("Show Plots", filePath)
-
 
 ###################      end macro        #########################
 

@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-21 19:34:43 +0000 (Tue, February 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-21 20:12:08 +0000 (Tue, February 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -82,7 +82,7 @@ hspace= 0.5
 
 # exporting to pdf: Default save to same location and name.pdf as this macro
 #  alternatively, provide a full valid path
-exportingFilePath = None
+outputPath = None
 
 ############################################################
 ##################   End User Settings     ########################
@@ -101,7 +101,7 @@ import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 import ccpn.framework.lib.experimentAnalysis.spectralDensityLib as sdl
 from ccpn.ui.gui.widgets.DrawSS import plotSS
-import  ccpn.ui.gui.modules.experimentAnalysis._macrosLib as macrosLib
+import ccpn.macros.relaxation._macrosLib as macrosLib
 
 
 
@@ -183,6 +183,8 @@ def _plotScatterRates(pdf):
     return fig
 
 ###################      start inline macro       #####################
+args = macrosLib.getArgs().parse_args()
+globals().update(args.__dict__)
 
 ## data preparation
 ## get the various values  and perform the needed calculations
@@ -242,7 +244,8 @@ avCt = abs(np.average(Ct)*1e9) #in nanoSec
 ####################     end data preparation     ##################
 
 ##  init the plot and save to pdf
-filePath = macrosLib._getExportingPath(__file__, exportingFilePath)
+
+filePath = macrosLib._getExportingPath(__file__, outputPath)
 
 with PdfPages(filePath) as pdf:
     fig1 = _ploteRates(pdf)
@@ -255,7 +258,6 @@ else:
     plt.close(fig1)
     plt.close(fig2)
 
-application._showHtmlFile("Show Plots", filePath)
 
 ###################      end macro        #########################
 

@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-21 19:34:43 +0000 (Tue, February 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-21 20:12:09 +0000 (Tue, February 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ from ccpn.util.Common import percentage
 import numpy as np
 from ccpn.util.Path import aPath, fetchDir, joinPath
 import matplotlib.pyplot as plt
-
+import argparse
 from matplotlib.ticker import MultipleLocator
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.floatUtils import fExp, fMan
@@ -76,19 +76,19 @@ def _setCommonYLim(ax, ys):
 def _setJoinedX(mainAxis, otherAxes):
     mainAxis.get_shared_x_axes().join(mainAxis, *otherAxes)
 
-def _getExportingPath(macroPath, exportingFilePath=None, suffix='.pdf'):
+def _getExportingPath(macroPath, outputPath=None, suffix='.pdf'):
 
     """
     :param macroPath: the filepath of the running macro
-    :param exportingFilePath:  a user defined path or None to use the default as the macro directory and macro name
+    :param outputPath:  a user defined path or None to use the default as the macro directory and macro name
     :param suffix: default '.pdf'
     :return: aPath
     ## get the path. no complex checking for paths. This is just for a macro!
     """
-    if exportingFilePath is None:  # use the macro file name
+    if outputPath is None:  # use the macro file name
         filePath = aPath(macroPath).withoutSuffix()
     else:
-        filePath = aPath(exportingFilePath)
+        filePath = aPath(outputPath)
     filePath = filePath.assureSuffix(suffix)
     return filePath
 
@@ -112,6 +112,18 @@ def _getDataTableForMacro(dataTableName):
         showWarning('Datatable not found', errorMess)
         raise RuntimeError(errorMess)
     return dataTable
+
+def getArgs():
+    defaultOutputPath = aPath(__file__).filepath
+    defaultDataTableName = 'RSDM_results'
+    sequence = 'KLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
+    ss_sequence = 'BBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
+    parser = argparse.ArgumentParser( description='Create Relaxation Analysis Plots')
+    parser.add_argument('-o',  '--outputPath', help='Output file path ', default=defaultOutputPath)
+    parser.add_argument('-d',  '--dataTableName', help='The DataTable name containing the Reduced Spectral Density Mapping results', default=defaultDataTableName)
+    parser.add_argument('-se',  '--sequence', help='The protein sequence', default=sequence)
+    parser.add_argument('-ss',  '--ss_sequence', help='The protein secondary structure  for the above sequence  using the DSSP nomenclature', default=ss_sequence)
+    return parser
 
 
 ##  Used for the Contouring lines

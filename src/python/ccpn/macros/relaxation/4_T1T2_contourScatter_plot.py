@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-20 12:45:31 +0000 (Mon, February 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-21 20:12:09 +0000 (Tue, February 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -88,7 +88,7 @@ s2LineColour =  'red'
 
 # exporting to pdf: Default save to same location and name.pdf as this macro
 #  alternatively, provide a full valid path
-exportingFilePath = None
+outputPath = None
 
 ############################################################
 ##################   End User Settings     ########################
@@ -100,7 +100,7 @@ import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import ccpn.framework.lib.experimentAnalysis.spectralDensityLib as sdl
-import  ccpn.ui.gui.modules.experimentAnalysis._macrosLib as macrosLib
+import ccpn.macros.relaxation._macrosLib as macrosLib
 from ccpn.util.Common import percentage
 
 def _plotClusters(pdf, xMaxLim=800):
@@ -166,8 +166,8 @@ def _plotClusters(pdf, xMaxLim=800):
     return fig
 
 ###################      start inline macro       #####################
-
-
+args = macrosLib.getArgs().parse_args()
+globals().update(args.__dict__)
 
 #### Data #####
 dataTable = macrosLib._getDataTableForMacro(dataTableName)
@@ -196,7 +196,7 @@ rctLines, s2Lines = sdl.calculateSpectralDensityContourLines(
                                                         )
 
 
-filePath = macrosLib._getExportingPath(__file__, exportingFilePath)
+filePath = macrosLib._getExportingPath(__file__, outputPath)
 with PdfPages(filePath) as pdf:
     fig1 = _plotClusters(pdf)
     info(f'Report saved in {filePath}')
@@ -206,6 +206,5 @@ if showInteractivePlot:
 else:
     plt.close(fig1)
 
-application._showHtmlFile("Show Plots", filePath)
 
 

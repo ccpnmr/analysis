@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-22 17:37:59 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 17:42:25 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -111,8 +111,6 @@ class _MultiSort(_TableModel):
                         newDf = newDf.sort_values([MAX, groupCol, DIFF], ascending=True).drop([MAX, DIFF], axis=1)
 
                     else:
-                        print(f'--> sorting    {groupCol}    {col}    {MAX}')
-
                         # descending - max->min of each group / subgroup always max->min
                         newDf[MAX] = newDf.groupby([groupCol])[[col]].transform(MAX)
                         newDf = newDf.sort_values([MAX, groupCol, col], ascending=False).drop(MAX, axis=1)
@@ -731,8 +729,6 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
         # update the visible columns
         self.headerColumnMenu.hiddenColumns = [col for col in self._df.columns if isinstance(col, tuple) and col[1] in self.defaultHiddenSubgroup]
 
-        print(f'-->    update hidden  {self.headerColumnMenu.hiddenColumns}')
-
     # NOTE:ED - not done yet
     # def refreshTable(self):
     #     # subclass to refresh the groups
@@ -829,7 +825,6 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
     def _postChangeSelectionOrderCallback(self, *args):
         super()._postChangeSelectionOrderCallback(*args)
 
-        print('--> _postChangeSelectionOrderCallback')
         self.updateTableExpanders()
 
     #=========================================================================================

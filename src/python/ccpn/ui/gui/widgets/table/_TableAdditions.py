@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-08 19:52:33 +0000 (Wed, February 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 17:37:59 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -135,7 +135,7 @@ class TableMenuABC(ABC):
     # Implementation
     #=========================================================================================
 
-    pass
+    ...
 
 
 class TableHeaderABC(ABC):
@@ -210,7 +210,7 @@ class TableHeaderABC(ABC):
     # Implementation
     #=========================================================================================
 
-    pass
+    ...
 
 
 #=========================================================================================
@@ -295,7 +295,7 @@ class TableHeaderColumns(TableHeaderABC):
     """
     name = "Columns"
     _parent = None
-    _hiddenColumns = None
+    # _hiddenColumns = None
     _internalColumns = None
     _menuItemVisible = True
 
@@ -324,11 +324,19 @@ class TableHeaderColumns(TableHeaderABC):
 
     # pass methods through to the QTableView/QHeaderView
 
-    def model(self) -> QtCore.QAbstractTableModel:
-        return self._parent.model()
+    @property
+    def hiddenColumns(self):
+        """Set/clear the hidden columns
+        """
+        header = list(self._parent._df.columns)
+        return [col for cc, col in enumerate(header) if self._parent.isColumnHidden(cc)]
 
-    def horizontalHeader(self) -> QtWidgets.QHeaderView:
-        return self._parent.horizontalHeader()
+    @hiddenColumns.setter
+    def hiddenColumns(self, columns):
+        header = list(self._parent._df.columns)
+        for cc, col in enumerate(header):
+            if col in columns or col in self._internalColumns:
+                self._parent.hideColumn(cc)
 
     #=========================================================================================
     # Class methods
@@ -336,37 +344,28 @@ class TableHeaderColumns(TableHeaderABC):
 
     # pass methods through to the QTableView/QHeaderView
 
-    def showColumn(self, *arg, **kwds):
-        self._parent.showColumn(*arg, **kwds)
+    def model(self) -> QtCore.QAbstractTableModel:
+        return self._parent.model()
 
-    def hideColumn(self, *arg, **kwds):
-        self._parent.hideColumn(*arg, **kwds)
+    def horizontalHeader(self) -> QtWidgets.QHeaderView:
+        return self._parent.horizontalHeader()
+
+    def showColumn(self, col):
+        self._parent.showColumn(col)
+
+    def hideColumn(self, col):
+        self._parent.hideColumn(col)
 
     #=========================================================================================
     # Implementation
     #=========================================================================================
-
-    def getHiddenColumns(self):
-        """Get a list of currently hidden columns
-        """
-        hiddenColumns = self._hiddenColumns
-        ll = list(set(hiddenColumns))
-        return [x for x in ll if x in self.columnTexts]
-
-    def setHiddenColumns(self, texts, update=True):
-        """Set a list of column-headers to be hidden from the table.
-        """
-        ll = [x for x in (texts or []) if x in self.columnTexts and x not in self._internalColumns]
-        self._hiddenColumns = ll
-        if update:
-            self.showColumns(None)
 
     def setInternalColumns(self, texts, update=True):
         """set a list of internal column-headers that are always hidden.
         """
         self._internalColumns = list(texts or [])
         if update:
-            self.showColumns(None)
+            self.refreshHiddenColumns()
 
     def hideDefaultColumns(self):
         """If the table is empty then check visible headers against the last header hidden list
@@ -385,43 +384,37 @@ class TableHeaderColumns(TableHeaderABC):
         except Exception:
             return []
 
-    def showColumns(self, df):
+    def refreshHiddenColumns(self):
         # show the columns in the list
-        hiddenColumns = self.getHiddenColumns()
-
         for colName in self.columnTexts:
             # always hide the internal columns
-            if colName in (hiddenColumns + self._internalColumns):
-                self._hideColumn(colName)
+            if colName in (self.hiddenColumns + self._internalColumns):
+                self._hideColumnName(colName)
             else:
-                self._showColumn(colName)
+                self._showColumnName(colName)
 
-    def _showColumn(self, name):
+    def _showColumnName(self, name):
         if name not in self.columnTexts:
             return
-        if name in self._hiddenColumns:
-            self._hiddenColumns.remove(name)
-        i = self.columnTexts.index(name)
-        self.showColumn(i)
 
-    def _hideColumn(self, name):
+        if 0 <= (i := self.columnTexts.index(name)):
+            self.showColumn(i)
+
+    def _hideColumnName(self, name):
         if name not in self.columnTexts:
             return
-        if name not in (self._hiddenColumns + self._internalColumns):
-            self._hiddenColumns.append(name)
-        i = self.columnTexts.index(name)
-        self.hideColumn(i)
+
+        if 0 <= (i := self.columnTexts.index(name)):
+            self.hideColumn(i)
 
     def _showColumnsPopup(self):
         """Show the columns popup-menu
         """
         settingsPopup = ColumnViewSettingsPopup(parent=self._parent, table=self,
                                                 dataFrameObject=self._parent._df,  # NOTE:ED - need to remove dataFrameObject :|
-                                                hiddenColumns=self.getHiddenColumns(),
+                                                hiddenColumns=self.hiddenColumns,
                                                 )
-        # hiddenColumns = settingsPopup.getHiddenColumns()
-        self.setHiddenColumns(texts=self._hiddenColumns, update=False)
-        settingsPopup.exec_()  # exclusive control to the menu and return hidden-columns
+        settingsPopup.exec_()  # pass exclusive control to the menu and return hidden-columns
 
 
 #=========================================================================================
@@ -457,13 +450,13 @@ class TableExport(TableMenuABC):
     # Properties
     #=========================================================================================
 
-    pass
+    ...
 
     #=========================================================================================
     # Class methods
     #=========================================================================================
 
-    pass
+    ...
 
     #=========================================================================================
     # Implementation
@@ -596,13 +589,13 @@ class TableDelete(TableMenuABC):
     # Properties
     #=========================================================================================
 
-    pass
+    ...
 
     #=========================================================================================
     # Class methods
     #=========================================================================================
 
-    pass
+    ...
 
     #=========================================================================================
     # Implementation

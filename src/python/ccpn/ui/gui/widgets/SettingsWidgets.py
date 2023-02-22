@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import contextlib
-from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -44,7 +44,7 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.Slider import Slider
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER, SOFTDIVIDER, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown, SpectrumDisplayPulldown, ChemicalShiftListPulldown
+from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown, SpectrumDisplayPulldown
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from functools import partial
@@ -1336,12 +1336,17 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
         # self.chainsWidget = ChainSelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=[ALL], displayText=[], defaults=[ALL])
 
         self.checkBoxes = {}
+        useInsideSpacer = False
         if settingsDict:
             optionTexts = [data['label'] for item, data in settingsDict.items()]
             _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
             colwidth = maxDim.width()
 
             for row, (item, data) in enumerate(settingsDict.items(), start=1):
+
+                # this is a fix to allow large widgets to expand with the settings-widget
+                useInsideSpacer |= data.get('useInsideSpacer', False)
+
                 if 'type' in data:
                     widgetType = data['type']
                     kws = {}
@@ -1349,7 +1354,7 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
                         # hack for a divider
                         if 'kwds' in data:
                             kws.update(data['kwds'])
-                        newItem = widgetType(self, grid=(row, 0), colour=getColours()[DIVIDER], **kws,)
+                        newItem = widgetType(self, grid=(row, 0), colour=getColours()[DIVIDER], **kws, )
 
                     else:
                         if 'callBack' in data:  # this avoids a crash if the widget init doesn't have a callback/mainWindow arg
@@ -1404,7 +1409,9 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
         cols = self.getLayout().columnCount()
         Spacer(self, 5, 5,
                QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-               grid=(rows, cols), gridSpan=(1, 1))
+               grid=(rows, cols - int(useInsideSpacer)), gridSpan=(1, 1))
+        if useInsideSpacer:
+            self.getLayout().setColumnStretch(cols - int(useInsideSpacer), 100)
 
         self.setMinimumWidth(self.sizeHint().width())
         self._registerNotifiers()
@@ -1752,7 +1759,6 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
 if __name__ == '__main__':
     import os
     import sys
-    from PyQt5 import QtGui, QtWidgets
 
 
     def myCallback(ph0, ph1, pivot, direction):

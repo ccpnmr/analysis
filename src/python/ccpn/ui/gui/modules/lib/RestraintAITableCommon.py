@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-17 15:39:18 +0000 (Fri, February 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 17:37:59 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,6 @@ __date__ = "$Date: 2023-01-20 15:57:58 +0100 (Fri, January 20, 2023) $"
 #=========================================================================================
 
 from dataclasses import dataclass
-
 from PyQt5 import QtWidgets
 
 from ccpn.ui.gui.lib.GuiStripContextMenus import _selectedPeaksMenuItem, _addMenuItems, _getNdPeakMenuItems, _setEnabledAllItems
@@ -99,7 +98,6 @@ class _ModuleHandler(QtWidgets.QWidget):
     # non-gui resources
     _restraintTables = []
     _outputTables = []
-    # _sourcePeaks = []
     _thisPeakList = None
 
     _collectionPulldown = None
@@ -116,6 +114,7 @@ class _ModuleHandler(QtWidgets.QWidget):
     _restraintTableFilter = {}
     _outputTableFilter = {}
     _modulePulldownFilter = []
+    _meanLowerLimit = 0.0
 
     comparisonSets = []
 

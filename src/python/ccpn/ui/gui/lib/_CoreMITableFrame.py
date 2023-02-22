@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-08 19:52:32 +0000 (Wed, February 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 17:37:58 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -28,15 +28,11 @@ __date__ = "$Date: 2023-02-07 16:38:53 +0100 (Tue, February 07, 2023) $"
 
 import pandas as pd
 from collections import OrderedDict
-from PyQt5 import QtWidgets, QtCore
+
 from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.util.Logging import getLogger
 
-from ccpn.ui.gui.lib._CoreTableFrame import _CoreTableFrameABC
 from sandbox.Ed.MIProjectTable import _MIProjectTableABC
 
 
@@ -78,7 +74,6 @@ class _CoreMITableWidgetABC(_MIProjectTableABC):
                          **kwds)
 
         self.headerColumnMenu.setInternalColumns(self._internalColumns, False)
-        self.headerColumnMenu.setHiddenColumns(_hiddenColumns)
 
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
@@ -378,7 +373,6 @@ class _CoreMITableWidgetABC(_MIProjectTableABC):
     #=========================================================================================
     # object properties
     #=========================================================================================
-
 
 #=========================================================================================
 # _CoreTableFrameABC

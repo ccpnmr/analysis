@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-09 18:53:19 +0000 (Thu, February 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 17:37:59 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -49,7 +49,7 @@ class ColumnViewSettingsPopup(CcpnDialogMainWidget):
         # self.dataFrameObject = dataFrameObject
         self.widgetColumnViewSettings = ColumnViewSettings(self.mainWidget, table=table,
                                                            dfObject=dataFrameObject,
-                                                           hiddenColumns=hiddenColumns, grid=(0, 0))
+                                                           grid=(0, 0))
 
         self.setCloseButton(callback=self._close, tipText='Close')
         self.setDefaultButton(self.CLOSEBUTTON)
@@ -58,19 +58,20 @@ class ColumnViewSettingsPopup(CcpnDialogMainWidget):
         self._postInit()
 
     def getHiddenColumns(self):
-        return self.widgetColumnViewSettings._getHiddenColumns()
+        return self.widgetColumnViewSettings.hiddenColumns
 
-    def setHiddenColumns(self, texts):
-        self.widgetColumnViewSettings._hiddenColumns = texts
+    # def setHiddenColumns(self, texts):
+    #     self.widgetColumnViewSettings._hiddenColumns = texts
 
     def _close(self):
         """Save the hidden columns to the table class. So it remembers when you open again the popup
         """
-        hiddenColumns = self.getHiddenColumns()
-        # self.dataFrameObject.hiddenColumns = hiddenColumns
-        self.tableHandler.setHiddenColumns(hiddenColumns, False)
+        # hiddenColumns = self.getHiddenColumns()
+        # # self.dataFrameObject.hiddenColumns = hiddenColumns
+        # self.tableHandler.setHiddenColumns(hiddenColumns, False)
         self.reject()
-        return hiddenColumns
+
+        return self.getHiddenColumns()
 
 
 #=========================================================================================
@@ -84,7 +85,7 @@ CheckboxTipText = 'Select column to be visible on the table.'
 class ColumnViewSettings(Frame):
     """ hide show check boxes corresponding to the table columns """
 
-    def __init__(self, parent=None, table=None, dfObject=None, direction='v', hiddenColumns=None, **kwds):
+    def __init__(self, parent=None, table=None, dfObject=None, direction='v', **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
         self.direction = direction
@@ -104,15 +105,12 @@ class ColumnViewSettings(Frame):
         self.widgetFrame = Frame(self, setLayout=True, margins=(5, 5, 5, 5), grid=(1, 0))
         Spacer(self, 5, 5, 'fixed', 'expanding', grid=(2, 0))
 
-        # NOTE:ED - check, shouldn't need to pass this in
-        # self._hiddenColumns = hiddenColumns or []
-
         self.initCheckBoxes()
 
     def initCheckBoxes(self):
 
         if columns := list(self._df.columns):
-            hiddenColumns = self.tableHandler._hiddenColumns or []
+            hiddenColumns = self.tableHandler.hiddenColumns or []
 
             for i, colum in enumerate(columns):
 
@@ -133,8 +131,9 @@ class ColumnViewSettings(Frame):
 
                     self.checkBoxes.append(cb)
 
-    def _getHiddenColumns(self):
-        return self.tableHandler._hiddenColumns
+    @property
+    def hiddenColumns(self):
+        return self.tableHandler.hiddenColumns
 
     def checkBoxCallBack(self):
         currentCheckBox = self.sender()
@@ -149,9 +148,9 @@ class ColumnViewSettings(Frame):
                 checkedBoxes.append(checkBox)
         if checkedBoxes:
             if currentCheckBox.isChecked():
-                self.tableHandler._showColumn(self._df.columns[i])
+                self.tableHandler._showColumnName(self._df.columns[i])
             else:
-                self.tableHandler._hideColumn(self._df.columns[i])
+                self.tableHandler._hideColumnName(self._df.columns[i])
         else:
             # always display at least one column, disables the last checkbox
             currentCheckBox.setEnabled(False)
@@ -176,12 +175,12 @@ class ColumnViewSettings(Frame):
     #     if name in self.tableHandler._hiddenColumns:
     #         self.tableHandler._hiddenColumns.remove(name)
 
-    def showColumns(self):
+    def refreshHiddenColumns(self):
         # show/hide the columns in the list
         columns = self.tableHandler.columnTexts
 
         for i, colName in enumerate(columns):
             if colName in self.tableHandler._hiddenColumns:
-                self.tableHandler._hideColumn(colName)
+                self.tableHandler._hideColumnName(colName)
             else:
-                self.tableHandler._showColumn(colName)
+                self.tableHandler._showColumnName(colName)

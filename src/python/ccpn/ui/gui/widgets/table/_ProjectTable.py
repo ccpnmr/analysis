@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-17 15:38:10 +0000 (Fri, February 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 17:37:59 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -388,7 +388,8 @@ class _ProjectTableABC(TableABC, Base):
                 model._sortOrder = sortOrder
                 self.sortByColumn(sortColumn, sortOrder)
 
-            self.headerColumnMenu.showColumns(None)
+            self.headerColumnMenu.refreshHiddenColumns()
+            self.postUpdateDf()
             self._highLightObjs(objs)
 
             # set the tipTexts
@@ -416,7 +417,7 @@ class _ProjectTableABC(TableABC, Base):
 
         self.updateDf(_df, resize=True)
 
-        self.headerColumnMenu.showColumns(None)
+        self.headerColumnMenu.refreshHiddenColumns()
 
     #=========================================================================================
     # Build the dataFrame for the table

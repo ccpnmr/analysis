@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-17 15:39:18 +0000 (Fri, February 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 17:37:59 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,6 @@ from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.PeakList import PeakList
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.MultipletList import MultipletList
-# from ccpn.core._PeakCluster import _PeakCluster
 from ccpn.core.Sample import Sample
 from ccpn.core.Substance import Substance
 from ccpn.core.NmrChain import NmrChain
@@ -265,8 +264,25 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
                      "}" % (noFocusColour, focusColour)
         self.setStyleSheet(styleSheet)
 
+    def getObjects(self, includeRoot=False):
+        """Get all objects from the tree
+        """
+        allObjects = []
+
+        for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
+            obj = item.data(1, 0)
+
+            # return items in the tree that have a pid
+            if hasattr(obj, 'pid'):
+                if self.projectItem and item == self.projectItem and not includeRoot:
+                    continue
+
+                allObjects += [obj]
+
+        return allObjects
+
     def getSelectedObjects(self, includeRoot=False):
-        """Get selected objects from the check boxes
+        """Get selected objects from the check-boxes
         """
         selectedObjects = []
 
@@ -284,7 +300,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         return selectedObjects
 
     def getSelectedItems(self, includeRoot=False):
-        """Get selected objects from the check boxes
+        """Get selected objects from the check-boxes
         """
         selectedItems = []
 
@@ -332,7 +348,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         return pids
 
     def selectObjects(self, pids):
-        """Handle changing the state of checkboxes
+        """Handle changing the state of check-boxes
         """
         if self._enableCheckBoxes:
             items = self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive)
@@ -348,7 +364,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
 
     def _itemChanged(self, item, column: int) -> None:
         if column == 0 and hasattr(item, 'storedCheckedState'):
-            # remember the state of the checkbox for the next click
+            # remember the state of the check-box for the next click
             if item.storedCheckedState != item.checkState(0):
                 item.storedCheckedState = item.checkState(0)
 
@@ -477,9 +493,10 @@ class _StoredTreeWidgetItem(QtWidgets.QTreeWidgetItem):
         super().__init__(parent)
         self.storedCheckedState: QtCore.Qt.CheckState = self.checkState(0)
         self.depth: int = depth
+        self._lastState = {}
 
     def setCheckState(self, column: int, state: QtCore.Qt.CheckState) -> None:
-        # The checkbox in the first column:
+        # The check-box in the first column:
         if column == 0:
             self.storedCheckedState = state
         return super().setCheckState(column, state)
@@ -560,27 +577,27 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
                                             'ccpn_restraint_list', 'ccpn_restraint'
                                             ],
         PeakList._pluralLinkName         : ['ccpn_peak_list', 'nef_peak', 'nef_spectrum_dimension', 'nef_spectrum_dimension_transfer'],
-        IntegralList._pluralLinkName  : ['ccpn_integral_list', 'ccpn_integral'],
-        MultipletList._pluralLinkName : ['ccpn_multiplet_list', 'ccpn_multiplet', 'ccpn_multiplet_peaks'],
-        Sample._pluralLinkName        : ['ccpn_sample', 'ccpn_sample_component'],
-        Substance._pluralLinkName     : ['ccpn_substance'],
-        NmrChain._pluralLinkName      : ['nmr_chain', 'nmr_residue', 'nmr_atom'],
+        IntegralList._pluralLinkName     : ['ccpn_integral_list', 'ccpn_integral'],
+        MultipletList._pluralLinkName    : ['ccpn_multiplet_list', 'ccpn_multiplet', 'ccpn_multiplet_peaks'],
+        Sample._pluralLinkName           : ['ccpn_sample', 'ccpn_sample_component'],
+        Substance._pluralLinkName        : ['ccpn_substance'],
+        NmrChain._pluralLinkName         : ['nmr_chain', 'nmr_residue', 'nmr_atom'],
         # TODO:ED - not done yet
-        StructureData._pluralLinkName : ['ccpn_dataset', 'ccpn_calculation_step', 'ccpn_calculation_data'],
-        Complex._pluralLinkName       : ['ccpn_complex', 'ccpn_complex_chain'],
-        SpectrumGroup._pluralLinkName : ['ccpn_spectrum_group', 'ccpn_group_spectrum'],
-        Note._pluralLinkName          : ['ccpn_note'],
+        StructureData._pluralLinkName    : ['ccpn_dataset', 'ccpn_calculation_step', 'ccpn_calculation_data'],
+        Complex._pluralLinkName          : ['ccpn_complex', 'ccpn_complex_chain'],
+        SpectrumGroup._pluralLinkName    : ['ccpn_spectrum_group', 'ccpn_group_spectrum'],
+        Note._pluralLinkName             : ['ccpn_note'],
         # _PeakCluster._pluralLinkName  : ['ccpn_peak_cluster_list', 'ccpn_peak_cluster', 'ccpn_peak_cluster_peaks'],
-        'restraintLinks'              : ['nef_peak_restraint_link'],
-        'additionalData'              : ['ccpn_internal_data'],
-        ViolationTable._pluralLinkName: ['ccpn_distance_restraint_violation_list', 'ccpn_distance_restraint_violation',
+        'restraintLinks'                 : ['nef_peak_restraint_link'],
+        'additionalData'                 : ['ccpn_internal_data'],
+        ViolationTable._pluralLinkName   : ['ccpn_distance_restraint_violation_list', 'ccpn_distance_restraint_violation',
                                             'ccpn_dihedral_restraint_violation_list', 'ccpn_dihedral_restraint_violation',
                                             'ccpn_rdc_restraint_violation_list', 'ccpn_rdc_restraint_violation',
                                             'ccpn_restraint_violation_list_metadata'
                                             ],
-        DataTable._pluralLinkName     : ['ccpn_datatable', 'ccpn_datatable_data', 'ccpn_datatable_metadata'],
-        Collection._pluralLinkName    : ['ccpn_collection'],
-        'ccpnLogging'                 : ['ccpn_logging', 'ccpn_history'],
+        DataTable._pluralLinkName        : ['ccpn_datatable', 'ccpn_datatable_data', 'ccpn_datatable_metadata'],
+        Collection._pluralLinkName       : ['ccpn_collection'],
+        'ccpnLogging'                    : ['ccpn_logging', 'ccpn_history'],
         'ccpnDataSetParameters'          : ['ccpn_parameter', 'ccpn_dataframe']
         }
 
@@ -590,24 +607,24 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         ChemicalShiftList._pluralLinkName: None,
         RestraintTable._pluralLinkName   : None,
         PeakList._pluralLinkName         : 'ccpn_peak_list',
-        IntegralList._pluralLinkName  : 'ccpn_integral_list',
-        MultipletList._pluralLinkName : 'ccpn_multiplet_list',
-        Sample._pluralLinkName        : None,
-        Substance._pluralLinkName     : None,
-        NmrChain._pluralLinkName      : 'nmr_chain',
+        IntegralList._pluralLinkName     : 'ccpn_integral_list',
+        MultipletList._pluralLinkName    : 'ccpn_multiplet_list',
+        Sample._pluralLinkName           : None,
+        Substance._pluralLinkName        : None,
+        NmrChain._pluralLinkName         : 'nmr_chain',
         # TODO:ED - not done yet
-        StructureData._pluralLinkName : None,
-        Complex._pluralLinkName       : None,
-        SpectrumGroup._pluralLinkName : None,
-        Note._pluralLinkName          : 'ccpn_note',
+        StructureData._pluralLinkName    : None,
+        Complex._pluralLinkName          : None,
+        SpectrumGroup._pluralLinkName    : None,
+        Note._pluralLinkName             : 'ccpn_note',
         # _PeakCluster._pluralLinkName  : None,
-        'restraintLinks'              : None,
-        'additionalData'              : 'ccpn_internal_data',
-        ViolationTable._pluralLinkName: None,
-        DataTable._pluralLinkName     : None,
-        Collection._pluralLinkName    : 'ccpn_collection',
-        'ccpnDataSetParameters'       : None,
-        'ccpnLogging'                 : None,
+        'restraintLinks'                 : None,
+        'additionalData'                 : 'ccpn_internal_data',
+        ViolationTable._pluralLinkName   : None,
+        DataTable._pluralLinkName        : None,
+        Collection._pluralLinkName       : 'ccpn_collection',
+        'ccpnDataSetParameters'          : None,
+        'ccpnLogging'                    : None,
         }
 
     contents = {}

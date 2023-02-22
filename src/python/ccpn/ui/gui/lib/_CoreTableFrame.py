@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-08 19:52:32 +0000 (Wed, February 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 17:37:59 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -76,7 +76,6 @@ class _CoreTableWidgetABC(_ProjectTableABC):
                          **kwds)
 
         self.headerColumnMenu.setInternalColumns(self._internalColumns, False)
-        self.headerColumnMenu.setHiddenColumns(_hiddenColumns)
 
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()

@@ -79,7 +79,7 @@ class TableABC(QtWidgets.QTableView):
                     }
                     """
 
-    # NOTE:ED overrides QtCore.Qt.ForegroundRole
+    # NOTE:ED overrides QtCore.Qt.ForegroundRole - keep
     # QTableView::item - color: %(GUITABLE_ITEM_FOREGROUND)s;
     # QTableView::item:selected - color: %(GUITABLE_SELECTED_FOREGROUND)s;
     # cell uses alternate-background-role for unselected-focused cell
@@ -282,6 +282,9 @@ class TableABC(QtWidgets.QTableView):
                 model.df = df
 
         return model
+
+    def postUpdateDf(self):
+        ...
 
     def setModel(self, model: QtCore.QAbstractItemModel) -> None:
         """Set the model for the view

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-22 20:02:40 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 20:17:37 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -499,7 +499,8 @@ class GuiInputDataPanel(GuiSettingPanel):
         # TODO check leaking notifiers  after closing the module
         selectedDataTable = self.guiModule.project.getByPid(selectedName)
         self.guiModule.backendHandler.resultDataTable = selectedDataTable
-
+        appearanceTab = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
+        appearanceTab._resetXYBarPlotOptions()
         self.guiModule.updateAll()
 
     def _filterInputCollections(self, pids, *args):
@@ -1163,11 +1164,9 @@ class AppearancePanel(GuiSettingPanel):
                                                            calculationMode=calculationMode, factor=factor)
         return value
 
-    def _settingsChangedCallback(self, settingsDict, *args):
-        """Callback when a core settings has changed.
-        E.g.: the fittingModel and needs to update some of the appearance Widgets"""
+    def _resetXYBarPlotOptions(self,):
+        """ """
         # reset the Ywidget options
-
         xColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphXcolumnName)
         xOptions, xPreferredSelection = self._getAxisXOptions()
         xColumnNameW.setTexts(xOptions)

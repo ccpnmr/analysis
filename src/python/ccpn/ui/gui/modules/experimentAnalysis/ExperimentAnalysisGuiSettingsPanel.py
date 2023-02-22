@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-22 15:02:08 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 20:02:40 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ from collections import OrderedDict as od
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import ALL_GROUPINGNMRATOMS
 from ccpn.util.Logging import getLogger
 import numpy as np
-from ccpn.util.isotopes import name2IsotopeCode
+from ccpn.util.OrderedSet import OrderedSet
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets, QtGui
 from ccpn.ui.gui.widgets.Label import Label, DividerLabel
@@ -1080,43 +1080,59 @@ class AppearancePanel(GuiSettingPanel):
     def _getAxisYOptions(self):
         """ Get the columns names for plottable data. E.g.: the Fitting results and stats. """
         allOptions = []
+        preferredSelection = None
 
         backend = self.guiModule.backendHandler
         data = backend.getMergedResultDataFrame()
 
         if data is None:
-            return allOptions
+            return [], preferredSelection
         fallbackColumns = data.select_dtypes(include=[float, int])
         if not sv.MODEL_NAME in data.columns:
-            return list(fallbackColumns.columns)
+            print('====&&&', list(fallbackColumns.columns))
+            return list(fallbackColumns.columns), preferredSelection
 
         modelNames = data[sv.MODEL_NAME].values
+        calModelName = None
+        if sv.CALCULATION_MODEL in data.columns:
+            calculationModelNames = data[sv.CALCULATION_MODEL].values
+            if len(calculationModelNames) > 0:
+                calModelName = calculationModelNames[0]
+
         if len(modelNames) > 0:
             modelName = modelNames[0]
         else:
             modelName = None
-        model = backend.getFittingModelByName(modelName)
-        if model is not None:
-            model = model()
-            argumentNames = model.modelArgumentNames
-            argumentErrorNames = model.modelArgumentErrorNames
-            statsNames = model.modelStatsNames
-            allOptions = argumentNames+argumentErrorNames+statsNames
-        else:
-            allOptions = list(fallbackColumns.columns)
-        return allOptions
+
+        _model = backend.getFittingModelByName(modelName)
+        _calcModel = backend.getCalculationModelByName(calModelName)
+
+        if _model is not None:
+            model = _model()
+            if model.ModelName != sv.BLANKMODELNAME:
+                allArgs = model.getAllArgNames()
+                allOptions.extend(allArgs)
+                preferredSelection = allArgs[0]
+        if _calcModel is not None:
+            model = _calcModel()
+            if model.ModelName != sv.BLANKMODELNAME:
+                moArgs = model.modelArgumentNames
+                allOptions.extend(moArgs)
+                preferredSelection = moArgs[0]
+
+        return allOptions, preferredSelection
 
     def _getAxisXOptions(self):
         """ Get the columns names for plottable data. E.g.: the Fitting results and stats. """
 
         allowed = [
-                    sv.ASHTAG,
+                   sv.ASHTAG,
                    sv.COLLECTIONID,
                    sv.COLLECTIONPID,
                    sv.NMRRESIDUECODE,
                    sv.NMRRESIDUECODETYPE
                 ]
-        return allowed
+        return allowed, sv.NMRRESIDUECODE
 
     def _setThresholdValueForData(self, *args):
         mode = None
@@ -1153,15 +1169,16 @@ class AppearancePanel(GuiSettingPanel):
         # reset the Ywidget options
 
         xColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphXcolumnName)
-        xColumnNameW.setTexts(self._getAxisXOptions())
-        currentX = xColumnNameW.getText()
+        xOptions, xPreferredSelection = self._getAxisXOptions()
+        xColumnNameW.setTexts(xOptions)
+        if len(xOptions) > 0:
+            xColumnNameW.select(xPreferredSelection)
 
         yColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
-        yOptions = self._getAxisYOptions()
+        yOptions, yPreferredSelection = self._getAxisYOptions()
         yColumnNameW.setTexts(yOptions)
-        currentY = yColumnNameW.getText()
-        if currentX == currentY and len(yOptions)>0: #chances are both are on index
-            yColumnNameW.select(yOptions[1])
+        if len(yOptions)>0:
+            yColumnNameW.select(yPreferredSelection)
 
 
     def _getSelectedDisplays(self):

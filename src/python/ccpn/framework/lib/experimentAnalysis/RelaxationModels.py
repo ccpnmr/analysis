@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-22 15:02:07 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 20:02:40 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -347,6 +347,7 @@ class HetNoeCalculation(CalculationModel):
         # TODO remove hardcoded 15N
         inputData = inputData[inputData[sv.ISOTOPECODE] == '15N']
         grouppedByCollectionsId = inputData.groupby([sv.COLLECTIONID])
+
         for collectionId, groupDf in grouppedByCollectionsId:
             groupDf.sort_values([self.xSeriesStepHeader], inplace=True)
             seriesValues = groupDf[self.PeakProperty]
@@ -368,6 +369,7 @@ class HetNoeCalculation(CalculationModel):
             outputFrame.loc[collectionId, self.modelArgumentNames[1]] = error
             outputFrame.loc[collectionId, sv.GROUPBYAssignmentHeaders] = groupDf[sv.GROUPBYAssignmentHeaders].values[0]
             outputFrame.loc[collectionId, sv.NMRATOMNAMES] = nmrAtomNames[0] if len(nmrAtomNames)>0 else ''
+            outputFrame.loc[collectionId, sv.CALCULATION_MODEL] = self.ModelName
         return outputFrame
 
 
@@ -462,7 +464,7 @@ class R2R1RatesCalculation(CalculationModel):
         outputFrame[sv.CONSTANT_STATS_OUTPUT_TABLE_COLUMNS] = None
         outputFrame[sv.SpectrumPropertiesHeaders] = None
         outputFrame[sv.PeakPropertiesHeaders] = None
-        outputFrame[sv.MODEL_NAME] = self.ModelName
+        outputFrame[sv.CALCULATION_MODEL] = self.ModelName
         return outputFrame
 
 
@@ -592,7 +594,7 @@ class SDMCalculation(CalculationModel):
         outputFrame[sv.CONSTANT_STATS_OUTPUT_TABLE_COLUMNS] = None
         outputFrame[sv.SpectrumPropertiesHeaders] = None
         outputFrame[sv.PeakPropertiesHeaders] = None
-        outputFrame[sv.MODEL_NAME] = self.ModelName
+        outputFrame[sv.CALCULATION_MODEL] = self.ModelName
         return outputFrame
 
 #####################################################

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-08 17:27:29 +0000 (Wed, February 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 15:02:08 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -317,7 +317,6 @@ class GuiInputDataPanel(GuiSettingPanel):
               'type': settingWidgets._SeriesInputDataTableSelectionWidget,
               'postInit': self._setFixedHeightPostInit,
               'kwds': {
-                  'objectWidgetChangedCallback':self._changedInputDataCallback,
                   'labelText': guiNameSpaces.Label_SelectDataTable,
                   'tipText': guiNameSpaces.TipText_DataTableSelection,
                   'displayText': [],
@@ -495,9 +494,12 @@ class GuiInputDataPanel(GuiSettingPanel):
         pids = self.guiModule.project.getPidsByObjects(filteredDataTables)
         return pids
 
-    def _resultDataTablePulldownCallback(self, *args):
+    def _resultDataTablePulldownCallback(self, selectedName,  *args):
         """Callback upon widget selection """
         # TODO check leaking notifiers  after closing the module
+        selectedDataTable = self.guiModule.project.getByPid(selectedName)
+        self.guiModule.backendHandler.resultDataTable = selectedDataTable
+
         self.guiModule.updateAll()
 
     def _filterInputCollections(self, pids, *args):
@@ -889,7 +891,7 @@ class AppearancePanel(GuiSettingPanel):
               'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_XcolumnName,
                        'tipText': guiNameSpaces.TipText_XcolumnName,
-                       'texts': self._axisXOptions,
+                       'texts': [],
                        'fixedWidths': SettingsWidgetFixedWidths}}),
             (guiNameSpaces.WidgetVarName_BarGraphYcolumnName,
              {'label': guiNameSpaces.Label_YcolumnName,
@@ -899,7 +901,7 @@ class AppearancePanel(GuiSettingPanel):
               'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_YcolumnName,
                        'tipText': guiNameSpaces.TipText_YcolumnName,
-                       'texts': self._axisYOptions,
+                       'texts': [],
                        'fixedWidths': SettingsWidgetFixedWidths}}),
 
             (guiNameSpaces.WidgetVarName_ThreshValueCalcOptions,
@@ -1074,25 +1076,47 @@ class AppearancePanel(GuiSettingPanel):
     def _preselectDefaultYaxisBarGraph(self):
         pass
 
-    @property
-    def _axisYOptions(self):
+
+    def _getAxisYOptions(self):
         """ Get the columns names for plottable data. E.g.: the Fitting results and stats. """
+        allOptions = []
+
         backend = self.guiModule.backendHandler
-        currentFittingModel = backend.currentFittingModel
-        currentCalculationModel = backend.currentCalculationModel
-        fittingArgumentNames = currentFittingModel.modelArgumentNames
-        calculationArgumentNames = currentCalculationModel.modelArgumentNames
-        statNames = currentFittingModel.modelStatsNames
-        allOptions = calculationArgumentNames + fittingArgumentNames + statNames
+        data = backend.getMergedResultDataFrame()
+
+        if data is None:
+            return allOptions
+        fallbackColumns = data.select_dtypes(include=[float, int])
+        if not sv.MODEL_NAME in data.columns:
+            return list(fallbackColumns.columns)
+
+        modelNames = data[sv.MODEL_NAME].values
+        if len(modelNames) > 0:
+            modelName = modelNames[0]
+        else:
+            modelName = None
+        model = backend.getFittingModelByName(modelName)
+        if model is not None:
+            model = model()
+            argumentNames = model.modelArgumentNames
+            argumentErrorNames = model.modelArgumentErrorNames
+            statsNames = model.modelStatsNames
+            allOptions = argumentNames+argumentErrorNames+statsNames
+        else:
+            allOptions = list(fallbackColumns.columns)
         return allOptions
 
-    @property
-    def _axisXOptions(self):
+    def _getAxisXOptions(self):
         """ Get the columns names for plottable data. E.g.: the Fitting results and stats. """
-        backend = self.guiModule.backendHandler
-        ## Todo: populate the list using headers that are definitely inside the Data
-        allOptions = [sv.ASHTAG, sv.COLLECTIONID, sv.COLLECTIONPID, sv.NMRRESIDUECODE, sv.NMRRESIDUECODETYPE]
-        return allOptions
+
+        allowed = [
+                    sv.ASHTAG,
+                   sv.COLLECTIONID,
+                   sv.COLLECTIONPID,
+                   sv.NMRRESIDUECODE,
+                   sv.NMRRESIDUECODETYPE
+                ]
+        return allowed
 
     def _setThresholdValueForData(self, *args):
         mode = None
@@ -1127,9 +1151,18 @@ class AppearancePanel(GuiSettingPanel):
         """Callback when a core settings has changed.
         E.g.: the fittingModel and needs to update some of the appearance Widgets"""
         # reset the Ywidget options
+
+        xColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphXcolumnName)
+        xColumnNameW.setTexts(self._getAxisXOptions())
+        currentX = xColumnNameW.getText()
+
         yColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
-        if yColumnNameW:
-            yColumnNameW.setTexts(self._axisYOptions)
+        yOptions = self._getAxisYOptions()
+        yColumnNameW.setTexts(yOptions)
+        currentY = yColumnNameW.getText()
+        if currentX == currentY and len(yOptions)>0: #chances are both are on index
+            yColumnNameW.select(yOptions[1])
+
 
     def _getSelectedDisplays(self):
         displays = []

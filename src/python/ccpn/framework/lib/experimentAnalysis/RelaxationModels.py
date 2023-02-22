@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-21 19:34:43 +0000 (Tue, February 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 15:02:07 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -462,7 +462,7 @@ class R2R1RatesCalculation(CalculationModel):
         outputFrame[sv.CONSTANT_STATS_OUTPUT_TABLE_COLUMNS] = None
         outputFrame[sv.SpectrumPropertiesHeaders] = None
         outputFrame[sv.PeakPropertiesHeaders] = None
-
+        outputFrame[sv.MODEL_NAME] = self.ModelName
         return outputFrame
 
 
@@ -493,8 +493,6 @@ class SDMCalculation(CalculationModel):
         """ The list of parameters as str used in the calculation model.
             These names will appear as column headers in the output result frames. """
         return [sv.J0, sv.JwX, sv.JwH]
-
-
 
 
     def calculateValues(self, inputDataTables) -> TableFrame:
@@ -594,6 +592,7 @@ class SDMCalculation(CalculationModel):
         outputFrame[sv.CONSTANT_STATS_OUTPUT_TABLE_COLUMNS] = None
         outputFrame[sv.SpectrumPropertiesHeaders] = None
         outputFrame[sv.PeakPropertiesHeaders] = None
+        outputFrame[sv.MODEL_NAME] = self.ModelName
         return outputFrame
 
 #####################################################

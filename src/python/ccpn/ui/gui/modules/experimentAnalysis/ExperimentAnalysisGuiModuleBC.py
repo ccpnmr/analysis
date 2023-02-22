@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-02 17:01:13 +0000 (Thu, February 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 15:02:07 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -94,56 +94,13 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     def inputDataTables(self) -> list:
         return self.backendHandler.inputDataTables
 
-    def getSelectedOutputDataTable(self):
-        """ Get the datatable from the selected Setting.
-        Impl. Note: Do not use/set current.dataTable so to allow multiple GuiModules to display different tables."""
-        settings = self.getSettings(grouped=False)
-        outputDataPid = settings.get(guiNameSpaces.WidgetVarName_OutputDataTablesSelection)
-        dataTable = self.project.getByPid(outputDataPid)
-        return dataTable
 
     def getGuiResultDataFrame(self):
         """Get the SelectedOutputDataTable and transform the raw data to a displayable table for the main widgets.
         """
-        dataTable = self.getSelectedOutputDataTable()
-        if dataTable is None:
-            return
-        dataFrame = dataTable.data
-        if len(dataFrame)==0:
-            return
-        if not sv.COLLECTIONPID in dataFrame:
-            return dataFrame
-        ## group by id and keep only first row as all duplicated except the series steps, which are not needed here.
-        ## reset index otherwise you lose the column collectionId
-        outDataFrame = dataFrame.groupby(sv.COLLECTIONPID).first().reset_index()
-        outDataFrame.set_index(sv.COLLECTIONPID, drop=False, inplace=True)
+        dataTable = self.backendHandler.getMergedResultDataFrame()
 
-        # add the rawData as new columns (Transposed from column to row)
-        lastSeenSeriesStep = None
-        for ix, ys in dataFrame.groupby(sv.COLLECTIONPID)[[sv.SERIES_STEP_X, sv.SERIES_STEP_Y]]:
-            for seriesStep, seriesValue in zip(ys[sv.SERIES_STEP_X].astype(str).values, ys[sv.SERIES_STEP_Y].values):
-                if seriesStep == lastSeenSeriesStep:
-                    seriesStep += sv.SEP # this is the case when two series Steps are the same! Cannot create two identical columns or 1 will disappear
-                outDataFrame.loc[ix, seriesStep] = seriesValue
-                lastSeenSeriesStep = seriesStep
-
-        # drop columns that should not be on the Gui. To remove: peak properties (dim, height, ppm etc)
-        toDrop = sv.PeakPropertiesHeaders + [sv._SNR, sv.DIMENSION, sv.ISOTOPECODE, sv.NMRATOMNAME, sv.NMRATOMPID]
-        toDrop += sv.ALL_EXCLUDED
-        toDrop += ['None',  'None_'] #not sure yet where they come from
-        outDataFrame.drop(toDrop, axis=1, errors='ignore', inplace=True)
-
-        outDataFrame[sv.COLLECTIONID] = outDataFrame[sv.COLLECTIONID]
-        ## sort by NmrResidueCode if available otherwise by COLLECTIONID
-        if outDataFrame[sv.NMRRESIDUECODE].astype(str).str.isnumeric().all():
-            outDataFrame.sort_values(by=sv.NMRRESIDUECODE, key=lambda x: x.astype(int), inplace =True)
-        else:
-            outDataFrame.sort_values(by=sv.COLLECTIONID, inplace=True)
-        ## apply an ascending ASHTAG. This is needed for tables and BarPlotting
-        outDataFrame[sv.ASHTAG] = np.arange(1, len(outDataFrame)+1)
-        ## put ASHTAG as first header
-        outDataFrame.insert(0, sv.ASHTAG, outDataFrame.pop(sv.ASHTAG))
-        return outDataFrame
+        return dataTable
 
     def getSettings(self, grouped=True) -> dict:
         """
@@ -199,8 +156,11 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         if refit or self.backendHandler._needsRefitting:
             self.backendHandler.fitInputData()
             self.backendHandler._needsRefitting = False
+        appearance = self.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
+        allSettings = self.settingsPanelHandler.getAllSettings()
+        appearance._settingsChangedCallback(allSettings)
         for panelName, panel in self.panelHandler.panels.items():
-            panel.updatePanel(**{guiNameSpaces.SETTINGS: self.settingsPanelHandler.getAllSettings()})
+            panel.updatePanel(**{guiNameSpaces.SETTINGS: allSettings})
         ## make sure all is selected as before the update
         self.current.collections = []
         self.current.collections = currentCollections

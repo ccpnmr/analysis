@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-22 18:10:24 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 19:08:04 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -334,19 +334,19 @@ class _TableModel(QtCore.QAbstractTableModel):
             fRow = self._filterIndex[index.row()] if self._filterIndex is not None and 0 <= index.row() < len(self._filterIndex) else index.row()
             row, col = self._sortIndex[fRow], index.column()
 
-        if role == DISPLAY_ROLE:
-            # need to discard columns that include check-boxes
-            val = self._df.iat[row, col]
+            if role == DISPLAY_ROLE:
+                # need to discard columns that include check-boxes
+                val = self._df.iat[row, col]
 
-            # float/np.float - round to 3 decimal places
-            if isinstance(val, (float, np.floating)):
-                # make it scientific annotation if a huge/tiny number
-                try:
-                    value = f'{val:.3f}' if (1e-6 < val < 1e6) or val == 0.0 else f'{val:.3e}'
-                except Exception:
+                # float/np.float - round to 3 decimal places
+                if isinstance(val, (float, np.floating)):
+                    # make it scientific annotation if a huge/tiny number
+                    try:
+                        value = f'{val:.3f}' if (1e-6 < val < 1e6) or val == 0.0 else f'{val:.3e}'
+                    except Exception:
+                        value = str(val)
+                else:
                     value = str(val)
-            else:
-                value = str(val)
 
                 return value
 

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-02 17:34:14 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-02-22 18:10:24 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -29,8 +29,7 @@ __date__ = "$Date: 2022-09-08 17:27:34 +0100 (Thu, September 08, 2022) $"
 import numpy as np
 import pandas as pd
 from PyQt5 import QtCore, QtGui
-# from operator import or_
-# from functools import reduce
+from contextlib import suppress
 
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
@@ -369,7 +368,10 @@ class _TableModel(QtCore.QAbstractTableModel):
     def data(self, index, role=DISPLAY_ROLE):
         """Process the data callback for the model
         """
-        if index.isValid():
+        if not index.isValid():
+            return None
+
+        with suppress(Exception):
             # get the source cell
             fRow = self._filterIndex[index.row()] if self._filterIndex is not None and 0 <= index.row() < len(self._filterIndex) else index.row()
             row, col = self._sortIndex[fRow], index.column()

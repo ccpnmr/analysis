@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-21 20:12:09 +0000 (Tue, February 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 10:50:03 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -38,6 +38,7 @@ import argparse
 from matplotlib.ticker import MultipleLocator
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.floatUtils import fExp, fMan
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 
 def _prettyFormat4Legend(value, rounding=3):
     """ Format mantissa to (rounding) round  and exponent for matplotlib """
@@ -89,9 +90,22 @@ def _getExportingPath(macroPath, outputPath=None, suffix='.pdf'):
         filePath = aPath(macroPath).withoutSuffix()
     else:
         filePath = aPath(outputPath)
+    filePath = filePath.addTimeStamp()
     filePath = filePath.assureSuffix(suffix)
     return filePath
 
+def _isSequenceValid(sequence, ss_sequence):
+    if sequence  in [None, 'None', np.nan]:
+        return False
+    if ss_sequence  in [None, 'None', np.nan]:
+        return False
+    if not isinstance(sequence, str):
+        return False
+    if not isinstance(ss_sequence, str):
+        return False
+    if len(ss_sequence) != len(sequence):
+        return False
+    return True
 
 def _getDataTableForMacro(dataTableName):
     from ccpn.core.DataTable import DataTable

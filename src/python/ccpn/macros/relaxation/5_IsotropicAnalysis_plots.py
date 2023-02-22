@@ -29,7 +29,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-21 20:33:03 +0000 (Tue, February 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 10:50:03 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -107,8 +107,9 @@ def _plotIsotropicAnalysisPage1(pdf):
     axTe = plt.subplot(412)
     axRex = plt.subplot(413)
     axss = fig.add_subplot(414)
-    plotSS(axss, xSequence, sequence, ss_sequence=ss_sequence, startSequenceCode=startSequenceCode, fontsize=5,
-           showSequenceNumber=False, )
+    if macrosLib._isSequenceValid(sequence, ss_sequence):
+        plotSS(axss, xSequence, sequence, ss_sequence=ss_sequence, startSequenceCode=startSequenceCode, fontsize=5,
+               showSequenceNumber=False, )
 
     axSe.bar(x, S2, yerr=None, color=barColour, ecolor=barErrorColour, error_kw=dict(lw=barErrorLW, capsize=barErrorCapsize, capthick=barErrorCapthick))
     axTe.bar(x, TE, yerr=None, color=barColour, ecolor=barErrorColour, error_kw=dict(lw=barErrorLW, capsize=barErrorCapsize, capthick=barErrorCapthick))
@@ -142,6 +143,8 @@ def _plotIsotropicAnalysisPage1(pdf):
     plt.tight_layout()
     plt.subplots_adjust(hspace=hspace)
     bestGct = otherAnalysis.TM.values[0]
+    if not macrosLib._isSequenceValid(sequence, ss_sequence):
+        axss.remove()
     plt.figtext(0.5, 0.01, f'Global Molecular Tumbling CorrelationTime Tm: {round(bestGct, 3)} ns',
                 ha="center", fontsize=6,)
 

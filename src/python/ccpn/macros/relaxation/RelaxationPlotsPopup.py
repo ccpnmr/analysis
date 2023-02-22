@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-21 22:18:12 +0000 (Tue, February 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 10:50:03 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -31,14 +31,15 @@ __date__ = "$Date: 2023-02-17 14:03:22 +0000 (Fri, February 17, 2023) $"
 # Start of code
 #=========================================================================================
 
-
 import ccpn.core #this is needed it to avoid circular imports
+import pandas as pd
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from PyQt5 import QtCore, QtGui, QtWidgets
 import ccpn.ui.gui.widgets.CompoundWidgets as cw
 from ccpn.ui.gui.widgets.PulldownListsForObjects import DataTablePulldown
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
-from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.util.Path import aPath, fetchDir, joinPath
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 
 TIPTEXT = ''' 
 A  popup to launch several macros that generate various relaxation plots.
@@ -48,14 +49,25 @@ See the Dynamics tutorial to learn how to create such a  dataTable. '''
 thisDirPath = aPath(__file__).filepath
 SEQUENCE = 'KLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
 SS_SEQUENCE = 'BBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
+Rates = 'Rates'
+AnisotropyDetermination = 'Anisotropy Determination'
+ReducedSpectralDensityMapping = 'Reduced Spectral Density Mapping'
+T1T2ContouredScatter = 'T1 vs T2 Contoured Scatter'
 
 MINIMUMWIDTHS = (150, 300)
 
 MACROS_DICT = {
-                            'Rates': '1_RelaxationRates_plots.py',
-                            'Anisotropy Determination': '2_AnisotropyDetermination_plots.py',
-                            'Reduced Spectral Density Mapping': '3_ReduceSpectralDensityMapping_plots.py',
-                            'T1 vs T2 Contoured Scatter': '4_T1T2_contourScatter_plot.py',
+                            Rates: '1_RelaxationRates_plots.py',
+                            AnisotropyDetermination: '2_AnisotropyDetermination_plots.py',
+                            ReducedSpectralDensityMapping: '3_ReduceSpectralDensityMapping_plots.py',
+                            T1T2ContouredScatter: '4_T1T2_contourScatter_plot.py',
+                            }
+
+NeededColumns_DICT = {
+                            Rates: [sv.R1, sv.R1_ERR, sv.R2_ERR, sv.R2, sv.HETNOE_VALUE, sv.HETNOE_VALUE_ERR],
+                            AnisotropyDetermination:  [sv.R1, sv.R1_ERR, sv.R2_ERR, sv.R2, sv.HETNOE_VALUE, sv.HETNOE_VALUE_ERR],
+                            ReducedSpectralDensityMapping: [sv.R1, sv.R1_ERR, sv.R2_ERR, sv.R2, sv.J0_ERR, sv.J0, sv.JwH, sv.JwH, sv.JwH_ERR, sv.JwX_ERR],
+                            T1T2ContouredScatter: [sv.R1, sv.R1_ERR, sv.R2_ERR, sv.R2],
                             }
 
 class RelaxationPlotsPopup(CcpnDialogMainWidget):
@@ -150,21 +162,36 @@ class RelaxationPlotsPopup(CcpnDialogMainWidget):
 
     def _okCallback(self):
         dataTableName = None
+        dataTable = None
         if self.project:
             dataTable = self.project.getByPid(self.dtwidget.getText())
             if dataTable is not None:
                 dataTableName = dataTable.name
+            else:
+                showWarning('Missing dataset','Please select a valid dataset.')
+                return
+        if dataTable is None:
+            return
+        # check the datatable is ok to create the available plots
 
         outputPath = self.filePathW.getText()
 
         sequence = self.seWidget.getText()
         ss = self.ssWidget.getText()
-        selectedOptions = self.optionsCB.getTexts()
+        selectedOptions = self.optionsCB.get()
 
         for selectedOption in selectedOptions:
             macroPathName = MACROS_DICT.get(selectedOption, None)
             if macroPathName is not None:
 
+                data = dataTable.data
+                neededColumns = NeededColumns_DICT.get(selectedOption, [])
+                neededColumnSeries = pd.Series(neededColumns)
+                if not neededColumnSeries.isin(data.columns).all():
+                    title, msg = f'Cannot generate the {selectedOption} plots',\
+                                 f'The following columns are mandatory: {neededColumns}. Please use a DataTable derived from a {sv.RSDM} analysis'
+                    showWarning(title, msg)
+                    continue
                 macroPath = aPath(joinPath(thisDirPath, macroPathName))
                 macroName = macroPath.basename
                 filePath = aPath(joinPath(outputPath, macroName))

@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-21 20:12:08 +0000 (Tue, February 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 10:50:03 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -93,8 +93,8 @@ def _plotSDM(pdf):
     # page  RSDM
     fig, axes = macrosLib._makeFigureLayoutWithOneColumn(4, height_ratios=[2, 2, 2, 1])
     axJ0, axJwh, axJwx, axss = axes
-
-    plotSS(axss, xSequence, sequence, ss_sequence=ss_sequence, showSequenceNumber=False,
+    if macrosLib._isSequenceValid(sequence, ss_sequence):
+        plotSS(axss, xSequence, sequence, ss_sequence=ss_sequence, showSequenceNumber=False,
            startSequenceCode=startSequenceCode, fontsize=labelMinorSize, )
 
     axJ0.errorbar(x, J0, yerr=J0_ERR, fmt="o", color=lineColour, ms=2, ecolor=lineErrorColour, elinewidth=lineErrorLW,
@@ -123,6 +123,9 @@ def _plotSDM(pdf):
         ax.yaxis.get_offset_text().set_size(fontYSize)
         ax.yaxis.get_offset_text().set_x(-0.02)
         macrosLib._setYLabelOffset(ax, -0.05, 0.5)
+
+    if not macrosLib._isSequenceValid(sequence, ss_sequence):
+        axss.remove()
 
     axJwx.set_xlabel('Residue Number', fontsize=fontXSize, )
     plt.tight_layout()

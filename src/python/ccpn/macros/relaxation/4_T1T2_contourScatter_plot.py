@@ -7,7 +7,6 @@ Which is a dataset that contains a table with the following (mandatory) columns:
     -  nmrResidueCode
     -  R1 and  R1_err
     - R2 and  R2_err
-    - HetNoe and  HetNoe_err
 
 Macro created for Analysis Version 3.1.1
 
@@ -26,7 +25,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-21 20:12:09 +0000 (Tue, February 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 10:50:03 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -178,7 +177,6 @@ x = x.values
 
 R1 = data[sv.R1].values
 R2 = data[sv.R2].values
-NOE = data[sv.HETNOE_VALUE]
 
 rctLines, s2Lines = sdl.calculateSpectralDensityContourLines(
                                                             spectrometerFrequency=spectrometerFrequency,

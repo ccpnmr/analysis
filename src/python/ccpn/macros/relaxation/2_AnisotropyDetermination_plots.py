@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-21 20:12:08 +0000 (Tue, February 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 10:50:03 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -133,10 +133,15 @@ def _ploteRates(pdf):
     axR1R2.spines[['right', 'top']].set_visible(False)
     macrosLib._setCommonYLim(axR1R2, R1R2)
     macrosLib._setXTicks(axR1R2, labelMajorSize, labelMinorSize)
-    ## plot Secondary structure
-    plotSS(axss, xSequence, sequence, ss_sequence=ss_sequence, startSequenceCode=startSequenceCode, fontsize=5,
-           showSequenceNumber=False, )
     axss.get_shared_x_axes().join(axss, axR2R1, axR1R2,)
+
+    ## plot Secondary structure
+    if macrosLib._isSequenceValid(sequence, ss_sequence):
+        plotSS(axss, xSequence, sequence, ss_sequence=ss_sequence, startSequenceCode=startSequenceCode, fontsize=5,
+           showSequenceNumber=False, )
+    else:
+           axss.remove()
+
     plt.tight_layout()
     fig.suptitle(titlePdf, fontsize=figureTitleFontSize, )
     plt.subplots_adjust(top=0.85)
@@ -218,14 +223,14 @@ eind =np.argwhere(NOE < NOE_limitExclusion).flatten()
 # calculate R1*R2  10%  trimmed mean line
 trimmedLineR1R2 = stats.trim_mean(fR1R2,  proportiontocut= 0.1)
 medianLineR1R2 = np.median(fR1R2)
-xTrimmedR1R2 = xSequence
+xTrimmedR1R2 = x
 yTrimmedR1R2 = np.array([trimmedLineR1R2]*len(xTrimmedR1R2))
 yMedianR1R2 = np.array([medianLineR1R2]*len(xTrimmedR1R2))
 yScatterTrimmedR1R2 = np.linspace(0, np.max(R1R2), len(yTrimmedR1R2))
 
 # calculate R2/R1  10%  trimmed mean line
 trimmedLineR2R1 = stats.trim_mean(fR2R1,  proportiontocut= 0.1)
-xTrimmedR2R1 = xSequence
+xTrimmedR2R1 = x
 yTrimmedR2R1 = np.array([trimmedLineR2R1]*len(xTrimmedR2R1))
 xScatterTrimmedLine = np.linspace(0, np.max(R2R1), len(yTrimmedR1R2))
 

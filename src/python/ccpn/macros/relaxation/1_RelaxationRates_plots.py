@@ -28,7 +28,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-21 20:12:08 +0000 (Tue, February 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 10:50:02 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -96,7 +96,10 @@ def _plotRates(pdf):
     axR1.bar(x, R1, yerr=R1_ERR, color=barColour, ecolor=barErrorColour, error_kw=dict(lw=barErrorLW, capsize=barErrorCapsize, capthick=barErrorCapthick))
     axR2.bar(x, R2, yerr=R2_ERR, color=barColour, ecolor=barErrorColour, error_kw=dict(lw=barErrorLW, capsize=barErrorCapsize, capthick=barErrorCapthick))
     axNOE.bar(x, NOE, yerr=NOE_ERR, color=barColour, ecolor=barErrorColour, error_kw=dict(lw=barErrorLW, capsize=barErrorCapsize, capthick=barErrorCapthick))
-    plotSS(axss, xSequence, sequence, ss_sequence=ss_sequence, showSequenceNumber=False, startSequenceCode=startSequenceCode, fontsize=labelMinorSize, )
+    if macrosLib._isSequenceValid(sequence, ss_sequence):
+        plotSS(axss, xSequence, sequence, ss_sequence=ss_sequence, showSequenceNumber=False, startSequenceCode=startSequenceCode, fontsize=labelMinorSize, )
+
+
 
     # set the various labels
     axR1.set_title('R1', fontsize=fontTitleSize, color=titleColor)
@@ -119,6 +122,10 @@ def _plotRates(pdf):
         axNOE.set_ylim([0, 1])
     else:
         axNOE.set_ylim([-1, 1])
+
+    if not macrosLib._isSequenceValid(sequence, ss_sequence):
+        axss.remove()
+
     fig.suptitle(titlePdf, fontsize=figureTitleFontSize)
     plt.tight_layout()
     plt.subplots_adjust(hspace=hspace)

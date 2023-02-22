@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-22 15:02:07 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 20:02:40 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -153,7 +153,8 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         if rebuildInputData or self.backendHandler._needsRebuildingInputDataTables:
             self.backendHandler._rebuildInputData()
             self.backendHandler._needsRebuildingInputDataTables = False
-        if refit or self.backendHandler._needsRefitting:
+        if refit or self.backendHandler._needsRefitting and len(self.backendHandler.inputDataTables) > 0:
+            getLogger().info(f'Nothing to refit. Skipping...')
             self.backendHandler.fitInputData()
             self.backendHandler._needsRefitting = False
         appearance = self.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)

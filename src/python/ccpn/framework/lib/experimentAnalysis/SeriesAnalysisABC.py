@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-22 15:02:07 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 20:02:40 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -231,7 +231,10 @@ class SeriesAnalysisABC(ABC):
             # keep only minimal info and not duplicates to the fitting frame (except the collectionPid)
             inputFrame = self.inputDataTables[-1].data
             fittingFrame = self.currentFittingModel.fitSeries(inputFrame)
-            cdf = calculationFrame[[ sv.COLLECTIONPID] + self.currentCalculationModel.modelArgumentNames]
+            if sv.CALCULATION_MODEL in calculationFrame.columns:
+                cdf = calculationFrame[[ sv.COLLECTIONPID, sv.CALCULATION_MODEL] + self.currentCalculationModel.modelArgumentNames]
+            else:
+                cdf = calculationFrame[[sv.COLLECTIONPID] + self.currentCalculationModel.modelArgumentNames]
             data = pd.merge(fittingFrame, cdf, on=[sv.COLLECTIONPID], how='left')
         data.joinNmrResidueCodeType()
         outputDataTable = self._fetchOutputDataTable(name=self._outputDataTableName)

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-14 14:59:57 +0000 (Tue, February 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-22 20:02:40 +0000 (Wed, February 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -222,6 +222,7 @@ VARIANCE = 'Variance'
 MAD = 'MAD (Median Absolute Deviation)'
 AAD = 'AAD (Average Absolute Deviation)'
 
+CALCULATION_MODEL = 'calculationModel'
 ### CSM Calculation Models
 ## Alpha Factors Definitions used in ChemicalShiftAnalysis DeltaDeltas
 uALPHA = '\u03B1'

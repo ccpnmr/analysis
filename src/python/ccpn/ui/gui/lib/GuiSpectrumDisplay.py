@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:41 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-02-23 14:45:09 +0000 (Thu, February 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -681,23 +681,25 @@ class GuiSpectrumDisplay(CcpnModule):
     def _spectrumViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
         """
+        spectrumView = data[Notifier.OBJECT]
+        if self.isDeleted or spectrumView not in self.spectrumViews:
+            # can ignore spectrumViews not belonging to this spectrumDisplay
+            return
+
         for strip in self.strips:
             strip._updateVisibility()
         self._updateAxesVisibility()
 
-        spectrumView = data[Notifier.OBJECT]
         trigger = data[Notifier.TRIGGER]
 
         # respond to the create/delete notifiers
         if trigger == Notifier.CREATE:
-
             for strip in self.strips:
                 strip._updatePlaneAxes()
 
-            spectrum = spectrumView.spectrum
             if spectrumView in self.spectrumViews:
                 self._spectrumChanged({Notifier.TRIGGER: Notifier.CHANGE,
-                                       Notifier.OBJECT : spectrum})
+                                       Notifier.OBJECT : spectrumView.spectrum})
 
         elif trigger == Notifier.DELETE:
 
@@ -2548,12 +2550,12 @@ class GuiSpectrumDisplay(CcpnModule):
             # need undo waypoint here
             with waypointBlocking():
                 with undoStackBlocking() as addUndoItem:
-                    # refresh on undo
-                    _data = {Notifier.OBJECT:specView,
-                             Notifier.TRIGGER:Notifier.CREATE
-                             }
-                    addUndoItem(undo=partial(self._spectrumViewChanged, _data)
-                                )
+                    # refresh on undo - why was this here anyway :|
+                    # _data = {Notifier.OBJECT:specView,
+                    #          Notifier.TRIGGER:Notifier.CREATE
+                    #          }
+                    # addUndoItem(undo=partial(self._spectrumViewChanged, _data)
+                    #             )
 
                     # push/pop ordering
                     addUndoItem(undo=self.setToolbarButtons)

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-02-23 14:45:09 +0000 (Thu, February 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,7 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.core.lib.ContextManagers import newObject, deleteWrapperWithoutSideBar, \
-    ccpNmrV3CoreUndoBlock, ccpNmrV3CoreSetter
+    ccpNmrV3CoreUndoBlock, ccpNmrV3CoreSetter, newV3Object
 from ccpn.ui._implementation.Strip import Strip
 from ccpn.util.decorators import logCommand
 
@@ -550,13 +550,17 @@ class SpectrumView(AbstractWrapperObject):
 # ccpnmodel.ccpncore.memops.ApiError.ApiError: StripSpectrumView <ccpnmr.gui.Task.StripSpectrumView ['user', 'View', '1D_H', 1, <ccpnmr.gui.Task.SpectrumView ['user', 'View', '1D_H', 'AcetatePE', 0]>]>: StripSpectrumViews can only be deleted when the SpectrumView or Strip is deleted.
 # """
 
+
+# NOTE:ED - this is the less complicated decorator
+#   newObject causes an api crash reading the apiTree :|
+#   not strictly needed as the spectrumViews are not undoable, but requires the notifier
+@newV3Object()
 def _newSpectrumView(display, spectrum, displayOrder) -> SpectrumView:
     """Create new SpectrumView
     :param spectrum: A Spectrum instance
     :param displayOrder: A tuple/list of spectrum dimensions (1-based) or 0 (For intensity) in display order
     :returns: SpectrumView instance
     """
-
     # # Set stripSerial
     # if 'Free' in apiStrip.className:
     #     # Independent strips

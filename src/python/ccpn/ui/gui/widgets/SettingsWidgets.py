@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:43 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-02-23 14:45:09 +0000 (Thu, February 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1185,12 +1185,13 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
     def _registerNotifiers(self):
         """Notifiers for responding to spectrumViews
         """
-        # can't use setNotifier as not guaranteed a parent abstractWrapperObject
-        self._spectrumViewNotifier = Notifier(self.project,
-                                              [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],  # DELETE not registering
-                                              SpectrumView.className,
-                                              self._spectrumViewChanged,
-                                              onceOnly=True)
+        # # can't use setNotifier as not guaranteed a parent abstractWrapperObject
+        # self._spectrumViewNotifier = Notifier(self.project,
+        #                                       [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],  # DELETE not registering
+        #                                       SpectrumView.className,
+        #                                       self._spectrumViewChanged,
+        #                                       onceOnly=True)
+        ...
 
     def _unRegisterNotifiers(self):
         """Unregister notifiers

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-23 16:37:40 +0000 (Thu, February 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-23 17:00:23 +0000 (Thu, February 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -176,6 +176,12 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         # hide the window here and make visible later
         self.hide()
+
+    def show(self):
+        super().show()
+
+        # install handler to resize when moving between displays
+        self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
 
     def _setKeyTimer(self):
         """

@@ -106,6 +106,7 @@ class RelaxationAppearancePanel(AppearancePanel):
         return super()._getThresholdValueFromBackend(columnName, calculationMode, factor)
 
     def _preselectDefaultYaxisBarGraph(self):
+        """ TO BE REMOVED"""
         yAxisWidget = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphYcolumnName)
         backend = self.guiModule.backendHandler
         model = backend.currentFittingModel

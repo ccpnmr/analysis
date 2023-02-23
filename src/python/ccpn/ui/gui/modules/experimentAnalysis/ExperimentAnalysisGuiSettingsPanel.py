@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-23 12:28:10 +0000 (Thu, February 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-23 14:32:50 +0000 (Thu, February 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -502,6 +502,7 @@ class GuiInputDataPanel(GuiSettingPanel):
         appearanceTab = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
         appearanceTab._resetXYBarPlotOptions()
         self.guiModule.updateAll()
+        appearanceTab._refitYZoomOnBarPlot(None, updateGuiModule=False)
 
     def _filterInputCollections(self, pids, *args):
         """ Add collections only if contain a subset of other collections. Avoid massive lists! """
@@ -896,7 +897,7 @@ class AppearancePanel(GuiSettingPanel):
                        'fixedWidths': SettingsWidgetFixedWidths}}),
             (guiNameSpaces.WidgetVarName_BarGraphYcolumnName,
              {'label': guiNameSpaces.Label_YcolumnName,
-              'callBack': self._commonCallback,
+              'callBack': self._refitYZoomOnBarPlot,
               'tipText': guiNameSpaces.TipText_YcolumnName,
               'type': compoundWidget.PulldownListCompoundWidget,
               'enabled': True,
@@ -1059,6 +1060,16 @@ class AppearancePanel(GuiSettingPanel):
         self._preselectDefaultXaxisBarGraph()
         self._preselectDefaultYaxisBarGraph()
 
+    def _refitYZoomOnBarPlot(self, selection, updateGuiModule=True, *args):
+        if updateGuiModule:
+            self.guiModule.updateAll()
+        barPlot = self.guiModule.panelHandler.getPanel(guiNameSpaces.BarPlotPanel)
+        if barPlot is not None:
+            try:
+                barPlot.fitYZoom()
+            except Exception as err:
+                getLogger().debug(f'BarPlot not found or not ready to zoom {err}')
+
     def _preselectDefaultXaxisBarGraph(self):
         """ Preselect the NmrResidue code if available """
         xAxisWidget = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphXcolumnName)
@@ -1120,7 +1131,7 @@ class AppearancePanel(GuiSettingPanel):
             data.dropna(axis=1, how='all', inplace=False) # remove all non plottable columns. remove columns with all None values
             fallbackColumns = data.select_dtypes(include=[float, int])  # remove all non plottable columns. remove columns with non Int or float values
             fallbackOptions = list(fallbackColumns.columns)
-            excludedFromPreferred = guiNameSpaces.ExcludedFromPreferred
+            excludedFromPreferred = guiNameSpaces._ExcludedFromPreferredYAxisOptions
             fallbackOptions = [i for i in fallbackOptions if i not in excludedFromPreferred]
             allOptions = fallbackOptions
             preferredSelection = allOptions[0] if len (allOptions)>0 else None
@@ -1170,7 +1181,7 @@ class AppearancePanel(GuiSettingPanel):
 
     def _resetXYBarPlotOptions(self,):
         """ """
-        # reset the Ywidget options
+        # reset the XYwidget options
         xColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_BarGraphXcolumnName)
         xOptions, xPreferredSelection = self._getAxisXOptions()
         xColumnNameW.setTexts(xOptions)
@@ -1182,7 +1193,6 @@ class AppearancePanel(GuiSettingPanel):
         yColumnNameW.setTexts(yOptions)
         if len(yOptions)>0:
             yColumnNameW.select(yPreferredSelection)
-
 
     def _getSelectedDisplays(self):
         displays = []

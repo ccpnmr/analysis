@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 16:20:49 +0100 (Thu, October 27, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-02-23 14:32:50 +0000 (Thu, February 23, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -329,11 +329,18 @@ class BarPlotPanel(GuiPanel):
         self.setXLabel(label=self.xColumnName)
         self.setYLabel(label=self.yColumnName)
 
+    def fitYZoom(self):
+        self.barGraphWidget.fitYZoom()
+
+    def fitXZoom(self):
+        self.barGraphWidget.fitXZoom()
+
     def plotDataFrame(self, dataFrame):
         """ Plot the given columns of dataframe as bars
          """
         self.barGraphWidget.clear()
         self._updateAxisLabels()
+
 
         if not self.xColumnName and not self.yColumnName in dataFrame.columns:
             getLogger().warning(f'Column names  not found in dataFrame: {self.xColumnName}, {self.yColumnName}')

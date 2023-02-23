@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-22 17:37:59 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-23 18:02:25 +0000 (Thu, February 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -735,8 +735,7 @@ class RestraintAnalysisTableModule(CcpnModule):
 
         self._nextComparisonColumn = 0
         # create the first empty tree
-        _ComparisonTree(cs, grid=(0, self._nextComparisonColumn), enableMouseMenu=True, resources=rss)
-        self._nextComparisonColumn += 1
+        self.addNewComparisonSet()
 
         # add spacer to the settings-widget so that the right-hand-side stays aligned
         self._splitterSpacer = Spacer(fr, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed, grid=(0, 1))
@@ -1430,7 +1429,9 @@ class RestraintAnalysisTableModule(CcpnModule):
         newState = not any(cs.isEmpty for cs in rss.comparisonSets)
         if newState:
             widg = self._comparisonSplitter
-            widg.addWidget(_ComparisonTree(widg, grid=(0, self._nextComparisonColumn), enableMouseMenu=True, resources=rss))
+            _ComparisonTree(widg,
+                            grid=(0, self._nextComparisonColumn),
+                            enableMouseMenu=True, resources=rss)
             self._nextComparisonColumn += 1
 
 

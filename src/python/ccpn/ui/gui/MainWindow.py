@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:41 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-02-23 16:37:40 +0000 (Thu, February 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -167,9 +167,10 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         self._project._undo.undoChanged.add(self._undoChangeCallback)
 
-        # install handler to resize when moving between displays
-        self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
-        # self.setUnifiedTitleAndToolBarOnMac(True) #uncomment this to remove the extra title bar on osx 10.14+
+        # TODO:ED - crashes on linux/windows :O
+        # # install handler to resize when moving between displays
+        # self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
+        # # self.setUnifiedTitleAndToolBarOnMac(True) #uncomment this to remove the extra title bar on osx 10.14+
 
         self._setKeyTimer()
 

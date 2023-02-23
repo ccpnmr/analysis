@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-22 20:17:37 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-23 12:28:10 +0000 (Thu, February 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1077,33 +1077,27 @@ class AppearancePanel(GuiSettingPanel):
     def _preselectDefaultYaxisBarGraph(self):
         pass
 
+    def _getModelNameFromData(self, data, modelNameColumn):
+        modelName = None
+        if modelNameColumn in data.columns:
+            modelNames = data[modelNameColumn].values
+            if len(modelNames) > 0:
+                modelName = modelNames[0]
+            else:
+                modelName = None
+        return modelName
 
     def _getAxisYOptions(self):
         """ Get the columns names for plottable data. E.g.: the Fitting results and stats. """
         allOptions = []
         preferredSelection = None
-
         backend = self.guiModule.backendHandler
         data = backend.getMergedResultDataFrame()
-
         if data is None:
-            return [], preferredSelection
-        fallbackColumns = data.select_dtypes(include=[float, int])
-        if not sv.MODEL_NAME in data.columns:
-            print('====&&&', list(fallbackColumns.columns))
-            return list(fallbackColumns.columns), preferredSelection
+            return allOptions, preferredSelection
 
-        modelNames = data[sv.MODEL_NAME].values
-        calModelName = None
-        if sv.CALCULATION_MODEL in data.columns:
-            calculationModelNames = data[sv.CALCULATION_MODEL].values
-            if len(calculationModelNames) > 0:
-                calModelName = calculationModelNames[0]
-
-        if len(modelNames) > 0:
-            modelName = modelNames[0]
-        else:
-            modelName = None
+        modelName = self._getModelNameFromData(data, sv.MODEL_NAME)
+        calModelName = self._getModelNameFromData(data, sv.CALCULATION_MODEL)
 
         _model = backend.getFittingModelByName(modelName)
         _calcModel = backend.getCalculationModelByName(calModelName)
@@ -1113,13 +1107,23 @@ class AppearancePanel(GuiSettingPanel):
             if model.ModelName != sv.BLANKMODELNAME:
                 allArgs = model.getAllArgNames()
                 allOptions.extend(allArgs)
-                preferredSelection = allArgs[0]
-        if _calcModel is not None:
+                preferredSelection = model._preferredYPlotArgName
+        if _calcModel is not None: # if we have the calculation model, then it's the preferred
             model = _calcModel()
             if model.ModelName != sv.BLANKMODELNAME:
                 moArgs = model.modelArgumentNames
                 allOptions.extend(moArgs)
-                preferredSelection = moArgs[0]
+                preferredSelection = model._preferredYPlotArgName
+
+        if len(allOptions) == 0:
+            # fallback options
+            data.dropna(axis=1, how='all', inplace=False) # remove all non plottable columns. remove columns with all None values
+            fallbackColumns = data.select_dtypes(include=[float, int])  # remove all non plottable columns. remove columns with non Int or float values
+            fallbackOptions = list(fallbackColumns.columns)
+            excludedFromPreferred = guiNameSpaces.ExcludedFromPreferred
+            fallbackOptions = [i for i in fallbackOptions if i not in excludedFromPreferred]
+            allOptions = fallbackOptions
+            preferredSelection = allOptions[0] if len (allOptions)>0 else None
 
         return allOptions, preferredSelection
 

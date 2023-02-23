@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-22 20:02:40 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-23 12:28:10 +0000 (Thu, February 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -107,6 +107,13 @@ class FittingModelABC(ABC):
     def getAllArgNames(self):
         _all = self.modelArgumentNames + self.modelArgumentErrorNames + self.modelStatsNames
         return _all
+
+    @property
+    def _preferredYPlotArgName(self):
+        """  Private only used in UI mode."""
+        if len(self.modelArgumentNames) >0:
+            return self.modelArgumentNames[0]
+        return None
 
     @abstractmethod
     def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:

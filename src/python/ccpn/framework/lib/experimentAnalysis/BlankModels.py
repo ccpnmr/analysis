@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-25 22:24:05 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-23 12:28:10 +0000 (Thu, February 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -78,8 +78,8 @@ class BlankMinimiser(MinimiserModel):
     """
 
     FITTING_FUNC = lf.blank_func
-    Astr = 'argA'  # They must be exactly as they are defined in the FITTING_FUNC arguments!
-    Bstr = 'argB'
+    Astr = sv.ARGA  # They must be exactly as they are defined in the FITTING_FUNC arguments!
+    Bstr = sv.ARGB
 
     defaultParams = {Astr:np.nan,
                      Bstr:np.nan}

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-22 20:02:40 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-23 12:28:10 +0000 (Thu, February 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -247,6 +247,11 @@ DEFAULT_EXCLUDED_RESIDUES = ['PRO']
 
 FILTERINGATOMS  = 'FilteringAtoms'
 ALPHAFACTORS    = 'AlphaFactors'
+
+ARGA = 'argA'
+ARGB = 'argB'
+ARGA_VALUE_ERR = f'{ARGA}{_ERR}'
+ARGB_VALUE_ERR = f'{ARGB}{_ERR}'
 
 ### Relaxation Calculation Models
 HETNOE_VALUE = f'{HETNOE}'

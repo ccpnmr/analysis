@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-21 22:18:12 +0000 (Tue, February 21, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-02-23 16:38:21 +0000 (Thu, February 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -2166,7 +2166,7 @@ class Framework(NotifierBase, GuiBase):
 
                 try:
                     # NOTE:ED - this could be quite nasty, but can't think of another way to get Linux to open a pdf
-                    subprocess.run([ccpnRunTerminal, linuxCommand, path])
+                    subprocess.run([linuxCommand, path])
 
                 except Exception as es:
                     getLogger().warning(f'Error opening PDFViewer. {es}')

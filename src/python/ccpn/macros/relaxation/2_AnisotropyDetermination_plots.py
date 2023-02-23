@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-22 10:50:03 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-23 18:29:07 +0000 (Thu, February 23, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -158,13 +158,21 @@ def _plotScatterRates(pdf):
                         color=scatterColor,
                         alpha=0.7, #t o see better the labels
                         ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize, )
+    # overlay the excluded
+    axRscatter.errorbar(R2R1[eind], R1R2[eind],
+                        # yerr=R1R2_ERR[eind]/2,
+                        # xerr=R2R1_ERR[eind]/2,
+                        color=scatterExcludedByNOEColor,
+                        alpha=0.7, #t o see better the labels
+                        ms=scatterSize, fmt='o', ecolor=scatterExcludedByNOEColor, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize, )
+
     for i, txt in enumerate(x):
         extraY = percentage(0.5, R1R2[i])
         yPos = R1R2[i] + extraY
         extraX = percentage(0.5, R2R1[i])
         xPos = R2R1[i] + extraX
         axRscatter.annotate(str(txt), xy=(R2R1[i], R1R2[i]), xytext=(xPos, yPos), fontsize=3.5, arrowprops=dict(facecolor='grey',arrowstyle="-",lw=0.3  ))
-    # axRscatter.plot(yTrimmedR2R1, yScatterTrimmedR1R2, TrimmedLineColour, linewidth=0.5, label ='R1R2 median')
+    axRscatter.plot(yTrimmedR2R1, yScatterTrimmedR1R2, TrimmedLineColour, linewidth=0.5, label ='R1R2 median')
     axRscatter.plot(xScatterTrimmedLine, yTrimmedR1R2, TrimmedLineColour, linewidth=0.5, label ='R1R2 10%-trimmed mean')
     axRscatter.set_title('R$_{1}$R$_{2}$ vs R$_{2}$/R$_{1}$ ', fontsize=fontTitleSize, color=titleColor)
     axRscatter.set_xlabel('R$_{2}$/R$_{1}$', fontsize=fontYSize, )
@@ -233,7 +241,6 @@ trimmedLineR2R1 = stats.trim_mean(fR2R1,  proportiontocut= 0.1)
 xTrimmedR2R1 = x
 yTrimmedR2R1 = np.array([trimmedLineR2R1]*len(xTrimmedR2R1))
 xScatterTrimmedLine = np.linspace(0, np.max(R2R1), len(yTrimmedR1R2))
-
 
 # calculate the S2 average eq.3
 avS2 = sdl.estimateAverageS2(R1, R2, NOE, noeExclusionLimit=NOE_limitExclusion, proportiontocut=0.1)

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-02-24 09:25:25 +0000 (Fri, February 24, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -500,29 +500,35 @@ class Gui(Ui):
         if not dataLoader.createNewProject:
             raise RuntimeError(f'DataLoader {dataLoader} does not create a new project')
 
-        if self.project is None:
-            raise RuntimeError('No current project; this should never happen!')
+        # if self.project is None:
+        #     raise RuntimeError('No current project; this should never happen!')
 
         oldProjectLoader = None
         oldProjectIsTemporary = True
         oldMainWindowPos = self.mainWindow and self.mainWindow.pos()
+        if self.project:
+            # if not self.project.isTemporary:
+            if self.project._undo is None or self.project._undo.isDirty():
+                message = f"Do you really want to open a new project (current project will be closed" \
+                          f"{' and any changes will be lost' if self.project.isModified else ''})?"
 
-        # if not self.project.isTemporary:
-        if self.project._undo is None or self.project._undo.isDirty():
-            message = f"Do you really want to open a new project (current project will be closed" \
-                      f"{' and any changes will be lost' if self.project.isModified else ''})?"
+                if not (_ok := MessageDialog.showYesNo('Load Project', message, parent=self.mainWindow)):
+                    return None
 
-            if not (_ok := MessageDialog.showYesNo('Load Project', message, parent=self.mainWindow)):
-                return None
-
-        # Some error recovery; store info to re-open the current project (or a new default)
-        oldProjectLoader = CcpNmrV3ProjectDataLoader(self.project.path)
-        oldProjectIsTemporary = self.project.isTemporary
+            # Some error recovery; store info to re-open the current project (or a new default)
+            oldProjectLoader = CcpNmrV3ProjectDataLoader(self.project.path)
+            oldProjectIsTemporary = self.project.isTemporary
 
         try:
-            # NOTE:ED - getting a strange QT bug disabling the menu-bar from here
-            #  I think because the main-window isn't visible on the first load :|
-            with MessageDialog.progressManager(self.mainWindow, f'Loading project {dataLoader.path} ... '):
+            if self.project:
+                # NOTE:ED - getting a strange QT bug disabling the menu-bar from here
+                #  I think because the main-window isn't visible on the first load :|
+                with MessageDialog.progressManager(self.mainWindow, f'Loading project {dataLoader.path} ... '):
+                    _loaded = dataLoader.load()
+                    if _loaded is None or len(_loaded) == 0:
+                        return None
+            else:
+                # progress not required on the first load
                 _loaded = dataLoader.load()
                 if _loaded is None or len(_loaded) == 0:
                     return None

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-22 17:37:59 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-24 20:45:11 +0000 (Fri, February 24, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -337,6 +337,8 @@ class TableHeaderColumns(TableHeaderABC):
         for cc, col in enumerate(header):
             if col in columns or col in self._internalColumns:
                 self._parent.hideColumn(cc)
+            else:
+                self._parent.showColumn(cc)
 
     #=========================================================================================
     # Class methods

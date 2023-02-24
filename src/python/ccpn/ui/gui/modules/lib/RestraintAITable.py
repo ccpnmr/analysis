@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-22 17:42:25 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-24 20:45:10 +0000 (Fri, February 24, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -523,7 +523,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
             # make matching length tables for each of the restraintTables for each peak so the rows match up in the table
             dfs = {}
             for lCount, cSet in enumerate(cSetLists):
-                name = cSet.comparisonSetName
+                cSetName = cSet.comparisonSetName
                 resLists = cSet.getTreeTables(depth=1, selected=True)
 
                 if not resLists:
@@ -544,11 +544,11 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
                     head += maxcc
 
-                COLS = [(name, f'{HeaderRestraint}'),
-                        (name, 'Atoms')]
+                COLS = [(cSetName, f'{HeaderRestraint}'),
+                        (cSetName, 'Atoms')]
 
                 # put the serial and atoms into another table to be concatenated to the right, lCount = index in resLists
-                dfs[cSet] = pd.concat([allPkSerials,
+                dfs[cSetName] = pd.concat([allPkSerials,
                                        # pd.DataFrame(ll, columns=[f'{HeaderRestraint}_{lCount + 1}',
                                        #                           f'Atoms_{lCount + 1}'])], axis=1)
                                        pd.DataFrame(ll, columns=COLS)], axis=1)
@@ -560,15 +560,19 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
             #                     if resList.pid == viols.getMetadata(_RESTRAINTTABLE) and viols.getMetadata(_VIOLATIONRESULT) is True
             #                     }
             #
-            violationResults = {cSet: [viols.data.copy()
+            violationResults = {cSet.comparisonSetName: [viols.data.copy()
                                        for viols in cSet.getTreeTables(depth=2, selected=True) if viols is not None]
                                 for cSet in cSetLists if cSet.getTreeTables(depth=1, selected=True)
                                 }
 
             if sum(len(viols) for viols in violationResults.values()):
 
+                # merge all the tables for each restraintTable
+                _out = [index, allPks]
+                zeroCols = []
+
                 # rename the columns to match the order in visible list
-                for ii, (cSet, resViols) in enumerate(violationResults.items()):
+                for ii, (cSetName, resViols) in enumerate(violationResults.items()):
                     for resViol in resViols:
                         # ind = allResLists.index(rl)
 
@@ -576,24 +580,25 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                         newCols = [_OLDHEADERS.get(cc, None) or cc for cc in resViol.columns]
                         # resViol.columns = [vv + f'_{ind + 1}' for vv in resViol.columns]
                         # resViol.columns = [vv + f'_{ind + 1}' for vv in newCols]
-                        resViol.columns = [(cSet.comparisonSetName, vv) for vv in newCols]
+                        resViol.columns = [(cSetName, vv) for vv in newCols]
 
-                # merge all the tables for each restraintTable
-                _out = [index, allPks]
-                zeroCols = []
                 for ii, cSet in enumerate(cSetLists):
-                    if cSet in violationResults:
-                        name = cSet.comparisonSetName
+                    cSetName = cSet.comparisonSetName
 
-                        HEADERSCOL = (name, f'{HeaderRestraint}')
-                        ATOMSCOL = (name, 'Atoms')
-                        HEADERMEANCOL = (name, f'{HeaderMean}')
+                    # if not cSet.getTreeTables(depth=1, selected=True):
+                    #     continue
 
-                        _left = dfs[cSet]
+                    if violationResults.get(cSetName, None):
+
+                        HEADERSCOL = (cSetName, f'{HeaderRestraint}')
+                        ATOMSCOL = (cSetName, 'Atoms')
+                        HEADERMEANCOL = (cSetName, f'{HeaderMean}')
+
+                        _left = dfs[cSetName]
 
                         try:
                             _new = None
-                            for vTable in violationResults[cSet]:
+                            for vTable in violationResults[cSetName]:
                                 # remove any duplicated violations - these add bad rows
                                 _right = vTable.drop_duplicates([HEADERSCOL, ATOMSCOL])
 
@@ -610,10 +615,10 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                                                HeaderTarget, HeaderLowerLimit, HeaderUpperLimit,
                                                HeaderMin, HeaderMax, HeaderMean, HeaderStd,
                                                HeaderCount1, HeaderCount2):
-                                    if (name, _colID) in list(_new.columns):
+                                    if (cSetName, _colID) in list(_new.columns):
                                         # check whether all the columns exist - discard otherwise
                                         # columns should have been renamed and post-fixed with _<num>. above
-                                        _cols.append(((name, _colID), lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'), f'{_colID}_Tip{ii + 1}', None, None))
+                                        _cols.append(((cSetName, _colID), lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'), f'{_colID}_Tip{ii + 1}', None, None))
 
                         #~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -653,9 +658,9 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                         #         # columns should have been renamed and post-fixed with _<num>. above
                         #         _cols.append(((name, _colID), lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'), f'{_colID}_Tip{ii + 1}', None, None))
 
-                    elif cSet in dfs:
+                    elif cSetName in dfs:
                         # lose the PeakSerial column for each
-                        _new = dfs[cSet].drop(columns=[PEAKSERIALCOL]).fillna(0.0)
+                        _new = dfs[cSetName].drop(columns=[PEAKSERIALCOL]).fillna(0.0)
                         _out.append(_new)
 
                         # # creat new column headings
@@ -677,12 +682,13 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                 _out = [index, allPks]
                 # no results - just show the table
                 for ii, cSet in enumerate(cSetLists):
+                    cSetName = cSet.comparisonSetName
 
                     if not cSet.getTreeTables(depth=1, selected=True):
                         continue
 
                     # lose the PeakSerial column for each
-                    _new = dfs[cSet].drop(columns=[PEAKSERIALCOL]).fillna(0.0)
+                    _new = dfs[cSetName].drop(columns=[PEAKSERIALCOL]).fillna(0.0)
                     _out.append(_new)
 
                     # # creat new column headings
@@ -728,6 +734,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
     def postUpdateDf(self):
         # update the visible columns
         self.headerColumnMenu.hiddenColumns = [col for col in self._df.columns if isinstance(col, tuple) and col[1] in self.defaultHiddenSubgroup]
+        self.headerColumnMenu.refreshHiddenColumns()
 
     # NOTE:ED - not done yet
     # def refreshTable(self):

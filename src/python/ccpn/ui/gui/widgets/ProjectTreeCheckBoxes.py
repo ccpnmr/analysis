@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-22 17:37:59 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-24 20:45:11 +0000 (Fri, February 24, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -69,6 +69,7 @@ BADITEMACTION = 'badItem'
 class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
     """Class to handle a tree view created from a project
     """
+    checkStateChanged = QtCore.pyqtSignal(QtWidgets.QTreeWidgetItem, int)
 
     # set the items in the project that can be exported
     checkList = [
@@ -363,10 +364,9 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
                     _item.setCheckState(0, self.lockedItems[_item.text(0)])
 
     def _itemChanged(self, item, column: int) -> None:
-        if column == 0 and hasattr(item, 'storedCheckedState'):
-            # remember the state of the check-box for the next click
-            if item.storedCheckedState != item.checkState(0):
-                item.storedCheckedState = item.checkState(0)
+        if column == 0 and hasattr(item, 'storedCheckedState') and item.storedCheckedState != item.checkState(0):
+            item.storedCheckedState = item.checkState(0)
+            self.checkStateChanged.emit(item, column)
 
     def _uncheckAll(self, includeRoot=False):
         """Clear all selection

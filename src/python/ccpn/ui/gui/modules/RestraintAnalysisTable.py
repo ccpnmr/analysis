@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-23 18:02:25 +0000 (Thu, February 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-24 20:45:10 +0000 (Fri, February 24, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -26,11 +26,11 @@ __date__ = "$Date: 2021-04-26 11:53:10 +0100 (Mon, April 26, 2021) $"
 # Start of code
 #=========================================================================================
 
-import contextlib
 from functools import reduce, partial
 from PyQt5 import QtWidgets, QtGui, QtCore
 from collections import OrderedDict
 from operator import add
+import re
 
 from ccpn.core.PeakList import PeakList
 from ccpn.core.RestraintTable import RestraintTable
@@ -39,7 +39,6 @@ from ccpn.core.StructureData import StructureData
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.Collection import Collection
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.guiSettings import BORDERNOFOCUS_COLOUR
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.lib.RestraintAITableCommon import _ModuleHandler, \
     _COLLECTION, _COLLECTIONBUTTON, _SPECTRUMDISPLAYS, _RESTRAINTTABLE, _RESTRAINTTABLES, \
@@ -60,6 +59,7 @@ from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.lib.alignWidgets import alignWidgets
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import fetchDir
+from ccpn.util import Common
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.framework.Application import getProject
 
@@ -84,9 +84,6 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
     i.e. restraint-tables that are connected to the same run, and are placed in the same
     column of the restraint module.
     """
-    isEmpty = True
-    comparisonItem = None
-
     def __init__(self, parent, *, resources=None, **kwds):
         project = getProject()
 
@@ -94,6 +91,8 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
 
         self.resources = resources
         self._parent = parent
+        self.isEmpty = True
+        self.comparisonItem = None
 
         # allow drops of items
         self.setAcceptDrops(True)
@@ -116,11 +115,13 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
         #     self.header().setSectionResizeMode(col, QtWidgets.QHeaderView.ResizeToContents)
         # self.header().setStretchLastSection(False)
 
+        self.checkStateChanged.connect(self._checked)
+
     def _populateTreeView(self, project=None):
         ...
 
-    def _clicked(self, item, *args):
-        """Respond to a click in the tree
+    def _checked(self, item, column):
+        """Respond to a checkbox state has changed
         """
         if item.isDisabled():
             return
@@ -154,9 +155,6 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
 
         self.resources.guiFrame.setRefreshButtonEnabled(True)
         self.update()
-
-    def _itemChanged(self, item, column: int) -> None:
-        super()._itemChanged(item, column)
 
     #=========================================================================================
     # Handle dropped items
@@ -283,8 +281,6 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
     def comparisonSet(self):
         """Return the core object used to create the comparison-set
         """
-        # NOTE:ED - rename notifiers? using core object here
-
         if not self.isEmpty and (obj := self.comparisonItem.data(1, 0)):
             return obj
 
@@ -292,23 +288,22 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
     def comparisonSetName(self):
         """Return the name of the item used to create the comparison-set
         """
-        # NOTE:ED - rename notifiers? using core object here
-
-        if not self.isEmpty and (obj := self.comparisonItem.data(1, 0)):
-            return obj.id
+        if not self.isEmpty and self.comparisonItem.data(1, 0):
+            return self.comparisonItem.text(0)
 
     def _processStructureData(self, structureData):
         """Drop a structureData in the comparison-set
         """
-        if next((cs for cs in self.resources.comparisonSets if structureData.id == cs.comparisonSetName), None):
-            MessageDialog.showWarning('Restraint Analysis Inspector', f'ComparisonSet {structureData.id} already exists')
-            return
+        name = structureData.id
+        existing = [cs.comparisonSetName for cs in self.resources.comparisonSets]
+        while name in existing:
+            name = Common.incrementName(name)
 
         self.clear()
 
         # set the name from the structureData
         top = self.comparisonItem = _StoredTreeWidgetItem(self.invisibleRootItem(), depth=0)
-        top.setText(0, structureData.id)
+        top.setText(0, name)
         top.setData(1, 0, structureData)
         top.setFlags(top.flags() & ~CHECKABLE)
 
@@ -319,15 +314,16 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
     def _processCollection(self, collection):
         """Drop a collection in the comparison-set
         """
-        if next((cs for cs in self.resources.comparisonSets if collection.id == cs.comparisonSetName), None):
-            MessageDialog.showWarning('Restraint Analysis Inspector', f'ComparisonSet {collection.id} already exists')
-            return
+        name = collection.id
+        existing = [cs.comparisonSetName for cs in self.resources.comparisonSets]
+        while name in existing:
+            name = Common.incrementName(name)
 
         self.clear()
 
         # set the name from the structureData
         top = self.comparisonItem = _StoredTreeWidgetItem(self.invisibleRootItem(), depth=0)
-        top.setText(0, collection.id)
+        top.setText(0, name)
         top.setData(1, 0, collection)
         top.setFlags(top.flags() & ~CHECKABLE)
 
@@ -340,15 +336,16 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
             return
 
         firstTable = restraintTables[0]
-        if next((cs for cs in self.resources.comparisonSets if firstTable.id == cs.comparisonSetName), None):
-            MessageDialog.showWarning('Restraint Analysis Inspector', f'ComparisonSet {firstTable.id} already exists')
-            return
+        name = firstTable.id
+        existing = [cs.comparisonSetName for cs in self.resources.comparisonSets]
+        while name in existing:
+            name = Common.incrementName(name)
 
         if self.isEmpty:
             # set the name from the first restraint-table
             top = self.comparisonItem = _StoredTreeWidgetItem(self.invisibleRootItem(), depth=0)
 
-            top.setText(0, firstTable.id)
+            top.setText(0, name)
             top.setData(1, 0, firstTable)
             top.setFlags(top.flags() & ~CHECKABLE)
 
@@ -456,7 +453,11 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
                     toDelete.append(child)
 
                 else:
-                    child.setText(0, coreObj.id)
+                    # rename event - need to keep the extension
+                    if ext := re.search(r'_\d+$', child.text(0)):
+                        child.setText(0, coreObj.id + ext.group())
+                    else:
+                        child.setText(0, coreObj.id)
 
         for itm in toDelete:
             try:
@@ -518,6 +519,7 @@ class RestraintAnalysisTableModule(CcpnModule):
         # a data-store for information that all widgets in module may access
         self.resources = _ModuleHandler()
         self.resources.guiModule = self
+        # self.resources.comparisonSets = []
 
         # set the widgets and callbacks
         self._setWidgets(self.settingsWidget, self.mainWidget, peakList, selectFirstItem)

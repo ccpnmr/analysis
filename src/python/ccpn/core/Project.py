@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:38 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-02-24 17:29:49 +0000 (Fri, February 24, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -571,6 +571,16 @@ class Project(AbstractWrapperObject):
         """Process data that must always be performed after updating all children
         """
         from ccpn.core._implementation.CollectionList import CollectionList
+
+        if project.application.hasGui:
+            # strange bug that v2 window is missing and needs replacing
+            from ccpn.ui.gui.MainWindow import MainWindow
+
+            if not MainWindow._getAllWrappedData(project):
+                # NOTE:ED - need to create a mainWindow
+                #   there must be a bug in saving that deletes the v2 ccpnmr.gui.Window.Window object :|
+                getLogger().debug('>>> Creating new mainWindow')
+                project.newWindow(title='default')
 
         # create new collection table
         project._collectionList = CollectionList(project=project)

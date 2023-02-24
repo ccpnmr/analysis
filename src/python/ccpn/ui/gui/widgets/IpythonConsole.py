@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-21 22:18:12 +0000 (Tue, February 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-24 17:39:18 +0000 (Fri, February 24, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,15 @@ from qtconsole.inprocess import QtInProcessKernelManager
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import isWindowsOS
 from ipykernel.inprocess.ipkernel import InProcessKernel
+
+
+try:
+    # Temporarily disable IPython history. Suspected to be the source of  threading issues
+    from IPython.core.history import HistoryManager
+    HistoryManager.enabled = False
+except ImportError:
+    pass
+
 
 class SilentKernel(InProcessKernel):
     """

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-22 19:08:04 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-28 14:00:20 +0000 (Tue, February 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -437,9 +437,9 @@ class _TableModel(QtCore.QAbstractTableModel):
             except Exception as es:
                 getLogger().debug2(f'error accessing cell {index}  ({row}, {col})   {es}')
 
-        # elif role == CHECK_ROLE:
-        #     # set state in cell/object
-        #     return True
+            # elif role == CHECK_ROLE:
+            #     # set state in cell/object
+            #     return True
 
         return False
 

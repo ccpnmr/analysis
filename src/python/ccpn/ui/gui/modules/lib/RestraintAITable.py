@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-24 20:45:10 +0000 (Fri, February 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-28 14:00:20 +0000 (Tue, February 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -48,17 +48,18 @@ from ccpn.ui.gui.modules.lib.RestraintAITableCommon import _RestraintOptions, UN
     HeaderCount1, HeaderCount2, _OLDHEADERS, _RESTRAINTTABLE, _VIOLATIONRESULT, ALL, PymolScriptName
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Column import ColumnClass
+from ccpn.ui.gui.widgets.Column import ColumnClass, Column
 from ccpn.ui.gui.widgets.GuiTable import _getValueByHeader
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.table._TableModel import _TableModel
+# from ccpn.ui.gui.widgets.table._TableModel import _TableModel
 from ccpn.util.Common import flattenLists
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import joinPath
 from ccpn.util.OrderedSet import OrderedSet
 
+from sandbox.Ed._MITableModel import _MITableModel
 from sandbox.Ed._MITableDelegates import _ExpandVerticalCellDelegate
 
 
@@ -70,7 +71,7 @@ DIVIDER = '------'
 # _MultiSort
 #=========================================================================================
 
-class _MultiSort(_TableModel):
+class _MultiSort(_MITableModel):
     """Subclass of the basic table-model to allow sorting into groups
     """
 
@@ -148,6 +149,23 @@ class _MultiSort(_TableModel):
 #=========================================================================================
 
 
+def _checkRestraintFloat(offset, value, row, col):
+    """Display the contents of the cell if the restraint-pid is valid - float
+    """
+    if row[col - offset]:
+        try:
+            return f'{value:.3f}' if (1e-6 < value < 1e6) or value == 0.0 else f'{value:.3e}'
+        except Exception:
+            return str(value)
+
+
+def _checkRestraintInt(offset, value, row, col):
+    """Display the contents of the cell if the restraint-pid is valid - int
+    """
+    if row[col - offset]:
+        return int(value)
+
+
 class _NewRestraintWidget(_CoreMITableWidgetABC):
     """Class to present a peak-driven Restraint Analysis Inspector Table
     """
@@ -161,6 +179,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
     _internalColumns = ['isDeleted', (HeaderIndex, HeaderIndex), OBJECTCOLUMN]  # columns that are always hidden
 
     defaultHiddenSubgroup = ['#',
+                             # 'Restraint Pid',
                              'Target Value',
                              'Lower Limit',
                              'Upper Limit',
@@ -170,6 +189,20 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                              'Count > 0.5',
                              'Count > 0.3',
                              ]
+
+    # define the functions applied to the columns
+    _subgroupColumns = [(HeaderRestraint, lambda val: str(val or '')),
+                        (HeaderAtoms, lambda val: str(val or '')),
+                        (HeaderTarget, partial(_checkRestraintFloat, 2)),
+                        (HeaderLowerLimit, partial(_checkRestraintFloat, 3)),
+                        (HeaderUpperLimit, partial(_checkRestraintFloat, 4)),
+                        (HeaderMin, partial(_checkRestraintFloat, 5)),
+                        (HeaderMax, partial(_checkRestraintFloat, 6)),
+                        (HeaderMean, partial(_checkRestraintFloat, 7)),
+                        (HeaderStd, partial(_checkRestraintFloat, 8)),
+                        (HeaderCount1, partial(_checkRestraintInt, 9)),
+                        (HeaderCount2, partial(_checkRestraintInt, 10)),
+                        ]
 
     # define self._columns here - these are wrong
     columnHeaders = {'#'      : '#',
@@ -318,8 +351,9 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
             self.current.clearPeaks()
             self.current.clearRestraints()
         else:
+            rTables = [rTable for cSet in self.resources.comparisonSets for rTable in cSet.getTreeTables(depth=1)]
             newRes = list({res for pk in objs for res in pk.restraints
-                           if res and res.restraintTable in self._restraintTables})
+                           if res and res.restraintTable in rTables})
             self.current.peaks = objs
             self.current.restraints = newRes
 
@@ -387,6 +421,9 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
         format of column = ( Header Name, value, tipText, editOption)
         editOption allows the user to modify the value content by doubleclick
         """
+
+        # NOTE:ED - don't think this is being used :|
+
         _restraintColumns = [((HeaderRestraint, HeaderRestraint), lambda rt: ''),
                              ((HeaderAtoms, HeaderAtoms), lambda rt: ''),
                              ((HeaderTarget, HeaderTarget), lambda rt: 0.0),
@@ -396,7 +433,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                              ((HeaderMax, HeaderMax), lambda rt: 0.0),
                              ((HeaderMean, HeaderMean), lambda rt: 0.0),
                              ((HeaderStd, HeaderStd), lambda rt: 0.0),
-                             ((HeaderStd, HeaderStd), lambda rt: 0.0),
+                             ((HeaderCount1, HeaderCount1), lambda rt: 0.0),
                              ((HeaderCount2, HeaderCount2), lambda rt: 0.0),
                              ]
 
@@ -480,10 +517,10 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
         # need to remove the 'str' and use pd.MultiIndex.from_tuples(list[tuple, ...])
 
-        _cols = [
-            (INDEXCOL, lambda row: _getValueByHeader(row, HeaderIndex), 'TipTex1', None, None),
-            (PEAKSERIALCOL, lambda row: _getValueByHeader(row, HeaderMatch), 'TipTex2', None, None),
-            (OBJCOL, lambda row: _getValueByHeader(row, HeaderObject), 'TipTex3', None, None),
+        self._columnDefs = [
+            Column(INDEXCOL, lambda row: _getValueByHeader(row, HeaderIndex), tipText='TipTex1', format=int),
+            Column(PEAKSERIALCOL, lambda row: _getValueByHeader(row, HeaderMatch), tipText='TipTex2'),
+            Column(OBJCOL, lambda row: _getValueByHeader(row, HeaderObject), tipText='TipTex3'),
             ]
 
         if cSetLists:
@@ -539,8 +576,8 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                     if _res:
                         ll[head:head + len(_res)] = _res
 
-                    if len(_res) > maxcc:
-                        print('exceeds maxcc error :|')
+                    # if len(_res) > maxcc:
+                    #     print('-->  exceeds maxcc error :|')
 
                     head += maxcc
 
@@ -549,9 +586,9 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
                 # put the serial and atoms into another table to be concatenated to the right, lCount = index in resLists
                 dfs[cSetName] = pd.concat([allPkSerials,
-                                       # pd.DataFrame(ll, columns=[f'{HeaderRestraint}_{lCount + 1}',
-                                       #                           f'Atoms_{lCount + 1}'])], axis=1)
-                                       pd.DataFrame(ll, columns=COLS)], axis=1)
+                                           # pd.DataFrame(ll, columns=[f'{HeaderRestraint}_{lCount + 1}',
+                                           #                           f'Atoms_{lCount + 1}'])], axis=1)
+                                           pd.DataFrame(ll, columns=COLS)], axis=1)
 
             # # get the dataSets that contain data with a matching 'result' name - should be violations
             # violationResults = {resList: viols.data.copy() if viols is not None else None
@@ -561,7 +598,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
             #                     }
             #
             violationResults = {cSet.comparisonSetName: [viols.data.copy()
-                                       for viols in cSet.getTreeTables(depth=2, selected=True) if viols is not None]
+                                                         for viols in cSet.getTreeTables(depth=2, selected=True) if viols is not None]
                                 for cSet in cSetLists if cSet.getTreeTables(depth=1, selected=True)
                                 }
 
@@ -597,28 +634,35 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                         _left = dfs[cSetName]
 
                         try:
-                            _new = None
+                            _vResults = []
                             for vTable in violationResults[cSetName]:
                                 # remove any duplicated violations - these add bad rows
                                 _right = vTable.drop_duplicates([HEADERSCOL, ATOMSCOL])
 
                                 if (HEADERSCOL in _left.columns and ATOMSCOL in _left.columns) and \
                                         (HEADERSCOL in _right.columns and ATOMSCOL in _right.columns):
-                                    _new = pd.merge(_left, _right, on=[HEADERSCOL, ATOMSCOL], how='left').drop(columns=[PEAKSERIALCOL]).fillna(0.0)
+                                    # _new = pd.merge(_left, _right, on=[HEADERSCOL, ATOMSCOL], how='left').drop(columns=[PEAKSERIALCOL]).fillna(0.0)
+
+                                    # TODO: CHECK overlapping peak-lists?
+                                    _vResults.append(pd.merge(_left, _right, on=[HEADERSCOL, ATOMSCOL], how='right'))
 
                                 zeroCols.append(HEADERMEANCOL)
 
-                            if _new is not None:
+                            if _vResults:
+                                _vMerge = pd.concat(_vResults, axis=0).drop_duplicates([HEADERSCOL, ATOMSCOL])
+                                _new = pd.merge(_left, _vMerge, how='left').drop(columns=[PEAKSERIALCOL]).fillna(0.0)
                                 _out.append(_new)
 
-                                for _colID in (HeaderRestraint, HeaderAtoms,
-                                               HeaderTarget, HeaderLowerLimit, HeaderUpperLimit,
-                                               HeaderMin, HeaderMax, HeaderMean, HeaderStd,
-                                               HeaderCount1, HeaderCount2):
+                                for _colID, fmt in self._subgroupColumns:
                                     if (cSetName, _colID) in list(_new.columns):
                                         # check whether all the columns exist - discard otherwise
                                         # columns should have been renamed and post-fixed with _<num>. above
-                                        _cols.append(((cSetName, _colID), lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'), f'{_colID}_Tip{ii + 1}', None, None))
+                                        self._columnDefs.append(Column((cSetName, _colID),
+                                                                       # lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'),
+                                                                       None,
+                                                                       tipText=f'{_colID}_Tip{ii + 1}',
+                                                                       format=fmt
+                                                                       ))
 
                         #~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -712,20 +756,27 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
         _table.columns = pd.MultiIndex.from_tuples(_table.columns)
 
-        # # set the table _columns
-        # self._columns = ColumnClass(_cols)
+        # # # set the table _columns
+        # # self._columns = ColumnClass(_cols)
+        #
+        # # set the table from the dataFrame
+        # # NOTE:ED - gaaaah get rid of this
+        # _dataFrame = DataFrameObject(dataFrame=_table,
+        #                              columnDefs=[],
+        #                              table=self,
+        #                              )
+        # # extract the row objects from the dataFrame
+        # _objects = list(_table.itertuples())
+        # _dataFrame._objects = _objects
+        #
+        # return _dataFrame
 
-        # set the table from the dataFrame
-        # NOTE:ED - gaaaah get rid of this
-        _dataFrame = DataFrameObject(dataFrame=_table,
-                                     columnDefs=[],
-                                     table=self,
-                                     )
-        # extract the row objects from the dataFrame
         _objects = list(_table.itertuples())
-        _dataFrame._objects = _objects
+        self._objects = _objects
 
-        return _dataFrame
+        # NOTE:ED - removed dataFrameObject or ColumnClass
+
+        return _table
 
     #=========================================================================================
     # Updates

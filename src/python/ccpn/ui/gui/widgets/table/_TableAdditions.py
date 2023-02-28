@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-28 17:43:43 +0000 (Tue, February 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-28 18:52:16 +0000 (Tue, February 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -762,3 +762,8 @@ class TableSearchMenu(TableMenuABC):
         #             model._filterIndex = sorted(newMapping)
         #
         # self.update()
+
+    def refreshFilter(self):
+        """Refresh the search-widget if the contents of the table have changed
+        """
+        self._searchWidget and self._searchWidget.refreshFilter()

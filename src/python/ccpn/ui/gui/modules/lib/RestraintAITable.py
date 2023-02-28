@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-28 18:43:02 +0000 (Tue, February 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-28 18:52:15 +0000 (Tue, February 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -797,6 +797,8 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
         # update the visible columns
         self.headerColumnMenu.hiddenColumns = [col for col in self._df.columns if isinstance(col, tuple) and col[1] in self.defaultHiddenSubgroup]
         self.headerColumnMenu.refreshHiddenColumns()
+
+        self.searchMenu.refreshFilter()
 
     # NOTE:ED - not done yet
     # def refreshTable(self):

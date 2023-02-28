@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-28 15:49:25 +0000 (Tue, February 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-28 17:43:43 +0000 (Tue, February 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -417,6 +417,14 @@ class TableHeaderColumns(TableHeaderABC):
                                                 hiddenColumns=self.hiddenColumns,
                                                 )
         settingsPopup.exec_()  # pass exclusive control to the menu and return hidden-columns
+
+    def isColumnInternal(self, column):
+        """Return True if the column is internal and not for external viewing
+        """
+        if 0 <= column < len(self.columnTexts):
+            return self.columnTexts[column] in self._internalColumns
+
+        return False
 
 
 #=========================================================================================

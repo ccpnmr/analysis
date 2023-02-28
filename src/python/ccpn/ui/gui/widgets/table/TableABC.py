@@ -1047,6 +1047,11 @@ class TableABC(QtWidgets.QTableView):
         if len(menu.actions()):
             menu.exec_(self.mapToGlobal(pos))
 
+    def isColumnInternal(self, column: int):
+        """Return True if the column is internal and not for external viewing
+        """
+        return self.headerColumnMenu.isColumnInternal(column)
+
     #=========================================================================================
     # Table functions
     #=========================================================================================

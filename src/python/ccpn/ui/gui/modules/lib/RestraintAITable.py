@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-28 14:00:20 +0000 (Tue, February 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-28 17:43:43 +0000 (Tue, February 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,7 @@ from ccpn.ui.gui.lib._CoreMITableFrame import _CoreMITableWidgetABC
 from ccpn.ui.gui.lib._CoreTableFrame import _CoreTableFrameABC
 import ccpn.ui.gui.modules.PyMolUtil as pyMolUtil
 from ccpn.ui.gui.modules.lib.RestraintAITableCommon import _RestraintOptions, UNITS, \
-    HeaderIndex, HeaderMatch, HeaderObject, HeaderRestraint, HeaderAtoms, HeaderTarget, \
+    HeaderIndex, HeaderMatch, HeaderObject, HeaderRestraint, HeaderAtoms, HeaderViolation, HeaderTarget, \
     HeaderLowerLimit, HeaderUpperLimit, HeaderMin, HeaderMax, HeaderMean, HeaderStd, \
     HeaderCount1, HeaderCount2, _OLDHEADERS, _RESTRAINTTABLE, _VIOLATIONRESULT, ALL, PymolScriptName
 from ccpn.ui.gui.widgets.Button import Button
@@ -193,15 +193,16 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
     # define the functions applied to the columns
     _subgroupColumns = [(HeaderRestraint, lambda val: str(val or '')),
                         (HeaderAtoms, lambda val: str(val or '')),
-                        (HeaderTarget, partial(_checkRestraintFloat, 2)),
-                        (HeaderLowerLimit, partial(_checkRestraintFloat, 3)),
-                        (HeaderUpperLimit, partial(_checkRestraintFloat, 4)),
-                        (HeaderMin, partial(_checkRestraintFloat, 5)),
-                        (HeaderMax, partial(_checkRestraintFloat, 6)),
-                        (HeaderMean, partial(_checkRestraintFloat, 7)),
-                        (HeaderStd, partial(_checkRestraintFloat, 8)),
-                        (HeaderCount1, partial(_checkRestraintInt, 9)),
-                        (HeaderCount2, partial(_checkRestraintInt, 10)),
+                        (HeaderViolation, None),
+                        (HeaderTarget, partial(_checkRestraintFloat, 1)),
+                        (HeaderLowerLimit, partial(_checkRestraintFloat, 2)),
+                        (HeaderUpperLimit, partial(_checkRestraintFloat, 3)),
+                        (HeaderMin, partial(_checkRestraintFloat, 4)),
+                        (HeaderMax, partial(_checkRestraintFloat, 5)),
+                        (HeaderMean, partial(_checkRestraintFloat, 6)),
+                        (HeaderStd, partial(_checkRestraintFloat, 7)),
+                        (HeaderCount1, partial(_checkRestraintInt, 8)),
+                        (HeaderCount2, partial(_checkRestraintInt, 9)),
                         ]
 
     # define self._columns here - these are wrong
@@ -514,6 +515,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
         INDEXCOL = ('Row', 'Row')
         PEAKSERIALCOL = (HeaderMatch, HeaderMatch)
         OBJCOL = ('_object', '_object')
+        extraDefaultHiddenColumns = []
 
         # need to remove the 'str' and use pd.MultiIndex.from_tuples(list[tuple, ...])
 
@@ -630,6 +632,9 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                         HEADERSCOL = (cSetName, f'{HeaderRestraint}')
                         ATOMSCOL = (cSetName, 'Atoms')
                         HEADERMEANCOL = (cSetName, f'{HeaderMean}')
+                        HEADERVIOLATION = (cSetName, '_violation')
+
+                        extraDefaultHiddenColumns.append(HEADERVIOLATION)
 
                         _left = dfs[cSetName]
 
@@ -650,6 +655,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
                             if _vResults:
                                 _vMerge = pd.concat(_vResults, axis=0).drop_duplicates([HEADERSCOL, ATOMSCOL])
+                                _vMerge.insert(3, HEADERVIOLATION, True)
                                 _new = pd.merge(_left, _vMerge, how='left').drop(columns=[PEAKSERIALCOL]).fillna(0.0)
                                 _out.append(_new)
 
@@ -775,6 +781,10 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
         self._objects = _objects
 
         # NOTE:ED - removed dataFrameObject or ColumnClass
+
+        if extraDefaultHiddenColumns:
+            hCols = self.headerColumnMenu._internalColumns
+            self.headerColumnMenu.setInternalColumns(hCols + [hCol for hCol in extraDefaultHiddenColumns if hCol not in hCols])
 
         return _table
 

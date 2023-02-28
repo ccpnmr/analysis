@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-24 20:45:10 +0000 (Fri, February 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-28 17:43:43 +0000 (Tue, February 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,7 @@ HeaderObject = '_object'
 HeaderExpand = 'Expand'
 HeaderRestraint = 'Restraint Pid'  # NOTE:ED - needs to match the column-heading in the violation-table
 HeaderAtoms = 'Atoms'
+HeaderViolation = '_isViolated'
 HeaderTarget = 'Target Value'
 HeaderLowerLimit = 'Lower Limit'
 HeaderUpperLimit = 'Upper Limit'
@@ -49,12 +50,13 @@ HeaderMean = 'Mean'
 HeaderStd = 'STD'
 HeaderCount1 = 'Count > 0.3'
 HeaderCount2 = 'Count > 0.5'
-nefHeaders = ['restraintpid', 'atoms',
+nefHeaders = ['restraintpid', 'atoms', 'is_violated'
               'target_value', 'lower_limit', 'upper_limit',
               'min', 'max', 'mean', 'std',
               'count_0_3', 'count_0_5']
 Headers = [HeaderRestraint,
            HeaderAtoms,
+           HeaderViolation,
            HeaderTarget,
            HeaderLowerLimit,
            HeaderUpperLimit,

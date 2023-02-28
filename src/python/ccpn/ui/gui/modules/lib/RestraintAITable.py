@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-28 17:43:43 +0000 (Tue, February 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-28 18:43:02 +0000 (Tue, February 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -427,6 +427,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
         _restraintColumns = [((HeaderRestraint, HeaderRestraint), lambda rt: ''),
                              ((HeaderAtoms, HeaderAtoms), lambda rt: ''),
+                             ((HeaderViolation, HeaderViolation), lambda rt: ''),
                              ((HeaderTarget, HeaderTarget), lambda rt: 0.0),
                              ((HeaderLowerLimit, HeaderLowerLimit), lambda rt: 0.0),
                              ((HeaderUpperLimit, HeaderUpperLimit), lambda rt: 0.0),
@@ -460,7 +461,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
                     # create new column headings
                     newCols = [((name, f'{_colID}'), lambda row: _getValueByHeader(row, f'{_colID}'), f'{_colID}', None, None)
-                               for _colID in (HeaderRestraint, HeaderAtoms,
+                               for _colID in (HeaderRestraint, HeaderAtoms, HeaderViolation,
                                               HeaderTarget, HeaderLowerLimit, HeaderUpperLimit,
                                               HeaderMin, HeaderMax, HeaderMean, HeaderStd,
                                               HeaderCount1, HeaderCount2)
@@ -632,7 +633,7 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                         HEADERSCOL = (cSetName, f'{HeaderRestraint}')
                         ATOMSCOL = (cSetName, 'Atoms')
                         HEADERMEANCOL = (cSetName, f'{HeaderMean}')
-                        HEADERVIOLATION = (cSetName, '_violation')
+                        HEADERVIOLATION = (cSetName, HeaderViolation)
 
                         extraDefaultHiddenColumns.append(HEADERVIOLATION)
 

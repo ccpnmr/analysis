@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-24 20:45:11 +0000 (Fri, February 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-28 15:49:25 +0000 (Tue, February 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -702,6 +702,8 @@ class TableSearchMenu(TableMenuABC):
         if (model := self.model()) and model._df is not None:
             model.resetFilter()
 
+            model.layoutChanged.emit()
+
         else:
             getLogger().debug(f'{self.__class__.__name__}.refreshTable: defaultDf is not defined')
 
@@ -717,6 +719,8 @@ class TableSearchMenu(TableMenuABC):
                 model._filterIndex = sorted(model._sortIndex.index(ii) for ii in rows)
 
             model.endResetModel()
+
+            model.layoutChanged.emit()
 
         # import numpy as np
         # NOTE:ED - keep for the minute

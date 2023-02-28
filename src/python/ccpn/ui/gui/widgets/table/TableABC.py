@@ -986,6 +986,11 @@ class TableABC(QtWidgets.QTableView):
         pos = QtCore.QPoint(pos.x() + 5, pos.y())
         menu.exec_(self.mapToGlobal(pos))
 
+    def showSearchSettings(self):
+        """Show the search-settings for the table
+        """
+        self.searchMenu and self.searchMenu.showSearchSettings()
+
     #=========================================================================================
     # Header context menu
     #=========================================================================================

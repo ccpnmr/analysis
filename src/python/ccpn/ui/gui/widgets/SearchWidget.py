@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-08 19:52:33 +0000 (Wed, February 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-28 15:49:25 +0000 (Tue, February 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -448,8 +448,8 @@ class _TableFilterABC(ScrollArea):
         # else:
         #     rows = OrderedSet(val for val in range(_model.rowCount()))
 
-        searchColumn = self.columnOptions.getText()
-        visHeadings = self.visibleColumns(searchColumn=searchColumn)
+        searchColNum = self.columnOptions.getObject()
+        visHeadings = self.visibleColumns(searchColNum)
 
         _compareErrorCount = 0
         _model = self.tableHandler.model()
@@ -551,13 +551,13 @@ class _SimplerDFTableFilter(_TableFilterABC):
         """
         return list(self.df.columns)
 
-    def visibleColumns(self, searchColumn=None):
+    def visibleColumns(self, columnIndex=None):
         """Return the list of visible columns
         """
         headerMenu = self._parent.headerColumnMenu
 
         return [col for col in self.df.columns if col not in headerMenu._hiddenColumns + headerMenu._internalColumns] \
-            if (searchColumn == VISIBLESEARCH) else [searchColumn]
+            if (columnIndex is None) else [self.df.columns[columnIndex]]
 
     @property
     def df(self):

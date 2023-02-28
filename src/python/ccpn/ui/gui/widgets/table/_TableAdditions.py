@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-28 18:52:16 +0000 (Tue, February 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-28 19:10:36 +0000 (Tue, February 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ from collections import OrderedDict
 from functools import partial
 from abc import ABC, abstractmethod
 import typing
+import pandas as pd
 
 from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
 from ccpn.ui.gui.widgets import MessageDialog
@@ -510,7 +511,10 @@ class TableExport(TableMenuABC):
             path = aPath(path)
             path = path.assureSuffix('xlsx')
             if columns is not None and isinstance(columns, list):  #this is wrong. columns can be a 1d array
-                dataFrame.to_excel(path, sheet_name=sheet_name, columns=columns, index=False)
+
+                indx = isinstance(dataFrame.columns, pd.MultiIndex)
+                dataFrame.to_excel(path, sheet_name=sheet_name, columns=columns, index=indx)
+
             else:
                 dataFrame.to_excel(path, sheet_name=sheet_name, index=False)
 

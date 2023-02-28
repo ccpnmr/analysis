@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-24 17:29:49 +0000 (Fri, February 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-02-28 16:47:04 +0000 (Tue, February 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -720,7 +720,13 @@ class Project(AbstractWrapperObject):
            :param overwrite: flag to overwrite if path exists
         """
         from ccpn.core.lib.XmlLoader import XmlLoader
+
         _newPath = aPath(newPath).assureSuffix(CCPN_DIRECTORY_SUFFIX)
+        if _newPath.exists() and overwrite:
+            parent = _newPath.parent
+            _newPath.removeDir()
+            parent.fetchDir(_newPath)
+
         _newXmlLoader = XmlLoader.newFromLoader(self._xmlLoader, path=_newPath, create=True)
         self._xmlLoader = _newXmlLoader
         self._path = _newXmlLoader.path.asString()

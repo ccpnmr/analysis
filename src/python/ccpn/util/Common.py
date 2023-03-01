@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:43 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-03-01 18:39:44 +0000 (Wed, March 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,7 @@ from collections.abc import Iterable
 from itertools import islice
 from string import whitespace
 
-from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices
+# from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices
 from ccpn.util.OrderedSet import OrderedSet
 
 from ccpn.util import Constants
@@ -388,6 +388,7 @@ def reorder(values, axisCodes, refAxisCodes):
     if this is longer than the values.
 
     NB if there are multiple matches possible, one is chosen by heuristics"""
+    from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices # this causes circular imports. KEEP LOCAL
     if len(values) != len(axisCodes):
         raise ValueError("Length mismatch between %s and %s" % (values, axisCodes))
     remapping = _axisCodeMapIndices(axisCodes, refAxisCodes)

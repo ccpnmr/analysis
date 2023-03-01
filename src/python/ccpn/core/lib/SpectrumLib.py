@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-02 11:59:59 +0000 (Thu, March 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-03-01 18:39:44 +0000 (Wed, March 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ from ccpn.framework.Application import getApplication
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoBlockWithoutSideBar
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.core.lib._DistanceRestraintsLib import _getBoundResonances, longRangeTransfers
-from ccpn.util.Common import percentage, isIterable
+# from ccpn.util.Common import percentage, isIterable # this causes circular imports. DO NOT USE HERE
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import singleton
 from ccpn.util.DataEnum import DataEnum
@@ -1577,7 +1577,7 @@ def estimateNoiseLevel1D(y, f=10, stdFactor=0.5) -> Tuple[float, float]:
     :param stdFactor: 0 to don't adjust the initial guess.
     :return: tuple (float, float) of estimated noise threshold  as max and min
     """
-
+    from ccpn.util.Common import percentage
     eMax, eMin = 0, 0
     if stdFactor == 0:
         stdFactor = 1
@@ -2504,6 +2504,8 @@ def _setParameterValues(obj, parameterName: str, values: Sequence, dimensions: S
     CCPNINTERNAL: used in setByAxisCode and setByDimension methods of
                   Spectrum and Peak classes
     """
+    from ccpn.util.Common import isIterable # this causes circular imports. KEEP LOCAL
+
     if not hasattr(obj, parameterName):
         raise ValueError('object "%s" does not have parameter "%s"' %
                          (obj.__class__.__name__, parameterName))
@@ -2545,6 +2547,8 @@ def _getParameterValues(obj, parameterName: str, dimensions: Sequence, dimension
     CCPNINTERNAL: used in getByAxisCode and getByDimension methods of
                   Spectrum and Peak classes
     """
+    from ccpn.util.Common import isIterable # this causes circular imports. KEEP LOCAL
+
     if not hasattr(obj, parameterName):
         raise ValueError('object "%s" does not have parameter "%s"' %
                          (obj.__class__.__name__, parameterName))
@@ -2585,6 +2589,8 @@ def _orderByDimensions(iterable, dimensions, dimensionCount) -> list:
     :param dimensions: a tuple or list of dimensions (1..dimensionCount)
     :return: a list with values defined by iterable in dimensions order
     """
+    from ccpn.util.Common import isIterable # this causes circular imports. KEEP LOCAL
+
     if not isIterable(iterable):
         raise ValueError('not an iterable; got %r' % (iterable))
     values = list(iterable)

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-28 18:52:16 +0000 (Tue, February 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-01 15:13:20 +0000 (Wed, March 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -560,7 +560,7 @@ class _SimplerDFTableFilter(_TableFilterABC):
         """
         headerMenu = self._parent.headerColumnMenu
 
-        return [col for col in self.df.columns if col not in headerMenu._hiddenColumns + headerMenu._internalColumns] \
+        return [col for col in self.df.columns if col not in headerMenu.allHiddenColumns] \
             if (columnIndex is None) else [self.df.columns[columnIndex]]
 
     @property

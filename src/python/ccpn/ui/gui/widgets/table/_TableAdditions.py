@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-28 19:10:36 +0000 (Tue, February 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-01 15:13:20 +0000 (Wed, March 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -296,7 +296,7 @@ class TableHeaderColumns(TableHeaderABC):
     """
     name = "Columns"
     _parent = None
-    # _hiddenColumns = None
+    _defaultHiddenColumns = None
     _internalColumns = None
     _menuItemVisible = True
 
@@ -304,8 +304,8 @@ class TableHeaderColumns(TableHeaderABC):
         super(TableHeaderColumns, self).__init__(*args, **kwds)
 
         # initialise the hidden/internal columns
-        self._hiddenColumns = []
-        self._internalColumns = []
+        self._defaultHiddenColumns = set()
+        self._internalColumns = set()
 
     def addMenuOptions(self, menu):
         """Add table-header items to the right-mouse menu
@@ -337,9 +337,9 @@ class TableHeaderColumns(TableHeaderABC):
         header = list(self._parent._df.columns)
         for cc, col in enumerate(header):
             if col in columns or col in self._internalColumns:
-                self._parent.hideColumn(cc)
+                self.hideColumn(cc)
             else:
-                self._parent.showColumn(cc)
+                self.showColumn(cc)
 
     #=========================================================================================
     # Class methods
@@ -354,9 +354,14 @@ class TableHeaderColumns(TableHeaderABC):
         return self._parent.horizontalHeader()
 
     def showColumn(self, col):
+        # not sure if this is being caught every time
+        if col in (cols := self.columnTexts):
+            self._defaultHiddenColumns |= {cols[col]}
         self._parent.showColumn(col)
 
     def hideColumn(self, col):
+        if col in (cols := self.columnTexts):
+            self._defaultHiddenColumns -= {cols[col]}
         self._parent.hideColumn(col)
 
     #=========================================================================================
@@ -366,11 +371,18 @@ class TableHeaderColumns(TableHeaderABC):
     def setInternalColumns(self, texts, update=True):
         """set a list of internal column-headers that are always hidden.
         """
-        self._internalColumns = list(texts or [])
+        self._internalColumns = set(texts or [])
         if update:
             self.refreshHiddenColumns()
 
-    def hideDefaultColumns(self):
+    def setDefaultColumns(self, texts, update=True):
+        """set a list of default column-headers that are hidden when first shown.
+        """
+        self._defaultHiddenColumns = set(texts or [])
+        if update:
+            self.refreshHiddenColumns()
+
+    def hideInternalColumns(self):
         """If the table is empty then check visible headers against the last header hidden list
         """
         for i, columnName in enumerate(self.columnTexts):
@@ -388,13 +400,20 @@ class TableHeaderColumns(TableHeaderABC):
             return []
 
     def refreshHiddenColumns(self):
+        """Refresh the visible columns
+        """
+        hiCols = set(self.hiddenColumns) | self._internalColumns | self._defaultHiddenColumns
+
         # show the columns in the list
-        for colName in self.columnTexts:
+        for col, colName in enumerate(self.columnTexts):
             # always hide the internal columns
-            if colName in (self.hiddenColumns + self._internalColumns):
+            if colName in hiCols:
                 self._hideColumnName(colName)
             else:
+                width = self._parent.columnWidth(col)
                 self._showColumnName(colName)
+                if not width:
+                    self._parent.resizeColumnToContents(col)
 
     def _showColumnName(self, name):
         if name not in self.columnTexts:
@@ -426,6 +445,12 @@ class TableHeaderColumns(TableHeaderABC):
             return self.columnTexts[column] in self._internalColumns
 
         return False
+
+    @property
+    def allHiddenColumns(self):
+        """Return a list of all the hidden/internal columns
+        """
+        return set(self.hiddenColumns) | self._internalColumns
 
 
 #=========================================================================================

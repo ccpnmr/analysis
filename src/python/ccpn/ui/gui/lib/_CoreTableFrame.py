@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-22 17:37:59 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-01 15:13:19 +0000 (Wed, March 01, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -60,10 +60,6 @@ class _CoreTableWidgetABC(_ProjectTableABC):
                  **kwds):
         """Initialise the widgets for the module.
         """
-
-        _hiddenColumns = [self.columnHeaders.get(col) or col for col in hiddenColumns] if hiddenColumns else \
-            [self.columnHeaders.get(col) or col for col in self.defaultHidden]
-
         super().__init__(parent,
                          multiSelect=True,
                          showHorizontalHeader=showHorizontalHeader,
@@ -75,7 +71,8 @@ class _CoreTableWidgetABC(_ProjectTableABC):
                          enableSearch=self._enableSearch,
                          **kwds)
 
-        self.headerColumnMenu.setInternalColumns(self._internalColumns, False)
+        self.headerColumnMenu.setInternalColumns(self._internalColumns, update=False)
+        self.headerColumnMenu.setDefaultColumns(self.defaultHidden, update=False)
 
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()

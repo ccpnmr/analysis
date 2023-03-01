@@ -284,7 +284,10 @@ class TableABC(QtWidgets.QTableView):
         return model
 
     def postUpdateDf(self):
-        ...
+        """Actions to be performed after the dataFrame has been updated for the table
+        """
+        # update the visible columns
+        self.headerColumnMenu.refreshHiddenColumns()
 
     def setModel(self, model: QtCore.QAbstractItemModel) -> None:
         """Set the model for the view

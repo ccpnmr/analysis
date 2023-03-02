@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-02 13:37:09 +0000 (Thu, March 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -3935,7 +3935,7 @@ class CcpnNefReader(CcpnNefContent):
             _frameID = _saveFrameNameFromCategory(sFrame)
             _framecode, _frameName, subName, prefix, postfix, _preSerial, _postSerial, _category = _frameID
 
-            if (subName == oldSpectrum):
+            if subName == oldSpectrum and _category == 'nef_nmr_spectrum':
                 newName = '_'.join([category, prefix + spectrum + postfix])
                 self._renameDataBlock(project, dataBlock, sFrame, newName)
 

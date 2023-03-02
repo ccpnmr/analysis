@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-01 15:13:20 +0000 (Wed, March 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-02 15:44:59 +0000 (Thu, March 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -158,12 +158,16 @@ def _checkRestraintFloat(offset, value, row, col):
         except Exception:
             return str(value)
 
+    return '-'
+
 
 def _checkRestraintInt(offset, value, row, col):
     """Display the contents of the cell if the restraint-pid is valid - int
     """
     if row[col - offset]:
         return int(value)
+
+    return '-'
 
 
 class _NewRestraintWidget(_CoreMITableWidgetABC):
@@ -657,7 +661,12 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
                             if _vResults:
                                 _vMerge = pd.concat(_vResults, axis=0).drop_duplicates([HEADERSCOL, ATOMSCOL])
                                 _vMerge.insert(3, HEADERVIOLATION, True)
-                                _new = pd.merge(_left, _vMerge, how='left').drop(columns=[PEAKSERIALCOL]).fillna(0.0)
+                                _new = pd.merge(_left, _vMerge, how='left').drop(columns=[PEAKSERIALCOL])
+
+                                # fill the blank spaces with the correct types
+                                _new.fillna({HEADERSCOL: '-', ATOMSCOL: '-', HEADERVIOLATION: False}, inplace=True)
+                                _new.fillna(0.0, inplace=True)
+
                                 _out.append(_new)
 
                                 for _colID, fmt in self._subgroupColumns:

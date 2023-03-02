@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-01 15:13:20 +0000 (Wed, March 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-02 15:45:00 +0000 (Thu, March 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -103,7 +103,14 @@ def _compareKeys(a, b, condition):
         getLogger().debug(f'Condition {condition} not available for table filters.')
 
     with contextlib.suppress(Exception):
-        if condition not in [Equal, Include, Exclude]:
+
+        if condition == Equal:
+            try:
+                return SearchConditionsDict.get(condition)(float(a), float(b))
+            except Exception:
+                return SearchConditionsDict.get(condition)(a, b)
+
+        elif condition not in [Include, Exclude]:
             a, b, = float(a), float(b)
 
         return SearchConditionsDict.get(condition)(a, b)

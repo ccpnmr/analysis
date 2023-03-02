@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-22 17:37:59 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-02 14:44:40 +0000 (Thu, March 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 
 import pandas as pd
+from collections import Counter
 
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -118,17 +119,27 @@ class ColumnViewSettings(Frame):
                 if colum not in self.tableHandler._internalColumns:
                     chcked = colum not in hiddenColumns
 
+                    if isinstance(self._df.columns, pd.MultiIndex):
+                        cc = Counter(colum)
+                        if len(cc) == 1:
+                            txt = colum and colum[0] or ''
+                        else:
+                            txt = ' - '.join(colum)
+                    else:
+                        txt = str(colum)
+
                     if self.direction == 'v':
                         i += 1
-                        cb = CheckBox(self.widgetFrame, text=colum, grid=(i, 1), callback=self.checkBoxCallBack,
+                        cb = CheckBox(self.widgetFrame, text=txt, grid=(i, 1), callback=self.checkBoxCallBack,
                                       checked=chcked,
                                       hAlign='l', tipText=CheckboxTipText)
 
                     else:
-                        cb = CheckBox(self.widgetFrame, text=colum, grid=(1, i), callback=self.checkBoxCallBack,
+                        cb = CheckBox(self.widgetFrame, text=txt, grid=(1, i), callback=self.checkBoxCallBack,
                                       checked=chcked,
                                       hAlign='l', tipText=CheckboxTipText)
 
+                    cb.setObject(colum)
                     self.checkBoxes.append(cb)
 
     @property
@@ -138,8 +149,10 @@ class ColumnViewSettings(Frame):
     def checkBoxCallBack(self):
         currentCheckBox = self.sender()
         name = currentCheckBox.text()
+        obj = currentCheckBox.getObject()
         # i = self._dfObject.headings.index(name)
-        i = [str(col) for col in self._df.columns].index(name)
+        # i = [str(col) for col in self._df.columns].index(name)
+        i = self._df.columns.get_loc(obj)
 
         checkedBoxes = []
         for checkBox in self.checkBoxes:

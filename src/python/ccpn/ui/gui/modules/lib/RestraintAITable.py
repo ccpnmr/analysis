@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-02 15:44:59 +0000 (Thu, March 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-02 16:39:18 +0000 (Thu, March 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,6 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.StructureData import StructureData
 from ccpn.core.lib.CcpnSorting import universalSortKey
-from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.lib._CoreMITableFrame import _CoreMITableWidgetABC
 from ccpn.ui.gui.lib._CoreTableFrame import _CoreTableFrameABC
@@ -45,7 +44,7 @@ import ccpn.ui.gui.modules.PyMolUtil as pyMolUtil
 from ccpn.ui.gui.modules.lib.RestraintAITableCommon import _RestraintOptions, UNITS, \
     HeaderIndex, HeaderMatch, HeaderObject, HeaderRestraint, HeaderAtoms, HeaderViolation, HeaderTarget, \
     HeaderLowerLimit, HeaderUpperLimit, HeaderMin, HeaderMax, HeaderMean, HeaderStd, \
-    HeaderCount1, HeaderCount2, _OLDHEADERS, _RESTRAINTTABLE, _VIOLATIONRESULT, ALL, PymolScriptName
+    HeaderCount1, HeaderCount2, _OLDHEADERS, _VIOLATIONRESULT, ALL, PymolScriptName
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Column import ColumnClass, Column
@@ -53,7 +52,6 @@ from ccpn.ui.gui.widgets.GuiTable import _getValueByHeader
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
 from ccpn.ui.gui.widgets import MessageDialog
-# from ccpn.ui.gui.widgets.table._TableModel import _TableModel
 from ccpn.util.Common import flattenLists
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import joinPath

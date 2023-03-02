@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-02 11:05:22 +0000 (Thu, March 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -149,7 +149,7 @@ isotope2Tolerance = {
 SPECTRUM_POSITIONS = 'positions'
 SPECTRUM_INTENSITIES = 'intensities'
 
-MAXALIASINGRANGE = 3
+MAXALIASINGRANGE = 3  # change to 6
 
 
 def splitPseudo3DSpectrumIntoPlanes(spectrum, seriesUnits='ms'):

@@ -1,10 +1,37 @@
+"""
+Module Documentation here
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
+#=========================================================================================
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-02 11:52:00 +0000 (Thu, March 02, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
+__date__ = "$Date: 2023-03-02 11:18:54 +0000 (Thu, March 2, 2023) $"
+#=========================================================================================
+# Start of code
+#=========================================================================================
 
 from typing import Optional, Sequence, Tuple
 
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.util.Common import isIterable
-
 from ccpn.util.Logging import getLogger
+
 
 class SpectrumDimensionAttributes(object):
     """Spectrum dimensional attributes
@@ -184,9 +211,10 @@ class SpectrumDimensionAttributes(object):
     @property
     def aliasingLimits(self) -> Tuple[float, float]:
         """tuple of sorted(minAliasingLimit, maxAliasingLimit).
-        i.e. The actual ppm limits of the full (including the aliased regions) limits.
+        i.e. The actual ppm-limits of the full (including the aliased regions) limits.
         """
-        return tuple(sorted((self.minAliasedFrequency, self.maxAliasedFrequency)))
+        val = [self.minAliasedFrequency, self.maxAliasedFrequency]
+        return (min(val), max(val))
 
     @aliasingLimits.setter
     def aliasingLimits(self, value):
@@ -194,6 +222,10 @@ class SpectrumDimensionAttributes(object):
             raise ValueError('%s dimension %d, aliasingLimits; expected (minLimit, maxLimit) but got %r' %
                              (self.spectrum, self.dimension, value)
                              )
+        # zero the values to silence api-errors until both values have been set
+        self.minAliasedFrequency = None
+        self.maxAliasedFrequency = None
+
         # first set the values
         self.minAliasedFrequency = min(value)
         self.maxAliasedFrequency = max(value)
@@ -205,11 +237,11 @@ class SpectrumDimensionAttributes(object):
     @property
     def aliasingPointLimits(self) -> Tuple[int, int]:
         """Return a tuple of sorted(minAliasingPointLimit, maxAliasingPointLimit).
-        i.e. The actual point limits of the full (including the aliased regions) limits.
+        i.e. The actual point-limits of the full (including the aliased regions) limits.
         """
-        minPoint = int(self.ppmToPoint(self.minAliasedFrequency)+0.5)
-        maxPoint = int(self.ppmToPoint(self.maxAliasedFrequency)+0.5)
-        return tuple(sorted((minPoint, maxPoint)))
+        mPoints = [int(self.ppmToPoint(self.minAliasedFrequency)+0.5),
+                   int(self.ppmToPoint(self.maxAliasedFrequency)+0.5)]
+        return (min(mPoints,), max(mPoints))
 
     @property
     def aliasingIndexes(self) -> Tuple[int, int]:
@@ -254,6 +286,7 @@ class SpectrumDimensionAttributes(object):
         # zero the values to silence api-errors until both values have been set
         self.minAliasedFrequency = None
         self.maxAliasedFrequency = None
+
         self.minAliasedFrequency = min(self.spectrumLimits) + value[0]*self.spectralWidth
         self.maxAliasedFrequency = max(self.spectrumLimits) + value[1]*self.spectralWidth
 

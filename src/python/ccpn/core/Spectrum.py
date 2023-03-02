@@ -53,8 +53,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:38 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-02 11:51:59 +0000 (Thu, March 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -82,7 +82,7 @@ from ccpn.core.lib import Pid
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection, getDefaultSpectrumColours
 from ccpn.core.lib.SpectrumLib import _includeInDimensionalCopy, _includeInCopy, _includeInCopyList, \
-    checkSpectrumPropertyValue, _setDefaultAxisOrdering
+    checkSpectrumPropertyValue, _setDefaultAxisOrdering, MAXALIASINGRANGE
 
 from ccpn.core.lib.ContextManagers import \
     newObject, deleteObject, ccpNmrV3CoreUndoBlock, \
@@ -107,7 +107,6 @@ from ccpn.util.OrderedSet import OrderedSet
 
 
 # defined here too as imported from Spectrum throughout the code base
-MAXALIASINGRANGE = specLib.MAXALIASINGRANGE
 _SCALECHANGED = 'scaleChanged'
 _ALLCHANGED = 'allChanged'
 _UPDATECHEMICALSHIFTS = 'updateChemicalShifts'

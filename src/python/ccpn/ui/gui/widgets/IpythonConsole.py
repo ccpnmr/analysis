@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-24 17:39:18 +0000 (Fri, February 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-02 17:20:59 +0000 (Thu, March 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -39,12 +39,12 @@ from ccpn.util.Common import isWindowsOS
 from ipykernel.inprocess.ipkernel import InProcessKernel
 
 
-try:
-    # Temporarily disable IPython history. Suspected to be the source of  threading issues
-    from IPython.core.history import HistoryManager
-    HistoryManager.enabled = False
-except ImportError:
-    pass
+# try:
+# Temporarily disable IPython history. Suspected to be the source of  threading issues
+# from IPython.core.history import HistoryManager
+# HistoryManager.enabled = True
+# except ImportError:
+#     pass
 
 
 class SilentKernel(InProcessKernel):
@@ -66,6 +66,12 @@ class SilentKernel(InProcessKernel):
 class _ProcessKernelManager(QtInProcessKernelManager):
     def start_kernel(self, **kwds):
         self.kernel = SilentKernel(parent=self, session=self.session)
+
+    def shutdown_kernel(self):
+        # Closing down the kernel and thread, We might need to call  implicitly the
+        # History thread close ....
+        self.kernel.iopub_thread.stop()
+        self._kill_kernel()
 
 class IpythonConsole(Widget):
     focusedIn = QtCore.pyqtSignal(QtGui.QFocusEvent)
@@ -182,10 +188,12 @@ class IpythonConsole(Widget):
         # CCPN INTERNAL - called in constructor of PythonConsoleModule.
         """
         from IPython import get_ipython
+
+        get_ipython().run_line_magic('reset', '-sf') # clear the global variable
+        if self.ipythonWidget.kernel_manager is not None:
+            self.ipythonWidget.kernel_manager.shutdown_kernel()
         self.ipythonWidget.kernel_client.stop_channels()
         self.ipythonWidget.kernel_client = None
-        get_ipython().run_line_magic('reset', '-sf') # clear the global variable
-
     def _showHistory(self):
         """
         Shows the history of commands executed inside the python console.

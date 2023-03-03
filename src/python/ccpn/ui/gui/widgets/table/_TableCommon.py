@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-17 15:38:10 +0000 (Fri, February 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-03 16:16:05 +0000 (Fri, March 03, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -68,6 +68,10 @@ VALUE_ROLE = QtCore.Qt.UserRole + 1001
 # a role to map the table-index to the cell in the df
 INDEX_ROLE = QtCore.Qt.UserRole + 1002
 BORDER_ROLE = QtCore.Qt.UserRole + 1003
+
+# extra colour options
+ROWCOLOUR_ROLE = QtCore.Qt.UserRole + 1004
+COLUMNCOLOUR_ROLE = QtCore.Qt.UserRole + 1005
 
 SELECT_ROWS = QtWidgets.QTableView.SelectRows
 SELECT_COLUMNS = QtWidgets.QTableView.SelectColumns

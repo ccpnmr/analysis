@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-01 15:13:19 +0000 (Wed, March 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-03 16:16:04 +0000 (Fri, March 03, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -54,7 +54,7 @@ class _CoreTableWidgetABC(_ProjectTableABC):
     _enableExport = True
     _enableCopyCell = True
 
-    def __init__(self, parent=None,
+    def __init__(self, parent, *,
                  showHorizontalHeader=True, showVerticalHeader=False,
                  hiddenColumns=None,
                  **kwds):

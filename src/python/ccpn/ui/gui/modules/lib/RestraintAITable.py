@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-02 16:39:18 +0000 (Thu, March 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-03 16:16:04 +0000 (Fri, March 03, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,7 @@ from PyQt5 import QtCore, QtWidgets
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.RestraintTable import RestraintTable
+from ccpn.ui._implementation.Strip import Strip
 from ccpn.core.StructureData import StructureData
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.core.lib.Notifiers import Notifier
@@ -253,8 +254,14 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
     # subgroups are always max->min
     applySortToGroups = False
 
-    def __init__(self, *args, **kwds):
-        super().__init__(showVerticalHeader=False, showGrid=True, *args, **kwds)
+    def __init__(self, parent, *args, **kwds):
+        """Initialise the table
+        """
+        # override with fixed state
+        kwds['showVerticalHeader'] = False
+        kwds['showGrid'] = True
+        kwds['alternatingRows'] = True
+        super().__init__(parent, *args, **kwds)
 
         self.setTextElideMode(QtCore.Qt.ElideMiddle)
 
@@ -374,20 +381,24 @@ class _NewRestraintWidget(_CoreMITableWidgetABC):
 
         peak = objs[0] if isinstance(objs, (tuple, list)) else objs
 
-        if self.current.strip is not None:
-            validPeakListViews = [pp.peakList for pp in self.current.strip.peakListViews if isinstance(pp.peakList, PeakList)]
+        if dpObjs := self.resources._displayListWidget.getDisplays():
+            # check which spectrumDisplays to navigate to - could be spectrumDisplay or strip
+            for dp in dpObjs:
+                if strp := dp if isinstance(dp, Strip) else (dp.strips and dp.strips[0]):
 
-            if peak and peak.peakList in validPeakListViews:
-                widths = None
+                    validPeakListViews = [pp.peakList for pp in strp.peakListViews if isinstance(pp.peakList, PeakList)]
 
-                if peak.peakList.spectrum.dimensionCount <= 2:
-                    widths = _getCurrentZoomRatio(self.current.strip.viewRange())
-                navigateToPositionInStrip(strip=self.current.strip,
-                                          positions=peak.position,
-                                          axisCodes=peak.axisCodes,
-                                          widths=widths)
+                    if peak and peak.peakList in validPeakListViews:
+                        widths = None
+
+                        if peak.spectrum.dimensionCount <= 2:
+                            widths = _getCurrentZoomRatio(strp.viewRange())
+                        navigateToPositionInStrip(strip=strp,
+                                                  positions=peak.position,
+                                                  axisCodes=peak.axisCodes,
+                                                  widths=widths)
         else:
-            getLogger().warning('Impossible to navigate to peak position. Set a current strip first')
+            getLogger().warning('Impossible to navigate to peak position. Set spectrumDisplays first')
 
     #=========================================================================================
     # Create table and row methods

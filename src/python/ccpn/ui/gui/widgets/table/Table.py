@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-15 19:22:57 +0000 (Wed, February 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-03 16:16:04 +0000 (Fri, March 03, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -57,6 +57,7 @@ _TABLE_KWDS = ('parent', 'df',
                'borderWidth', 'cellPadding', 'focusBorderWidth', 'gridColour',
                '_resize', 'setWidthToColumns', 'setHeightToRows',
                'setOnHeaderOnly', 'showGrid', 'wordWrap',
+               'alternatingRows',
                'selectionCallback', 'selectionCallbackEnabled',
                'actionCallback', 'actionCallbackEnabled',
                'enableExport', 'enableDelete', 'enableSearch', 'enableCopyCell',
@@ -83,6 +84,7 @@ class Table(TableABC, Base):
                  borderWidth=2, cellPadding=2, focusBorderWidth=1, gridColour=None,
                  _resize=False, setWidthToColumns=False, setHeightToRows=False,
                  setOnHeaderOnly=False, showGrid=False, wordWrap=False,
+                 alternatingRows=True,
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
                  actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
                  enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
@@ -108,6 +110,7 @@ class Table(TableABC, Base):
         :param setOnHeaderOnly:
         :param showGrid:
         :param wordWrap:
+        :param alternatingRows:
         :param selectionCallback:
         :param selectionCallbackEnabled:
         :param actionCallback:
@@ -126,6 +129,7 @@ class Table(TableABC, Base):
                          borderWidth=borderWidth, cellPadding=cellPadding, focusBorderWidth=focusBorderWidth, gridColour=gridColour,
                          _resize=_resize, setWidthToColumns=setWidthToColumns, setHeightToRows=setHeightToRows,
                          setOnHeaderOnly=setOnHeaderOnly, showGrid=showGrid, wordWrap=wordWrap,
+                         alternatingRows=alternatingRows,
                          selectionCallback=selectionCallback, selectionCallbackEnabled=selectionCallbackEnabled,
                          actionCallback=actionCallback, actionCallbackEnabled=actionCallbackEnabled,
                          enableExport=enableExport, enableDelete=enableDelete, enableSearch=enableSearch, enableCopyCell=enableCopyCell,

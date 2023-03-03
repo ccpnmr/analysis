@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-03 00:18:22 +0000 (Fri, March 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-03 16:16:04 +0000 (Fri, March 03, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -73,6 +73,15 @@ class TableABC(QtWidgets.QTableView):
                         selection-background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
                         selection-color: %(GUITABLE_SELECTED_FOREGROUND)s;
                     }
+                    QTableView::focus {
+                        background-color: %(GUITABLE_BACKGROUND)s;
+                        alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
+                        border: %(_BORDER_WIDTH)spx solid %(BORDER_FOCUS)s;
+                        border-radius: 2px;
+                        gridline-color: %(_GRID_COLOR)s;
+                        selection-background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
+                        selection-color: %(GUITABLE_SELECTED_FOREGROUND)s;
+                    }
                     QTableView::item {
                         padding-top: %(_CELL_PADDING)spx;
                         padding-bottom: %(_CELL_PADDING)spx;
@@ -113,6 +122,7 @@ class TableABC(QtWidgets.QTableView):
                  borderWidth=2, cellPadding=2, focusBorderWidth=1, gridColour=None,
                  _resize=False, setWidthToColumns=False, setHeightToRows=False,
                  setOnHeaderOnly=False, showGrid=False, wordWrap=False,
+                 alternatingRows=True,
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
                  actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
                  enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
@@ -137,6 +147,7 @@ class TableABC(QtWidgets.QTableView):
         :param setOnHeaderOnly:
         :param showGrid:
         :param wordWrap:
+        :param alternatingRows:
         :param selectionCallback:
         :param selectionCallbackEnabled:
         :param actionCallback:
@@ -154,11 +165,72 @@ class TableABC(QtWidgets.QTableView):
         if df is None:
             # make sure it's not empty
             df = pd.DataFrame({})
-
-        self._setMenuProperties(enableCopyCell, enableDelete, enableExport, enableSearch)
+        self._tableBlockingLevel = 0
 
         self.setShowGrid(showGrid)
+        self.setWordWrap(wordWrap)
+        self.setSortingEnabled(True)
 
+        # set the preferred scrolling behaviour
+        self.setHorizontalScrollMode(self.ScrollPerPixel)
+        self.setVerticalScrollMode(self.ScrollPerPixel)
+        if selectRows:
+            self.setSelectionBehavior(self.SelectRows)
+
+        self._setMenuProperties(enableCopyCell, enableDelete, enableExport, enableSearch)
+        self._setStyling(borderWidth, cellPadding, focusBorderWidth, gridColour, alternatingRows)
+        self._setSelectionBehaviour(multiSelect)
+        self._setFonts(df, showHorizontalHeader, showVerticalHeader)
+        self._setCallbacks(actionCallback, actionCallbackEnabled, selectionCallback, selectionCallbackEnabled)
+
+        # set up the menus
+        self.setTableMenu(tableMenuEnabled)
+        self.setHeaderMenu()
+
+        self.setItemDelegate(self.defaultTableDelegate(parent=self, focusBorderWidth=focusBorderWidth))
+
+        # initialise the table
+        self.updateDf(df, _resize, setHeightToRows, setWidthToColumns, setOnHeaderOnly=setOnHeaderOnly)
+
+    def _setSelectionBehaviour(self, multiSelect):
+        """Set the selection-behaiour
+        """
+        # define the multi-selection behaviour
+        self.multiSelect = multiSelect
+        if multiSelect:
+            self._selectionMode = self.ExtendedSelection
+        else:
+            self._selectionMode = self.SingleSelection
+        self.setSelectionMode(self._selectionMode)
+        self._clickInterval = QtWidgets.QApplication.instance().doubleClickInterval() * 1e6  # change to ns
+        self._clickedInTable = False
+        self._currentIndex = None
+
+    def _setFonts(self, df, showHorizontalHeader, showVerticalHeader):
+        """Set the font-style
+        """
+        setWidgetFont(self, name=TABLEFONT)
+        height = getFontHeight(name=TABLEFONT)
+        self._setHeaderWidgets(height, showHorizontalHeader, showVerticalHeader, df)
+        self.setMinimumSize(2 * height, 2 * height + self.horizontalScrollBar().height())
+
+    def _setCallbacks(self, actionCallback, actionCallbackEnabled, selectionCallback, selectionCallbackEnabled):
+        """Set the action/selection callbacks
+        """
+        # set selection/action callbacks
+        self.doubleClicked.connect(self._actionConnect)
+        if selectionCallback is not NOTHING:
+            self.setSelectionCallback(selectionCallback)  # can set to None
+        if selectionCallbackEnabled is not NOTHING:
+            self.setSelectionCallbackEnabled(selectionCallbackEnabled)
+        if actionCallback is not NOTHING:
+            self.setActionCallback(actionCallback)  # can be set to None
+        if actionCallbackEnabled is not NOTHING:
+            self.setActionCallbackEnabled(actionCallbackEnabled)
+
+    def _setStyling(self, borderWidth, cellPadding, focusBorderWidth, gridColour, alternatingRows):
+        """Set the stylesheet options
+        """
         # set stylesheet
         colours = getColours()
         # add border-width/cell-padding options
@@ -173,57 +245,7 @@ class TableABC(QtWidgets.QTableView):
         self.gridcolour = colours['_GRID_COLOR'] = col
         self._defaultStyleSheet = self.styleSheet % colours
         self.setStyleSheet(self._defaultStyleSheet)
-        self.setAlternatingRowColors(True)
-        self.setWordWrap(wordWrap)
-
-        # set the preferred scrolling behaviour
-        self.setHorizontalScrollMode(self.ScrollPerPixel)
-        self.setVerticalScrollMode(self.ScrollPerPixel)
-        if selectRows:
-            self.setSelectionBehavior(self.SelectRows)
-
-        # define the multi-selection behaviour
-        self.multiSelect = multiSelect
-        if multiSelect:
-            self._selectionMode = self.ExtendedSelection
-        else:
-            self._selectionMode = self.SingleSelection
-        self.setSelectionMode(self._selectionMode)
-        self._clickInterval = QtWidgets.QApplication.instance().doubleClickInterval() * 1e6  # change to ns
-        self._clickedInTable = False
-        self._currentIndex = None
-
-        # enable sorting and sort on the first column
-        self.setSortingEnabled(True)
-        self.sortByColumn(0, QtCore.Qt.AscendingOrder)
-
-        setWidgetFont(self, name=TABLEFONT)
-        height = getFontHeight(name=TABLEFONT)
-        self._setHeaderWidgets(height, showHorizontalHeader, showVerticalHeader, df)
-        self.setMinimumSize(2 * height, 2 * height + self.horizontalScrollBar().height())
-
-        # set up the menus
-        self.setTableMenu(tableMenuEnabled)
-        self.setHeaderMenu()
-
-        self._tableBlockingLevel = 0
-
-        # initialise the table
-        self.updateDf(df, _resize, setHeightToRows, setWidthToColumns, setOnHeaderOnly=setOnHeaderOnly)
-
-        # set selection/action callbacks
-        self.doubleClicked.connect(self._actionConnect)
-
-        if selectionCallback is not NOTHING:
-            self.setSelectionCallback(selectionCallback)  # can set to None
-        if selectionCallbackEnabled is not NOTHING:
-            self.setSelectionCallbackEnabled(selectionCallbackEnabled)
-        if actionCallback is not NOTHING:
-            self.setActionCallback(actionCallback)  # can be set to None
-        if actionCallbackEnabled is not NOTHING:
-            self.setActionCallbackEnabled(actionCallbackEnabled)
-
-        self.setItemDelegate(self.defaultTableDelegate(parent=self, focusBorderWidth=focusBorderWidth))
+        self.setAlternatingRowColors(alternatingRows)
 
     def _setMenuProperties(self, enableCopyCell, enableDelete, enableExport, enableSearch):
         """Add the required menus to the table

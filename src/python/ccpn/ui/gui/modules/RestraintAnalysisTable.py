@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-24 20:45:10 +0000 (Fri, February 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-03 16:16:04 +0000 (Fri, March 03, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -84,6 +84,7 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
     i.e. restraint-tables that are connected to the same run, and are placed in the same
     column of the restraint module.
     """
+
     def __init__(self, parent, *, resources=None, **kwds):
         project = getProject()
 
@@ -413,7 +414,7 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
                     '    structureData\n' \
                     '    restraintTables'
 
-            self.hint = p.drawText(rgn, align, label)
+            self.hint = p.drawText(rgn, int(align), label)
             p.end()
 
     def _updateNotify(self, trigger, obj):

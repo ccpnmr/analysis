@@ -117,7 +117,7 @@ class Column:
                  getColor=None, getIcon=None, stretch=False, format=None,
                  editDecimals=None, editStep=None, rawDataHeading=None,
                  isHidden = False, isInternal = False, columnWidth=None,
-                 alignment=QtCore.Qt.AlignLeft, **kwargs):
+                 alignment=QtCore.Qt.AlignCenter, **kwargs):
         # editDecimals=None, editStep=None, alignment=QtCore.Qt.AlignLeft,
         # orderFunc=None):
 
@@ -142,13 +142,13 @@ class Column:
         #self.alignment = ALIGN_OPTS.get(alignment, alignment) | Qt.AlignVCenter
         # Alignment combinations broken in PyQt4 v1.1.1
         # Use better default than top left
-        self.alignment = QtCore.Qt.AlignCenter
+        self.alignment = alignment
         # self.orderFunc = orderFunc
         self.heading = kwargs.get('heading', self.headerText)
 
 
-        self.getIcon = getIcon or self._defaultIcon
-        self.getColor = getColor or self._defaultColor
+        self.getIcon = getIcon #or self._defaultIcon
+        self.getColor = getColor #or self._defaultColor
         self.tipText = tipText
 
         self._checkTextAttrs()

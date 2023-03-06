@@ -15,13 +15,13 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-03 16:16:04 +0000 (Fri, March 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-06 14:10:59 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
-__date__ = "$Date: 2022-09-08 17:13:11 +0100 (Thu, September 08, 2022) $"
+__date__ = "$Date: 2023-02-06 18:05:05 +0100 (Mon, February 06, 2023) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -37,13 +37,14 @@ from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptio
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.table.TableABC import TableABC
 from ccpn.ui.gui.widgets.table._TableCommon import INDEX_ROLE
 from ccpn.ui.gui.widgets.table._TableDelegates import _TableDelegate
 from ccpn.ui._implementation.QueueHandler import QueueHandler
 from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Common import NOTHING
+
+from ccpn.ui.gui.widgets.table.MITableABC import MITableABC
 
 
 #=========================================================================================
@@ -68,14 +69,15 @@ _TABLE_KWDS = ('parent', 'df',
                'actionCallback', 'actionCallbackEnabled',
                'enableExport', 'enableDelete', 'enableSearch', 'enableCopyCell',
                'tableMenuEnabled',
+               'dividerColour',
                'ignoreStyleSheet',
                'mainWindow', 'moduleParent'
                )
 
 
-class _ProjectTableABC(TableABC, Base):
-    className = '_ProjectTableABC'
-    attributeName = '_ProjectTableABC'
+class _MIProjectTableABC(MITableABC, Base):
+    className = '_MIProjectTableABC'
+    attributeName = '_MIProjectTableABC'
 
     _OBJECT = '_object'
     _ISDELETED = 'isDeleted'
@@ -109,7 +111,7 @@ class _ProjectTableABC(TableABC, Base):
 
     _rowHeightScale = 1.0
 
-    def __init__(self, parent, df=None,
+    def __init__(self, parent, *, df=None,
                  multiSelect=True, selectRows=True,
                  showHorizontalHeader=True, showVerticalHeader=True,
                  borderWidth=2, cellPadding=2, focusBorderWidth=1, gridColour=None,
@@ -120,6 +122,7 @@ class _ProjectTableABC(TableABC, Base):
                  actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
                  enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
                  tableMenuEnabled=NOTHING,
+                 dividerColour=None,
                  # local parameters
                  ignoreStyleSheet=True,
                  mainWindow=None, moduleParent=None,
@@ -151,6 +154,8 @@ class _ProjectTableABC(TableABC, Base):
         :param enableDelete:
         :param enableSearch:
         :param enableCopyCell:
+        :param tableMenuEnabled:
+        :param dividerColour:
         :param ignoreStyleSheet:
         :param mainWindow:
         :param moduleParent:
@@ -167,6 +172,7 @@ class _ProjectTableABC(TableABC, Base):
                          actionCallback=actionCallback, actionCallbackEnabled=actionCallbackEnabled,
                          enableExport=enableExport, enableDelete=enableDelete, enableSearch=enableSearch, enableCopyCell=enableCopyCell,
                          tableMenuEnabled=tableMenuEnabled,
+                         dividerColour=dividerColour
                          )
         # Base messes up styleSheets defined in superclass
         baseKwds = {k: v for k, v in kwds.items() if k not in _TABLE_KWDS}
@@ -181,7 +187,7 @@ class _ProjectTableABC(TableABC, Base):
 
         self.moduleParent = moduleParent
         self._table = None
-        self._dataFrameObject = None
+        # self._dataFrameObject = None
 
         self._setTableNotifiers()
 
@@ -372,8 +378,9 @@ class _ProjectTableABC(TableABC, Base):
         objs = selectedObjects if selectedObjects is not None else self.getSelectedObjects()
 
         try:
-            self._dataFrameObject = self.buildTableDataFrame()
-            _df = self._dataFrameObject.dataFrame
+            # self._dataFrameObject = self.buildTableDataFrame()
+            # _df = self._dataFrameObject.dataFrame
+            _df = self.buildTableDataFrame()
 
             # remember the old values
             sortColumn, sortOrder = 0, 0
@@ -383,7 +390,10 @@ class _ProjectTableABC(TableABC, Base):
 
             # update model to the new _df
             model = self.updateDf(_df)
+            self._columnHeader.updateDf(_df)
+            self._indexHeader.updateDf(_df)
 
+            # NOTE:ED - update headers
             self.resizeColumnsToContents()
 
             # re-sort the table
@@ -397,7 +407,7 @@ class _ProjectTableABC(TableABC, Base):
 
             # set the tipTexts
             if self._columnDefs is not None:
-                model.setToolTips('horizontal', self._columnDefs.tipTexts)
+                model.setToolTips('horizontal', [cd.tipText for cd in self._columnDefs])
 
         except Exception as es:
             getLogger().warning('Error populating table', str(es))
@@ -411,7 +421,7 @@ class _ProjectTableABC(TableABC, Base):
     def populateEmptyTable(self):
         """Populate with an empty dataFrame containing the correct column headers.
         """
-        self._dataFrameObject = None
+        # self._dataFrameObject = None
         _df = pd.DataFrame({val: [] for val in self.columnHeaders.keys()})
 
         if self.OBJECTCOLUMN in _df.columns:
@@ -419,6 +429,10 @@ class _ProjectTableABC(TableABC, Base):
             _df.set_index(_df[self.OBJECTCOLUMN], inplace=True, )
 
         self.updateDf(_df, resize=True)
+        self._columnHeader.updateDf(_df, resize=True)
+        self._indexHeader.updateDf(_df, resize=True)
+
+        # NOTE:ED - update headers
 
         self.headerColumnMenu.refreshHiddenColumns()
 
@@ -589,13 +603,6 @@ class _ProjectTableABC(TableABC, Base):
         """
         # MUST BE SUBCLASSED
         raise NotImplementedError(f'Code error: {self.__class__.__name__}.actionCallback not implemented')
-
-    # def setActionCallback(self, actionCallback=None):
-    #     # enable callbacks
-    #     if not (actionCallback is None or callable(actionCallback)):
-    #         raise ValueError(f'{self.__class__.__name__}.setActionCallback: actionCallback is not None|callable')
-    #
-    #     self.actionCallback = actionCallback
 
     def setCheckBoxCallback(self, checkBoxCallback):
         # enable callback on the checkboxes

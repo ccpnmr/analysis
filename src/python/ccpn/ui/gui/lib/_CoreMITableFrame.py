@@ -15,34 +15,32 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-03 16:16:04 +0000 (Fri, March 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-06 14:10:58 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
-__date__ = "$Date: 2022-04-29 16:52:01 +0100 (Fri, April 29, 2022) $"
+__date__ = "$Date: 2023-02-07 16:38:53 +0100 (Tue, February 07, 2023) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
 import pandas as pd
 from collections import OrderedDict
-from PyQt5 import QtWidgets, QtCore
+
 from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.table._ProjectTable import _ProjectTableABC
-from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.util.Logging import getLogger
+
+from ccpn.ui.gui.widgets.table.MIProjectTable import _MIProjectTableABC
 
 
 #=========================================================================================
 # _CoreTableWidgetABC
 #=========================================================================================
 
-class _CoreTableWidgetABC(_ProjectTableABC):
+class _CoreMITableWidgetABC(_MIProjectTableABC):
     """Class to present a table for core objects
     """
     defaultHidden = None
@@ -60,6 +58,10 @@ class _CoreTableWidgetABC(_ProjectTableABC):
                  **kwds):
         """Initialise the widgets for the module.
         """
+
+        # _hiddenColumns = [self.columnHeaders.get(col) or col for col in hiddenColumns] if hiddenColumns else \
+        #     [self.columnHeaders.get(col) or col for col in self.defaultHidden]
+
         super().__init__(parent,
                          multiSelect=True,
                          showHorizontalHeader=showHorizontalHeader,
@@ -71,8 +73,7 @@ class _CoreTableWidgetABC(_ProjectTableABC):
                          enableSearch=self._enableSearch,
                          **kwds)
 
-        self.headerColumnMenu.setInternalColumns(self._internalColumns, update=False)
-        self.headerColumnMenu.setDefaultColumns(self.defaultHidden, update=False)
+        self.headerColumnMenu.setInternalColumns(self._internalColumns, False)
 
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
@@ -373,215 +374,8 @@ class _CoreTableWidgetABC(_ProjectTableABC):
     # object properties
     #=========================================================================================
 
-
 #=========================================================================================
 # _CoreTableFrameABC
 #=========================================================================================
 
-class _CoreTableFrameABC(Frame):
-    """Frame containing the pulldown and the table widget
-    """
-    _TableKlass = _CoreTableWidgetABC
-    _PulldownKlass = None
-
-    _activePulldownClass = None
-    _activeCheckbox = None
-
-    def __init__(self, parent, mainWindow=None, moduleParent=None,
-                 obj=None, selectFirstItem=False, **kwds):
-        super().__init__(parent, setLayout=True, **kwds)
-
-        # Derive application, project, and current from mainWindow
-        self.mainWindow = mainWindow
-        if mainWindow:
-            self.application = mainWindow.application
-            self.project = mainWindow.application.project
-            self.current = mainWindow.application.current
-        else:
-            self.application = self.project = self.current = None
-        # self._table = None
-        self.moduleParent = moduleParent
-
-        # add the widgets to frame
-        self._setWidgets(container=self)
-
-        if obj is not None:
-            self.selectTable(obj)
-        elif selectFirstItem:
-            # self._modulePulldown.selectFirstItem()
-            # ensures that the module and contained widgets are initialised before selecting the first item
-            QtCore.QTimer.singleShot(0, self._modulePulldown.selectFirstItem)
-
-    def _setWidgets(self, container=None):
-        """Set up the widgets for the module
-        """
-        # use the default font-size for the margins and padding
-        hh = getFontHeight() // 4
-
-        # main widgets at the top - in a static frame, frame-in-a-frame to enforce ignored state
-        #  so that the table scrollbars appear for small modules
-        row = 0
-        _outer = Frame(parent=container, grid=(row, 0), gridSpan=(1, 1), setLayout=True)
-        _outer.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
-        _outer.setContentsMargins(hh, hh, hh, hh)
-        _outer.getLayout().setColumnStretch(1, 2)
-
-        # inner static-frame
-        self._moduleHeaderFrame = Frame(parent=_outer, grid=(0, 0), gridSpan=(1, 1), setLayout=True)
-        self._moduleHeaderFrame.setContentsMargins(0, 0, hh, 0)
-        self._moduleHeaderFrame.layout().setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
-        self._moduleHeaderFrame.layout().setSpacing(hh)
-        Spacer(_outer, 5, 5,
-               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
-               grid=(0, 1))
-
-        # put pulldown-list and extra buttons in the static-frame
-        fRow = 0
-        gridHPos = 0
-        self._modulePulldown = self._PulldownKlass(parent=self._moduleHeaderFrame,
-                                                   mainWindow=self.mainWindow,
-                                                   grid=(fRow, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
-                                                   showSelectName=True,
-                                                   sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
-                                                   callback=self._selectionPulldownCallback)
-        self._addWidgetRow = fRow
-        self._addWidgetCol = gridHPos + 2  # new widgets are added from here by default
-
-        # main window below the static-frame
-        row += 1
-        self._tableWidget = self._TableKlass(parent=container,
-                                             mainWindow=self.mainWindow,
-                                             grid=(row, 0), gridSpan=(1, 2),
-                                             # pass on extra keywords to table-widget here
-                                             )
-
-    def setActivePulldownClass(self, coreClass, checkBox):
-        """Set up the callback properties for changing the current object from the pulldown
-        """
-        self._activePulldownClass = coreClass
-        self._activeCheckbox = checkBox
-
-    #=========================================================================================
-    # Properties
-    #=========================================================================================
-
-    @property
-    def _tableCurrent(self):
-        """Return the list of source objects, e.g., _table.peaks/_table.nmrResidues
-        """
-        # MUST BE SUBCLASSED
-        raise NotImplementedError(f'Code error: {self.__class__.__name__}._tableCurrent not implemented')
-
-    @_tableCurrent.setter
-    def _tableCurrent(self, value):
-        # MUST BE SUBCLASSED
-        raise NotImplementedError(f'Code error: {self.__class__.__name__}._tableCurrent not implemented')
-
-    @property
-    def table(self):
-        """Return the source table
-        """
-        return self._tableWidget._table
-
-    @property
-    def guiTable(self):
-        """Return the table widget
-        """
-        return self._tableWidget
-
-    #=========================================================================================
-    # Implementation
-    #=========================================================================================
-
-    def selectTable(self, table=None):
-        """Manually select a table from the pullDown
-        """
-        if table is None:
-            self._modulePulldown.selectFirstItem()
-        elif isinstance(table, self._tableWidget.tableClass):
-            self._modulePulldown.select(table.pid)
-        else:
-            getLogger().warning(f'select: Object is not of type {self._tableWidget.tableName}')
-            raise TypeError(f'select: Object is not of type {self._tableWidget.tableName}')
-
-    def addWidgetToTop(self, widget, col=2, colSpan=1):
-        """Convenience to add a widget to the top of the table; col >= 2
-        """
-        if col < self._addWidgetCol:
-            raise RuntimeError(f'Col has to be >= {self._addWidgetCol}')
-        self._moduleHeaderFrame.getLayout().addWidget(widget, self._addWidgetRow, col, 1, colSpan)
-
-    def addWidgetToPos(self, widget, row=0, col=2, rowSpan=1, colSpan=1, overrideMinimum=False, alignment=None):
-        """Convenience to add a widget to the top of the table; col >= 2
-        """
-        if col < self._addWidgetCol and not overrideMinimum:
-            raise RuntimeError(f'Col has to be >= {self._addWidgetCol}')
-        self._moduleHeaderFrame.getLayout().addWidget(widget, row, col, rowSpan, colSpan)
-
-    def _cleanupWidget(self):
-        """CCPN-INTERNAL: used to clean-up when closing
-        """
-        self._modulePulldown.unRegister()
-        self._tableWidget._close()
-
-    #=========================================================================================
-    # Process dropped items
-    #=========================================================================================
-
-    def _processDroppedItems(self, data):
-        """CallBack for Drop events
-        """
-        if self._tableWidget and data:
-            pids = data.get('pids', [])
-            self._handleDroppedItems(pids, self._tableWidget.tableClass, self._modulePulldown)
-
-    def _handleDroppedItems(self, pids, objType, pulldown):
-        """handle dropping pids onto the table
-        :param pids: the selected objects pids
-        :param objType: the instance of the obj to handle, e.g. PeakList
-        :param pulldown: the pulldown of the module wich updates the table
-        :return: Actions: Select the dropped item on the table or/and open a new modules if multiple drops.
-        If multiple different obj instances, then asks first.
-        """
-        from ccpn.ui.gui.lib.MenuActions import _openItemObject
-        from ccpn.ui.gui.widgets.MessageDialog import showYesNo
-
-        objs = [self.project.getByPid(pid) for pid in pids]
-
-        selectableObjects = [obj for obj in objs if isinstance(obj, objType)]
-        others = [obj for obj in objs if not isinstance(obj, objType)]
-        if selectableObjects:
-            _openItemObject(self.mainWindow, selectableObjects[1:])
-            pulldown.select(selectableObjects[0].pid)
-
-        elif othersClassNames := list({obj.className for obj in others if hasattr(obj, 'className')}):
-            title, msg = ('Dropped wrong item.', f"Do you want to open the {''.join(othersClassNames)} in a new module?") if len(othersClassNames) == 1 else ('Dropped wrong items.', 'Do you want to open items in new modules?')
-
-            if showYesNo(title, msg):
-                _openItemObject(self.mainWindow, others)
-
-    #=========================================================================================
-    # Widget/Notifier Callbacks
-    #=========================================================================================
-
-    def _selectionPulldownCallback(self, item):
-        """Notifier Callback for selecting object from the pull down menu
-        """
-        _table = self._tableWidget._table = self._modulePulldown.getSelectedObject()
-        self._tableWidget._update()
-
-        # update the current object from the pulldown
-        if self._activePulldownClass and self._activeCheckbox and _table != self._tableCurrent and self._activeCheckbox.isChecked():
-            self._tableCurrent = _table
-
-    def _selectCurrentPulldownClass(self, data):
-        """Respond to change in current activePulldownClass
-        """
-        if self._activePulldownClass and self._activeCheckbox and self._activeCheckbox.isChecked():
-            _table = self._tableWidget._table = self._tableCurrent
-            self._tableWidget._update()
-
-            if _table:
-                self._modulePulldown.select(_table.pid, blockSignals=True)
-            else:
-                self._modulePulldown.setIndex(0, blockSignals=True)
+# NOTE:ED - class shouldn't be needed

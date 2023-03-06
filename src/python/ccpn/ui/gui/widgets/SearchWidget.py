@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:13 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-03-02 15:45:00 +0000 (Thu, March 02, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,22 +26,24 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
+import contextlib
+import operator as op
+import numpy as np
+import itertools
+from functools import partial
 from PyQt5 import QtCore, QtWidgets
+
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Frame import Frame
-from functools import partial
-from ccpn.util.OrderedSet import OrderedSet
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Logging import getLogger
-import operator as op
-import numpy as np
 
 
 VISIBLESEARCH = '<Visible Table>'
@@ -86,7 +88,7 @@ RangeConditions = [Between, NotBetween]
 def strTofloat(value):
     try:
         return float(value)
-    except:
+    except Exception:
         return None
 
 
@@ -97,21 +99,21 @@ def _compareKeys(a, b, condition):
     :param condition: Any key of SearchConditionsDict.
     :return:
     """
-    if not condition in list(SearchConditionsDict.keys()):
-        getLogger().debug('Condition %s  not available  for GuiTable filters.' % condition)
-    try:
+    if condition not in list(SearchConditionsDict.keys()):
+        getLogger().debug(f'Condition {condition} not available for table filters.')
+
+    with contextlib.suppress(Exception):
+
         if condition == Equal:
-            return SearchConditionsDict.get(condition)(a, b)
-        elif condition == Include:
-            return SearchConditionsDict.get(condition)(a, b)
-        elif condition == Exclude:
-            # this functions slightly differently as requires specific columns to search
-            return SearchConditionsDict.get(condition)(a, b)
-        else:
+            try:
+                return SearchConditionsDict.get(condition)(float(a), float(b))
+            except Exception:
+                return SearchConditionsDict.get(condition)(a, b)
+
+        elif condition not in [Include, Exclude]:
             a, b, = float(a), float(b)
-            return SearchConditionsDict.get(condition)(a, b)
-    except Exception as ex:
-        getLogger().debug2('Error in comparing values for GuiTable filters.', ex)
+
+        return SearchConditionsDict.get(condition)(a, b)
 
 
 def _compareKeysInRange(originValue, queryRange, condition):
@@ -315,12 +317,12 @@ class GuiTableFilter(ScrollArea):
 
 class _TableFilterABC(ScrollArea):
 
-    def __init__(self, table, parent=None, **kwds):
+    def __init__(self, parent, table, **kwds):
         # super().__init__(parent, setLayout=True, showBorder=False, **kwds)
         super().__init__(parent, scrollBarPolicies=('never', 'never'), **kwds)
 
-        self.table = table
         self._parent = parent
+        self.tableHandler = table
 
         # self._widgetScrollArea = ScrollArea(parent=parent, scrollBarPolicies=('never', 'never'), **kwds)
         self.setWidgetResizable(True)
@@ -346,8 +348,8 @@ class _TableFilterABC(ScrollArea):
         self.searchButtons = ButtonList(self._widget, texts=['Search ', 'Reset', 'Close'],
                                         icons=[Icon('icons/edit-find'), None, None],
                                         tipTexts=['Search in selected Columns', 'Restore Table', 'Close Filter'],
-                                        callbacks=[partial(self.findOnTable, self.table),
-                                                   partial(self.restoreTable, self.table),
+                                        callbacks=[partial(self.findOnTable, self.tableHandler),
+                                                   partial(self.restoreTable, self.tableHandler),
                                                    self.hideSearch],
                                         grid=(1, 2), )
 
@@ -404,7 +406,7 @@ class _TableFilterABC(ScrollArea):
         # texts = [c.heading for c in columns]
         # objectsRange = range(len(columns))
 
-        texts = self.columns
+        texts = self._parent._df.columns
         objectsRange = range(len(texts))
 
         self.columnOptions.clear()
@@ -421,17 +423,21 @@ class _TableFilterABC(ScrollArea):
             self.condition2.show()
 
     def updateSearchWidgets(self, table):
-        self.table = table
+        self.tableHandler = table
+        self.setColumnOptions()
+        self.searchButtons.getButton('Reset').setEnabled(False)
+
+    def refreshFilter(self):
         self.setColumnOptions()
         self.searchButtons.getButton('Reset').setEnabled(False)
 
     def hideSearch(self):
-        self.restoreTable(self.table)
+        self.restoreTable(self.tableHandler)
         # if self.table.searchWidget is not None:
-        self.table.hideSearchWidget()
+        self.tableHandler.hideSearchWidget()
 
     def restoreTable(self, table):
-        self.table.refreshTable()
+        self.tableHandler.refreshTable()
         # self.condition1.clear()
         self.searchButtons.getButton('Reset').setEnabled(False)
         self._listRows = None
@@ -441,7 +447,7 @@ class _TableFilterABC(ScrollArea):
             self.restoreTable(table)
             return
 
-        self.table = table
+        self.tableHandler = table
         condition1Value = self.condition1.text()
         condition2Value = self.condition2.text()
         condition = self.conditionWidget.getText()
@@ -453,52 +459,48 @@ class _TableFilterABC(ScrollArea):
         # else:
         #     rows = OrderedSet(val for val in range(_model.rowCount()))
 
-        searchColumn = self.columnOptions.getText()
-        visHeadings = self.visibleColumns(searchColumn=searchColumn)
+        searchColNum = self.columnOptions.getObject()
+        visHeadings = self.visibleColumns(searchColNum)
 
         _compareErrorCount = 0
-        _model = self.table.model()
+        _model = self.tableHandler.model()
 
         df = self.df
         if condition != Exclude:
             rows = OrderedSet()
         else:
             # Exclude needs to remove values from the list
-            rows = OrderedSet(row for row in range(df.shape[0]))
+            rows = OrderedSet(iter(range(df.shape[0])))
 
-        for row in range(df.shape[0]):
-            for column in range(df.shape[1]):
-                if df.columns[column] in visHeadings:
+        for row, column in itertools.product(range(df.shape[0]), range(df.shape[1])):
+            if df.columns[column] in visHeadings:
 
-                    # could replace this with a quicker column-based method
-                    cellText = df.iat[row, column]
-                    # float/np.float - round to 3 decimal places
-                    if isinstance(cellText, (float, np.floating)):
-                        cellText = f'{cellText:.3f}'
+                # could replace this with a quicker column-based method
+                cellText = df.iat[row, column]
+                # float/np.float - round to 3 decimal places
+                cellText = f'{cellText:.3f}' if isinstance(cellText, (float, np.floating)) else str(cellText)
+
+                if condition in RangeConditions:
+                    match = _compareKeysInRange(cellText, (condition1Value, condition2Value), condition)
+                else:
+                    match = _compareKeys(cellText, condition1Value, condition)
+                    if match is None:
+                        _compareErrorCount += 1
+
+                if match:
+                    if condition != Exclude:
+                        # add the found sorted row to the found list
+                        rows.add(row)
                     else:
-                        cellText = str(cellText)
+                        # remove the found sorted values from the list
+                        rows -= {row}
 
-                    if condition in RangeConditions:
-                        match = _compareKeysInRange(cellText, (condition1Value, condition2Value), condition)
-                    else:
-                        match = _compareKeys(cellText, condition1Value, condition)
-                        if match is None:
-                            _compareErrorCount += 1
-
-                    if match:
-                        if condition != Exclude:
-                            # add the found sorted row to the found list
-                            rows.add(row)
-                        else:
-                            # remove the found sorted values from the list
-                            rows -= {row}
-
-        if _compareErrorCount > 0:
-            getLogger().debug('Error in comparing values for GuiTable filters, use debug2 for details')
+        # if _compareErrorCount > 0:
+        #     getLogger().debug2('Error in comparing values for GuiTable filters, use debug2 for details')
 
         self._listRows = rows
         if len(rows):
-            self.table.setDataFromSearchWidget(rows)
+            self.tableHandler.setDataFromSearchWidget(rows)
             self.searchButtons.getButton('Reset').setEnabled(True)
 
         elif not ignoreNotFound:
@@ -509,7 +511,7 @@ class _TableFilterABC(ScrollArea):
         try:
             self.columnOptions.setCurrentText(columnObject.__name__)
             self.condition1.setText(value)
-            self.findOnTable(self.table, matchExactly=False, ignoreNotFound=True)
+            self.findOnTable(self.tableHandler, matchExactly=False, ignoreNotFound=True)
         except Exception as es:
             getLogger().debug('column not found in table')
 
@@ -529,18 +531,18 @@ class _DFTableFilter(_TableFilterABC):
     def columns(self):
         """Return the full list of columns
         """
-        return self.table._dataFrameObject.userHeadings
+        return self.tableHandler._dataFrameObject.userHeadings
 
     def visibleColumns(self, searchColumn=None):
         """Return the list of visible columns
         """
-        return self.table._dataFrameObject.visibleColumnHeadings if (searchColumn == VISIBLESEARCH) else [searchColumn]
+        return self.tableHandler._dataFrameObject.visibleColumnHeadings if (searchColumn == VISIBLESEARCH) else [searchColumn]
 
     @property
     def df(self):
         """Return the Pandas-dataFrame
         """
-        return self.table._dataFrameObject.dataFrame
+        return self.tableHandler._dataFrameObject.dataFrame
 
 
 #=========================================================================================
@@ -558,18 +560,21 @@ class _SimplerDFTableFilter(_TableFilterABC):
     def columns(self):
         """Return the full list of columns
         """
-        return list(self.table._df.columns)
+        return list(self.df.columns)
 
-    def visibleColumns(self, searchColumn=None):
+    def visibleColumns(self, columnIndex=None):
         """Return the list of visible columns
         """
-        return [col for col in self.table._df.columns if col not in self.table._hiddenColumns + self.table._internalColumns] if (searchColumn == VISIBLESEARCH) else [searchColumn]
+        headerMenu = self._parent.headerColumnMenu
+
+        return [col for col in self.df.columns if col not in headerMenu.allHiddenColumns] \
+            if (columnIndex is None) else [self.df.columns[columnIndex]]
 
     @property
     def df(self):
         """Return the Pandas-dataFrame
         """
-        return self.table._df
+        return self._parent._df
 
 
 #=========================================================================================
@@ -597,7 +602,7 @@ def attachSearchWidget(parent, table):
                 returnVal = True
 
     except Exception as es:
-        getLogger().warning('Error attaching search widget: %s' % str(es))
+        getLogger().warning(f'Error attaching search widget: {str(es)}')
     finally:
         return returnVal
 
@@ -623,34 +628,32 @@ def attachDFSearchWidget(parent, tableView):
                 returnVal = True
 
     except Exception as es:
-        getLogger().warning('Error attaching search widget: %s' % str(es))
+        getLogger().warning(f'Error attaching search widget: {str(es)}')
     finally:
         return returnVal
 
 
-def attachSimpleSearchWidget(parent, tableView, searchWidget=None):
+def attachSimpleSearchWidget(parent, table, searchWidget=None):
     """Attach the search widget to the bottom of the table widget
     Search widget is applied to QTableView object
     """
-    returnVal = False
     try:
-        parentLayout = tableView.parent().layout()
+        # always assumes that the parent-table is contained within a frame
+        parentLayout = parent.parent().layout()
 
         if isinstance(parentLayout, QtWidgets.QGridLayout):
-            idx = parentLayout.indexOf(tableView)
+            idx = parentLayout.indexOf(parent)
             location = parentLayout.getItemPosition(idx)
-            if location is not None:
-                if len(location) > 0:
-                    row, column, rowSpan, columnSpan = location
-                    widget = _SimplerDFTableFilter(parent=parent, table=tableView, vAlign='b')
-                    setattr(tableView, searchWidget or 'searchWidget', widget)  # not nice
+            if location is not None and len(location) > 0:
+                row, column, rowSpan, columnSpan = location
+                widget = _SimplerDFTableFilter(parent=parent, table=table, vAlign='b')
 
-                    parentLayout.addWidget(widget, row + 1, column, 1, columnSpan)
-                    tableView.searchWidget.hide()
+                # setattr(tableView, searchWidget or 'searchWidget', widget)  # not nice
 
-                returnVal = True
+                parentLayout.addWidget(widget, row + 1, column, 1, columnSpan)
+                widget.hide()
+
+                return widget
 
     except Exception as es:
-        getLogger().warning('Error attaching search widget: %s' % str(es))
-    finally:
-        return returnVal
+        getLogger().warning(f'Error attaching search widget: {str(es)}')

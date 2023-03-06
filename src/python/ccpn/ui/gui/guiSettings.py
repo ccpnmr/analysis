@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:41 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-02-17 15:38:09 +0000 (Fri, February 17, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -224,10 +224,14 @@ GUITABLE_ITEM_FOREGROUND = 'GUITABLE_ITEM_FOREGROUND'
 GUITABLE_SELECTED_FOREGROUND = 'GUITABLE_SELECTED_FOREGROUND'
 GUITABLE_SELECTED_BACKGROUND = 'GUITABLE_SELECTED_BACKGROUND'
 GUITABLE_DROP_BORDER = 'GUITABLE_DROP_BORDER'
+GUITABLE_GRIDLINES = 'GUITABLE_GRIDLINES'
+GUITABLEHEADER_SELECTED_FOREGROUND = 'GUITABLEHEADER_SELECTED_FOREGROUND'
+GUITABLEHEADER_SELECTED_BACKGROUND = 'GUITABLEHEADER_SELECTED_BACKGROUND'
+GUITABLEHEADER_GROUP_GRIDLINES = 'GUITABLEHEADER_GROUP_GRIDLINES'
 
 # strip header colours
-STRIPHEADER_FOREGROUND = 'STRIPHEADER_FOREGROUND'
-STRIPHEADER_BACKGROUND = 'STRIPHEADER_BACKGROUND'
+GUITABLEHEADER_FOREGROUND = 'GUITABLEHEADER_FOREGROUND'
+GUITABLEHEADER_BACKGROUND = 'GUITABLEHEADER_BACKGROUND'
 
 # border for focus/noFocus - QPlainTextEdit
 BORDERNOFOCUS = 'BORDER_NOFOCUS'
@@ -249,7 +253,7 @@ COLOUR_BLIND_RED = QtGui.QColor('#DB4325')
 TEXT_COLOUR = '#555D85'
 TEXT_COLOUR_WARNING = '#E06523'
 SOFT_DIVIDER_COLOUR = '#888DA5'
-LIGHT_GREY = 'rgb(250,250,250)'
+LIGHT_GREY = 'rgb(245,245,245)'
 STEEL = 'rgb(102,102,102)'  # from apple
 MARISHINO = '#004D81'  # rgb(0,77,129) ; red colour (from apple)
 MEDIUM_BLUE = '#7777FF'
@@ -273,115 +277,118 @@ colourSchemes = {
     # all colours defined here
     DEFAULT: {
 
-        CCPNGLWIDGET_HEXFOREGROUND       : '#070707',
-        CCPNGLWIDGET_HEXBACKGROUND       : '#FFFFFF',
-        CCPNGLWIDGET_HEXHIGHLIGHT        : rgbRatioToHex(0.23, 0.23, 1.0),
+        CCPNGLWIDGET_HEXFOREGROUND        : '#070707',
+        CCPNGLWIDGET_HEXBACKGROUND        : '#FFFFFF',
+        CCPNGLWIDGET_HEXHIGHLIGHT         : rgbRatioToHex(0.23, 0.23, 1.0),
 
-        CCPNGLWIDGET_FOREGROUND          : (0.05, 0.05, 0.05, 1.0),  #'#080000'
-        CCPNGLWIDGET_BACKGROUND          : (1.0, 1.0, 1.0, 1.0),
-        CCPNGLWIDGET_BUTTON_FOREGROUND   : (0.2, 0.21, 0.2, 1.0),  #'#080000'
+        CCPNGLWIDGET_FOREGROUND           : (0.05, 0.05, 0.05, 1.0),  #'#080000'
+        CCPNGLWIDGET_BACKGROUND           : (1.0, 1.0, 1.0, 1.0),
+        CCPNGLWIDGET_BUTTON_FOREGROUND    : (0.2, 0.21, 0.2, 1.0),  #'#080000'
 
-        CCPNGLWIDGET_PICKCOLOUR          : (0.2, 0.5, 0.9, 1.0),
-        CCPNGLWIDGET_GRID                : (0.5, 0.0, 0.0, 1.0),  #'#080000'
-        CCPNGLWIDGET_HIGHLIGHT           : (0.23, 0.23, 1.0, 1.0),  #'#3333ff'
-        CCPNGLWIDGET_LABELLING           : (0.05, 0.05, 0.05, 1.0),
-        CCPNGLWIDGET_PHASETRACE          : (0.2, 0.2, 0.2, 1.0),
-        CCPNGLWIDGET_ZOOMAREA            : (0.8, 0.9, 0.2, 0.3),
-        CCPNGLWIDGET_PICKAREA            : (0.2, 0.5, 0.9, 0.3),
-        CCPNGLWIDGET_SELECTAREA          : (0.8, 0.2, 0.9, 0.3),
-        CCPNGLWIDGET_BADAREA             : (0.9, 0.15, 0.1, 0.3),
+        CCPNGLWIDGET_PICKCOLOUR           : (0.2, 0.5, 0.9, 1.0),
+        CCPNGLWIDGET_GRID                 : (0.5, 0.0, 0.0, 1.0),  #'#080000'
+        CCPNGLWIDGET_HIGHLIGHT            : (0.23, 0.23, 1.0, 1.0),  #'#3333ff'
+        CCPNGLWIDGET_LABELLING            : (0.05, 0.05, 0.05, 1.0),
+        CCPNGLWIDGET_PHASETRACE           : (0.2, 0.2, 0.2, 1.0),
+        CCPNGLWIDGET_ZOOMAREA             : (0.8, 0.9, 0.2, 0.3),
+        CCPNGLWIDGET_PICKAREA             : (0.2, 0.5, 0.9, 0.3),
+        CCPNGLWIDGET_SELECTAREA           : (0.8, 0.2, 0.9, 0.3),
+        CCPNGLWIDGET_BADAREA              : (0.9, 0.15, 0.1, 0.3),
 
-        CCPNGLWIDGET_ZOOMLINE            : (0.6, 0.7, 0.2, 1.0),
-        CCPNGLWIDGET_MOUSEMOVELINE       : (0.8, 0.2, 0.9, 1.0),
+        CCPNGLWIDGET_ZOOMLINE             : (0.6, 0.7, 0.2, 1.0),
+        CCPNGLWIDGET_MOUSEMOVELINE        : (0.8, 0.2, 0.9, 1.0),
 
-        CCPNGLWIDGET_MULTIPLETLINK       : FIREBRICK,
+        CCPNGLWIDGET_MULTIPLETLINK        : FIREBRICK,
 
-        CCPNMODULELABEL_BACKGROUND       : '#5858C0',
-        CCPNMODULELABEL_FOREGROUND       : '#E0E0E0',
-        CCPNMODULELABEL_BORDER           : '#5858C0',
-        CCPNMODULELABEL_BACKGROUND_ACTIVE: '#7080EE',
-        CCPNMODULELABEL_FOREGROUND_ACTIVE: '#FFFFFF',
-        CCPNMODULELABEL_BORDER_ACTIVE    : '#7080EE',
+        CCPNMODULELABEL_BACKGROUND        : '#5858C0',
+        CCPNMODULELABEL_FOREGROUND        : '#E0E0E0',
+        CCPNMODULELABEL_BORDER            : '#5858C0',
+        CCPNMODULELABEL_BACKGROUND_ACTIVE : '#7080EE',
+        CCPNMODULELABEL_FOREGROUND_ACTIVE : '#FFFFFF',
+        CCPNMODULELABEL_BORDER_ACTIVE     : '#7080EE',
 
-        GUICHAINLABEL_TEXT               : TEXT_COLOUR,
+        GUICHAINLABEL_TEXT                : TEXT_COLOUR,
 
-        GUICHAINRESIDUE_UNASSIGNED       : 'black',
-        GUICHAINRESIDUE_ASSIGNED         : GREEN1,
-        GUICHAINRESIDUE_POSSIBLE         : 'orange',
-        GUICHAINRESIDUE_WARNING          : WARNING_RED,
-        GUICHAINRESIDUE_DRAGENTER        : MARISHINO,
-        GUICHAINRESIDUE_DRAGLEAVE        : 'black',  # '#666e98',
+        GUICHAINRESIDUE_UNASSIGNED        : 'black',
+        GUICHAINRESIDUE_ASSIGNED          : GREEN1,
+        GUICHAINRESIDUE_POSSIBLE          : 'orange',
+        GUICHAINRESIDUE_WARNING           : WARNING_RED,
+        GUICHAINRESIDUE_DRAGENTER         : MARISHINO,
+        GUICHAINRESIDUE_DRAGLEAVE         : 'black',  # '#666e98',
 
-        GUINMRATOM_SELECTED              : TEXT_COLOUR,
-        GUINMRATOM_NOTSELECTED           : '#FDFDFC',
+        GUINMRATOM_SELECTED               : TEXT_COLOUR,
+        GUINMRATOM_NOTSELECTED            : '#FDFDFC',
 
-        GUINMRRESIDUE                    : TEXT_COLOUR,
+        GUINMRRESIDUE                     : TEXT_COLOUR,
 
-        GUISTRIP_PIVOT                   : MARISHINO,
+        GUISTRIP_PIVOT                    : MARISHINO,
 
-        DRAG_FOREGROUND                  : 'white',
-        DRAG_BACKGROUND                  : HIGHLIGHT_COLOUR,
-        LABEL_FOREGROUND                 : TEXT_COLOUR,
-        LABEL_WARNINGFOREGROUND          : TEXT_COLOUR_WARNING,
-        DIVIDER                          : '#a9a9a9',  # could be could CCPN_WIDGET_BORDER_COLOUR, was TEXT_COLOUR
-        SOFTDIVIDER                      : SOFT_DIVIDER_COLOUR,
-        LABEL_SELECTEDBACKGROUND         : 'mediumseagreen',
-        LABEL_SELECTEDFOREGROUND         : 'black',
-        LABEL_HIGHLIGHT                  : 'palegreen',
+        DRAG_FOREGROUND                   : 'white',
+        DRAG_BACKGROUND                   : HIGHLIGHT_COLOUR,
+        LABEL_FOREGROUND                  : TEXT_COLOUR,
+        LABEL_WARNINGFOREGROUND           : TEXT_COLOUR_WARNING,
+        DIVIDER                           : '#a9a9a9',  # could be could CCPN_WIDGET_BORDER_COLOUR, was TEXT_COLOUR
+        SOFTDIVIDER                       : SOFT_DIVIDER_COLOUR,
+        LABEL_SELECTEDBACKGROUND          : 'mediumseagreen',
+        LABEL_SELECTEDFOREGROUND          : 'black',
+        LABEL_HIGHLIGHT                   : 'palegreen',
 
-        SEQUENCEGRAPHMODULE_LINE         : 'darkgray',
-        SEQUENCEGRAPHMODULE_TEXT         : TEXT_COLOUR,
+        SEQUENCEGRAPHMODULE_LINE          : 'darkgray',
+        SEQUENCEGRAPHMODULE_TEXT          : TEXT_COLOUR,
 
-        SEQUENCEMODULE_DRAGMOVE          : MEDIUM_BLUE,
-        SEQUENCEMODULE_TEXT              : TEXT_COLOUR,
+        SEQUENCEMODULE_DRAGMOVE           : MEDIUM_BLUE,
+        SEQUENCEMODULE_TEXT               : TEXT_COLOUR,
 
-        GUITABLE_BACKGROUND              : 'white',
-        GUITABLE_ALT_BACKGROUND          : LIGHT_GREY,
-        GUITABLE_ITEM_FOREGROUND         : TEXT_COLOUR,
-        GUITABLE_SELECTED_FOREGROUND     : '#0F0F0F',
-        GUITABLE_SELECTED_BACKGROUND     : '#FFFCBA',
-        GUITABLE_DROP_BORDER             : GUITABLE_DROP_BORDER_COLOUR,
+        GUITABLE_BACKGROUND               : 'white',
+        GUITABLE_ALT_BACKGROUND           : LIGHT_GREY,
+        GUITABLE_ITEM_FOREGROUND          : TEXT_COLOUR,
+        GUITABLE_SELECTED_FOREGROUND      : '#0F0F0F',
+        GUITABLE_SELECTED_BACKGROUND      : '#FFFCBA',
+        GUITABLE_DROP_BORDER              : GUITABLE_DROP_BORDER_COLOUR,
+        GUITABLE_GRIDLINES                : 'lightgrey',
+        GUITABLEHEADER_SELECTED_FOREGROUND: '#0F0F0F',
+        GUITABLEHEADER_SELECTED_BACKGROUND: 'gainsboro',
+        GUITABLEHEADER_GROUP_GRIDLINES    : 'darkgrey',
 
+        GUITABLEHEADER_FOREGROUND            : TEXT_COLOUR,
+        GUITABLEHEADER_BACKGROUND            : '#ebebeb',
 
-        STRIPHEADER_FOREGROUND           : TEXT_COLOUR,
-        STRIPHEADER_BACKGROUND           : '#ebebeb',
+        BORDERFOCUS                       : BORDERFOCUS_COLOUR,
+        BORDERNOFOCUS                     : BORDERNOFOCUS_COLOUR,
+        TOOLTIP_BACKGROUND                : TOOLTIP_BACKGROUND_COLOUR,
 
-        BORDERFOCUS                      : BORDERFOCUS_COLOUR,
-        BORDERNOFOCUS                    : BORDERNOFOCUS_COLOUR,
-        TOOLTIP_BACKGROUND               : TOOLTIP_BACKGROUND_COLOUR,
-
-        MARKS_COLOURS                    : MARK_LINE_COLOUR_DICT,
-        SPECTRUM_HEXCOLOURS              : spectrumHexDarkColours,
-        SPECTRUM_HEXMEDIUMCOLOURS        : spectrumHexMediumColours,
-        SPECTRUM_HEXDEFAULTCOLOURS       : spectrumHexDefaultDarkColours,
+        MARKS_COLOURS                     : MARK_LINE_COLOUR_DICT,
+        SPECTRUM_HEXCOLOURS               : spectrumHexDarkColours,
+        SPECTRUM_HEXMEDIUMCOLOURS         : spectrumHexMediumColours,
+        SPECTRUM_HEXDEFAULTCOLOURS        : spectrumHexDefaultDarkColours,
         },
 
     # Overridden for dark colour scheme
     DARK   : {
 
-        CCPNGLWIDGET_HEXFOREGROUND: '#F0FFFF',
-        CCPNGLWIDGET_HEXBACKGROUND: '#0F0F0F',
-        CCPNGLWIDGET_HEXHIGHLIGHT : rgbRatioToHex(0.2, 1.0, 0.3),
+        CCPNGLWIDGET_HEXFOREGROUND    : '#F0FFFF',
+        CCPNGLWIDGET_HEXBACKGROUND    : '#0F0F0F',
+        CCPNGLWIDGET_HEXHIGHLIGHT     : rgbRatioToHex(0.2, 1.0, 0.3),
 
-        CCPNGLWIDGET_FOREGROUND   : (0.9, 1.0, 1.0, 1.0),  #'#f0ffff'
-        CCPNGLWIDGET_BACKGROUND   : (0.1, 0.1, 0.1, 1.0),
+        CCPNGLWIDGET_FOREGROUND       : (0.9, 1.0, 1.0, 1.0),  #'#f0ffff'
+        CCPNGLWIDGET_BACKGROUND       : (0.1, 0.1, 0.1, 1.0),
         CCPNGLWIDGET_BUTTON_FOREGROUND: (0.75, 0.79, 0.77, 1.0),  #'#080000'
 
-        CCPNGLWIDGET_PICKCOLOUR   : (0.2, 0.5, 0.9, 1.0),
-        CCPNGLWIDGET_GRID         : (0.9, 1.0, 1.0, 1.0),  #'#f7ffff'
-        CCPNGLWIDGET_HIGHLIGHT    : (0.2, 1.0, 0.3, 1.0),  #'#00ff00'
-        CCPNGLWIDGET_LABELLING    : (1.0, 1.0, 1.0, 1.0),
-        CCPNGLWIDGET_PHASETRACE   : (0.8, 0.8, 0.8, 1.0),
-        CCPNGLWIDGET_ZOOMLINE     : (1.0, 0.9, 0.2, 1.0),
-        CCPNGLWIDGET_MULTIPLETLINK: LIGHTCORAL,
+        CCPNGLWIDGET_PICKCOLOUR       : (0.2, 0.5, 0.9, 1.0),
+        CCPNGLWIDGET_GRID             : (0.9, 1.0, 1.0, 1.0),  #'#f7ffff'
+        CCPNGLWIDGET_HIGHLIGHT        : (0.2, 1.0, 0.3, 1.0),  #'#00ff00'
+        CCPNGLWIDGET_LABELLING        : (1.0, 1.0, 1.0, 1.0),
+        CCPNGLWIDGET_PHASETRACE       : (0.8, 0.8, 0.8, 1.0),
+        CCPNGLWIDGET_ZOOMLINE         : (1.0, 0.9, 0.2, 1.0),
+        CCPNGLWIDGET_MULTIPLETLINK    : LIGHTCORAL,
 
-        SPECTRUM_HEXCOLOURS       : spectrumHexLightColours,
-        SPECTRUM_HEXMEDIUMCOLOURS : spectrumHexMediumColours,
-        SPECTRUM_HEXDEFAULTCOLOURS: spectrumHexDefaultLightColours,
+        SPECTRUM_HEXCOLOURS           : spectrumHexLightColours,
+        SPECTRUM_HEXMEDIUMCOLOURS     : spectrumHexMediumColours,
+        SPECTRUM_HEXDEFAULTCOLOURS    : spectrumHexDefaultLightColours,
 
-        LABEL_SELECTEDBACKGROUND  : 'mediumseagreen',
-        LABEL_SELECTEDFOREGROUND  : 'black',
-        LABEL_HIGHLIGHT           : 'palegreen',
+        LABEL_SELECTEDBACKGROUND      : 'mediumseagreen',
+        LABEL_SELECTEDFOREGROUND      : 'black',
+        LABEL_HIGHLIGHT               : 'palegreen',
         },
 
     # Overridden for light colour scheme

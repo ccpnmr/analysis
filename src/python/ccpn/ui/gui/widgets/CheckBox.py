@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-02 10:56:13 +0000 (Thu, February 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-02 14:44:38 +0000 (Thu, March 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,7 @@ class CheckBox(QtWidgets.QCheckBox, Base):
 
         super().__init__(parent)
         Base._init(self, **kwds)
+        self._object = None
 
         self.setChecked(checked)
         if text:
@@ -47,7 +48,7 @@ class CheckBox(QtWidgets.QCheckBox, Base):
         if callback:
             self.setCallback(callback)
         if not self.objectName():
-            self.setObjectName(text)
+            self.setObjectName(str(text))
 
         self.setEnabled(checkable)
 
@@ -75,6 +76,14 @@ class CheckBox(QtWidgets.QCheckBox, Base):
         Internal. Called for saving/restoring the widget state.
         """
         return self.setChecked(value)
+
+    def getObject(self):
+        """Get/Set an attached object
+        """
+        return self._object
+
+    def setObject(self, value):
+        self._object = value
 
 
 class EditableCheckBox(Widget):

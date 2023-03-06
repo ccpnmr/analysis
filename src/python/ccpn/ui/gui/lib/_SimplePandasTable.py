@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:27 +0100 (Wed, October 26, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-02-22 17:37:59 +0000 (Wed, February 22, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -227,8 +227,8 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
             self.moduleParent.mainWidget._dropEventCallback = self._processDroppedItems
 
         self._droppedNotifier = GuiNotifier(self,
-                                           [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                           self._processDroppedItems)
+                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                            self._processDroppedItems)
 
         # add a widget handler to give a clean corner widget for the scroll area
         self._cornerDisplay = ScrollBarVisibilityWatcher(self)
@@ -1819,7 +1819,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                 model._sortOrder = sortOrder
                 self.sortByColumn(sortColumn, sortOrder)
 
-            self.showColumns(None)
+            self.refreshHiddenColumns()
             self._highLightObjs(objs)
 
             # set the tipTexts
@@ -1848,7 +1848,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         _updateSimplePandasTable(self, self._df, _resize=True)
         self._defaultDf = self._df.copy()  # make a copy for the search-widget
 
-        self.showColumns(None)
+        self.refreshHiddenColumns()
 
     #=========================================================================================
     # hidden column information
@@ -1869,7 +1869,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         ll = [x for x in texts if x in self.columnTexts and x not in self._internalColumns]
         self._hiddenColumns = ll
         if update:
-            self.showColumns(None)
+            self.refreshHiddenColumns()
 
     def hideDefaultColumns(self):
         """If the table is empty then check visible headers against the last header hidden list
@@ -1888,7 +1888,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         except:
             return []
 
-    def showColumns(self, df):
+    def refreshHiddenColumns(self):
         # show the columns in the list
         hiddenColumns = self.getHiddenColumns()
 
@@ -2563,7 +2563,7 @@ class _SearchTableView():
         ll = [x for x in texts if x in self.columnTexts and x not in self._internalColumns]
         self._hiddenColumns = ll
         if update:
-            self.showColumns(None)
+            self.refreshHiddenColumns()
 
     def hideDefaultColumns(self):
         """If the table is empty then check visible headers against the last header hidden list
@@ -2582,7 +2582,7 @@ class _SearchTableView():
         except:
             return []
 
-    def showColumns(self, df):
+    def refreshHiddenColumns(self):
         # show the columns in the list
         hiddenColumns = self.getHiddenColumns()
 

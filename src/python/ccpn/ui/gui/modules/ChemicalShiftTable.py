@@ -6,7 +6,7 @@ tertiary version by Ejb 9/5/17
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:10 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-03-01 15:13:20 +0000 (Wed, March 01, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -292,14 +292,7 @@ class _NewChemicalShiftTable(_ProjectTableABC):
                  **kwds):
         """Initialise the widgets for the module.
         """
-
-        # initialise the currently attached dataFrame
-        self._hiddenColumns = [self.columnHeaders[col] for col in hiddenColumns] if hiddenColumns else \
-            [self.columnHeaders[col] for col in self.defaultHidden]
-        self._internalColumns = [self.columnHeaders[col] for col in self._internalColumns]
-
         # create the table; objects are added later via the displayTableForNmrChain method
-        # initialise the table
         super().__init__(parent=parent,
                          mainWindow=mainWindow,
                          moduleParent=moduleParent,
@@ -308,6 +301,9 @@ class _NewChemicalShiftTable(_ProjectTableABC):
                          setLayout=True,
                          **kwds
                          )
+
+        self.headerColumnMenu.setInternalColumns([self.columnHeaders[col] for col in self._internalColumns], update=False)
+        self.headerColumnMenu.setDefaultColumns([self.columnHeaders[col] for col in self.defaultHidden], update=False)
 
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-03 00:18:22 +0000 (Fri, March 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-03 16:16:04 +0000 (Fri, March 03, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -26,21 +26,21 @@ __date__ = "$Date: 2022-09-08 17:12:49 +0100 (Thu, September 08, 2022) $"
 # Start of code
 #=========================================================================================
 
-import numpy as np
 import pandas as pd
 from PyQt5 import QtWidgets, QtCore, QtGui
 from dataclasses import dataclass
 from contextlib import contextmanager, suppress
 import typing
 
-from ccpn.ui.gui.guiSettings import getColours
+from ccpn.ui.gui.guiSettings import getColours, GUITABLE_GRIDLINES
 from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.table._TableModel import _TableModel, VALUE_ROLE, INDEX_ROLE
-from ccpn.ui.gui.widgets.table._TableAdditions import _TableHeaderColumns, \
-    _TableCopyCell, _TableExport, _TableSearch, _TableDelete
-from ccpn.ui.gui.widgets.table._TableDelegate import _TableDelegateABC
+from ccpn.ui.gui.widgets.table._TableModel import _TableModel
+from ccpn.ui.gui.widgets.table._TableCommon import INDEX_ROLE
+from ccpn.ui.gui.widgets.table._TableAdditions import TableHeaderColumns, \
+    TableCopyCell, TableExport, TableSearchMenu, TableDelete, TableMenuABC, TableHeaderABC
+from ccpn.ui.gui.widgets.table._TableDelegates import _TableDelegateABC
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import NOTHING
@@ -57,38 +57,49 @@ class _BlockingContent:
 # TableABC
 #=========================================================================================
 
-class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, _TableDelete, QtWidgets.QTableView):
+class TableABC(QtWidgets.QTableView):
+    """A model/view to show pandas DataFrames as a table.
+
+    The view defines the communication between the display and the model.
+    """
+    tableChanged = QtCore.pyqtSignal()
+
     styleSheet = """QTableView {
                         background-color: %(GUITABLE_BACKGROUND)s;
                         alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
                         border: %(_BORDER_WIDTH)spx solid %(BORDER_NOFOCUS)s;
                         border-radius: 2px;
+                        gridline-color: %(_GRID_COLOR)s;
+                        selection-background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
+                        selection-color: %(GUITABLE_SELECTED_FOREGROUND)s;
                     }
                     QTableView::focus {
                         background-color: %(GUITABLE_BACKGROUND)s;
                         alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
                         border: %(_BORDER_WIDTH)spx solid %(BORDER_FOCUS)s;
                         border-radius: 2px;
+                        gridline-color: %(_GRID_COLOR)s;
+                        selection-background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
+                        selection-color: %(GUITABLE_SELECTED_FOREGROUND)s;
                     }
                     QTableView::item {
-                        margin: 0px;
-                        padding: %(_CELL_PADDING)spx;
-                    }
-                    QTableView::item:focus {
-                        margin: 0px;
-                        border: %(_FOCUS_BORDER_WIDTH)spx solid %(BORDER_FOCUS)s;
-                        padding: %(_CELL_PADDING_OFFSET)spx;
-                    }
-                    QTableView::item:selected {
-                        background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
-                        color: %(GUITABLE_SELECTED_FOREGROUND)s;
+                        padding-top: %(_CELL_PADDING)spx;
+                        padding-bottom: %(_CELL_PADDING)spx;
                     }
                     """
 
-    # NOTE:ED overrides QtCore.Qt.ForegroundRole
+    # NOTE:ED overrides QtCore.Qt.ForegroundRole - keep
     # QTableView::item - color: %(GUITABLE_ITEM_FOREGROUND)s;
     # QTableView::item:selected - color: %(GUITABLE_SELECTED_FOREGROUND)s;
     # cell uses alternate-background-role for unselected-focused cell
+
+    _tableMenuOptions = None
+
+    searchMenu = None
+    copyCellMenu = None
+    deleteMenu = None
+    exportMenu = None
+    headerColumnMenu = None
 
     _columnDefs = None
     _enableSelectionCallback = False
@@ -100,16 +111,18 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     _tableMenuEnabled = True
 
     # define the default TableModel class
-    defaultTableModel = _TableModel
+    tableModelClass = _TableModel
+    defaultTableDelegate = _TableDelegateABC
 
     _droppedNotifier = None
 
-    def __init__(self, parent, df=None,
+    def __init__(self, parent, *, df=None,
                  multiSelect=True, selectRows=True,
                  showHorizontalHeader=True, showVerticalHeader=True,
-                 borderWidth=2, cellPadding=2, focusBorderWidth=0,
+                 borderWidth=2, cellPadding=2, focusBorderWidth=1, gridColour=None,
                  _resize=False, setWidthToColumns=False, setHeightToRows=False,
                  setOnHeaderOnly=False, showGrid=False, wordWrap=False,
+                 alternatingRows=True,
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
                  actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
                  enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
@@ -127,12 +140,14 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         :param borderWidth:
         :param cellPadding:
         :param focusBorderWidth:
+        :param gridColour:
         :param _resize:
         :param setWidthToColumns:
         :param setHeightToRows:
         :param setOnHeaderOnly:
         :param showGrid:
         :param wordWrap:
+        :param alternatingRows:
         :param selectionCallback:
         :param selectionCallbackEnabled:
         :param actionCallback:
@@ -142,30 +157,19 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         :param enableSearch:
         :param enableCopyCell:
         :param kwds:
+
+        parameters that are NOTHING can be set on the subclass, these are ignored in the parameter-list
         """
         super().__init__(parent)
-
-        # parameters that are NOTHING can be set on the subclass, these are ignored in the parameter-list
-
-        _TableCopyCell._init(self, enableCopyCell)
-        _TableExport._init(self, enableExport)
-        _TableSearch._init(self, enableSearch)
-        _TableDelete._init(self, enableDelete)
+        self._parent = parent
+        if df is None:
+            # make sure it's not empty
+            df = pd.DataFrame({})
+        self._tableBlockingLevel = 0
 
         self.setShowGrid(showGrid)
-        self._parent = parent
-
-        # set stylesheet
-        colours = getColours()
-        # add border-width/cell-padding options
-        self._borderWidth = colours['_BORDER_WIDTH'] = borderWidth
-        self._cellPadding = colours['_CELL_PADDING'] = cellPadding  # the extra padding for the selected cell-item
-        self._focusBorderWidth = colours['_FOCUS_BORDER_WIDTH'] = focusBorderWidth
-        self._cellPaddingOffset = colours['_CELL_PADDING_OFFSET'] = cellPadding - focusBorderWidth
-        self._defaultStyleSheet = self.styleSheet % colours
-        self.setStyleSheet(self._defaultStyleSheet)
-        self.setAlternatingRowColors(True)
         self.setWordWrap(wordWrap)
+        self.setSortingEnabled(True)
 
         # set the preferred scrolling behaviour
         self.setHorizontalScrollMode(self.ScrollPerPixel)
@@ -173,6 +177,24 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         if selectRows:
             self.setSelectionBehavior(self.SelectRows)
 
+        self._setMenuProperties(enableCopyCell, enableDelete, enableExport, enableSearch)
+        self._setStyling(borderWidth, cellPadding, focusBorderWidth, gridColour, alternatingRows)
+        self._setSelectionBehaviour(multiSelect)
+        self._setFonts(df, showHorizontalHeader, showVerticalHeader)
+        self._setCallbacks(actionCallback, actionCallbackEnabled, selectionCallback, selectionCallbackEnabled)
+
+        # set up the menus
+        self.setTableMenu(tableMenuEnabled)
+        self.setHeaderMenu()
+
+        self.setItemDelegate(self.defaultTableDelegate(parent=self, focusBorderWidth=focusBorderWidth))
+
+        # initialise the table
+        self.updateDf(df, _resize, setHeightToRows, setWidthToColumns, setOnHeaderOnly=setOnHeaderOnly)
+
+    def _setSelectionBehaviour(self, multiSelect):
+        """Set the selection-behaiour
+        """
         # define the multi-selection behaviour
         self.multiSelect = multiSelect
         if multiSelect:
@@ -184,27 +206,19 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         self._clickedInTable = False
         self._currentIndex = None
 
-        # enable sorting and sort on the first column
-        self.setSortingEnabled(True)
-        self.sortByColumn(0, QtCore.Qt.AscendingOrder)
-
+    def _setFonts(self, df, showHorizontalHeader, showVerticalHeader):
+        """Set the font-style
+        """
         setWidgetFont(self, name=TABLEFONT)
         height = getFontHeight(name=TABLEFONT)
-        self._setHeaderWidgets(height, showHorizontalHeader, showVerticalHeader)
+        self._setHeaderWidgets(height, showHorizontalHeader, showVerticalHeader, df)
         self.setMinimumSize(2 * height, 2 * height + self.horizontalScrollBar().height())
 
-        # set up the menus
-        self.setTableMenu(tableMenuEnabled)
-        self.setHeaderMenu()
-
-        self._tableBlockingLevel = 0
-
-        # initialise the table
-        self.updateDf(df, _resize, setHeightToRows, setWidthToColumns, setOnHeaderOnly=setOnHeaderOnly)
-
+    def _setCallbacks(self, actionCallback, actionCallbackEnabled, selectionCallback, selectionCallbackEnabled):
+        """Set the action/selection callbacks
+        """
         # set selection/action callbacks
         self.doubleClicked.connect(self._actionConnect)
-
         if selectionCallback is not NOTHING:
             self.setSelectionCallback(selectionCallback)  # can set to None
         if selectionCallbackEnabled is not NOTHING:
@@ -214,7 +228,41 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         if actionCallbackEnabled is not NOTHING:
             self.setActionCallbackEnabled(actionCallbackEnabled)
 
-        self.setItemDelegate(_TableDelegateABC())
+    def _setStyling(self, borderWidth, cellPadding, focusBorderWidth, gridColour, alternatingRows):
+        """Set the stylesheet options
+        """
+        # set stylesheet
+        colours = getColours()
+        # add border-width/cell-padding options
+        self._borderWidth = colours['_BORDER_WIDTH'] = borderWidth
+        self._cellPadding = colours['_CELL_PADDING'] = cellPadding  # the extra padding for the selected cell-item
+        self._focusBorderWidth = colours['_FOCUS_BORDER_WIDTH'] = focusBorderWidth
+        self._cellPaddingOffset = colours['_CELL_PADDING_OFFSET'] = cellPadding - focusBorderWidth
+        try:
+            col = QtGui.QColor(gridColour).name() if gridColour else colours[GUITABLE_GRIDLINES]
+        except Exception:
+            col = colours[GUITABLE_GRIDLINES]
+        self.gridcolour = colours['_GRID_COLOR'] = col
+        self._defaultStyleSheet = self.styleSheet % colours
+        self.setStyleSheet(self._defaultStyleSheet)
+        self.setAlternatingRowColors(alternatingRows)
+
+    def _setMenuProperties(self, enableCopyCell, enableDelete, enableExport, enableSearch):
+        """Add the required menus to the table
+        """
+        # create the individual table-menu and table-header-menu options
+        self.searchMenu = TableSearchMenu(self, enableSearch if enableSearch != NOTHING else False)
+        self.copyCellMenu = TableCopyCell(self, enableCopyCell if enableCopyCell != NOTHING else False)
+        self.deleteMenu = TableDelete(self, enableDelete if enableDelete != NOTHING else False)
+        self.exportMenu = TableExport(self, enableExport if enableExport != NOTHING else False)
+        self.headerColumnMenu = TableHeaderColumns(self, True)
+
+        # add options to the table-menu and table-header-menu
+        self.tableMenuOptions = [self.searchMenu,
+                                 self.copyCellMenu,
+                                 self.deleteMenu,
+                                 self.exportMenu,
+                                 self.headerColumnMenu]
 
     def updateDf(self, df, resize=True, setHeightToRows=False, setWidthToColumns=False, setOnHeaderOnly=False, newModel=False):
         """Initialise the dataFrame
@@ -226,7 +274,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
             # set the model
             if newModel or not (model := self.model()):
                 # create a new model if required
-                model = self.defaultTableModel(df, view=self)
+                model = self.tableModelClass(df, view=self)
                 self.setModel(model)
             else:
                 model.df = df
@@ -250,12 +298,18 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
             df = pd.DataFrame({})
             if newModel or not (model := self.model()):
                 # create a new model if required
-                model = self.defaultTableModel(df, view=self)
+                model = self.tableModelClass(df, view=self)
                 self.setModel(model)
             else:
                 model.df = df
 
         return model
+
+    def postUpdateDf(self):
+        """Actions to be performed after the dataFrame has been updated for the table
+        """
+        # update the visible columns
+        self.headerColumnMenu.refreshHiddenColumns()
 
     def setModel(self, model: QtCore.QAbstractItemModel) -> None:
         """Set the model for the view
@@ -305,7 +359,7 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         except Exception:
             getLogger().debug2(f'{self.__class__.__name__} has no _widgetScrollArea')
 
-    def _setHeaderWidgets(self, _height, showHorizontalHeader, showVerticalHeader):
+    def _setHeaderWidgets(self, _height, showHorizontalHeader, showVerticalHeader, df):
         """Initialise the headers
         """
         # set the horizontalHeader information
@@ -471,9 +525,10 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
             sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes())
 
             df = self._df
-            new = df.iloc[list(newRows)]
-            old = df.iloc[list(oldRows)]
-            sel = df.iloc[list(sRows)]
+            # remove any bad rows
+            new = df.iloc[(rr for rr in newRows if rr is not None and rr is not False)]
+            old = df.iloc[(rr for rr in oldRows if rr is not None and rr is not False)]
+            sel = df.iloc[(rr for rr in sRows if rr is not None and rr is not False)]
             try:
                 last = df.iloc[[self.currentIndex().data(INDEX_ROLE)[0]]]
             except Exception:
@@ -531,7 +586,8 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
             sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes())
 
             df = self._df
-            sel = df.iloc[list(sRows)]
+            # remove any bad rows
+            sel = df.iloc[(rr for rr in sRows if rr is not None and rr is not False)]
             try:
                 last = df.iloc[[self.currentIndex().data(INDEX_ROLE)[0]] if sRows else []]
             except Exception:
@@ -567,8 +623,9 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         :return: a DataFrame with selected rows
         """
         sRows = OrderedSet((dd := idx.data(INDEX_ROLE)) is not None and dd[0] for idx in self.selectedIndexes())
-        df = self._df
-        return df.iloc[list(sRows)]
+
+        # remove any bad rows
+        return self._df.iloc[(rr for rr in sRows if rr is not None and rr is not False)]
 
     def selectFirstRow(self, doCallback=True):
         from ccpn.core.lib.ContextManagers import nullContext
@@ -879,6 +936,20 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     # Table context menu
     #=========================================================================================
 
+    @property
+    def tableMenuOptions(self):
+        """Return the list of table options attached to the table
+        """
+        return self._tableMenuOptions
+
+    @tableMenuOptions.setter
+    def tableMenuOptions(self, value):
+        for tt in value:
+            if not isinstance(tt, (TableMenuABC, TableHeaderABC)):
+                raise RuntimeError(f'{self.__class__.__name__}.tableMenuOptions are incorrect.')
+
+        self._tableMenuOptions = value
+
     def setTableMenu(self, tableMenuEnabled=NOTHING) -> typing.Optional[Menu]:
         """Set up the context menu for the main table
         """
@@ -909,13 +980,11 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
     def addTableMenuOptions(self, menu):
         """Add options to the right-mouse menu
         """
-        # self._copySelectedCellAction = menu.addAction('Copy clicked cell value', self._copySelectedCell)
-
-        # NOTE:ED - call additional addTableMenuOptions here to add options to the table menu
-        _TableCopyCell.addTableMenuOptions(self, menu)
-        _TableExport.addTableMenuOptions(self, menu)
-        _TableSearch.addTableMenuOptions(self, menu)
-        _TableDelete.addTableMenuOptions(self, menu)
+        # NOTE:ED - call additional addMenuOptions here to add options to the table menu
+        for tableOption in self._tableMenuOptions:
+            if isinstance(tableOption, TableMenuABC):
+                # add the specific options to the menu
+                tableOption.addMenuOptions(menu)
 
     def setTableMenuOptions(self, menu):
         """Update options in the right-mouse menu
@@ -933,14 +1002,19 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         # call the class setup
         self.setTableMenuOptions(menu)
 
-        # NOTE:ED - call additional setTableMenuOptions here to update options in the table menu
-        _TableCopyCell.setTableMenuOptions(self, menu)
-        _TableExport.setTableMenuOptions(self, menu)
-        _TableSearch.setTableMenuOptions(self, menu)
-        _TableDelete.setTableMenuOptions(self, menu)
+        # NOTE:ED - call additional setMenuOptions here to add enable/disable/hide options in the table menu
+        for tableOption in self._tableMenuOptions:
+            if isinstance(tableOption, TableMenuABC):
+                # add the specific options to the menu
+                tableOption.setMenuOptions(menu)
 
         pos = QtCore.QPoint(pos.x() + 5, pos.y())
         menu.exec_(self.mapToGlobal(pos))
+
+    def showSearchSettings(self):
+        """Show the search-settings for the table
+        """
+        self.searchMenu and self.searchMenu.showSearchSettings()
 
     #=========================================================================================
     # Header context menu
@@ -964,7 +1038,10 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         """Add options to the right-mouse menu
         """
         # NOTE:ED - call additional setHeaderMenu here to add options to the header menu
-        _TableHeaderColumns.addHeaderMenuOptions(self, menu)
+        for tableOption in self._tableMenuOptions:
+            if isinstance(tableOption, TableHeaderABC):
+                # add the specific options to the menu
+                tableOption.addMenuOptions(menu)
 
     def setHeaderMenuOptions(self, menu):
         """Update options in the right-mouse menu
@@ -987,93 +1064,21 @@ class TableABC(_TableHeaderColumns, _TableCopyCell, _TableExport, _TableSearch, 
         self.setHeaderMenuOptions(menu)
 
         # NOTE:ED - call additional setHeaderMenuOptions here to add enable/disable/hide options in the header menu
-        _TableHeaderColumns.setHeaderMenuOptions(self, menu)
+        for tableOption in self._tableMenuOptions:
+            if isinstance(tableOption, TableHeaderABC):
+                # enable/disable/hide the specific options in the menu
+                tableOption.setMenuOptions(menu)
 
         if len(menu.actions()):
             menu.exec_(self.mapToGlobal(pos))
+
+    def isColumnInternal(self, column: int):
+        """Return True if the column is internal and not for external viewing
+        """
+        return self.headerColumnMenu.isColumnInternal(column)
 
     #=========================================================================================
     # Table functions
     #=========================================================================================
 
-    pass
-
-
-#=========================================================================================
-# Table testing
-#=========================================================================================
-
-def main():
-    """Show the test-table
-    """
-    MAX_ROWS = 8
-
-    from ccpn.ui.gui.widgets.Application import TestApplication
-    import pandas as pd
-    import random
-
-    data = [[1, 150, 300, 900, float('nan'), 80.1, 'delta'],
-            [2, 200, 500, 300, float('nan'), 34.2, ['help', 'more', 'chips']],
-            [3, 100, np.nan, 1000, None, -float('Inf'), 'charlie'],
-            [4, 999, np.inf, 500, None, float('Inf'), 'echo'],
-            [5, 300, -np.inf, 450, 700, 150.3, 'bravo']
-            ]
-
-    # multiIndex columnHeaders
-    cols = ("No", "Toyota", "Ford", "Tesla", "Nio", "Other", "NO")
-    rowIndex = ["AAA", "BBB", "CCC", "DDD", "EEE"]  # duplicate index
-
-    for ii in range(MAX_ROWS):
-        chrs = ''.join(chr(random.randint(65, 68)) for _ in range(5))
-        rowIndex.append(chrs[:3])
-        data.append([6 + ii,
-                     300 + random.randint(1, MAX_ROWS),
-                     random.random() * 1e6,
-                     450 + random.randint(-100, 400),
-                     700 + random.randint(-MAX_ROWS, MAX_ROWS),
-                     150.3 + random.random() * 1e2,
-                     ('bravo' + chrs[3:]) if ii % 2 else ('delta' + chrs[3:])
-                     ])
-
-    df = pd.DataFrame(data, columns=cols, index=rowIndex)
-
-    # show the example table
-    app = TestApplication()
-    win = QtWidgets.QMainWindow()
-    frame = QtWidgets.QFrame()
-    layout = QtWidgets.QGridLayout()
-    frame.setLayout(layout)
-
-    table = TableABC(None, df=df, focusBorderWidth=1)
-
-    # set some background colours
-    cells = ((0, 0, '#80C0FF'),
-             (1, 1, '#fe83cc'), (1, 2, '#fe83cc'),
-             (2, 3, '#83fbcc'),
-             (3, 2, '#e0ff87'), (3, 3, '#e0ff87'), (3, 4, '#e0ff87'), (3, 5, '#e0ff87'),
-             (4, 2, '#e0f08a'), (4, 3, '#e0f08a'), (4, 4, '#e0f08a'), (4, 5, '#e0f08a'),
-             (6, 2, '#70a04f'), (6, 6, '#70a04f'),
-             (7, 1, '#eebb43'), (7, 2, '#eebb43'),
-             (8, 4, '#7090ef'), (8, 5, '#7090ef'),
-             (9, 0, '#30f06f'), (9, 1, '#30f06f'),
-             (10, 2, '#e0d0e6'), (10, 3, '#e0d0e6'), (10, 4, '#e0d0e6'),
-             (11, 2, '#e0d0e6'), (11, 3, '#e0d0e6'), (11, 4, '#e0d0e6'),
-             )
-
-    for row, col, colour in cells:
-        if 0 <= row < table.rowCount() and 0 <= col < table.columnCount():
-            table.setBackground(row, col, colour)
-
-    win.setCentralWidget(frame)
-    frame.layout().addWidget(table, 0, 0)
-
-    win.setWindowTitle(f'Testing {table.__class__.__name__}')
-    win.show()
-
-    app.start()
-
-
-if __name__ == '__main__':
-    """Call the test function
-    """
-    main()
+    ...

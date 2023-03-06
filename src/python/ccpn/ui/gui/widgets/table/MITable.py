@@ -1,6 +1,7 @@
 """
 Module Documentation here
 """
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -15,41 +16,22 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-03 16:16:04 +0000 (Fri, March 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-06 14:10:59 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
-__date__ = "$Date: 2022-09-08 17:12:59 +0100 (Thu, September 08, 2022) $"
+__date__ = "$Date: 2023-01-27 14:43:33 +0100 (Fri, January 27, 2023) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore
-
-import ccpn.core  # MUST be imported here for correct import-order
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.table.TableABC import TableABC
 from ccpn.util.Common import NOTHING
 
+from ccpn.ui.gui.widgets.table.MITableABC import MITableABC
 
-ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
-                'horizontal'        : QtCore.Qt.Horizontal,
-                'v'                 : QtCore.Qt.Vertical,
-                'vertical'          : QtCore.Qt.Vertical,
-                QtCore.Qt.Horizontal: QtCore.Qt.Horizontal,
-                QtCore.Qt.Vertical  : QtCore.Qt.Vertical,
-                }
-
-# define a role to return a cell-value
-DTYPE_ROLE = QtCore.Qt.UserRole + 1000
-VALUE_ROLE = QtCore.Qt.UserRole + 1001
-INDEX_ROLE = QtCore.Qt.UserRole + 1002
-
-EDIT_ROLE = QtCore.Qt.EditRole
-_EDITOR_SETTER = ('setColor', 'selectValue', 'setData', 'set', 'setValue', 'setText', 'setFile')
-_EDITOR_GETTER = ('get', 'value', 'text', 'getFile')
 
 _TABLE_KWDS = ('parent', 'df',
                'multiSelect', 'selectRows',
@@ -62,15 +44,16 @@ _TABLE_KWDS = ('parent', 'df',
                'actionCallback', 'actionCallbackEnabled',
                'enableExport', 'enableDelete', 'enableSearch', 'enableCopyCell',
                'tableMenuEnabled',
+               'dividerColour',
                'ignoreStyleSheet',
                )
 
 
 #=========================================================================================
-# Table
+# MITable
 #=========================================================================================
 
-class Table(TableABC, Base):
+class MITable(MITableABC, Base):
     """
     New table class to integrate into ccpn-widgets
     """
@@ -89,6 +72,7 @@ class Table(TableABC, Base):
                  actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
                  enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
                  tableMenuEnabled=NOTHING,
+                 dividerColour=None,
                  # local parameters
                  ignoreStyleSheet=True,
                  **kwds):
@@ -119,8 +103,9 @@ class Table(TableABC, Base):
         :param enableDelete:
         :param enableSearch:
         :param enableCopyCell:
-        :param enableCopyCell:
         :param tableMenuEnabled:
+        :param dividerColour:
+        :param ignoreStyleSheet:
         :param kwds:
         """
         super().__init__(parent, df=df,
@@ -134,6 +119,7 @@ class Table(TableABC, Base):
                          actionCallback=actionCallback, actionCallbackEnabled=actionCallbackEnabled,
                          enableExport=enableExport, enableDelete=enableDelete, enableSearch=enableSearch, enableCopyCell=enableCopyCell,
                          tableMenuEnabled=tableMenuEnabled,
+                         dividerColour=dividerColour
                          )
         baseKwds = {k: v for k, v in kwds.items() if k not in _TABLE_KWDS}
         Base._init(self, ignoreStyleSheet=ignoreStyleSheet, **baseKwds)
@@ -143,58 +129,107 @@ class Table(TableABC, Base):
 # Table testing
 #=========================================================================================
 
+
 def main():
-    """Show the test-table
-    """
-    MAX_ROWS = 7
-
-    import pandas as pd
+    import sys
     import numpy as np
+    import pandas as pd
     import random
-    from PyQt5 import QtGui, QtWidgets
+    import contextlib
+    import time
+    from PyQt5 import QtWidgets, QtGui, QtCore
+    from ast import literal_eval
+    from ccpn.util.PrintFormatter import PrintFormatter
 
-    from ccpn.ui.gui.widgets.Application import TestApplication
+    _useMulti = True
 
-    data = [[1, 150, 300, 900, float('nan'), 80.1, 'delta'],
-            [2, 200, 500, 300, float('nan'), 34.2, ['help', 'more', 'chips']],
-            [3, 100, np.nan, 1000, None, -float('Inf'), 'charlie'],
-            [4, 999, np.inf, 500, None, float('Inf'), 'echo'],
-            [5, 300, -np.inf, 450, 700, 150.3, 'bravo']
+    app = QtWidgets.QApplication(sys.argv)
+
+    data = [[1, 150, 300, 900, float('nan'), 80.1, 'delta', 'help'],
+            [2, 200, 500, 300, float('nan'), 34.2, ['help', 'more', 'chips'], 12],
+            [3, 100, np.nan, 1000, None, -float('Inf'), 'charlie', 'baaa'],
+            [4, 999, np.inf, 500, None, float('Inf'), 'echo', True],
+            [5, 300, -np.inf, 450, 700, 150.3, 'bravo', False]
             ]
 
-    # multiIndex columnHeaders
-    cols = ("No", "Toyota", "Ford", "Tesla", "Nio", "Other", "NO")
-    rowIndex = ["AAA", "BBB", "CCC", "DDD", "EEE"]  # duplicate index
+    if _useMulti:
+        multiIndex = [
+            ("No", "No", "No"),
+            ("Most", "Petrol", "Toyota"),
+            ("Most", "Petrol", "Ford"),
+            ("Most", "Electric", "Tesla"),
+            ("Most", "Electric", "Nio"),
+            ("Other", "Other", "Other"),
+            ("Other", "More", "NO"),
+            ]
 
-    for ii in range(MAX_ROWS):
-        chrs = ''.join(chr(random.randint(65, 68)) for _ in range(5))
-        rowIndex.append(chrs[:3])
-        data.append([6 + ii,
-                     300 + random.randint(1, MAX_ROWS),
-                     random.random() * 1e6,
-                     450 + random.randint(-100, 400),
-                     700 + random.randint(-MAX_ROWS, MAX_ROWS),
-                     150.3 + random.random() * 1e2,
-                     f'bravo{chrs[3:]}' if ii % 2 else f'delta{chrs[3:]}'])
+        MAX_ROWS = 4
+        for ii in range(12):
+            chrs = ''.join(chr(random.randint(65, 67)) for _ in range(6))
+            if len(multiIndex) < 12:
+                multiIndex.append((chrs[0], chrs[1:3], chrs[3:]))
+            if len(data) < 12:
+                data.append([len(multiIndex) + 1 + ii,
+                             300 + random.randint(1, MAX_ROWS),
+                             random.random() * 1e6,
+                             450 + random.randint(-100, 400),
+                             700 + random.randint(-MAX_ROWS, MAX_ROWS),
+                             150.3 + random.random() * 1e2,
+                             f'bravo{chrs[4]}',
+                             random.randint(-5, 5)])
+
+        rowIndex = pd.MultiIndex.from_tuples(multiIndex)
+
+        # multiIndex columnHeaders
+        cols = pd.MultiIndex.from_tuples([
+            ("No", "No", "No"),
+            ("Most", "Petrol", "Toyota"),
+            ("Most", "Petrol", "Ford"),
+            ("Most", "Electric", "Tesla\nRAAAAAH!"),
+            ("Most", "Electric", "Nio"),
+            ("Other", "Other", "NO"),
+            ("Set", "NO", "NO"),
+            ("Set", "NO", "YES"),
+            ])
+
+    else:
+        # multiIndex columnHeaders
+        cols = ("No", "Toyota", "Ford", "Tesla\nWAAAAH!", "Nio", "Other", "NO", "YES")
+        rowIndex = ("AAA", "BBB", "CCC", "DDD", "EEE")
 
     df = pd.DataFrame(data, columns=cols, index=rowIndex)
 
-    # show the example table
-    app = TestApplication()
-    win = QtWidgets.QMainWindow()
-    frame = QtWidgets.QFrame()
-    layout = QtWidgets.QGridLayout()
-    frame.setLayout(layout)
+    with contextlib.suppress(Exception):
+        # recovers the df, but the index/columns are mangled, need resetting as MultiIndex
+        dfOut = df.to_json(orient='columns')
+        _reload = pd.read_json(dfOut, orient='columns')
+        _reload.columns = pd.MultiIndex.from_tuples([literal_eval(ss) for ss in _reload.columns.tolist()])
+        _reload.index = pd.MultiIndex.from_tuples([literal_eval(ss) for ss in _reload.index.tolist()])
 
-    table = TableABC(None, df=df, focusBorderWidth=1, cellPadding=11,
-                     showGrid=True, gridColour='white',
-                     setWidthToColumns=False, setHeightToRows=False, _resize=True)
+    # my class to store python-objects as strings - recovers df exactly
+    pretty = PrintFormatter()
+    pretty.ALLOWPICKLE = True  # useful for passing information between threads
+    _loadPickle = pretty(df)
+    _reloadPickle = pretty.literal_eval(_loadPickle)
 
+    print('PICKLED dataFrame')
+    print(_loadPickle)
+
+    # load the object into the table
+    window = QtWidgets.QMainWindow()
+
+    # show the table
+    table = MITableABC(window, df=df, showGrid=True, showHorizontalHeader=True, dividerColour='orange')
+    table.setEditable(True)
+    window.setCentralWidget(table)
+    table.setTextElideMode(QtCore.Qt.ElideMiddle)
+
+    # set random colours
     for row in range(table.rowCount()):
         for col in range(table.columnCount()):
             table.setBackground(row, col, QtGui.QColor(random.randint(0, 256**3) & 0x3f3f3f | 0x404040))
 
-    # set some background colours
+    # set background colours of selected blocks
     cells = ((0, 0, '#80C0FF'),
              (1, 1, '#fe83cc'), (1, 2, '#fe83cc'),
              (2, 3, '#83fbcc'),
@@ -212,23 +247,21 @@ def main():
         if 0 <= row < table.rowCount() and 0 <= col < table.columnCount():
             table.setBackground(row, col, colour)
 
-    # set the horizontalHeader information
-    header = table.horizontalHeader()
-    # test a single stretching column
-    header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
-    header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
-    header.setStretchLastSection(False)
+    window.show()
 
-    win.setCentralWidget(frame)
-    frame.layout().addWidget(table, 0, 0)
+    tt = table._df.columns.tolist()
+    print(tt, tt[0], type(tt[0]))
 
-    win.setWindowTitle(f'Testing {table.__class__.__name__}')
-    win.show()
+    time.sleep(0.5)
+    table.resizeColumnsToContents()
+    table.resizeRowsToContents()
+    app.exec_()
 
-    app.start()
+    # this needs some proper methods
+    print('Sort order:')
+    idxs = [table.model().index(row, 0) for row in range(table.rowCount())]
+    print([val[0] for val in table.model().mapToSource(idxs)])
 
 
 if __name__ == '__main__':
-    """Call the test function
-    """
     main()

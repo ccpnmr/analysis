@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-30 20:44:26 +0100 (Fri, July 30, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2023-02-17 15:38:10 +0000 (Fri, February 17, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,42 +26,18 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-
 from os import path
-
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore
 
 from ccpn.ui.gui.widgets.ColourDialog import inverseGrey
+from ccpn.ui.gui.widgets.table._TableCommon import USER_ROLE, EDIT_ROLE, \
+    TOOLTIP_ROLE, STATUS_ROLE, BACKGROUND_ROLE, FOREGROUND_ROLE, CHECK_ROLE, \
+    ICON_ROLE, SIZE_ROLE, NO_PROPS, ALIGNMENT_ROLE, CHECKABLE, ENABLED, \
+    SELECTABLE, EDITABLE, CHECKED, UNCHECKED, HORIZONTAL, \
+    QColor, QIcon, QSize
 
 
 ICON_FILE = path.join(path.dirname(__file__), 'icons', 'editable.png')
-
-USER_ROLE = QtCore.Qt.UserRole
-EDIT_ROLE = QtCore.Qt.EditRole
-QtCore.Qt.DisplayRole = QtCore.Qt.DisplayRole
-TOOLTIP_ROLE = QtCore.Qt.ToolTipRole
-STATUS_ROLE = QtCore.Qt.StatusTipRole
-BG_ROLE = QtCore.Qt.BackgroundRole
-FG_ROLE = QtCore.Qt.ForegroundRole
-CHECK_ROLE = QtCore.Qt.CheckStateRole
-ICON_ROLE = QtCore.Qt.DecorationRole
-SIZE_ROLE = QtCore.Qt.SizeHintRole
-ALIGNMENT_ROLE = QtCore.Qt.TextAlignmentRole
-
-NO_PROPS = QtCore.Qt.NoItemFlags
-CHECKABLE = QtCore.Qt.ItemIsUserCheckable
-ENABLED = QtCore.Qt.ItemIsEnabled
-SELECTABLE = QtCore.Qt.ItemIsSelectable
-EDITABLE = QtCore.Qt.ItemIsEditable
-
-CHECKED = QtCore.Qt.Checked
-UNCHECKED = QtCore.Qt.Unchecked
-HORIZONTAL = QtCore.Qt.Horizontal
-VERTICAL = QtCore.Qt.Vertical
-
-QColor = QtGui.QColor
-QIcon = QtGui.QIcon
-QSize = QtCore.QSize
 HEAD_ADJUST = QSize(50, 0)
 
 
@@ -72,31 +48,35 @@ class TableModel(QtCore.QAbstractTableModel):
     ############################################################
 
     def numberRows(self):
-        raise Exception('%s: should be implemented in subclass' % self.__class__)
+        raise RuntimeError(f'{self.__class__}: should be implemented in subclass')
 
     def numberCols(self):
-        raise Exception('%s: should be implemented in subclass' % self.__class__)
+        raise RuntimeError(f'{self.__class__}: should be implemented in subclass')
 
     def dataForCell(self, row, col):
-        raise Exception('%s: should be implemented in subclass' % self.__class__)
+        raise RuntimeError(f'{self.__class__}: should be implemented in subclass')
 
     ############################################################
     # functions which could be overridden in subclass
     ############################################################
 
-    def headerForCol(self, col):
+    @staticmethod
+    def headerForCol(col):
         return 1 + col
 
-    def headerForRow(self, row):
+    @staticmethod
+    def headerForRow(row):
         return 1 + row
 
     def sortRows(self, col, isDescending=False):
         pass
 
-    def setDataForCell(self, row, col, value):
+    @staticmethod
+    def setDataForCell(row, col, value):
         return False
 
-    def isEditableCell(self, row, col):
+    @staticmethod
+    def isEditableCell(row, col):
         return False
 
     ############################################################
@@ -182,11 +162,7 @@ class ObjectTableModel(TableModel):
 
     def removeRows(self, start, num, parent):
 
-        if start + num < len(self.objects):
-            return True
-
-        else:
-            return False
+        return start + num < len(self.objects)
 
     def insertRows(self, start, num, parent):
 
@@ -194,11 +170,7 @@ class ObjectTableModel(TableModel):
 
     def removeColumns(self, start, num, parent):
 
-        if start + num < len(self.columns):
-            return True
-
-        else:
-            return False
+        return start + num < len(self.columns)
 
     def insertColumns(self, start, num, parent):
 
@@ -245,21 +217,16 @@ class ObjectTableModel(TableModel):
 
     def dataForCell(self, row, col):
 
-        obj = self.objects[row]
-        return obj
+        return self.objects[row]
 
     def headerData(self, i, orientation, role):
 
         if role == QtCore.Qt.DisplayRole:
-            if orientation == HORIZONTAL:
-                return self.columns[i].heading
-            else:
-                return i + 1
+            return self.columns[i].heading if orientation == HORIZONTAL else i + 1
 
         elif role == ICON_ROLE:
-            if orientation == HORIZONTAL:
-                if self.columns[i].setEditValue:
-                    return QIcon(self.editIcon)
+            if orientation == HORIZONTAL and self.columns[i].setEditValue:
+                return QIcon(self.editIcon)
 
         elif role == TOOLTIP_ROLE:
             if orientation == HORIZONTAL:
@@ -297,8 +264,8 @@ class ObjectTableModel(TableModel):
                     TOOLTIP_ROLE         : objCol.tipText,
                     ALIGNMENT_ROLE       : objCol.alignment,
                     STATUS_ROLE          : None,
-                    BG_ROLE              : color,
-                    FG_ROLE              : inverseGrey(color)}
+                    BACKGROUND_ROLE      : color,
+                    FOREGROUND_ROLE      : inverseGrey(color)}
 
         return dataDict
 
@@ -311,16 +278,12 @@ class ObjectTableModel(TableModel):
             objCol = self.columns[index.column()]
             value = objCol.getFormatValue(obj)
 
-            if isinstance(value, bool):
-                return None
-            else:
-                return value
+            return None if isinstance(value, bool) else value
 
         elif role == ICON_ROLE:
             obj = self.objects[index.row()]
             objCol = self.columns[index.column()]
-            icon = objCol.getIcon(obj)
-            if icon:
+            if icon := objCol.getIcon(obj):
                 return QIcon(icon)
 
         elif role == EDIT_ROLE:
@@ -329,8 +292,7 @@ class ObjectTableModel(TableModel):
             return objCol.getEditValue(obj)
 
         elif role == USER_ROLE:
-            obj = self.objects[index.row()]
-            return obj
+            return self.objects[index.row()]
 
         elif role == TOOLTIP_ROLE:
             objCol = self.columns[index.column()]
@@ -340,19 +302,17 @@ class ObjectTableModel(TableModel):
             objCol = self.columns[index.column()]
             return objCol.tipText
 
-        elif role == FG_ROLE:
+        elif role == FOREGROUND_ROLE:
             obj = self.objects[index.row()]
             objCol = self.columns[index.column()]
             # color = objCol.getColor(obj)
             # if color:
             #   return inverseGrey(color)
 
-        elif role == BG_ROLE:
+        elif role == BACKGROUND_ROLE:
             obj = self.objects[index.row()]
             objCol = self.columns[index.column()]
-            color = objCol.getColor(obj)
-
-            if color:
+            if color := objCol.getColor(obj):
                 return QColor(color)
 
         elif role == CHECK_ROLE:
@@ -360,11 +320,7 @@ class ObjectTableModel(TableModel):
             objCol = self.columns[index.column()]
             value = objCol.getValue(obj)
             if isinstance(value, bool):
-                if value:
-                    return CHECKED
-                else:
-                    return UNCHECKED
-
+                return CHECKED if value else UNCHECKED
             else:
                 return None
 

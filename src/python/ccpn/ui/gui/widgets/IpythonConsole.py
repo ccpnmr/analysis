@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-02 17:20:59 +0000 (Thu, March 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-06 13:28:15 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -194,6 +194,7 @@ class IpythonConsole(Widget):
             self.ipythonWidget.kernel_manager.shutdown_kernel()
         self.ipythonWidget.kernel_client.stop_channels()
         self.ipythonWidget.kernel_client = None
+
     def _showHistory(self):
         """
         Shows the history of commands executed inside the python console.

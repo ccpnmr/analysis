@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-28 14:00:20 +0000 (Tue, February 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-03-06 17:30:44 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -471,18 +471,20 @@ class _TableModel(QtCore.QAbstractTableModel):
             # process the heights/widths of the headers
             if orientation == QtCore.Qt.Horizontal:
                 try:
-                    # get the estimated width of the column, also for the last visible column
+                    txt = str(self.headerData(col, orientation, role=DISPLAY_ROLE))
+                    height = len(txt.split('\n')) * int(self._chrHeight)
+
+                    # get the estimated width of the column, also for the last visible column\
                     if (self._view._columnDefs and self._view._columnDefs._columns):
                         colObj = self._view._columnDefs._columns[col]
                         width = colObj.columnWidth
                         if width is not None:
-                            # use the fixed-column width
-                            return QtCore.QSize(width, self._chrHeight)
+                            return QtCore.QSize(width, height)
 
                     width = self._estimateColumnWidth(col)
 
                     # return the size
-                    return QtCore.QSize(width, self._chrHeight)
+                    return QtCore.QSize(width, height)
 
                 except Exception:
                     # return the default QSize

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-03 16:16:04 +0000 (Fri, March 03, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-03-06 16:37:07 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -659,7 +659,7 @@ class TableABC(QtWidgets.QTableView):
             selectionModel = self.selectionModel()
             model = self.model()
             selectionModel.clearSelection()
-            columnTextIx = self.columnTexts.index(headerName)
+            columnTextIx = self.headerColumnMenu.columnTexts.index(headerName)
             for i in model._sortIndex:
                 cell = model.index(i, columnTextIx)
                 if cell is None:

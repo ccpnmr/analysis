@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-06 15:43:23 +0000 (Mon, March 06, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-03-06 16:37:07 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -76,16 +76,16 @@ class _ExperimentalAnalysisTableABC(Table):
         # initialise the table
         super().__init__(parent=parent, **kwds)
 
-        _hiddenColumns = [sv._ROW_UID, sv.COLLECTIONID, sv.PEAKPID, sv.NMRRESIDUEPID, sv.NMRCHAINNAME,
+        self._hiddenColumns = [sv._ROW_UID, sv.COLLECTIONID, sv.PEAKPID, sv.NMRRESIDUEPID, sv.NMRCHAINNAME,
                                sv.NMRRESIDUETYPE, sv.NMRATOMNAMES, sv.SERIESUNIT, sv.SPECTRUMPID,
                                sv.VALUE, sv.VALUE_ERR,
                                sv.SERIES_STEP_X, sv.SERIES_STEP_Y, sv.MINIMISER_METHOD, sv.MINIMISER_MODEL, sv.CHISQR,
                                sv.REDCHI, sv.AIC, sv.BIC,
                                sv.MODEL_NAME, sv.NMRRESIDUECODETYPE]
         errCols = [tt for tt in self.headerColumnMenu.columnTexts if sv._ERR in tt]
-        _hiddenColumns += errCols
-        self.headerColumnMenu.setDefaultColumns(_hiddenColumns, update=False)
-
+        self._hiddenColumns += errCols
+        self.headerColumnMenu.setDefaultColumns(self._hiddenColumns, update=False)
+        self.headerColumnMenu.setInternalColumns(self._internalColumns)
         self.guiModule = guiModule
         self.moduleParent = guiModule
 
@@ -113,7 +113,7 @@ class _ExperimentalAnalysisTableABC(Table):
     def build(self, dataFrame):
         if dataFrame is not None:
             self.updateDf(df=dataFrame)
-            self.setHiddenColumns(texts=self._hiddenColumns)
+            self.headerColumnMenu.setDefaultColumns(self._hiddenColumns)
             self._setBlankModelColumns()
 
 
@@ -250,6 +250,13 @@ class _ExperimentalAnalysisTableABC(Table):
     def _toggleSeriesStepsHeaders(self, setVisible=True):
         """ Show/Hide the rawData columns"""
         headers = self.guiModule.backendHandler._getSeriesStepValues()
+        # need to include also the headers which are duplicates and include an _ (underscore at the end)
+        extraHeaders = []
+        for header in headers:
+            for columnHeader in self.headerColumnMenu.columnTexts:
+                if str(columnHeader).startswith(str(header)) and sv.SEP in columnHeader :
+                    extraHeaders.append(columnHeader)
+        headers += extraHeaders
         self._setVisibleColumns(headers, setVisible)
 
     def _toggleAssignmentsHeaders(self, setVisible=True):

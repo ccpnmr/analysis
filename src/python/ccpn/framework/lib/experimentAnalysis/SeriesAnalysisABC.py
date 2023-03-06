@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-22 20:02:40 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-06 16:37:07 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -436,8 +436,11 @@ class SeriesAnalysisABC(ABC):
 
     def _getSeriesStepValues(self):
         """ Get the series values from the first input SpectrumGroups"""
+
         for spectrumGroup in self.inputSpectrumGroups:
-            return spectrumGroup.series
+            if spectrumGroup.series and  len(spectrumGroup.series)>0:
+                return list(spectrumGroup.series) # not yet implemented with multiple SG.
+        return []
 
     def plotResults(self, *args, **kwargs):
         pass

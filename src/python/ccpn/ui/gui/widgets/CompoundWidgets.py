@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-25 22:24:05 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-06 12:41:51 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -191,6 +191,23 @@ class ListCompoundWidget(CompoundBaseWidget):
 
     def clearList(self):
         self.listWidget._deleteAll()
+
+    def select(self, item, blockSignals=False):
+        """Convenience: Set item in Pulldown; works with text or item"""
+        if blockSignals:
+            with self.blockWidgetSignals(recursive=False, additionalWidgets=[self.pulldownList, ]):
+                self.pulldownList.select(item)
+        else:
+            self.pulldownList.select(item)
+
+    def setIndex(self, index, blockSignals=False):
+        """Convenience: set item in Pulldown by index"""
+
+        if blockSignals:
+            with self.blockWidgetSignals():
+                self.pulldownList.setIndex(index)
+        else:
+            self.pulldownList.setIndex(index)
 
     def setLabelText(self, label):
         """Set the text for the list widget label

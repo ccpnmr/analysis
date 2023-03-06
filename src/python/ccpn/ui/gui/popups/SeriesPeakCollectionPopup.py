@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-15 15:17:07 +0000 (Wed, February 15, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-06 12:41:51 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -63,7 +63,8 @@ def showWarningPopup():
 
 
 class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
-    def __init__(self, parent=None, mainWindow=None, title='Series Peak Collection', **kwds):
+    def __init__(self, parent=None, mainWindow=None, title='Series Peak Collection',
+                 collectionName='collectionName', spectrumGroup = None, **kwds):
         super().__init__(parent, setLayout=True, size=(200, 350), minimumSize=None, windowTitle=title, **kwds)
 
         if mainWindow:
@@ -76,8 +77,9 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
             self.application = None
             self.project = None
             self.current = None
+        self._collectionName = collectionName
         self._sourcePeakList = None
-        self._spectrumGroup = None
+        self._spectrumGroup = spectrumGroup
         self._topCollection = None
         self._fixedWidthsCW = [200, 200]
         self.setWidgets()
@@ -96,6 +98,8 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         self.spectrumGroupCW = SpectrumGroupPulldown(self.mainWidget, mainWindow=self.mainWindow,
                                                      labelText='SpectrumGroup', grid=(row, 0),
                                                      gridSpan=(1, 2))
+        if self._spectrumGroup is not None:
+            self.spectrumGroupCW.select(self._spectrumGroup.pid)
         # fixedWidths=self._fixedWidthsCW)
         row += 1
         self.sourcePeakListCW = PeakListPulldown(self.mainWidget,
@@ -104,7 +108,9 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
                                                  gridSpan=(1, 2))
         # fixedWidths=self._fixedWidthsCW)
         row += 1
-        self.collectionNameCW = cw.EntryCompoundWidget(self.mainWidget, labelText='Collection Name', grid=(row, 0),
+        self.collectionNameCW = cw.EntryCompoundWidget(self.mainWidget,
+                                                       entryText=self._collectionName,
+                                                       labelText='Collection Name', grid=(row, 0),
                                                        gridSpan=(1, 2))
         row += 1
 
@@ -142,7 +148,7 @@ class SeriesPeakCollectionPopup(CcpnDialogMainWidget):
         self.refitLabel = Label(self.mainWidget, text='Refitting', grid=(row, 0))
         self.refitOption = CheckBox(self.mainWidget, text='Refit Peaks At Position',
                                     tipText = 'Recalculate the peak height and linewidths preserving the original peak position',
-                                    checked=False, grid=(row, 1))
+                                    checked=True, grid=(row, 1))
         row += 1
         self.coloursLabel = Label(self.mainWidget, text='Colouring', grid=(row, 0))
         self.coloursOption = CheckBox(self.mainWidget, text='Use colour from contours', checked=True,

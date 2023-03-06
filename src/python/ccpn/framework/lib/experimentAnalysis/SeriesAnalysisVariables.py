@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-23 12:28:10 +0000 (Thu, February 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-06 12:41:50 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -232,6 +232,7 @@ DELTA = 'Delta'
 DELTA_DELTA = f'{DELTA*2}'
 DELTA_DELTA_ERR = f'{DELTA_DELTA}{_ERR}'
 EUCLIDEAN_DISTANCE = 'Euclidean Distance'
+TITRATION = 'Titration'
 DEFAULT_H_ALPHAFACTOR = 1
 DEFAULT_N_ALPHAFACTOR = 0.142
 DEFAULT_C_ALPHAFACTOR = 0.25
@@ -289,11 +290,13 @@ LEASTSQ = 'leastsq'
 InversionRecovery = 'InversionRecovery'
 ExponentialDecay = 'ExponentialDecay'
 OnePhaseDecay = 'OnePhaseDecay'
-NA = 'N/A'
+USERDEFINEDEXPERIMENT = 'User-Defined'
 NONE = 'None'
 T1 = 'T1'
 T2 = 'T2'
-EXPERIMENTS  = [NA, T1, T2, HETNOE]
+CEST = 'CEST'
+
+EXPERIMENTS  = [USERDEFINEDEXPERIMENT, T1, T2, HETNOE]
 
 ## Warnings
 UNDER_DEVELOPMENT_WARNING = f'''This functionality is currently under active development. Use it at your own risk.'''

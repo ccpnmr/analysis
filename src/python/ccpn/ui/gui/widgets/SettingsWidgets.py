@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-24 14:35:11 +0000 (Fri, February 24, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-03-06 12:41:51 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1541,8 +1541,18 @@ class ObjectSelectionWidget(ListCompoundWidget):
             self._notifierDelete.unRegister()
             self._notifierDelete = None
 
-    def select(self, name):
-        self.pulldownList.select(name)
+    def select(self, item, blockSignals=False):
+        """Convenience: Set item in Pulldown; works with text or item"""
+
+        # update the pulldown first. It could be it still not populated (e.g. only populates after you click in)
+        self.updatePulldown()
+        super().select(item, blockSignals)
+
+    def setIndex(self, index, blockSignals=False):
+        """Convenience: set item in Pulldown by index"""
+        # update the pulldown first. It could be it still not populated (e.g. only populates after you click in)
+        self.updatePulldown()
+        super().select(index, blockSignals)
 
     def _selectObjectInList(self):
         """Handle clicking items in object selection

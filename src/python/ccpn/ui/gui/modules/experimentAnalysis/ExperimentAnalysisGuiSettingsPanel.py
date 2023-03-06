@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-23 14:32:50 +0000 (Thu, February 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-06 12:41:51 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -184,16 +184,54 @@ TABPOS = 0
 class GuiInputDataPanel(GuiSettingPanel):
 
     tabPosition = TABPOS
-    tabName = guiNameSpaces.Label_InputData
+    tabName = guiNameSpaces.Label_SetupTab
     tabTipText = guiNameSpaces.TipText_GuiInputDataPanel
 
     def __init__(self, guiModule, *args, **Framekwargs):
         GuiSettingPanel.__init__(self, guiModule, *args, **Framekwargs)
 
+    def _getExperimentSelectorNames(self):
+        settingsHandler = self.guiModule.settingsPanelHandler
+        experimentSelectorHandler = settingsHandler.experimentSelectorHandler
+        moduleAnalysisType = self.guiModule.analysisType
+        experimentSelectorsNames = []
+        experimentSelectorsTipTexts = []
+        for selectorName, selector in experimentSelectorHandler.ExperimentSelectors.items():
+            if selector.analysisType in [moduleAnalysisType, None]:
+                experimentSelectorsNames.append(selectorName)
+                experimentSelectorsTipTexts.append(selector._makeTipText())
+        return experimentSelectorsNames, experimentSelectorsTipTexts
+
     def setWidgetDefinitions(self):
         """ Define the widgets in a dict."""
         backend = self.guiModule.backendHandler
+        settingsHandler = self.guiModule.settingsPanelHandler
+        experimentSelectorHandler = settingsHandler.experimentSelectorHandler
+        expNames, expTipTexts = self._getExperimentSelectorNames()
         self.widgetDefinitions = od((
+            (guiNameSpaces.WidgetVarName_ExperimentSeparator,
+             {'label': guiNameSpaces.Label_ExperimentSeparator,
+              'type': LabeledHLine,
+              'kwds': {'text': guiNameSpaces.Label_ExperimentSeparator,
+                       'height': 30,
+                       'gridSpan': (1, 2),
+                       'colour': DividerColour,
+                       'tipText': guiNameSpaces.TipText_ExperimentSeparator}}),
+            (guiNameSpaces.WidgetVarName_ExperimentName,
+             {'label': guiNameSpaces.Label_ExperimentOption,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': None,
+              'callBack':  self._experimentSelectorChanged,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_ExperimentOption,
+                       'hAlign': 'l',
+                       'tipText': '',
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds': {'texts': expNames,
+                                        'tipTexts': expTipTexts,
+                                        'direction': 'v',
+                                        'selectedInd': 0,
+                                        }}}),
 
             (guiNameSpaces.WidgetVarName_GeneralSetupSeparator,
              {'label': guiNameSpaces.Label_GeneralSetup,
@@ -254,30 +292,6 @@ class GuiInputDataPanel(GuiSettingPanel):
                        'showSelectName': True,
                        'objectName': guiNameSpaces.WidgetVarName_InputCollectionSelection,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
-
-            (guiNameSpaces.WidgetVarName_ExperimentSeparator,
-             {'label': guiNameSpaces.Label_ExperimentSeparator,
-              'type': LabeledHLine,
-              'kwds': {'text': guiNameSpaces.Label_ExperimentSeparator,
-                       'height': 30,
-                       'gridSpan': (1, 2),
-                       'colour': DividerColour,
-                       'tipText': guiNameSpaces.TipText_ExperimentSeparator}}),
-            (guiNameSpaces.WidgetVarName_ExperimentName,
-             {'label': guiNameSpaces.Label_ExperimentOption,
-              'type': compoundWidget.RadioButtonsCompoundWidget,
-              'postInit': None,
-              'callBack': None,
-              'enabled': True,
-              'kwds': {'labelText': guiNameSpaces.Label_ExperimentOption,
-                       'hAlign': 'l',
-                       'tipText': '',
-                       'fixedWidths': SettingsWidgetFixedWidths,
-                       'compoundKwds': {'texts': sv.EXPERIMENTS,
-                                        'tipTexts': sv.EXPERIMENTS,
-                                        'direction': 'v',
-                                        'selectedInd': 0,
-                                        }}}),
 
             (guiNameSpaces.WidgetVarName_DataTableSeparator,
              {'label': guiNameSpaces.Label_DataTables,
@@ -402,7 +416,25 @@ class GuiInputDataPanel(GuiSettingPanel):
 
     def _createInputCollectionCallback(self):
         """ Show the relevant Popup"""
-        popup = self.guiModule.application.showPeakCollectionsPopup()
+
+        from ccpn.ui.gui.popups.SeriesPeakCollectionPopup import SeriesPeakCollectionPopup
+        settingsHandler = self.guiModule.settingsPanelHandler
+        experimentSelectorHandler = settingsHandler.experimentSelectorHandler
+        experimentSelector =  experimentSelectorHandler.experimentSelector
+        if experimentSelector is not None:
+            collectionName = experimentSelector.inputCollection
+        else:
+            collectionName = 'MyCollection'
+        spectrumGroups = self.guiModule.backendHandler.inputSpectrumGroups
+        if len(spectrumGroups)>0:
+            spectrumGroup = spectrumGroups[-1]
+        else:
+            spectrumGroup = None
+        popup = SeriesPeakCollectionPopup(parent=self.guiModule.mainWindow,
+                                          collectionName=collectionName,
+                                          mainWindow=self.guiModule.mainWindow,
+                                          spectrumGroup = spectrumGroup)
+        popup.exec_()
         if popup is not None:
             topCollection = popup._topCollection
             if topCollection is not None:
@@ -410,6 +442,14 @@ class GuiInputDataPanel(GuiSettingPanel):
                 widget.update()
                 if widget is not None:
                     widget.select(topCollection.pid)
+
+    def _experimentSelectorChanged(self, *args, **kwargs):
+        widget = self.getWidget(guiNameSpaces.WidgetVarName_ExperimentName)
+        value = widget.getByText()
+        settingsHandler = self.guiModule.settingsPanelHandler
+        experimentSelectorHandler = settingsHandler.experimentSelectorHandler
+        experimentSelectorHandler.experimentSelector = value
+
 
     def _createSpectrumGroupCallback(self):
         """ Show the relevant Popup """
@@ -524,7 +564,7 @@ class GuiInputDataPanel(GuiSettingPanel):
             return
         spGroup = self.guiModule.project.getByPid(sgPids[-1])
         dataTableName = inputSettings.get(guiNameSpaces.WidgetVarName_DataTableName, None)
-        experimentName = inputSettings.get(guiNameSpaces.WidgetVarName_ExperimentName, sv.NA)
+        experimentName = inputSettings.get(guiNameSpaces.WidgetVarName_ExperimentName, sv.USERDEFINEDEXPERIMENT)
         if not spGroup:
             getLogger().warn('Cannot create an input DataTable without a SpectrumGroup. Select one first')
             return

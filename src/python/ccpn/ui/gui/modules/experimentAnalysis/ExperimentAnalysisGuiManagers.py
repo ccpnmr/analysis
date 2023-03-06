@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -11,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:28 +0100 (Wed, October 26, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-03-06 12:41:51 +0000 (Mon, March 06, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,7 +29,7 @@ from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import PanelPositions, TopFrame, BottomFrame,\
     LeftFrame, RightFrame
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
-
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentSelectors import _registerExperimentSelectors, ExperimentSelectorHandler
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Splitter import Splitter
@@ -221,6 +221,8 @@ class SettingsPanelHandler(ExperimentAnalysisHandlerABC):
         self._marginSizes = (5, 5, 5, 5)
         self._panels = {}
         self.tabs = defaultdict()
+        _registerExperimentSelectors()
+        self.experimentSelectorHandler = ExperimentSelectorHandler(guiModule)
         self.settingsWidget = self.guiModule.settingsWidget
         self.settingsWidget.setContentsMargins(*self._marginSizes)
         self.settingsTabWidget = Tabs(self.settingsWidget, setLayout=True, grid=(0, 0))
@@ -253,7 +255,7 @@ class SettingsPanelHandler(ExperimentAnalysisHandlerABC):
         return settings
 
     def getInputDataSettings(self) -> dict:
-        return self.getAllSettings().get(guiNameSpaces.Label_InputData, {})
+        return self.getAllSettings().get(guiNameSpaces.Label_SetupTab, {})
 
     def _getSelectedSpectrumGroup(self):
         """ Get the SpectrumGroup Obj from the Widgets. """

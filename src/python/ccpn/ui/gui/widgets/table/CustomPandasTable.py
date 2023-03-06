@@ -91,9 +91,19 @@ class CustomDataFrameTable(Table):
         df = pd.DataFrame(data)
         frames = [s for h, s in dataFrame.iterrows()]
         self._objects = frames
+
+        # self.updateDf(df)
+        # self._internalColumns.extend(_internalColumns)
+        # self.setHiddenColumns(hiddenColumns)
+
+        cols = list(self.headerColumnMenu._internalColumns)
+        cols.extend(_internalColumns)
+        self.headerColumnMenu.setInternalColumns(cols)
+        self.headerColumnMenu.setDefaultColumns(hiddenColumns)
         self.updateDf(df)
-        self._internalColumns.extend(_internalColumns)
-        self.setHiddenColumns(hiddenColumns)
+
+        # update the visible columns
+        self.headerColumnMenu.refreshHiddenColumns()
 
     def getObjects(self):
         return self._objects

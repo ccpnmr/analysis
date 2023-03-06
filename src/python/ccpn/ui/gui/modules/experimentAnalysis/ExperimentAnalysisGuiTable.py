@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:28 +0100 (Wed, October 26, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-03-06 15:32:45 +0000 (Mon, March 06, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -74,17 +74,19 @@ class _ExperimentalAnalysisTableABC(Table):
 
         # initialise the currently attached dataFrame
 
-        self._hiddenColumns = [sv._ROW_UID, sv.COLLECTIONID, sv.PEAKPID, sv.NMRRESIDUEPID, sv.NMRCHAINNAME,
+        _hiddenColumns = [sv._ROW_UID, sv.COLLECTIONID, sv.PEAKPID, sv.NMRRESIDUEPID, sv.NMRCHAINNAME,
                                sv.NMRRESIDUETYPE, sv.NMRATOMNAMES, sv.SERIESUNIT, sv.SPECTRUMPID,
                                sv.VALUE, sv.VALUE_ERR,
                                sv.SERIES_STEP_X, sv.SERIES_STEP_Y, sv.MINIMISER_METHOD, sv.MINIMISER_MODEL, sv.CHISQR,
                                sv.REDCHI, sv.AIC, sv.BIC,
                                sv.MODEL_NAME, sv.NMRRESIDUECODETYPE]
-        errCols = [tt for tt in self.columnTexts if sv._ERR in tt]
-        self._hiddenColumns += errCols
+        errCols = [tt for tt in self.headerColumnMenu.columnTexts if sv._ERR in tt]
+        _hiddenColumns += errCols
 
         # initialise the table
         super().__init__(parent=parent, **kwds)
+
+        self.headerColumnMenu.setDefaultColumns(_hiddenColumns, update=False)
 
         self.guiModule = guiModule
         self.moduleParent = guiModule

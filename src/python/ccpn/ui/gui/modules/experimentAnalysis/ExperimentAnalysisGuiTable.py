@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-06 15:32:45 +0000 (Mon, March 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-06 15:43:23 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -73,6 +73,8 @@ class _ExperimentalAnalysisTableABC(Table):
         kwds['setLayout'] = True
 
         # initialise the currently attached dataFrame
+        # initialise the table
+        super().__init__(parent=parent, **kwds)
 
         _hiddenColumns = [sv._ROW_UID, sv.COLLECTIONID, sv.PEAKPID, sv.NMRRESIDUEPID, sv.NMRCHAINNAME,
                                sv.NMRRESIDUETYPE, sv.NMRATOMNAMES, sv.SERIESUNIT, sv.SPECTRUMPID,
@@ -82,10 +84,6 @@ class _ExperimentalAnalysisTableABC(Table):
                                sv.MODEL_NAME, sv.NMRRESIDUECODETYPE]
         errCols = [tt for tt in self.headerColumnMenu.columnTexts if sv._ERR in tt]
         _hiddenColumns += errCols
-
-        # initialise the table
-        super().__init__(parent=parent, **kwds)
-
         self.headerColumnMenu.setDefaultColumns(_hiddenColumns, update=False)
 
         self.guiModule = guiModule
@@ -245,9 +243,9 @@ class _ExperimentalAnalysisTableABC(Table):
     def _setVisibleColumns(self, headers, setVisible):
         for header in headers:
             if setVisible:
-                self._showColumn(str(header))
+                self.headerColumnMenu._showColumnName(str(header))
             else:
-                self._hideColumn(str(header))
+                self.headerColumnMenu._hideColumnName(str(header))
 
     def _toggleSeriesStepsHeaders(self, setVisible=True):
         """ Show/Hide the rawData columns"""
@@ -261,7 +259,7 @@ class _ExperimentalAnalysisTableABC(Table):
 
     def _toggleErrorsHeaders(self, setVisible=True):
         """ Show/Hide the Fitting/Calculation error columns"""
-        headers = [tt for tt in self.columnTexts if sv._ERR in tt]
+        headers = [tt for tt in self.headerColumnMenu.columnTexts if sv._ERR in tt]
         self._setVisibleColumns(headers, setVisible)
 
     def _toggleCalculationErrorsHeaders(self, setVisible=True):
@@ -269,6 +267,7 @@ class _ExperimentalAnalysisTableABC(Table):
         headers = []
         calcModel = self.guiModule.backendHandler.currentCalculationModel
         if calcModel is not None:
+            headers = calcModel.modelArgumentErrorNames
             headers = calcModel.modelArgumentErrorNames
         self._setVisibleColumns(headers, setVisible)
 

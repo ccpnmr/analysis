@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-06 14:10:59 +0000 (Mon, March 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-06 14:12:16 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.RestraintTable import RestraintTable
 from ccpn.ui._implementation.Strip import Strip
 from ccpn.core.StructureData import StructureData
+from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.lib._CoreMITableFrame import _CoreMITableWidgetABC
@@ -53,6 +54,9 @@ from ccpn.ui.gui.widgets.GuiTable import _getValueByHeader
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
 from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.ui.gui.widgets.VLine import VLine
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.util.Common import flattenLists
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import joinPath
@@ -63,7 +67,7 @@ from ccpn.ui.gui.widgets.table._MITableDelegates import _ExpandVerticalCellDeleg
 
 
 SELECT = '< Select >'
-DIVIDER = '------'
+PULLDOWNSEPARATOR = '------'
 
 
 #=========================================================================================
@@ -996,7 +1000,7 @@ class RestraintFrame(_CoreTableFrameABC):
         self.expandButtons = ButtonList(parent=self, texts=[' Expand all', ' Collapse all'],
                                         callbacks=[partial(self._expandAll, True), partial(self._expandAll, False), ])
 
-        from ccpn.ui.gui.widgets.PulldownList import PulldownList
+        vLine = VLine(self, colour=getColours()[DIVIDER], width=16)
 
         self.pdbSelect = PulldownList(self, tipText='Select PDB Source',
                                       # clickToShowCallback=self._selectPDBAboutToShow,
@@ -1011,8 +1015,9 @@ class RestraintFrame(_CoreTableFrameABC):
         # move to the correct positions
         self.addWidgetToTop(self.refreshButton, 2)
         self.addWidgetToTop(self.expandButtons, 3)
-        self.addWidgetToTop(self.pdbSelect, 4)
-        self.addWidgetToTop(self.showOnViewerButton, 5)
+        self.addWidgetToTop(vLine, 4)
+        self.addWidgetToTop(self.pdbSelect, 5)
+        self.addWidgetToTop(self.showOnViewerButton, 6)
 
         self._modulePulldown.setDisabled(True)
         self._modulePulldown.setVisible(False)
@@ -1048,26 +1053,31 @@ class RestraintFrame(_CoreTableFrameABC):
     def _showOnMolecularViewer(self):
         """Show the structure in the viewer
         """
+        selected = self.pdbSelect.getObject()
         selectedPeaks = self._tableWidget.getSelectedObjects() or []
 
         # get the restraints to display
         restraints = flattenLists([pk.restraints for pk in selectedPeaks])
 
-        # get the PDB file from the parent restraintTable.
-        if pdbPath := next((rs.restraintTable.structureData.moleculeFilePath for rs in restraints if rs.restraintTable.structureData.moleculeFilePath), None):
-            getLogger().info(f'Using pdb file {pdbPath} for displaying violation on Molecular viewer.')
+        if isinstance(selected, StructureData):
+            if (pdbPath := selected.moleculeFilePath):
+                getLogger().info(f'Using pdb file {pdbPath} for displaying violation on Molecular viewer.')
 
-        else:
-            MessageDialog.showWarning('No Molecule File found',
-                                      'To add a molecule file path: Find the StructureData on sideBar,'
-                                      'open the properties popup, add a full PDB file path in the entry widget.')
-            return
+                # run Pymol
+                pymolSPath = joinPath(self.moduleParent.pymolScriptsPath, PymolScriptName)
 
-        # run Pymol
-        pymolSPath = joinPath(self.moduleParent.pymolScriptsPath, PymolScriptName)
+                pymolScriptPath = pyMolUtil._restraintsSelection2PyMolFile(pymolSPath, pdbPath, restraints)
+                pyMolUtil.runPymolWithScript(self.application, pymolScriptPath)
 
-        pymolScriptPath = pyMolUtil._restraintsSelection2PyMolFile(pymolSPath, pdbPath, restraints)
-        pyMolUtil.runPymolWithScript(self.application, pymolScriptPath)
+            else:
+                MessageDialog.showWarning('No Molecule File found',
+                                          f'PDB filepath not set for {selected.pid}\n'
+                                          'To add a molecule file path: Find the StructureData on sideBar,'
+                                          'open the properties popup, add a full PDB filepath in the entry widget.')
+                return
+
+        elif isinstance(selected, StructureEnsemble):
+            MessageDialog.showNotImplementedMessage()
 
     def _selectionPulldownCallback(self, item):
         """Notifier Callback for selecting object from the pull down menu
@@ -1100,11 +1110,11 @@ class RestraintFrame(_CoreTableFrameABC):
 
         objects = [None] + cSets + [None]
         texts = [SELECT] + [cSet.comparisonSet.pid for cSet in self.resources.comparisonSets
-                            if isinstance(cSet.comparisonSet, StructureData)] + [DIVIDER]
+                            if isinstance(cSet.comparisonSet, StructureData)] + [PULLDOWNSEPARATOR]
 
-        # add the structureEnsembles
-        objects.extend(self.project.structureEnsembles)
-        texts.extend(se.pid for se in self.project.structureEnsembles)
+        # # add the structureEnsembles
+        # objects.extend(self.project.structureEnsembles)
+        # texts.extend(se.pid for se in self.project.structureEnsembles)
 
         current = combo.getText()
         with self.blockWidgetSignals():
@@ -1113,7 +1123,7 @@ class RestraintFrame(_CoreTableFrameABC):
             combo.setData(texts=texts, objects=objects)
             combo.select(current)
 
-        combo.disableLabelsOnPullDown([DIVIDER])
+        combo.disableLabelsOnPullDown([PULLDOWNSEPARATOR])
         combo.update()
 
     #=========================================================================================

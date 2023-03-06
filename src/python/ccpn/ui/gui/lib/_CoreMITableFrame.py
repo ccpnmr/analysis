@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-03 16:16:04 +0000 (Fri, March 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-06 14:10:58 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,7 @@ from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Logging import getLogger
 
-from sandbox.Ed.MIProjectTable import _MIProjectTableABC
+from ccpn.ui.gui.widgets.table.MIProjectTable import _MIProjectTableABC
 
 
 #=========================================================================================

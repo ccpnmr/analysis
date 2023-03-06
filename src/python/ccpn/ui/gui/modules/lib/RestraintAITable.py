@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-03 16:16:04 +0000 (Fri, March 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-06 14:10:59 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -58,8 +58,8 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Path import joinPath
 from ccpn.util.OrderedSet import OrderedSet
 
-from sandbox.Ed._MITableModel import _MITableModel
-from sandbox.Ed._MITableDelegates import _ExpandVerticalCellDelegate
+from ccpn.ui.gui.widgets.table._MITableModel import _MITableModel
+from ccpn.ui.gui.widgets.table._MITableDelegates import _ExpandVerticalCellDelegate
 
 
 SELECT = '< Select >'

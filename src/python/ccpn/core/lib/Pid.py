@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-03-06 13:07:26 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -49,7 +49,7 @@ def createPid(head: str, *args: str) -> Pid:
     The head is  not checked - it should be either a valid pid or a class code"""
 
     # map args to corrected strings
-    ll = [val.translate(remapSeparators) for val in args]
+    ll = [val.translate(remapSeparators) for val in args if val is not None]
 
     if head[-1] == PREFIXSEP:
         sep = ''

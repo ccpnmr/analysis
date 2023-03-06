@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-01 18:39:44 +0000 (Wed, March 01, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-06 18:43:33 +0000 (Mon, March 06, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -2189,7 +2189,9 @@ def _createPeak(spectrum, peakList=None, height=None, **ppmPositions) -> Optiona
 
         try:
             # try and match the axis codes before creating new peakList (if required)
-            indices = spectrum.getByAxisCodes('dimensionIndices', axisCodes)
+            # indices = spectrum.getByAxisCodes('dimensionIndices', axisCodes)  # (1)
+            indices = getAxisCodeMatchIndices(spectrum.axisCodes, axisCodes)  # (2)
+
         except Exception as es:
             getLogger().warning(f'Non-matching axis codes found {axisCodes}')
             return
@@ -2204,7 +2206,8 @@ def _createPeak(spectrum, peakList=None, height=None, **ppmPositions) -> Optiona
                 peakList = spectrum.newPeakList()
 
         # should get all ppm's from the reference - shouldn't really be any Nones now though
-        _ppmPositions = [_ppmPositions[ii] for ii in indices]
+        # _ppmPositions = [_ppmPositions[indices.index(ind)] if ind in indices else None for ind, ii in enumerate(indices)]  # (1) - reverse lookup
+        _ppmPositions = [_ppmPositions[ii] for ii in indices]  # (2)
         if height is None:
             height = spectrum.getHeight(_ppmPositions)
         specLimits = spectrum.spectrumLimits

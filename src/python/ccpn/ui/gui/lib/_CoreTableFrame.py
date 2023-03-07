@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-03 16:16:04 +0000 (Fri, March 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-07 21:17:30 +0000 (Tue, March 07, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -65,10 +65,10 @@ class _CoreTableWidgetABC(_ProjectTableABC):
                          showHorizontalHeader=showHorizontalHeader,
                          showVerticalHeader=showVerticalHeader,
                          setLayout=True,
-                         enableExport=self._enableExport,
-                         enableDelete=self._enableDelete,
-                         enableCopyCell=self._enableCopyCell,
-                         enableSearch=self._enableSearch,
+                         # enableExport=self._enableExport,
+                         # enableDelete=self._enableDelete,
+                         # enableCopyCell=self._enableCopyCell,
+                         # enableSearch=self._enableSearch,
                          **kwds)
 
         self.headerColumnMenu.setInternalColumns(self._internalColumns, update=False)

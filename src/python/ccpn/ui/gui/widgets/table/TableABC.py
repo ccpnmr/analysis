@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-07 14:12:15 +0000 (Tue, March 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-07 21:17:30 +0000 (Tue, March 07, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -100,6 +100,12 @@ class TableABC(QtWidgets.QTableView):
     deleteMenu = None
     exportMenu = None
     headerColumnMenu = None
+
+    # define overriding attributes here for subclassing - not setting will default to these
+    _enableSearch = False
+    _enableDelete = False
+    _enableExport = False
+    _enableCopyCell = False
 
     _columnDefs = None
     _enableSelectionCallback = False
@@ -251,10 +257,10 @@ class TableABC(QtWidgets.QTableView):
         """Add the required menus to the table
         """
         # create the individual table-menu and table-header-menu options
-        self.searchMenu = TableSearchMenu(self, enableSearch if enableSearch != NOTHING else False)
-        self.copyCellMenu = TableCopyCell(self, enableCopyCell if enableCopyCell != NOTHING else False)
-        self.deleteMenu = TableDelete(self, enableDelete if enableDelete != NOTHING else False)
-        self.exportMenu = TableExport(self, enableExport if enableExport != NOTHING else False)
+        self.searchMenu = TableSearchMenu(self, enableSearch if enableSearch != NOTHING else self._enableSearch)
+        self.copyCellMenu = TableCopyCell(self, enableCopyCell if enableCopyCell != NOTHING else self._enableCopyCell)
+        self.deleteMenu = TableDelete(self, enableDelete if enableDelete != NOTHING else self._enableDelete)
+        self.exportMenu = TableExport(self, enableExport if enableExport != NOTHING else self._enableExport)
         self.headerColumnMenu = TableHeaderColumns(self, True)
 
         # add options to the table-menu and table-header-menu

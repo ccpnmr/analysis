@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-06 16:37:07 +0000 (Mon, March 06, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-07 14:12:15 +0000 (Tue, March 07, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1081,4 +1081,42 @@ class TableABC(QtWidgets.QTableView):
     # Table functions
     #=========================================================================================
 
-    ...
+    def setSearchEnabled(self, value):
+        """Enable/disable the search option in the right-mouse menu.
+
+        :param bool value: enabled True/False
+        """
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}.setSearchEnabled: value must be True/False')
+
+        self.searchMenu.enabled = value
+
+    def setExportEnabled(self, value):
+        """Enable/disable the export option in the right-mouse menu.
+
+        :param bool value: enabled True/False
+        """
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}.setExportEnabled: value must be True/False')
+
+        self.exportMenu.enabled = value
+
+    def setDeleteEnabled(self, value):
+        """Enable/disable the delete option in the right-mouse menu.
+
+        :param bool value: enabled True/False
+        """
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}.setDeleteEnabled: value must be True/False')
+
+        self.deleteMenu.enabled = value
+
+    def setCopyCellEnabled(self, value):
+        """Enable/disable the copyCell option in the right-mouse menu.
+
+        :param bool value: enabled True/False
+        """
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}.setCopyCellEnabled: value must be True/False')
+
+        self.copyCellMenu.enabled = value

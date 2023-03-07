@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-06 13:28:15 +0000 (Mon, March 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-07 13:57:47 +0000 (Tue, March 07, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -59,17 +59,26 @@ class SilentKernel(InProcessKernel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def _abort_queues(self):
+    async def _abort_queues(self):
         """ Re-implementation  to avoid logging extra warning from the Kernel"""
         return
 
 class _ProcessKernelManager(QtInProcessKernelManager):
+
+
     def start_kernel(self, **kwds):
         self.kernel = SilentKernel(parent=self, session=self.session)
 
     def shutdown_kernel(self):
-        # Closing down the kernel and thread, We might need to call  implicitly the
-        # History thread close ....
+
+        # close  the history thread
+        inProcessInteractiveShell = self.kernel.shell
+        if inProcessInteractiveShell is not None:
+            history_manager = inProcessInteractiveShell.history_manager
+            history_manager.end_session()
+            history_manager.save_thread.stop()
+
+        # Closing down the kernel and threads
         self.kernel.iopub_thread.stop()
         self._kill_kernel()
 
@@ -88,16 +97,16 @@ class IpythonConsole(Widget):
         # NOTE:ED - check that this is working for Linux/MacOS
         if isWindowsOS():
             import asyncio
-
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-        import warnings
+        ## Removed the ccpn kernel until found the cause of threading issues.
+        # import warnings
+        # with warnings.catch_warnings():
+        #     # temporarily suppress the warnings from the incompatible pydevd - not sure how else to solve this :|
+        #     warnings.simplefilter('ignore')
+        #     km = _ProcessKernelManager()
 
-        with warnings.catch_warnings():
-            # temporarily suppress the warnings from the incompatible pydevd - not sure how else to solve this :|
-            warnings.simplefilter('ignore')
-            km = _ProcessKernelManager()
-
+        km = QtInProcessKernelManager()
         km.start_kernel()
         km.kernel.gui = 'qt4'
         self.mainWindow = mainWindow

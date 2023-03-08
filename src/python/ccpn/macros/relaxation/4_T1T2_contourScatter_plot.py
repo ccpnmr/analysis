@@ -25,7 +25,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-22 10:50:03 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-08 16:58:57 +0000 (Wed, March 08, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -49,6 +49,13 @@ sequence  = 'KLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
 ss_sequence   =  'BBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
 
 
+####### Plot limits
+# Keep None if you want to calculate a best fit from data.
+xMinLim_UserDefined = None
+xMaxLim_UserDefined = None
+yMinLim_UserDefined = None
+yMaxLim_UserDefined = None
+
 ####### S2_contours
 ##  Order Parameter Lines
 S2_contours_minValue = 0.3
@@ -70,8 +77,8 @@ ictScalingFactor = 1e-12
 
 ## Some Graphics Settings
 
-titlePdf  = 'GB1 Relaxation Rates with Isotropic-Model Contouring Lines '
-showInteractivePlot = False # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
+titlePdf  = 'Relaxation Rates with Isotropic-Model Contouring Lines '
+showInteractivePlot = True # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
 
 fontTitleSize = 6
 fontXSize = 4
@@ -102,7 +109,7 @@ import ccpn.framework.lib.experimentAnalysis.spectralDensityLib as sdl
 import ccpn.macros.relaxation._macrosLib as macrosLib
 from ccpn.util.Common import percentage
 
-def _plotClusters(pdf, xMaxLim=800):
+def _plotClusters(pdf):
     fig = plt.figure(dpi=300)
     fig.suptitle(titlePdf, fontsize=fontTitleSize)
 
@@ -110,6 +117,14 @@ def _plotClusters(pdf, xMaxLim=800):
     ## R1 vs R2
     T1 = 1/R1*1e3
     T2 = 1 / R2*1e3
+
+    xPerc = percentage(20, np.mean(T1))
+    yPerc = percentage(50, np.mean(T2))
+    xMinLim = 0
+    xMaxLim = np.max(T1)  + xPerc
+    yMinLim = 0
+    yMaxLim =np.max(T2) + yPerc
+
     ax.scatter(T1, T2, s=1, color='black', )
     for i, txt in enumerate(x):
         extraY = percentage(0.5, T2[i])
@@ -140,9 +155,9 @@ def _plotClusters(pdf, xMaxLim=800):
             ax.plot(xRct, yRct, rctLineColour, linewidth=0.5, label='_'+str(round(n, 2)))
         else:
             ax.plot(xRct, yRct, rctLineColour, linewidth=0.2, label='_' + str(round(n, 2)))
-        # add labels
-    macrosLib.labelLines(plt.gca().get_lines(), xvals=[xMaxLim+10]*len(rctLines), color=rctLineColour, align=False, clip_on=False, fontsize=4, zorder=None)
 
+    lXseValues = []
+    lYseValues = []
     for j in s2Lines:
         n, lines = j
         s2Array = np.array(lines)
@@ -154,11 +169,39 @@ def _plotClusters(pdf, xMaxLim=800):
         lXse = xSe[ixMinxSe]
         lYse = ySe[ixMinxSe]
         ax.annotate(str(round(n, 2)), (lXse, lYse), color=s2LineColour, fontsize=5)
+        lXseValues.append(lXse)
+        lYseValues.append(lYse)
+
+    try:
+        lXseValues = np.array(lXseValues)
+        lYseValues = np.array(lYseValues)
+        xMaxLim = np.min(lXseValues[lXseValues>np.max(T1)])
+        xMinLim = np.min(lXseValues) if np.min(lXseValues) < np.min(T1) else np.min(T1)
+        yMaxLim = np.max(lYseValues[lYseValues>np.max(T2)])
+    except Exception as err:
+        print(f'GUI error. Cannot determine the best fit for setting the plot zoom limits. {err}')
+
+     # add labels
+
     ax.plot([],[], rctLineColour, linewidth=0.5, label='$T_m$ rotational correlation time') # just a  placeholder
     ax.plot([],[],  s2LineColour, linewidth=0.5, label='$S^2$ order parameter')
 
-    ax.set_xlim(300, xMaxLim+10)
-    ax.set_ylim(0, 500)
+    if xMaxLim_UserDefined is not None:
+        xMaxLim = xMaxLim_UserDefined
+        xPerc = 0
+    if xMinLim_UserDefined  is not None:
+        xMinLim = xMinLim_UserDefined
+        xPerc = 0
+    if yMaxLim_UserDefined  is not None:
+        yMaxLim = yMaxLim_UserDefined
+    if yMinLim_UserDefined  is not None:
+        yMinLim = yMinLim_UserDefined
+
+
+    macrosLib.labelLines(plt.gca().get_lines(), xvals=[xMaxLim + xPerc] * len(rctLines), color=rctLineColour,
+                         align=False, clip_on=False, fontsize=4, zorder=None)
+    ax.set_xlim(xMinLim - xPerc, xMaxLim + xPerc)
+    ax.set_ylim(yMinLim, yMaxLim)
     ax.legend(prop={'size': 6})
 
     pdf.savefig()

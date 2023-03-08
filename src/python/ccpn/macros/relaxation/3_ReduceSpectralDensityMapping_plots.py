@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-22 10:50:03 +0000 (Wed, February 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-08 16:58:57 +0000 (Wed, March 08, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -55,7 +55,7 @@ ss_sequence   =  'BBBBBCCCCBBBBBBCCCCHHHHHHHHHHHHHHCCCCCBBBBCCCCCBBBBBC'
 spectrometerFrequency=600.130
 ## Some Graphics Settings
 
-titlePdf  = 'GB1 Reduced Spectral Density Mapping'
+titlePdf  = 'Reduced Spectral Density Mapping'
 showInteractivePlot = False # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
 
 lineColour='black'

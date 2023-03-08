@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-23 18:29:07 +0000 (Thu, February 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-08 16:58:57 +0000 (Wed, March 08, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -61,7 +61,7 @@ NOE_limitExclusion = 0.65
 spectrometerFrequency=600.13
 
 ## Some Graphics Settings
-titlePdf  = 'Anisotropy and Chemical Exchange Determination of GB1'
+titlePdf  = 'Anisotropy and Chemical Exchange Determination'
 figureTitleFontSize = 8
 showInteractivePlot = False # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
 scatterColor = 'navy'

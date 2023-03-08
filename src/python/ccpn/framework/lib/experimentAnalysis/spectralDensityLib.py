@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-21 19:34:43 +0000 (Tue, February 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-08 15:36:28 +0000 (Wed, March 08, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -653,3 +653,45 @@ def _fitIsotropicModelFromT1T2NOE(resultRSDM_dataframe, spectrometerFrequency=50
         resultDf.loc[j, 'score'] = score
 
     return resultDf, initialDf #could put in the same df, with the initialDf as first row
+
+
+
+############################################################
+############               Consistency Tests                  #################
+############################################################
+
+
+def __consistencyTest( r1=None, r2=None, noe=None, thetaAngle=None, tc=None, frequencies=None,):
+    """
+    UNDER IMPLEMENTATION. DO NOT USE. Implemented as Relax.
+    :param thetaAngle: the angle between the 15N-1H. vector and the principal axis of the 15N chemical shift tensor
+    """
+
+    d = calculate_d_factor()
+    c = calculate_d_factor()
+    gh = constants.HgyromagneticRatio
+    gx = constants.N15gyromagneticRatio
+
+    j0 = calculateJ0(noe, r1, r2, d, c, gx, gh)
+    jwx = calculateJ0(noe, r1, r2, d, c, gx, gh)
+    jwh = calculateJ0(noe, r1, r2, d, c, gx, gh)
+
+    # P_2. Second rank Legendre polynomial: p_2(x) = 0.5 * (3 * (x ** 2) -1) where x is the cosine of the angle Theta when expressed in radians.
+    p_2 = 0.5 * ((3.0 * (np.cos(thetaAngle * pi / 180)) ** 2) - 1)
+
+    # Eta,  cross-correlation rate between 15N CSA and 15N-1H dipolar interaction. Fushman & Cowburn (1998) JACS, 120: 7109-7110.
+    eta = ((d * c/3.0) ** 0.5) * (4.0 * j0 + 3.0 * jwx) * p_2
+
+    # F_eta.
+    f_eta = eta * gh / (frequencies[0, 3] * (4.0 + 3.0 / (1 + (frequencies[0, 1] * tc) ** 2)))
+
+    # P_HF.
+    # P_HF is the contribution to R2 from high frequency motions.
+    # P_HF = 0.5 * d * [J(wH-wN) + 6 * J(wH) + 6 * J(wH+wN)].
+    # Here, P_HF is described using a reduced spectral density approach.
+    p_hf = 1.3 * (gx / gh) * (1.0 - noe) * r1
+
+    # F_R2 tests the consistency of the transverse relaxation data.
+    f_r2 = (r2 - p_hf) / ((4.0 + 3.0 / (1 + (frequencies[0, 1] * tc) ** 2)) * (d + c / 3.0))
+
+    return j0, f_eta, f_r2

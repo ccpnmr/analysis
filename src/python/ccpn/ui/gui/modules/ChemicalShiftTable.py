@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-01 15:13:20 +0000 (Wed, March 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-08 15:06:47 +0000 (Wed, March 08, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -281,6 +281,11 @@ class _NewChemicalShiftTable(_ProjectTableABC):
     selectCurrent = True
     callBackClass = ChemicalShift
     search = False
+
+    _enableSearch = True
+    _enableDelete = True
+    _enableExport = True
+    _enableCopyCell = True
 
     # set the queue handling parameters
     _maximumQueueLength = 25

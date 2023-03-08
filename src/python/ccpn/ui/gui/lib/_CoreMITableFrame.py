@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-07 21:17:29 +0000 (Tue, March 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-08 15:06:47 +0000 (Wed, March 08, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -67,10 +67,6 @@ class _CoreMITableWidgetABC(_MIProjectTableABC):
                          showHorizontalHeader=showHorizontalHeader,
                          showVerticalHeader=showVerticalHeader,
                          setLayout=True,
-                         # enableExport=self._enableExport,
-                         # enableDelete=self._enableDelete,
-                         # enableCopyCell=self._enableCopyCell,
-                         # enableSearch=self._enableSearch,
                          **kwds)
 
         self.headerColumnMenu.setInternalColumns(self._internalColumns, False)

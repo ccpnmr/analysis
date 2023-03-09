@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-08 16:58:57 +0000 (Wed, March 08, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-09 10:46:37 +0000 (Thu, March 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -188,9 +188,10 @@ def _plotScatterRates(pdf):
     plt.subplots_adjust(hspace=hspace) # space between plots
     plt.subplots_adjust(bottom=0.15,)# space title and plots
 
-    txt =  f'''Average Order Parameter $S^2$: {round(avS2, 3)}
-    Overall Correlation Time $T_m$: {round(avCt, 3)} ns'''
-    plt.figtext(0.5, 0.01, txt, ha="center", fontsize=fontXSize,)
+
+    # txt =  f'''Average Order Parameter $S^2$: {round(avS2, 3)}
+    # Overall Correlation Time $T_m$: {round(avCt, 3)} ns'''
+    # plt.figtext(0.5, 0.01, txt, ha="center", fontsize=fontXSize,)
 
     pdf.savefig()
     return fig
@@ -250,7 +251,7 @@ r1f = R1[mask]
 r2f = R2[mask]
 noef = NOE[mask]
 Ct = sdl.estimateOverallCorrelationTimeFromR1R2(r1f, r2f, spectrometerFrequency=spectrometerFrequency)
-avCt = abs(np.average(Ct)*1e9) #in nanoSec
+avCt = abs(np.mean(Ct)*1e9) #in nanoSec
 
 
 ####################     end data preparation     ##################

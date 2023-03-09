@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-09 10:46:37 +0000 (Thu, March 09, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-09 12:26:00 +0000 (Thu, March 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -45,6 +45,24 @@ PlanckConstant                = 6.62606876 * 1e-34
 DiracConstant                  = PlanckConstant / (2.0 * pi)
 MagneticConstant            = 4.0 * pi * 1e-7                      # permeability of vacuum (free space)
 BoltzmannConstant          = 1.380650424 * 1e-23        #  in SI units of J.K^-1
+
+# Gyromagetic Ratio (MHz/T) to be moved to the IsotopeRecords Json?
+GMR_1H           =  42.577
+GMR_1H_H2O  =  42.576
+GMR_2H           =  6.536
+GMR_3H           =  45.415
+GMR_3He          =  -32.434
+GMR_7Li       =  16.546
+GMR_13C     = 10.708
+GMR_14N     =  3.077
+GMR_15N     =  -4.316
+GMR_17O     =  -5.772
+GMR_19F     =  40.078
+GMR_23Na   = 11.262
+GMR_27Al    = 11.103
+GMR_29Si    =  -8.465
+GMR_31P     =  17.235
+
 
 # https://en.wikipedia.org/wiki/Gyromagnetic_ratio
 REDUCED_PLANK = 1.05457162853e-34

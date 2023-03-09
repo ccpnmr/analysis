@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-28 13:03:57 +0000 (Tue, February 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-09 11:46:34 +0000 (Thu, March 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -41,8 +41,8 @@ def restrictedPick(peakListView, axisCodes, peak=None, nmrResidue=None):
 
     spectrum = peakListView.spectrumView.spectrum
     peakList = spectrum.peakLists[0]
-    doPos = peakListView.spectrumView.displayPositiveContours
-    doNeg = peakListView.spectrumView.displayNegativeContours
+    doPos = spectrum.includePositiveContours
+    doNeg = spectrum.includeNegativeContours
 
     if peak and nmrResidue:
         # cannot do both at the same time

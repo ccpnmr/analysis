@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-03 16:16:05 +0000 (Fri, March 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-09 10:14:19 +0000 (Thu, March 09, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,7 @@ __date__ = "$Date: 2023-02-17 10:41:16 +0100 (Fri, February 17, 2023) $"
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from dataclasses import dataclass, field
-
+from typing import List
 
 ORIENTATIONS = {'h'                 : QtCore.Qt.Horizontal,
                 'horizontal'        : QtCore.Qt.Horizontal,
@@ -93,5 +93,5 @@ class _TableSelection():
     """Small Class to pass row/column information from the main-table to the headers
     """
     orientation: int = None
-    rows: list[int] = field(default_factory=list)
-    columns: list[int] = field(default_factory=list)
+    rows: List[int] = field(default_factory=list)
+    columns: List[int] = field(default_factory=list)

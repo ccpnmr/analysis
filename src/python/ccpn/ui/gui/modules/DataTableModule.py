@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-07 21:17:30 +0000 (Tue, March 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-10 11:56:42 +0000 (Fri, March 10, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -320,6 +320,8 @@ class _TableWidget(Table):
     _hiddenColumns = []
 
     _defaultEditable = False
+    _enableCopyCell = True
+    _enableExport = True
     _enableSearch = True
 
     _rowHeightScale = 1.0

@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:46 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-03-10 18:39:55 +0000 (Fri, March 10, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,14 +26,11 @@ __date__ = "$Date: 2020-03-30 11:32:43 +0000 (Mon, March 30, 2020) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.ui.gui.popups.AxisOrderingPopup import AxisOrderingPopup
 from PyQt5 import QtWidgets
 from itertools import permutations
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Label import Label
+# from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
-from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.core.PeakList import PeakList
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
@@ -53,8 +50,8 @@ class ReorderPeakListAxes(CcpnDialogMainWidget):
         self.application = self.mainWindow.application
         self.current = self.application.current
         self.peakList = peakList
-        self.axisCodes = None       #peakList.axisCodes
-        self._axisOrdering = None           #peakList.axisCodes
+        self.axisCodes = None  #peakList.axisCodes
+        self._axisOrdering = None  #peakList.axisCodes
         self._label = label
 
         row = 0
@@ -117,9 +114,9 @@ class ReorderPeakListAxes(CcpnDialogMainWidget):
         axisOrder = []
         if self.mainWindow and self.peakList:
             # add permutations for the axes
-            axisPerms = permutations([axisCode for axisCode in self.axisCodes])
+            axisPerms = permutations(list(self.axisCodes))
             axisOrder = tuple(permutations(list(range(len(self.axisCodes)))))
-            ll += [" ".join(ax for ax in perm) for perm in axisPerms]
+            ll += [" ".join(perm) for perm in axisPerms]
 
         self.preferredAxisOrderPulldown.pulldownList.setData(ll)
         self.preferredAxisOrderPulldown.setIndex(1 if len(ll) > 1 else 0)
@@ -130,10 +127,7 @@ class ReorderPeakListAxes(CcpnDialogMainWidget):
         index = self.preferredAxisOrderPulldown.getIndex()
 
         axisOrder = tuple(permutations(list(range(len(self.axisCodes)))))
-        if index > 0:
-            self._axisOrdering = tuple(axisOrder[index - 1])
-        else:
-            self._axisOrdering = None
+        self._axisOrdering = tuple(axisOrder[index - 1]) if index > 0 else None
 
     def _accept(self):
         self.accept()
@@ -148,15 +142,15 @@ class ReorderPeakListAxes(CcpnDialogMainWidget):
         """
         if peakList is None:
             self.pLwidget.selectFirstItem()
+        elif isinstance(peakList, PeakList):
+            for widgetObj in self.pLwidget.textList:
+                if peakList.pid == widgetObj:
+                    self.peakList = peakList
+                    self.pLwidget.select(self.peakList.pid)
+
         else:
-            if not isinstance(peakList, PeakList):
-                getLogger().warning('select: Object is not of type PeakList')
-                raise TypeError('select: Object is not of type PeakList')
-            else:
-                for widgetObj in self.pLwidget.textList:
-                    if peakList.pid == widgetObj:
-                        self.peakList = peakList
-                        self.pLwidget.select(self.peakList.pid)
+            getLogger().warning('select: Object is not of type PeakList')
+            raise TypeError('select: Object is not of type PeakList')
 
     def _pulldownPLcallback(self, data):
         """Select the peakList from the pulldown text

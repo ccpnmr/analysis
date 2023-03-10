@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-28 16:47:04 +0000 (Tue, February 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-10 18:39:55 +0000 (Fri, March 10, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -834,7 +834,7 @@ class Project(AbstractWrapperObject):
 
         try:
             result = self._wrappedData.root._undo
-        except:
+        except Exception:
             result = None
 
         return result
@@ -879,6 +879,12 @@ class Project(AbstractWrapperObject):
         else:
             undo.decreaseWaypointBlocking()
             self._logger.debug("Waypoint setting unblocked")
+
+    @property
+    def waypointBlocking(self):
+        """Return True if the undo-stack is blocked
+        """
+        return self._undo.waypointBlocking
 
     #-----------------------------------------------------------------------------------------
 

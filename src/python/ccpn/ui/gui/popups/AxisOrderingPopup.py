@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:22:27 +0000 (Tue, February 15, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-03-10 18:39:55 +0000 (Fri, March 10, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,15 +26,11 @@ __date__ = "$Date: 2019-11-27 12:20:27 +0000 (Wed, November 27, 2019) $"
 # Start of code
 #=========================================================================================
 
-import sys
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets
 from itertools import permutations
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
-from ccpn.util.floatUtils import fRound
-from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.Spectrum import Spectrum
@@ -58,7 +54,7 @@ class AxisOrderingPopup(CcpnDialogMainWidget):
         if self.spectrum:
 
             row = 0
-            Label(self.mainWidget, text=title + ': ' + label+' - '+str(spectrum.pid), bold=True, grid=(row, 0), gridSpan=(1,3))
+            Label(self.mainWidget, text=f'{title}: {label} - {str(spectrum.pid)}', bold=True, grid=(row, 0), gridSpan=(1, 3))
 
             row += 1
             self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self.mainWidget, labelText="Select Axis Ordering",
@@ -89,9 +85,9 @@ class AxisOrderingPopup(CcpnDialogMainWidget):
         axisOrder = []
         if self.mainWindow:
             # add permutations for the axes
-            axisPerms = permutations([axisCode for axisCode in self.spectrum.axisCodes])
+            axisPerms = permutations(list(self.spectrum.axisCodes))
             axisOrder = tuple(permutations(list(range(len(self.spectrum.axisCodes)))))
-            ll += [" ".join(ax for ax in perm) for perm in axisPerms]
+            ll += [" ".join(perm) for perm in axisPerms]
 
         self.preferredAxisOrderPulldown.pulldownList.setData(ll)
 
@@ -114,6 +110,10 @@ class AxisOrderingPopup(CcpnDialogMainWidget):
         self.accept()
 
 
+#=========================================================================================
+# checkSpectraToOpen
+#=========================================================================================
+
 def checkSpectraToOpen(mainWindow, spectra):
     for obj in spectra:
         if isinstance(obj, Spectrum):
@@ -125,7 +125,7 @@ def checkSpectraToOpen(mainWindow, spectra):
                 # use spectrum defaults - ignore as already set in the spectrum class
                 pass
 
-            elif axisOption == 1 and not mainWindow.project._undo.waypointBlocking:
+            elif axisOption == 1 and not mainWindow.project.waypointBlocking:
 
                 # always ask
                 popup = AxisOrderingPopup(parent=mainWindow, mainWindow=mainWindow, title='Set Spectrum Axis Ordering', spectrum=obj)
@@ -143,7 +143,7 @@ def checkSpectraToOpen(mainWindow, spectra):
                 # use spectrum defaults - ignore as already set in the spectrum class
                 pass
 
-            elif axisOption == 1 and obj.spectra and not mainWindow.project._undo.waypointBlocking:
+            elif axisOption == 1 and obj.spectra and not mainWindow.project.waypointBlocking:
 
                 # always ask
                 popup = AxisOrderingPopup(parent=mainWindow, mainWindow=mainWindow,

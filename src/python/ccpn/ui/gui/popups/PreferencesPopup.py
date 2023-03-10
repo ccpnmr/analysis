@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:46 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-03-10 16:03:28 +0000 (Fri, March 10, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -686,10 +686,16 @@ class PreferencesPopup(CcpnDialogMainWidget):
             setattr(self, FONTDATAFORMAT.format(num), _data)
 
         row += 1
-        self.glFontSizeLabel = _makeLabel(parent, text="Spectrum display font size", grid=(row, 0))
+        self.glFontSizeLabel = _makeLabel(parent, text="Spectrum display font-size", grid=(row, 0))
         self.glFontSizeData = PulldownList(parent, grid=(row, 1), hAlign='l')
         self.glFontSizeData.setMinimumWidth(PulldownListsMinimumWidth)
         self.glFontSizeData.currentIndexChanged.connect(self._queueChangeGLFontSize)
+
+        row += 1
+        self.glAxisFontSizeLabel = _makeLabel(parent, text="Spectrum display Axes font-size", grid=(row, 0))
+        self.glAxisFontSizeData = PulldownList(parent, grid=(row, 1), hAlign='l')
+        self.glAxisFontSizeData.setMinimumWidth(PulldownListsMinimumWidth)
+        self.glAxisFontSizeData.currentIndexChanged.connect(self._queueChangeGLAxisFontSize)
 
         row += 1
         _label = _makeLabel(parent, text='Available printing-fonts', grid=(row, 0), vAlign='t')
@@ -803,6 +809,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         self.glFontSizeData.addItems([str(val) for val in _OLDGLFONT_SIZES])
         self.glFontSizeData.setCurrentIndex(self.glFontSizeData.findText(str(prefApp.spectrumDisplayFontSize)))
+
+        self.glAxisFontSizeData.addItems([str(val) for val in _OLDGLFONT_SIZES])
+        self.glAxisFontSizeData.setCurrentIndex(self.glAxisFontSizeData.findText(str(prefApp.spectrumDisplayAxisFontSize)))
 
         self.showTipsAtStartUp.setChecked(prefGen.showTipOfTheDay)
         self.showAllTips.setEnabled(len(prefGen.seenTipsOfTheDay) > 0)
@@ -2415,3 +2424,12 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     def _changeGLFontSize(self, value):
         self.preferences.appearance.spectrumDisplayFontSize = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueChangeGLAxisFontSize(self, value):
+        value = int(self.glAxisFontSizeData.getText() or str(GLFONT_DEFAULTSIZE))
+        if value != self.preferences.appearance.spectrumDisplayAxisFontSize:
+            return partial(self._changeGLAxisFontSize, value)
+
+    def _changeGLAxisFontSize(self, value):
+        self.preferences.appearance.spectrumDisplayAxisFontSize = value

@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-16 11:55:36 +0000 (Thu, February 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-10 16:03:28 +0000 (Fri, March 10, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1979,6 +1979,21 @@ class CcpnGLWidget(QOpenGLWidget):
 
         return _font
 
+    def getAxisFont(self, transparent=False):
+        """Get the font for the axes
+        """
+        scale = self.viewports.devicePixelRatio
+        size = self.globalGL.glAxisFontSize
+
+        # get the correct font depending on the scaling and set the scaled height/width
+        _font = list(self.globalGL.fonts.values())[0].closestFont(size * scale)
+
+        if not (0.9999 < scale < 1.0001):
+            _font.charHeight = _font.height / scale
+            _font.charWidth = _font.width / scale
+
+        return _font
+
     def _setColourScheme(self):
         """Update colours from colourScheme
         """
@@ -2026,9 +2041,15 @@ class CcpnGLWidget(QOpenGLWidget):
         _size = self.application.preferences.appearance.spectrumDisplayFontSize
         if _size != self.globalGL.glSmallFontSize:
             self.globalGL.glSmallFontSize = _size
-            self.refreshDevicePixelRatio()
+
+        _size = self.application.preferences.appearance.spectrumDisplayAxisFontSize
+        if _size != self.globalGL.glAxisFontSize:
+            self.globalGL.glAxisFontSize = _size
+
+        self.refreshDevicePixelRatio()
 
         self.buildOverlayStrings()
+
         # # get the updated font
         # smallFont = self.getSmallFont()
         #
@@ -3518,7 +3539,7 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 labelColour = self.foreground
 
-            smallFont = self.getSmallFont()
+            smallFont = self.getAxisFont()
 
             if self._drawBottomAxis:
                 # create the X axis labelling

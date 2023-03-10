@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:47 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-03-10 16:03:28 +0000 (Fri, March 10, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -210,6 +210,22 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             _font.charWidth = _font.width / scale
 
         return _font
+
+    def getAxisFont(self, transparent=False):
+        """Get the font for the axes
+        """
+        scale = self.viewports.devicePixelRatio
+        size = self.globalGL.glAxisFontSize
+
+        # get the correct font depending on the scaling and set the scaled height/width
+        _font = list(self.globalGL.fonts.values())[0].closestFont(size * scale)
+
+        if not (0.9999 < scale < 1.0001):
+            _font.charHeight = _font.height / scale
+            _font.charWidth = _font.width / scale
+
+        return _font
+
 
     def paintGL(self):
         """Handle the GL painting
@@ -1729,7 +1745,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             else:
                 labelColour = self.foreground
 
-            smallFont = self.getSmallFont()
+            smallFont = self.getAxisFont()
 
             if self._drawBottomAxis and self._axisType == GLDefs.BOTTOMAXIS:
                 # create the X axis labelling

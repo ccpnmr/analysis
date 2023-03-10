@@ -131,12 +131,13 @@
         "PDFViewer" : ""
     },
     "appearance"       : {
-        "font0"                              : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular",
-        "font1"                              : "Monaco,13,-1,5,50,0,0,0,0,0,Regular",
-        "font2"                              : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular",
-        "font3"                              : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular",
-        "font4"                              : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular",
+        "font0"                              : "Helvetica,12,-1,5,50,0,0,0,0,0,Regular",
+        "font1"                              : "Monaco,11,-1,5,50,0,0,0,0,0,Regular",
+        "font2"                              : "Helvetica,12,-1,5,50,0,0,0,0,0,Regular",
+        "font3"                              : "Helvetica,12,-1,5,50,0,0,0,0,0,Regular",
+        "font4"                              : "Helvetica,12,-1,5,50,0,0,0,0,0,Regular",
         "spectrumDisplayFontSize"            : 13,
+        "spectrumDisplayAxisFontSize"        : 12,
         "openImportPopupOnDroppedNef"        : true,
         "rememberLastClosedModuleState"      : true,
         "autoOpenPythonConsoleOnMacroEditor" : true,
@@ -146,7 +147,7 @@
         "closeSpectrumDisplayOnLastStrip"    : false
     },
     "printSettings"    : {
-        "font"              : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular",
+        "font"              : "Helvetica,12,-1,5,50,0,0,0,0,0,Regular",
         "fontName"          : "Default Font",
         "fontSize"          : 12,
         "pageSize"          : "A4",

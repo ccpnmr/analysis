@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:41 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-10 19:10:47 +0000 (Fri, March 10, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.util.Logging import getLogger
 
 
-def navigateToCurrentPeakPosition(application, selectFirstPeak=False):
+def navigateToCurrentPeakPosition(application, selectFirstPeak=False, selectClickedPeak=False, allStrips=False):
     """
     Takes the current peak position and navigates (centres) to that position all strips and spectrum displays of the project.
     Called by shortcut. For a more generic usage refer to:  "navigateToPositionInStrip"
@@ -45,7 +45,12 @@ def navigateToCurrentPeakPosition(application, selectFirstPeak=False):
 
     project = application.project
     displays = project.spectrumDisplays
-    peak = application.current.peak
+
+    cStrip = application.current.strip
+    if selectClickedPeak and not selectFirstPeak:
+        peak = cStrip and cStrip._lastClickedObjects and cStrip._lastClickedObjects[0]
+    else:
+        peak = application.current.peak
 
     if len(application.current.peaks) > 1 and not selectFirstPeak:
         getLogger().warning('More than one peak selected. Select only one for the "navigateToCurrentPeakPosition" command.')
@@ -59,10 +64,14 @@ def navigateToCurrentPeakPosition(application, selectFirstPeak=False):
         getLogger().warning('No peak selected.')
         return
 
-    for display in displays:
-        for strip in display.strips:
-            if strip:
-                navigateToPositionInStrip(strip, peak.position, peak.axisCodes)
+    if allStrips:
+        for display in displays:
+            for strip in display.strips:
+                if strip and not strip.isDeleted:
+                    navigateToPositionInStrip(strip, peak.position, peak.axisCodes)
+
+    elif cStrip:
+        navigateToPositionInStrip(cStrip, peak.position, peak.axisCodes)
 
 
 def navigateToCurrentNmrResiduePosition(application):

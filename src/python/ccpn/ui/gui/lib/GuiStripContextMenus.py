@@ -8,7 +8,7 @@ To create a menu:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:04 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-03-10 19:10:47 +0000 (Fri, March 10, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -417,6 +417,15 @@ def _setPeakAliasingItem():
     return _SCMitem(name='Set Aliasing...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Set aliasing for current peak(s)',
                     callback=_app.mainWindow.setPeakAliasing)
+
+
+def _centreOnSelectedPeak():
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
+    return _SCMitem(name='Centre on Selected Peak',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Centre the current strip on the first selected peak',
+                    callback=_app.mainWindow.centreOnSelectedPeak)
 
 
 def _refitPeakItem():
@@ -920,6 +929,7 @@ def _get1dPeakMenuItems(menuId) -> list:
         _integrate1DItem(),
         _separator(),
 
+        _centreOnSelectedPeak(),
         _navigateToPeakPosMenuItem(menuId),
         _markPeaksItem()
         ]
@@ -1110,6 +1120,7 @@ def _getNdPeakMenuItems(menuId) -> list:
         _newCollectionItem(),
         _separator(),
 
+        _centreOnSelectedPeak(),
         _navigateToPeakPosMenuItem(menuId),
         _markPeaksItem(),
         ]

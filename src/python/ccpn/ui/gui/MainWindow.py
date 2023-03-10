@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-23 17:00:23 +0000 (Thu, February 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-10 19:10:47 +0000 (Fri, March 10, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1418,6 +1418,14 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
             popup = SetPeakAliasingPopup(parent=self, mainWindow=self, peaks=self.current.peaks)
             popup.exec_()
+
+    def centreOnSelectedPeak(self):
+        """Centre the current strip on the first selected peak
+        """
+        if self.current.peaks and self.current.strip:
+            from ccpn.ui.gui.lib.SpectrumDisplayLib import navigateToCurrentPeakPosition
+
+            navigateToCurrentPeakPosition(self.application, selectClickedPeak=True, allStrips=False)
 
     def calibrateFromPeaks(self):
         """Calibrate the current strip from the selected peaks

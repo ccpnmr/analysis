@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-10 16:03:28 +0000 (Fri, March 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-10 18:39:27 +0000 (Fri, March 10, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -639,9 +639,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.useOnlineDocumentation.setEnabled(False)
 
         row += 1
-        self.closeSpectrumDisplayOnLastSpectrum = _makeCheckBox(parent, row=row, text="Close spectrumDisplay on last spectrum",
+        self.closeSpectrumDisplayOnLastSpectrum = _makeCheckBox(parent, row=row, text="Close spectrum display on last spectrum",
                                                                 callback=self._queueSetCloseSpectrumDisplayOnLastSpectrum,
-                                                                toolTip="Close spectrumDisplays if the last spectrum has been removed or deleted")
+                                                                toolTip="Close spectrum displays if the last spectrum has been removed or deleted")
 
         # row += 1
         # # not sure whether this is needed
@@ -692,7 +692,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.glFontSizeData.currentIndexChanged.connect(self._queueChangeGLFontSize)
 
         row += 1
-        self.glAxisFontSizeLabel = _makeLabel(parent, text="Spectrum display Axes font-size", grid=(row, 0))
+        self.glAxisFontSizeLabel = _makeLabel(parent, text="Spectrum display axes font-size", grid=(row, 0))
         self.glAxisFontSizeData = PulldownList(parent, grid=(row, 1), hAlign='l')
         self.glAxisFontSizeData.setMinimumWidth(PulldownListsMinimumWidth)
         self.glAxisFontSizeData.currentIndexChanged.connect(self._queueChangeGLAxisFontSize)
@@ -1138,7 +1138,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.zPlaneNavigationModeLabel.setToolTip('Select where the Plane navigation tools are located')
 
         row += 1
-        self.useApplyToSpectrumDisplaysLabel = _makeLabel(parent, text="Apply to open SpectrumDisplay's", grid=(row, 0))
+        self.useApplyToSpectrumDisplaysLabel = _makeLabel(parent, text="Apply to open spectrum displays", grid=(row, 0))
         self.useApplyToSpectrumDisplaysBox = CheckBox(parent, grid=(row, 1))
         self.useApplyToSpectrumDisplaysBox.toggled.connect(partial(self._queueApplyToSpectrumDisplays, 'applyToSpectrumDisplays'))
 
@@ -1496,7 +1496,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         _makeLine(parent, grid=(row, 0), text="Multiplets")
 
         row += 1
-        self.multipletAveragingLabel = _makeLabel(parent, text="Multiplet Averaging", grid=(row, 0))
+        self.multipletAveragingLabel = _makeLabel(parent, text="Multiplet averaging", grid=(row, 0))
         self.multipletAveraging = RadioButtons(parent, texts=MULTIPLETAVERAGINGTYPES,
                                                callback=self._queueSetMultipletAveraging,
                                                direction='h',

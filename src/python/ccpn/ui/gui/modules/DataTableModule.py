@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-10 14:55:09 +0000 (Fri, March 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-10 17:47:44 +0000 (Fri, March 10, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -33,16 +33,17 @@ from collections import OrderedDict
 from ccpn.core.DataTable import DataTable as KlassTable
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.widgets.HLine import HLine
+# from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownListsForObjects import DataTablePulldown as KlassPulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Splitter import Splitter
-from ccpn.ui.gui.guiSettings import getColours, DIVIDER
+from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget
 from ccpn.ui.gui.widgets.table.Table import Table
+# from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Logging import getLogger
@@ -124,7 +125,8 @@ class DataTableModule(CcpnModule):
         self._splitter.addWidget(self._topFrame)
         self._splitter.addWidget(_bottomWidget)
         self._splitter.setChildrenCollapsible(False)
-        self._splitter.setSizes([1000, 2000])
+        self._splitter.setStretchFactor(1, 10)
+        # self._splitter.setSizes([1000, 2000])
 
         # add the guiTable to the bottom
         self._tableWidget = _TableWidget(parent=_bottomWidget,
@@ -155,31 +157,51 @@ class DataTableModule(CcpnModule):
                                         textAlignment='l', backgroundText='> Optional <')
         self.lineEditComment.editingFinished.connect(self._applyComment)
 
-        row += 1
-        HLine(parent=_topWidget, grid=(row, 0), gridSpan=(1, 4), height=16, colour=getColours()[DIVIDER])
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+        # hide the metadata in a more-less-frame
         row += 1
-        Label(_topWidget, text='\nmetadata', grid=(row, 0), hAlign='r', vAlign='t')
-        self._metadata = Table(_topWidget, showVerticalHeader=False, grid=(row, 1), gridSpan=(1, 3))
+        self._mlFrame = MoreLessFrame(_topWidget, name='Metadata', showMore=False, grid=(row, 0), gridSpan=(1, 4))
+        MLContent = self._mlFrame.contentsFrame
+
+        mlrow = 0
+        Label(MLContent, text='\nmetadata', grid=(mlrow, 0), hAlign='r', vAlign='t')
+        self._metadata = Table(MLContent, showVerticalHeader=False, grid=(mlrow, 1), gridSpan=(1, 3))
         self._metadata.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         self._metadata._enableSelectionCallback = False
         self._metadata._enableActionCallback = False
         self._metadata.setEditable(False)
 
-        row += 1
-        Spacer(_topWidget, 5, 5,
+        mlrow += 1
+        Spacer(MLContent, 5, 5,
                QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
-               grid=(row, 3), gridSpan=(1, 1))
+               grid=(mlrow, 3), gridSpan=(1, 1))
         _topWidget.getLayout().setColumnStretch(3, 1)
+
+        row += 1
+        self._mlSpacer = Spacer(_topWidget, 5, 5,
+                                QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding,
+                                grid=(row, 3), gridSpan=(1, 1))
+        _topWidget.getLayout().setColumnStretch(3, 1)
+
+        # set the closed size of the more-less-frame
+        self._baseSize = self._mlFrame.sizeHint()
+        for item in self._mlFrame.findChildren(MoreLessFrame):
+            self._baseSize -= item.sizeHint()
+        self._mlFrame.setMaximumHeight(self._baseSize.height())
+        self._splitter.setSizes([1, 10])
+
+        self._mlFrame.setCallback(self._moreLessCallback)
+        # assume all are initially closed
 
     def _setCallbacks(self):
         """Set the active callbacks for the module
         """
         if self.activePulldownClass:
-            self._setCurrentPulldown = Notifier(self.current,
-                                                [Notifier.CURRENT],
-                                                targetName=self.activePulldownClass._pluralLinkName,
-                                                callback=self._selectCurrentPulldownClass)
+            self._setCurrentPulldown = self.setNotifier(self.current,
+                                                        [Notifier.CURRENT],
+                                                        targetName=self.activePulldownClass._pluralLinkName,
+                                                        callback=self._selectCurrentPulldownClass)
 
             # set the active callback from the pulldown
             self._activeCheckbox = self._settings.checkBoxes[LINKTOPULLDOWNCLASS]['widget']
@@ -302,6 +324,25 @@ class DataTableModule(CcpnModule):
     @_tableCurrent.setter
     def _tableCurrent(self, value):
         self.current.dataTable = value
+
+    #=========================================================================================
+    # Callbacks
+    #=========================================================================================
+
+    def _moreLessCallback(self, moreLessFrame):
+        """Resize the opened/closed moreLessFrame
+        """
+        if self._mlFrame.contentsVisible:
+            # set an arbitrarily large height and remove size-constraint from spacer
+            self._mlFrame.setMaximumHeight(2000)
+            self._mlSpacer.changeSize(5, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Ignored)
+        else:
+            # set to minimum height and enable size-constraint for spacer
+            self._mlFrame.setMaximumHeight(self._baseSize.height())
+            self._mlSpacer.changeSize(5, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding)
+
+            # force the splitter to minimise the top-section
+            self._splitter.setSizes([1, 10])
 
 
 #=========================================================================================

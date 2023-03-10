@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-10 11:56:42 +0000 (Fri, March 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-10 14:55:09 +0000 (Fri, March 10, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,7 @@ __date__ = "$Date: 2021-10-29 16:38:09 +0100 (Fri, October 29, 2021) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 import pandas as pd
 from collections import OrderedDict
 
@@ -476,6 +476,20 @@ class _TableWidget(Table):
     #=========================================================================================
 
     # add edit/add parameters to meta-data table
+
+    #=========================================================================================
+    # Implementation
+    #=========================================================================================
+
+    def mousePressEvent(self, e: QtGui.QMouseEvent) -> None:
+        super(_TableWidget, self).mousePressEvent(e)
+
+        self.setCurrent()
+
+    def setCurrent(self):
+        """Set self to current.guiTable"""
+        if self.current is not None:
+            self.current.guiTable = self
 
 
 #=========================================================================================

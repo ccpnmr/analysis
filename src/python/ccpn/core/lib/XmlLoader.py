@@ -287,15 +287,39 @@ class XmlLoaderABC(TraitBase):
     root = Any(default_value=None, allow_none=True)
     _id = Tuple()
 
-    def __init__(self, root):
+    _readOnly = Bool(False)  # flag indicating a read-only project, default False, but True for V2 projects
+    logger = Any(default_value=None, allow_none=True)
+
+    def __init__(self, root, readOnly:bool = False):
         super().__init__()
         self.root = root
+
+        self._setReadOnly(readOnly)
+        self.logger = getLogger()
 
     @property
     def id(self) -> tuple:
         """:return the id as a tuple
         """
         return self._id
+
+    @property
+    def readOnly(self):
+        """Return the read-only state
+        """
+        return self._readOnly
+
+    def _setReadOnly(self, value):
+        """Set the read-only state
+        CCPNInternal - subclasses should only be initiated by the root of the loader tree
+        """
+        self._readOnly = value
+
+    @property
+    def _readOnlyState(self) -> str:
+        """Return a quick reference read-only state of the object
+        """
+        return 'T' if self.readOnly else 'F'
 
     def addToLookup(self):
         """Add self.id to the root lookup dict
@@ -338,18 +362,18 @@ class TopObject(XmlLoaderABC):
     # data
     apiTopObject = Any(default_value=None, allow_none=True)
 
-    def __init__(self, package, path):
+    def __init__(self, package:Package, path:Path, readOnly:bool = False):
 
         if package is None:
             raise ValueError('package is None')
 
-        super().__init__(root=package.root)
+        super().__init__(root=package.root, readOnly=readOnly)
 
         self.package = package
         self._path = path.relative_to(self.package.path)
         self._guid = self._getGuidFromXmlPath(path)
 
-        # ApiTopObject only knows aboud its guid and packageName, not its repository!
+        # ApiTopObject only knows about its guid and packageName, not its repository!
         # However, the two should be unique for the _id
         self._id = (None, self.package.name, self.guid)
         self.addToLookup()
@@ -425,7 +449,7 @@ class TopObject(XmlLoaderABC):
                                                    topObjId=self.guid,
                                                    partialLoad=False)
                     except Exception as es:
-                        raise RuntimeError(f'Failed to load "{self.path}": {es}')
+                        raise RuntimeError(f'Failed to load "{self.path}": {es}') from es
 
                 else:
                     try:
@@ -438,7 +462,7 @@ class TopObject(XmlLoaderABC):
 
 
                     except Exception as es:
-                        raise RuntimeError(f'Failed to load "{self.path}": {es}')
+                        raise RuntimeError(f'Failed to load "{self.path}": {es}') from es
 
             if apiTopObject is None:
                 raise RuntimeError(f'Failed to load "{self.path}": unknown error')
@@ -465,11 +489,17 @@ class TopObject(XmlLoaderABC):
             self.logger.debug2(f'ignoring deleted object {self.apiTopObject}')
             return
 
-        if not self.package.path.exists():
-              self.package.path.mkdir(parents=True, exist_ok=False)
+        if not self.readOnly:
+            try:
+                if not self.package.path.exists():
+                    self.package.path.mkdir(parents=True, exist_ok=False)
 
-        with self.path.open('w') as fp:
-            saveToStream(fp, self.apiTopObject)
+                with self.path.open('w') as fp:
+                    saveToStream(fp, self.apiTopObject)
+
+            except (PermissionError, FileNotFoundError):
+                self.logger.warning('Folder may be read-only')
+
 
         if updateIsModified:
             forceSetattr(self.apiTopObject, 'isModified', False)
@@ -495,21 +525,25 @@ class Package(XmlLoaderABC):
     # children
     topObjects = List(default_value=[])  # top objects associated with this package
 
-    def __init__(self, repository, path, createPath=False):
+    def __init__(self, repository:Repository, path:Path, createPath:bool=False, readOnly:bool = False):
         """Initialise the object, optionally create the package path
         """
         if repository is None:
             raise ValueError('repository is None')
 
-        super().__init__(root=repository.root)
+        super().__init__(root=repository.root, readOnly=readOnly)
 
         self.repository = repository
 
         self._path = path.relative_to(self.repository.path)
         if self.path.exists() and not self.path.is_dir():
             raise FileExistsError(f'{self.path} exists but is not a directory')
-        if not self.path.exists() and createPath:
-            self.path.mkdir(parents=True, exist_ok=False)
+
+        if not self.path.exists() and createPath and not self.readOnly:
+            try:
+                self.path.mkdir(parents=True, exist_ok=False)
+            except (PermissionError, FileNotFoundError):
+                self.logger.warning('Folder may be read-only')
 
         self._name = '.'.join(self._path.parts)
         self._id = (self.repository.name, self.name, None)
@@ -558,7 +592,7 @@ class Package(XmlLoaderABC):
     def isLoaded(self) -> bool:
         """:return True if all topObjects have been loaded
         """
-        return all([topObj.isLoaded for topObj in self.topObjects])
+        return all(topObj.isLoaded for topObj in self.topObjects)
 
     def getTopObjects(self) -> list:
         """:return a list with topObjects
@@ -584,7 +618,7 @@ class Package(XmlLoaderABC):
         """Add TopObject instance defined by path
         :return TopObject instance
         """
-        topObj = TopObject(package=self, path=path)
+        topObj = TopObject(package=self, path=path, readOnly=self.readOnly)
         self.topObjects.append(topObj)
         return topObj
 
@@ -602,9 +636,13 @@ class Package(XmlLoaderABC):
         self._name = newName
         self._path = Path().joinpath(*newName.split('.'))
         # make a symlink to the old package directory
-        if self.path.exists() and self.path.is_symlink():
-            self.path.unlink()
-        self.path.symlink_to(oldPath, target_is_directory=True)
+        if not self.readOnly:
+            try:
+                if self.path.exists() and self.path.is_symlink():
+                    self.path.unlink()
+                self.path.symlink_to(oldPath, target_is_directory=True)
+            except (PermissionError, FileNotFoundError):
+                self.logger.warning('Folder may be read-only')
 
         self._id = (self.repository.name, self.name, None)
         # We keep the old _id's in the lookup, as I do not know how the
@@ -614,6 +652,17 @@ class Package(XmlLoaderABC):
             _id = (None, self.name, topObj.guid)
             topObj._id = _id
             topObj.addToLookup()
+
+    def _setReadOnly(self, value):
+        super()._setReadOnly(value)
+        for topObj in self.topObjects:
+            topObj._setReadOnly(value)
+
+    @property
+    def _readOnlyState(self) -> str:
+        """Return a quick reference read-only state of the object and its XML children
+        """
+        return super()._readOnlyState + ''.join([obj._readOnlyState for obj in self.topObjects])
 
     def __str__(self):
         _defined = len(self.topObjects)
@@ -636,13 +685,13 @@ class Repository(XmlLoaderABC):
     # children
     packages = List()
 
-    def __init__(self, xmlLoader:XmlLoader, name:str, path:Path, useParent:bool, createPath:bool = False):
+    def __init__(self, xmlLoader:XmlLoader, name:str, path:Path, useParent:bool, createPath:bool = False, readOnly:bool = False):
         """Initialise the object, optionally create the path
         """
         if xmlLoader is None:
             raise ValueError('xmlLoader is None')
 
-        super().__init__(root=xmlLoader.root)
+        super().__init__(root=xmlLoader.root, readOnly=readOnly)
 
         self.name = name
         self._id = (self.name, None, None)
@@ -706,15 +755,15 @@ class Repository(XmlLoaderABC):
         :return newly created Package instance
         """
         if name is None and path is None:
-            raise ValueError(f'Neither name nor path are defined')
+            raise ValueError('Neither name nor path are defined')
 
         if name is not None and path is not None:
-            raise ValueError(f'Both name and path are defined')
+            raise ValueError('Both name and path are defined')
 
         if name is not None:
             path = self.path.joinpath(*name.split('.'))
 
-        _pkg = Package(self, path=path, createPath=createPath)
+        _pkg = Package(self, path=path, createPath=createPath, readOnly=self.readOnly)
         if not _pkg.isMemops:
             self.packages.append(_pkg)
 
@@ -762,10 +811,21 @@ class Repository(XmlLoaderABC):
         """Update the url of the apiRepository, accounting for using parent of path
         """
         if self.apiRepositoryPath is None:
-            raise RuntimeError(f'Undefined apiRepoitoryPath')
+            raise RuntimeError('Undefined apiRepositoryPath')
         _path = self.path.parent if self.useParent else self.path
         _url = Implementation.Url(path=_path.asString())
         self.apiRepository.setUrl(_url)
+
+    def _setReadOnly(self, value):
+        super()._setReadOnly(value)
+        for package in self.packages:
+            package._setReadOnly(value)
+
+    @property
+    def _readOnlyState(self) -> str:
+        """Return a quick reference read-only state of the object and its XML children
+        """
+        return super()._readOnlyState + ''.join([obj._readOnlyState for obj in self.packages])
 
     def __str__(self):
         return f'<Repository "{self.name}": loaded:{len(self.loadedTopObjects)}>'
@@ -785,7 +845,7 @@ class XmlLoader(XmlLoaderABC):
     pathHasChanged     = Bool(False)  # indicates if repository data path is different from current path
 
     isV2               = Bool(False)  # flag indicating V2 project, default False only set for loading
-    readOnly           = Bool(False)  # flag indicating a read-only project, default False, but True for V2 projects
+    # readOnly           = Bool(False)  # flag indicating a read-only project, default False, but True for V2 projects
 
     name               = Unicode()    # project name, derived from path;
     nameHasChanged     = Bool(False)  # indicates if repository name is different from current name
@@ -808,20 +868,19 @@ class XmlLoader(XmlLoaderABC):
 
     #--------------------------------------------------------------------------------------------
 
-    def __init__(self, path, name:str = None, readOnly:bool = False, create:bool = False):
+    def __init__(self, path:Path, name:str = None, readOnly:bool = False, create:bool = False):
         """Initialise the XmlLoader instance
-        :param path: path to the V3/V2 directory; must exists or allow creation
+        :param path: path to the V3/V2 directory; must exist or allow creation
         :param name: optional name of the project, extracted from path's basename if None
         :param readOnly: flag denoting read-only status
         :param create: flag to indicate creation if path does not exist; implies readOnly=False
         :raises FileNotFoundError
         """
 
-        super().__init__(root=self)
+        super().__init__(root=self, readOnly=readOnly)
 
-        self.logger = getLogger()
-
-        self.readOnly = readOnly
+        # self.logger = getLogger()
+        # self.readOnly = readOnly
 
         if isV2project(path):
             self.isV2 = True
@@ -857,6 +916,26 @@ class XmlLoader(XmlLoaderABC):
         self.name = _newName
 
     #--------------------------------------------------------------------------------------------
+
+    @property
+    def readOnly(self):
+        """Return the read-only state
+        """
+        return self._readOnly
+
+    @readOnly.setter
+    def readOnly(self, value):
+        """Set the read-only state for all loaded xml objects
+        """
+        super()._setReadOnly(value)
+        for rep in self.repositories:
+            rep._setReadOnly(value)
+
+    @property
+    def _readOnlyState(self) -> str:
+        """Return a quick reference read-only state of the object and its XML children
+        """
+        return super()._readOnlyState + ''.join([obj._readOnlyState for obj in self.repositories])
 
     @property
     def v3Path(self) -> Path:
@@ -941,7 +1020,8 @@ class XmlLoader(XmlLoaderABC):
                            path=self.v3Path,
                            # USERDATA: no 'ccpnv3' as this gets added deep in the bowels of the api code
                            useParent=not self.isV2,
-                           createPath=True
+                           createPath=True,
+                           readOnly=self.readOnly
                            )
         self.repositories.append(_repo)
 
@@ -950,11 +1030,12 @@ class XmlLoader(XmlLoaderABC):
                            path=ccpnmodelDataPythonPath / CCPN_API_DIRECTORY,
                            # REFDATA: no 'ccpnv3' as this gets added deep in the bowels of the api code
                            useParent=True,
-                           createPath=False
+                           createPath=False,
+                           readOnly=self.readOnly
                            )
         self.repositories.append(_repo)
 
-        # These apiRepsoitories have been depricated
+        # These apiRepositories have been deprecated
         # _repo = Repository(name=GENERALDATA,
         #                    path=userCcpnDataPath,
         #                    useParent=False,
@@ -1125,15 +1206,15 @@ class XmlLoader(XmlLoaderABC):
             self._loadMemopsFromXml(_projectXml, partialLoad=False)
 
         except Exception as es:
-            # retry, skipping cached topObjects
-            if self.isV2:
-                self.logger.debug(f'XmlLoader.loadProject: loading "{_projectXml}" failed on first try; retrying patial load')
-                self._loadMemopsFromXml(_projectXml, partialLoad=True)
-            else:
-                raise RuntimeError(f'XmlLoader.loadProject: {es}')
+            if not self.isV2:
+                raise RuntimeError(f'XmlLoader.loadProject: {es}') from es
+
+            self.logger.debug(f'XmlLoader.loadProject: loading "{_projectXml}" failed on first try; retrying patial load')
+            self._loadMemopsFromXml(_projectXml, partialLoad=True)
 
         if self.memopsRoot is None:
             raise RuntimeError(f'Failed loading project from "{_projectXml}"')
+
         setattr(self.memopsRoot, XML_LOADER_ATTR, self)  # back linkage
 
         # call to sortedNmrProjects will also load the topObjects via
@@ -1243,11 +1324,17 @@ class XmlLoader(XmlLoaderABC):
 
         if not self.readOnly:
             if self.nameHasChanged:
-                xmlProjectFile.removeFile()
-                self._rename(self.name)  # Check below if we save
+                try:
+                    xmlProjectFile.removeFile()
+                    self._rename(self.name)  # Check below if we save
+                except (PermissionError, FileNotFoundError):
+                    self.logger.warning('Folder may be read-only')
 
             if (self.pathHasChanged or self.nameHasChanged):
-                self._saveMemopsToXml()
+                try:
+                    self._saveMemopsToXml()
+                except (PermissionError, FileNotFoundError):
+                    self.logger.warning('Folder may be read-only')
 
         self._debugInfo('After loading memopsRoot:')
 

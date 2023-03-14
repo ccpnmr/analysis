@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-14 19:17:42 +0000 (Tue, March 14, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ import json
 import sys
 import getpass
 from collections import namedtuple
+from contextlib import suppress
 
 from ccpn.util.Path import aPath
 from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY, ccpnVersionHistory
@@ -37,6 +38,7 @@ from ccpn.framework.Version import VersionString, applicationVersion
 from ccpn.util.Time import now
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson, TraitJsonHandlerBase
 from ccpn.util.traits.CcpNmrTraits import List, Path
+from ccpn.util.Logging import getLogger
 
 
 def getProjectSaveHistory(projectPath):
@@ -59,8 +61,12 @@ def fetchProjectSaveHistory(projectPath):
     sv = ProjectSaveHistory(projectPath)
     if not sv.exists():
         # pre 3.1.0 ccp project; create one with '3.0.4' as the last (and only) entry
-        sv.addSaveRecord('3.0.4', comment='created retroactively')
-        sv.save()
+        try:
+            sv.addSaveRecord('3.0.4', comment='created retroactively')
+            sv.save()
+        except (PermissionError, FileNotFoundError):
+            getLogger().warning('Folder may be read-only')
+
     else:
         sv.restore()
     return sv

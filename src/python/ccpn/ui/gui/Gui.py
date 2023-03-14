@@ -547,7 +547,8 @@ class Gui(Ui):
             if oldMainWindowPos:
                 self.mainWindow.move(oldMainWindowPos)
 
-        except (RuntimeError, ApiError) as es:
+        # except (RuntimeError, ApiError) as es:
+        except NotImplementedError as es:
             MessageDialog.showError('Error loading Project:', f'{es}', parent=self.mainWindow)
 
             # Try to restore the state
@@ -667,6 +668,10 @@ class Gui(Ui):
         """
         if self.project.isTemporary:
             return self.saveProjectAs()
+
+        if self.project.readOnly:
+            MessageDialog.showWarning('Save project', 'Project is read-only')
+            return True
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
             with MessageDialog.progressManager(self.mainWindow, f'Saving project ... '):

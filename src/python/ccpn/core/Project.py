@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-10 18:39:55 +0000 (Fri, March 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-14 19:17:41 +0000 (Tue, March 14, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -27,8 +27,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import contextlib
 import functools
 # import os
+import sys
 import typing
 import operator
 from typing import Sequence, Union, Optional, List
@@ -51,7 +53,7 @@ from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoB
 from ccpn.util import Logging
 from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.Path import aPath, Path
-from ccpn.util.Logging import getLogger
+from ccpn.util.Logging import getLogger, updateLogger
 from ccpn.util.decorators import logCommand
 
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
@@ -63,6 +65,7 @@ from ccpn.framework.PathsAndUrls import \
     CCPN_PLUGINS_DIRECTORY, \
     CCPN_SCRIPTS_DIRECTORY, \
     CCPN_SUB_DIRECTORIES, \
+    CCPN_LOGS_DIRECTORY, \
     CCPN_BACKUPS_DIRECTORY, \
     CCPN_DIRECTORY_SUFFIX
 
@@ -150,6 +153,7 @@ class Project(AbstractWrapperObject):
 
     #TODO: do we still have this limitation?
     _MAX_PROJECT_NAME_LENGTH = 32
+    _READONLY = 'readOnly'
 
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure (incomplete)
@@ -535,8 +539,12 @@ class Project(AbstractWrapperObject):
     def _checkProjectSubDirectories(self):
         """if need be, create all project subdirectories
         """
-        for dir in CCPN_SUB_DIRECTORIES:
-            self.projectPath.fetchDir(dir)
+        if not self.readOnly:
+            try:
+                for dir in CCPN_SUB_DIRECTORIES:
+                    self.projectPath.fetchDir(dir)
+            except (PermissionError, FileNotFoundError):
+                getLogger().warning('Folder may be read-only')
 
     def _initialiseProject(self):
         """Complete initialisation of project,
@@ -742,6 +750,10 @@ class Project(AbstractWrapperObject):
     def save(self, comment='regular save'):
         """Save project; add optional comment to save records
         """
+        if self.readOnly:
+            getLogger().warning('Project is read-only')
+            return
+
         # Update the spectrum internal settings
         for spectrum in self.spectra:
             spectrum._saveObject()
@@ -823,8 +835,34 @@ class Project(AbstractWrapperObject):
                 if obj and not obj.isDeleted:
                     obj.delete()
 
+    @property
+    def readOnly(self):
+        """Return the read-only state
+        """
+        # _saveAsOverride allows the readOnly state to be True during saveAs
+        return (self._getInternalParameter(self._READONLY) or False) and not self.application._saveAsOverride
 
-    #-----------------------------------------------------------------------------------------
+    @readOnly.setter
+    def readOnly(self, value):
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}.readOnly must be a bool')
+
+        self._setInternalParameter(self._READONLY, value)
+        # NOTE:ED - does this need to include override?
+        self._xmlLoader.readOnly = value and not self.application._saveAsOverride
+
+        updateLogger(self.application.applicationName,
+                     self.projectPath / CCPN_LOGS_DIRECTORY,
+                     level = self.application._debugLevel,
+                     readOnly=value)
+
+    def updateReadOnlyState(self):
+        """Update the state of the xmlLoader from the current read-only state
+        """
+        # needs to take into account the saveAsOverride state from the application
+        self._xmlLoader.readOnly = self.readOnly
+
+        #-----------------------------------------------------------------------------------------
     # Undo machinery
     #-----------------------------------------------------------------------------------------
 
@@ -2279,6 +2317,9 @@ def _newProject(application, name:str, path:Path, isTemporary:bool = False) -> P
     project._objectVersion = application.applicationVersion
     project._saveHistory = newProjectSaveHistory(project.path)
 
+    application._saveAsOverride = False
+    project.updateReadOnlyState()
+
     # the initialisation is completed by Framework._initialiseProject when it has done its things
     # project._initialiseProject()
 
@@ -2310,6 +2351,8 @@ def _loadProject(application, path: str) -> Project:
     # back linkage
     xmlLoader.project = project
 
+    project.updateReadOnlyState()
+
     project._saveHistory = fetchProjectSaveHistory(project.path)
 
     # If path pointed to a V2 project, call the updates, and save the data
@@ -2321,14 +2364,18 @@ def _loadProject(application, path: str) -> Project:
         except Exception as es:
             txt = f'Failed upgrading {project} from version-2: {es}'
             getLogger().warning(txt)
-            raise RuntimeError(txt)
+            raise RuntimeError(txt) from es
 
         getLogger().debug(f'after update: Saving project to {xmlLoader.path}')
         # Save using the xmlLoader only as we do not have a complete and valid V3-Project yet
-        xmlLoader.saveUserData(keepFallBack=False)
-        project._saveHistory.addSaveRecord(version=project._objectVersion,
-                                           comment='upgraded from version-2')
-        project._saveHistory.save()
+        try:
+            xmlLoader.saveUserData(keepFallBack=False)
+            project._saveHistory.addSaveRecord(version=project._objectVersion,
+                                               comment='upgraded from version-2')
+            project._saveHistory.save()
+        except (PermissionError, FileNotFoundError):
+            getLogger().warning('Folder may be read-only')
+
         project._isNew = True
         project._isTemporary = True
 
@@ -2336,10 +2383,16 @@ def _loadProject(application, path: str) -> Project:
         # path or name have changed (actually, they are connected)
         # save it, keeping a fallback for if all goes wrong
         # Save using the xmlLoader only as we do not have a complete and valid V3-Project yet
-        xmlLoader.saveUserData(keepFallBack=True)
-        project._saveHistory.addSaveRecord(version=project._objectVersion,
-                                           comment='Path/name has changed')
-        project._saveHistory.save()
+        if not project.readOnly:
+            try:
+                xmlLoader.saveUserData(keepFallBack=True)
+                project._saveHistory.addSaveRecord(version=project._objectVersion,
+                                                   comment='Path/name has changed')
+                project._saveHistory.save()
+
+            except (PermissionError, FileNotFoundError):
+                getLogger().warning('Folder may be read-only')
+
         project._isNew = False
         project._isTemporary = False
 

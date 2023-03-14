@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:43 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-14 19:17:42 +0000 (Tue, March 14, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,8 @@ import logging
 import os
 import time
 import inspect
+import contextlib
+import sys
 from ccpn.util.Path import aPath
 
 DEBUG = DEBUG1 = logging.DEBUG # = 10
@@ -130,6 +132,7 @@ def createLogger(loggerName,
                  stream=None,
                  level=None,
                  mode='a',
+                 readOnly=False,
                  removeOldLogsDays=MAX_LOG_FILE_DAYS):
     """Return a (unique) logger for this memopsRoot and with given programName, if any.
        Puts log output into a log file but also optionally can have output go to
@@ -143,7 +146,11 @@ def createLogger(loggerName,
 
     _logDirectory = aPath(logDirectory)
     if not _logDirectory.exists():
-        _logDirectory.mkdir(parents=False, exist_ok=False)
+        if not readOnly:
+            try:
+                _logDirectory.mkdir(parents=False, exist_ok=False)
+            except (PermissionError, FileNotFoundError):
+                sys.stderr.write('>>> Folder may be read-only\n')
 
     today = datetime.date.today()
     fileName = 'log_%s_%02d%02d%02d.txt' % (loggerName, today.year, today.month, today.day)
@@ -169,13 +176,23 @@ def createLogger(loggerName,
         level = defaultLogLevel
 
     logger.setLevel(level)
+    logger._streamHandler = None
 
-    handler = logging.FileHandler(logPath, mode=mode)
-    _setupHandler(handler, level)
+    if not readOnly:
+        try:
+            handler = logging.FileHandler(logPath, mode=mode)
+            _setupHandler(handler, level)
+        except (PermissionError, FileNotFoundError):
+            sys.stderr.write('>>> Folder may be read-only\n')
 
-    if stream:
-        handler = logging.StreamHandler(stream)
-        _setupHandler(handler, level)
+    try:
+        if stream:
+            handler = logging.StreamHandler(stream)
+            _setupHandler(handler, level)
+            logger._streamHandler = handler
+
+    except (PermissionError, FileNotFoundError):
+        sys.stderr.write('>>> Folder may be read-only\n')
 
     logger.debugGL = functools.partial(_debugGLError, DEBUG1, logger)
     logger.echoInfo = functools.partial(_message, INFO, logger, includeInspection=False)
@@ -191,6 +208,50 @@ def createLogger(loggerName,
     logging.addLevelName(DEBUG3, 'DEBUG3')
 
     return logger
+
+
+def updateLogger(loggerName,
+                 logDirectory,
+                 level=None,
+                 mode='a',
+                 readOnly=False):
+
+    global logger
+
+    if not logger:
+        raise RuntimeError('There is no logger!')
+
+    _logDirectory = aPath(logDirectory)
+    if not _logDirectory.exists() and not readOnly:
+        try:
+            _logDirectory.mkdir(parents=False, exist_ok=False)
+        except (PermissionError, FileNotFoundError):
+            sys.stderr.write('>>> Folder may be read-only\n')
+
+    today = datetime.date.today()
+    fileName = 'log_%s_%02d%02d%02d.txt' % (loggerName, today.year, today.month, today.day)
+
+    logPath = _logDirectory / fileName
+
+    # there seems no way to close the logger itself
+    # and just closing the handler does not work
+    # (and certainly do not want to close stdout or stderr)
+    for handler in tuple(logger.handlers):
+        logger.removeHandler(handler)
+
+    if not readOnly:
+        # re-insert the originals
+        try:
+            handler = logging.FileHandler(logPath, mode=mode)
+            _setupHandler(handler, level)
+        except (PermissionError, FileNotFoundError):
+            sys.stderr.write('>>> Folder may be read-only\n')
+
+    if logger._streamHandler:
+        try:
+            _setupHandler(logger._streamHandler, level)
+        except (PermissionError, FileNotFoundError):
+            sys.stderr.write('>>> Folder may be read-only\n')
 
 
 def _setupHandler(handler, level):

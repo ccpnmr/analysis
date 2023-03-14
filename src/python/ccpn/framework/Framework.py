@@ -166,6 +166,10 @@ class Framework(NotifierBase, GuiBase):
         self._plugins = []  # Hack for now, how should we store these?
         # used in GuiMainWindow by startPlugin()
 
+        # set to True to override the read-only status of a project
+        #   required to use saveAs but keep the project.readOnly status until the next load
+        self._saveAsOverrideState = False
+
         #-----------------------------------------------------------------------------------------
         # Initialisations
         #-----------------------------------------------------------------------------------------
@@ -269,6 +273,21 @@ class Framework(NotifierBase, GuiBase):
         """:return True if application has a gui"""
         return isinstance(self.ui, Gui)
 
+    @property
+    def _saveAsOverride(self):
+        """Return the save-override state, this allows the saving of read-only projects
+        """
+        return self._saveAsOverrideState
+
+    @_saveAsOverride.setter
+    def _saveAsOverride(self, value):
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}.saveAsOverrideState must be a bool')
+
+        self._saveAsOverrideState = value
+        if self.project:
+            self.project.updateReadOnlyState()
+
     #-----------------------------------------------------------------------------------------
     # Useful (?) directories as Path instances
     #-----------------------------------------------------------------------------------------
@@ -276,7 +295,7 @@ class Framework(NotifierBase, GuiBase):
     @property
     def statePath(self) -> Path:
         """
-        :return: the absolute path to the state sub-directory of the current project
+        :return: the absolute path to the state subdirectory of the current project
                  as a Path instance
         """
         return self.project.statePath
@@ -284,7 +303,7 @@ class Framework(NotifierBase, GuiBase):
     @property
     def pipelinePath(self) -> Path:
         """
-        :return: the absolute path to the state/pipeline sub-directory of
+        :return: the absolute path to the state/pipeline subdirectory of
                  the current project as a Path instance
         """
         return self.project.pipelinePath
@@ -971,6 +990,12 @@ class Framework(NotifierBase, GuiBase):
     def _saveProject(self) -> bool:
         """Save project to newPath and return True if successful
         """
+        # ensure override flag is clean
+        self._saveAsOverride = False
+        if self.project.readOnly:
+            getLogger().warning('Project is read-only')
+            return True
+
         if self.preferences.general.keepSpectraInsideProject:
             self.project.copySpectraToProject()
 
@@ -981,7 +1006,7 @@ class Framework(NotifierBase, GuiBase):
             self._getUndo().markSave()
 
         except Exception as es:
-            failMessage = f'saveAs: unable to save {es}'
+            failMessage = f'save: unable to save {es}'
             getLogger().warning(failMessage)
             return False
 
@@ -994,7 +1019,14 @@ class Framework(NotifierBase, GuiBase):
         :param overwrite: flag to indicate overwriting of existing path
         :return True if successful
         """
-        return self.ui.saveProjectAs(newPath=newPath, overwrite=overwrite)
+        try:
+            # override read-only for a save to a new folder
+            #   project can still be read-only for next load
+            self._saveAsOverride = True
+            return self.ui.saveProjectAs(newPath=newPath, overwrite=overwrite)
+
+        finally:
+            self._saveAsOverride = False
 
     # @logCommand('application.')  # decorated in ui
     def saveProject(self) -> bool:

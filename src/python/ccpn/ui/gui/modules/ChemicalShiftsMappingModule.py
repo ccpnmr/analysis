@@ -58,7 +58,7 @@ Module Documentation
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -69,8 +69,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-27 16:20:49 +0100 (Thu, October 27, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-03-14 19:17:42 +0000 (Tue, March 14, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -273,7 +273,17 @@ class ChemicalShiftsMapping(CcpnModule):
         self.selectedNmrAtomNames = []  # used in other classes  (set in popup)
         self._selectedSpectrumGroup = None
         self.scriptsPath = self.application.scriptsPath
-        self.pymolScriptsPath = fetchDir(self.scriptsPath, 'pymol')
+        self.pymolScriptsPath = None
+
+        if self.project.readOnly:
+            self.pymolScriptsPath = aPath(self.scriptsPath) / 'pymol'
+            if not self.pymolScriptsPath.exists():
+                getLogger().warning(f'{self.pymolScriptsPath} does not exist')
+        else:
+            try:
+                self.pymolScriptsPath = fetchDir(self.scriptsPath, 'pymol')
+            except (PermissionError, FileNotFoundError):
+                getLogger().warning('Folder may be read-only')
 
         self.thresholdLinePos = DefaultThreshould
         self._bindingExportDialog = None

@@ -5,19 +5,19 @@ Replaced former Api.packageProject and _unpackCcpnTarfile
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-02 12:59:27 +0000 (Wed, February 02, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-03-14 19:17:41 +0000 (Tue, March 14, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -59,6 +59,7 @@ ARCHIVE_SUFFIX = '.tgz'
 class ProjectArchiver(object):
     """A class to manage the archives of a project
     """
+    readOnly = False
 
     def __init__(self, projectPath):
         """Initialise the class with the specified projectPath
@@ -75,12 +76,15 @@ class ProjectArchiver(object):
     def archiveDirectory(self) -> Path:
         """:return: absolute path to directory with archives as a Path instance
         """
-        return self._projectPath.fetchDir(CCPN_ARCHIVES_DIRECTORY)
+        try:
+            return self._projectPath.fetchDir(CCPN_ARCHIVES_DIRECTORY)
+        except (PermissionError, FileNotFoundError):
+            getLogger().warning('Folder may be read-only')
 
     @property
     def archives(self) -> list:
         """:return: a list of archive (.tgz) tar files"""
-        return self.archiveDirectory.listdir(suffix=ARCHIVE_SUFFIX)
+        return self.archiveDirectory and self.archiveDirectory.listdir(suffix=ARCHIVE_SUFFIX)
 
     def makeArchive(self) -> Path:
         """Make a new time-stamped archive from project.

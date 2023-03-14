@@ -1691,11 +1691,9 @@ class Spectrum(AbstractWrapperObject):
 
     @logCommand(get='self')
     def deleteAllPeakLists(self):
-        """
-        Remove all peakLists from the spectrum and create the default empty PeakList
+        """Remove all peakLists from the spectrum and create the default empty PeakList
         """
         self.project.deleteObjects(*self.peakLists)
-
 
     def _getSeriesItem(self, spectrumGroup):
         """Return the series item for the current spectrum for the selected spectrumGroup
@@ -3264,8 +3262,11 @@ class Spectrum(AbstractWrapperObject):
 
         # Only save (and possibly overwrite) if we have valid data
         if self._dataStore is not None and \
-                self.dataSource is not None:
-            self._spectrumTraits.save(_path)
+                self.dataSource is not None and not self.project.readOnly:
+            try:
+                self._spectrumTraits.save(_path)
+            except (PermissionError, FileNotFoundError):
+                getLogger().warning('Folder may be read-only')
 
     def _restoreFromSpectrumMetaData(self):
         """Retore the spectrum metadata from the project/state/spectra json file

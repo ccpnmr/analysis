@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-14 09:51:15 +0000 (Tue, March 14, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -416,25 +416,25 @@ class Window(AbstractWrapperObject):
         """
         # with undoBlockWithoutSideBar():
         with undoStackBlocking() as _:  # Do not add to undo/redo stack
-            # get the current state of the layout
-            _list = self._getModuleInsertList(moduleArea=display.area)
+            # # get the current state of the layout
+            # _list = self._getModuleInsertList(moduleArea=display.area)
 
-            # get the list of spectra currently displayed in the spectrumDisplay
-            specViewList = [(specView, action.isChecked()) for specView in display.spectrumViews
-                            for action in display.spectrumToolBar.actions()
-                            if action.objectName() == specView.spectrum.pid]
-
-            with undoStackBlocking() as addUndoItem:
-                # re-insert spectrumToolbar
-                addUndoItem(undo=partial(self._recoverSpectrumToolbar, display, specViewList), )
-
-                # disable all notifiers in spectrumDisplays
-                addUndoItem(undo=partial(self._setBlankingSpectrumDisplayNotifiers, display, False),
-                            redo=partial(self._setBlankingSpectrumDisplayNotifiers, display, True))
-
-                # add/remove spectrumDisplay from module Area - using moveDock method
-                addUndoItem(undo=partial(self._restoreModules, _list),
-                            redo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None), )
+            # # get the list of spectra currently displayed in the spectrumDisplay
+            # specViewList = [(specView, action.isChecked()) for specView in display.spectrumViews
+            #                 for action in display.spectrumToolBar.actions()
+            #                 if action.objectName() == specView.spectrum.pid]
+            #
+            # with undoStackBlocking() as addUndoItem:
+            #     # re-insert spectrumToolbar
+            #     addUndoItem(undo=partial(self._recoverSpectrumToolbar, display, specViewList), )
+            #
+            #     # disable all notifiers in spectrumDisplays
+            #     addUndoItem(undo=partial(self._setBlankingSpectrumDisplayNotifiers, display, False),
+            #                 redo=partial(self._setBlankingSpectrumDisplayNotifiers, display, True))
+            #
+            #     # add/remove spectrumDisplay from module Area - using moveDock method
+            #     addUndoItem(undo=partial(self._restoreModules, _list),
+            #                 redo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None), )
 
             # disable the spectrumDisplay notifiers
             self._setBlankingSpectrumDisplayNotifiers(display, True)

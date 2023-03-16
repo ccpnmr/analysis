@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:42 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-16 17:40:41 +0000 (Thu, March 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -155,14 +155,24 @@ class MoreLessFrame(Frame):
         _size = self._label.sizeHint()
         h, w = _size.height(), _size.width() + self._openButton.sizeHint().width()
         offset = w
-        points = [QtCore.QPoint(0, 1),
+        points0 = [QtCore.QPoint(0, 1),
                   QtCore.QPoint(offset + 2, 1),
                   QtCore.QPoint(offset + 2, 1),
                   QtCore.QPoint(offset + h, h - 1),
                   QtCore.QPoint(offset + h + 1, h - 1),
-                  QtCore.QPoint(rgn.width() + 1, h - 1), ]
+                  QtCore.QPoint(rgn.width() + 1, h - 1),
+                   ]
+        points1 = [QtCore.QPoint(offset + 3, 2),
+                  QtCore.QPoint(offset + h - 1, h - 2),
+                  ]
 
-        # draw the border
+        # draw the lines
         p.setPen(QtGui.QPen(self._borderColour, 1))
-        p.drawLines(*points)
+
+        # add a little smoothing
+        p.setRenderHint(QtGui.QPainter.Antialiasing, True)
+        p.drawLines(*points1)
+        p.setRenderHint(QtGui.QPainter.Antialiasing, False)
+        p.drawLines(*points0)
         p.end()
+

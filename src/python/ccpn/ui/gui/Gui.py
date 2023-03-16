@@ -80,7 +80,7 @@ def _ccpnExceptionhook(ccpnType, value, tback):
         sys.stderr.write('_ccpnExceptionhook: tback = %s\n' % tback)
 
     if application and application.hasGui:
-        title = str(ccpnType)[8:-2] + ':'
+        title = f'{str(ccpnType)[8:-2]}:'
         text = str(value)
         MessageDialog.showError(title=title, message=text)
 
@@ -182,7 +182,7 @@ class Gui(Ui):
         """UI operations done after every project load/create
         """
         if mainWindow is None:
-            raise ValueError(f'Gui.initialize: Undefined mainWindow')
+            raise ValueError('Gui.initialize: Undefined mainWindow')
 
         with notificationEchoBlocking():
             with undoStackBlocking():
@@ -257,10 +257,9 @@ class Gui(Ui):
         from ccpn.core.lib.Pid import Pid
 
         pid = Pid(gid)
-        if pid is not None:
-            if pid.type in [PidLongClassName, PidShortClassName]:
-                # get the GuiModule object By its Gid
-                return self.application.mainWindow.moduleArea.modules.get(pid.id)
+        if pid is not None and pid.type in [PidLongClassName, PidShortClassName]:
+            # get the GuiModule object By its Gid
+            return self.application.mainWindow.moduleArea.modules.get(pid.id)
 
         return self.application.getByGid(gid)
 
@@ -277,9 +276,12 @@ class Gui(Ui):
         """Query the user about his/her choice to import/new/cancel
         """
         choices = ('Import', 'New project', 'Cancel')
-        choice = MessageDialog.showMulti('Load %s' % dataLoader.dataFormat,
-                                         'How do you want to handle "%s":' % dataLoader.path,
-                                         choices, parent=self.mainWindow)
+        choice = MessageDialog.showMulti(
+                f'Load {dataLoader.dataFormat}',
+                f'How do you want to handle "{dataLoader.path}":',
+                choices,
+                parent=self.mainWindow,
+                )
 
         if choice == choices[0]:  # import
             dataLoader.createNewProject = False
@@ -370,7 +372,7 @@ class Gui(Ui):
 
             if not ok:
                 # skip loading so that user can back-up/copy project
-                getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
+                getLogger().info(f'==> Cancelled loading ccpn project "{path}"')
                 ignore = True
 
         elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat and Project._needsUpgrading(path):
@@ -417,7 +419,7 @@ class Gui(Ui):
 
         elif dataLoader.isSpectrumLoader and dataLoader.existsInProject():
             ok = MessageDialog.showYesNoWarning('Loading Spectrum',
-                                                f'"{dataLoader.dataSource.path}"\n' 
+                                                f'"{dataLoader.dataSource.path}"\n'
                                                 f'"{dataLoader.path}"\n'
                                                 f'already exists in the project\n'
                                                 '\n'
@@ -458,7 +460,7 @@ class Gui(Ui):
     #-----------------------------------------------------------------------------------------
 
     @logCommand('application.')
-    def newProject(self, name:str = 'default') -> (Project, None):
+    def newProject(self, name: str = 'default') -> (Project, None):
         """Create a new project instance with name; create default project if name=None
         :return a Project instance or None
         """
@@ -607,7 +609,7 @@ class Gui(Ui):
             self.mainWindow = None
 
     @logCommand('application.')
-    def saveProjectAs(self, newPath=None, overwrite:bool=False) -> bool:
+    def saveProjectAs(self, newPath=None, overwrite: bool = False) -> bool:
         """Opens save Project to newPath.
         Optionally open file dialog.
         :param newPath: new path to save project (str | Path instance)
@@ -631,7 +633,7 @@ class Gui(Ui):
             # should not really need to check the second and third condition above, only
             # the Qt dialog stupidly insists a directory exists before you can select it
             # so if it exists but is empty then don't bother asking the question
-            msg = 'Path "%s" already exists; overwrite?' % newPath
+            msg = f'Path "{newPath}" already exists; overwrite?'
             if not MessageDialog.showYesNo(title, msg):
                 return False
 
@@ -644,17 +646,22 @@ class Gui(Ui):
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
             with MessageDialog.progressManager(self.mainWindow, f'Saving project as {newPath} ... '):
-                if not self.application._saveProjectAs(newPath=newPath, overwrite=True):
-                    txt = "Saving project to %s aborted" % newPath
-                    getLogger().warning(txt)
-                    MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
+                try:
+                    if not self.application._saveProjectAs(newPath=newPath, overwrite=True):
+                        txt = f"Saving project to {newPath} aborted"
+                        MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
+                        return False
+
+                except (PermissionError, FileNotFoundError):
+                    msg = f'Folder {newPath} may be read-only'
+                    MessageDialog.showWarning('Save project', msg)
                     return False
 
         self.mainWindow._updateWindowTitle()
         self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
-        self.mainWindow._fillRecentProjectsMenu() # Update the menu
+        self.mainWindow._fillRecentProjectsMenu()  # Update the menu
 
-        successMessage = 'Project successfully saved to "%s"' % self.project.path
+        successMessage = f'Project successfully saved to "{self.project.path}"'
         MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
         self.mainWindow.statusBar().showMessage(successMessage)
         getLogger().info(successMessage)
@@ -674,11 +681,16 @@ class Gui(Ui):
             return True
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
-            with MessageDialog.progressManager(self.mainWindow, f'Saving project ... '):
-                if not self.application._saveProject():
-                    return False
+            with MessageDialog.progressManager(self.mainWindow, 'Saving project ... '):
+                try:
+                    if not self.application._saveProject():
+                        return False
+                except (PermissionError, FileNotFoundError):
+                    msg = 'Folder may be read-only'
+                    MessageDialog.showWarning('Save project', msg)
+                    return True
 
-        successMessage = 'Project successfully saved to "%s"' % self.project.path
+        successMessage = f'Project successfully saved to {self.project.path!r}'
         # MessageDialog.showInfo("Project Save", successMessage, parent=self.mainWindow) # This popup has been flagged as annoying by users
         self.mainWindow.statusBar().showMessage(successMessage)
         getLogger().info(successMessage)
@@ -694,25 +706,25 @@ class Gui(Ui):
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
 
         result = []
-        errorStringTemplate = f'Loading "{dataLoader.path}" failed:\n\n' + '%s'
+        errorStringTemplate = f'Loading "{dataLoader.path}" failed:\n\n%s'
         with catchExceptions(errorStringTemplate=errorStringTemplate):
-            # For data loads that are possibly time consuming, use progressManager
+            # For data loads that are possibly time-consuming, use progressManager
             if isinstance(dataLoader, (StarDataLoader, NefDataLoader)):
-                with MessageDialog.progressManager(self.mainWindow, f'Importing data ... '):
+                with MessageDialog.progressManager(self.mainWindow, 'Importing data ... '):
                     result = dataLoader.load()
             else:
                 result = dataLoader.load()
         return result
 
     # @logCommand('application.') # eventually decorated by  _loadData()
-    def loadData(self, *paths, formatFilter:(list,tuple)=None) -> list:
+    def loadData(self, *paths, formatFilter: (list, tuple) = None) -> list:
         """Loads data from paths; query if none supplied
         Optionally filter for dataFormat(s)
         :param *paths: argument list of path's (str or Path instances)
         :param formatFilter: list/tuple of dataFormat strings
         :returns list of loaded objects
         """
-        if len(paths) == 0:
+        if not paths:
             dialog = FileDialog.DataFileDialog(parent=self.mainWindow, acceptMode='load')
             dialog._show()
             if (path := dialog.selectedFile()) is None:
@@ -767,7 +779,7 @@ class Gui(Ui):
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getSpectrumLoaders, checkPathForDataLoader
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
-        if len(paths) == 0:
+        if not paths:
             # This only works with non-native file dialog; override the default behavior
             dialog = FileDialog.SpectrumFileDialog(parent=self.mainWindow, acceptMode='load',
                                                    useNative=False)

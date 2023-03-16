@@ -225,9 +225,10 @@ class Framework(NotifierBase, GuiBase):
         self._disableUndoException = getattr(self.args, 'disableUndoException', False)
         self._disableModuleException = getattr(self.args, 'disableModuleException', False)
         self._disableQueueException = getattr(self.args, 'disableQueueException', False)
+        self._readOnly = getattr(self.args, 'readOnly', False)
         self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 
-        # Create a temporary directory; Need to hold on to the original tempfile object, as otherwise
+        # Create a temporary directory; Need to hold on to the original temp-file object, as otherwise
         # gets garbage collected. Access path name by using the "name" attribute.
         self._temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpNmr_')
 
@@ -980,8 +981,13 @@ class Framework(NotifierBase, GuiBase):
             self.current._dumpStateToFile(self.statePath)
             self._getUndo().markSave()
 
+        except (PermissionError, FileNotFoundError):
+            failMessage = f'Folder {newPath} may be read-only'
+            getLogger().warning(failMessage)
+            raise
+
         except Exception as es:
-            failMessage = f'saveAs error: {es}'
+            failMessage = f'saveAs: unable to save {es}'
             getLogger().warning(failMessage)
             return False
 
@@ -1004,6 +1010,11 @@ class Framework(NotifierBase, GuiBase):
             Layout.saveLayoutToJson(self.ui.mainWindow)
             self.current._dumpStateToFile(self.statePath)
             self._getUndo().markSave()
+
+        except (PermissionError, FileNotFoundError):
+            failMessage = 'Folder may be read-only'
+            getLogger().warning(failMessage)
+            raise
 
         except Exception as es:
             failMessage = f'save: unable to save {es}'

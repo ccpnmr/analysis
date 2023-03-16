@@ -489,7 +489,7 @@ class TopObject(XmlLoaderABC):
             self.logger.debug2(f'ignoring deleted object {self.apiTopObject}')
             return
 
-        if not self.readOnly:
+        if not self.readOnly and not self.root.writeBlockingLevel:
             try:
                 if not self.package.path.exists():
                     self.package.path.mkdir(parents=True, exist_ok=False)
@@ -500,11 +500,10 @@ class TopObject(XmlLoaderABC):
             except (PermissionError, FileNotFoundError):
                 self.logger.warning('Folder may be read-only')
 
+            if updateIsModified:
+                forceSetattr(self.apiTopObject, 'isModified', False)
 
-        if updateIsModified:
-            forceSetattr(self.apiTopObject, 'isModified', False)
-
-        self.isLoaded = True # xml-file reflects contents
+            self.isLoaded = True # xml-file reflects contents
 
     def __str__(self):
         _loaded = 'loaded' if self.isLoaded else 'not-loaded'
@@ -581,11 +580,10 @@ class Package(XmlLoaderABC):
         if not self.path.exists():
             return []
 
-        result = [_p for _p in
-                  self.path.listdir(suffix=XML_SUFFIX,
+        result = list(self.path.listdir(suffix=XML_SUFFIX,
                                     excludeDotFiles=True,
                                     relative=False)
-                 ]
+                 )
         return result
 
     @property
@@ -851,6 +849,7 @@ class XmlLoader(XmlLoaderABC):
     nameHasChanged     = Bool(False)  # indicates if repository name is different from current name
 
     readingBlockingLevel = Int(default_value=0)  # reading blocking
+    writeBlockingLevel = Int(default_value=0)  # write blocking
 
     memopsXmlPath      = CPath(default_value=None, allow_none=True)  # The path to the memops (project) xml-file
     memopsRoot         = Any(default_value=None, allow_none=True)    # The MemopsRoot of the old-style V2 project object;
@@ -1139,8 +1138,9 @@ class XmlLoader(XmlLoaderABC):
         # as this triggers another call to memopsRoot.refreshTopObjects()
         nmrProjects = list(forceGetattr(memopsRoot,'nmrProjects').values())
         self.apiNmrProject = nmrProjects[0]
-        self._updateApiRepositoryPaths()
+
         self._defineRepositories()
+        self._updateApiRepositoryPaths()
         self._updateTopObjects()
 
     @classmethod
@@ -1193,10 +1193,10 @@ class XmlLoader(XmlLoaderABC):
         """
 
         if not self.path.exists():
-            raise FileNotFoundError('path "%s" does not exist' % self.path)
+            raise FileNotFoundError(f'path "{self.path}" does not exist')
 
         if not self.path.is_dir():
-            raise FileNotFoundError('path "%s" is not a directory' % self.path)
+            raise FileNotFoundError(f'path "{self.path}" is not a directory')
 
         self.isV2 = isV2project(self.path)
 
@@ -1221,9 +1221,13 @@ class XmlLoader(XmlLoaderABC):
         # memopsRoot.refreshTopObjects
         nmrProjects = self.memopsRoot.sortedNmrProjects()
         if nmrProjects is None or len(nmrProjects) == 0:
-            raise RuntimeError('No valid NMR project data could be loaded from "%s"' % self.path)
+            raise RuntimeError(
+                f'No valid NMR project data could be loaded from "{self.path}"'
+            )
         elif len(nmrProjects) > 1:
-            self.logger.warning('Multiple NMR projects defined by "%s": loading only first one.' % self.path)
+            self.logger.warning(
+                f'Multiple NMR projects defined by "{self.path}": loading only first one.'
+            )
         self.apiNmrProject = nmrProjects[0]
 
         # We appear to have to do this often, as 'stray' topObjects appear
@@ -1274,11 +1278,11 @@ class XmlLoader(XmlLoaderABC):
             return self.xmlProjectFile.resolve()
 
         # It did not exist; maybe project was renamed. Try to find another candidate
-        projectFiles = list(self.v3ImplementationPath.glob('*' + XML_SUFFIX))
+        projectFiles = list(self.v3ImplementationPath.glob(f'*{XML_SUFFIX}'))
         if len(projectFiles) > 0:
             return aPath(projectFiles[0]).resolve()
 
-        raise FileNotFoundError('No valid xml-file in "%s"' % self.v3ImplementationPath)
+        raise FileNotFoundError(f'No valid xml-file in "{self.v3ImplementationPath}"')
 
     # @debug3Enter()
     def _loadMemopsFromXml(self, xmlProjectFile=None, partialLoad=False):
@@ -1290,7 +1294,7 @@ class XmlLoader(XmlLoaderABC):
             xmlProjectFile = self._getXmlProjectFile()
 
         if not xmlProjectFile.exists():
-            raise FileNotFoundError('Invalid xmlProjectFile "%s"' % xmlProjectFile)
+            raise FileNotFoundError(f'Invalid xmlProjectFile "{xmlProjectFile}"')
 
         # the memops name might differ from self.name, as the project
         # might have moved/renamed. Hence, derive it from the xml-file
@@ -1300,7 +1304,7 @@ class XmlLoader(XmlLoaderABC):
             self.memopsRoot = loadFromStream(stream=fp, topObjId=_name, partialLoad=partialLoad)
 
         if self.memopsRoot is None:
-            raise RuntimeError('Loading memops from "%s" failed' % xmlProjectFile)
+            raise RuntimeError(f'Loading memops from "{xmlProjectFile}" failed')
 
         self.memopsXmlPath = xmlProjectFile
         self.memopsRoot._logger = getLogger()  # memopsRoot needs a logger
@@ -1330,11 +1334,12 @@ class XmlLoader(XmlLoaderABC):
                 except (PermissionError, FileNotFoundError):
                     self.logger.warning('Folder may be read-only')
 
-            if (self.pathHasChanged or self.nameHasChanged):
-                try:
-                    self._saveMemopsToXml()
-                except (PermissionError, FileNotFoundError):
-                    self.logger.warning('Folder may be read-only')
+            # if (self.pathHasChanged or self.nameHasChanged):
+            #     try:
+            #         print(f'{self.pathHasChanged}   {self.path}    {self.apiUserPath}   {self.userData.apiRepository.url.path}')
+            #         self._saveMemopsToXml()
+            #     except (PermissionError, FileNotFoundError):
+            #         self.logger.warning('Folder may be read-only')
 
         self._debugInfo('After loading memopsRoot:')
 
@@ -1353,7 +1358,11 @@ class XmlLoader(XmlLoaderABC):
         if self.readOnly:
             raise RuntimeError(f'Project "{self.name}" is read-only')
 
-        # Assure that all apiTopObjects are accounted for; some may have been created
+        if self.writeBlockingLevel:
+            getLogger().debug('blocking save of .xml files')
+            return
+
+        # Assure that all apiTopOjects are accounted for; some may have been created
         self._updateTopObjects()
 
         topObjects = self.userData.getTopObjects()
@@ -1391,6 +1400,10 @@ class XmlLoader(XmlLoaderABC):
         # shouldn't need all these error-checks, just being careful
         if self.readOnly:
             getLogger().debug(f'Project {self.name!r} is read-only')
+            return
+
+        if self.writeBlockingLevel:
+            getLogger().debug(f'blocking save: {self.xmlProjectFile}')
             return
 
         _xmlFile = self.xmlProjectFile
@@ -1483,10 +1496,21 @@ class XmlLoader(XmlLoaderABC):
         finally:
             self.readingBlockingLevel -= 1
 
+    @contextmanager
+    def blockWriting(self):
+        """context manager for blocking any reading of xml-files
+        """
+        self.writeBlockingLevel += 1
+        try:
+            yield
+
+        finally:
+            self.writeBlockingLevel -= 1
+
     def _debugInfo(self, topLine=None):
         """bit of debugging info"""
         if topLine is not None:
-            self.logger.debug2('>>> %s' % topLine)
+            self.logger.debug2(f'>>> {topLine}')
         self.logger.debug2(f'... xmlLoader      : {self}')
         self.logger.debug2(f'... memopsRoot      : {self.memopsRoot}')
         self.logger.debug2(f'... repositories: {self.repositories}')
@@ -1520,7 +1544,7 @@ def saveToStream(stream, apiTopObject, mapping=None, comment=None, simplified=Tr
 
     except Exception as es:
         getLogger().error(f'While saving xml file: {es}')
-        raise RuntimeError(es)
+        raise RuntimeError(es) from es
 
     finally:
         if SILENCE_GARBAGE_COLLECTION and _gcEnabled:
@@ -1548,7 +1572,7 @@ def loadFromStream(stream, topObjId=None, topObject=None, partialLoad=False):
                                        partialLoad=partialLoad)
     except Exception as es:
         getLogger().error(f'While loading xml file: {es}')
-        raise RuntimeError(es)
+        raise RuntimeError(es) from es
 
     finally:
         if SILENCE_GARBAGE_COLLECTION and _gcEnabled:
@@ -1564,7 +1588,7 @@ def _getIdFromTopObject(topObj) -> tuple:
 
     activeRepositories = list(forceGetattr(topObj, ACTIVE_REPOSITORIES_ATTR))
 
-    if len(activeRepositories) == 0:
+    if not activeRepositories:
         # This sometimes happens; the model does not always sets a
         # a repository; eg. when creating a new project
         # Allocate these to the userData
@@ -1575,9 +1599,10 @@ def _getIdFromTopObject(topObj) -> tuple:
         forceSetattr(topObj, ACTIVE_REPOSITORIES_ATTR, activeRepositories)
         # dataDict[ACTIVE_REPOSITORIES_ATTR] = activeRepositories
 
-    if len(activeRepositories) == 0:
+    if not activeRepositories:
         # getLogger().debug(f'No repository found for "{packageName}"')
         raise RuntimeError(f'No repository found for {topObj}')
+
     elif len(activeRepositories) > 1:
         getLogger().debug(f'Several repositories found for {topObj}; using first one {repositories[0]}')
     apiRepo = activeRepositories[0]

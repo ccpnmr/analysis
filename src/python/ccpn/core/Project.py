@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-14 19:17:41 +0000 (Tue, March 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-16 14:43:46 +0000 (Thu, March 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -2337,7 +2337,7 @@ def _loadProject(application, path: str) -> Project:
     if not _path.exists():
         raise ValueError(f'Path {_path} does not exist')
 
-    xmlLoader = XmlLoader(path=_path)
+    xmlLoader = XmlLoader(path=_path, readOnly=application._readOnly)
     xmlLoader.loadProject()
 
     _isV2 = xmlLoader.isV2  # save this, because if V2, we are going to change the xmlLoader
@@ -2368,13 +2368,14 @@ def _loadProject(application, path: str) -> Project:
 
         getLogger().debug(f'after update: Saving project to {xmlLoader.path}')
         # Save using the xmlLoader only as we do not have a complete and valid V3-Project yet
-        try:
-            xmlLoader.saveUserData(keepFallBack=False)
-            project._saveHistory.addSaveRecord(version=project._objectVersion,
-                                               comment='upgraded from version-2')
-            project._saveHistory.save()
-        except (PermissionError, FileNotFoundError):
-            getLogger().warning('Folder may be read-only')
+        if not project.readOnly:
+            try:
+                # xmlLoader.saveUserData(keepFallBack=False)
+                project._saveHistory.addSaveRecord(version=project._objectVersion,
+                                                   comment='upgraded from version-2')
+                project._saveHistory.save()
+            except (PermissionError, FileNotFoundError):
+                getLogger().warning('Folder may be read-only')
 
         project._isNew = True
         project._isTemporary = True
@@ -2385,7 +2386,7 @@ def _loadProject(application, path: str) -> Project:
         # Save using the xmlLoader only as we do not have a complete and valid V3-Project yet
         if not project.readOnly:
             try:
-                xmlLoader.saveUserData(keepFallBack=True)
+                # xmlLoader.saveUserData(keepFallBack=True)
                 project._saveHistory.addSaveRecord(version=project._objectVersion,
                                                    comment='Path/name has changed')
                 project._saveHistory.save()

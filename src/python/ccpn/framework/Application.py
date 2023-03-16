@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:42 +0000 (Thu, January 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-16 14:43:46 +0000 (Thu, March 16, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -148,6 +148,8 @@ def defineProgramArguments():
     parser.add_argument('--disable-undo-exception', dest='disableUndoException', action='store_true', help='Disable exception wrapping undo/redo actions, reserved for high-level debugging.')
     parser.add_argument('--disable-module-exception', dest='disableModuleException', action='store_true', help='Disable exception wrapping in module updates, reserved for high-level debugging.')
     parser.add_argument('--disable-queue-exception', dest='disableQueueException', action='store_true', help='Disable exception wrapping undo/redo actions, reserved for high-level debugging.')
+
+    parser.add_argument('--read-only', dest='readOnly', action='store_true', help='Set new/loaded projects to read-only.')
 
     # log information at end of undo/redo if exception occurs (not called if --disable-undo-exception set), calls _logObjects
     parser.add_argument('--ccpn-logging', dest='ccpnLogging', action='store_true', help='Additional logging of some ccpn objects, reserved for high-level debugging.')

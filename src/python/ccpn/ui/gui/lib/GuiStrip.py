@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-16 11:55:36 +0000 (Thu, February 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-17 18:30:46 +0000 (Fri, March 17, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -2531,6 +2531,10 @@ class GuiStrip(Frame):
             for _displayedSpectrum in _displayedSpectra:
                 spectrum = _displayedSpectrum.spectrum
                 spectrumView = _displayedSpectrum.spectrumView
+
+                if not spectrum.peakPicker:
+                    getLogger().warning('Strip.pickPeaks: not peakPicker selected for %s' % spectrum)
+                    continue
 
                 _checkOutside = _displayedSpectrum.checkForRegionsOutsideLimits(regions)
                 _skip = any(_checkOutside)

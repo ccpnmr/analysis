@@ -4,7 +4,7 @@ Simple 1D PeakPicker; for testing only
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-04 15:19:15 +0100 (Mon, April 04, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-03-17 17:39:32 +0000 (Fri, March 17, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -133,7 +133,8 @@ class PeakPicker1D(PeakPickerABC):
 
     def findPeaks(self, data):
         peaks = []
-        x = np.arange(int(self.spectrum.referencePoints[0]),len(data))
+        start = int(self.spectrum.referencePoints[0])
+        x = np.arange(start, start + len(data))
         self._setThresholds()
         maxValues, minValues = _find1DMaxima(y=data, x=x,
                                              positiveThreshold=self.positiveThreshold,
@@ -141,11 +142,13 @@ class PeakPicker1D(PeakPickerABC):
                                              findNegative=self._doNegativePeaks)
         for position, height in maxValues:
             if self._isHeightWithinIntesityLimits(height) and self._isPositionWithinLimits(position):
-                pk = SimplePeak(points=(float(position),), height=float(height))
+                points=(float(position - start),)
+                pk = SimplePeak(points=points, height=float(height))
                 peaks.append(pk)
         if self._doNegativePeaks:
             for position, height in minValues:
                 if self._isHeightWithinIntesityLimits(height) and self._isPositionWithinLimits(position):
+                    points = (float(position - start),)
                     pk = SimplePeak(points=(float(position),), height=float(height))
                     peaks.append(pk)
 

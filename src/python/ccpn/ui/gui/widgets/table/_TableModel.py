@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-06 17:30:44 +0000 (Mon, March 06, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-20 14:23:37 +0000 (Mon, March 20, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -84,8 +84,8 @@ class _TableModel(QtCore.QAbstractTableModel):
         self._defaultForegroundColour = QtGui.QColor(getColours()[GUITABLE_ITEM_FOREGROUND])
 
         # initialise sorting/filtering
-        self._sortColumn = 0
-        self._sortOrder = QtCore.Qt.AscendingOrder
+        self._sortColumn = None
+        self._sortOrder = None
         self._filterIndex = None
 
         # create a pixmap for the editable icon (currently a pencil)

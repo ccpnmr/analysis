@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-07 21:17:30 +0000 (Tue, March 07, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-20 14:23:37 +0000 (Mon, March 20, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -121,6 +121,9 @@ class TableABC(QtWidgets.QTableView):
     defaultTableDelegate = _TableDelegateABC
 
     _droppedNotifier = None
+
+    defaultSortColumn = 0  # allow the use of integer or string/tuple values here
+    defaultSortOrder = QtCore.Qt.AscendingOrder
 
     def __init__(self, parent, *, df=None,
                  multiSelect=True, selectRows=True,

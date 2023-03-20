@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-03 16:16:04 +0000 (Fri, March 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-20 14:23:37 +0000 (Mon, March 20, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -375,22 +375,34 @@ class _ProjectTableABC(TableABC, Base):
             self._dataFrameObject = self.buildTableDataFrame()
             _df = self._dataFrameObject.dataFrame
 
-            # remember the old values
-            sortColumn, sortOrder = 0, 0
+            # remember the old sorting-values
+            sortColumn, sortOrder = None, None
             if (oldModel := self.model()):
                 sortColumn = oldModel._sortColumn
                 sortOrder = oldModel._sortOrder
+
+            # check with the table default
+            if sortColumn is None:
+                sortColumn = self.defaultSortColumn
+            if sortOrder is None:
+                sortOrder = self.defaultSortOrder
 
             # update model to the new _df
             model = self.updateDf(_df)
 
             self.resizeColumnsToContents()
 
+            try:
+                # get a valid column from integer or string/tuple[multi-index]
+                intCol = sortColumn if isinstance(sortColumn, int) else _df.columns.get_loc(sortColumn)
+            except Exception:
+                intCol = 0
+
             # re-sort the table
-            if oldModel and (0 <= sortColumn < model.columnCount()) and self.isSortingEnabled():
+            if oldModel and (0 <= intCol < model.columnCount()) and self.isSortingEnabled():
                 model._sortColumn = sortColumn
                 model._sortOrder = sortOrder
-                self.sortByColumn(sortColumn, sortOrder)
+                self.sortByColumn(intCol, sortOrder)
 
             self.postUpdateDf()
             self._highLightObjs(objs)

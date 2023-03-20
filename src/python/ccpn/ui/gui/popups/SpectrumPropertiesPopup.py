@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:42 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-20 15:48:11 +0000 (Mon, March 20, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -353,8 +353,8 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
         self._dimensionsTab = None
         self._contoursTab = None
 
+        self._generalTab = self._dimensionsTab = self._contoursTab = None
         if spectrum.dimensionCount == 1:
-            self._generalTab = self._dimensionsTab = self._contoursTab = None
             for (tabName, attrName, tabFunc) in (('General', '_generalTab', partial(GeneralTab, container=self, mainWindow=self.mainWindow, spectrum=spectrum)),
                                                  ('Dimensions', '_dimensionsTab', partial(DimensionsTab, container=self, mainWindow=self.mainWindow, spectrum=spectrum, dimensions=spectrum.dimensionCount)),
                                                  ):
@@ -369,7 +369,6 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
             self.tabWidget.setCurrentIndex(1)
 
         else:
-            self._generalTab = self._dimensionsTab = self._contoursTab = None
             for (tabName, attrName, tabFunc) in (('General', '_generalTab', partial(GeneralTab, container=self, mainWindow=self.mainWindow, spectrum=spectrum)),
                                                  ('Dimensions', '_dimensionsTab', partial(DimensionsTab, container=self, mainWindow=self.mainWindow, spectrum=spectrum, dimensions=spectrum.dimensionCount)),
                                                  ('Contours', '_contoursTab', partial(ContoursTab, container=self, mainWindow=self.mainWindow, spectrum=spectrum, showCopyOptions=False)),
@@ -1320,6 +1319,33 @@ class DimensionsTab(Widget):
     def _fillPullDowns(self):
         pass
 
+    def _getOnlyAvailable(self, expType):
+        """Set the reference dimensions for those that only have one option when changing experiment-type
+        """
+        if (self._referenceExperiment or self.spectrum.experimentType) is None:
+            return
+
+        # get the nucleus codes from the current isotope codes
+        refDimensions = list(self._referenceDimensions or self.spectrum.referenceExperimentDimensions)
+
+        _referenceLists = [['', ] for val in refDimensions]
+        _refDimensions = [val if val else '' for val in refDimensions]
+
+        # get the permutations of the available experiment dimensions
+        matches = self.spectrum.getAvailableReferenceExperimentDimensions(_experimentType=expType)
+        if matches:
+            for ac in matches:
+                for ii in range(self.dimensions):
+                    if ac[ii] not in _referenceLists[ii]:
+                        _referenceLists[ii].append(ac[ii])
+
+        for ii, (refList, ref, combo) in enumerate(zip(_referenceLists, _refDimensions, self.referenceDimensionPullDowns)):
+            if len(refList) == 2:
+                refDimensions[ii] = refList[1]
+                combo.setIndex(1)
+
+        self._referenceDimensions = tuple(refDimensions)
+
     def _populateReferenceDimensions(self):
         """Populate the references dimensions from the current experiment and the current value
         """
@@ -1629,6 +1655,9 @@ class DimensionsTab(Widget):
 
                 result = partial(self._setSpectrumType, spectrum, expType)
 
+                # set the only options here if available
+                self._getOnlyAvailable(expType)
+
                 if not expType:
                     # flag magTransfers to change if setting to empty - keeps current list
                     self._queueSetMagnetisationTransfers(self.spectrum, keepMagTransfers=True)
@@ -1637,6 +1666,9 @@ class DimensionsTab(Widget):
         with self.blockWidgetSignals(blockUpdates=False):
             self._populateReferenceDimensions()
             self._populateMagnetisationTransfers()
+
+        # update the reference-dimensions from the new experiment-type
+        self._queueSetReferenceDimensions(spectrum, None)
 
         return result
 

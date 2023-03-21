@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-17 16:19:30 +0000 (Fri, March 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-21 12:48:58 +0000 (Tue, March 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -810,7 +810,8 @@ def _getBins(y, binCount=None):
     fittedCurveExtremum = edges[np.argmax(fittedCurve)]  # value at the Extremum of the fitted curve
     return statistics, edges, binNumbers, fittedCurve, mostCommonBinNumber, highestValues, fittedCurveExtremum
 
-
+# from ccpn.util.decorators import profile
+# @profile('/Users/luca/Documents/V3-testings/profiling/')
 def snap1DPeaksByGroup(peaks, ppmLimit=0.05, figOfMeritLimit=1,
                        doNeg=False, unsnappedLimit=1, increaseLimitStep=0.1):
     """
@@ -1093,7 +1094,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
 
     maxValues, minValues = _find1DMaxima(y_filtered, x_filtered, positiveThreshold=noiseLevel, negativeThreshold=negativeNoiseLevel, findNegative=doNeg)
     allValues = maxValues + minValues
-
+    # allValues = _filterKnownPeakPositionsFromNewMaxima(allValues, peak, rounding=4)
     if len(allValues) > 0:
         allValues = np.array(allValues)
         positions = allValues[:, 0]
@@ -1129,6 +1130,14 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
     height = _correctNegativeHeight(height, doNeg)  # Very important. don't return a negative height if doNeg is False.
     return position, float(height), heightError
 
+def _filterKnownPeakPositionsFromNewMaxima(newMaxima, peak, rounding=4):
+    """Remove known positions from the newly found maxima to avoid snapping to an existing peak"""
+    knownPositions = [round(p.position[0], rounding) for p in peak.peakList.peaks]
+    for maximum in newMaxima:
+        pos, intens = maximum
+        if round(pos, rounding) in knownPositions:
+            newMaxima.remove(maximum)
+    return newMaxima
 
 def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=False, figOfMeritLimit=0):
     """

@@ -106,9 +106,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         #     return
 
         # setup database metabolite tables
-        self.settings['Simulators']['HMDB'] = Simulator(self.project, '/home/mh491/Database/Remediated_Databases/ccpn_metabolites_hmdb.db')
-        self.settings['Simulators']['BMRB'] = Simulator(self.project, '/home/mh491/Database/Remediated_Databases/ccpn_metabolites_bmrb.db')
-        self.settings['Simulators']['GISSMO'] = Simulator(self.project, '/home/mh491/Database/Remediated_Databases/ccpn_metabolites_gissmo.db')
+        self.settings['Simulators']['HMDB'] = Simulator(self.project, '/Users/mh653/Documents/PhD/Database/Remediated_Databases/ccpn_metabolites_hmdb.db')
+        self.settings['Simulators']['BMRB'] = Simulator(self.project, '/Users/mh653/Documents/PhD/Database/Remediated_Databases/ccpn_metabolites_bmrb.db')
+        self.settings['Simulators']['GISSMO'] = Simulator(self.project, '/Users/mh653/Documents/PhD/Database/Remediated_Databases/ccpn_metabolites_gissmo.db')
 
         hmdb_metabolites = self.settings['Simulators']['HMDB'].caller.execute_query('select metabolite_id, name, hmdb_accession, '
                                                                'chemical_formula, average_molecular_weight, smiles, '
@@ -155,12 +155,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
         self.spectrumGroups = [spectrumGroup.id for spectrumGroup in sorted(self.project.spectrumGroups)]
         self.spectra = [spectrum.id for spectrum in self.project.getByPid(self.settings['Spectrum']['SpectrumGroupId']).spectra]
-        widget.setData(self.spectrumGroups)
+        widget.setData(self.spectra)
         self.guiDict['Spectrum']['SpectrumId'] = widget
         self.settings['Spectrum']['SpectrumId'] = self._getValue(widget)
-
-        if self.spectrumGroups:
-            self._selectSpectrumGroup(self.spectrumGroups[0])
 
         # pull down list for selecting the database to reference from
         grid = _addRow(grid)
@@ -209,7 +206,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             shift = widget.value()
             self.simspec.moveSpinSystemMultiplet(index, shift)
             self.refreshSumSpectrum()
-        grid = (index+6, index+6)
+        grid = (index+7, index+7)
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Multiplet {index+1} Chemical Shift', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
@@ -260,6 +257,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         y = numpy.zeros(points)
         if spectrumID not in self.sumSpectra:
             self.sumSpectra[spectrumID] = self.project.newEmptySpectrum(['1H'], name=f'Reference_Sum_{spectrumID}', intensities=y, positions=x)
+            self.settings['Spectrum']['referenceSumSpectrum'] = self.sumSpectra[spectrumID]
             self.settings['Spectrum']['referenceSpectrumGroup'].addSpectrum(self.settings['Spectrum']['referenceSumSpectrum'])
 
     def _selectMetaboliteList(self, databaseName):
@@ -288,7 +286,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                 widget.deleteLater()
             self.guiDict['Spectrum']['SimulatedSpectrumAttributes'] = []
 
-        grid = (3, 1)
+        grid = (4, 1)
         # Add a widget for the simulated spectrum peak width
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Width', grid=grid)

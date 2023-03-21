@@ -5,19 +5,19 @@ This module defines the creation of a Simulated Spectrum from a ChemicalShift Li
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-27 13:22:37 +0100 (Mon, June 27, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2023-03-20 21:01:51 +0000 (Mon, March 20, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -91,6 +91,12 @@ class SimulatedSpectrumByExperimentTypeABC(TraitBase):
     def spectrum(self):
         return self._spectrum
 
+    def getPeakAtomNameMappers(self):
+        peakAtomNameMappers = self.peakAtomNameMappers
+        if peakAtomNameMappers is None:
+            peakAtomNameMappers = self._createAtomNameMappers()
+        return peakAtomNameMappers
+
     @property
     def peakList(self):
         return self._spectrum.peakLists[self._peakListIndex]
@@ -131,7 +137,7 @@ class SimulatedSpectrumByExperimentTypeABC(TraitBase):
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
                 for ix, filteredData in data.groupby(CS_NMRRESIDUE):
-                    for mappers in self.peakAtomNameMappers: # mappers are list of lists
+                    for mappers in self.getPeakAtomNameMappers(): # mappers are list of lists
                         # make a new Peak for each mapperGroup
                         peak = self.peakList.newPeak()
                         # loop through mappers to get the required atoms names  to fill the peak assignments and CS value
@@ -212,9 +218,12 @@ class SimulatedSpectrumByExperimentTypeABC(TraitBase):
         pass
 
     def _getAllRequiredAtomNames(self):
-        values = [v._getAllAtomNames() for mm in self.peakAtomNameMappers for v in mm]
+        values = [v._getAllAtomNames() for mm in self.getPeakAtomNameMappers() for v in mm]
         return OrderedSet(flattenLists(values))
 
+    @staticmethod
+    def _createAtomNameMappers():
+        return [[],]
     # =========================================================================================
 
     def __str__(self):
@@ -354,6 +363,30 @@ class SimulatedSpectrum_15N_HSQC(SimulatedSpectrumByExperimentTypeABC):
                             ],
                           ]
 
+class SimulatedSpectrum_13C_HSQC(SimulatedSpectrumByExperimentTypeABC):
+
+    experimentType      = '13C HSQC/HMQC'
+    isotopeCodes        = ['1H', '13C']
+    axisCodes           = ['H', 'C']
+    spectralWidths      = [16, 160]
+    referenceValues     = [14, 160]
+    peakAtomNameMappers = None
+
+    @staticmethod
+    def _createAtomNameMappers():
+        from ccpn.core.lib.AssignmentLib import NEF_ATOM_NAMES_CBONDED
+
+        peakMappers = [[],]
+        for catom in NEF_ATOM_NAMES_CBONDED.keys():
+            for hatom in NEF_ATOM_NAMES_CBONDED.get(catom, []):
+                atomNameMappers = [AtomNamesMapper(isotopeCode='1H', axisCode='H', offsetNmrAtomNames={0:hatom}),
+                                    AtomNamesMapper(isotopeCode='13C', axisCode='C', offsetNmrAtomNames={0:catom})]
+                peakMappers.append(atomNameMappers)
+
+        return(peakMappers)
+
+
+
 
 #--------------------------------------------------------------------------------------------
 # 3D ExperimentTypes
@@ -481,6 +514,7 @@ class SimulatedSpectrum_HNCACB(SimulatedSpectrumByExperimentTypeABC):
 CSL2SPECTRUM_DICT = OrderedDict([
                             (SimulatedSpectrum_1H.experimentType, SimulatedSpectrum_1H),
                             (SimulatedSpectrum_15N_HSQC.experimentType, SimulatedSpectrum_15N_HSQC),
+                            (SimulatedSpectrum_13C_HSQC.experimentType, SimulatedSpectrum_13C_HSQC),
                             (SimulatedSpectrum_HNCO.experimentType, SimulatedSpectrum_HNCO),
                             (SimulatedSpectrum_HNCA.experimentType, SimulatedSpectrum_HNCA),
                             (SimulatedSpectrum_HNCOCA.experimentType, SimulatedSpectrum_HNCOCA),

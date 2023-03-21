@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:43 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2023-03-20 21:01:51 +0000 (Mon, March 20, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -53,7 +53,7 @@ NEF_ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CG', 'CG1', 'CG2', 'CGx', 'CGy', 'CG
                   '15N': ['N', 'ND1', 'ND2', 'NE', 'NE1', 'NE2', 'NZ', 'NH1', 'NH2', 'NHx', 'NHy'],
                   '1H' : ['H', 'HA', 'HA2', 'HA3', 'HAx', 'HAy', 'HA%', 'HB', 'HB2', 'HB3', 'HBx', 'HBy',
                           'HB%', 'HG', 'HG1', 'HG12', 'HG13', 'HG1x', 'HG1y', 'HG1%', 'HG2', 'HG2%',
-                          'HG3', 'HGx', 'HGx%', 'HGy', 'HGy%', 'HD1', 'HD1%', 'HD2', 'HD21', 'HD22',
+                          'HG3', 'HGx', 'HGx%', 'HGy', 'HGy%', 'HG%', 'HD1', 'HD1%', 'HD2', 'HD21', 'HD22',
                           'HD2x', 'HD2y', 'HD2%', 'HD3', 'HDx', 'HDx%', 'HDy', 'HDy%', 'HE', 'HE1', 'HE2',
                           'HE21', 'HE22', 'HE2x', 'HE2y', 'HE3', 'HEx', 'HEy', 'HE%', 'HZ', 'HZ2', 'HZ3', 'HZ%',
                           'HH', 'HH11', 'HH12', 'HH1x', 'HH1y', 'HH2', 'HH21', 'HH22', 'HH2x', 'HH2y',
@@ -113,6 +113,36 @@ PROTEIN_NEF_ATOM_NAMES = {
     'VAL': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB', 'CGx', 'CGy', 'CG%', 'CG1', 'CG2',
             'HGx%', 'HGy%', 'HG1%', 'HG2%', 'HG%']
     }
+
+# This is a quick and dirty fix in order to enable the creation of synthetic  1H-13C HSQC peak lists.
+# This should be overhauled once the new NTdb_jsons have been introduced and updated with NEF atom names.
+NEF_ATOM_NAMES_CBONDED = {'CA': ['HA', 'HA2', 'HA3', 'HAx', 'HAy', 'HA%'],
+                  'CB': ['HB', 'HB2', 'HB3', 'HBx', 'HBy', 'HB%'],
+                  'CG': ['HG', 'HG1', 'HG2', 'HG3', 'HGx', 'HGy', 'HG%'],
+                  'CG1': ['HG12', 'HG13', 'HG1x', 'HG1y', 'HG1%', 'HG%'],
+                  'CG2': ['HG2%', 'HG%'],
+                  'CGx': ['HGx%', 'HG%'],
+                  'CGy': ['HGy%', 'HG%'],
+                  'CG%': ['HGx%', 'HGy%', 'HG%'],
+                  'CD': ['HD2', 'HD3', 'HDx', 'HDy', 'HD%'],
+                  'CD1': ['HD1', 'HD1%'],
+                  'CD2': ['HD2', 'HD2%'],
+                  'CDx': ['HDx', 'HDx%', 'HD%'],
+                  'CDy': ['HDy', 'HDy%', 'HD%'],
+                  'CD%': ['HD%'],
+                  'CE': ['HEx%', 'HEy%', 'HE%'],
+                  'CE1': ['HE1'],
+                  'CE2': ['HE2'],
+                  'CE3': ['HE3'],
+                  'CEx': ['HEx', 'HE%'],
+                  'CEy': ['HEy', 'HE%'],
+                  'CE%': ['HE%'],
+                  'CZ': ['HZ'],
+                  'CZ2': ['HZ2'],
+                  'CZ3': ['HZ3'],
+                  'CH2': ['HH2'],
+                  }
+
 
 from itertools import combinations
 import typing

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-22 13:04:34 +0000 (Wed, March 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-22 13:05:22 +0000 (Wed, March 22, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -256,7 +256,7 @@ class Chain(AbstractWrapperObject):
 
     @logCommand(get='self')
     def toNmrChain(self, nmrChainName=None, ):
-        """ Makes an Nmr Chain from the chain
+        """ Makes a new NmrChain from its ressidues/atoms.
 
         :param nmrChainName: str. Default None to use the same name as the chain. If the name is already taken, it creates a sequential code.
         :return the newly created nmrChain object

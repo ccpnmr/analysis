@@ -3,19 +3,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-07-05 13:20:36 +0100 (Tue, July 05, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-03-22 13:04:34 +0000 (Wed, March 22, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -254,21 +254,34 @@ class Chain(AbstractWrapperObject):
         """
         return any([a.isAssigned for a in self.atoms])
 
-    def _toNmrChain(self):
-        """ Makes an Nmr Chain from the chain """
+    @logCommand(get='self')
+    def toNmrChain(self, nmrChainName=None, ):
+        """ Makes an Nmr Chain from the chain
+
+        :param nmrChainName: str. Default None to use the same name as the chain. If the name is already taken, it creates a sequential code.
+        :return the newly created nmrChain object
+
+        """
         try:
             from ccpn.util.isotopes import DEFAULT_ISOTOPE_DICT
             from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+            from ccpn.core.NmrChain import NmrChain
+            name = nmrChainName
+            if name is not None:
+                name = self.name
+                if self.project.getByPid( f'{NmrChain.shortClassName}:{name}'):
+                    getLogger().warn(f'NmrChain name {name} is already existing.')
+                    name = NmrChain._uniqueName(project=self.project, name=name)
 
             with undoBlockWithoutSideBar():
-                nmrChain = self.project.newNmrChain(isConnected=True)
+                nmrChain = self.project.newNmrChain(shortName=name,) #  isConnected=True is not possible with a name different from #  (API errors)!
                 for residue in self.residues:
                     nmrResidue = nmrChain.newNmrResidue(sequenceCode=residue.sequenceCode, residueType=residue.residueType)
                     for atom in residue.atoms:
                         if atom.name:
                             isotopeCode = DEFAULT_ISOTOPE_DICT.get(atom.elementSymbol)
                             nmrResidue.newNmrAtom(atom.name, isotopeCode=isotopeCode)
-
+            return nmrChain
         except Exception as e:
             self.project._logger.warning("Error in creating an NmrChain from Chain: %s" % e)
 

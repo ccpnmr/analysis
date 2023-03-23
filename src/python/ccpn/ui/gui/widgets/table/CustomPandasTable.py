@@ -11,6 +11,11 @@ from ccpn.util.OrderedSet import OrderedSet
 
 class CustomDataFrameTable(Table):
     _defaultEditable = False
+    _enableSearch = True
+    _enableDelete = False
+    _enableExport = True
+    _enableCopyCell = True
+
     def __init__(self, parent, dataFrame=None, columns=None, **kwds):
         super().__init__(parent, **kwds)
         self._columnDefs = self.getColumnDefs(columns)

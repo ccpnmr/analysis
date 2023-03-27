@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-21 12:48:58 +0000 (Tue, March 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-27 15:14:04 +0100 (Mon, March 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1095,6 +1095,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
     maxValues, minValues = _find1DMaxima(y_filtered, x_filtered, positiveThreshold=noiseLevel, negativeThreshold=negativeNoiseLevel, findNegative=doNeg)
     allValues = maxValues + minValues
     # allValues = _filterKnownPeakPositionsFromNewMaxima(allValues, peak, rounding=4)
+    allValues =  _filterLowSNFromNewMaxima(allValues, noiseLevel, negativeNoiseLevel)
     if len(allValues) > 0:
         allValues = np.array(allValues)
         positions = allValues[:, 0]
@@ -1136,6 +1137,22 @@ def _filterKnownPeakPositionsFromNewMaxima(newMaxima, peak, rounding=4):
     for maximum in newMaxima:
         pos, intens = maximum
         if round(pos, rounding) in knownPositions:
+            newMaxima.remove(maximum)
+    return newMaxima
+
+def _filterLowSNFromNewMaxima(newMaxima, noiseLevel, negativeNoise,  snThreshold=1.5):
+    """Remove known positions from the newly found maxima to avoid snapping to an existing peak"""
+
+    for maximum in newMaxima:
+        pos, intens = maximum
+        ratio = None
+        if intens > 0:
+            ratio = intens/noiseLevel
+        if intens <0:
+            ratio = intens/negativeNoise
+        if ratio is None:
+            continue
+        if ratio  <= snThreshold:
             newMaxima.remove(maximum)
     return newMaxima
 

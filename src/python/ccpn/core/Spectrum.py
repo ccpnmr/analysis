@@ -53,8 +53,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-02 11:51:59 +0000 (Thu, March 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-03-27 15:06:50 +0100 (Mon, March 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1688,6 +1688,14 @@ class Spectrum(AbstractWrapperObject):
         """Return the series item for the current spectrum for the selected spectrumGroup
         """
         return self._getSeriesItem(spectrumGroup)
+
+    @logCommand(get='self')
+    def deleteAllPeakLists(self):
+        """
+        Remove all peakLists from the spectrum and create the default empty PeakList
+        """
+        self.project.deleteObjects(*self.peakLists)
+
 
     def _getSeriesItem(self, spectrumGroup):
         """Return the series item for the current spectrum for the selected spectrumGroup

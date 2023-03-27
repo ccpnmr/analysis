@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:48:27 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-03-27 15:06:18 +0100 (Mon, March 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -67,7 +67,8 @@ class SpectrumDisplay1d(SpectrumDisplay, GuiSpectrumDisplay):
     # NB: 'self' is added to the callback in _fillToolbar using partial
     _toolbarItems = [
         #  action name,        icon,                 tooltip,                                       active, callback
-
+        ('addStrip',            'icons/plus',                'Duplicate the rightmost strip',       True, GuiSpectrumDisplay.addStrip),
+        ('removeStrip',        'icons/minus',           'Remove the current strip',          True, GuiSpectrumDisplay.removeCurrentStrip),
         ('increaseStripWidth', 'icons/range-expand',   'Increase the width of strips in display',   True, GuiSpectrumDisplay.increaseStripSize),
         ('decreaseStripWidth', 'icons/range-contract', 'Decrease the width of strips in display',   True, GuiSpectrumDisplay.decreaseStripSize),
         ('maximiseZoom',       'icons/zoom-full',      'Maximise Zoom (ZA)',                        True, GuiSpectrumDisplay._resetAllZooms),
@@ -79,8 +80,7 @@ class SpectrumDisplay1d(SpectrumDisplay, GuiSpectrumDisplay):
         ('restoreZoom',        'icons/zoom-restore', 'Restore Zoom (ZR)',                           True, GuiSpectrumDisplay._restoreZoom),
         ('undoZoom',           'icons/zoom-undo',    'Previous Zoom (ZP)',                          True, GuiSpectrumDisplay._previousZoom),
         ('redoZoom',           'icons/zoom-redo',    'Next Zoom (ZN)',                              True, GuiSpectrumDisplay._nextZoom),
-        # ('addStrip', 'icons/plus', 'Duplicate the rightmost strip', True, self.addStrip),
-        # ('removeStrip', 'icons/minus', 'Remove the current strip', True, self.removeCurrentStrip),
+
         ]
 
     def __init__(self, project: Project, wrappedData: 'ApiBoundDisplay'):

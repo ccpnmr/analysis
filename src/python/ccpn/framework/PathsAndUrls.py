@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -110,22 +110,23 @@ CCPN_DIRECTORY_SUFFIX    = '.ccpn'
 CCPN_BACKUP_SUFFIX       = '_backup'  # used by Project, ApiLoader; deprecated
 
 # subdirectories of Projects
-CCPN_API_DIRECTORY       = 'ccpnv3'
-CCPN_ARCHIVES_DIRECTORY  = 'archives'
-CCPN_BACKUPS_DIRECTORY   = 'backups'
-CCPN_SUMMARIES_DIRECTORY = 'summaries'
-CCPN_LOGS_DIRECTORY      = 'logs'
-CCPN_DATA_DIRECTORY      = 'data'
-CCPN_PLUGINS_DIRECTORY   = 'data/plugins'
-CCPN_SPECTRA_DIRECTORY   = 'data/spectra'
-CCPN_SCRIPTS_DIRECTORY   = 'scripts'
-CCPN_STATE_DIRECTORY     = 'state'
+CCPN_API_DIRECTORY          = 'ccpnv3'
+CCPN_ARCHIVES_DIRECTORY     = 'archives'
+CCPN_BACKUPS_DIRECTORY      = 'backups'
+CCPN_SUMMARIES_DIRECTORY    = 'summaries'
+CCPN_LOGS_DIRECTORY         = 'logs'
+CCPN_DATA_DIRECTORY         =  'data'
+CCPN_PLUGINS_DIRECTORY      = 'data/plugins'
+CCPN_SPECTRA_DIRECTORY      = 'data/spectra'
+CCPN_SCRIPTS_DIRECTORY      = 'scripts'
+CCPN_STATE_DIRECTORY        = 'state'
+CCPN_STATESPECTRA_DIRECTORY = 'state/spectra'
 
 CCPN_SUB_DIRECTORIES = [
     CCPN_API_DIRECTORY, CCPN_ARCHIVES_DIRECTORY, CCPN_BACKUPS_DIRECTORY,
     CCPN_SUMMARIES_DIRECTORY, CCPN_LOGS_DIRECTORY, CCPN_DATA_DIRECTORY,
     CCPN_PLUGINS_DIRECTORY, CCPN_SPECTRA_DIRECTORY, CCPN_SCRIPTS_DIRECTORY,
-    CCPN_STATE_DIRECTORY
+    CCPN_STATE_DIRECTORY, CCPN_STATESPECTRA_DIRECTORY
 ]
 
 ccpnVersionHistory       = 'versionHistory.json'

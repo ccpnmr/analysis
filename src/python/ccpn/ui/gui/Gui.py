@@ -84,6 +84,9 @@ def _ccpnExceptionhook(ccpnType, value, tback):
         text = str(value)
         MessageDialog.showError(title=title, message=text)
 
+    if application.project and not application.project.readOnly:
+        application.project._updateLoggerState(readOnly=False, flush=True)
+
     sys.__excepthook__(ccpnType, value, tback)
 
 
@@ -549,7 +552,10 @@ class Gui(Ui):
             if oldMainWindowPos:
                 self.mainWindow.move(oldMainWindowPos)
 
-        # except (RuntimeError, ApiError) as es:
+        except (RuntimeError, ValueError, ApiError) as es:
+            MessageDialog.showError('Error loading Project:', f'{es}', parent=self.mainWindow)
+            return None
+
         except NotImplementedError as es:
             MessageDialog.showError('Error loading Project:', f'{es}', parent=self.mainWindow)
 
@@ -586,7 +592,7 @@ class Gui(Ui):
                 return None
 
             # load the project using the dataLoader;
-            # We'll ask framework, who will pass it back to ui._loadProject
+            # We'll ask framework who will pass it back to ui._loadProject
             if (objs := self.application._loadData([dataLoader])):
                 if len(objs) == 1:
                     return objs[0]
@@ -676,14 +682,20 @@ class Gui(Ui):
         if self.project.isTemporary:
             return self.saveProjectAs()
 
-        if self.project.readOnly:
-            MessageDialog.showWarning('Save project', 'Project is read-only')
+        if self.project.readOnly and not MessageDialog.showYesNo(
+                'Save Project',
+                'The project is marked as read-only.\n'
+                'This can be changed by clicking the lock-icon in the botton-right\n'
+                'corner of the window or from the python-console with the command:\n\n'
+                'project.setReadOnly(False)\n\n'
+                'Do you want to continue saving?\n',
+                ):
             return True
 
         with catchExceptions(errorStringTemplate='Error saving project: %s'):
             with MessageDialog.progressManager(self.mainWindow, 'Saving project ... '):
                 try:
-                    if not self.application._saveProject():
+                    if not self.application._saveProject(force=True):
                         return False
                 except (PermissionError, FileNotFoundError):
                     msg = 'Folder may be read-only'

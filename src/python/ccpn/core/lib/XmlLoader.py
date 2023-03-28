@@ -883,7 +883,7 @@ class XmlLoader(XmlLoaderABC):
 
         if isV2project(path):
             self.isV2 = True
-            self.readOnly = True
+            self.setReadOnly(True)
 
         self.path = aPath(path)
         if not self.path.exists():
@@ -922,10 +922,12 @@ class XmlLoader(XmlLoaderABC):
         """
         return self._readOnly
 
-    @readOnly.setter
-    def readOnly(self, value):
+    def setReadOnly(self, value):
         """Set the read-only state for all loaded xml objects
         """
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}.setReadOnly must be a bool')
+
         super()._setReadOnly(value)
         for rep in self.repositories:
             rep._setReadOnly(value)
@@ -939,7 +941,7 @@ class XmlLoader(XmlLoaderABC):
     @property
     def v3Path(self) -> Path:
         """returns the path to the CcpNmr repository as Path object
-        Takes account of the optional V2status
+        Takes account of the optional V2-status
         """
         if self.path is None:
             raise RuntimeError('XmlLoader: undefined path')
@@ -1329,7 +1331,8 @@ class XmlLoader(XmlLoaderABC):
         if not self.readOnly:
             if self.nameHasChanged:
                 try:
-                    xmlProjectFile.removeFile()
+                    # the only one to rename should be the primary project xml
+                    # xmlProjectFile.removeFile()
                     self._rename(self.name)  # Check below if we save
                 except (PermissionError, FileNotFoundError):
                     self.logger.warning('Folder may be read-only')

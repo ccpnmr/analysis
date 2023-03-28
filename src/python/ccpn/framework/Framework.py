@@ -34,8 +34,9 @@ import sys
 import subprocess
 import platform
 import tempfile
-
 import faulthandler
+import contextlib
+from datetime import datetime
 
 
 try:
@@ -146,7 +147,7 @@ class Framework(NotifierBase, GuiBase):
         printCreditsText(sys.stderr, self.applicationName, self.applicationVersion)
 
         #-----------------------------------------------------------------------------------------
-        # register the programme for later with the getApplication() call
+        # register the program for later with the getApplication() call
         #-----------------------------------------------------------------------------------------
         from ccpn.framework.Application import ApplicationContainer
 
@@ -167,12 +168,15 @@ class Framework(NotifierBase, GuiBase):
         # used in GuiMainWindow by startPlugin()
 
         # set to True to override the read-only status of a project
-        #   required to use saveAs but keep the project.readOnly status until the next load
-        self._saveAsOverrideState = False
+        #   required to use save/saveAs but keep the project.readOnly status until the next load
+        self._saveOverrideState = False
 
         #-----------------------------------------------------------------------------------------
         # Initialisations
         #-----------------------------------------------------------------------------------------
+
+        self._created = datetime.now().strftime("%H%M")  # adds the app creation time to the end of the logger filename
+
         self.args = args
 
         # NOTE:ED - what is revision for? there are no uses and causes a new error for sphinx documentation unless a string
@@ -234,10 +238,12 @@ class Framework(NotifierBase, GuiBase):
 
         # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
+
         self._dataLoaders = getDataLoaders()
 
         # register SpectrumDataSource formats for the first and only time
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+
         self._spectrumDataSourceFormats = getDataFormats()
 
         # get a user interface; nb. ui.start() is called by the application
@@ -275,19 +281,41 @@ class Framework(NotifierBase, GuiBase):
         return isinstance(self.ui, Gui)
 
     @property
-    def _saveAsOverride(self):
-        """Return the save-override state, this allows the saving of read-only projects
+    def _saveOverride(self):
+        """Return the save-override state, this allows the saving of projects that are marked as read-only
         """
-        return self._saveAsOverrideState
+        return self._saveOverrideState
 
-    @_saveAsOverride.setter
-    def _saveAsOverride(self, value):
+    @_saveOverride.setter
+    def _saveOverride(self, value):
         if not isinstance(value, bool):
-            raise TypeError(f'{self.__class__.__name__}.saveAsOverrideState must be a bool')
+            raise TypeError(f'{self.__class__.__name__}._saveOverride must be a bool')
 
-        self._saveAsOverrideState = value
+        self._saveOverrideState = value
         if self.project:
-            self.project.updateReadOnlyState()
+            self.project._updateReadOnlyState()
+            self.project._updateLoggerState()
+            if self.mainWindow:
+                self.mainWindow._setReadOnlyIcon()
+
+    @property
+    def defaultReadOnly(self):
+        """Return the deafult read-only state for all projects.
+        Overrides project.readOnly except for using save/saveAs as necessary
+        """
+        return self._readOnly
+
+    @defaultReadOnly.setter
+    def defaultReadOnly(self, value):
+        if not isinstance(value, bool):
+            raise TypeError(f'{self.__class__.__name__}.defaultReadOnly must be a bool')
+
+        self._readOnly = value
+        if self.project:
+            self.project._updateReadOnlyState()
+            self.project._updateLoggerState()
+            if self.mainWindow:
+                self.mainWindow._setReadOnlyIcon()
 
     #-----------------------------------------------------------------------------------------
     # Useful (?) directories as Path instances
@@ -407,10 +435,12 @@ class Framework(NotifierBase, GuiBase):
         """
         if self.args.interface == 'Gui':
             from ccpn.ui.gui.Gui import Gui
+
             ui = Gui(application=self)
 
         else:
             from ccpn.ui.Ui import NoUi
+
             ui = NoUi(application=self)
 
         return ui
@@ -490,6 +520,11 @@ class Framework(NotifierBase, GuiBase):
 
     def _backupProject(self):
         try:
+            if self.project.readOnly:
+                # skip if the project is read-only
+                getLogger().debug('Backup skipped: Project is read-only')
+                return
+
             from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 
             apiIo.backupProject(self.project._wrappedData.parent)
@@ -502,10 +537,14 @@ class Framework(NotifierBase, GuiBase):
             Layout.saveLayoutToJson(self.ui.mainWindow, layoutFile)
             self.current._dumpStateToFile(backupStatePath)
 
-            #Spectra should not be copied over. Dangerous for disk space
+            # Spectra should not be copied over. Dangerous for disk space
             # backupDataPath = fetchDir(backupPath, DataDirName)
+
+        except (PermissionError, FileNotFoundError):
+            getLogger().warning('Backup failed: Folder may be read-only')
+
         except Exception as es:
-            getLogger().warning('Project backup failed with error %s' % es)
+            getLogger().warning(f'Project backup failed with error {es}')
 
     #-----------------------------------------------------------------------------------------
 
@@ -567,7 +606,7 @@ class Framework(NotifierBase, GuiBase):
     # Utilities
     #-----------------------------------------------------------------------------------------
 
-    def setDebug(self, level:int):
+    def setDebug(self, level: int):
         """Set the debugging level
         :param level: 0: off, 1-3: debug level 1-3
         """
@@ -938,7 +977,7 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.core.lib.ProjectLib import checkProjectName
 
         if name is None:
-            raise ValueError(f'Undefined name for new project')
+            raise ValueError('Undefined name for new project')
         if checkProjectName(name, correctName=False) is None:
             raise ValueError(f'Invalid project name "{name}"; check log/console for details')
 
@@ -952,6 +991,12 @@ class Framework(NotifierBase, GuiBase):
 
         getLogger().debug(f'Opened project "{name}" at {result.path}')
 
+        # update the logger read-only state
+        self.project._updateReadOnlyState()
+        self.project._updateLoggerState(readOnly=False, flush=True)
+        if self.mainWindow:
+            self.mainWindow._setReadOnlyIcon()
+
         return result
 
     # @logCommand('application.')  # decorated in ui class
@@ -959,14 +1004,19 @@ class Framework(NotifierBase, GuiBase):
         """Create new, empty project with name
         :return a Project instance
         """
-        return self.ui.newProject(name)
+        result = self.ui.newProject(name)
+        getLogger().debug('--> NEW PROJECT')
+        return result
 
     # @logCommand('application.') # eventually decorated by  _loadData()
     def loadProject(self, path=None) -> Project:
         """Load project defined by path
         :return a Project instance
         """
-        return self.ui.loadProject(path)
+        result = self.ui.loadProject(path)
+        getLogger().debug('--> LOADED PROJECT')
+
+        return result
 
     def _saveProjectAs(self, newPath=None, overwrite=False) -> bool:
         """Save project to newPath (optionally overwrite)
@@ -993,33 +1043,47 @@ class Framework(NotifierBase, GuiBase):
 
         return True
 
-    def _saveProject(self) -> bool:
+    @contextlib.contextmanager
+    def _setSaveOverride(self, state):
+        """Temporarily set the save-override state for save/saveAs
+        """
+        lastState = self._saveOverride
+        self._saveOverride = state
+        try:
+            yield
+
+        finally:
+            self._saveOverride = lastState
+
+    def _saveProject(self, force=False) -> bool:
         """Save project to newPath and return True if successful
         """
         # ensure override flag is clean
-        self._saveAsOverride = False
-        if self.project.readOnly:
-            getLogger().warning('Project is read-only')
-            return True
+        self._saveOverride = False
 
-        if self.preferences.general.keepSpectraInsideProject:
-            self.project.copySpectraToProject()
+        with self._setSaveOverride(force):
+            if self.project.readOnly:
+                getLogger().warning('Project is read-only')
+                return True
 
-        try:
-            self.project.save()
-            Layout.saveLayoutToJson(self.ui.mainWindow)
-            self.current._dumpStateToFile(self.statePath)
-            self._getUndo().markSave()
+            if self.preferences.general.keepSpectraInsideProject:
+                self.project.copySpectraToProject()
 
-        except (PermissionError, FileNotFoundError):
-            failMessage = 'Folder may be read-only'
-            getLogger().warning(failMessage)
-            raise
+            try:
+                self.project.save()
+                Layout.saveLayoutToJson(self.ui.mainWindow)
+                self.current._dumpStateToFile(self.statePath)
+                self._getUndo().markSave()
 
-        except Exception as es:
-            failMessage = f'save: unable to save {es}'
-            getLogger().warning(failMessage)
-            return False
+            except (PermissionError, FileNotFoundError):
+                failMessage = 'Folder may be read-only'
+                getLogger().warning(failMessage)
+                raise
+
+            except Exception as es:
+                failMessage = f'save: unable to save {es}'
+                getLogger().warning(failMessage)
+                return False
 
         return True
 
@@ -1030,14 +1094,12 @@ class Framework(NotifierBase, GuiBase):
         :param overwrite: flag to indicate overwriting of existing path
         :return True if successful
         """
-        try:
+        # self._saveOverride = False
+
+        with self._setSaveOverride(True):
             # override read-only for a save to a new folder
             #   project can still be read-only for next load
-            self._saveAsOverride = True
             return self.ui.saveProjectAs(newPath=newPath, overwrite=overwrite)
-
-        finally:
-            self._saveAsOverride = False
 
     # @logCommand('application.')  # decorated in ui
     def saveProject(self) -> bool:
@@ -1101,20 +1163,34 @@ class Framework(NotifierBase, GuiBase):
             with logCommandManager('application.', 'loadProject', dataLoader.path):
 
                 # NOTE:ED - move inside ui._loadProject?
-                if dataLoader.makeArchive:
-                    # make an archive in the project specific archive folder before loading
-                    from ccpn.core.lib.ProjectArchiver import ProjectArchiver
-
-                    archiver = ProjectArchiver(projectPath=dataLoader.path)
-                    archivePath = archiver.makeArchive()
-                    getLogger().info(f'==> Project archived to {archivePath}')
-                    if not archivePath:
-                        MessageDialog.showWarning('Archive Project',
-                                                  f'There was a problem creating an archive for {dataLoader.path}',
+                if self.project:
+                    if self.project.readOnly and dataLoader.makeArchive:
+                        MessageDialog.showWarning('Archive Project', 'Project is read-only',
                                                   parent=self.ui.mainWindow
                                                   )
 
-                result = self.ui._loadProject(dataLoader=dataLoader)
+                    elif dataLoader.makeArchive:
+                        # make an archive in the project specific archive folder before loading
+                        from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+
+                        archiver = ProjectArchiver(projectPath=dataLoader.path)
+                        if archivePath := archiver.makeArchive():
+                            getLogger().info(f'==> Project archived to {archivePath}')
+                        else:
+                            MessageDialog.showWarning('Archive Project',
+                                                      f'There was a problem creating an archive for {dataLoader.path}',
+                                                      parent=self.ui.mainWindow
+                                                      )
+
+                if not (result := self.ui._loadProject(dataLoader=dataLoader)):
+                    # update the logger read-only state
+                    self.project._updateReadOnlyState()
+                    self.project._updateLoggerState(flush=not self.project.readOnly)
+                    if self.mainWindow:
+                        self.mainWindow._setReadOnlyIcon()
+
+                    return []
+
                 getLogger().info(f"==> Loaded project {result}")
                 if not isIterable(result):
                     result = [result]
@@ -1133,7 +1209,14 @@ class Framework(NotifierBase, GuiBase):
         if _echoBlocking:
             self._decreaseNotificationBlocking()
 
-        getLogger().debug('Loaded objects: %s' % objs)
+        getLogger().debug(f'Loaded objects: {objs}')
+
+        # update the logger read-only state
+        self.project._updateReadOnlyState()
+        self.project._updateLoggerState(flush=not self.project.readOnly)
+        if self.mainWindow:
+            self.mainWindow._setReadOnlyIcon()
+
         return objs
 
     # @logCommand('application.') # eventually decorated by  _loadData()
@@ -1182,10 +1265,17 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.core.Project import _loadProject
 
         # always close first
-        self._closeProject()
-        project = _loadProject(application=self, path=path)
-        self._initialiseProject(project)  # This also set the linkages
-        return [project]
+        # self._closeProject()
+        try:
+            project = _loadProject(application=self, path=path)
+
+        except (ValueError, RuntimeError) as es:
+            getLogger().warning(f'Error loading "{path}": {es}')
+
+        else:
+            self._closeProject()  # close old project
+            self._initialiseProject(project)  # This also set the linkages
+            return [project]
 
     def _loadSparkyFile(self, path: str, createNewProject=True) -> Project:
         """Load Project from Sparky file at path, and do necessary setup
@@ -1471,6 +1561,7 @@ class Framework(NotifierBase, GuiBase):
             with open(userPath) as fp:
                 layout = json.load(fp, object_hook=AttrDict)
                 self.layout = layout
+
         else:
             # opens the autogenerated if an existing project
             savedLayoutPath = self._getAutogeneratedLayoutFile()
@@ -1478,9 +1569,12 @@ class Framework(NotifierBase, GuiBase):
                 with open(savedLayoutPath) as fp:
                     layout = json.load(fp, object_hook=AttrDict)
                     self.layout = layout
+
             else:  # opens the default
-                Layout._createLayoutFile(self)
-                self._getUserLayout()
+                if not self.project.readOnly:
+                    Layout._createLayoutFile(self)
+                    self._getUserLayout()
+
         # except Exception as e:
         #   getLogger().warning('No layout found. %s' %e)
 
@@ -1509,12 +1603,21 @@ class Framework(NotifierBase, GuiBase):
             self._getUserLayout(path)
             self.ui.mainWindow.moduleArea._closeAll()
             Layout.restoreLayout(self.ui.mainWindow, self.layout, restoreSpectrumDisplay=True)
+
+        except (PermissionError, FileNotFoundError):
+            getLogger().debug('Folder may be read-only')
+
         except Exception as e:
-            getLogger().warning('Impossible to restore layout. %s' % e)
+            getLogger().warning(f'Impossible to restore layout. {e}')
 
     def _getAutogeneratedLayoutFile(self):
         if self.project:
             layoutFile = Layout.getLayoutFile(self)
+            return layoutFile
+
+    def _fetchAutogeneratedLayoutFile(self):
+        if self.project:
+            layoutFile = Layout.fetchLayoutFile(self)
             return layoutFile
 
     ###################################################################################################################

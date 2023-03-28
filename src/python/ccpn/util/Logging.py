@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-14 19:17:42 +0000 (Tue, March 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,8 @@ import contextlib
 import sys
 from ccpn.util.Path import aPath
 
-DEBUG = DEBUG1 = logging.DEBUG # = 10
+
+DEBUG = DEBUG1 = logging.DEBUG  # = 10
 DEBUG2 = 9
 DEBUG3 = 8
 INFO = logging.INFO
@@ -132,7 +133,8 @@ def createLogger(loggerName,
                  stream=None,
                  level=None,
                  mode='a',
-                 readOnly=False,
+                 readOnly=True,
+                 now='',
                  removeOldLogsDays=MAX_LOG_FILE_DAYS):
     """Return a (unique) logger for this memopsRoot and with given programName, if any.
        Puts log output into a log file but also optionally can have output go to
@@ -153,7 +155,7 @@ def createLogger(loggerName,
                 sys.stderr.write('>>> Folder may be read-only\n')
 
     today = datetime.date.today()
-    fileName = 'log_%s_%02d%02d%02d.txt' % (loggerName, today.year, today.month, today.day)
+    fileName = f'log_{loggerName}_{today.year:02d}{today.month:02d}{today.day:02d}_{now}.txt'
 
     logPath = _logDirectory / fileName
 
@@ -177,15 +179,26 @@ def createLogger(loggerName,
 
     logger.setLevel(level)
     logger._streamHandler = None
+    logger._fileHandler = None
 
-    if not readOnly:
-        try:
-            handler = logging.FileHandler(logPath, mode=mode)
-            _setupHandler(handler, level)
-        except (PermissionError, FileNotFoundError):
-            sys.stderr.write('>>> Folder may be read-only\n')
+    # if not readOnly:
+    #     try:
+    #         handler = logging.FileHandler(logPath, mode=mode)
+    #         _setupHandler(handler, level)
+    #     except (PermissionError, FileNotFoundError):
+    #         sys.stderr.write('>>> Folder may be read-only\n')
 
     try:
+        # store the file-handler for later
+        handler = DeferredFileHandler(logPath, mode=mode, delay=True, readOnly=readOnly)
+        _setupHandler(handler, level)
+        logger._fileHandler = handler
+
+    except (PermissionError, FileNotFoundError):
+        sys.stderr.write('>>> Folder may be read-only\n')
+
+    try:
+        # store the stream-handler for later
         if stream:
             handler = logging.StreamHandler(stream)
             _setupHandler(handler, level)
@@ -214,8 +227,9 @@ def updateLogger(loggerName,
                  logDirectory,
                  level=None,
                  mode='a',
-                 readOnly=False):
-
+                 readOnly=True,
+                 flush=False,
+                 now=''):
     global logger
 
     if not logger:
@@ -225,11 +239,12 @@ def updateLogger(loggerName,
     if not _logDirectory.exists() and not readOnly:
         try:
             _logDirectory.mkdir(parents=False, exist_ok=False)
+
         except (PermissionError, FileNotFoundError):
             sys.stderr.write('>>> Folder may be read-only\n')
 
     today = datetime.date.today()
-    fileName = 'log_%s_%02d%02d%02d.txt' % (loggerName, today.year, today.month, today.day)
+    fileName = f'log_{loggerName}_{today.year:02d}{today.month:02d}{today.day:02d}_{now}.txt'
 
     logPath = _logDirectory / fileName
 
@@ -239,17 +254,30 @@ def updateLogger(loggerName,
     for handler in tuple(logger.handlers):
         logger.removeHandler(handler)
 
-    if not readOnly:
-        # re-insert the originals
+    # if not readOnly:
+    #     # re-insert the originals
+    #     try:
+    #         handler = logging.FileHandler(logPath, mode=mode)
+    #         _setupHandler(handler, level)
+    #     except (PermissionError, FileNotFoundError):
+    #         sys.stderr.write('>>> Folder may be read-only\n')
+
+    if logger._fileHandler:
         try:
-            handler = logging.FileHandler(logPath, mode=mode)
-            _setupHandler(handler, level)
+            logger._fileHandler._updateFilename(logPath)
+            _setupHandler(logger._fileHandler, level)
+            logger._fileHandler._readOnly = readOnly
+            if flush:
+                # flush the stream and write all, file is re-opened as required on next log emit
+                logger._fileHandler.close()
+
         except (PermissionError, FileNotFoundError):
             sys.stderr.write('>>> Folder may be read-only\n')
 
     if logger._streamHandler:
         try:
             _setupHandler(logger._streamHandler, level)
+
         except (PermissionError, FileNotFoundError):
             sys.stderr.write('>>> Folder may be read-only\n')
 
@@ -276,7 +304,7 @@ def _clearLogHandlers():
     if logger is not None:
 
         for handler in logger.handlers[:]:
-          logger.removeHandler(handler)
+            logger.removeHandler(handler)
 
 
 def _removeOldLogFiles(logPath, removeOldLogsDays=MAX_LOG_FILE_DAYS):
@@ -302,3 +330,52 @@ def setLevel(logger, level=logging.INFO):
     logger.setLevel(level)
     for handler in logger.handlers:
         handler.setLevel(level)
+
+
+class DeferredFileHandler(logging.FileHandler):
+    """Deferred file-handler that queues messages until read-only mode is disabled.
+    """
+
+    def __init__(self, filename, readOnly=False, **kwds):
+        super().__init__(filename, **kwds)
+
+        self._queued = []
+        self._readOnly = readOnly
+
+    def emit(self, record: logging.LogRecord) -> None:
+        """Emit a record to the file-stream.
+        If readOnly is set, then records are stored in queue until the next emit or handler is closed
+        """
+        if self._readOnly:
+            # append to the queue of records
+            self._queued.append(record)
+
+        else:
+            try:
+                # emit all queued items first, then new item
+                for rcd in self._queued:
+                    super().emit(rcd)
+                self._queued = []
+
+                super().emit(record)
+
+            except (PermissionError, FileNotFoundError):
+                # any write-error, keep queue and add new item to the end
+                self._queued.append(record)
+
+    def close(self) -> None:
+        if not self._readOnly:
+            # emit all queued items to the stream
+            for rcd in self._queued:
+                super().emit(rcd)
+            self._queued = []
+
+        super().close()
+
+    def _updateFilename(self, filename):
+        """Update the filename to the new folder
+        """
+        filename = os.fspath(filename)
+        #keep the absolute path, otherwise derived classes which use this
+        #may come a cropper when the current directory changes
+        self.baseFilename = os.path.abspath(filename)

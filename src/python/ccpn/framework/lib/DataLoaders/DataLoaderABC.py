@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -56,6 +56,7 @@ SPARKYFILE = 'sparkyFile'
 # ANY_SUFFIX = 'Any-suffix'
 from ccpn.framework.constants import NO_SUFFIX, ANY_SUFFIX
 
+
 def getDataLoaders() -> dict:
     """Get data loader classes
     :return: a dictionary of (format-identifier-strings, DataLoader classes) as (key, value) pairs
@@ -78,6 +79,7 @@ def getDataLoaders() -> dict:
     from ccpn.framework.lib.DataLoaders.HtmlDataLoader import HtmlDataLoader
     from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
     from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
+
     return DataLoaderABC._dataLoaders
 
 
@@ -86,7 +88,7 @@ def getSpectrumLoaders() -> dict:
     :return: a dictionary of (format-identifier-strings, DataLoader classes) as (key, value) pairs
     """
     _loaders = getDataLoaders()
-    return dict( [(df, dl) for df, dl in _loaders.items() if dl.isSpectrumLoader])
+    return dict([(df, dl) for df, dl in _loaders.items() if dl.isSpectrumLoader])
 
 
 @singleton
@@ -107,7 +109,7 @@ class DataLoaderSuffixDict(dict):
 
         # Fill the dict
         for dataFormat, klass in getDataLoaders().items():
-            suffixes =  [NO_SUFFIX, ANY_SUFFIX] if len(klass.suffixes) == 0 else klass.suffixes
+            suffixes = [NO_SUFFIX, ANY_SUFFIX] if len(klass.suffixes) == 0 else klass.suffixes
             for suffix in suffixes:
                 suffix = NO_SUFFIX if suffix is None else suffix
                 self[suffix].append(klass)
@@ -154,7 +156,7 @@ def _getPotentialDataLoaders(path) -> list:
         loaders = [ld for ld in loaders if not ld.requireDirectory]
 
     # if it is a directory: include loaders that do allow a directory
-    if _path.is_dir(): # also False if _path does not exist
+    if _path.is_dir():  # also False if _path does not exist
         loaders = [ld for ld in loaders if ld.allowDirectory]
 
     return loaders
@@ -235,11 +237,11 @@ class DataLoaderABC(TraitBase):
     canCreateNewProject = False
     allowDirectory = False  # Can/Can't open a directory
     requireDirectory = False  # explicitly require a directory
-    isSpectrumLoader = False    # Subclassed for SpectrumLoaders
-    loadFunction = (None, None) # A (function, attributeName) tuple;
-                                # :param attributeName:=('project','application') to get obj
-                                #                       as either self.project or self.application
-                                # :param function(obj:(Application,Project), path:Path) -> List[newObj1, ...]
+    isSpectrumLoader = False  # Subclassed for SpectrumLoaders
+    loadFunction = (None, None)  # A (function, attributeName) tuple;
+    # :param attributeName:=('project','application') to get obj
+    #                       as either self.project or self.application
+    # :param function(obj:(Application,Project), path:Path) -> List[newObj1, ...]
 
     #=========================================================================================
     # end to be subclassed
@@ -286,6 +288,7 @@ class DataLoaderABC(TraitBase):
 
         # local import to avoid cycles
         from ccpn.framework.Application import getApplication
+
         self.application = getApplication()
         # NB: self.project derived via a property from application
 
@@ -358,7 +361,7 @@ class DataLoaderABC(TraitBase):
             result = loaderFunc(obj, self.path)
 
         except (ValueError, RuntimeError) as es:
-            raise RuntimeError(f'Error loading "{self.path}": {es}')
+            raise RuntimeError(f'Error loading "{self.path}": {es}') from es
 
         return result
 
@@ -446,11 +449,11 @@ class DataLoaderABC(TraitBase):
         else:
             _newProject = 'Never'
 
-        result = cls.__doc__ +\
-            f'\n' +\
-            f'    Valid suffixes:      {cls.suffixes}\n' +\
-            f'    Directory:           {_directory}\n' +\
-            f'    Creates new project: {_newProject}'
+        result = cls.__doc__ + \
+                 f'\n' + \
+                 f'    Valid suffixes:      {cls.suffixes}\n' + \
+                 f'    Directory:           {_directory}\n' + \
+                 f'    Creates new project: {_newProject}'
 
         return result
 
@@ -468,7 +471,6 @@ class NotFoundDataLoader(DataLoaderABC):
     allowDirectory = True
 
     def checkValid(self) -> bool:
-
         if not super().checkValid():
             return False
         # Path was valid; set general other error message

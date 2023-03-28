@@ -3,6 +3,7 @@ Various Project related routines
 """
 from __future__ import annotations
 
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -16,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -32,24 +33,17 @@ import re
 import sys
 
 from ccpn.util import Logging
-from ccpn.util.Logging import getLogger
-from ccpn.util.Path import aPath, Path
+from ccpn.util.Path import aPath
 
 from ccpn.framework.Application import getApplication
 
-from ccpn.framework.PathsAndUrls import \
-    CCPN_API_DIRECTORY, \
-    CCPN_DIRECTORY_SUFFIX, \
-    CCPN_BACKUP_SUFFIX, \
-    ccpnmodelDataPythonPath, \
-    userCcpnDataPath, \
-    CCPN_BACKUPS_DIRECTORY, \
-    CCPN_LOGS_DIRECTORY
-
+from ccpn.framework.PathsAndUrls import CCPN_API_DIRECTORY, CCPN_DIRECTORY_SUFFIX, CCPN_LOGS_DIRECTORY
 
 from ccpnmodel.ccpncore.memops.metamodel import Constants as metaConstants
-MEMOPS                  = metaConstants.modellingPackageName
-IMPLEMENTATION          = metaConstants.implementationPackageName
+
+
+MEMOPS = metaConstants.modellingPackageName
+IMPLEMENTATION = metaConstants.implementationPackageName
 
 
 def checkProjectName(name, correctName=True) -> (str, None):
@@ -68,7 +62,7 @@ def checkProjectName(name, correctName=True) -> (str, None):
     if len(newName) > Project._MAX_PROJECT_NAME_LENGTH:
         if not correctName:
             return None
-        newName = newName[0:32]
+        newName = newName[:32]
 
     return newName
 
@@ -93,12 +87,12 @@ def isV2project(path) -> bool:
     if not path.is_dir(): return False
     if isV3project(path): return False
     if not (path / MEMOPS / IMPLEMENTATION).exists(): return False
-    # it is a directory which is not a V3project directory , that has memops/implementation subdirectory,
+    # it is a directory which is not a V3-project directory , that has memops/implementation subdirectory,
     # so we assume it to be a V2 project directory.
     return True
 
 
-def createLogger(project):
+def createLogger(project, now=''):
     """Create a logger for project
     Adapted from Api.py
     """
@@ -109,7 +103,8 @@ def createLogger(project):
     logger = Logging.createLogger(_app.applicationName,
                                   project.projectPath / CCPN_LOGS_DIRECTORY,
                                   stream=sys.stderr,
-                                  level = _app._debugLevel
+                                  level=_app._debugLevel,
+                                  now=now
                                   )
 
     return logger

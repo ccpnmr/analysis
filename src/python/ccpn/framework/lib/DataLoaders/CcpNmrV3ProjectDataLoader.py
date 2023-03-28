@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -57,8 +57,8 @@ class CcpNmrV3ProjectDataLoader(DataLoaderABC):
         # We now have asserted that it is a directory with .ccpn suffix
         self.shouldBeValid = True
 
-        # check sub directories
-        for subDir in (CCPN_API_DIRECTORY, CCPN_STATE_DIRECTORY):
+        # check subdirectories
+        for subDir in (CCPN_API_DIRECTORY,):  # CCPN_STATE_DIRECTORY):
             _p = self.path / subDir
             if not _p.exists():
                 self.isValid = False
@@ -66,7 +66,8 @@ class CcpNmrV3ProjectDataLoader(DataLoaderABC):
                 return False
 
         self.isValid = True
-        self.errorString =  ''
+        self.errorString = ''
         return True
+
 
 CcpNmrV3ProjectDataLoader._registerFormat()

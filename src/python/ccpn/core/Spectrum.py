@@ -53,8 +53,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-27 15:06:50 +0100 (Mon, March 27, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-28 18:46:13 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -754,13 +754,13 @@ class Spectrum(AbstractWrapperObject):
         self._spectrumTraits.dataStore = _dataStore
         return self._dataStore.path
 
-    def _setdataFormat(self, dataFormat:str):
+    def _setdataFormat(self, dataFormat: str):
         """Helper function to set the dataFormat of the dataStore object without
         triggering any action (like opening the file)
         CCPNMRINTERNAL: used in CcpnNefIo
         """
         if dataFormat is None or not isinstance(dataFormat, str) or \
-           not dataFormat in list(getDataFormats().keys()):
+                not dataFormat in list(getDataFormats().keys()):
             raise ValueError(f'Invalid dataFormat "{dataFormat}"')
         if self._dataStore is None:
             raise RuntimeError('dataStore not defined')
@@ -781,7 +781,7 @@ class Spectrum(AbstractWrapperObject):
     def dataFormat(self, value):
         self._openFile(path=self.filePath, dataFormat=value, checkParameters=True)
 
-    def _openFile(self, path:str, dataFormat:str, checkParameters:bool = True) -> bool:
+    def _openFile(self, path: str, dataFormat: str, checkParameters: bool = True) -> bool:
         """Open the spectrum as defined by path, creating a dataSource object
         :param path: a path to the spectrum; may contain redirections (e.g. $DATA)
         :param dataFormat: a dataFormat defined by one of the SpectrumDataSource types
@@ -793,7 +793,7 @@ class Spectrum(AbstractWrapperObject):
             raise ValueError(f'Undefined path')
 
         if dataFormat is None or not isinstance(dataFormat, str) or \
-           not dataFormat in list(getDataFormats().keys()):
+                not dataFormat in list(getDataFormats().keys()):
             raise ValueError(f'Invalid dataFormat "{dataFormat}"')
 
         newDataStore = DataStore.newFromPath(path=path, dataFormat=dataFormat)
@@ -1935,7 +1935,7 @@ class Spectrum(AbstractWrapperObject):
         CCPNMRINTERNAL: used in SpectrumDisplay._getDimensionsMapping()
         """
         # find the map of newAxisCodeOrder to self.axisCodes; eg. 'H' to 'Hn'
-        if not isinstance(axisCodes, (list,tuple)):
+        if not isinstance(axisCodes, (list, tuple)):
             raise ValueError(f'Invalid axisCodes: expected list or tuple, got "{axisCodes}"')
         axisCodeMap = getAxisCodeMatch(axisCodes, self.axisCodes)
         if len(axisCodeMap) == 0:
@@ -2805,6 +2805,9 @@ class Spectrum(AbstractWrapperObject):
                     pass
                 path.removeFile()
 
+            except (PermissionError, FileNotFoundError):
+                getLogger().debug('Folder may be read-only')
+
             except Exception as es:
                 _oldPath = path
                 getLogger().debug(f'Cannot extract to path: {es}')
@@ -2823,8 +2826,11 @@ class Spectrum(AbstractWrapperObject):
 
                     # It should now save the file to this folder as 'path'
 
+                except (PermissionError, FileNotFoundError):
+                    getLogger().debug('Folder may be read-only')
+
                 except Exception as es2:
-                    raise RuntimeError(f'Cannot extract to path:\n\n{es}\n\n{es2}')
+                    raise RuntimeError(f'Cannot extract to path:\n\n{es}\n\n{es2}') from es2
 
         else:
             path = aPath(path)
@@ -3092,7 +3098,6 @@ class Spectrum(AbstractWrapperObject):
                 getLogger().debug3(f'Error in creating spectrumAsDataFrame. Attr: {_attr}. Error:{e}')
         return df
 
-
     # def _getDataSourceFromPath(self, path, dataFormat=None, checkParameters=True) -> tuple:
     #     """Return a (dataStore, dataSource) tuple if path points  a file compatible
     #     with dataFormat, or (None, None) otherwise.
@@ -3140,7 +3145,7 @@ class Spectrum(AbstractWrapperObject):
 
         # Special case, empty spectrum
         if dataSource.dataFormat == EmptySpectrumDataSource.dataFormat:
-           dataSource.importFromSpectrum(self, includePath=False)
+            dataSource.importFromSpectrum(self, includePath=False)
 
         # found a valid dataSource from an initial _dataFormat None; i.e. undefined;
         # update the dataStore
@@ -3189,6 +3194,9 @@ class Spectrum(AbstractWrapperObject):
         # The is needed as nef-initiated loading may have scuppered the
         # references to the internal data
         self._spectrumTraits._storeToSpectrum()
+        # if self._wrappedData.isModified:
+        # NOTE:ED - metadata may not have been saved if project was read-only
+        self._saveSpectrumMetaData()
 
     @classmethod
     def _restoreObject(cls, project, apiObj):
@@ -3214,8 +3222,8 @@ class Spectrum(AbstractWrapperObject):
         # Assure a setting of crucial attributes
         spectrum._updateParameterValues()
 
-        # save the spectrum metadata
-        spectrum._saveSpectrumMetaData()
+        # # save the spectrum metadata
+        # spectrum._saveSpectrumMetaData()
 
         # set the initial axis ordering
         specLib._getDefaultOrdering(spectrum)
@@ -3244,14 +3252,45 @@ class Spectrum(AbstractWrapperObject):
     def _metaDataPath(self):
         """Return the path to the metadata file
         """
-        _tmpPath = self.project.statePath.fetchDir(self._pluralLinkName)
-        return _tmpPath / self.name + '.json'
+        # assumes that the spectrum-folder is a subdirectory of the project
+        _tmpPath = self.project.statePath / self._pluralLinkName / self.name + '.json'
+
+        # if not self.project.readOnly:
+        #     try:
+        #         aPath(self.project.path).fetchDir(CCPN_STATE_DIRECTORY)
+        #         tmp = self.project.statePath.fetchDir(self._pluralLinkName)
+        #
+        #     except (PermissionError, FileNotFoundError):
+        #         getLogger().warning(f'Folder may be read-only')
+        #
+        #     except Exception as es:
+        #         print(f'-->  {es}')
+
+        return _tmpPath
+
+    def _fetchMetaDataPath(self):
+        """Return the path to the metadata file
+        Create as required
+        """
+        tmpPath = self._metaDataPath
+        print(f'_fetchMetaDataPath   {tmpPath}')
+
+        if not self.project.readOnly:
+            try:
+                # create subdirectory
+                aPath(self.project.path).fetchDir(CCPN_STATE_DIRECTORY)
+                self.project.statePath.fetchDir(self._pluralLinkName)
+
+            except (PermissionError, FileNotFoundError):
+                getLogger().warning('Folder may be read-only')
+
+        return tmpPath
 
     def _saveSpectrumMetaData(self):
         """Save the spectrum metadata in the project/state/spectra in json file for optional future reference
         """
         try:
-            _path = self._metaDataPath
+            _path = self._fetchMetaDataPath()
         except Exception:
             getLogger().warning(f'{self}: Unable to save metadata; undefined path')
             return
@@ -3373,6 +3412,8 @@ class Spectrum(AbstractWrapperObject):
         if self.dataSource is not None:
             self._spectrumTraits.dataSource.closeFile()
             self._spectrumTraits.dataSource = None
+            # if self._wrappedData.isModified:
+            # self._saveSpectrumMetaData()
 
     @logCommand(get='self')
     def delete(self):
@@ -3387,7 +3428,7 @@ class Spectrum(AbstractWrapperObject):
                 # recover the dataSource when undeleting
                 addUndoItem(undo=
                             partial(self._openFile, path=_path, dataFormat=dataFormat, checkParameters=False)
-                )
+                            )
 
             # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier?
             specDisplays = []
@@ -3743,7 +3784,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
         spectrum.negativeContourCount = 0
 
         spectrum._updateParameterValues()
-        spectrum._saveSpectrumMetaData()
+        # spectrum._saveSpectrumMetaData()
         spectrum._setDefaultAxisOrdering()
 
     return spectrum

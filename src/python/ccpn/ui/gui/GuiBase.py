@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-14 19:17:42 +0000 (Tue, March 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -419,8 +419,8 @@ class GuiBase(object):
             # if temporary then use the saveAs dialog
             self.ui.saveProjectAs()
 
-        elif self.project.readOnly:
-            MessageDialog.showWarning('Save Project', 'Project is read-only')
+        # elif self.project.readOnly:
+        #     MessageDialog.showWarning('Save Project', 'Project is read-only')
 
         else:
             self.saveProject()

@@ -1,6 +1,7 @@
 """
 Module Documentation here
 """
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-07 13:57:47 +0000 (Tue, March 07, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -27,6 +28,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtGui, QtWidgets, QtCore
+import contextlib
+
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFont, CONSOLEFONT
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -39,12 +42,12 @@ from ccpn.util.Common import isWindowsOS
 from ipykernel.inprocess.ipkernel import InProcessKernel
 
 
-# try:
-# Temporarily disable IPython history. Suspected to be the source of  threading issues
-# from IPython.core.history import HistoryManager
-# HistoryManager.enabled = True
-# except ImportError:
-#     pass
+with contextlib.suppress(ImportError):
+    # Temporarily disable IPython history. Suspected to be the source of threading issues
+    from IPython.core.history import HistoryManager
+
+
+    HistoryManager.enabled = False
 
 
 class SilentKernel(InProcessKernel):
@@ -56,6 +59,7 @@ class SilentKernel(InProcessKernel):
         -->  Enable tracemalloc to get the object allocation traceback"
 
     """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -63,14 +67,13 @@ class SilentKernel(InProcessKernel):
         """ Re-implementation  to avoid logging extra warning from the Kernel"""
         return
 
-class _ProcessKernelManager(QtInProcessKernelManager):
 
+class _ProcessKernelManager(QtInProcessKernelManager):
 
     def start_kernel(self, **kwds):
         self.kernel = SilentKernel(parent=self, session=self.session)
 
     def shutdown_kernel(self):
-
         # close  the history thread
         inProcessInteractiveShell = self.kernel.shell
         if inProcessInteractiveShell is not None:
@@ -81,6 +84,7 @@ class _ProcessKernelManager(QtInProcessKernelManager):
         # Closing down the kernel and threads
         self.kernel.iopub_thread.stop()
         self._kill_kernel()
+
 
 class IpythonConsole(Widget):
     focusedIn = QtCore.pyqtSignal(QtGui.QFocusEvent)
@@ -97,6 +101,7 @@ class IpythonConsole(Widget):
         # NOTE:ED - check that this is working for Linux/MacOS
         if isWindowsOS():
             import asyncio
+
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
         ## Removed the ccpn kernel until found the cause of threading issues.
@@ -162,7 +167,6 @@ class IpythonConsole(Widget):
         Executes the specified macro file in the python console.
         """
         if macroFile:
-
             extraCommands = ' '.join(extraCommands or [])
             self.ipythonWidget.execute(f'%run -i {macroFile} {extraCommands}')
 
@@ -198,7 +202,7 @@ class IpythonConsole(Widget):
         """
         from IPython import get_ipython
 
-        get_ipython().run_line_magic('reset', '-sf') # clear the global variable
+        get_ipython().run_line_magic('reset', '-sf')  # clear the global variable
         if self.ipythonWidget.kernel_manager is not None:
             self.ipythonWidget.kernel_manager.shutdown_kernel()
         self.ipythonWidget.kernel_client.stop_channels()

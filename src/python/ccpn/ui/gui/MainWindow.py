@@ -43,13 +43,13 @@ from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, no
 ## MainWindow class
 from ccpn.ui._implementation.Window import Window as _CoreClassMainWindow
 
-
 from ccpn.ui.gui import guiSettings
 
 from ccpn.ui.gui.lib.mouseEvents import SELECT, PICK, MouseModes, \
     setCurrentMouseMode, getCurrentMouseMode
 from ccpn.ui.gui.lib import GuiStrip
 from ccpn.ui.gui.lib.Shortcuts import Shortcuts
+from ccpn.ui.gui.guiSettings import getColours
 
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 
@@ -64,8 +64,8 @@ from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
-from ccpn.ui.gui.widgets.Font import setWidgetFont
-from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
+from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, progressManager
 
 from ccpn.util.Common import camelCaseToString
@@ -73,12 +73,9 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 from ccpn.util.Colour import colorSchemeTable
 
-
-
 #from collections import OrderedDict
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
-
 
 # For readability there should be a class:
 # _MainWindowMenus which (Only!) has menu instantiations, the callbacks to initiate them, + relevant methods
@@ -89,12 +86,13 @@ from ccpn.ui.gui.lib.MenuActions import _openItemObject
 MAXITEMLOGGING = 4
 KEY_DELAY = 0.75
 
-
 _PEAKS = 1
 _INTEGRALS = 2
 _MULTIPLETS = 4
 _INTEGRAL_PEAKS = 8
 _MULTIPLET_PEAKS = 16
+
+READONLYCHANGED = 'readOnlyChanged'
 
 
 class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
@@ -172,7 +170,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         # self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
         # # self.setUnifiedTitleAndToolBarOnMac(True) #uncomment this to remove the extra title bar on osx 10.14+
 
-        self._setKeyTimer()
+        self._initKeyTimer()
+        self._initReadOnlyIcon()
 
         # hide the window here and make visible later
         self.hide()
@@ -183,7 +182,60 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         # install handler to resize when moving between displays
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
 
-    def _setKeyTimer(self):
+    def _initReadOnlyIcon(self):
+        """Add icon to the statusBar that reflects the read-only state of the current project
+        The icon can be clicked to lock/unlock the project.
+        """
+        self._lockedIcon = Icon('icons/locked')
+        self._unlockedIcon = Icon('icons/unlocked')
+        self._pixmapWidth = getFontHeight()
+
+        self._readOnlyState = ActiveLabel(self, mainWindow=self)
+        self._readOnlyState.setFixedSize(self._pixmapWidth + 4, self._pixmapWidth + 4)
+        self._readOnlyState.setPixmap(self._unlockedIcon.pixmap(self._pixmapWidth, self._pixmapWidth))
+        self._readOnlyState.setToolTip('The read-only status of the project')
+        self._readOnlyState.setEnabled(False)  # will enable with the state of the project once it has loaded
+
+        self.statusBar().addPermanentWidget(self._readOnlyState, 0)
+
+        self._readOnlyState.setSelectionCallback(self._toggleReadOnlyState)
+        # need notifier on changing the setting in the project
+
+    def _toggleReadOnlyState(self):
+        """Toggle the read-only status of the current project
+        """
+        readOnly = not self.project.readOnly  # toggle the state
+        self.project.setReadOnly(readOnly)
+        QtCore.QTimer.singleShot(0, self._setReadOnlyIcon)
+
+    def _setReadOnlyIcon(self):
+        """Set the read-only icon to locked/unlocked.
+        """
+        readOnly = self.project.readOnly
+        if readOnly:
+            self._readOnlyState.setPixmap(self._lockedIcon.pixmap(self._pixmapWidth, self._pixmapWidth))
+            self._readOnlyState.setToolTip('The project is marked as read-only.\n'
+                                           'Click here to unlock, or use the command:\n'
+                                           'project.setReadOnly(False)\n'
+                                           'from the python-console.')
+        else:
+            self._readOnlyState.setPixmap(self._unlockedIcon.pixmap(self._pixmapWidth, self._pixmapWidth))
+            self._readOnlyState.setToolTip('The project is unlocked.\n'
+                                           'Click here to lock, or use the command:\n'
+                                           'project.setReadOnly(True)\n'
+                                           'from the python-console.')
+
+        self._readOnlyState.setEnabled(True)
+        self._readOnlyState.updateGeometry()
+
+    def _projectNotifierCallback(self, data):
+        """Notifier responds to change in the read-only state of the current project,
+        and updates the read-only icon.
+        """
+        if (specifiers := data.get(Notifier.SPECIFIERS)) and specifiers.get(READONLYCHANGED) is not None:
+            QtCore.QTimer.singleShot(0, self._setReadOnlyIcon)
+
+    def _initKeyTimer(self):
         """
         Create a timer to reset the keysequences by simulating an escape key if nothing pressed for a second
         only affects this widget, runs every 0.5s
@@ -272,6 +324,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
         self.setNotifier(self.application.project, [Notifier.CHANGE], 'SpectrumDisplay', self._spectrumDisplayChanged)
 
+        self.setNotifier(self.application.project, [Notifier.CHANGE], 'Project', self._projectNotifierCallback)
+
     # def _activatedkeySequence(self, ev):
     #     key = ev.key()
     #     self.statusBar().showMessage('key: %s' % str(key))
@@ -321,12 +375,17 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         from copy import deepcopy
 
+        self._spectrumModuleLayouts = self.moduleLayouts = None
+
         # get the project layout as soon as mainWindow is initialised
         if self.application.preferences.general.restoreLayoutOnOpening:
-            self.moduleLayouts = self.application._getUserLayout()
-            self._spectrumModuleLayouts = deepcopy(self.moduleLayouts)
-        else:
-            self._spectrumModuleLayouts = self.moduleLayouts = None
+            try:
+                if _mLayouts := self.application._getUserLayout():
+                    self.moduleLayouts = _mLayouts
+                    self._spectrumModuleLayouts = deepcopy(self.moduleLayouts)
+
+            except (PermissionError, FileNotFoundError):
+                getLogger().debug('Folder may be read-only')
 
     def _updateWindowTitle(self):
         """
@@ -388,25 +447,25 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         Sets up SideBar, python console and splitters to divide up main window properly.
 
         """
-        self.namespace = {'application': self.application,
-                          'current'    : self.application.current,
-                          'preferences': self.application.preferences,
-                          'redo'       : self.application.redo,
-                          'undo'       : self.application.undo,
+        self.namespace = {'application'             : self.application,
+                          'current'                 : self.application.current,
+                          'preferences'             : self.application.preferences,
+                          'redo'                    : self.application.redo,
+                          'undo'                    : self.application.undo,
 
-                          'get'        : self.application.get,
+                          'get'                     : self.application.get,
 
-                          'ui'         : self.application.ui,
-                          'mainWindow' : self,
-                          'project'    : self.application.project,
-                          'loadProject': self.application.loadProject,
+                          'ui'                      : self.application.ui,
+                          'mainWindow'              : self,
+                          'project'                 : self.application.project,
+                          'loadProject'             : self.application.loadProject,
                           # 'newProject' : self.application.newProject, this is a crash!
-                          'info'       : getLogger().info,
-                          'warning'    : getLogger().warning,
+                          'info'                    : getLogger().info,
+                          'warning'                 : getLogger().warning,
                           #### context managers
-                          'undoBlock': undoBlockWithoutSideBar,
+                          'undoBlock'               : undoBlockWithoutSideBar,
                           'notificationEchoBlocking': notificationEchoBlocking,
-                          'plotter'    : plotter
+                          'plotter'                 : plotter
                           }
         self.pythonConsole = IpythonConsole(self)
 
@@ -439,7 +498,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         #     self._sidebarSplitter.handle(i).setEnabled(False)
 
         # create a splitter to put the sidebar on the left
-        self._horizontalSplitter = Splitter(horizontal=True, mouseDoubleClickResize=False )
+        self._horizontalSplitter = Splitter(horizontal=True, mouseDoubleClickResize=False)
 
         self._horizontalSplitter.addWidget(self._sideBarFrame)
         self._horizontalSplitter.addWidget(self.moduleArea)
@@ -447,6 +506,11 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         self._temporaryWidgetStore = Frame(parent=self, showBorder=None, setLayout=False)
         self._temporaryWidgetStore.hide()
+
+        # set the background/fontSize for the tooltips
+        self.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
+                           'color: {TOOLTIP_FOREGROUND}; '
+                           'font-size: {_size}pt ; }}'.format(_size=self.font().pointSize(), **getColours()))
 
     def _setupMenus(self):
         """
@@ -576,6 +640,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         :return False in case of 'cancel'
         """
         from ccpn.ui.gui.popups.ImportNefPopup import ImportNefPopup
+
         dialog = ImportNefPopup(parent=self,
                                 mainWindow=self,
                                 project=self.project,
@@ -1088,7 +1153,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 getLogger().debug(f'_closeExtraWindowModules: {es}')
 
     def _stopPythonConsole(self):
-        if  self.pythonConsoleModule:
+        if self.pythonConsoleModule:
             self.pythonConsoleModule.pythonConsoleWidget._stopChannels()
 
     def _closeWindowFromUpdate(self, event=None, disableCancel=True):
@@ -1267,20 +1332,20 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         # All ignored urls
         urlsToIgnore = [(url, dl, createNew) for url, dl, createNew, ignore in dataLoaders if
-                         (ignore)]
+                        (ignore)]
         # All valid urls
         allUrlsToLoad = [(url, dl, createNew) for url, dl, createNew, ignore in dataLoaders if
                          (not ignore)]
 
         # Error urls
         errorUrls = [(url, dl, createNew) for url, dl, createNew in allUrlsToLoad if
-                         (dl is None)]
-        # Project url's
+                     (dl is None)]
+        # Project urls
         newProjectUrls = [(url, dl, createNew) for url, dl, createNew in allUrlsToLoad if
                           (dl is not None and createNew)]
-        # Data url's
+        # Data urls
         dataUrls = [(url, dl, createNew) for url, dl, createNew in allUrlsToLoad if
-                          (dl is not None and not createNew)]
+                    (dl is not None and not createNew)]
 
         # Check for the different (potential) errors
         if len(urlsToIgnore) == len(dataLoaders):
@@ -1291,7 +1356,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             # We only dropped one item
             if len(errorUrls) == 1:
                 url = errorUrls[0][0]
-                txt = f'Dropped item "{url}" failed to load.\n' +\
+                txt = f'Dropped item "{url}" failed to load.\n' + \
                       f'\nCheck console/log for details'
                 MessageDialog.showError('Load Data', txt, parent=self)
                 return []
@@ -1318,8 +1383,13 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             return []
 
         _dLoaders = [dl for url, dl, createNew in allUrlsToLoad]
-        result = self.application._loadData(_dLoaders)
-        return result
+        try:
+            result = self.application._loadData(_dLoaders)
+            return result
+
+        except (RuntimeError, ValueError) as es:
+            MessageDialog.showError('Error loading data', f'{es}', parent=self)
+            return []
 
     def _processPids(self, data, position=None, relativeTo=None):
         """Handle the urls passed to the drop event
@@ -1513,6 +1583,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     @logCommand('mainWindow.')
     def refitCurrentPeaks(self, singularMode=True):
         from ccpn.core.lib import AssignmentLib
+
         peaks = self.application.current.peaks
         if not peaks:
             return
@@ -1625,15 +1696,16 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         """add current peaks to a new collection"""
         from ccpn.util.Common import flattenLists
         from ccpn.core.lib.PeakCollectionLib import _getCollectionNameForAssignments, _getCollectionNameFromPeakPosition
+
         strip = self.application.current.strip
         with undoBlockWithoutSideBar():
             if strip and strip.spectrumDisplay:
                 spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews if spectrumView.isDisplayed]
                 peaks = [peak for peak in self.application.current.peaks if peak.spectrum in spectra]
                 nmrAtoms = set(flattenLists([peak.assignedNmrAtoms for peak in peaks]))
-                name = _getCollectionNameForAssignments(list(nmrAtoms)) # get a name from assigned peaks
+                name = _getCollectionNameForAssignments(list(nmrAtoms))  # get a name from assigned peaks
                 if not name:
-                    name = _getCollectionNameFromPeakPosition(peaks[0]) # alternatively get a name from ppm position
+                    name = _getCollectionNameFromPeakPosition(peaks[0])  # alternatively get a name from ppm position
                 # we need to check if ordering is crucial here. For series is taking care by the SG where peaks belong.
                 collection = self.application.project.newCollection(items=list(set(peaks)), name=name)
                 self.application.current.collection = collection
@@ -1968,10 +2040,12 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 with progressManager(self, 'Snapping peaks to extrema'):
 
                     try:
-                        _is1Ds = [p.spectrum.dimensionCount==1 for p in peaks]
+                        _is1Ds = [p.spectrum.dimensionCount == 1 for p in peaks]
                         if all(_is1Ds):
                             from ccpn.core.lib.PeakPickers.PeakSnapping1D import snap1DPeaksByGroup
+
                             snap1DPeaksByGroup(peaks)
+
                         else:
                             peaks.sort(key=lambda x: x.position[0] if x.position and None not in x.position else 0, reverse=False)  # reorder peaks by position
                             for peak in peaks:
@@ -2214,10 +2288,9 @@ class MainWindow(_CoreClassMainWindow, GuiMainWindow):
     """GUI main window, corresponds to OS window"""
 
     def __init__(self, project: Project, wrappedData: 'ApiWindow'):
-
         logger = Logging.getLogger()
-        logger.debug('MainWindow>> project: %s' % project)
-        logger.debug('MainWindow>> project.application: %s' % project.application)
+        logger.debug(f'MainWindow>> project: {project}')
+        logger.debug(f'MainWindow>> project.application: {project.application}')
 
         _CoreClassMainWindow.__init__(self, project, wrappedData)
 
@@ -2228,5 +2301,3 @@ class MainWindow(_CoreClassMainWindow, GuiMainWindow):
         project._mainWindow = self
         application._mainWindow = self
         application.ui.mainWindow = self
-
-

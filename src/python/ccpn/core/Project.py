@@ -2,6 +2,7 @@
 """
 from __future__ import annotations
 
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -16,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-16 14:43:46 +0000 (Thu, March 16, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 18:46:13 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -48,7 +49,7 @@ from ccpn.core.lib import Undo
 from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, fetchProjectSaveHistory, newProjectSaveHistory
 from ccpn.core.lib.ProjectLib import createLogger
 from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
-    inactivity, logCommandManager
+    inactivity, logCommandManager, ccpNmrV3CoreUndoBlock
 
 from ccpn.util import Logging
 from ccpn.util.ExcelReader import ExcelReader
@@ -81,6 +82,7 @@ from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib import ApiPath
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.api.memops import Implementation
+
 
 # TODO These should be merged with the same constants in CcpnNefIo
 # (and likely those in ExportNefPopup) and moved elsewhere
@@ -292,7 +294,7 @@ class Project(AbstractWrapperObject):
     @property
     def statePath(self) -> Path:
         """
-        :return: the absolute path to the state sub-directory of the current project
+        :return: the absolute path to the state subdirectory of the current project
                  as a Path instance
         """
         return self.projectPath / CCPN_STATE_DIRECTORY
@@ -300,7 +302,7 @@ class Project(AbstractWrapperObject):
     @property
     def pipelinePath(self) -> Path:
         """
-        :return: the absolute path to the state/pipeline sub-directory of
+        :return: the absolute path to the state/pipeline subdirectory of
                  the current project as a Path instance
         """
         return self.statePath.fetchDir(Pipeline.className)
@@ -308,7 +310,7 @@ class Project(AbstractWrapperObject):
     @property
     def dataPath(self) -> Path:
         """
-        :return: the absolute path to the data sub-directory of the current project
+        :return: the absolute path to the data subdirectory of the current project
                  as a Path instance
         """
         return self.projectPath / CCPN_DATA_DIRECTORY
@@ -316,7 +318,7 @@ class Project(AbstractWrapperObject):
     @property
     def spectraPath(self) -> Path:
         """
-        :return: the absolute path to the data sub-directory of the current project
+        :return: the absolute path to the data subdirectory of the current project
                  as a Path instance
         """
         return self.projectPath / CCPN_SPECTRA_DIRECTORY
@@ -324,7 +326,7 @@ class Project(AbstractWrapperObject):
     @property
     def pluginDataPath(self) -> Path:
         """
-        :return: the absolute path to the data/plugins sub-directory of the
+        :return: the absolute path to the data/plugins subdirectory of the
                  current project as a Path instance
         """
         return self.projectPath / CCPN_PLUGINS_DIRECTORY
@@ -332,7 +334,7 @@ class Project(AbstractWrapperObject):
     @property
     def scriptsPath(self) -> Path:
         """
-        :return: the absolute path to the script sub-directory of the current project
+        :return: the absolute path to the script subdirectory of the current project
                  as a Path instance
         """
         return self.projectPath / CCPN_SCRIPTS_DIRECTORY
@@ -340,7 +342,7 @@ class Project(AbstractWrapperObject):
     @property
     def archivesPath(self) -> Path:
         """
-        :return: the absolute path to the archives sub-directory of the current project
+        :return: the absolute path to the archives subdirectory of the current project
                  as a Path instance
         """
         return self.projectPath / CCPN_ARCHIVES_DIRECTORY
@@ -350,6 +352,7 @@ class Project(AbstractWrapperObject):
         """path to directory containing  backup Project
         """
         from ccpn.framework.PathsAndUrls import CCPN_BACKUP_SUFFIX, CCPN_DIRECTORY_SUFFIX
+
         _dir, _base, _suffix = self.projectPath.parent.split3()
         bPath = _dir / _base + CCPN_BACKUP_SUFFIX + CCPN_DIRECTORY_SUFFIX
         return bPath
@@ -364,6 +367,7 @@ class Project(AbstractWrapperObject):
         :param path: Path to the project; name is extracted from it
         """
         from ccpn.core.lib.XmlLoader import XmlLoader
+
         if not isinstance(xmlLoader, XmlLoader):
             raise ValueError(f'Ex[ected XmlLoader instance, got {xmlLoader}')
 
@@ -387,7 +391,7 @@ class Project(AbstractWrapperObject):
         AbstractWrapperObject.__init__(self, project=self, wrappedData=xmlLoader.apiNmrProject)
 
         self._path = xmlLoader.path.asString()
-        self._checkProjectSubDirectories()
+        # self._checkProjectSubDirectories()  # only do when saving?
 
         # self._appBase = None (delt with below)
         # Reference to application; defined by Framework
@@ -541,8 +545,8 @@ class Project(AbstractWrapperObject):
         """
         if not self.readOnly:
             try:
-                for dir in CCPN_SUB_DIRECTORIES:
-                    self.projectPath.fetchDir(dir)
+                for dd in CCPN_SUB_DIRECTORIES:
+                    self.projectPath.fetchDir(dd)
             except (PermissionError, FileNotFoundError):
                 getLogger().warning('Folder may be read-only')
 
@@ -553,7 +557,7 @@ class Project(AbstractWrapperObject):
         (linkages, Current, notifiers and such)
         """
 
-        self._logger = createLogger(self)
+        self._logger = createLogger(self, now=self.application._created)
 
         # Set up notifiers
         self._registerPresetApiNotifiers()
@@ -701,6 +705,9 @@ class Project(AbstractWrapperObject):
         """Clean up the wrapper project previous to deleting or replacing
         Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)
         """
+        # only update the logger if there have been changes to the project
+        self._updateLoggerState(readOnly=self.readOnly or not self.isModified)
+
         getLogger().info(f"Closing {self.path}")
 
         # close any spectra
@@ -721,7 +728,7 @@ class Project(AbstractWrapperObject):
         self._pid2Obj.clear()
         # self.__dict__.clear()  # GWV: dangerous; why done?
 
-    def saveAs(self, newPath:str, overwrite:bool = False):
+    def saveAs(self, newPath: str, overwrite: bool = False):
         """Save project to newPath (optionally overwrite);
            Derive the new project name from newPath
            :param newPath: new path for storing project files
@@ -751,7 +758,7 @@ class Project(AbstractWrapperObject):
         """Save project; add optional comment to save records
         """
         if self.readOnly:
-            getLogger().warning('Project is read-only')
+            getLogger().warning('save skipped: Project is read-only')
             return
 
         # Update the spectrum internal settings
@@ -773,8 +780,11 @@ class Project(AbstractWrapperObject):
             getLogger().warning('Error checking project status: %s' % str(es))
 
         self._xmlLoader.saveUserData(keepFallBack=True)
+        self._checkProjectSubDirectories()
         self._saveHistory.addSaveRecord(comment=f'{self.name}: {comment}')
         self._saveHistory.save()
+        self._updateLoggerState(readOnly=self.readOnly, flush=True)
+
         self._isTemporary = False
         self._isNew = False
 
@@ -822,7 +832,6 @@ class Project(AbstractWrapperObject):
         self._queryNextUniqueIdValue(className)
         self._wrappedData._nextUniqueIdValues[className] = int(value)
 
-
     @logCommand('project.')
     def deleteObjects(self, *objs: typing.Sequence[typing.Union[str, Pid.Pid, AbstractWrapperObject]]):
         """Delete one or more objects, given as either objects or Pids
@@ -837,32 +846,53 @@ class Project(AbstractWrapperObject):
 
     @property
     def readOnly(self):
-        """Return the read-only state
+        """Return the read-only state of the project.
         """
-        # _saveAsOverride allows the readOnly state to be True during saveAs
-        return (self._getInternalParameter(self._READONLY) or False) and not self.application._saveAsOverride
+        # _saveOverride allows the readOnly state to be temporarily set to False during save/saveAs
+        # _readOnly sets all projects as read-only from the command-line switch --read-only
+        return ((self._getInternalParameter(self._READONLY) or False) or self.application._readOnly) and \
+            not self.application._saveOverride
 
-    @readOnly.setter
-    def readOnly(self, value):
+    @logCommand('project.')
+    @ccpNmrV3CoreUndoBlock(readOnlyChanged=True)
+    def setReadOnly(self, value):
+        """Set the read-only state of the project.
+        """
         if not isinstance(value, bool):
-            raise TypeError(f'{self.__class__.__name__}.readOnly must be a bool')
+            raise TypeError(f'{self.__class__.__name__}.setReadOnly must be a bool')
 
         self._setInternalParameter(self._READONLY, value)
-        # NOTE:ED - does this need to include override?
-        self._xmlLoader.readOnly = value and not self.application._saveAsOverride
+        self._updateReadOnlyState()
+        self._updateLoggerState(flush=not value)
 
-        updateLogger(self.application.applicationName,
-                     self.projectPath / CCPN_LOGS_DIRECTORY,
-                     level = self.application._debugLevel,
-                     readOnly=value)
+        # # NOTE:ED - does this need to include override?
+        # self._xmlLoader.readOnly = (value and not self.application._saveOverride)
+        #
+        # updateLogger(self.application.applicationName,
+        #              self.projectPath / CCPN_LOGS_DIRECTORY,
+        #              level = self.application._debugLevel,
+        #              readOnly=value)
 
-    def updateReadOnlyState(self):
+    def _updateReadOnlyState(self):
         """Update the state of the xmlLoader from the current read-only state
+        CCPN Internal
         """
         # needs to take into account the saveAsOverride state from the application
-        self._xmlLoader.readOnly = self.readOnly
+        self._xmlLoader.setReadOnly(self.readOnly)
 
-        #-----------------------------------------------------------------------------------------
+    def _updateLoggerState(self, readOnly=True, flush=False):
+        """Update the read-only state of the logger
+        CCPN Internal
+        """
+        updateLogger(self.application.applicationName,
+                     self.projectPath / CCPN_LOGS_DIRECTORY,
+                     level=self.application._debugLevel,
+                     readOnly=readOnly,
+                     flush=flush,
+                     now=self.application._created
+                     )
+
+    #-----------------------------------------------------------------------------------------
     # Undo machinery
     #-----------------------------------------------------------------------------------------
 
@@ -1411,7 +1441,6 @@ class Project(AbstractWrapperObject):
                     else:
                         obj._finaliseAction(action)
 
-
     # def _finaliseApiRename(self, wrappedData):
     #     """Reset Finalise rename - called from API object (for API notifiers)
     #     """
@@ -1702,16 +1731,21 @@ class Project(AbstractWrapperObject):
         return getCcpCodeData(self._apiNmrProject, ccpCode, molType='protein', atomType=atomType)
 
     @logCommand('project.')
-    def saveToArchive(self) -> Path:
+    def saveToArchive(self) -> Optional[Path]:
         """Make new time-stamped archive of project
         :return path to .tgz archive file as a Path object
         """
+        # NOTE:ED - need better gui error-trap
+        if self.readOnly:
+            getLogger().warning(f'{self.__class__.__name__}.saveToArchive: project is read-only')
+            return None
+
         from ccpn.core.lib.ProjectArchiver import ProjectArchiver
 
         archiver = ProjectArchiver(projectPath=self.path)
-        archivePath = archiver.makeArchive()
-        getLogger().info('==> Project archived to %s' % archivePath)
-        return archivePath
+        if archivePath := archiver.makeArchive():
+            getLogger().info(f'==> Project archived to {archivePath}')
+            return archivePath
 
     def _getArchivePaths(self) -> List[Path]:
         """:return list of archives from archive directory
@@ -1728,6 +1762,7 @@ class Project(AbstractWrapperObject):
         # GWV: 13Jan2023: made into private method; only FrameWork needs this.
         # NOTE:ED - better than being in spectrumLib but still needs moving
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
+
         return getExpClassificationDict(self._wrappedData)
 
     @logCommand('project.')
@@ -2211,7 +2246,7 @@ class Project(AbstractWrapperObject):
         return _fetchSubstance(self, name=name, labelling=labelling)
 
     @logCommand('project.')
-    def newComplex(self, name: str, chains=(), **kwds):
+    def newComplex(self, name: str = None, chains=(), **kwds):
         """Create new Complex.
         See the Complex class for details.
         Optional keyword arguments can be passed in; see Complex._newComplex for details.
@@ -2292,13 +2327,14 @@ class Project(AbstractWrapperObject):
         else:
             return f"<PR:{self.name}>"
 
+
 #End class Project
 
 #=========================================================================================
 # Code adapted from prior _implementation/Io.py
 #=========================================================================================
 
-def _newProject(application, name:str, path:Path, isTemporary:bool = False) -> Project:
+def _newProject(application, name: str, path: Path, isTemporary: bool = False) -> Project:
     """Make new project, putting underlying data storage (API project) at path
     :return Project instance
     """
@@ -2317,8 +2353,9 @@ def _newProject(application, name:str, path:Path, isTemporary:bool = False) -> P
     project._objectVersion = application.applicationVersion
     project._saveHistory = newProjectSaveHistory(project.path)
 
-    application._saveAsOverride = False
-    project.updateReadOnlyState()
+    application._saveOverride = False
+    project._application = application
+    project._updateReadOnlyState()
 
     # the initialisation is completed by Framework._initialiseProject when it has done its things
     # project._initialiseProject()
@@ -2337,7 +2374,7 @@ def _loadProject(application, path: str) -> Project:
     if not _path.exists():
         raise ValueError(f'Path {_path} does not exist')
 
-    xmlLoader = XmlLoader(path=_path, readOnly=application._readOnly)
+    xmlLoader = XmlLoader(path=_path, readOnly=True)  # application._readOnly)  always read-only during load
     xmlLoader.loadProject()
 
     _isV2 = xmlLoader.isV2  # save this, because if V2, we are going to change the xmlLoader
@@ -2351,9 +2388,11 @@ def _loadProject(application, path: str) -> Project:
     # back linkage
     xmlLoader.project = project
 
-    project.updateReadOnlyState()
+    project._application = application  # bit of a hack, isn't set until initialise
+    project._updateReadOnlyState()
 
-    project._saveHistory = fetchProjectSaveHistory(project.path)
+    # project._saveHistory = fetchProjectSaveHistory(project.path, project.readOnly)
+    project._saveHistory = getProjectSaveHistory(project.path)
 
     # If path pointed to a V2 project, call the updates, and save the data
     if _isV2:
@@ -2373,7 +2412,7 @@ def _loadProject(application, path: str) -> Project:
                 # xmlLoader.saveUserData(keepFallBack=False)
                 project._saveHistory.addSaveRecord(version=project._objectVersion,
                                                    comment='upgraded from version-2')
-                project._saveHistory.save()
+                # project._saveHistory.save()
             except (PermissionError, FileNotFoundError):
                 getLogger().warning('Folder may be read-only')
 
@@ -2386,10 +2425,13 @@ def _loadProject(application, path: str) -> Project:
         # Save using the xmlLoader only as we do not have a complete and valid V3-Project yet
         if not project.readOnly:
             try:
+                # NOTE:ED - shouldn't actually be doing any writes now?
+                #   in which case remove the error-check
+
                 # xmlLoader.saveUserData(keepFallBack=True)
                 project._saveHistory.addSaveRecord(version=project._objectVersion,
                                                    comment='Path/name has changed')
-                project._saveHistory.save()
+                # project._saveHistory.save()
 
             except (PermissionError, FileNotFoundError):
                 getLogger().warning('Folder may be read-only')

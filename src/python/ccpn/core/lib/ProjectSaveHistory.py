@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-14 19:17:42 +0000 (Tue, March 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -30,15 +30,14 @@ import json
 import sys
 import getpass
 from collections import namedtuple
-from contextlib import suppress
 
-from ccpn.util.Path import aPath
 from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY, ccpnVersionHistory
 from ccpn.framework.Version import VersionString, applicationVersion
 from ccpn.util.Time import now
+from ccpn.util.Path import aPath
+from ccpn.util.Logging import getLogger
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson, TraitJsonHandlerBase
 from ccpn.util.traits.CcpNmrTraits import List, Path
-from ccpn.util.Logging import getLogger
 
 
 def getProjectSaveHistory(projectPath):
@@ -54,18 +53,16 @@ def getProjectSaveHistory(projectPath):
     return sv
 
 
-def fetchProjectSaveHistory(projectPath):
+def fetchProjectSaveHistory(projectPath, readOnly=True):
     """Return a ProjectSaveHistory instance from a project path.
     Creates a default single-entry instance if it doesn't exist and creates file
     """
-    sv = ProjectSaveHistory(projectPath)
+    sv = ProjectSaveHistory(projectPath, create=not readOnly)
     if not sv.exists():
         # pre 3.1.0 ccp project; create one with '3.0.4' as the last (and only) entry
-        try:
-            sv.addSaveRecord('3.0.4', comment='created retroactively')
+        sv.addSaveRecord('3.0.4', comment='created retroactively')
+        if not readOnly:
             sv.save()
-        except (PermissionError, FileNotFoundError):
-            getLogger().warning('Folder may be read-only')
 
     else:
         sv.restore()
@@ -75,7 +72,7 @@ def fetchProjectSaveHistory(projectPath):
 def newProjectSaveHistory(projectPath):
     """Create and return a new ProjectSaveHistory instance
     """
-    sv = ProjectSaveHistory(projectPath)
+    sv = ProjectSaveHistory(projectPath, create=True)
     sv.addSaveRecord(applicationVersion, comment='created')
     sv.save()
     return sv
@@ -89,10 +86,11 @@ class ProjectSaveHistory(CcpNmrJson):
 
     classVersion = 1.0  # Json classVersion
 
-    SaveRecord = namedtuple('SaveRecord', 'version datetime user platform comment'.split())
+    SaveRecord = namedtuple('SaveRecord', 'version datetime user platform comment')
 
     # The path of the file
-    path = Path()
+    projectPath = Path()
+    _path = Path()
 
 
     class RecordListHandler(TraitJsonHandlerBase):
@@ -110,17 +108,26 @@ class ProjectSaveHistory(CcpNmrJson):
     # the list of entries
     records = List(default_value=[]).tag(saveToJson=True, jsonHandler=RecordListHandler)
 
-    def __init__(self, projectPath):
+    def __init__(self, projectPath, create=False):
         """
         :param projectPath: path of project
         """
         super().__init__()
 
         self.records = []  # to stop the singleton behaviour
-        _path = aPath(projectPath)
-        if not _path.exists():
-            raise ValueError('Project path "%s" does not exist' % projectPath)
-        self.path = _path.fetchDir(CCPN_STATE_DIRECTORY) / ccpnVersionHistory
+        self.projectPath = _projectPath = aPath(projectPath)
+
+        if not _projectPath.exists():
+            getLogger().debug(f'Project path "{projectPath}" does not exist')
+
+        self._path = aPath(CCPN_STATE_DIRECTORY) / ccpnVersionHistory
+
+        if create:
+            try:
+                _projectPath.fetchDir(CCPN_STATE_DIRECTORY)
+
+            except (PermissionError, FileNotFoundError):
+                getLogger().warning(f'Child-folder {self._path} may be read-only')
 
     @property
     def lastSavedVersion(self) -> VersionString:
@@ -129,11 +136,15 @@ class ProjectSaveHistory(CcpNmrJson):
         """
         return VersionString(self.records[-1].version)
 
+    @property
+    def path(self):
+        return self.projectPath / self._path
+
     def _newRecord(self, version, datetime=None, user=None, platform=None, comment=None):
         """Return a new record, set default for all None values
         """
         if not isinstance(version, (VersionString, str)):
-            raise ValueError('Invalid version parameter "%s"' % version)
+            raise ValueError(f'Invalid version parameter "{version}"')
         version = VersionString(version)
 
         if datetime is None:
@@ -142,8 +153,7 @@ class ProjectSaveHistory(CcpNmrJson):
             user = getpass.getuser()
         if platform is None:
             platform = sys.platform
-        record = self.SaveRecord(version, datetime, user, platform, comment)
-        return record
+        return self.SaveRecord(version, datetime, user, platform, comment)
 
     def addSaveRecord(self, version=None, comment=None):
         """Add a save record to the history;
@@ -159,25 +169,39 @@ class ProjectSaveHistory(CcpNmrJson):
     def exists(self) -> bool:
         """Return true if project save history file exists
         """
-        return self.path.exists()
+        # check no shenanigans with the sub-path
+        validRelative = aPath(self.path).is_relative_to(self.projectPath)
+        return self._path.asString() != '.' and validRelative and self.path.exists()
 
-    def save(self):
+    def save(self, *args, **kwds):
         """Save to (json) file
         """
-        super().save(self.path)
+        try:
+            self.projectPath.fetchDir(CCPN_STATE_DIRECTORY)
+            self._path = aPath(CCPN_STATE_DIRECTORY) / ccpnVersionHistory
 
-    def restore(self):
+            super().save(self.path)
+
+        except (PermissionError, FileNotFoundError):
+            getLogger().warning(f'Child-folder {self._path} may be read-only')
+
+    def restore(self, **kwds):
         """Restore self from a json file.
         Check for prior 'ed'-formatted file
         :return self
         """
         if not self.exists():
-            raise RuntimeError('Path "%s" does not exist; unable to restore project save history' % self.path)
+            raise RuntimeError(
+                    f'Path "{self.path}" does not exist; unable to restore project save history'
+                    )
 
         try:
-            super().restore(self.path)
+            if self._path.asString() == '.':
+                getLogger().debug('Folder may be read-only')
+            else:
+                super().restore(self.path)
 
-        except (RuntimeError, ValueError) as es:
+        except (RuntimeError, ValueError):
 
             # test for old 'ed' files
             with self.path.open('r') as fp:
@@ -201,7 +225,7 @@ class ProjectSaveHistory(CcpNmrJson):
 
     def __str__(self):
         return '<%s: len=%s, lastSavedVersion=%r>' % \
-               (self.__class__.__name__, len(self), self.lastSavedVersion)
+            (self.__class__.__name__, len(self), self.lastSavedVersion)
 
 
 # Register this class

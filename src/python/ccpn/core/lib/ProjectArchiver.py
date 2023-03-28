@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-14 19:17:41 +0000 (Tue, March 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 18:46:13 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2022-01-18 10:28:48 +0000 (Tue, January 18, 2022) $"
 #=========================================================================================
 
 import os
+import typing
 from tarfile import TarFile
 
 from ccpn.util.Path import Path, aPath
@@ -59,7 +60,6 @@ ARCHIVE_SUFFIX = '.tgz'
 class ProjectArchiver(object):
     """A class to manage the archives of a project
     """
-    readOnly = False
 
     def __init__(self, projectPath):
         """Initialise the class with the specified projectPath
@@ -76,27 +76,58 @@ class ProjectArchiver(object):
     def archiveDirectory(self) -> Path:
         """:return: absolute path to directory with archives as a Path instance
         """
+        # cleans up any mess in the path
+        return aPath(self._projectPath / CCPN_ARCHIVES_DIRECTORY)
+        # try:
+        #     return self._projectPath.fetchDir(CCPN_ARCHIVES_DIRECTORY)
+        # except (PermissionError, FileNotFoundError):
+        #     getLogger().warning('Folder may be read-only')
+
+    @property
+    def archives(self) -> list:
+        """:return: a list of archive (.tgz) tar files
+        """
+        try:
+            return self.archiveDirectory and self.archiveDirectory.listdir(suffix=ARCHIVE_SUFFIX)
+        except (PermissionError, FileNotFoundError):
+            getLogger().warning('Folder may be read-only, or may not exist')
+
+        return []
+
+    @property
+    def _validFolder(self) -> bool:
+        """Check the archive path is in the correct place
+        """
+        return self.archiveDirectory.is_relative_to(self._projectPath)
+
+    def fetchArchiveDirectory(self) -> typing.Optional[Path]:
+        """Return the archive-folder
+        Creates folder if it doesn't exist
+        :return: Path object or None
+        """
+        if not self._validFolder:
+            raise RuntimeError('Archive is not subfolder of project')
+
         try:
             return self._projectPath.fetchDir(CCPN_ARCHIVES_DIRECTORY)
         except (PermissionError, FileNotFoundError):
             getLogger().warning('Folder may be read-only')
-
-    @property
-    def archives(self) -> list:
-        """:return: a list of archive (.tgz) tar files"""
-        return self.archiveDirectory and self.archiveDirectory.listdir(suffix=ARCHIVE_SUFFIX)
 
     def makeArchive(self) -> Path:
         """Make a new time-stamped archive from project.
         :return: absolute path to the new archives as a Path instance
                  or None on IOerror
         """
+        if not self._validFolder:
+            raise RuntimeError('Archive is not subfolder of project')
+
         archivePath = self.archiveDirectory / self._projectPath.basename
         archivePath = archivePath.addTimeStamp().withSuffix(
                 CCPN_DIRECTORY_SUFFIX + ARCHIVE_SUFFIX)
         cwd = os.getcwd()
 
         try:
+            self.fetchArchiveDirectory()
             os.chdir(self._projectPath)
 
             with TarFile.open(archivePath, mode='w:gz') as tarfile:

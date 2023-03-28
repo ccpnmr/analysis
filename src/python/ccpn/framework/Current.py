@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:03 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -54,6 +54,7 @@ from ccpn.core._implementation._OldChemicalShift import _OldChemicalShift
 from ccpn.core._implementation._PeakCluster import _PeakCluster
 from ccpn.ui._implementation.Strip import Strip
 from ccpn.util.Logging import getLogger
+from ccpn.util.Path import aPath
 
 
 DEBUG = False
@@ -483,38 +484,48 @@ class Current:
             ntf.unRegister()
 
     def _dumpStateToFile(self, statePath):
+        if self.project.readOnly:
+            return
+
+        path = self._getStateFile(statePath)
         try:
-            path = os.path.join(statePath, self.className)
+            # check in the correct folder
+            if not (subpath := aPath(statePath).relative_to(self.project.path)):
+                raise RuntimeError(f'folder is not a subdirectoy of {self.project.path}')
+
+            aPath(self.project.path).fetchDir(subpath)
             with open(path, "w") as file:
                 json.dump(self.state, file, sort_keys=False, indent=2, )
 
             if DEBUG:
                 sys.stderr.write('>>> _dumpStateToFile\n')
 
+        except (PermissionError, FileNotFoundError):
+            getLogger().debug('Folder may be read-only')
+
         except Exception as e:
             getLogger().debug(f'Impossible to create a Current File: {e}')
 
-    def _createStateFile(self, statePath):
-        path = os.path.join(statePath, self.className)
-        if not os.path.exists(path):
-            self._dumpStateToFile(statePath)
-
-        return path
+    def _getStateFile(self, statePath):
+        return aPath(statePath) / self.className
+        # if not path.exists(path):
+        #     self._dumpStateToFile(statePath)
+        #
+        # return path
 
     def _restoreStateFromFile(self, statePath):
         """restore current from the default File in the project directory
         """
         try:
-            if path := self._createStateFile(statePath):
-                with open(path) as fp:
-                    if state := json.load(fp):
-                        self._restoreFromState(state)
+            with open(self._getStateFile(statePath)) as fp:
+                if state := json.load(fp):
+                    self._restoreFromState(state)
 
             if DEBUG:
                 sys.stderr.write('>>> _restoreStateFromFile\n')
 
-        except Exception as e:
-            getLogger().debug(f'No state found: {e}')
+        except Exception as es:
+            getLogger().debug(f'No state found: {es}')
 
 
 # Add fields to current

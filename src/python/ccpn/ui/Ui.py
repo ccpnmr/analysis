@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -32,13 +32,16 @@ import re
 import os
 
 from ccpn.framework.Version import applicationVersion
+from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
 
 from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.core.lib.ContextManagers import catchExceptions
 
 from ccpn.util import Register
 from ccpn.util.Update import installUpdates, UpdateAgent
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import aPath
+from ccpn.util.decorators import logCommand
 
 
 class Ui(NotifierBase):
@@ -588,6 +591,76 @@ class NoUi(Ui):
             getLogger().warning(txt)
 
         return objs
+
+    @logCommand('application.')
+    def saveProjectAs(self, newPath=None, overwrite: bool = False) -> bool:
+        """Opens save Project to newPath.
+        Optionally open file dialog.
+        :param newPath: new path to save project (str | Path instance)
+        :param overwrite: flag to indicate overwriting of existing path
+        :return True if successful
+        """
+        from ccpn.core.lib.ProjectLib import checkProjectName
+
+        oldPath = self.project.path
+        if newPath is None:
+            return False
+
+        newPath = aPath(newPath).assureSuffix(CCPN_EXTENSION)
+
+        if (not overwrite and
+                newPath.exists() and
+                (newPath.is_file() or (newPath.is_dir() and len(newPath.listdir(excludeDotFiles=False)) > 0))
+        ):
+            getLogger().warning(f'Path "{newPath}" already exists')
+            return False
+
+        # check the project name derived from path
+        newName = newPath.basename
+        if (_name := checkProjectName(newName, correctName=True)) != newName:
+            newPath = (newPath.parent / _name).assureSuffix(CCPN_EXTENSION)
+            getLogger().info(f'Project name changed from "{newName}" to "{_name}"\nSee console/log for details',
+                             )
+
+        with catchExceptions(errorStringTemplate='Error saving project: %s'):
+            try:
+                if not self.application._saveProjectAs(newPath=newPath, overwrite=True):
+                    getLogger().warning(f"Saving project to {newPath} aborted")
+                    return False
+
+            except (PermissionError, FileNotFoundError):
+                getLogger().debug(f'Folder {newPath} may be read-only')
+                return False
+
+        self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
+
+        getLogger().info(f'Project successfully saved to "{self.project.path}"')
+
+        return True
+
+    @logCommand('application.')
+    def saveProject(self) -> bool:
+        """Save project.
+        :return True if successful
+        """
+        if self.project.isTemporary:
+            return self.saveProjectAs()
+
+        if self.project.readOnly:
+            getLogger().info('The project is marked as read-only.')
+            return True
+
+        with catchExceptions(errorStringTemplate='Error saving project: %s'):
+            try:
+                if not self.application._saveProject(force=True):
+                    return False
+            except (PermissionError, FileNotFoundError):
+                getLogger().debug('Folder may be read-only')
+                return True
+
+        getLogger().info(f'Project successfully saved to "{self.project.path}"')
+
+        return True
 
 
 class TestUi(NoUi):

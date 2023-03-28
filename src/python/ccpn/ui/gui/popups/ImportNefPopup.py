@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-01 12:01:31 +0000 (Wed, March 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 15:18:46 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -56,7 +56,7 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.VLine import VLine
 from ccpn.ui.gui.lib.Validators import LineEditValidator, LineEditValidatorWhiteSpace
 from ccpn.ui.gui.widgets.table.Table import Table
-from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS, TOOLTIP_BACKGROUND
+from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 
 from ccpn.framework.lib.ccpnNef import CcpnNefIo
 from ccpn.framework.lib.ccpnNef.CcpnNefIo import DATANAME
@@ -2742,8 +2742,9 @@ class NefDictFrame(Frame):
                 self._metrics.pointer_height = 0
 
                 # set the background/fontSize for the tooltips
-                _toolBG = getColours()[TOOLTIP_BACKGROUND]
-                self.setStyleSheet(f'QToolTip {{ background-color: {_toolBG}; font-size: {self.font().pointSize()}pt ; }}')
+                self.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
+                                   'color: {TOOLTIP_FOREGROUND}; '
+                                   'font-size: {_size}pt ; }}'.format(_size=self.font().pointSize(), **getColours()))
 
                 # add the widgets
                 _frame = Frame(self, setLayout=True, margins=(10, 10, 10, 10))

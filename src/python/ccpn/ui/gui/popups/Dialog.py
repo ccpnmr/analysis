@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-01 18:39:44 +0000 (Wed, March 01, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-28 15:18:45 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
-from ccpn.ui.gui.guiSettings import getColours, TOOLTIP_BACKGROUND
+from ccpn.ui.gui.guiSettings import getColours
 from ccpn.ui.gui.lib.ChangeStateHandler import ChangeDict
 
 
@@ -167,9 +167,10 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self.setWindowFilePath('')
         self.setWindowIcon(QtGui.QIcon())
 
-        # set the background/fontSize for the tooltips
-        _toolBG = getColours()[TOOLTIP_BACKGROUND]
-        self.setStyleSheet(f'QToolTip {{ background-color: {_toolBG}; font-size: {self.font().pointSize()}pt ; }}')
+        # set the background/fontSize for the tooltips, fraction slower but don't need to import the colour-names
+        self.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
+                           'color: {TOOLTIP_FOREGROUND}; '
+                           'font-size: {_size}pt ; }}'.format(_size=self.font().pointSize(), **getColours()))
 
         ## WARNING ==> setAttribute WA_DeleteOnClose, True :
         ## This flag should be used after checking all popup are closed correctly
@@ -447,7 +448,8 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     def handleUserClicked(self):
         """Context manager to handle user actions in dialogs.
         """
-        from ccpn.core.lib.ContextManagers import undoStackBlocking # this causes circular imports. KEEP LOCAL
+        from ccpn.core.lib.ContextManagers import undoStackBlocking  # this causes circular imports. KEEP LOCAL
+
         # handle clicking of a user button
         with handleDialogApply(self) as error:
             # add item here to redraw items
@@ -490,6 +492,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         Return True unless any errors occurred
         """
         from ccpn.core.lib.ContextManagers import undoStackBlocking
+
         if self.EDITMODE:
             # get the list of widgets that have been changed - exit if all empty
             allChanges = bool(self._changes)
@@ -592,7 +595,6 @@ class CcpnDialog(QtWidgets.QDialog, Base):
     OKBUTTONTEXT = 'OK'
 
     def __init__(self, parent=None, windowTitle='', setLayout=False, size=(300, 100), **kwds):
-
         super().__init__(parent)
         Base._init(self, setLayout=setLayout, **kwds)
 

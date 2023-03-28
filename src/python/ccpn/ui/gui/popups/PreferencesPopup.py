@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-10 18:39:27 +0000 (Fri, March 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 15:18:46 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -699,6 +699,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         _label = _makeLabel(parent, text='Available printing-fonts', grid=(row, 0), vAlign='t')
+        _label.setToolTip('The list of fonts that are available to the spectrumDisplay print action.\n'
+                          'This is not all the installed fonts, only the .ttf fonts that can be\nused when printing spectrumDisplays to file.')
         ft = self._availableFontTable = Table(parent, grid=(row, 1), gridSpan=(1, 2), hAlign='l',
                                               showHorizontalHeader=False, showVerticalHeader=False,
                                               selectionCallbackEnabled=False, actionCallbackEnabled=False,
@@ -710,11 +712,16 @@ class PreferencesPopup(CcpnDialogMainWidget):
         ft.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         parent.getLayout().addWidget(ft, row, 1, 1, 2)  # there is a bug somewhere if not done like this :|
         self._updateFontTable(ft)
+        ft.setToolTip('The list of fonts that are available to the spectrumDisplay print action.\n'
+                          'This is not all the installed fonts, only the .ttf fonts that can be\nused when printing spectrumDisplays to file.')
+
+        parent.layout().setRowStretch(row, 5)  # let the table expand vertically
 
         row += 1
-        ButtonCompoundWidget(parent, grid=(row, 1), gridSpan=(1, 2),
-                             text=' Update ', buttonAlignment='right', icon=Icon('icons/redo'), enabled=True,
-                             minimumWidths=(25, 25, 25), callback=self._updateAvailableFonts)
+        btn = ButtonCompoundWidget(parent, grid=(row, 1), gridSpan=(1, 2),
+                                   text=' update printing-fonts ', buttonAlignment='right', icon=Icon('icons/redo'), enabled=True,
+                                   minimumWidths=(25, 25, 25), callback=self._updateAvailableFonts)
+        btn.setToolTip('Update the current printing-fonts if there are new fonts available')
 
         row += 1
         parent.addSpacer(15, 2, expandX=True, expandY=True, grid=(row, 2), gridSpan=(1, 1))

@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:04 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-03-28 15:18:45 +0100 (Tue, March 28, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -71,7 +71,7 @@ from ccpn.ui.gui.popups.ViolationTablePopup import ViolationTablePopup
 from ccpn.ui.gui.popups.CollectionEditorPopup import CollectionEditorPopup
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, \
     undoBlockWithoutSideBar, undoStackBlocking
-from ccpn.ui.gui.guiSettings import getColours, TOOLTIP_BACKGROUND
+from ccpn.ui.gui.guiSettings import getColours
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Logging import getLogger
 
@@ -671,8 +671,9 @@ class OpenItemABC():
                 self._metrics.pointer_height = 0
 
                 # set the background/fontSize for the tooltips
-                _toolBG = getColours()[TOOLTIP_BACKGROUND]
-                self.setStyleSheet(f'QToolTip {{ background-color: {_toolBG}; font-size: {self.font().pointSize()}pt ; }}')
+                self.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
+                                   'color: {TOOLTIP_FOREGROUND}; '
+                                   'font-size: {_size}pt ; }}'.format(_size=self.font().pointSize(), **getColours()))
 
                 # add the widgets
                 _frame = Frame(self, setLayout=True, margins=(10, 10, 10, 10))

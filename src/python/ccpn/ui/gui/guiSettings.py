@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-10 18:39:27 +0000 (Fri, March 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 15:18:45 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -237,6 +237,7 @@ GUITABLEHEADER_BACKGROUND = 'GUITABLEHEADER_BACKGROUND'
 BORDERNOFOCUS = 'BORDER_NOFOCUS'
 BORDERFOCUS = 'BORDER_FOCUS'
 TOOLTIP_BACKGROUND = 'TOOLTIP_BACKGROUND'
+TOOLTIP_FOREGROUND = 'TOOLTIP_FOREGROUND'
 
 #----------------------------------------------------------------------------------------------
 # Colours
@@ -259,9 +260,10 @@ MARISHINO = '#004D81'  # rgb(0,77,129) ; red colour (from apple)
 MEDIUM_BLUE = '#7777FF'
 GREEN1 = '#009a00'
 WARNING_RED = '#e01010'
-FIREBRICK = hexToRgbRatio([k for k, v in allColours.items() if v == 'firebrick'][0])
-LIGHTCORAL = hexToRgbRatio([k for k, v in allColours.items() if v == 'lightcoral'][0])
-TOOLTIP_BACKGROUND_COLOUR = [k for k, v in allColours.items() if v == 'lightgoldenrodyellow'][0]
+FIREBRICK = hexToRgbRatio(next((k for k, v in allColours.items() if v == 'firebrick'), '#F03010'))
+LIGHTCORAL = hexToRgbRatio(next((k for k, v in allColours.items() if v == 'lightcoral'), '#F03010'))
+TOOLTIP_BACKGROUND_COLOUR = next((k for k, v in allColours.items() if v == 'lightgoldenrodyellow'), '#F03010')
+TOOLTIP_FOREGROUND_COLOUR = '#222438'
 
 BORDERNOFOCUS_COLOUR = '#A9A9A9'
 BORDERFOCUS_COLOUR = '#4E86F6'
@@ -350,12 +352,13 @@ colourSchemes = {
         GUITABLEHEADER_SELECTED_BACKGROUND: 'gainsboro',
         GUITABLEHEADER_GROUP_GRIDLINES    : 'darkgrey',
 
-        GUITABLEHEADER_FOREGROUND            : TEXT_COLOUR,
-        GUITABLEHEADER_BACKGROUND            : '#ebebeb',
+        GUITABLEHEADER_FOREGROUND         : TEXT_COLOUR,
+        GUITABLEHEADER_BACKGROUND         : '#ebebeb',
 
         BORDERFOCUS                       : BORDERFOCUS_COLOUR,
         BORDERNOFOCUS                     : BORDERNOFOCUS_COLOUR,
         TOOLTIP_BACKGROUND                : TOOLTIP_BACKGROUND_COLOUR,
+        TOOLTIP_FOREGROUND                : TOOLTIP_FOREGROUND_COLOUR,
 
         MARKS_COLOURS                     : MARK_LINE_COLOUR_DICT,
         SPECTRUM_HEXCOLOURS               : spectrumHexDarkColours,

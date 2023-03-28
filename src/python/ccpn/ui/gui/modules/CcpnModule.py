@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:41 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-28 15:18:45 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -59,7 +59,7 @@ from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS, TOOLTIP_BACKGROUND
+from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.SideBar import SideBar, SideBarSearchListView
 from ccpn.ui.gui.widgets.PythonEditor import QCodeEditor
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
@@ -356,8 +356,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
         # set the background/fontSize for the tooltips
         _font = getFont(name=DEFAULTFONT)
-        _toolBG = getColours()[TOOLTIP_BACKGROUND]
-        self.setStyleSheet(f'QToolTip {{ background-color: {_toolBG}; font-size: {_font.pointSize()}pt ; }}')
+        self.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
+                           'color: {TOOLTIP_FOREGROUND}; '
+                           'font-size: {_size}pt ; }}'.format(_size=_font.pointSize(), **getColours()))
 
     #=========================================================================================
     # CCPN Properties

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-20 14:23:37 +0000 (Mon, March 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 15:25:12 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -69,6 +69,7 @@ class _TableModel(QtCore.QAbstractTableModel):
         :param df: pandas DataFrame
         """
         super().__init__(parent)
+
         self.df = df
         self._view = view
         if view:
@@ -329,7 +330,7 @@ class _TableModel(QtCore.QAbstractTableModel):
         if not index.isValid():
             return None
 
-        with suppress(Exception):
+        try:
             # get the source cell
             fRow = self._filterIndex[index.row()] if self._filterIndex is not None and 0 <= index.row() < len(self._filterIndex) else index.row()
             row, col = self._sortIndex[fRow], index.column()
@@ -376,7 +377,7 @@ class _TableModel(QtCore.QAbstractTableModel):
                     # get the colour from the dict
                     return bool(indexGui.get(BACKGROUND_ROLE))
 
-            elif role == TOOLTIP_ROLE:
+            elif role == TOOLTIP_ROLE and self._view._toolTipsEnabled:
                 data = self._df.iat[row, col]
 
                 return str(data)
@@ -413,6 +414,9 @@ class _TableModel(QtCore.QAbstractTableModel):
 
             # elif role == ALIGNMENT_ROLE:
             #     pass
+
+        except Exception:
+            return None
 
         return None
 

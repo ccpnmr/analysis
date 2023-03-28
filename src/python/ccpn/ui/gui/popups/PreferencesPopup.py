@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 15:18:46 +0100 (Tue, March 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 15:25:11 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -704,7 +704,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         ft = self._availableFontTable = Table(parent, grid=(row, 1), gridSpan=(1, 2), hAlign='l',
                                               showHorizontalHeader=False, showVerticalHeader=False,
                                               selectionCallbackEnabled=False, actionCallbackEnabled=False,
-                                              tableMenuEnabled=False
+                                              tableMenuEnabled=False, toolTipsEnabled=False,
                                               )
         ft.setEditable(False)
         ft.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)

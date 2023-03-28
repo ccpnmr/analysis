@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-06 14:11:00 +0000 (Mon, March 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 15:25:11 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -78,7 +78,7 @@ class MITableABC(TableABC):
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
                  actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
                  enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
-                 tableMenuEnabled=NOTHING,
+                 tableMenuEnabled=NOTHING, toolTipsEnabled=NOTHING,
                  # local parameters
                  dividerColour=None,
                  **kwds):
@@ -110,6 +110,7 @@ class MITableABC(TableABC):
         :param enableSearch:
         :param enableCopyCell:
         :param tableMenuEnabled:
+        :param toolTipsEnabled:
         :param dividerColour:
         :param kwds:
         """
@@ -128,7 +129,8 @@ class MITableABC(TableABC):
                          selectionCallback=selectionCallback, selectionCallbackEnabled=selectionCallbackEnabled,
                          actionCallback=actionCallback, actionCallbackEnabled=actionCallbackEnabled,
                          enableExport=enableExport, enableDelete=enableDelete, enableSearch=enableSearch, enableCopyCell=enableCopyCell,
-                         tableMenuEnabled=tableMenuEnabled)
+                         tableMenuEnabled=tableMenuEnabled, toolTipsEnabled=toolTipsEnabled,
+                         )
 
         # the last-section must match the new headers
         self.horizontalHeader().setStretchLastSection(True)

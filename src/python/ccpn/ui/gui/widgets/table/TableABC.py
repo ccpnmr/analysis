@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-20 14:23:37 +0000 (Mon, March 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 15:25:12 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -115,6 +115,7 @@ class TableABC(QtWidgets.QTableView):
     _defaultEditable = True
     _rowHeightScale = None
     _tableMenuEnabled = True
+    _toolTipsEnabled = True
 
     # define the default TableModel class
     tableModelClass = _TableModel
@@ -135,7 +136,7 @@ class TableABC(QtWidgets.QTableView):
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
                  actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
                  enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
-                 tableMenuEnabled=NOTHING,
+                 tableMenuEnabled=NOTHING, toolTipsEnabled=NOTHING,
                  **kwds
                  ):
         """Initialise the table.
@@ -195,6 +196,8 @@ class TableABC(QtWidgets.QTableView):
         # set up the menus
         self.setTableMenu(tableMenuEnabled)
         self.setHeaderMenu()
+
+        self.setToolTipsEnabled(toolTipsEnabled)
 
         self.setItemDelegate(self.defaultTableDelegate(parent=self, focusBorderWidth=focusBorderWidth))
 
@@ -985,6 +988,18 @@ class TableABC(QtWidgets.QTableView):
         self.addTableMenuOptions(menu)
 
         return menu
+
+    def setToolTipsEnabled(self, toolTipsEnabled=NOTHING):
+        """Enable/disable the individual tooltips for the items in the table.
+        Call without parameters to revert to the class setting.
+        :param toolTipsEnabled:
+        """
+        if toolTipsEnabled is not NOTHING:
+            self._toolTipsEnabled = bool(toolTipsEnabled)
+        else:
+            # delete the local to revert to the super-class setting
+            with suppress(AttributeError):
+                del self._toolTipsEnabled
 
     def addTableMenuOptions(self, menu):
         """Add options to the right-mouse menu

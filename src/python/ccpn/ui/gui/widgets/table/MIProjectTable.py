@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-06 14:10:59 +0000 (Mon, March 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 15:25:11 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -68,7 +68,7 @@ _TABLE_KWDS = ('parent', 'df',
                'selectionCallback', 'selectionCallbackEnabled',
                'actionCallback', 'actionCallbackEnabled',
                'enableExport', 'enableDelete', 'enableSearch', 'enableCopyCell',
-               'tableMenuEnabled',
+               'tableMenuEnabled', 'toolTipsEnabled',
                'dividerColour',
                'ignoreStyleSheet',
                'mainWindow', 'moduleParent'
@@ -121,7 +121,7 @@ class _MIProjectTableABC(MITableABC, Base):
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
                  actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
                  enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
-                 tableMenuEnabled=NOTHING,
+                 tableMenuEnabled=NOTHING, toolTipsEnabled=NOTHING,
                  dividerColour=None,
                  # local parameters
                  ignoreStyleSheet=True,
@@ -155,6 +155,7 @@ class _MIProjectTableABC(MITableABC, Base):
         :param enableSearch:
         :param enableCopyCell:
         :param tableMenuEnabled:
+        :param toolTipsEnabled:
         :param dividerColour:
         :param ignoreStyleSheet:
         :param mainWindow:
@@ -171,7 +172,7 @@ class _MIProjectTableABC(MITableABC, Base):
                          selectionCallback=selectionCallback, selectionCallbackEnabled=selectionCallbackEnabled,
                          actionCallback=actionCallback, actionCallbackEnabled=actionCallbackEnabled,
                          enableExport=enableExport, enableDelete=enableDelete, enableSearch=enableSearch, enableCopyCell=enableCopyCell,
-                         tableMenuEnabled=tableMenuEnabled,
+                         tableMenuEnabled=tableMenuEnabled, toolTipsEnabled=toolTipsEnabled,
                          dividerColour=dividerColour
                          )
         # Base messes up styleSheets defined in superclass
@@ -382,11 +383,17 @@ class _MIProjectTableABC(MITableABC, Base):
             # _df = self._dataFrameObject.dataFrame
             _df = self.buildTableDataFrame()
 
-            # remember the old values
-            sortColumn, sortOrder = 0, 0
+            # remember the old sorting-values
+            sortColumn, sortOrder = None, None
             if (oldModel := self.model()):
                 sortColumn = oldModel._sortColumn
                 sortOrder = oldModel._sortOrder
+
+            # check with the table default
+            if sortColumn is None:
+                sortColumn = self.defaultSortColumn
+            if sortOrder is None:
+                sortOrder = self.defaultSortOrder
 
             # update model to the new _df
             model = self.updateDf(_df)
@@ -396,11 +403,17 @@ class _MIProjectTableABC(MITableABC, Base):
             # NOTE:ED - update headers
             self.resizeColumnsToContents()
 
+            try:
+                # get a valid column from integer or string/tuple[multi-index]
+                intCol = sortColumn if isinstance(sortColumn, int) else _df.columns.get_loc(sortColumn)
+            except Exception:
+                intCol = 0
+
             # re-sort the table
-            if oldModel and (0 <= sortColumn < model.columnCount()) and self.isSortingEnabled():
+            if oldModel and (0 <= intCol < model.columnCount()) and self.isSortingEnabled():
                 model._sortColumn = sortColumn
                 model._sortOrder = sortOrder
-                self.sortByColumn(sortColumn, sortOrder)
+                self.sortByColumn(intCol, sortOrder)
 
             self.postUpdateDf()
             self._highLightObjs(objs)

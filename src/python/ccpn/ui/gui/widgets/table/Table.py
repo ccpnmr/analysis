@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-03 16:16:04 +0000 (Fri, March 03, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 15:25:12 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -61,7 +61,7 @@ _TABLE_KWDS = ('parent', 'df',
                'selectionCallback', 'selectionCallbackEnabled',
                'actionCallback', 'actionCallbackEnabled',
                'enableExport', 'enableDelete', 'enableSearch', 'enableCopyCell',
-               'tableMenuEnabled',
+               'tableMenuEnabled', 'toolTipsEnabled',
                'ignoreStyleSheet',
                )
 
@@ -88,7 +88,7 @@ class Table(TableABC, Base):
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
                  actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
                  enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
-                 tableMenuEnabled=NOTHING,
+                 tableMenuEnabled=NOTHING, toolTipsEnabled=NOTHING,
                  # local parameters
                  ignoreStyleSheet=True,
                  **kwds):
@@ -121,6 +121,8 @@ class Table(TableABC, Base):
         :param enableCopyCell:
         :param enableCopyCell:
         :param tableMenuEnabled:
+        :param toolTipsEnabled:
+        :param ignoreStyleSheet:
         :param kwds:
         """
         super().__init__(parent, df=df,
@@ -133,7 +135,7 @@ class Table(TableABC, Base):
                          selectionCallback=selectionCallback, selectionCallbackEnabled=selectionCallbackEnabled,
                          actionCallback=actionCallback, actionCallbackEnabled=actionCallbackEnabled,
                          enableExport=enableExport, enableDelete=enableDelete, enableSearch=enableSearch, enableCopyCell=enableCopyCell,
-                         tableMenuEnabled=tableMenuEnabled,
+                         tableMenuEnabled=tableMenuEnabled, toolTipsEnabled=toolTipsEnabled,
                          )
         baseKwds = {k: v for k, v in kwds.items() if k not in _TABLE_KWDS}
         Base._init(self, ignoreStyleSheet=ignoreStyleSheet, **baseKwds)

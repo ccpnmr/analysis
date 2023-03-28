@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-06 14:10:59 +0000 (Mon, March 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 15:25:11 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,7 @@ _TABLE_KWDS = ('parent', 'df',
                'selectionCallback', 'selectionCallbackEnabled',
                'actionCallback', 'actionCallbackEnabled',
                'enableExport', 'enableDelete', 'enableSearch', 'enableCopyCell',
-               'tableMenuEnabled',
+               'tableMenuEnabled', 'toolTipsEnabled',
                'dividerColour',
                'ignoreStyleSheet',
                )
@@ -71,7 +71,7 @@ class MITable(MITableABC, Base):
                  selectionCallback=NOTHING, selectionCallbackEnabled=NOTHING,
                  actionCallback=NOTHING, actionCallbackEnabled=NOTHING,
                  enableExport=NOTHING, enableDelete=NOTHING, enableSearch=NOTHING, enableCopyCell=NOTHING,
-                 tableMenuEnabled=NOTHING,
+                 tableMenuEnabled=NOTHING, toolTipsEnabled=NOTHING,
                  dividerColour=None,
                  # local parameters
                  ignoreStyleSheet=True,
@@ -104,6 +104,7 @@ class MITable(MITableABC, Base):
         :param enableSearch:
         :param enableCopyCell:
         :param tableMenuEnabled:
+        :param toolTipsEnabled:
         :param dividerColour:
         :param ignoreStyleSheet:
         :param kwds:
@@ -118,7 +119,7 @@ class MITable(MITableABC, Base):
                          selectionCallback=selectionCallback, selectionCallbackEnabled=selectionCallbackEnabled,
                          actionCallback=actionCallback, actionCallbackEnabled=actionCallbackEnabled,
                          enableExport=enableExport, enableDelete=enableDelete, enableSearch=enableSearch, enableCopyCell=enableCopyCell,
-                         tableMenuEnabled=tableMenuEnabled,
+                         tableMenuEnabled=tableMenuEnabled, toolTipsEnabled=toolTipsEnabled,
                          dividerColour=dividerColour
                          )
         baseKwds = {k: v for k, v in kwds.items() if k not in _TABLE_KWDS}

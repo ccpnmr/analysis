@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:43 +0000 (Thu, January 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 15:20:40 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -76,6 +76,7 @@ def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
                 with open(preferencesPath) as fp:
                     userPreferences = json.load(fp, object_hook=AttrDict)
                 preferences = _updateDict(preferences, userPreferences)
+
     except Exception:  #should we have the preferences hard coded as py dict for extra safety? if json goes wrong the whole project crashes!
         with open(defaultPreferencesPath) as fp:
             preferences = json.load(fp, object_hook=AttrDict)

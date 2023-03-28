@@ -4,19 +4,19 @@ This file contains the Preference object and related methods;
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-17 13:42:00 +0100 (Fri, June 17, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-03-28 15:20:40 +0100 (Tue, March 28, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,10 +28,11 @@ __date__ = "$Date: 2022-01-18 10:28:48 +0000 (Tue, January 18, 2022) $"
 
 import json
 
+from ccpn.ui.gui.guiSettings import FONTLIST
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.decorators import singleton
 from ccpn.util.Path import aPath
-from ccpn.util.Common import uniquify
+from ccpn.util.Common import uniquify, isMacOS, isLinux
 
 from ccpn.framework.PathsAndUrls import \
     userPreferencesPath, \
@@ -190,10 +191,26 @@ class Preferences(AttrDict):
     def __str__(self):
         return f'<Preferences: {repr(self._lastPath)}>'
 
-    @staticmethod
-    def _overrideDefaults(prefs):
+    def _overrideDefaults(self, prefs):
         """Override any settings that are currently causing problems
         """
         # NOTE:ED - there is a bug in pyqt5.12.3 that causes a crash when using QWebEngineView
         prefs.general.useNativeWebbrowser = True
         prefs.appearance.useOnlineDocumentation = False
+
+        # if the fonts have not been defined, copy from the OS-specific settings
+        if isMacOS():
+            fontPrefix = 'MacOS'
+        elif isLinux():
+            fontPrefix = 'Linux'
+        else:
+            fontPrefix = 'MS'
+
+        # iterate through the current fonts
+        for fontNum, fontName in enumerate(FONTLIST):
+            prefFont = f'font{fontNum}'
+            frmFont = f'{fontPrefix}{prefFont}'
+
+            # set from the default for the OS-specific
+            if not prefs.appearance.get(prefFont):
+                prefs.appearance[prefFont] = prefs.appearance[frmFont]

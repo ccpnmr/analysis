@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:42 +0000 (Thu, January 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 18:59:24 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,7 @@ import contextlib
 # from ccpn import core
 import numpy as np
 from ccpn.framework import Framework
+from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
 from ccpnmodel.ccpncore.testing.CoreTesting import TEST_PROJECTS_PATH
 
@@ -108,9 +109,12 @@ class WrapperTesting(unittest.TestCase):
 
         projectPath = self.projectPath
         if projectPath is not None:
-            projectPath = os.path.join(TEST_PROJECTS_PATH, projectPath)
+            projectPath = aPath(TEST_PROJECTS_PATH) / projectPath
         self.framework = Framework.createFramework(projectPath=projectPath,
-                                                   noLogging=self.noLogging, noDebugLogging=self.noDebugLogging, noEchoLogging=self.noEchoLogging,
+                                                   noLogging=self.noLogging,
+                                                   noDebugLogging=self.noDebugLogging,
+                                                   noEchoLogging=self.noEchoLogging,
+                                                   interface='NoUi',
                                                    _skipUpdates=True)
         self.project = self.framework.project
         if self.project is None:

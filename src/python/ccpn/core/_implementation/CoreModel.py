@@ -4,6 +4,7 @@ the model-related aspects of the V3 core object
 """
 from __future__ import annotations  # pycharm still highlights as errors
 
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -17,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:38 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-28 18:59:24 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -28,6 +29,9 @@ __date__ = "$Date: 2023-01-24 10:28:48 +0000 (Tue, January 24, 2023) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+from ccpn.util.Logging import getLogger
+
 
 class CoreModel(object):
     """Model-related methods; Only to be used for core objects via AbstractWrapperObject
@@ -64,7 +68,9 @@ class CoreModel(object):
         sets _factoryFunction attribute (defaults to None)
         """
         if cls._isRegistered:
-            raise RuntimeError(f'Class "{cls.__name__}": class has been registered before')
+            # 'raise' caused a crash in the NoUi mode when running test-cases
+            getLogger().debug(f'Class "{cls.__name__}": class has been registered before')
+            return
 
         if cls.className is None:
             raise RuntimeError(f'Class "{cls.__name__}": className class-attribute is undefined')
@@ -129,14 +135,14 @@ class CoreModel(object):
         return result
 
     @classmethod
-    def _getClassIndex(cls, className:str) -> int:
+    def _getClassIndex(cls, className: str) -> int:
         """:return an ordering index for the className; used for "uniqueId" stuff
         """
         _classList = list(cls._coreClassDict.keys())
         return _classList.index(className)
 
     @classmethod
-    def _getClass(cls, className:str) -> (CoreModel, None):
+    def _getClass(cls, className: str) -> (CoreModel, None):
         """:return coreClass corresponding to className (either long or short versions)
         """
         return cls._coreClassDict.get(className) or cls._coreClassShortNameDict.get(className)
@@ -147,7 +153,7 @@ class CoreModel(object):
          """
         if node is None:
             node = cls
-        s = '\t' * tabs + '%s' % (node.className)
+        s = '\t' * tabs + f'{node.className}'
         if node._isGuiClass:
             s += '  (GuiClass)'
         if hasattr(node, '_isRegistered') and node._isRegistered:

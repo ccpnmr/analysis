@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:38 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-03-28 18:59:24 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -49,6 +49,7 @@ from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
     apiNotificationBlanking, ccpNmrV3CoreSetter
 from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.framework.Version import VersionString, applicationVersion
+from ccpn.framework.Application import getApplication
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
@@ -102,7 +103,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
     New classes can be added, provided they match the requirements. All classes
     must form a parent-child tree with the root at Project. All classes must
-    must have teh standard class-level attributes, such as  shortClassName, _childClasses,
+    have the standard class-level attributes, such as  shortClassName, _childClasses,
     and _pluralLinkName.
     Each class must implement the properties id and _parent, and the methods
     _getAllWrappedData, and rename.
@@ -128,7 +129,6 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     #
     # # List of child classes. Will be filled by child-classes registering.
     # _childClasses = []
-
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'abstractWrapperClasses'
@@ -753,6 +753,11 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         data = OrderedDict()
         for childClass in self._childClasses:
 
+            app = getApplication()
+            if childClass._isGuiClass and app and not app.hasGui:
+                getLogger().debug(f'-->  _getApiChildren: skipping gui-class {childClass} for NoUi interface')
+                continue
+
             if ('all' in classes) or \
                     (childClass._isGuiClass and 'gui' in classes) or \
                     (not childClass._isGuiClass and 'nonGui' in classes) or \
@@ -788,7 +793,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         """RF; Get list of all objects that have self as a parent
         """
         getDataObj = self._project._data2Obj.get
-        result = list(getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self))
+        result = [getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self)]
         return result
 
     def _getApiObjectTree(self) -> tuple:
@@ -961,6 +966,13 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         data2Obj = project._data2Obj
 
         for childClass in self._childClasses:
+
+            app = getApplication()
+            if childClass._isGuiClass and app and not app.hasGui:
+                # if gui is disabled then skip all gui-core-classes
+                getLogger().debug(f'-->  _restoreChildren: skipping gui-class {childClass} for NoUi interface')
+                continue
+
             # recursively create children
             apiObjs = childClass._getAllWrappedData(self)
             for apiObj in apiObjs:
@@ -1017,7 +1029,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             newInstance = _factoryFunction(project, apiObj)
 
         else:
-             newInstance = cls(project, apiObj)
+            newInstance = cls(project, apiObj)
 
         if newInstance is None:
             raise RuntimeError(f'Error creating new instance of class "{cls.className}"')
@@ -1237,8 +1249,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         """Get descendant of class cls with relative key relativeId
          Implementation function, used to generate getCls functions
          """
-        dd = self._project._pid2Obj.get(cls.className)
-        if dd:
+        if dd := self._project._pid2Obj.get(cls.className):
             if self is self._project:
                 key = '{}'.format(relativeId)  # NOTE:ED - should always be a string
             else:
@@ -1247,7 +1258,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         else:
             return None
 
-    def _allDescendants(self, descendantClasses:(list,tuple)) -> list:
+    def _allDescendants(self, descendantClasses: (list, tuple)) -> list:
         """get all descendant objects of type decendantClasses[-1] of self,
         following descendantClasses down the data tree.
 
@@ -1260,15 +1271,15 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
         if descendantClasses is None or len(descendantClasses) == 0:
             # we should never be here
-            raise RuntimeError('Error getting all descendants from %s; decendants tree is empty' % self)
+            raise RuntimeError(f'Error getting all descendants from {self}; decendants tree is empty')
 
-        # get and check the children of type of first decendantClasses
+        # get and check the children of type of first descendantClasses
         if descendantClasses[0] not in self._childClasses:
-            raise RuntimeError('Invalid descendantClass %s for %s' % (descendantClasses[0], self))
+            raise RuntimeError(f'Invalid descendantClass {descendantClasses[0]} for {self}')
 
         className = descendantClasses[0].className
         # Passing the 'classes' argument limits the dict to className only (for speed)
-        children = self._getChildren(classes=[className])[className]
+        children = self._getChildren(classes=[className]).get(className) or []
 
         objs = []
         if len(descendantClasses) == 1:
@@ -1288,7 +1299,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         # NB: the returned list of NmrResidues is sorted; if not: breaks the programme
         # GWV: WHY??
         if className == NmrResidue.className:
-                objs.sort()
+            objs.sort()
 
         # print('_allDescendants for %-30s of class %-20r: %s' % \
         #       (self, descendantClasses[0].__name__, objs))
@@ -1316,8 +1327,9 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
         wrappedData = self._wrappedData
         if not hasattr(wrappedData, keyTag):
-            raise ValueError("Cannot set unique %s for %s: %s object has no attribute %s"
-                             % (keyTag, self.className, wrappedData.__class__, keyTag))
+            raise ValueError(
+                    f"Cannot set unique {keyTag} for {self.className}: {wrappedData.__class__} object has no attribute {keyTag}"
+                    )
 
         undo = self._project._undo
         if undo is not None:
@@ -1332,13 +1344,15 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                 value = defaultValue
 
             # Set to new, unique value if present value is a duplicate
-            competitorDict = set(getattr(x, keyTag)
-                                 for x in self._getAllWrappedData(self._parent)
-                                 if x is not wrappedData)
+            competitorDict = {
+                getattr(x, keyTag)
+                for x in self._getAllWrappedData(self._parent)
+                if x is not wrappedData
+                }
 
             if value in competitorDict and hasattr(wrappedData, 'serial'):
                 # First try appending serial
-                value = '%s-%s' % (value, wrappedData.serial)
+                value = f'{value}-{wrappedData.serial}'
 
             while value in competitorDict:
                 # Keep incrementing suffix till value is unique

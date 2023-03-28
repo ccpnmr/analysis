@@ -211,6 +211,7 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import re
+import sys
 from contextlib import contextmanager
 
 from ccpnmodel.ccpncore.api.memops import Implementation
@@ -229,6 +230,7 @@ from ccpn.util.Common import getProcess
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import Path, aPath
 
+from ccpn.framework.Application import getApplication
 from ccpn.framework.PathsAndUrls import \
     CCPN_API_DIRECTORY, \
     CCPN_DIRECTORY_SUFFIX, \
@@ -290,7 +292,7 @@ class XmlLoaderABC(TraitBase):
     _readOnly = Bool(False)  # flag indicating a read-only project, default False, but True for V2 projects
     logger = Any(default_value=None, allow_none=True)
 
-    def __init__(self, root, readOnly:bool = False):
+    def __init__(self, root, readOnly: bool = False):
         super().__init__()
         self.root = root
 
@@ -326,7 +328,7 @@ class XmlLoaderABC(TraitBase):
         """
         self.root._lookupDict[self.id] = self
 
-    def lookup(self, id:tuple):
+    def lookup(self, id: tuple):
         """Lookup object corresponding to id, or root if id is None
         """
         if id is None:
@@ -362,7 +364,7 @@ class TopObject(XmlLoaderABC):
     # data
     apiTopObject = Any(default_value=None, allow_none=True)
 
-    def __init__(self, package:Package, path:Path, readOnly:bool = False):
+    def __init__(self, package: Package, path: Path, readOnly: bool = False):
 
         if package is None:
             raise ValueError('package is None')
@@ -401,7 +403,7 @@ class TopObject(XmlLoaderABC):
         _name = _atop.name if hasattr(_atop, 'name') else 'noName'
         return f'{_atop.className}-{_name}'
 
-    def load(self, reload:bool = False) -> TopObject:
+    def load(self, reload: bool = False) -> TopObject:
         """Load self, either as a new api topObject or reload for an existing api topObject
         :param reload: flag to indicated reloading an existing apiTopObject (from xml)
         :return self
@@ -445,9 +447,9 @@ class TopObject(XmlLoaderABC):
                 if self.apiTopObject is None:
                     try:
                         apiTopObject = loadFromStream(stream=fp,
-                                                   topObject=self.root.memopsRoot,
-                                                   topObjId=self.guid,
-                                                   partialLoad=False)
+                                                      topObject=self.root.memopsRoot,
+                                                      topObjId=self.guid,
+                                                      partialLoad=False)
                     except Exception as es:
                         raise RuntimeError(f'Failed to load "{self.path}": {es}') from es
 
@@ -456,9 +458,9 @@ class TopObject(XmlLoaderABC):
                         apiTopObject = self.apiTopObject
                         # Routine does not return an object if called with apiTopObj!!
                         result = loadFromStream(stream=fp,
-                                               topObject=apiTopObject,
-                                               topObjId=apiTopObject.guid,
-                                               partialLoad=False)
+                                                topObject=apiTopObject,
+                                                topObjId=apiTopObject.guid,
+                                                partialLoad=False)
 
 
                     except Exception as es:
@@ -503,7 +505,7 @@ class TopObject(XmlLoaderABC):
             if updateIsModified:
                 forceSetattr(self.apiTopObject, 'isModified', False)
 
-            self.isLoaded = True # xml-file reflects contents
+            self.isLoaded = True  # xml-file reflects contents
 
     def __str__(self):
         _loaded = 'loaded' if self.isLoaded else 'not-loaded'
@@ -524,7 +526,7 @@ class Package(XmlLoaderABC):
     # children
     topObjects = List(default_value=[])  # top objects associated with this package
 
-    def __init__(self, repository:Repository, path:Path, createPath:bool=False, readOnly:bool = False):
+    def __init__(self, repository: Repository, path: Path, createPath: bool = False, readOnly: bool = False):
         """Initialise the object, optionally create the package path
         """
         if repository is None:
@@ -581,9 +583,9 @@ class Package(XmlLoaderABC):
             return []
 
         result = list(self.path.listdir(suffix=XML_SUFFIX,
-                                    excludeDotFiles=True,
-                                    relative=False)
-                 )
+                                        excludeDotFiles=True,
+                                        relative=False)
+                      )
         return result
 
     @property
@@ -683,7 +685,7 @@ class Repository(XmlLoaderABC):
     # children
     packages = List()
 
-    def __init__(self, xmlLoader:XmlLoader, name:str, path:Path, useParent:bool, createPath:bool = False, readOnly:bool = False):
+    def __init__(self, xmlLoader: XmlLoader, name: str, path: Path, useParent: bool, createPath: bool = False, readOnly: bool = False):
         """Initialise the object, optionally create the path
         """
         if xmlLoader is None:
@@ -730,9 +732,8 @@ class Repository(XmlLoaderABC):
         """
         self.packages = []
         for _pLocator in [_p for _p in self.apiRepository.getStored()
-                          if not (    _p.targetName == 'any'
-                                 )
-                         ]:
+                          if not (_p.targetName == 'any')
+                          ]:
             for repo in _pLocator.repositories:
                 if repo.name == self.name:
                     self._addPackage(name=_pLocator.targetName, createPath=False)
@@ -783,7 +784,7 @@ class Repository(XmlLoaderABC):
 
             if _p.is_dir():
                 # recursion
-                result.extend( self._findPackagePaths(_p) )
+                result.extend(self._findPackagePaths(_p))
 
             elif _p.suffix == XML_SUFFIX:
                 # we found a xml-file in this directory; hence we assume path
@@ -867,7 +868,7 @@ class XmlLoader(XmlLoaderABC):
 
     #--------------------------------------------------------------------------------------------
 
-    def __init__(self, path:Path, name:str = None, readOnly:bool = False, create:bool = False):
+    def __init__(self, path: Path, name: str = None, readOnly: bool = False, create: bool = False):
         """Initialise the XmlLoader instance
         :param path: path to the V3/V2 directory; must exist or allow creation
         :param name: optional name of the project, extracted from path's basename if None
@@ -1099,8 +1100,11 @@ class XmlLoader(XmlLoaderABC):
         with self.blockReading():
             self.apiNmrProject = self.memopsRoot.newNmrProject(name=self.name)  # creates the Nmr repository
             self._initApiData()
-            # And the Graphics data
-            self._initApiGraphicsData()
+
+            app = getApplication()
+            if not app or app.hasGui:
+                # And the Graphics data
+                self._initApiGraphicsData()
 
         # associate the topObjects with their repository / package
         self._updateTopObjects()
@@ -1138,7 +1142,7 @@ class XmlLoader(XmlLoaderABC):
         """
         # can't do : result.apiNmrProject = list(memopsRoot.nmrProjects)[0]
         # as this triggers another call to memopsRoot.refreshTopObjects()
-        nmrProjects = list(forceGetattr(memopsRoot,'nmrProjects').values())
+        nmrProjects = list(forceGetattr(memopsRoot, 'nmrProjects').values())
         self.apiNmrProject = nmrProjects[0]
 
         self._defineRepositories()
@@ -1224,12 +1228,12 @@ class XmlLoader(XmlLoaderABC):
         nmrProjects = self.memopsRoot.sortedNmrProjects()
         if nmrProjects is None or len(nmrProjects) == 0:
             raise RuntimeError(
-                f'No valid NMR project data could be loaded from "{self.path}"'
-            )
+                    f'No valid NMR project data could be loaded from "{self.path}"'
+                    )
         elif len(nmrProjects) > 1:
             self.logger.warning(
-                f'Multiple NMR projects defined by "{self.path}": loading only first one.'
-            )
+                    f'Multiple NMR projects defined by "{self.path}": loading only first one.'
+                    )
         self.apiNmrProject = nmrProjects[0]
 
         # We appear to have to do this often, as 'stray' topObjects appear
@@ -1240,7 +1244,7 @@ class XmlLoader(XmlLoaderABC):
             # Following previous code (Api.py:460): Special hack for moving data
             # of renamed packages on upgrade
             for newName, oldName in self.memopsRoot._movedPackageNames.items():
-                if (pkg := self.lookup( (USERDATA, oldName))) is not None:
+                if (pkg := self.lookup((USERDATA, oldName))) is not None:
                     pkg._renamePackage(newName)
 
             # upgrade api data
@@ -1257,8 +1261,11 @@ class XmlLoader(XmlLoaderABC):
 
         # init the V3 project data
         self._initApiData()
-        # init the Graphics data
-        self._initApiGraphicsData()
+
+        app = getApplication()
+        if not app or app.hasGui:
+            # init the Graphics data
+            self._initApiGraphicsData()
 
         self._updateTopObjects()
         self.setUnmodified()
@@ -1350,7 +1357,7 @@ class XmlLoader(XmlLoaderABC):
     # Saving
     #--------------------------------------------------------------------------------------------
 
-    def saveUserData(self, keepFallBack:bool = True, updateIsModified:bool = True):
+    def saveUserData(self, keepFallBack: bool = True, updateIsModified: bool = True):
         """Save userData topObjects to Xml.
         :param keepFallBack: retain current ccpnv3 directory in backups
         :param updateIsModified: if False, the isModified flag of the apiTopObjects are retained 'as-is'
@@ -1460,7 +1467,7 @@ class XmlLoader(XmlLoaderABC):
         getLogger().debug(f'Updated {count} TopObjects')
 
     # @debug3Enter()
-    def _rename(self, newName:str):
+    def _rename(self, newName: str):
         """Update self.name and memopsRoot name
         :param newName: the new name of the project
         """
@@ -1485,7 +1492,7 @@ class XmlLoader(XmlLoaderABC):
     def setUnmodified(self):
         """Set all topObject and self to unmodified status"""
         # set memopsRoot and all topObjects as not-modified
-        for topObject in [self.memopsRoot] +list(self.memopsRoot.topObjects):
+        for topObject in [self.memopsRoot] + list(self.memopsRoot.topObjects):
             forceSetattr(topObject, 'isModified', False)
 
     @contextmanager
@@ -1523,6 +1530,8 @@ class XmlLoader(XmlLoaderABC):
         return f'<XmlLoader: "{self.name}" ({version})>'
 
     __repr__ = __str__
+
+
 #end class
 
 
@@ -1654,6 +1663,7 @@ def forceGetattr(obj, attributeName):
     value = obj.__dict__[attributeName]
     return value
 
+
 #=========================================================================================
 # Hot-fixing:
 #   MemopsRoot.refreshTopObjects
@@ -1713,6 +1723,7 @@ def _refreshTopObjects(memopsRoot, packageName):
 
     return
 
+
 # Hotfix
 Implementation.MemopsRoot.refreshTopObjects = _refreshTopObjects
 
@@ -1753,4 +1764,3 @@ def _load(apiTopObject):
 # Hotfix; don't work as code is not using regular inheritance, but rather hard inserted
 # Implementation.TopObject.load = _load
 # Implementation.TopObject.loadFrom = _loadFrom
-

@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-01 18:39:44 +0000 (Wed, March 01, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-28 13:51:58 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -521,6 +521,21 @@ def _traverse(obj, tree_types=(list, tuple)):
 def percentage(percent, whole):
     return (percent * whole) / 100.0
 
+def _add(x, y):
+    if y > 0:
+        return _add(x, y - 1) + 1
+    elif y < 0:
+        return _add(x, y + 1) - 1
+    else:
+        return x
+
+def _sub(x, y):
+    if y > 0:
+        return _sub(x, y - 1) - 1
+    elif y < 0:
+        return _sub(x, y + 1) + 1
+    else:
+        return x
 
 def _fillListToLenght(aList, desiredLength, fillingValue=None):
     """

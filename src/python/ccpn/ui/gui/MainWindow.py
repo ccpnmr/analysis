@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-10 19:10:47 +0000 (Fri, March 10, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-03-28 13:51:58 +0100 (Tue, March 28, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1970,7 +1970,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                     try:
                         _is1Ds = [p.spectrum.dimensionCount==1 for p in peaks]
                         if all(_is1Ds):
-                            from ccpn.core.lib.peakUtils import snap1DPeaksByGroup
+                            from ccpn.core.lib.PeakPickers.PeakSnapping1D import \
+                                snap1DPeaksByGroup
                             snap1DPeaksByGroup(peaks)
                         else:
                             peaks.sort(key=lambda x: x.position[0] if x.position and None not in x.position else 0, reverse=False)  # reorder peaks by position

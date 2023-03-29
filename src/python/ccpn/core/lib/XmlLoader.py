@@ -499,11 +499,12 @@ class TopObject(XmlLoaderABC):
                 with self.path.open('w') as fp:
                     saveToStream(fp, self.apiTopObject)
 
+                if updateIsModified:
+                    # make sure that isModified is not updated if the file is not saved
+                    forceSetattr(self.apiTopObject, 'isModified', False)
+
             except (PermissionError, FileNotFoundError):
                 self.logger.warning('Folder may be read-only')
-
-            if updateIsModified:
-                forceSetattr(self.apiTopObject, 'isModified', False)
 
             self.isLoaded = True  # xml-file reflects contents
 
@@ -1417,11 +1418,18 @@ class XmlLoader(XmlLoaderABC):
             return
 
         _xmlFile = self.xmlProjectFile
-        _xmlFile.parent.mkdir(parents=True, exist_ok=True)
-        with _xmlFile.open('w') as fp:
-            saveToStream(stream=fp, apiTopObject=self.memopsRoot)
-        if updateIsModified:
-            forceSetattr(self.memopsRoot, 'isModified', False)
+        try:
+            _xmlFile.parent.mkdir(parents=True, exist_ok=True)
+            with _xmlFile.open('w') as fp:
+                saveToStream(stream=fp, apiTopObject=self.memopsRoot)
+
+            if updateIsModified:
+                # make sure that isModified is not updated if the file is not saved
+                forceSetattr(self.memopsRoot, 'isModified', False)
+
+        except (PermissionError, FileNotFoundError):
+            self.logger.warning('Folder may be read-only')
+
         self.memopsXmlPath = _xmlFile
 
     #--------------------------------------------------------------------------------------------

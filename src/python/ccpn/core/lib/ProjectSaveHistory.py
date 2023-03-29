@@ -170,7 +170,10 @@ class ProjectSaveHistory(CcpNmrJson):
         """Return true if project save history file exists
         """
         # check no shenanigans with the sub-path
-        validRelative = aPath(self.path).is_relative_to(self.projectPath)
+        # validRelative = aPath(self.path).is_relative_to(self.projectPath)
+        rr = aPath(self.path).asString()
+        ll = aPath(self.projectPath).asString()
+        validRelative = bool(rr.startswith(ll) and len(rr[len(ll):]) > 1)
         return self._path.asString() != '.' and validRelative and self.path.exists()
 
     def save(self, *args, **kwds):

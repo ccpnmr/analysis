@@ -98,7 +98,10 @@ class ProjectArchiver(object):
     def _validFolder(self) -> bool:
         """Check the archive path is in the correct place
         """
-        return self.archiveDirectory.is_relative_to(self._projectPath)
+        # return self.archiveDirectory.is_relative_to(self._projectPath)
+        rr = aPath(self.archiveDirectory).asString()
+        ll = aPath(self._projectPath).asString()
+        return bool(rr.startswith(ll) and len(rr[len(ll):]) > 1)
 
     def fetchArchiveDirectory(self) -> typing.Optional[Path]:
         """Return the archive-folder

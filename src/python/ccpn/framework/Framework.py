@@ -962,10 +962,14 @@ class Framework(NotifierBase, GuiBase):
         the cleanup() method of the _temporaryDirectory instance seems not to do the job
         """
         for _path in [Path(p) for p in Path(self._temporaryDirectory.name).glob('*')]:
-            if _path.is_dir():
-                _path.removeDir()
-            else:
-                _path.removeFile()
+            try:
+                # causes crash in Windows with temporary folder
+                if _path.is_dir():
+                    _path.removeDir()
+                else:
+                    _path.removeFile()
+            except (PermissionError, FileNotFoundError):
+                getLogger().debug('Folder may be read-only')
 
     def _newProject(self, name: str = 'default') -> Project:
         """Create new, empty project with name

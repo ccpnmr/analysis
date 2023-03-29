@@ -459,7 +459,11 @@ class TopObject(XmlLoaderABC):
         """Save the apiTopObject to the xml file defined by self.path
         """
         if self.apiTopObject is None:
-            raise RuntimeError(f'Cannot save: undefined apiTopObject')
+            raise RuntimeError('Cannot save: undefined apiTopObject')
+        if self.apiTopObject.isDeleted:
+            # ignore deleted objects
+            self.logger.debug2(f'ignoring deleted object {self.apiTopObject}')
+            return
 
         if not self.package.path.exists():
               self.package.path.mkdir(parents=True, exist_ok=False)
@@ -857,7 +861,7 @@ class XmlLoader(XmlLoaderABC):
     @property
     def v3Path(self) -> Path:
         """returns the path to the CcpNmr repository as Path object
-        Takes account of the optional V2status 
+        Takes account of the optional V2status
         """
         if self.path is None:
             raise RuntimeError('XmlLoader: undefined path')
@@ -1262,7 +1266,7 @@ class XmlLoader(XmlLoaderABC):
         if self.readOnly:
             raise RuntimeError(f'Project "{self.name}" is read-only')
 
-        # Assure that all apiTopOject are accounted for; some may have been created
+        # Assure that all apiTopObjects are accounted for; some may have been created
         self._updateTopObjects()
 
         topObjects = self.userData.getTopObjects()
@@ -1284,7 +1288,7 @@ class XmlLoader(XmlLoaderABC):
             bPath = bPath.addTimeStamp()
             self.v3Path.rename(bPath)
 
-        # Force a rename to assure correctness
+        # Force rename to assure correctness
         self._rename(self.name)
         # save memops file in v3Path
         self._saveMemopsToXml(updateIsModified=updateIsModified)
@@ -1297,6 +1301,11 @@ class XmlLoader(XmlLoaderABC):
         """Saves memopsRoot to self.xmlProjectFile;
         :param updateIsModified: flag to update isModified status
         """
+        # shouldn't need all these error-checks, just being careful
+        if self.readOnly:
+            getLogger().debug(f'Project {self.name!r} is read-only')
+            return
+
         _xmlFile = self.xmlProjectFile
         _xmlFile.parent.mkdir(parents=True, exist_ok=True)
         with _xmlFile.open('w') as fp:

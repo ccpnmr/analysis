@@ -685,9 +685,7 @@ class Gui(Ui):
         if self.project.readOnly and not MessageDialog.showYesNo(
                 'Save Project',
                 'The project is marked as read-only.\n'
-                'This can be changed by clicking the lock-icon in the botton-right\n'
-                'corner of the window or from the python-console with the command:\n\n'
-                'project.setReadOnly(False)\n\n'
+                'This can be changed by clicking the lock-icon in the botton-right.\n\n'
                 'Do you want to continue saving?\n',
                 ):
             return True

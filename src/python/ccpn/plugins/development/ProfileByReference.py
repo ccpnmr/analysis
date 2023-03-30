@@ -267,10 +267,17 @@ class ProfileByReferenceGuiPlugin(PluginModule):
     def _setupSimulatedSpectrum(self, newRow, previousRow, selectedRow, lastRow):
         metabolitesData = self.metabolites.data
         metaboliteID = newRow.metabolite_id.iloc[0]
-        print(metaboliteID)
-        metaboliteName = metabolitesData.loc[metabolitesData['metabolite_id'] == metaboliteID, 'name'].iloc[0]
+        spectrumId = newRow.spectrum_id.iloc[0]
+        origin = newRow.origin.iloc[0]
+        if origin == 'gissmo':
+            plotting = 'spinSystem'
+        elif origin == 'bmrb':
+            plotting = 'onlypeaks'
+        else:
+            plotting = 'peaklist'
+        metaboliteName = origin + '_' + metabolitesData.loc[metabolitesData['metabolite_id'] == metaboliteID, 'name'].iloc[0]
         if metaboliteName not in self.metaboliteSimulations:
-            self.simspec = self.simulator.pure_spectrum(metabolite_id=metaboliteID, width=0.002, frequency=700, points=self.settings['Spectrum']['referenceSumSpectrumPoints'], limits=self.settings['Spectrum']['referenceSumSpectrumLimits'], plotting='spin_system')[0]
+            self.simspec = self.simulator.pureSpectrum(spectrumId=spectrumId, width=0.002, frequency=700, points=self.settings['Spectrum']['referenceSumSpectrumPoints'], limits=self.settings['Spectrum']['referenceSumSpectrumLimits'], plotting=plotting)
             self.metaboliteSimulations[metaboliteName] = self.simspec
             self.addSimSpectrumToList(self.simspec)
             self.settings['Spectrum']['referenceSpectrumGroup'].addSpectrum(self.simspec.spectrum)

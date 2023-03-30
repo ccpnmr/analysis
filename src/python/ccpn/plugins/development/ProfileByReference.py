@@ -26,6 +26,8 @@ __date__ = "$Date: 2017-11-28 10:28:42 +0000 (Tue, Nov 28, 2017) $"
 
 import os, copy, json, pprint, math, shutil, pandas, operator, numpy
 from collections import OrderedDict as OD
+
+import pandas as pd
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.framework.lib.Plugin import Plugin
 from ccpn.ui.gui.modules.PluginModule import PluginModule
@@ -46,6 +48,8 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Slider import Slider
+from ccpn.ui.gui.widgets.GuiTable import GuiTable
+from ccpn.ui.gui.widgets.table.Table import Table
 from ccpn.util.nef import GenericStarParser, StarIo
 from ccpn.util.nef.GenericStarParser import SaveFrame, DataBlock, DataExtent, Loop, LoopRow
 from functools import partial
@@ -106,23 +110,13 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         #     return
 
         # setup database metabolite tables
-        self.settings['Simulators']['HMDB'] = Simulator(self.project, '/Users/mh653/Documents/PhD/Database/Remediated_Databases/ccpn_metabolites_hmdb.db')
-        self.settings['Simulators']['BMRB'] = Simulator(self.project, '/Users/mh653/Documents/PhD/Database/Remediated_Databases/ccpn_metabolites_bmrb.db')
-        self.settings['Simulators']['GISSMO'] = Simulator(self.project, '/Users/mh653/Documents/PhD/Database/Remediated_Databases/ccpn_metabolites_gissmo.db')
+        self.simulator = Simulator(self.project, '/Users/mh653/Documents/PhD/Database/Merged_Databases/merged_database.db')
 
-        hmdb_metabolites = self.settings['Simulators']['HMDB'].caller.execute_query('select metabolite_id, name, hmdb_accession, '
-                                                               'chemical_formula, average_molecular_weight, smiles, '
-                                                               'inchi from metabolites')
-        bmrb_metabolites = self.settings['Simulators']['BMRB'].caller.execute_query('select distinct metabolite_id, name, accession, '
-                                                               'chemical_formula, average_molecular_weight, smiles, '
-                                                               'inchi from metabolites natural join samples')
-        gissmo_metabolites = self.settings['Simulators']['GISSMO'].caller.execute_query('select metabolite_id, name, inchi from metabolites')
+        metabolites = self.simulator.caller.execute_query('select * from metabolites')
 
-        self.settings['Databases']['HMDB'] = self.project.newDataTable(name='hmdb_metabolites_table', data=hmdb_metabolites)
-        self.settings['Databases']['BMRB'] = self.project.newDataTable(name='bmrb_metabolites_table', data=bmrb_metabolites)
-        self.settings['Databases']['GISSMO'] = self.project.newDataTable(name='gissmo_metabolites_table', data=gissmo_metabolites)
+        self.metabolites = self.project.newDataTable(name='metabolites_table', data=metabolites)
 
-        grid = (0, 0)
+        grid = (0, 4)
         self.guiDict['Spectrum']['SimulatedSpectrumAttributes'] = []
 
         # pull down list for selecting the spectrum group to overlay on
@@ -159,33 +153,33 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['Spectrum']['SpectrumId'] = widget
         self.settings['Spectrum']['SpectrumId'] = self._getValue(widget)
 
-        # pull down list for selecting the database to reference from
-        grid = _addRow(grid)
-        widget = Label(self.scrollAreaLayout, text='Database', grid=grid)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-
-        grid = _addColumn(grid)
-        widget = PulldownList(self.scrollAreaLayout, grid=grid, gridSpan=(1, 2),
-                              callback=self._selectMetaboliteList, tipText=help['MetaboliteList'])
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-
-        databaseTables = list(self.settings['Simulators'].keys())
-        widget.setData(databaseTables)
-        self.guiDict['Spectrum']['dataTableID'] = widget
-        self.settings['Spectrum']['dataTableID'] = self._getValue(widget)
-
-        # pull down list for selecting the current metabolite from the database
+        # pull down list for selecting the current metabolite by name
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text='Metabolite', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
         grid = _addColumn(grid)
         widget = PulldownList(self.scrollAreaLayout, grid=grid, gridSpan=(1, 2),
-                              callback=self._setupNewMetabolite, tipText=help['Metabolite'])
+                              callback=self._selectMetabolite, tipText=help['Metabolite'])
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
         self.guiDict['Spectrum']['metabolite'] = widget
+        metaboliteNames = self.metabolites.data.sort_values('name').name.tolist()
+        widget.setData(metaboliteNames)
         self.settings['Spectrum']['metabolite'] = self._getValue(widget)
+
+        # pull down list for selecting the simulation of the metabolite
+        grid = _addRow(grid)
+        widget = Label(self.scrollAreaLayout, text='Simulation', grid=grid)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+
+        grid = _addColumn(grid)
+        df = pd.DataFrame(columns=['pH', 'amount', 'reference', 'sample_id', 'metabolite_id', 'frequency',
+                                   'temperature', 'data_source', 'validation_scores', 'methods', 'spectrum_id',
+                                   'origin'])
+        widget = Table(self.scrollAreaLayout, df=df, grid=grid, gridSpan=(1, 2), selectionCallback=self._setupSimulatedSpectrum, borderWidth=4)
+        _setWidgetProperties(widget, _setWidth([500], grid), 300)
+        self.guiDict['Spectrum']['simulation'] = widget
 
         '''# Action buttons: Filter creates a new filtered peak list
         grid = _addVerticalSpacer(self.scrollAreaLayout, grid)
@@ -260,20 +254,23 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             self.settings['Spectrum']['referenceSumSpectrum'] = self.sumSpectra[spectrumID]
             self.settings['Spectrum']['referenceSpectrumGroup'].addSpectrum(self.settings['Spectrum']['referenceSumSpectrum'])
 
-    def _selectMetaboliteList(self, databaseName):
-        databaseTable = self.settings['Databases'][databaseName]
-        widget = self.guiDict['Spectrum']['metabolite']
-        metaboliteNames = databaseTable.data.sort_values('name').name.tolist()
-        widget.setData(metaboliteNames)
-        self.settings['Spectrum']['metabolite'] = self._getValue(widget)
-        self.settings['Spectrum']['currentDatabase'] = databaseName
+    def _selectMetabolite(self, metaboliteName):
+        self.settings['Spectrum']['metabolite'] = metaboliteName
+        metabolitesData = self.metabolites.data
+        metabolite_id = metabolitesData.loc[metabolitesData['name'] == metaboliteName, 'metabolite_id'].iloc[0]
+        widget = self.guiDict['Spectrum']['simulation']
+        query = f'select * from samples natural join spectra where metabolite_id is "{metabolite_id}"'
+        data = self.simulator.caller.execute_query(query)
+        widget.updateDf(data)
 
-    def _setupNewMetabolite(self, metaboliteName):
-        currentDatabase = self.settings['Spectrum']['currentDatabase']
-        metabolitesData = self.settings['Databases'][currentDatabase].data
-        metaboliteID = metabolitesData.loc[metabolitesData['name'] == metaboliteName].metabolite_id.iloc[0]
+
+    def _setupSimulatedSpectrum(self, newRow, previousRow, selectedRow, lastRow):
+        metabolitesData = self.metabolites.data
+        metaboliteID = newRow.metabolite_id.iloc[0]
+        print(metaboliteID)
+        metaboliteName = metabolitesData.loc[metabolitesData['metabolite_id'] == metaboliteID, 'name'].iloc[0]
         if metaboliteName not in self.metaboliteSimulations:
-            self.simspec = self.settings['Simulators'][currentDatabase].pure_spectrum(metabolite_id=metaboliteID, width=0.002, frequency=700, points=self.settings['Spectrum']['referenceSumSpectrumPoints'], limits=self.settings['Spectrum']['referenceSumSpectrumLimits'], plotting='spin_system')[0]
+            self.simspec = self.simulator.pure_spectrum(metabolite_id=metaboliteID, width=0.002, frequency=700, points=self.settings['Spectrum']['referenceSumSpectrumPoints'], limits=self.settings['Spectrum']['referenceSumSpectrumLimits'], plotting='spin_system')[0]
             self.metaboliteSimulations[metaboliteName] = self.simspec
             self.addSimSpectrumToList(self.simspec)
             self.settings['Spectrum']['referenceSpectrumGroup'].addSpectrum(self.simspec.spectrum)

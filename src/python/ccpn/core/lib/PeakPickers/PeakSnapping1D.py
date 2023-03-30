@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-28 13:51:58 +0100 (Tue, March 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-03-30 13:42:00 +0100 (Thu, March 30, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -168,10 +168,55 @@ def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaks
     # check for missed maxima or peaks snapped to height@position but had other unpicked maxima close-by
     return shift
 
-
 ###################################
 ####### Private library functions   #######
 ###################################
+
+def _getRereferencingParamsFromDeltas(sourcePeaks, destinationPeaks, sortBy=None, snr=3, fom=0.5):
+    """
+    Calculate the best global alignment shift from two sets of peaks. E.g. before and after snapping peaks.
+
+    :param sourcePeaks: list of peaks
+    :param destinationPeaks:  list of peaks. same length as source
+    :param sortBy: str or None. one of: position, height
+    :param snr: float. signal-to-noise ratio threshold limit. include peaks only if the snr is greater than this value
+    :param fom: float. figure of merit threshold limit. include peaks only if the fom is greater than this value
+    :return: dict of optimisation parameters and results.
+    """
+    if len(sourcePeaks) != len(destinationPeaks):
+        raise RuntimeError('source and destination peaks must be of the same count')
+    # do some sorting/filtering
+    sourcePeaks = list(sourcePeaks)
+    destinationPeaks = list(destinationPeaks)
+    if sortBy in ['position', 'height']:
+        sourcePeaks.sort(key=lambda x: x.sortBy, reverse=True)
+        destinationPeaks.sort(key=lambda x: x.sortBy, reverse=True)
+    sourcePositions, destinationPositions = [], []
+    for sourcePeak, destinationPeak in zip(sourcePeaks, destinationPeaks):
+        if sourcePeak.figureOfMerit < fom or destinationPeak.figureOfMerit < fom:
+            continue
+        if sourcePeak.signalToNoiseRatio < snr or destinationPeak.signalToNoiseRatio < snr:
+            continue
+        sourcePositions.append(sourcePeak.position)
+        destinationPositions.append(destinationPeak.position)
+
+    # do the calculations
+    deltas = np.array(sourcePositions) - np.array(destinationPositions)
+    deltas = deltas.flatten()
+    # - use deltas to fit patterns of shifts and detect the most probable global shift
+    stats, edges, binNumbers, fittedCurve, mostCommonBinNumber, highestValues, fittedCurveExtremum = _getBins(deltas)
+    shift = np.max(np.abs(highestValues))
+    statsDict = {
+        'shift': shift,
+        'deltas': deltas,
+        'stats': stats,
+        'edges': edges,
+        'binNumbers': binNumbers,
+        'fittedCurve': fittedCurve,
+        'mostCommonBinNumber': mostCommonBinNumber,
+        'highestValues': highestValues,
+        'fittedCurveExtremum': fittedCurveExtremum}
+    return statsDict
 
 def _snap1DPeaksByGroup(peaks, ppmLimit=0.05, figOfMeritLimit=1,
                        doNeg=False, ):

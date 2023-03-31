@@ -100,7 +100,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         # deepcopy doesn't work on dictionaries with the qt widgets, so to get a separation of gui widgets and values for storage
         # it is needed to create the two dictionaries alongside each other
         self.guiDict = OD([('Spectrum', OD())])
-        self.settings = OD([('Spectrum', OD()), ('Databases', OD()), ('Simulators', OD())])
+        self.settings = OD([('Spectrum', OD()), ('Databases', OD()), ('Simulators', OD()), ('ResultsTables', OD())])
         self.metaboliteSimulations = OD()
         self.sumSpectra = OD()
 
@@ -224,6 +224,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
     def scaleChange(self):
         scale = 10**self.guiDict['Spectrum']['Scale'].value()
+        self.settings['ResultsTables']['currentTable'].data.at[self.settings['Spectrum']['currentSpectrumId'], self.settings['Spectrum']['currentMetaboliteName']] = scale
         self.simspec.scaleSpectrum(scale)
         self.refreshSumSpectrum()
 
@@ -234,8 +235,13 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
     def _selectSpectrumGroup(self, spectrumGroupID):
         spectrumGroup = self.project.getByPid('SG:' + spectrumGroupID)
-        valuesColumns = ['Metabolite Name', 'Database'] + [spectrum.name for spectrum in spectrumGroup.spectra]
-        self.values = pandas.DataFrame(columns=valuesColumns)
+        tableName = f'deconv_{spectrumGroupID}'
+        if tableName not in self.settings['ResultsTables']:
+            spectra = [spectrum.name for spectrum in spectrumGroup.spectra]
+            tableData = pd.DataFrame(spectra, columns=['spectrum'], index=spectra)
+            resultsTable = self.project.newDataTable(name=tableName, data=tableData)
+            self.settings['ResultsTables'][tableName] = resultsTable
+        self.settings['ResultsTables']['currentTable'] = resultsTable
         # create the simulated spectrum group
         if 'Reference_Spectra' not in self.project.spectrumGroups:
             self.settings['Spectrum']['referenceSpectrumGroup'] = self.project.newSpectrumGroup(
@@ -247,6 +253,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         points = len(spectrum.positions)
         self.settings['Spectrum']['referenceSumSpectrumLimits'] = limits
         self.settings['Spectrum']['referenceSumSpectrumPoints'] = points
+        self.settings['Spectrum']['currentSpectrumId'] = spectrumID
         x = numpy.linspace(limits[0], limits[1], points)
         y = numpy.zeros(points)
         if spectrumID not in self.sumSpectra:
@@ -276,12 +283,17 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         else:
             plotting = 'peaklist'
         metaboliteName = origin + '_' + metabolitesData.loc[metabolitesData['metabolite_id'] == metaboliteID, 'name'].iloc[0]
+        self.settings['Spectrum']['currentMetaboliteName'] = metaboliteName
+        if metaboliteName not in self.settings['ResultsTables']['currentTable'].data.columns.to_list():
+            column = [None] * len(self.settings['ResultsTables']['currentTable'].data)
+            self.settings['ResultsTables']['currentTable'].data[metaboliteName] = column
         if metaboliteName not in self.metaboliteSimulations:
             self.simspec = self.simulator.pureSpectrum(spectrumId=spectrumId, width=0.002, frequency=700, points=self.settings['Spectrum']['referenceSumSpectrumPoints'], limits=self.settings['Spectrum']['referenceSumSpectrumLimits'], plotting=plotting)
             self.metaboliteSimulations[metaboliteName] = self.simspec
             self.addSimSpectrumToList(self.simspec)
             self.settings['Spectrum']['referenceSpectrumGroup'].addSpectrum(self.simspec.spectrum)
             self.refreshSumSpectrum()
+            self.settings['ResultsTables']['currentTable'].data.at[self.settings['Spectrum']['currentSpectrumId'], metaboliteName] = 1
         else:
             self.simspec = self.metaboliteSimulations[metaboliteName]
 
@@ -309,7 +321,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
         # Add a widget for the simulated spectrum scale
         grid = _addRow(grid)
-        widget = Label(self.scrollAreaLayout, text=f'Scale', grid=grid)
+        widget = Label(self.scrollAreaLayout, text=f'Scale (10^n)', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
         self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
 

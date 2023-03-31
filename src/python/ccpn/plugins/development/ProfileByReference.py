@@ -195,10 +195,10 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                grid=(grid[0] + 1, 10),
                gridSpan=(1, 1))'''
 
-    def addDoubleSpinbox(self, index):
+    def addDoubleSpinbox(self, index, multipletId):
         def valueChange():
             shift = widget.value()
-            self.simspec.moveSpinSystemMultiplet(index, shift)
+            self.simspec.moveMultiplet(multipletId, shift)
             self.refreshSumSpectrum()
         grid = (index+7, index+7)
         grid = _addRow(grid)
@@ -207,7 +207,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
 
         grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=self.simspec.spinSystemMatrix[index][index], decimals=4,
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=self.simspec.multiplets[multipletId], decimals=4,
                                step=0.0001, grid=grid, gridSpan=(1, 2), suffix='ppm')
         widget.setRange(0, 10)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
@@ -341,8 +341,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['Spectrum']['Frequency'] = widget
         self.settings['Spectrum']['Frequency'] = self._getValue(widget)
 
-        for index in range(len(self.simspec.spinSystemMatrix)):
-            self.addDoubleSpinbox(index)
+        if self.simspec.multiplets:
+            for index, multipletId in enumerate(self.simspec.multiplets):
+                self.addDoubleSpinbox(index, multipletId)
         self.project.widgetList = self.guiDict['Spectrum']['SimulatedSpectrumAttributes']
 
     def addSimSpectrumToList(self, spectrum):

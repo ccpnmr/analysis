@@ -147,11 +147,13 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                               callback=self._selectSpectrum, tipText=help['Spectrum'])
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
-        self.spectrumGroups = [spectrumGroup.id for spectrumGroup in sorted(self.project.spectrumGroups)]
         self.spectra = [spectrum.id for spectrum in self.project.getByPid(self.settings['Spectrum']['SpectrumGroupId']).spectra]
         widget.setData(self.spectra)
         self.guiDict['Spectrum']['SpectrumId'] = widget
         self.settings['Spectrum']['SpectrumId'] = self._getValue(widget)
+
+        if self.spectra:
+            self._selectSpectrum(self.spectra[0])
 
         # pull down list for selecting the current metabolite by name
         grid = _addRow(grid)
@@ -207,7 +209,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
 
         grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=self.simspec.multiplets[multipletId], decimals=4,
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=self.simspec.multiplets[multipletId]['center'], decimals=4,
                                step=0.0001, grid=grid, gridSpan=(1, 2), suffix='ppm')
         widget.setRange(0, 10)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')

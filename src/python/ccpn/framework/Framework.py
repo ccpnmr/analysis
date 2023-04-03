@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-23 16:38:21 +0000 (Thu, February 23, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-04-03 12:51:40 +0100 (Mon, April 03, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1814,9 +1814,13 @@ class Framework(NotifierBase, GuiBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        peakTableModule = PeakTableModule(mainWindow, selectFirstItem=selectFirstItem)
+        peakTableModule = PeakTableModule(mainWindow, selectFirstItem=False) #selection is done by the current peaks.
+        if self.current.peak and not peakList:
+            peakList = self.current.peak.peakList
         if peakList:
             peakTableModule.selectTable(peakList)
+            peakTableModule.selectPeaks(self.current.peaks)
+
         mainWindow.moduleArea.addModule(peakTableModule, position=position, relativeTo=relativeTo)
         return peakTableModule
 

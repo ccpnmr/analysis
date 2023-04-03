@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-08 19:52:32 +0000 (Wed, February 08, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-04-03 12:51:40 +0100 (Mon, April 03, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -143,6 +143,12 @@ class PeakTableModule(CcpnModule):
         """Select the object in the table
         """
         self._mainFrame.selectTable(table)
+
+    def selectPeaks(self, peaks):
+        """Select the peaks in the table
+        """
+        pids = self.project.getPidsByObjects(peaks)
+        self._mainFrame.guiTable.selectRowsByValues(pids, 'Pid')
 
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module

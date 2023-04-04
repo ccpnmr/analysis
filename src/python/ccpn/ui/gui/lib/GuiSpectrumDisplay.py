@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-02-23 14:45:09 +0000 (Thu, February 23, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-04-04 16:08:27 +0100 (Tue, April 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -2372,6 +2372,16 @@ class GuiSpectrumDisplay(CcpnModule):
 
         for strip in self.strips:
             strip._nextZoom()
+
+    def _setZoom(self):
+        """Changes to the next zoom of current strip."""
+        if not self.strips:
+            showWarning('Set Zoom', 'SpectrumDisplay "%s" does not contain any strips'  % self.pid)
+            return
+        strip = self.strips[0]
+        strip._setZoomPopup()
+
+
 
     def _zoomIn(self):
         """zoom in to the current strip."""

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-27 15:06:18 +0100 (Mon, March 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-04 16:08:27 +0100 (Tue, April 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -80,8 +80,9 @@ class SpectrumDisplay1d(SpectrumDisplay, GuiSpectrumDisplay):
         ('restoreZoom',        'icons/zoom-restore', 'Restore Zoom (ZR)',                           True, GuiSpectrumDisplay._restoreZoom),
         ('undoZoom',           'icons/zoom-undo',    'Previous Zoom (ZP)',                          True, GuiSpectrumDisplay._previousZoom),
         ('redoZoom',           'icons/zoom-redo',    'Next Zoom (ZN)',                              True, GuiSpectrumDisplay._nextZoom),
+        ('setZoom',          'icons/zoom-set',           'Set Zoom... (SZ)',                           True, GuiSpectrumDisplay._setZoom),
 
-        ]
+    ]
 
     def __init__(self, project: Project, wrappedData: 'ApiBoundDisplay'):
         """Init for SpectrumDisplay1d;
@@ -137,7 +138,9 @@ class SpectrumDisplayNd(SpectrumDisplay, GuiSpectrumDisplay):
         ('restoreZoom',         'icons/zoom-restore',   'Restore Zoom (ZR)',                        True, GuiSpectrumDisplay._restoreZoom),
         ('undoZoom',            'icons/zoom-undo',      'Previous Zoom (ZP)',                       True, GuiSpectrumDisplay._previousZoom),
         ('redoZoom',            'icons/zoom-redo',      'Next Zoom (ZN)',                           True, GuiSpectrumDisplay._nextZoom),
-        ]
+        ('setZoom',             'icons/zoom-set',           'Set Zoom... (SZ)',                         True,    GuiSpectrumDisplay._setZoom),
+
+    ]
 
     def __init__(self, project: Project, wrappedData: 'ApiBoundDisplay'):
         """Init for SpectrumDisplayNd;

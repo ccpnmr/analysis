@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-17 17:39:32 +0000 (Fri, March 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-04 17:14:17 +0100 (Tue, April 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,7 @@ from numba import jit
 import numpy as np
 # from ccpn.framework.Application import getApplication
 
-@jit(nopython=True, nogil=True)
+# @jit(nopython=True, nogil=True)
 def _find1DMaxima(y, x, positiveThreshold, negativeThreshold=None, findNegative=False):
     """
     from https://gist.github.com/endolith/250860#file-readme-md which was translated from

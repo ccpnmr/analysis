@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-31 13:26:28 +0100 (Fri, March 31, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-04 17:14:17 +0100 (Tue, April 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -43,22 +43,15 @@ from scipy.optimize import curve_fit
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import  undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima
+from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D, _1DRawDataDict
+from scipy import spatial
 
 
-def snap1DPeaksToExtrema(peaks, maximumLimit=0.1, figOfMeritLimit=1, doNeg=True):
-    with undoBlockWithoutSideBar():
-        with notificationEchoBlocking():
-            if len(peaks) > 0:
-                peaks.sort(key=lambda x: x.position[0], reverse=False)  # reorder peaks by position
-                for peak in peaks:  # peaks can be from diff peakLists
-                    if peak is not None:
-                        position, height, error = _get1DClosestExtremum(peak, maximumLimit, doNeg=doNeg,  figOfMeritLimit=figOfMeritLimit)
-                        peak.position = position
-                        peak.height = height
-                        peak.heightError = error
 
+# from ccpn.util.decorators import profile
+# @profile('/Users/luca/Documents/V3-testings/profiling/')
 def snap1DPeaksByGroup(peaks, ppmLimit=0.05, unsnappedLimit=1, increaseLimitStep=0.1, groupPpmLimit=0.2,  figOfMeritLimit=1,
-                       doNeg=False,):
+                       doNeg=False, rawDataDict=None):
     """
     Snap the peaks by group. Use the ppmLimit to define limits of groups.
     Use the ppmLimit to explore left/right new maxima.
@@ -72,105 +65,51 @@ def snap1DPeaksByGroup(peaks, ppmLimit=0.05, unsnappedLimit=1, increaseLimitStep
     :param increaseLimitStep:
     :return:
     """
-    _snap1DPeaksByGroup(peaks, ppmLimit=ppmLimit,  figOfMeritLimit=figOfMeritLimit,
-                       doNeg=doNeg)
+    if rawDataDict is None:
+        rawDataDict = _1DRawDataDict()
+    _snap1DPeaksByGroup.count = 0
+    for peak in peaks: # set the temp properties first.
+        peak._temporaryPosition = peak.position
+        peak._temporaryHeight = peak.height
+        peak._temporaryHeightError = peak.heightError
 
-    for newLimit in np.arange(ppmLimit, unsnappedLimit+increaseLimitStep, increaseLimitStep):
-        unsnappedPeaks = [p for p in peaks if p.heightError is not None and p.figureOfMerit >= figOfMeritLimit  ]
-        if len(unsnappedPeaks) == 0:
-            return
-        _snap1DPeaksByGroup(unsnappedPeaks, ppmLimit=newLimit, figOfMeritLimit=figOfMeritLimit,
-                       doNeg=doNeg)
+    ## Do the first snap with initial limits.
+    _snap1DPeaksByGroup(peaks, ppmLimit=ppmLimit,  figOfMeritLimit=figOfMeritLimit, doNeg=doNeg, rawDataDict=rawDataDict)
+    _snap1DPeaksByGroup.count = 1
+    unsnappedPeaks = [p for p in peaks if p._temporaryHeightError and p._temporaryHeightError > 0 and p.figureOfMerit >= figOfMeritLimit]
+    if len(unsnappedPeaks) > 0:
+        ## Keep increasing the limits to a max until we find new maxima .
+        for newLimit in np.arange(ppmLimit, unsnappedLimit + increaseLimitStep, increaseLimitStep):
+            _snap1DPeaksByGroup(unsnappedPeaks, ppmLimit=newLimit, figOfMeritLimit=figOfMeritLimit,
+                       doNeg=doNeg,  rawDataDict=rawDataDict)
+            _snap1DPeaksByGroup.count += 1
+            unsnappedPeaks = [p for p in unsnappedPeaks if p._temporaryHeightError and p._temporaryHeightError > 0 and p.figureOfMerit >= figOfMeritLimit]
+            if len(unsnappedPeaks) == 0:
+                break
 
-
-def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaksAsLimits=False,
-                                      doNeg=False, figOfMeritLimit=1, spectrum=None, autoRereferenceSpectrum=False):
-    """
-    Snap all peaks to the closest maxima
-
-    Steps:
-    - reorder the peaks by heights to give higher peaks priority to the snap
-    - 1st iteration: search for nearest maxima and calculate delta positions (don't set peak.position here yet)
-    - use deltas to fit patterns of shifts and detect the most probable global shift
-    - use the global shift to re-reference the spectrum
-    - 2nd iteration: re-search for nearest maxima
-    - set newly detected position to peak if found better fits
-    - re-set the spectrum referencing to original (if not requested as argument)
-
-    :param peaks: list of peaks to snap
-    :param maximumLimit: float to use as + left-right limits from peak position where to search new maxima
-    :param useAdjacientPeaksAsLimits: bool. use adj peak position as left-right limits. don't search maxima after adjacent peaks
-    :param doNeg: snap also negative peaks
-    :param figOfMeritLimit: float. don't snap peaks with FOM below limit threshold
-    :param spectrum: the spectum obj. optional if all peaks belong to the same spectrum
-    :return:
-    """
-    if not peaks:
-        getLogger().warning('Cannot snap peaks. No peaks found')
-        return []
-    if not spectrum:
-        spectrum = peaks[0].peakList.spectrum
-
-    # - reorder the peaks by heights to give higher peaks priority to the snap
-    peaks = list(peaks)
-    peaks.sort(key=lambda x: x.height, reverse=True)  # reorder peaks by height
-    oPositions, oHeights = [x.position for x in peaks], [x.height for x in peaks]
-    nPositions, nHeights, nHErrors = [], [], []
-
-    # - 1st iteration: search for nearest maxima and calculate deltas
-    for peak in peaks:
-        if peak is not None:
-            position, height, hError = _get1DClosestExtremum(peak, maximumLimit=maximumLimit,
-                                                     useAdjacientPeaksAsLimits=useAdjacientPeaksAsLimits, doNeg=doNeg,
-                                                     figOfMeritLimit=figOfMeritLimit)
-            nPositions.append(position)
-            nHeights.append(height)
-            nHErrors.append(hError)
-    deltas = np.array(nPositions) - np.array(oPositions)
-    deltas = deltas.flatten()
-
-    if len(peaks) == 1:
-        peaks[0].position = nPositions[0]
-        peaks[0].height = nHeights[0]
-        peaks[0].heightError = nHErrors[0]
-        return deltas[0]
-
-    # - use deltas to fit patterns of shifts and detect the most probable global shift
-    stats, edges, binNumbers, fittedCurve, mostCommonBinNumber, highestValues, fittedCurveExtremum = _getBins(deltas)
-    shift = max(highestValues)
-    oReferenceValues = spectrum.referenceValues
-    oPositions = spectrum.positions
-    #  - use the global shift to re-reference the spectrum
-    spectrum.referenceValues = [spectrum.referenceValues[0] - shift]
-    spectrum.positions = spectrum.positions - shift
-
-    #  - 2nd iteration: re-search for nearest maxima
-    for peak in peaks:
-        if peak is not None:
-            oPosition = peak.position
-            peak.position = [peak.position[0] + shift, ]  #  - use the shift to re-reference the peak to the moved spectrum
-            position, height, error = _get1DClosestExtremum(peak, maximumLimit=maximumLimit,
-                                                     useAdjacientPeaksAsLimits=useAdjacientPeaksAsLimits, doNeg=doNeg,
-                                                     figOfMeritLimit=figOfMeritLimit)
-            #  - set newly detected position if found better fits
-            if peak.position == position:  # Same position detected. Revert
-                peak.height = peak.peakList.spectrum.getHeight(oPosition)
-                peak.position = oPosition
-                peak.heightError = error
-            else:
-                peak.position = position
-                peak.height = height
-                peak.heightError = error
-    # - re-set the spectrum referencing to original (if not requested as argument)
-    if not autoRereferenceSpectrum:
-        spectrum.referenceValues = oReferenceValues
-        spectrum.positions = oPositions
-    # check for missed maxima or peaks snapped to height@position but had other unpicked maxima close-by
-    return shift
+    with undoBlockWithoutSideBar(): # set the final properties.
+        with notificationEchoBlocking():
+            for peak in peaks:
+                peak.position = peak._temporaryPosition
+                peak.height = float(peak._temporaryHeight)
+                peak.heightError = peak._temporaryHeightError
 
 ###################################
 ####### Private library functions   #######
 ###################################
+
+def _snap1DPeaksToClosestExtremum(peaks, maximumLimit=0.1, figOfMeritLimit=1, doNeg=True, rawDataDict=None, ):
+    if len(peaks) > 0:
+        peaks = list(peaks)
+        peaks.sort(key=lambda pk: pk._temporaryPosition[-1], reverse=False)  # reorder peaks by position
+
+        for peak in peaks:  # peaks can be from diff peakLists
+            if peak is not None:
+                position, height, error = _get1DClosestExtremum(peak, maximumLimit, doNeg=doNeg,  figOfMeritLimit=figOfMeritLimit, rawDataDict=rawDataDict)
+                peak._temporaryPosition = position
+                peak._temporaryHeight = height
+                peak._temporaryHeightError = error
+
 
 def _getRereferencingParamsFromDeltas(sourcePeaks, destinationPeaks, sortBy=None, snr=3, fom=0.5):
     """
@@ -218,8 +157,8 @@ def _getRereferencingParamsFromDeltas(sourcePeaks, destinationPeaks, sortBy=None
         'fittedCurveExtremum': fittedCurveExtremum}
     return statsDict
 
-def _snap1DPeaksByGroup(peaks, ppmLimit=0.05, groupPpmLimit=0.05,  figOfMeritLimit=1,
-                       doNeg=False, ):
+def _snap1DPeaksByGroup(peaks, rawDataDict=None, ppmLimit=0.05, groupPpmLimit=0.05,  figOfMeritLimit=1,
+                       doNeg=False,  maxRecursion=5 ):
     """
     :param peaks: 1D peaks to be snapped.
     :param ppmLimit: float. imit in ppm to define a searching window.
@@ -236,11 +175,14 @@ def _snap1DPeaksByGroup(peaks, ppmLimit=0.05, groupPpmLimit=0.05,  figOfMeritLim
 
     ## Start the snapping routine
     for spectrum, peaks in spectraPeaks.items():
-        xValues, yValues = spectrum.positions, spectrum.intensities
+        if not rawDataDict or not spectrum in rawDataDict:
+            getLogger().warning(f'Raw data for {spectrum.pid}  not found')
+            continue
+        xValues, yValues = rawDataDict.get(spectrum)
         noiseLevel = spectrum.noiseLevel
         negativeNoiseLevel = spectrum.negativeNoiseLevel
         snappingPeaks = np.array(peaks)
-        snappingPositions = np.array([pk.position[0] for pk in snappingPeaks])
+        snappingPositions = np.array([pk._temporaryPosition[0] for pk in snappingPeaks])
 
         ## Cluster peaks in groups by the ppmLimit. Consider a group of peaks if they fall within the ppmLimits,
         i = np.argsort(snappingPositions)
@@ -255,14 +197,14 @@ def _snap1DPeaksByGroup(peaks, ppmLimit=0.05, groupPpmLimit=0.05,  figOfMeritLim
             peakGroup = np.array(peakGroup)
             if len(peakGroup) == 1:
                 ## if there is only one peak in the group then snap normally to closest:
-                snap1DPeaksToExtrema(list(peakGroup), maximumLimit=ppmLimit)
+                _snap1DPeaksToClosestExtremum(list(peakGroup), maximumLimit=ppmLimit, rawDataDict=rawDataDict)
             else:
-                positions = np.array([pk.position[0] for pk in peakGroup])
+                positions = np.array([pk._temporaryPosition[0] for pk in peakGroup])
                 limits = np.min(positions), np.max(positions)
                 searchingLimits = limits[0] - ppmLimit, limits[1] + ppmLimit
                 # need to check if within these limits there are other peaks. and restrict the search. otherwise will "steal" the maximum from other closer peaks
                 rounding = 4
-                # otherPeaks = [round(p.position[0],rounding) for p in peakGroup[0].peakList.peaks if p not in peakGroup if p.position[0] if _isWithinLimits(p.position[0], searchingLimits)]
+                # otherPeaks = [round(p._temporaryPosition[0],rounding) for p in peakGroup[0].peakList.peaks if p not in peakGroup if p.position[0] if _isWithinLimits(p.position[0], searchingLimits)]
 
                 xROItarget, yROItarget = _1DregionsFromLimits(xValues, yValues, limits=searchingLimits)
                 maxValues, minValues = _find1DMaxima(yROItarget, xROItarget, positiveThreshold=noiseLevel,
@@ -273,22 +215,30 @@ def _snap1DPeaksByGroup(peaks, ppmLimit=0.05, groupPpmLimit=0.05,  figOfMeritLim
                 if len(foundCoords) == 0:
                     ## No new coords found. Recalculate height at position.
                     for peak in peakGroup:
-                        peak.height = peak.spectrum.getHeight(peak.position)
-                        peak.heightError =1
+                        peak._temporaryHeight = _getClosestHeight(xValues, yValues, peak._temporaryPosition, peak._temporaryHeight)
+                        peak._temporaryHeightError = 1
                     continue
                 if len(foundCoords) == len(peakGroup):
                     ## found the same count of new coords and peaks in the group. Order by position and snap sequentially.
                     peakGroup = list(peakGroup)
-                    peakGroup.sort(key=lambda x: x.position[0], reverse=False)  # reorder peaks by position
+                    peakGroup.sort(key=lambda x: x._temporaryPosition[0], reverse=False)  # reorder peaks by position
                     foundCoords = list(foundCoords)
                     foundCoords.sort(key=lambda x: x[0], reverse=False)  # reorder peaks by  position p[0]  reverse=False;  or height [1] reverse=True
                     for peak, coord in zip(peakGroup, foundCoords):
-                        peak.position = [coord[0], ]
-                        peak.height = float(coord[1])
-                        peak.heightError = None
+                        peak._temporaryPosition = [coord[0], ]
+                        peak._temporaryHeight = float(coord[1])
+                        peak._temporaryHeightError = 0
                 else:
-                    ## found different count of new coords and peaks. Order by distanceMatrix and snap to best fit.
-                    _snap1DPeaksByGroup(peaks, ppmLimit=ppmLimit / 2)
+                    ## found different count of new coords and peaks.
+                    try:
+                        _snap1DPeaksByGroup.count +=1
+                    except Exception as err:
+                        _snap1DPeaksByGroup.count = 0
+                    if  _snap1DPeaksByGroup.count <= maxRecursion:
+                        _snap1DPeaksByGroup(peakGroup, ppmLimit=ppmLimit / 2, rawDataDict=rawDataDict)
+                    else:# cannot find any solution. snap one at the time
+                        for peak in peakGroup:
+                            _snap1DPeaksByGroup([peak], ppmLimit=ppmLimit, rawDataDict=rawDataDict)
 
 def _1Dregion(x, y, value, lim=0.01):
     # centre of position, peak position
@@ -349,9 +299,9 @@ def _getBins(y, binCount=None):
     return statistics, edges, binNumbers, fittedCurve, mostCommonBinNumber, highestValues, fittedCurveExtremum
 
 def _getAdjacentPeakPositions1D(peak):
-    positions = [p.position[0] for p in peak.peakList.peaks]
+    positions = [p._temporaryPosition[0] for p in peak.peakList.peaks]
     positions.sort()
-    queryPos = peak.position[0]
+    queryPos = peak._temporaryPosition[0]
     tot = len(positions)
     idx = positions.index(queryPos)
     previous, next = True, True
@@ -374,49 +324,36 @@ def _correctNegativeHeight(height, doNeg=False):
             return np.nextafter(0, 1)
     return height
 
-def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=False, doNeg=False,
-                          figOfMeritLimit=1):
+def _get1DClosestExtremum(peak, maximumLimit=0.1,  doNeg=False,
+                          figOfMeritLimit=1, rawDataDict=None ):
     """
     :param peak:
     :param maximumLimit: don't snap peaks over this threshold in ppm
-    :param useAdjacientPeaksAsLimits: stop a peak to go over pre-existing peaks (to the left/right)
     :param doNeg: include negative peaks as solutions
-    :param figOfMeritLimit: skip if below this threshold and give only height at position
+    :param figOfMeritLimit: skip if below this threshold and give only height at position.
     :return: position, height : position is a list of length 1,  height is a float
 
     search  maxima close to a given peak based on the maximumLimit (left/right) or using the adjacent peaks position as limits.
      return the nearest coordinates position, height
 
     """
-    from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D
-    from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima
-
     spectrum = peak.peakList.spectrum
-    x = spectrum.positions
-    y = spectrum.intensities
-    position, height, heightError = peak.position, peak.height, peak.heightError
+    if rawDataDict is not None:
+        if spectrum in rawDataDict:
+            x, y = rawDataDict.get(spectrum)
+        else:
+            x = spectrum.positions
+            y = spectrum.intensities
+    else:
+        x = spectrum.positions
+        y = spectrum.intensities
+    position, height, heightError = peak._temporaryPosition, peak.height, peak.heightError
     if peak.figureOfMerit < figOfMeritLimit:
-        height = peak.peakList.spectrum.getHeight(peak.position)
-        height = _correctNegativeHeight(height, doNeg)
-        heightError = 1
         return position, height, heightError
 
-    if useAdjacientPeaksAsLimits:  #  a left # b right limit
-        a, b = _getAdjacentPeakPositions1D(peak)
-        if not a:  # could not find adjacient peaks if the snapping peak is the first or last
-            if peak.position[0] > 0:  #it's positive
-                a = peak.position[0] - maximumLimit
-            else:
-                a = peak.position[0] + maximumLimit
-        if not b:
-            if peak.position[0] > 0:  # it's positive
-                b = peak.position[0] + maximumLimit
-            else:
-                b = peak.position[0] - maximumLimit
-    else:
-        a, b = peak.position[0] - maximumLimit, peak.position[0] + maximumLimit
+    a, b = peak._temporaryPosition[0] - maximumLimit, peak._temporaryPosition[0] + maximumLimit
 
-    # refind maxima
+    # find closest maxima
     noiseLevel = spectrum.noiseLevel
     negativeNoiseLevel = spectrum.negativeNoiseLevel
     if not noiseLevel:  # estimate as you can from the spectrum
@@ -437,43 +374,37 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
         allValues = np.array(allValues)
         positions = allValues[:, 0]
         heights = allValues[:, 1]
-        nearestPosition = find_nearest(positions, peak.position[0])
+        nearestPosition = find_nearest(positions, peak._temporaryPosition[0])
         nearestHeight = heights[positions == nearestPosition]
+        position = [float(nearestPosition), ]
+        height = nearestHeight
+        heightError = 0
 
-        if useAdjacientPeaksAsLimits:
-            if a == nearestPosition or b == nearestPosition:  # avoid snapping to an existing peak, as it might be a wrong snap.
-                height = peak.peakList.spectrum.getHeight(peak.position)
-                heightError = 1
-            # elif abs(nearestPosition) > abs(peak.position[0] + maximumLimit):  # avoid snapping on the noise if not maximum found
-            # peak.height = peak.peakList.spectrum.getHeight(peak.position)
-
-            else:
-                position = [float(nearestPosition), ]
-                height = nearestHeight
-                heightError = None
-        else:
-            a, b = _getAdjacentPeakPositions1D(peak)
-            if float(nearestPosition) in (a, b):  # avoid snapping to an existing peak,
-                height = peak.peakList.spectrum.getHeight(peak.position)
-                heightError = 1
-
-            else:
-                position = [float(nearestPosition), ]
-                height = nearestHeight
-                heightError = None
     else:
-        height = peak.peakList.spectrum.getHeight(peak.position)
+        height = _getClosestHeight(x,y, peak._temporaryPosition, peak._temporaryHeight)
         heightError = 1
 
     height = _correctNegativeHeight(height, doNeg)  # Very important. don't return a negative height if doNeg is False.
     return position, float(height), heightError
 
-def _filterKnownPeakPositionsFromNewMaxima(newMaxima, peak=None,  knownPositions = None, rounding=4):
-    """Remove known positions from the newly found maxima to avoid snapping to an existing peak"""
-    if knownPositions is None and peak:
-        knownPositions = [round(p.position[0], rounding) for p in peak.peakList.peaks]
+def _getClosestHeight(x,y, pos, currentHeight):
+    try:
+        ax = x.reshape(len(x), 1)
+        closestX = ax[spatial.KDTree(ax).query(pos)[1]]
+        closestY = y[x==closestX]
+        return closestY
+    except Exception as err:
+        getLogger().warning('Could not find the closest', err)
+    return currentHeight
+
+def _filterKnownPeakPositionsFromNewMaxima(newMaxima, peak,   rounding=4):
+    """Remove known positions from the newly found maxima to avoid snapping to an existing peak except to itself."""
+
+    knownPositions = [round(p._temporaryPosition[0], rounding) for p in peak.peakList.peaks]
     for maximum in newMaxima:
         pos, intens = maximum
+        if round(pos, rounding) == round(peak._temporaryPosition[0], rounding):
+            continue # Don't remove if  a maximum is equal to the current position.
         if round(pos, rounding) in knownPositions:
             newMaxima.remove(maximum)
     return newMaxima
@@ -495,7 +426,7 @@ def _filterLowSNFromNewMaxima(newMaxima, noiseLevel, negativeNoise,  snThreshold
 
 
 def _filterShouldersFromNewMaxima(newMaxima, x,y, proximityTollerance=1e5 ):
-    """Remove known positions from the newly found maxima to avoid snapping to an existing peak"""
+    """Remove a positions from the newly found maxima to avoid snapping to a shoulder peak (not the real maximum)"""
     for maximum in newMaxima:
         pos, intens = maximum
         if intens ==  y[0] or intens == [-1]:

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-28 13:51:58 +0100 (Tue, March 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-04 17:14:17 +0100 (Tue, April 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -569,7 +569,7 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 4, halfBoxFitWidth: i
     if numDim == 1:
         # do the fit for 1D here
         doNeg = getApp.preferences.general.negativePeakPick1D
-        snap1DPeaksByGroup([peak], ppmLimit=0.1, doNeg=doNeg)
+        snap1DPeaksByGroup([peak], ppmLimit=0.2, doNeg=doNeg)
 
     else:
         from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:38 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-04-04 17:14:17 +0100 (Tue, April 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -74,6 +74,11 @@ class Peak(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.Peak._metaclass.qualifiedName()
+
+    # Internal. Used as temporary holder during time-consuming peak snapping routines.
+    _tempPosition = None
+    _tempHeight = None
+    _tempHeightError = None
 
     # CCPN properties
     @property
@@ -1116,34 +1121,6 @@ class Peak(AbstractWrapperObject):
 
         self._wrappedData.integral = value._wrappedData if value else None
 
-    # def _linkPeaks(self, peaks):
-    #     """
-    #     NB: this is needed for screening spectrumHits and peakHits. You might see peakCluster instead.
-    #     Saves the peaks in _ccpnInternalData as pids
-    #     """
-    #     pids = [str(peak.pid) for peak in peaks if peak != self and isinstance(peak, Peak)]
-    #     if isinstance(self._ccpnInternalData, dict):
-    #
-    #         # a single write is required to the api to notify that a change has occurred,
-    #         # this will prompt for a save of the v2 data
-    #         tempCcpn = self._ccpnInternalData.copy()
-    #         tempCcpn[self._linkedPeaksName] = pids
-    #         self._ccpnInternalData = tempCcpn
-    #     else:
-    #         raise ValueError("Peak.linkPeaks: CCPN internal must be a dictionary")
-    #
-    # @property
-    # def _linkedPeaks(self):
-    #     """
-    #     NB: this is needed for screening spectrumHits and peakHits. You might see peakCluster instead.
-    #     It returns a list of peaks belonging to other peakLists or spectra which are required to be linked to this particular peak.
-    #     This functionality is not implemented in the model. Saves the Peak pids in _ccpnInternalData.
-    #     :return: a list of peaks
-    #     """
-    #     pids = self._ccpnInternalData.get(self._linkedPeaksName) or []
-    #     peaks = [self.project.getByPid(pid) for pid in pids if pid is not None]
-    #     return peaks
-
     @property
     def signalToNoiseRatio(self):
         """
@@ -1286,7 +1263,38 @@ class Peak(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
+    @property
+    def _temporaryHeight(self):
+        """temporary height of Peak."""
+        if self._tempHeight is None:
+            self._tempHeight = self.height
+        return self._tempHeight
 
+    @_temporaryHeight.setter
+    def _temporaryHeight(self, value):
+        self._tempHeight = value
+
+    @property
+    def _temporaryHeightError(self):
+        """temporary height Error of Peak."""
+        if self._tempHeightError is None:
+            self._tempHeightError = self.heightError
+        return self._tempHeightError
+
+    @_temporaryHeightError.setter
+    def _temporaryHeightError(self, value):
+        self._tempHeightError = value
+
+    @property
+    def _temporaryPosition(self):
+        """temporary Position  of Peak."""
+        if self._tempPosition is None:
+            self._tempPosition = self.position
+        return self._tempPosition
+
+    @_temporaryPosition.setter
+    def _temporaryPosition(self, value):
+        self._tempPosition = value
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-06 18:43:33 +0000 (Mon, March 06, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-04-04 17:14:17 +0100 (Tue, April 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,7 @@ import numpy as np
 import decorator
 from typing import Tuple, Optional, Sequence, Any
 from itertools import permutations
-
+from tqdm import tqdm
 from ccpn.framework.Application import getApplication
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoBlockWithoutSideBar
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
@@ -1567,6 +1567,21 @@ def estimateSNR(noiseLevels, signalPoints, factor=2.5):
         snRatios = (factor * pp) / dd
         return abs(snRatios)
     return [None] * len(signalPoints)
+
+class _1DRawDataDict(dict):
+    """
+    Class to contain Spectra Raw ppmPosition and Intensities
+    """
+    def __init__(self):
+        super(_1DRawDataDict, self).__init__()
+        from ccpn.framework.Application import getProject
+        getLogger().info('Building 1D raw data dictionary...')
+        project = getProject()
+        dd =  {}
+        for sp in tqdm(project.spectra):
+            dd[sp] = (sp.positions,sp.intensities)
+        self.update(dd)
+        getLogger().info('Building 1D raw data dictionary. Completed')
 
 
 def estimateNoiseLevel1D(y, f=10, stdFactor=0.5) -> Tuple[float, float]:

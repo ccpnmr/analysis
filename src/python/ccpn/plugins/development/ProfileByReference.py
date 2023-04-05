@@ -202,6 +202,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             shift = widget.value()
             self.simspec.moveMultiplet(multipletId, shift)
             self.refreshSumSpectrum()
+        def resetMultiplet():
+            widget.setValue(self.simspec.originalMultiplets[multipletId]['center'])
         grid = (index+7, index+7)
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Multiplet {index+1} Chemical Shift', grid=grid)
@@ -215,9 +217,14 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(valueChange)
-
         self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
         self.settings['Spectrum'][f'Multiplet {index+1} Chemical Shift'] = self._getValue(widget)
+
+        grid = _addColumn(grid)
+        buttonWidget = Button(parent=self.scrollAreaLayout, text='Reset', grid=grid)
+        _setWidgetProperties(buttonWidget, heightType='Minimum')
+        buttonWidget.clicked.connect(resetMultiplet)
+        self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(buttonWidget)
 
     def widthChange(self):
         width = self.guiDict['Spectrum']['Width'].value()/self.guiDict['Spectrum']['Frequency'].value()

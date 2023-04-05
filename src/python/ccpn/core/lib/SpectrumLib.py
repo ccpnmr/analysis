@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-04 17:14:17 +0100 (Tue, April 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-05 17:06:32 +0100 (Wed, April 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -516,7 +516,7 @@ def _estimate1DSpectrumSNR(spectrum, engine='max'):
         func = engines.get(engine)
     else:
         func = np.max
-        print('Engine not recognised. Using Default')
+        getLogger().warning('Engine not recognised. Using Default')
     _snr = estimateSNR(noiseLevels=[spectrum.noiseLevel, spectrum.negativeNoiseLevel],
                        signalPoints=[func(spectrum.intensities)])
 

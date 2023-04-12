@@ -204,6 +204,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             self.refreshSumSpectrum()
         def resetMultiplet():
             widget.setValue(self.simspec.originalMultiplets[multipletId]['center'])
+        def navigateToMultiplet():
+            target = widget.value()
+            # todo code here to move the view to the target value above
         grid = (index+7, index+7)
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Multiplet {index+1} Chemical Shift', grid=grid)
@@ -226,8 +229,14 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         buttonWidget.clicked.connect(resetMultiplet)
         self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(buttonWidget)
 
+        grid = _addColumn(grid)
+        buttonWidget = Button(parent=self.scrollAreaLayout, text='Navigate-to', grid=grid)
+        _setWidgetProperties(buttonWidget, heightType='Minimum')
+        buttonWidget.clicked.connect(navigateToMultiplet)
+        self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(buttonWidget)
+
     def widthChange(self):
-        width = self.guiDict['Spectrum']['Width'].value()/self.guiDict['Spectrum']['Frequency'].value()
+        width = self.guiDict['Spectrum']['Width'].value()
         self.simspec.setWidth(width)
         self.refreshSumSpectrum()
 
@@ -297,7 +306,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             column = [None] * len(self.settings['ResultsTables']['currentTable'].data)
             self.settings['ResultsTables']['currentTable'].data[metaboliteName] = column
         if metaboliteName not in self.metaboliteSimulations:
-            self.simspec = self.simulator.pureSpectrum(spectrumId=spectrumId, width=0.002, frequency=700, points=self.settings['Spectrum']['referenceSumSpectrumPoints'], limits=self.settings['Spectrum']['referenceSumSpectrumLimits'], plotting=plotting)
+            self.simspec = self.simulator.pureSpectrum(spectrumId=spectrumId, width=1, frequency=700, points=self.settings['Spectrum']['referenceSumSpectrumPoints'], limits=self.settings['Spectrum']['referenceSumSpectrumLimits'], plotting=plotting)
             self.metaboliteSimulations[metaboliteName] = self.simspec
             self.addSimSpectrumToList(self.simspec)
             self.settings['Spectrum']['referenceSpectrumGroup'].addSpectrum(self.simspec.spectrum)

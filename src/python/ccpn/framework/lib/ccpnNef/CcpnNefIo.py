@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-02 13:37:09 +0000 (Thu, March 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-12 16:15:39 +0100 (Wed, April 12, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -3927,7 +3927,7 @@ class CcpnNefReader(CcpnNefContent):
         dataBlock.clear()
         dataBlock.update(newData)
 
-    def _renameDataBlockSpectra(self, project, dataBlock, category, oldSpectrum, spectrum):
+    def _renameDataBlockSpectra(self, project, dataBlock, category, oldSpectrum, spectrum, oldSerial, newSerial):
         """Rename all saveFrames matching the spectrum_name
         """
         data = [(k, sFrame) for k, sFrame in dataBlock.items()]
@@ -3936,6 +3936,8 @@ class CcpnNefReader(CcpnNefContent):
             _framecode, _frameName, subName, prefix, postfix, _preSerial, _postSerial, _category = _frameID
 
             if subName == oldSpectrum and _category == 'nef_nmr_spectrum':
+                if _postSerial is not None and _postSerial == oldSerial and _postSerial != newSerial:
+                    postfix = f'`{newSerial}`'
                 newName = '_'.join([category, prefix + spectrum + postfix])
                 self._renameDataBlock(project, dataBlock, sFrame, newName)
 
@@ -4552,7 +4554,7 @@ class CcpnNefReader(CcpnNefContent):
                            loopSearchList=loopList, rowSearchList=replaceList)
 
         # need to rename the matching-key in dataBlock
-        self._renameDataBlockSpectra(project, dataBlock, category, oldSpectrum, spectrum)
+        self._renameDataBlockSpectra(project, dataBlock, category, oldSpectrum, spectrum, oldSerial, newSerial)
         self._checkAllSpectrumRename(dataBlock, oldSpectrum, spectrum, category, project)
 
         # # rename the items in the additionalData saveFrame
@@ -4780,7 +4782,7 @@ class CcpnNefReader(CcpnNefContent):
 
         # now need to update the serial number in the relevant saveFrames
 
-        _frameID = _saveFrameNameFromCategory(saveFrame)
+        # _frameID = _saveFrameNameFromCategory(saveFrame)
         framecode, frameName, subName, prefix, postfix, preSerial, postSerial, category = _frameID
 
         # if postSerial is not None:
@@ -4808,7 +4810,7 @@ class CcpnNefReader(CcpnNefContent):
         #                        frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
 
         # need to rename the matching-key in dataBlock
-        self._renameDataBlockSpectra(project, dataBlock, category, oldSpectrum, spectrum)
+        self._renameDataBlockSpectra(project, dataBlock, category, oldSpectrum, spectrum, oldSerial, newSerial)
         self._checkAllSpectrumRename(dataBlock, oldSpectrum, spectrum, category, project)
 
         # # rename the items in the additionalData saveFrame

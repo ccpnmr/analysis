@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-04-12 16:15:39 +0100 (Wed, April 12, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ import traceback
 import signal
 import pandas as pd
 from functools import partial
+from PyQt5 import QtWidgets
 from PyQt5.QtGui import QPainter
 from contextlib import contextmanager, nullcontext, suppress
 from collections.abc import Iterable
@@ -1128,6 +1129,9 @@ def progressHandler(title='Progress', text='busy...', minimum=0, maximum=100,
                            hideCancelButton=hideCancelButton,
                            )
 
+        # need this to force the gui to catch up and display the busy dialog
+        QtWidgets.QApplication.processEvents()
+
     except Exception as es:
         raise RuntimeError('progressHandler: Error initialising') from es
 
@@ -1177,6 +1181,9 @@ def busyHandler(title='Progress', text='busy...', minimum=0, maximum=100,
                               steps=steps, minimum=minimum, maximum=maximum,
                               delay=delay, closeDelay=closeDelay,
                               autoClose=autoClose)
+
+        # need this to force the gui to catch up and display the busy dialog
+        QtWidgets.QApplication.processEvents()
 
     except Exception as es:
         raise RuntimeError('busyHandler: Error initialising') from es

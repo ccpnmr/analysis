@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 15:18:46 +0100 (Tue, March 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-12 16:15:39 +0100 (Wed, April 12, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -62,7 +62,7 @@ from ccpn.framework.lib.ccpnNef import CcpnNefIo
 from ccpn.framework.lib.ccpnNef.CcpnNefIo import DATANAME
 from ccpn.framework.lib.ccpnNef.CcpnNefCommon import nef2CcpnClassNames
 
-from ccpn.core.lib.ContextManagers import catchExceptions
+from ccpn.core.lib.ContextManagers import catchExceptions  #, busyHandler
 from ccpn.core.lib.Pid import Pid, IDSEP
 from ccpn.core.Project import Project
 from ccpn.core.StructureData import StructureData
@@ -293,9 +293,9 @@ class NefDictFrame(Frame):
         self._headerFrameOuter = Frame(self, setLayout=True, showBorder=False, grid=(0, 0),
                                        hAlign='left', hPolicy='ignored', vPolicy='fixed')
         self.headerFrame = Frame(self._headerFrameOuter, setLayout=True,
-                                 grid=(0, 0))
+                                 grid=(1, 0))
 
-        self.headerLabel = Label(self.headerFrame, text='FRAMEFRAME', grid=(0, 0), gridSpan=(1, 3))
+        self.headerLabel = Label(self._headerFrameOuter, text='FRAMEFRAME', grid=(0, 0), gridSpan=(1, 3))
         self.verifyButton = Button(self.headerFrame, text='Verify Now', grid=(1, 0),
                                    callback=self._verifyPopulate)
         self.verifyButton.setVisible(not self._primaryProject)
@@ -306,6 +306,9 @@ class NefDictFrame(Frame):
         self.verifyCheckBox.setVisible(not self._primaryProject)
         self.headerFrame.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
         self.verifyCheckBox.clicked.connect(self._verifyChecked)
+
+        self.headerFrame.setVisible(False)
+        self.headerFrame.setEnabled(False)
 
         # add the pane for the treeview/tables
         self._paneSplitter = Splitter(self, setLayout=True, horizontal=True)
@@ -1342,18 +1345,21 @@ class NefDictFrame(Frame):
         func = self._nefReader.renames.get(primaryHandler)
         if func is not None:
 
+            # take from lineEdit if exists, otherwise assume auto-rename (for the minute)
+            newName = lineEdit.get() if lineEdit else None
+
+            # with busyHandler(title='Busy...', text=f'Renaming {parentGroup[:-1] if parentGroup.endswith("s") else parentGroup}: {itemName}'):
             dd = {}
             # grab the tree state
             self._traverseTree(self.nefTreeView.headerItem, self._getTreeState, dd)
 
-            # take from lineEdit if exists, otherwise assume autorename (for the minute)
-            newName = lineEdit.get() if lineEdit else None
             try:
                 # call the correct rename function based on the item clicked
                 newName = func(self._nefReader, self.project,
                                self._nefDict, self._contentCompareDataBlocks,
                                saveFrame,
-                               itemName=itemName, newName=newName if not autoRename else None)
+                               itemName=itemName, newName=None if autoRename else newName)
+
             except Exception as es:
                 showWarning('Rename SaveFrame', str(es))
             else:
@@ -2431,7 +2437,7 @@ class NefDictFrame(Frame):
 
     @contextmanager
     def _tableColouring(self, table):
-        # not sure this is needed now - handled by the _SimplePandasTableModel indexing
+        # not sure if this is needed now - handled by the _SimplePandasTableModel indexing
         def _setRowBackgroundColour(row, colour):
             # set the colour for the items in the model colour table
             for j in _cols:
@@ -2475,7 +2481,7 @@ class NefDictFrame(Frame):
         # update the collections table
         if self._collectionsTable and self._collections:
             _df = pd.DataFrame({COLLECTION: self._collections.keys(),
-                                'Items'   : ['\n'.join(vv for vv in val) for val in self._collections.values()]})
+                                'Items'   : ['\n'.join(val) for val in self._collections.values()]})
             # _updateSimplePandasTable(self._collectionsTable, _df, _resize=True)
             self._collectionsTable.updateDf(_df, resize=True)
 
@@ -2512,7 +2518,7 @@ class NefDictFrame(Frame):
         # update the structureData table
         if self._structureDataTable and self._structureData:
             _df = pd.DataFrame({STRUCTUREDATA: self._structureData.keys(),
-                                'Items'      : ['\n'.join(vv for vv in val) for val in self._structureData.values()]})
+                                'Items'      : ['\n'.join(val) for val in self._structureData.values()]})
             # _updateSimplePandasTable(self._structureDataTable, _df, _resize=True)
             self._structureDataTable.updateDf(_df, resize=True)
 
@@ -2549,8 +2555,8 @@ class NefDictFrame(Frame):
         self._nefLoader._contentNef(self.project, self._nefDict, selection=None)
 
         # changed to verify with the button
-        if not self._primaryProject and self.verifyCheckBox.isChecked():
-            warnings, errors = self._nefLoader._verifyNef(self.project, self._nefDict, selection=None)
+        # if not self._primaryProject and self.verifyCheckBox.isChecked():
+        warnings, errors = self._nefLoader._verifyNef(self.project, self._nefDict, selection=None)
 
         try:
             self.valid = self._nefLoader.isValid
@@ -2661,8 +2667,7 @@ class NefDictFrame(Frame):
             if (_data := item.data(1, 0)):
                 itemName, saveFrame, parentGroup, _, _ = _data
                 if saveFrame:
-                    primaryHandler = handlerMapping.get(parentGroup) or saveFrame.get('sf_category')
-                    if primaryHandler:
+                    if primaryHandler := handlerMapping.get(parentGroup) or saveFrame.get('sf_category'):
                         handler = self.applyCheckBoxes.get(primaryHandler)
                         if handler is not None:
                             handler(self, name=itemName, saveFrame=saveFrame, parentGroup=parentGroup)  #, item)
@@ -2678,7 +2683,10 @@ class NefDictFrame(Frame):
             contextMenu.addItem('Remove from Collections', callback=partial(self._removeFromCollection, selectionWidget=selectionWidget))
 
             menu.addItem('<New Collection>', callback=partial(self._makeNewCollection, selectionWidget=selectionWidget))
-            colNames = OrderedSet([col.name for col in self.project.collections] + [col for col in self._collections.keys()])
+            colNames = OrderedSet(
+                [col.name for col in self.project.collections]
+                + list(self._collections.keys())
+            )
             for col in colNames:
                 menu.addItem(col, callback=partial(self._addToCollection, col, selectionWidget=selectionWidget))
 
@@ -2695,7 +2703,8 @@ class NefDictFrame(Frame):
         # pass None to remove from collections
         self._addToCollection(None, selectionWidget=selectionWidget)
 
-    def _newPulldown(self, parent, allowEmpty=True, name=COLLECTION, **kwds):
+    @staticmethod
+    def _newPulldown(parent, allowEmpty=True, name=COLLECTION, **kwds):
         combo = PulldownList(parent, editable=True, **kwds)
         combo.setMinimumWidth(50)
         _validator = LineEditValidator(parent=combo, allowSpace=False,
@@ -2707,7 +2716,7 @@ class NefDictFrame(Frame):
             combo.setToolTip(f'Select existing collection, or edit to create new collection.\n'
                              f'Choose {REMOVEENTRY} to remove selection from all collections.')
         else:
-            combo.setToolTip(f'Select existing structureData, or edit to create new structureData.')
+            combo.setToolTip('Select existing structureData, or edit to create new structureData.')
         combo.setCompleter(None)
 
         return combo
@@ -2898,7 +2907,7 @@ class NefDictFrame(Frame):
 
             elif len(newItms) > 1:
                 # clicked multiple - need to handle differently
-                if (parents := list(set(itm.data(1, 0)[2] for itm in newItms if itm.data(1, 0)))):
+                if parents := list({itm.data(1, 0)[2] for itm in newItms if itm.data(1, 0)}):
                     if (parentItm := self.nefTreeView.findSection(parents[0])):
 
                         if isinstance(parentItm, (list, tuple)):
@@ -2945,47 +2954,47 @@ class NefDictFrame(Frame):
         # possibly need new set of code :|
 
         # add a new collections saveFrame
-        if self._collections:
-            category = 'ccpn_collections'
+        if not self._collections:
+            return
 
-            # get a new name
-            name = StarIo.string2FramecodeString('fromnefimporter')
-            if name != category:
-                name = '%s_%s' % (category, name)
+        category = 'ccpn_collections'
 
-            # Set up new collections saveFrame
-            result = StarIo.NmrSaveFrame(name=name, category=category)
-            result.addItem('sf_category', category)
-            result.addItem('sf_framecode', name)
+        # get a new name
+        name = StarIo.string2FramecodeString('fromnefimporter')
+        if name != category:
+            name = f'{category}_{name}'
 
-            # find the loops
-            frameMap = CcpnNefIo.nef2CcpnMap.get(category) or {}
-            for tag, itemvalue in frameMap.items():
-                if not isinstance(itemvalue, (str, type(None))):  # a loop
-                    result.newLoop(tag, CcpnNefIo.nef2CcpnMap.get(tag) or {})
+        # Set up new collections saveFrame
+        result = StarIo.NmrSaveFrame(name=name, category=category)
+        result.addItem('sf_category', category)
+        result.addItem('sf_framecode', name)
 
-            # make a new loop row mapping
-            loopName = 'ccpn_collection'
-            loop = result[loopName]
-            _mapping = CcpnNefIo.nef2CcpnMap.get(loopName) or {}
-            rowdata = {}
-            for neftag, attrstring in _mapping.items():
-                rowdata[neftag] = None
+        # find the loops
+        frameMap = CcpnNefIo.nef2CcpnMap.get(category) or {}
+        for tag, itemvalue in frameMap.items():
+            if not isinstance(itemvalue, (str, type(None))):  # a loop
+                result.newLoop(tag, CcpnNefIo.nef2CcpnMap.get(tag) or {})
 
-            # fill the import dict so contents of saveframe is loaded
-            _importDict = self._nefReader._importDict.setdefault(name, {})
-            _importDict.setdefault('_importRows', tuple(col for col in self._collections.keys()))
+        # make a new loop row mapping
+        loopName = 'ccpn_collection'
+        loop = result[loopName]
+        _mapping = CcpnNefIo.nef2CcpnMap.get(loopName) or {}
+        rowdata = {neftag: None for neftag, attrstring in _mapping.items()}
 
-            # add rows for each new collection
-            for ii, (col, itms) in enumerate(self._collections.items()):
-                row = loop.newRow(rowdata)
-                row['uniqueId'] = ii
-                row['name'] = col
-                row['items'] = json.dumps(itms)
-                row['comment'] = 'from NefImporter'
+        # fill the import dict so contents of saveframe is loaded
+        _importDict = self._nefReader._importDict.setdefault(name, {})
+        _importDict.setdefault('_importRows', tuple(self._collections.keys()))
 
-            # add to the datablock
-            self._nefDict.addItem(result['sf_framecode'], result)
+        # add rows for each new collection
+        for ii, (col, itms) in enumerate(self._collections.items()):
+            row = loop.newRow(rowdata)
+            row['uniqueId'] = ii
+            row['name'] = col
+            row['items'] = json.dumps(itms)
+            row['comment'] = 'from NefImporter'
+
+        # add to the datablock
+        self._nefDict.addItem(result['sf_framecode'], result)
 
 
 class ImportNefPopup(CcpnDialogMainWidget):
@@ -3120,24 +3129,23 @@ class ImportNefPopup(CcpnDialogMainWidget):
         #                         and isinstance(obj[2], bool))
         self.nefObjects = ()
         if not isinstance(nefObjects, (tuple, list)):
-            raise TypeError('nefObjects {} must be a list/tuple'.format(nefObjects))
+            raise TypeError(f'nefObjects {nefObjects} must be a list/tuple')
         for checkObj in nefObjects:
             if not isinstance(checkObj, dict):
-                raise TypeError('nefDictFrame object {} must be a dict'.format(checkObj))
+                raise TypeError(f'nefDictFrame object {checkObj} must be a dict')
 
             for k, val in checkObj.items():
                 if k not in NEFDICTFRAMEKEYS.keys():
-                    raise TypeError('nefDictFrame object {} contains a bad key {}'.format(checkObj, k))
+                    raise TypeError(f'nefDictFrame object {checkObj} contains a bad key {k}')
                 if not isinstance(val, (NEFDICTFRAMEKEYS[k])):
-                    raise TypeError('nefDictFrame key {} must be of type {}'.format(k, NEFDICTFRAMEKEYS[k]))
-            missingKeys = list([kk for kk in NEFDICTFRAMEKEYS_REQUIRED if kk not in checkObj.keys()])
-            if missingKeys:
-                raise TypeError('nefDictFrame missing keys {}'.format(repr(missingKeys)))
+                    raise TypeError(f'nefDictFrame key {k} must be of type {NEFDICTFRAMEKEYS[k]}')
+            if missingKeys := [kk for kk in NEFDICTFRAMEKEYS_REQUIRED if kk not in checkObj.keys()]:
+                raise TypeError(f'nefDictFrame missing keys {repr(missingKeys)}')
 
             self.nefObjects += (checkObj,)
 
         if len(self.nefObjects) != len(nefObjects):
-            getLogger().warning('nefObjects contains bad items {}'.format(nefObjects))
+            getLogger().warning(f'nefObjects contains bad items {nefObjects}')
 
     def setActiveNefWindow(self, value):
         """Set the number of the current active nef window for returning values from the dialog
@@ -3146,8 +3154,9 @@ class ImportNefPopup(CcpnDialogMainWidget):
             self._activeImportWindow = value
         else:
             ll = len(self._nefWindows)
-            raise TypeError('Invalid window number, must be 0{}{}'.format('-' if ll > 1 else '',
-                                                                          (ll - 1) if ll > 1 else ''))
+            raise TypeError(
+                f"Invalid window number, must be 0{'-' if ll > 1 else ''}{ll - 1 if ll > 1 else ''}"
+            )
 
     def getActiveNefReader(self):
         """Get the current active nef reader for the dialog
@@ -3295,14 +3304,14 @@ def main():
         errLog = _loader.validErrorLog
         for k, val in errLog.items():
             if val:
-                print('>>> {} : {}'.format(k, val))
+                print(f'>>> {k} : {val}')
 
     valid = _loader2.isValid
     if not valid:
         errLog = _loader2.validErrorLog
         for k, val in errLog.items():
             if val:
-                print('>>> {} : {}'.format(k, val))
+                print(f'>>> {k} : {val}')
 
     # # simple test print of saveframes
     # names = _loader.getSaveFrameNames(returnType=Nef.NEF_RETURNALL)
@@ -3360,7 +3369,7 @@ def main():
 
     # NOTE:ED - add routines here to set up the mapping between the different nef file loaded
     val = dialog.exec_()
-    print('>>> dialog exit {}'.format(val))
+    print(f'>>> dialog exit {val}')
 
     import ccpn.util.nef.nef as NefModule
 

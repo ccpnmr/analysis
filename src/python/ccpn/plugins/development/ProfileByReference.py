@@ -237,12 +237,15 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
     def widthChange(self):
         width = self.guiDict['Spectrum']['Width'].value()
+        integration = self.simspec.scale * width
+        self.settings['ResultsTables']['currentTable'].data.at[self.settings['Spectrum']['currentSpectrumId'], self.settings['Spectrum']['currentMetaboliteName']] = integration
         self.simspec.setWidth(width)
         self.refreshSumSpectrum()
 
     def scaleChange(self):
         scale = 10**self.guiDict['Spectrum']['Scale'].value()
-        self.settings['ResultsTables']['currentTable'].data.at[self.settings['Spectrum']['currentSpectrumId'], self.settings['Spectrum']['currentMetaboliteName']] = scale
+        integration = scale * self.simspec.width
+        self.settings['ResultsTables']['currentTable'].data.at[self.settings['Spectrum']['currentSpectrumId'], self.settings['Spectrum']['currentMetaboliteName']] = integration
         self.simspec.scaleSpectrum(scale)
         self.refreshSumSpectrum()
 

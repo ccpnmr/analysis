@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 18:46:13 +0100 (Tue, March 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-13 11:29:46 +0100 (Thu, April 13, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -3273,8 +3273,6 @@ class Spectrum(AbstractWrapperObject):
         Create as required
         """
         tmpPath = self._metaDataPath
-        print(f'_fetchMetaDataPath   {tmpPath}')
-
         if not self.project.readOnly:
             try:
                 # create subdirectory

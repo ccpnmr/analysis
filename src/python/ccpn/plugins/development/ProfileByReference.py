@@ -28,6 +28,7 @@ import os, copy, json, pprint, math, shutil, pandas, operator, numpy
 from collections import OrderedDict as OD
 
 import pandas as pd
+from math import log10
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.framework.lib.Plugin import Plugin
 from ccpn.ui.gui.modules.PluginModule import PluginModule
@@ -272,9 +273,11 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         spectrum = self.project.getByPid('SP:' + spectrumID)
         limits = (max(spectrum.positions), min(spectrum.positions))
         points = len(spectrum.positions)
+        frequency = spectrum.spectrometerFrequencies[0]
         self.settings['Spectrum']['referenceSumSpectrumLimits'] = limits
         self.settings['Spectrum']['referenceSumSpectrumPoints'] = points
         self.settings['Spectrum']['currentSpectrumId'] = spectrumID
+        self.settings['Spectrum']['referenceSumSpectrumFrequency'] = frequency
         x = numpy.linspace(limits[0], limits[1], points)
         y = numpy.zeros(points)
         if spectrumID not in self.sumSpectra:
@@ -303,20 +306,30 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             plotting = 'onlypeaks'
         else:
             plotting = 'peaklist'
-        metaboliteName = origin + '_' + metabolitesData.loc[metabolitesData['metabolite_id'] == metaboliteID, 'name'].iloc[0]
+        metaboliteName = metabolitesData.loc[metabolitesData['metabolite_id'] == metaboliteID, 'name'].iloc[0]
+        self.settings['Spectrum']['currentSimulatedSpectrumId'] = spectrumId
         self.settings['Spectrum']['currentMetaboliteName'] = metaboliteName
-        if metaboliteName not in self.settings['ResultsTables']['currentTable'].data.columns.to_list():
-            column = [None] * len(self.settings['ResultsTables']['currentTable'].data)
-            self.settings['ResultsTables']['currentTable'].data[metaboliteName] = column
-        if metaboliteName not in self.metaboliteSimulations:
-            self.simspec = self.simulator.pureSpectrum(spectrumId=spectrumId, width=1, frequency=700, points=self.settings['Spectrum']['referenceSumSpectrumPoints'], limits=self.settings['Spectrum']['referenceSumSpectrumLimits'], plotting=plotting)
-            self.metaboliteSimulations[metaboliteName] = self.simspec
+        if spectrumId not in self.metaboliteSimulations:
+            width = 1
+            scale = 1
+            frequency = round(self.settings['Spectrum']['referenceSumSpectrumFrequency']/10)*10
+            self.simspec = self.simulator.pureSpectrum(spectrumId=spectrumId, width=width, frequency=frequency, points=self.settings['Spectrum']['referenceSumSpectrumPoints'], limits=self.settings['Spectrum']['referenceSumSpectrumLimits'], plotting=plotting)
+            self.metaboliteSimulations[spectrumId] = self.simspec
             self.addSimSpectrumToList(self.simspec)
             self.settings['Spectrum']['referenceSpectrumGroup'].addSpectrum(self.simspec.spectrum)
             self.refreshSumSpectrum()
+        else:
+            self.simspec = self.metaboliteSimulations[spectrumId]
+            scale = log10(self.simspec.scale)
+            width = self.simspec.width
+            frequency = self.simspec.frequency
+        if metaboliteName not in self.settings['ResultsTables']['currentTable'].data.columns.to_list():
+            column = [None] * len(self.settings['ResultsTables']['currentTable'].data)
+            self.settings['ResultsTables']['currentTable'].data[metaboliteName] = column
             self.settings['ResultsTables']['currentTable'].data.at[self.settings['Spectrum']['currentSpectrumId'], metaboliteName] = 1
         else:
-            self.simspec = self.metaboliteSimulations[metaboliteName]
+            integration = scale * width
+            self.settings['ResultsTables']['currentTable'].data.at[self.settings['Spectrum']['currentSpectrumId'], metaboliteName] = integration
 
         if self.guiDict['Spectrum']['SimulatedSpectrumAttributes']:
             for widget in self.guiDict['Spectrum']['SimulatedSpectrumAttributes']:
@@ -331,7 +344,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
 
         grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=1, decimals=1, step=0.1, grid=grid, gridSpan=(1, 2))
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=width, decimals=1, step=0.1, grid=grid, gridSpan=(1, 2))
         widget.setRange(0.1, 5)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
         widget.setButtonSymbols(2)
@@ -347,7 +360,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
 
         grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=1, decimals=3, step=0.001, grid=grid, gridSpan=(1, 2))
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=scale, decimals=3, step=0.001, grid=grid, gridSpan=(1, 2))
         widget.setRange(-7, 7)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
         widget.setButtonSymbols(2)
@@ -363,10 +376,10 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
 
         grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=self.simspec.frequency, decimals=1, step=10,
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=frequency, decimals=1, step=10,
                                grid=grid,
                                gridSpan=(1, 2))
-        widget.setRange(100, 1200)
+        widget.setRange(10, 1200)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(self.frequencyChange)

@@ -23,6 +23,8 @@
         "showSpectrumBorder"                   : true,
         "autoBackupEnabled"                    : true,
         "autoBackupFrequency"                  : 30,
+        "autoBackupCount"                      : 10,
+        "backupSaveCount"                      : 10,
         "stripRegionPadding"                   : 0.0,
         "peakDropFactor"                       : 0.1,
         "peakFactor1D"                         : 0.15,

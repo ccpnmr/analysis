@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-13 16:04:08 +0100 (Thu, April 13, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -115,7 +115,7 @@ CCPN_ARCHIVES_DIRECTORY     = 'archives'
 CCPN_BACKUPS_DIRECTORY      = 'backups'
 CCPN_SUMMARIES_DIRECTORY    = 'summaries'
 CCPN_LOGS_DIRECTORY         = 'logs'
-CCPN_DATA_DIRECTORY         =  'data'
+CCPN_DATA_DIRECTORY         = 'data'
 CCPN_PLUGINS_DIRECTORY      = 'data/plugins'
 CCPN_SPECTRA_DIRECTORY      = 'data/spectra'
 CCPN_SCRIPTS_DIRECTORY      = 'scripts'

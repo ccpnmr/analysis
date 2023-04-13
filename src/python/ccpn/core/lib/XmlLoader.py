@@ -183,6 +183,7 @@ ccpncore.lib.chemComp.Io  --> fetchChemComp  (and others) : uses XmlIo.LoadFromF
 """
 from __future__ import annotations  # pycharm still highlights as errors
 
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -239,45 +240,46 @@ from ccpn.framework.PathsAndUrls import \
     userCcpnDataPath, \
     CCPN_BACKUPS_DIRECTORY
 
+
 #--------------------------------------------------------------------------------------------
 # definitions
 #--------------------------------------------------------------------------------------------
 
-MEMOPS                  = metaConstants.modellingPackageName
-IMPLEMENTATION          = metaConstants.implementationPackageName
-MEMOPS_PACKAGE          = f'{MEMOPS}.{IMPLEMENTATION}'
+MEMOPS = metaConstants.modellingPackageName
+IMPLEMENTATION = metaConstants.implementationPackageName
+MEMOPS_PACKAGE = f'{MEMOPS}.{IMPLEMENTATION}'
 # API_SUB_DIRECTORIES     = ['ccp', 'ccpnmr', MEMOPS]
 
-XML_SUFFIX              = '.xml'
-BACKUP_SUFFIX           = '.ccpnV3backup'
-KEY_SEPARATOR           = '+'
+XML_SUFFIX = '.xml'
+BACKUP_SUFFIX = '.ccpnV3backup'
+KEY_SEPARATOR = '+'
 
-XML_LOADER_ATTR         = 'xmlLoader'  # attribute name for MemopsRoot
+XML_LOADER_ATTR = 'xmlLoader'  # attribute name for MemopsRoot
 ACTIVE_REPOSITORIES_ATTR = 'activeRepositories'
 
 # repositories
-USERDATA                = 'userData'
-REFDATA                 = 'refData'
-GENERALDATA             = 'generalData'
-BACKUPDATA              = 'backup'
-REPOSITORIES            = [USERDATA, REFDATA, GENERALDATA, BACKUPDATA]
+USERDATA = 'userData'
+REFDATA = 'refData'
+GENERALDATA = 'generalData'
+BACKUPDATA = 'backup'
+REPOSITORIES = [USERDATA, REFDATA, GENERALDATA, BACKUPDATA]
 
-USERDATA_PACKAGES       = ['ccp.nmr.Nmr',
-                           'ccp.lims.RefSampleComponent',
-                           'ccp.lims.Sample'
-                           'ccp.molecule.MolSystem',
-                           'ccpnmr.gui.Task',
-                           'ccpnmr.gui.Window',
-                          ]
+USERDATA_PACKAGES = ['ccp.nmr.Nmr',
+                     'ccp.lims.RefSampleComponent',
+                     'ccp.lims.Sample'
+                     'ccp.molecule.MolSystem',
+                     'ccpnmr.gui.Task',
+                     'ccpnmr.gui.Window',
+                     ]
 
 # Current reference data packages with xml-data
-REFDATA_PACKAGES        = ['ccp.molecule.ChemCompCoord',
-                           'ccp.molecule.ChemComp',
-                           'ccp.molecule.ChemElement',
-                           'ccp.molecule.ChemCompLabel',
-                           'ccp.nmr.NmrExpPrototype',
-                           'ccp.nmr.NmrReference'
-                           ]
+REFDATA_PACKAGES = ['ccp.molecule.ChemCompCoord',
+                    'ccp.molecule.ChemComp',
+                    'ccp.molecule.ChemElement',
+                    'ccp.molecule.ChemCompLabel',
+                    'ccp.nmr.NmrExpPrototype',
+                    'ccp.nmr.NmrReference'
+                    ]
 
 #TODO: original code implemented silencing of garbage collection on reading/writing: still valid?
 SILENCE_GARBAGE_COLLECTION = False
@@ -1373,20 +1375,25 @@ class XmlLoader(XmlLoaderABC):
             getLogger().debug('blocking save of .xml files')
             return
 
-        # Assure that all apiTopOjects are accounted for; some may have been created
+        # Assure that all apiTopObjects are accounted for; some may have been created
         self._updateTopObjects()
 
         topObjects = self.userData.getTopObjects()
         if len(topObjects) == 0:
             raise RuntimeError('No data to save; this should not happen')
 
+        app = getApplication()
+        backupSaveCount = app.preferences.general.backupSaveCount
+
         # check if we have to keep current ccpnv3 directory before removing it
         if self.v3Path.exists() and keepFallBack:
             self.backupsPath.mkdir(exist_ok=True, parents=False)
-            # check existing backups
+            # check existing backups, need to check extension for user-backups
             _existing = [_p for _p in self.backupsPath.listdir(suffix=BACKUP_SUFFIX) if _p.basename.startswith(CCPN_API_DIRECTORY)]
-            if len(_existing) == XmlLoader.MAX_BACKUPS_ON_SAVE:
-                # remove the oldest backup
+            if len(_existing) >= backupSaveCount:  # XmlLoader.MAX_BACKUPS_ON_SAVE:
+                # only remove the oldest backup, fileName contains date
+                #   if the count has been reduced, there may be more many backup here,
+                #   but we don't want to delete all the extras, only the oldest; they may still be important.
                 _existing.sort()
                 _p = _existing.pop(0)
                 _p.removeDir()

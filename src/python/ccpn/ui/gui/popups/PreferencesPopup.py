@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 15:25:11 +0100 (Tue, March 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-13 16:04:08 +0100 (Thu, April 13, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -481,9 +481,32 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.autoBackupFrequencyData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', min=1, decimals=0, step=10)
         self.autoBackupFrequencyData.setMinimumWidth(LineEditsMinimumWidth)
         self.autoBackupFrequencyData.valueChanged.connect(self._queueSetAutoBackupFrequency)
+
+        row += 1
+        tTip = 'The number of auto-backups to keep. If the number of backups exceeds this value the oldest backup is removed.\n' \
+               'If this value is changed, older backups may need to be manually deleted.'
+        self.autoBackupCountLabel = _makeLabel(parent, text="Number of auto-backups", grid=(row, 0))
+        self.autoBackupCountData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', min=1, decimals=0, step=1)
+        self.autoBackupCountLabel.setToolTip(tTip)
+        self.autoBackupCountData.setToolTip(tTip)
+        self.autoBackupCountData.setMinimumWidth(LineEditsMinimumWidth)
+        self.autoBackupCountData.valueChanged.connect(self._queueSetAutoBackupCount)
         self.autoBackupEnabledBox.setChecked(False)
         self.autoBackupEnabledBox.setEnabled(False)
         self.autoBackupFrequencyData.setEnabled(False)
+        self.autoBackupCountData.setEnabled(False)
+
+        row += 1
+        tTip = 'The number of user-backups to keep.\n' \
+               'A backup is written to the backup folder every time a project is saved by the user.\n' \
+               'If the number of backups exceeds this value, the oldest backup is removed.\n' \
+               'If this value is changed, older backups may need to be manually deleted.'
+        self.backupSaveCountLabel = _makeLabel(parent, text="Number of backups on user-save", grid=(row, 0))
+        self.backupSaveCountData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', min=1, decimals=0, step=1)
+        self.backupSaveCountLabel.setToolTip(tTip)
+        self.backupSaveCountData.setToolTip(tTip)
+        self.backupSaveCountData.setMinimumWidth(LineEditsMinimumWidth)
+        self.backupSaveCountData.valueChanged.connect(self._queueSetBackupSaveCount)
 
         #====== Paths ======
         row += 1
@@ -713,7 +736,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         parent.getLayout().addWidget(ft, row, 1, 1, 2)  # there is a bug somewhere if not done like this :|
         self._updateFontTable(ft)
         ft.setToolTip('The list of fonts that are available to the spectrumDisplay print action.\n'
-                          'This is not all the installed fonts, only the .ttf fonts that can be\nused when printing spectrumDisplays to file.')
+                      'This is not all the installed fonts, only the .ttf fonts that can be\nused when printing spectrumDisplays to file.')
 
         parent.layout().setRowStretch(row, 5)  # let the table expand vertically
 
@@ -895,6 +918,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.restoreLayoutOnOpeningBox.setChecked(self.preferences.general.restoreLayoutOnOpening)
         # self.autoBackupEnabledBox.setChecked(self.preferences.general.autoBackupEnabled)
         # self.autoBackupFrequencyData.setValue(self.preferences.general.autoBackupFrequency)
+        self.autoBackupCountData.setValue(self.preferences.general.autoBackupCount)
+        self.backupSaveCountData.setValue(self.preferences.general.backupSaveCount)
 
         self.userWorkingPathData.setText(self.preferences.general.userWorkingPath)
         self.useProjectPathBox.setChecked(self.preferences.general.useProjectPath)
@@ -1918,6 +1943,28 @@ class PreferencesPopup(CcpnDialogMainWidget):
         raise NotImplementedError('AutoBackup is not available in the current release')
         value = self.autoBackupEnabledBox.get()
         self.autoBackupFrequencyData.enableWidget(value)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetAutoBackupCount(self, _value):
+        textFromValue = self.autoBackupCountData.textFromValue
+        value = self.autoBackupCountData.get()
+        prefValue = textFromValue(self.preferences.general.autoBackupCount)
+        if textFromValue(value) != prefValue:
+            return partial(self._setAutoBackupCount, value)
+
+    def _setAutoBackupCount(self, value):
+        self.preferences.general.autoBackupCount = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetBackupSaveCount(self, _value):
+        textFromValue = self.backupSaveCountData.textFromValue
+        value = self.backupSaveCountData.get()
+        prefValue = textFromValue(self.preferences.general.backupSaveCount)
+        if textFromValue(value) != prefValue:
+            return partial(self._setBackupSaveCount, value)
+
+    def _setBackupSaveCount(self, value):
+        self.preferences.general.backupSaveCount = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetRegionPadding(self, _value):

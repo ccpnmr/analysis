@@ -156,7 +156,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         if self.spectra:
             self._selectSpectrum(self.spectra[0])
 
-        # pull down list for selecting the current metabolite by name
+        # table widget for selecting the current metabolite by name
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text='Metabolite', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
@@ -167,7 +167,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(widget, _setWidth([500], grid), 300)
         self.guiDict['Spectrum']['metabolite'] = widget
 
-        # pull down list for selecting the simulation of the metabolite
+        # table widget for selecting the simulation of the metabolite
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text='Simulation', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
@@ -204,7 +204,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         def navigateToMultiplet():
             target = widget.value()
             # todo code here to move the view to the target value above
-        grid = (index+7, index+7)
+        grid = (index+8, index+8)
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Multiplet {index+1} Chemical Shift', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
@@ -249,6 +249,11 @@ class ProfileByReferenceGuiPlugin(PluginModule):
     def frequencyChange(self):
         frequency = self.guiDict['Spectrum']['Frequency'].value()
         self.simspec.setFrequency(frequency)
+        self.refreshSumSpectrum()
+
+    def globalShiftChange(self):
+        shift = self.guiDict['Spectrum']['GlobalShift'].value()
+        self.simspec.setGlobalShift(shift)
         self.refreshSumSpectrum()
 
     def _selectSpectrumGroup(self, spectrumGroupID):
@@ -308,6 +313,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         if spectrumId not in self.metaboliteSimulations:
             width = 1
             scale = 1
+            globalShift = 0
             frequency = round(self.settings['Spectrum']['referenceSumSpectrumFrequency']/10)*10
             self.simspec = self.simulator.pureSpectrum(spectrumId=spectrumId, width=width, frequency=frequency, points=self.settings['Spectrum']['referenceSumSpectrumPoints'], limits=self.settings['Spectrum']['referenceSumSpectrumLimits'], plotting=plotting)
             self.metaboliteSimulations[spectrumId] = self.simspec
@@ -319,6 +325,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             scale = log10(self.simspec.scale)
             width = self.simspec.width
             frequency = self.simspec.frequency
+            globalShift = self.simspec.globalShift
         if metaboliteName not in self.settings['ResultsTables']['currentTable'].data.columns.to_list():
             column = [None] * len(self.settings['ResultsTables']['currentTable'].data)
             self.settings['ResultsTables']['currentTable'].data[metaboliteName] = column
@@ -366,22 +373,41 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.settings['Spectrum']['Scale'] = self._getValue(widget)
 
         # Add a widget for the simulated spectrum frequency
+        if origin != 'bmrb':
+            grid = _addRow(grid)
+            widget = Label(self.scrollAreaLayout, text=f'Frequency', grid=grid)
+            _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+            self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
+
+            grid = _addColumn(grid)
+            widget = DoubleSpinbox(self.scrollAreaLayout, value=frequency, decimals=1, step=10,
+                                   grid=grid,
+                                   gridSpan=(1, 2))
+            widget.setRange(10, 1200)
+            _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
+            widget.setButtonSymbols(2)
+            widget.valueChanged.connect(self.frequencyChange)
+            self.guiDict['Spectrum']['SimulatedSpectrumAttributes'].append(widget)
+            self.guiDict['Spectrum']['Frequency'] = widget
+            self.settings['Spectrum']['Frequency'] = self._getValue(widget)
+
+        # Add a widget for the simulated spectrum global shift
         grid = _addRow(grid)
-        widget = Label(self.scrollAreaLayout, text=f'Frequency', grid=grid)
+        widget = Label(self.scrollAreaLayout, text=f'Global Shift', grid=grid)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
         self.guiDict[f'Spectrum']['SimulatedSpectrumAttributes'].append(widget)
 
         grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=frequency, decimals=1, step=10,
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=globalShift, decimals=4, step=0.0001,
                                grid=grid,
                                gridSpan=(1, 2))
-        widget.setRange(10, 1200)
+        widget.setRange(-1, 1)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
         widget.setButtonSymbols(2)
-        widget.valueChanged.connect(self.frequencyChange)
+        widget.valueChanged.connect(self.globalShiftChange)
         self.guiDict['Spectrum']['SimulatedSpectrumAttributes'].append(widget)
-        self.guiDict['Spectrum']['Frequency'] = widget
-        self.settings['Spectrum']['Frequency'] = self._getValue(widget)
+        self.guiDict['Spectrum']['GlobalShift'] = widget
+        self.settings['Spectrum']['GlobalShift'] = self._getValue(widget)
 
         if self.simspec.multiplets:
             for index, multipletId in enumerate(self.simspec.multiplets):

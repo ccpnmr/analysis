@@ -162,14 +162,10 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
         grid = _addColumn(grid)
-        widget = PulldownList(self.scrollAreaLayout, grid=grid, gridSpan=(1, 2),
-                              callback=self._selectMetabolite, tipText=help['Metabolite'])
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-
+        df = self.metabolites.data.sort_values('name')[['name', 'hmdb_accession', 'bmrb_id', 'chemical_formula', 'average_molecular_weight', 'smiles', 'inchi', 'metabolite_id', 'description']]
+        widget = Table(self.scrollAreaLayout, df=df, grid=grid, gridSpan=(1, 2), selectionCallback=self._selectMetabolite, borderWidth=4)
+        _setWidgetProperties(widget, _setWidth([500], grid), 300)
         self.guiDict['Spectrum']['metabolite'] = widget
-        metaboliteNames = self.metabolites.data.sort_values('name').name.tolist()
-        widget.setData(metaboliteNames)
-        self.settings['Spectrum']['metabolite'] = self._getValue(widget)
 
         # pull down list for selecting the simulation of the metabolite
         grid = _addRow(grid)
@@ -285,10 +281,10 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             self.settings['Spectrum']['referenceSumSpectrum'] = self.sumSpectra[spectrumID]
             self.settings['Spectrum']['referenceSpectrumGroup'].addSpectrum(self.settings['Spectrum']['referenceSumSpectrum'])
 
-    def _selectMetabolite(self, metaboliteName):
+    def _selectMetabolite(self, newRow, previousRow, selectedRow, lastRow):
+        metaboliteName = newRow.name.iloc[0]
         self.settings['Spectrum']['metabolite'] = metaboliteName
-        metabolitesData = self.metabolites.data
-        metabolite_id = metabolitesData.loc[metabolitesData['name'] == metaboliteName, 'metabolite_id'].iloc[0]
+        metabolite_id = newRow.metabolite_id.iloc[0]
         widget = self.guiDict['Spectrum']['simulation']
         query = f'select * from samples natural join spectra where metabolite_id is "{metabolite_id}"'
         data = self.simulator.caller.execute_query(query)

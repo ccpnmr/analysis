@@ -216,7 +216,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(valueChange)
-        self.guiDict['TemporaryWidgets'][f'Multiplet{index+1}ChmeicalShift'] = widget
+        self.guiDict['TemporaryWidgets'][f'Multiplet{index+1}ChemicalShift'] = widget
         self.settings['Current'][f'Multiplet {index+1} Chemical Shift'] = self._getValue(widget)
 
         grid = _addColumn(grid)
@@ -252,7 +252,12 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
     def globalShiftChange(self):
         shift = self.guiDict['TemporaryWidgets']['GlobalShift'].value()
-        self.simspec.setGlobalShift(shift)
+        difference = shift - self.simspec.globalShift
+        for widget in self.guiDict['TemporaryWidgets']:
+            if widget.endswith('ChemicalShift'):
+                self.guiDict['TemporaryWidgets'][widget].setValue(self.guiDict['TemporaryWidgets'][widget].value() + difference)
+        self.simspec.shiftOriginalMultiplets(difference)
+        self.simspec.globalShift = shift
         self.refreshSumSpectrum()
 
     def _selectSpectrumGroup(self, spectrumGroupID):
@@ -293,7 +298,6 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         query = f'select * from samples natural join spectra where metabolite_id is "{metabolite_id}"'
         data = self.simulator.caller.execute_query(query)
         widget.updateDf(data)
-
 
     def _setupSimulatedSpectrum(self, newRow, previousRow, selectedRow, lastRow):
         metabolitesData = self.metabolites.data
@@ -345,7 +349,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets']['WidthLabel'] = widget
 
         grid = _addColumn(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=width, decimals=1, step=0.1, grid=grid, gridSpan=(1, 2))
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=width, decimals=1, step=0.1, grid=grid, gridSpan=(1, 2), suffix='Hz')
         widget.setRange(0.1, 5)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
         widget.setButtonSymbols(2)
@@ -377,8 +381,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
             grid = _addColumn(grid)
             widget = DoubleSpinbox(self.scrollAreaLayout, value=frequency, decimals=1, step=10,
-                                   grid=grid,
-                                   gridSpan=(1, 2))
+                                   grid=grid, gridSpan=(1, 2), suffix='MHz')
             widget.setRange(10, 1200)
             _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
             widget.setButtonSymbols(2)
@@ -394,8 +397,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
         grid = _addColumn(grid)
         widget = DoubleSpinbox(self.scrollAreaLayout, value=globalShift, decimals=4, step=0.0001,
-                               grid=grid,
-                               gridSpan=(1, 2))
+                               grid=grid, gridSpan=(1, 2), suffix='ppm')
         widget.setRange(-1, 1)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
         widget.setButtonSymbols(2)

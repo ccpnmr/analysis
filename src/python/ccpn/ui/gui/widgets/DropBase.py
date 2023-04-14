@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-01 18:39:44 +0000 (Wed, March 01, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-04-14 16:30:18 +0100 (Fri, April 14, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,7 @@ import contextlib
 import json
 from ccpn.util.Logging import getLogger
 from PyQt5 import QtGui, QtCore, QtWidgets
+
 
 # GST maybe this too high level but because of the way drag events are handled cooperatively
 # at the moment it needs to be here...
@@ -206,23 +207,30 @@ class DropBase:
         if self.inDragToMaximisedModule:
             return
 
-        inModuleOverlay = self._callModuleDrop(event)
-
-        if inModuleOverlay:
+        if inModuleOverlay := self._callModuleDrop(event):
             inModuleOverlay.dropEvent(event)
             self._clearOverlays()
             return
 
         if self.acceptDrops():
-
             dataDict = self.parseEvent(event)
-            getLogger().debug('Accepted drop with data:%s' % dataDict)
-            getLogger().debug('DropBase-event>: %s callback: %s data: %s' % (self, self._dropEventCallback, dataDict))
+            getLogger().debug(f'Accepted drop with data:{dataDict}')
+            getLogger().debug(f'DropBase-event>: {self} callback: {self._dropEventCallback} data: {dataDict}')
 
             if dataDict is not None and len(dataDict) > 1:
                 event.accept()
-                if self._dropEventCallback is not None:
-                    self._dropEventCallback(dataDict)
+
+                # follow parents to find first valid callback, until top-level reached
+                widg = self
+                while widg:
+                    if (hasattr(widg, '_dropEventCallback') and widg._dropEventCallback is not None):
+                        widg._dropEventCallback(dataDict)
+                        event.accept()
+                        break
+                    widg = widg.parent()
+
+                else:
+                    event.ignore()
 
         else:
             getLogger().debug('Widget not droppable')
@@ -238,7 +246,8 @@ class DropBase:
           - event, source key,values pairs
           - (type, data) key,value pairs,
         """
-        from ccpn.core.lib.Pid import Pid # this causes circular imports. KEEP LOCAL
+        from ccpn.core.lib.Pid import Pid  # this causes circular imports. KEEP LOCAL
+
         data = dict(
                 event=event,
                 source=None

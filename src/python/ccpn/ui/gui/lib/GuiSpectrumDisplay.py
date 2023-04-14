@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-04 16:08:27 +0100 (Tue, April 04, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-04-14 16:30:18 +0100 (Fri, April 14, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -237,10 +237,9 @@ class GuiSpectrumDisplay(CcpnModule):
         self._spectrumDisplaySettings.stripArrangementChanged.connect(self._stripDirectionChangedInSettings)
         self._spectrumDisplaySettings.zPlaneNavigationModeChanged.connect(self._zPlaneNavigationModeChangedInSettings)
 
-        # notifier to respond to items being dropped onto the stripFrame
+        # notifier to respond to items being dropped onto the spectrumDisplay
         self.setAcceptDrops(True)
-        self._droppedNotifier = self.setGuiNotifier(self.stripFrame,
-                                                   [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
+        self._droppedNotifier = self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                                                    self._processDroppedItems)
 
         # GWV: This assures that a 'hoverbar' is visible over the strip when dragging
@@ -372,6 +371,7 @@ class GuiSpectrumDisplay(CcpnModule):
         # spectrumGroupsToolBar - holds spectrumGroup icons, slightly different behaviour
         self.spectrumGroupToolBar = SpectrumGroupToolBar(parent=self.toolBarFrame, spectrumDisplay=self,
                                                          grid=(2, 0), hPolicy='preferred', hAlign='left')
+
         self.spectrumGroupToolBar.hide()
         self.spectrumUtilToolBar.setStyleSheet(_styleSheet)
         self.spectrumToolBar.setStyleSheet(_styleSheet)

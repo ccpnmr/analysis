@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 15:18:45 +0100 (Tue, March 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-14 16:30:18 +0100 (Fri, April 14, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1088,9 +1088,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
         self.drag.destroyed.connect(self._destroyed)
 
-        # GST doesn't work in the current version but should work in 5.13
-        forbiddenCursorPixmap = QtGui.QCursor(QtCore.Qt.ForbiddenCursor).pixmap()
-        self.drag.setDragCursor(forbiddenCursorPixmap, QtCore.Qt.IgnoreAction)
+        # GST doesn't work in the current version but should work in 5.13, OS cursors don't have pixmaps :|
+        # forbiddenCursorPixmap = QtGui.QCursor(QtCore.Qt.ForbiddenCursor).pixmap()
+        # self.drag.setDragCursor(forbiddenCursorPixmap, QtCore.Qt.IgnoreAction)
 
         dragResult = self.drag.exec_()
         endPosition = QtGui.QCursor.pos()
@@ -1190,11 +1190,11 @@ class CcpnModuleLabel(DockLabel):
                 raise RuntimeError('Requested closeButton without callback')
             else:
                 self.closeButton.clicked.connect(closeCallback)
-            self.setupLabelButton(self.closeButton, 'close_cross', CcpnModuleLabel.TOP_RIGHT)
+            self.setupLabelButton(self.closeButton, 'close-module', CcpnModuleLabel.TOP_RIGHT)
 
         # Settings
         self.settingsButton = ToolButton(self)
-        self.setupLabelButton(self.settingsButton, 'settings_cog', CcpnModuleLabel.TOP_LEFT)
+        self.setupLabelButton(self.settingsButton, 'gearbox', CcpnModuleLabel.TOP_LEFT)
 
         if settingsCallback is None:
             raise RuntimeError('Requested settingsButton without callback')

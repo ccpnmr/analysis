@@ -4,10 +4,12 @@ The NmrResidueLabel allows drag and drop of the ids displayed in them
 
 """
 
+
+import contextlib
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -18,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:47 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-04-17 12:17:56 +0100 (Mon, April 17, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -55,6 +57,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import AXISUNIT_POINT
+from ccpn.core.lib.SpectrumLib import DIMENSION_TIME
 
 
 STRIPLABEL_CONNECTDIR = '_connectDir'
@@ -185,7 +188,7 @@ class _StripLabel(ActiveLabel):  #  VerticalLabel): could use Vertical label so 
     def _processDoubleClick(self, obj):
         """Process the doubleClick event, action the clicked stripHeader in the selected strip
         """
-        from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakInStrip, navigateToNmrResidueInStrip
+        from ccpn.ui.gui.lib.SpectrumDisplayLib import navigateToPeakInStrip, navigateToNmrResidueInStrip
 
         obj = self.project.getByPid(obj) if isinstance(obj, str) else obj
         if obj:
@@ -680,14 +683,35 @@ class PlaneAxisWidget(_OpenGLFrameABC):
     def _nextPlane(self, *args):
         """Increases axis position by one plane
         """
-        if self.strip:
-            self.strip._changePlane(self.axis, planeIncrement=-1, planeCount=self.planeCount)
+        with contextlib.suppress(Exception):
+            if self.strip:
+                # check the dimension-type of the current z-plane for the spectrum-display
+                specView = self.strip.spectrumDisplay.spectrumViews[0]
+                planeType = specView.dimensionTypes[self.axis]
+                axisReversed = specView.spectrum.axesReversed[specView.dimensionIndices[self.axis]]
+
+                # NOTE:ED - HACK for time-domain until slider is implemented, should it be the other direction?
+                # decimals = self._axisSelector.spinBox.decimals()  <- more generic with decimals?
+                step = 1 if planeType == DIMENSION_TIME else (-1 if axisReversed else 1)
+
+                self.strip._changePlane(self.axis, planeIncrement=step, planeCount=self.planeCount,
+                                        isTimeDomain=planeType == DIMENSION_TIME)
 
     def _previousPlane(self, *args):
         """Decreases axis position by one plane
         """
-        if self.strip:
-            self.strip._changePlane(self.axis, planeIncrement=1, planeCount=self.planeCount)
+        with contextlib.suppress(Exception):
+            if self.strip:
+                # check the dimension-type of the current z-plane for the spectrum-display
+                specView = self.strip.spectrumDisplay.spectrumViews[0]
+                planeType = specView.dimensionTypes[self.axis]
+                axisReversed = specView.spectrum.axesReversed[specView.dimensionIndices[self.axis]]
+
+                # NOTE:ED - HACK for time-domain until slider is implemented
+                step = -1 if planeType == DIMENSION_TIME else (1 if axisReversed else -1)
+
+                self.strip._changePlane(self.axis, planeIncrement=step, planeCount=self.planeCount,
+                                        isTimeDomain=planeType == DIMENSION_TIME)
 
     def _spinBoxChanged(self, *args):
         """Sets the value of the axis plane position box if the specified value is within the displayable limits.

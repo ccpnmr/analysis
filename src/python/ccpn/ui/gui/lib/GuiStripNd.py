@@ -34,8 +34,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:41 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-04-17 12:17:56 +0100 (Mon, April 17, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -588,6 +588,7 @@ class GuiStripNd(GuiStrip):
                                         unit=_axis.unit)
 
     def _changePlane(self, stripAxisIndex: int, planeIncrement: int, planeCount=None,
+                     isTimeDomain: bool = False,
                      refresh: bool = True
                      ):
         """Change the position of plane-axis defined by stripAxisIndex by increment (in points)
@@ -596,6 +597,7 @@ class GuiStripNd(GuiStrip):
                                The actual ppm increment (for axis in ppm units) will be
                                the minimum ppm increment along stripAxisIndex.
         :param planeCount: the number of planes to display
+        :param isTimeDomain: axis is a time-domain and needs to enforce integer point step.
         :param refresh: optionally refresh strip after setting values
         """
         if stripAxisIndex < 0 or stripAxisIndex >= self.spectrumDisplay.dimensionCount:
@@ -630,6 +632,9 @@ class GuiStripNd(GuiStrip):
             ds = _displayedNdSpectra[0]
             specDim = ds.spectrumView.spectrumDimensions[stripAxisIndex]
             pointPosition = specDim.ppmToPoint(_axis.position)
+            if isTimeDomain:
+                # NOTE:ED - hack to make step an integer, otherwise wraps badly for time-domains :|
+                pointPosition = round(pointPosition)
             newPosition = pointPosition + _incrementByUnit * planeIncrement
             width = _incrementByUnit * _axis._planeCount
 

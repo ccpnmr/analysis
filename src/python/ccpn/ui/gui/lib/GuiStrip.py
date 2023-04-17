@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-17 18:30:46 +0000 (Fri, March 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-17 12:17:56 +0100 (Mon, April 17, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -2764,6 +2764,7 @@ class GuiStrip(Frame):
         pass
 
     def _changePlane(self, stripAxisIndex: int, planeIncrement: int, planeCount=None,
+                     isTimeDomain: bool = False,
                      refresh: bool = True
                      ):
         """Change the position of plane-axis defined by stripAxisIndex by increment (in points)
@@ -2771,8 +2772,9 @@ class GuiStrip(Frame):
         :param planeIncrement: an integer defining number of planes to increment.
                                The actual ppm increment (for axis in ppm units) will be
                                the minimum ppm increment along stripAxisIndex.
-        :param planeCount: the number of planes to display
-        :param refresh: optionally refresh strip after setting values
+        :param planeCount: the number of planes to display.
+        :param isTimeDomain: axis is a time-domain and needs to enforce integer point step.
+        :param refresh: optionally refresh strip after setting values.
         """
         # Only implemented for nD
         pass

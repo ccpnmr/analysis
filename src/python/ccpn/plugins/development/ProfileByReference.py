@@ -291,9 +291,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             self.settings['Current']['referenceSpectrumGroup'].addSpectrum(self.settings['Current']['referenceSumSpectrum'])
 
     def _selectMetabolite(self, newRow, previousRow, selectedRow, lastRow):
-        metaboliteName = newRow.name.iloc[0]
+        metaboliteName = selectedRow.name.iloc[0]
         self.settings['Current']['metabolite'] = metaboliteName
-        metabolite_id = newRow.metabolite_id.iloc[0]
+        metabolite_id = selectedRow.metabolite_id.iloc[0]
         widget = self.guiDict['CoreWidgets']['simulation']
         query = f'select * from samples natural join spectra where metabolite_id is "{metabolite_id}"'
         data = self.simulator.caller.execute_query(query)
@@ -301,9 +301,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
     def _setupSimulatedSpectrum(self, newRow, previousRow, selectedRow, lastRow):
         metabolitesData = self.metabolites.data
-        metaboliteID = newRow.metabolite_id.iloc[0]
-        spectrumId = newRow.spectrum_id.iloc[0]
-        origin = newRow.origin.iloc[0]
+        metaboliteID = selectedRow.metabolite_id.iloc[0]
+        spectrumId = selectedRow.spectrum_id.iloc[0]
+        origin = selectedRow.origin.iloc[0]
         if origin == 'gissmo':
             plotting = 'spinSystem'
         elif origin == 'bmrb':

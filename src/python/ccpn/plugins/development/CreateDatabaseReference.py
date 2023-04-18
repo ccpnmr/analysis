@@ -211,7 +211,6 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
             widget.valueChanged.connect(changeCouplingConstant)
             widget.setSingleStep(0.1)
 
-
     def _modifySpinSystemMatrix(self):
         dimension = self.settings['Current']['ProtonCount']
         ss_matrix = np.zeros((dimension, dimension))
@@ -223,19 +222,6 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
             ss_matrix[column][row] = value
             ss_matrix[row][column] = value
         self.settings['Current']['SimulatedSpectrum'].spinSystemMatrix = ss_matrix
-
-
-    def addSimSpectrumToList(self, spectrum):
-        if 'SimulatedSpectra' not in self.settings['Spectra']:
-            self.settings['Spectra']['SimulatedSpectra'] = [spectrum]
-        else:
-            self.settings['Spectra']['SimulatedSpectra'].append(spectrum)
-
-    def refreshSumSpectrum(self):
-        sumIntensities = numpy.zeros(self.settings['Current']['referenceSumSpectrumPoints'])
-        for spectrum in self.settings['Spectra']['SimulatedSpectra']:
-            sumIntensities += spectrum.spectrum.intensities
-        self.settings['Current']['referenceSumSpectrum'].intensities = sumIntensities
 
     def _getValue(self, widget):
         # Get the current value of the widget:

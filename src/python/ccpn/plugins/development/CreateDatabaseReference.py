@@ -68,7 +68,7 @@ from .pluginAddons import _addRow, _addColumn, _addVerticalSpacer, _setWidth, _s
 
 # Widths in pixels for nice widget alignments, length depends on the number of fixed columns in the plugin.
 # Variable number of columns will take the last value in the list
-columnWidths = [300]
+columnWidths = [75]
 
 # Set some tooltip texts
 help = {'SimulationType': 'The type of simulation to create. Spin System: Accurate and flexible but only for very small molecules. Peak List: Less flexible but can be made for any molecule.'}
@@ -88,7 +88,7 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaLayout = Frame(None, setLayout=True)
         self.scrollArea.setWidget(self.scrollAreaLayout)
-        self.scrollAreaLayout.setContentsMargins(20, 20, 20, 20)
+        # self.scrollAreaLayout.setContentsMargins(20, 20, 20, 20)
 
         # self.userPluginPath = self.application.preferences.general.userPluginPath
         # self.outputPath = self.application.preferences.general.dataPath
@@ -113,22 +113,25 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
 
         # Pull down and button to create a new reference spectrum
         widget = PulldownList(self.scrollAreaLayout, grid=grid, gridSpan=(1, 2), tipText=help['SimulationType'], callback=self._chooseSimulationType)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+        _setWidgetProperties(widget, 200)
 
         simulationTypes = ['Spin System', 'Peak List']
         widget.setData(simulationTypes)
         self.guiDict['CoreWidgets']['SimulationTypePullDown'] = widget
         self._chooseSimulationType(simulationTypes[0])
 
-        grid = _addColumn(grid)
-        widget = Button(parent=self.scrollAreaLayout, text='Create New Simulation', grid=grid, callback=self._createNewSimulation)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid), heightType='Minimum')
+        grid = _addColumn(_addColumn(grid))
+        widget = Button(parent=self.scrollAreaLayout, text='Create New Simulation', grid=grid, gridSpan=(1, 2), callback=self._createNewSimulation)
+        _setWidgetProperties(widget, 200)
         self.guiDict['CoreWidgets']['SimulationTypeButton'] = widget
 
     def _chooseSimulationType(self, type):
         self.settings['Current']['SimulationType'] = type
 
     def _createNewSimulation(self):
+        for key in self.guiDict['TemporaryWidgets']:
+            self.guiDict['TemporaryWidgets'][key].deleteLater()
+        self.guiDict['TemporaryWidgets'] = OD()
         type = self.settings['Current']['SimulationType']
         simulatedSpectrum = SimulatedSpectrum(self.project, [(0, 0, 0, None)], {'0': {'center': float(0), 'indices': [0]}},
                                               np.zeros((1, 1)), 500, 65536, (12, -2), 'lorentzian', False, None, None,
@@ -138,33 +141,80 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         self.settings['Current']['Spectrum'] = spectrum
         simulatedSpectrum.spectrum = spectrum
         self.settings['Current']['SimulatedSpectrum'] = simulatedSpectrum
+        simulatedSpectrum.scaleSpectrum(10)
+
+        grid = (1, 0)
+
+        # Add a widget for the simulated spectrum peak width
+        widget = Label(self.scrollAreaLayout, text=f'Width', grid=grid, gridSpan=(1, 2))
+        _setWidgetProperties(widget, 200)
+        self.guiDict['TemporaryWidgets']['WidthLabel'] = widget
+        grid = _addColumn(_addColumn(grid))
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=1, decimals=1, step=0.1, grid=grid, gridSpan=(1, 2), callback=self._widthChange, suffix='Hz')
+        widget.setRange(0.1, 5)
+        _setWidgetProperties(widget, 200)
+        self.guiDict['TemporaryWidgets']['Width'] = widget
+        self.settings['Current']['Width'] = self._getValue(widget)
+
+        # Add a widget for the simulated spectrum scale
+        grid = _addRow(grid)
+        widget = Label(self.scrollAreaLayout, text=f'Scale (10^n)', grid=grid, gridSpan=(1, 2))
+        _setWidgetProperties(widget, 200)
+        self.guiDict['TemporaryWidgets']['ScaleLabel'] = widget
+        grid = _addColumn(_addColumn(grid))
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=1, decimals=3, step=0.001, grid=grid, gridSpan=(1, 2), callback=self._scaleChange)
+        widget.setRange(-7, 7)
+        _setWidgetProperties(widget, 200)
+        self.guiDict['TemporaryWidgets']['Scale'] = widget
+        self.settings['Current']['Scale'] = self._getValue(widget)
+
+        # Add a widget for the simulated spectrum frequency
+        grid = _addRow(grid)
+        widget = Label(self.scrollAreaLayout, text=f'Frequency', grid=grid, gridSpan=(1, 2))
+        _setWidgetProperties(widget, 200)
+        self.guiDict['TemporaryWidgets']['FrequencyLabel'] = widget
+        grid = _addColumn(_addColumn(grid))
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=500, step=10, grid=grid, gridSpan=(1, 2), suffix='MHz', callback=self._frequencyChange)
+        widget.setRange(10, 1200)
+        _setWidgetProperties(widget, 200)
+        self.guiDict['TemporaryWidgets']['Frequency'] = widget
+        self.settings['Current']['Frequency'] = self._getValue(widget)
+
         if type == 'Spin System':
             self._setupSsmWidgets()
         elif type == 'Peak List':
             pass
 
+    def _widthChange(self, width):
+        self.settings['Current']['SimulatedSpectrum'].setWidth(width)
+
+    def _scaleChange(self, scale):
+        self.settings['Current']['SimulatedSpectrum'].scaleSpectrum(scale)
+
+    def _frequencyChange(self, frequency):
+        self.settings['Current']['SimulatedSpectrum'].setFrequency(frequency)
+
     def _setupSsmWidgets(self):
         def changeMultipletCenter():
             shift = widget.value()
             self.settings['Current']['SimulatedSpectrum'].moveMultiplet('0', shift)
-        grid = (1, 0)
+        grid = (5, 0)
         self.settings['Current']['ProtonCount'] = 1
 
-        grid = _addColumn(grid)
-        widget = Button(parent=self.scrollAreaLayout, text='Remove Proton', grid=grid, callback=self._removeColumn)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid), heightType='Minimum')
+        widget = Button(parent=self.scrollAreaLayout, text='Remove Proton', grid=grid, gridSpan=(1, 2), callback=self._removeColumn)
+        _setWidgetProperties(widget, 200)
         self.guiDict['TemporaryWidgets']['RemoveProtonButton'] = widget
 
-        grid = _addColumn(grid)
-        widget = Button(parent=self.scrollAreaLayout, text='Add Proton', grid=grid,
+        grid = _addColumn(_addColumn(grid))
+        widget = Button(parent=self.scrollAreaLayout, text='Add Proton', grid=grid, gridSpan=(1, 2),
                         callback=self._addColumn)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid), heightType='Minimum')
+        _setWidgetProperties(widget, 200)
         self.guiDict['TemporaryWidgets']['addProtonButton'] = widget
 
         grid = _addRow(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=float(0), decimals=4, step=0.0001, grid=grid, gridSpan=(1, 1))
-        widget.setRange(0, 10)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='l')
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=float(0), decimals=4, step=0.0001, grid=grid, gridspan=(1,1))
+        widget.setRange(-2, 12)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
         widget.valueChanged.connect(changeMultipletCenter)
         self.guiDict['TemporaryWidgets']['Column0ProtonSpinbox0'] = widget
         self.settings['Current']['ProtonCount'] = 1
@@ -182,14 +232,14 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         self._modifySpinSystemMatrix()
 
     def _addColumn(self):
-        if self.settings['Current']['ProtonCount'] > 3:
+        if self.settings['Current']['ProtonCount'] > 5:
             return
         self.settings['Current']['SimulatedSpectrum'].multiplets[str(self.settings['Current']['ProtonCount'])] = {'center': float(0), 'indices': [self.settings['Current']['ProtonCount']]}
         column = self.settings['Current']['ProtonCount']
         for row in range(column+1):
             self._addSsmSpinbox(column, row)
         self.settings['Current']['ProtonCount'] = column + 1
-        self.grid = (2, column)
+        self.grid = (6, column)
         self._modifySpinSystemMatrix()
 
     def _addSsmSpinbox(self, column, row):
@@ -199,16 +249,17 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         def changeCouplingConstant():
             coupling = widget.value()
             self.settings['Current']['SimulatedSpectrum'].editCouplingConstant(column, row, coupling)
-        grid = (row + 2, column)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=0, decimals=4, step=0.0001, grid=grid, gridSpan=(1, 1))
-        widget.setRange(0, 20)
+        grid = (row + 6, column)
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=0, decimals=4, step=0.0001, grid=grid, gridspan=(1,1))
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
         self.guiDict['TemporaryWidgets'][f'Column{column}ProtonSpinbox{row}'] = widget
         if row == column:
             multipletId = str(column)
             widget.valueChanged.connect(changeMultipletCenter)
+            widget.setRange(-2, 12)
         else:
             widget.valueChanged.connect(changeCouplingConstant)
+            widget.setRange(0, 20)
             widget.setSingleStep(0.1)
 
     def _modifySpinSystemMatrix(self):

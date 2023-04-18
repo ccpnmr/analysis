@@ -252,6 +252,7 @@ MEMOPS_PACKAGE = f'{MEMOPS}.{IMPLEMENTATION}'
 
 XML_SUFFIX = '.xml'
 BACKUP_SUFFIX = '.ccpnV3backup'
+AUTOBACKUP_SUFFIX = '.ccpnV3autobackup'
 KEY_SEPARATOR = '+'
 
 XML_LOADER_ATTR = 'xmlLoader'  # attribute name for MemopsRoot
@@ -1360,7 +1361,7 @@ class XmlLoader(XmlLoaderABC):
     # Saving
     #--------------------------------------------------------------------------------------------
 
-    def saveUserData(self, keepFallBack: bool = True, updateIsModified: bool = True):
+    def saveUserData(self, keepFallBack: bool = True, updateIsModified: bool = True, autoBackup: bool = False):
         """Save userData topObjects to Xml.
         :param keepFallBack: retain current ccpnv3 directory in backups
         :param updateIsModified: if False, the isModified flag of the apiTopObjects are retained 'as-is'
@@ -1383,22 +1384,27 @@ class XmlLoader(XmlLoaderABC):
             raise RuntimeError('No data to save; this should not happen')
 
         app = getApplication()
-        backupSaveCount = app.preferences.general.backupSaveCount
 
         # check if we have to keep current ccpnv3 directory before removing it
         if self.v3Path.exists() and keepFallBack:
+
+            saveCount = app.preferences.general.autoBackupCount if autoBackup else app.preferences.general.backupSaveCount
+            suffix = AUTOBACKUP_SUFFIX if autoBackup else BACKUP_SUFFIX
+
             self.backupsPath.mkdir(exist_ok=True, parents=False)
-            # check existing backups, need to check extension for user-backups
-            _existing = [_p for _p in self.backupsPath.listdir(suffix=BACKUP_SUFFIX) if _p.basename.startswith(CCPN_API_DIRECTORY)]
-            if len(_existing) >= backupSaveCount:  # XmlLoader.MAX_BACKUPS_ON_SAVE:
+
+            # check existing save/auto-backups
+            _existing = [_p for _p in self.backupsPath.listdir(suffix=suffix) if _p.basename.startswith(CCPN_API_DIRECTORY)]
+            if len(_existing) >= saveCount:  # XmlLoader.MAX_BACKUPS_ON_SAVE:
                 # only remove the oldest backup, fileName contains date
                 #   if the count has been reduced, there may be more many backup here,
                 #   but we don't want to delete all the extras, only the oldest; they may still be important.
                 _existing.sort()
                 _p = _existing.pop(0)
                 _p.removeDir()
+
             # create the new backup by moving current v3Path
-            bPath = self.backupsPath / (CCPN_API_DIRECTORY + BACKUP_SUFFIX)
+            bPath = self.backupsPath / (CCPN_API_DIRECTORY + suffix)
             bPath = bPath.addTimeStamp()
             self.v3Path.rename(bPath)
 

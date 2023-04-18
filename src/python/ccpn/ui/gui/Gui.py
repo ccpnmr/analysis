@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-31 13:27:32 +0100 (Fri, March 31, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-04-18 16:08:03 +0100 (Tue, April 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -35,15 +35,10 @@ from ccpn.core.Project import Project
 
 from ccpn.framework.Application import getApplication
 from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders, _checkPathForDataLoader
+from ccpn.framework.lib.DataLoaders.DataLoaderABC import _checkPathForDataLoader
 
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.lib.ContextManagers import \
-    notificationEchoBlocking, \
-    catchExceptions, \
-    undoBlockWithoutSideBar, \
-    logCommandManager, \
-    undoStackBlocking
+from ccpn.core.lib.ContextManagers import notificationEchoBlocking, catchExceptions, \
+    logCommandManager, undoStackBlocking
 
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
@@ -55,7 +50,7 @@ from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
 
 # This import initializes relative paths for QT style-sheets.  Do not remove! GWV ????
 from ccpn.ui.gui.guiSettings import FontSettings
-from ccpn.ui.gui.widgets.Font import getFontHeight, setWidgetFont
+from ccpn.ui.gui.widgets.Font import getFontHeight
 
 from ccpn.util.Logging import getLogger
 from ccpn.util import Logging
@@ -586,16 +581,17 @@ class Gui(Ui):
             if (path := dialog.selectedFile()) is None:
                 return None
 
-        with catchExceptions(errorStringTemplate='Error loading project: %s'):
-            dataLoader, createNewProject, ignore = self._getDataLoader(path)
-            if ignore or dataLoader is None or not createNewProject:
-                return None
+        with self.application.pauseAutoBackups():
+            with catchExceptions(errorStringTemplate='Error loading project: %s'):
+                dataLoader, createNewProject, ignore = self._getDataLoader(path)
+                if ignore or dataLoader is None or not createNewProject:
+                    return None
 
-            # load the project using the dataLoader;
-            # We'll ask framework who will pass it back to ui._loadProject
-            if (objs := self.application._loadData([dataLoader])):
-                if len(objs) == 1:
-                    return objs[0]
+                # load the project using the dataLoader;
+                # We'll ask framework who will pass it back to ui._loadProject
+                if (objs := self.application._loadData([dataLoader])):
+                    if len(objs) == 1:
+                        return objs[0]
 
         return None
 

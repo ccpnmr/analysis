@@ -73,7 +73,6 @@ Test should contain the following folders, as of 3.1.1
 
 Projects on loading only require the ccpnv3 folder.
 
-
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -89,14 +88,13 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 18:59:24 +0100 (Tue, March 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-18 16:08:03 +0100 (Tue, April 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
-import contextlib
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -105,9 +103,11 @@ import os
 import sys
 import time
 import shutil
+import contextlib
 
 from PyQt5 import QtCore, QtWidgets
 from ccpn.core.testing.WrapperTesting import WrapperTesting
+from ccpn.ui.gui.guiSettings import consoleStyle
 from ccpn.util.Path import aPath
 from ccpn.framework.PathsAndUrls import userCcpnPath
 from ccpn.framework.Application import getApplication
@@ -126,54 +126,7 @@ tempProjectDir3 = tempFolder / TEMPPROJECT3
 
 _printAll = True
 
-os.system("")
-
-
-# Class of different styles - move to colours?
-class style():
-    """Colors class:reset all colors with colors.reset; two
-    subclasses fg for foreground
-    and bg for background; use as colors.subclass.colorname.
-    i.e. colors.fg.red or colors.bg.greenalso, the generic bold, disable,
-    underline, reverse, strike through,
-    and invisible work with the main class i.e. colors.bold
-    """
-    reset = '\033[0m'
-    bold = '\033[01m'
-    disable = '\033[02m'
-    underline = '\033[04m'
-    reverse = '\033[07m'
-    strikethrough = '\033[09m'
-    invisible = '\033[08m'
-
-
-    class fg:
-        black = '\033[30m'
-        red = '\033[31m'
-        green = '\033[32m'
-        orange = '\033[33m'
-        blue = '\033[34m'
-        magenta = '\033[35m'
-        cyan = '\033[36m'
-        white = '\033[37m'
-        darkgrey = '\033[90m'
-        lightred = '\033[91m'
-        lightgreen = '\033[92m'
-        yellow = '\033[93m'
-        lightblue = '\033[94m'
-        pink = '\033[95m'
-        lightcyan = '\033[96m'
-
-
-    class bg:
-        black = '\033[40m'
-        red = '\033[41m'
-        green = '\033[42m'
-        orange = '\033[43m'
-        blue = '\033[44m'
-        magenta = '\033[45m'
-        cyan = '\033[46m'
-        white = '\033[47m'
+os.system('')  # activates console text colours
 
 
 class ProjectReadOnly(WrapperTesting):
@@ -195,23 +148,23 @@ class ProjectReadOnly(WrapperTesting):
                 return
 
             if fp in self.fileEvents:
-                print(f'{style.fg.yellow}    --> {fp}')
+                print(f'{consoleStyle.fg.yellow}    --> {fp}')
                 return
 
             self.fileEvents.add(fp)
             if _printAll:
-                print(f'{style.fg.magenta}    fileEvent {len(self.fileEvents)}    {fp}')
+                print(f'{consoleStyle.fg.magenta}    fileEvent {len(self.fileEvents)}    {fp}')
 
     def _dirEvent(self, fp):
         # STILL sometimes getting a duplicate dirEvent, OR a missing event in the middle of a directory structure
         with QtCore.QMutexLocker(self._lock):
             if fp in self.dirEvents:
-                print(f'{style.fg.yellow}    --> {fp}')
+                print(f'{consoleStyle.fg.yellow}    --> {fp}')
                 return
 
             self.dirEvents.add(fp)
             if _printAll:
-                print(f'{style.fg.green}    dirEvent  {len(self.dirEvents)}    {fp}')
+                print(f'{consoleStyle.fg.green}    dirEvent  {len(self.dirEvents)}    {fp}')
 
     def _wait(self, app, watcher):
         # add any new files to the watcher

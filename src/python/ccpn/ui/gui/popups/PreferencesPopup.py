@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-13 16:04:08 +0100 (Thu, April 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-18 16:08:03 +0100 (Tue, April 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -100,7 +100,7 @@ def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays, 
     pref = self.application.preferences
 
     # remember the previous autoBackup settings
-    # lastBackup = (pref.general.autoBackupEnabled, pref.general.autoBackupFrequency)
+    lastBackup = (pref.general.autoBackupEnabled, pref.general.autoBackupFrequency)
 
     # update the preferences, but keep in place
     pref.clear()
@@ -109,9 +109,9 @@ def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays, 
     # application preferences updated so re-save
     self.application._savePreferences()
 
-    # if (pref.general.autoBackupEnabled, pref.general.autoBackupFrequency) != lastBackup:
-    #     # update the autoBackup with the new settings
-    #     self.application._updateAutoBackup()
+    if (pref.general.autoBackupEnabled, pref.general.autoBackupFrequency) != lastBackup:
+        # update the autoBackup with the new settings
+        self.application._updateAutoBackup()
 
     # update the current userWorkingPath in the active file dialogs
     if userWorkingPath:
@@ -491,10 +491,12 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.autoBackupCountData.setToolTip(tTip)
         self.autoBackupCountData.setMinimumWidth(LineEditsMinimumWidth)
         self.autoBackupCountData.valueChanged.connect(self._queueSetAutoBackupCount)
-        self.autoBackupEnabledBox.setChecked(False)
-        self.autoBackupEnabledBox.setEnabled(False)
-        self.autoBackupFrequencyData.setEnabled(False)
-        self.autoBackupCountData.setEnabled(False)
+
+        # options can be disabled here
+        # self.autoBackupEnabledBox.setChecked(False)
+        # self.autoBackupEnabledBox.setEnabled(False)
+        # self.autoBackupFrequencyData.setEnabled(False)
+        # self.autoBackupCountData.setEnabled(False)
 
         row += 1
         tTip = 'The number of user-backups to keep.\n' \
@@ -916,8 +918,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.languageBox.setCurrentIndex(self.languageBox.findText(self.preferences.general.language))
         self.autoSaveLayoutOnQuitBox.setChecked(self.preferences.general.autoSaveLayoutOnQuit)
         self.restoreLayoutOnOpeningBox.setChecked(self.preferences.general.restoreLayoutOnOpening)
-        # self.autoBackupEnabledBox.setChecked(self.preferences.general.autoBackupEnabled)
-        # self.autoBackupFrequencyData.setValue(self.preferences.general.autoBackupFrequency)
+
+        self.autoBackupEnabledBox.setChecked(self.preferences.general.autoBackupEnabled)
+        self.autoBackupFrequencyData.setValue(self.preferences.general.autoBackupFrequency)
         self.autoBackupCountData.setValue(self.preferences.general.autoBackupCount)
         self.backupSaveCountData.setValue(self.preferences.general.backupSaveCount)
 
@@ -1928,7 +1931,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetAutoBackupFrequency(self, _value):
-        raise NotImplementedError('AutoBackup is not available in the current release')
+        # raise NotImplementedError('AutoBackup is not available in the current release')
         textFromValue = self.autoBackupFrequencyData.textFromValue
         value = self.autoBackupFrequencyData.get()
         prefValue = textFromValue(self.preferences.general.autoBackupFrequency)
@@ -1936,11 +1939,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
             return partial(self._setAutoBackupFrequency, value)
 
     def _setAutoBackupFrequency(self, value):
-        raise NotImplementedError('AutoBackup is not available in the current release')
+        # raise NotImplementedError('AutoBackup is not available in the current release')
         self.preferences.general.autoBackupFrequency = value
 
     def _enableAutoBackupFrequency(self):
-        raise NotImplementedError('AutoBackup is not available in the current release')
+        # raise NotImplementedError('AutoBackup is not available in the current release')
         value = self.autoBackupEnabledBox.get()
         self.autoBackupFrequencyData.enableWidget(value)
 

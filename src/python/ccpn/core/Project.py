@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 18:46:13 +0100 (Tue, March 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-18 16:08:03 +0100 (Tue, April 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -349,7 +349,7 @@ class Project(AbstractWrapperObject):
 
     @property
     def backupPath(self):
-        """path to directory containing  backup Project
+        """path to directory containing backup Project
         """
         from ccpn.framework.PathsAndUrls import CCPN_BACKUP_SUFFIX, CCPN_DIRECTORY_SUFFIX
 
@@ -754,39 +754,42 @@ class Project(AbstractWrapperObject):
         if self.application and self.application.hasGui:
             self.application.mainWindow.sideBar.setProjectName(self)
 
-    def save(self, comment='regular save'):
+    def save(self, comment='regular save', autoBackup: bool = False):
         """Save project; add optional comment to save records
         """
         if self.readOnly:
             getLogger().warning('save skipped: Project is read-only')
             return
 
-        # Update the spectrum internal settings
-        for spectrum in self.spectra:
-            spectrum._saveObject()
+        # stop the auto-backups so they don't clash with current save
+        with self.application.pauseAutoBackups():
 
-        try:
-            apiStatus = self._getAPIObjectsStatus()
-            if apiStatus.invalidObjects:
-                # if deleteInvalidObjects:
-                # delete here ...
-                # run save and apiStatus again. Ensure nothing else has been compromised on the deleting process
-                # else:
-                errorMsg = '\n '.join(apiStatus.invalidObjectsErrors)
-                getLogger().critical('Found compromised items. Project might be left in an invalid state. %s' % errorMsg)
-                raise RuntimeError(errorMsg)
+            # Update the spectrum internal settings
+            for spectrum in self.spectra:
+                spectrum._saveObject()
 
-        except Exception as es:
-            getLogger().warning('Error checking project status: %s' % str(es))
+            try:
+                apiStatus = self._getAPIObjectsStatus()
+                if apiStatus.invalidObjects:
+                    # if deleteInvalidObjects:
+                    # delete here ...
+                    # run save and apiStatus again. Ensure nothing else has been compromised on the deleting process
+                    # else:
+                    errorMsg = '\n '.join(apiStatus.invalidObjectsErrors)
+                    getLogger().critical(f'Found compromised items. Project might be left in an invalid state. {errorMsg}')
+                    raise RuntimeError(errorMsg)
 
-        self._xmlLoader.saveUserData(keepFallBack=True)
-        self._checkProjectSubDirectories()
-        self._saveHistory.addSaveRecord(comment=f'{self.name}: {comment}')
-        self._saveHistory.save()
-        self._updateLoggerState(readOnly=self.readOnly, flush=True)
+            except Exception as es:
+                getLogger().warning(f'Error checking project status: {str(es)}')
 
-        self._isTemporary = False
-        self._isNew = False
+            self._xmlLoader.saveUserData(keepFallBack=True, autoBackup=autoBackup)
+            self._checkProjectSubDirectories()
+            self._saveHistory.addSaveRecord(comment=f'{self.name}: {comment}')
+            self._saveHistory.save()
+            self._updateLoggerState(readOnly=self.readOnly, flush=True)
+
+            self._isTemporary = False
+            self._isNew = False
 
     #-----------------------------------------------------------------------------------------
     # CCPN properties

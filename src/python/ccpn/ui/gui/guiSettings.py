@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 15:18:45 +0100 (Tue, March 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-18 16:08:03 +0100 (Tue, April 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -486,3 +486,60 @@ class ZPlaneNavigationModes(DataEnum):
     PERSPECTRUMDISPLAY = 0, 'Per spectrum display', 'spectrumdisplay'
     PERSTRIP = 1, 'Per strip', 'strip'
     INSTRIP = 2, 'In strip', 'instrip'
+
+
+class consoleStyle():
+    """Colors class:reset all colors with colors.reset; two
+    subclasses fg for foreground
+    and bg for background; use as colors.subclass.colorname.
+    i.e. colors.fg.red or colors.bg.greenalso, the generic bold, disable,
+    underline, reverse, strike through,
+    and invisible work with the main class i.e. colors.bold
+    """
+    reset = '\033[0m'
+    bold = '\033[01m'
+    disable = '\033[02m'
+    underline = '\033[04m'
+    reverse = '\033[07m'
+    strikethrough = '\033[09m'
+    invisible = '\033[08m'
+
+
+    class fg:
+        black = '\033[30m'
+        darkred = '\033[31m'
+        darkgreen = '\033[32m'
+        darkyellow = '\033[33m'
+        darkblue = '\033[34m'
+        darkmagenta = '\033[35m'
+        darkcyan = '\033[36m'
+        lightgrey = '\033[37m'
+        default = '\033[39m'
+        darkgrey = '\033[90m'
+        red = '\033[91m'
+        green = '\033[92m'
+        yellow = '\033[93m'
+        blue = '\033[94m'
+        magenta = '\033[95m'
+        cyan = '\033[96m'
+        white = '\033[97m'
+
+
+    class bg:
+        black = '\033[40m'
+        darkred = '\033[41m'
+        darkgreen = '\033[42m'
+        darkyellow = '\033[43m'
+        darkblue = '\033[44m'
+        darkmagenta = '\033[45m'
+        darkcyan = '\033[46m'
+        lightgrey = '\033[47m'
+        default = '\033[49m'
+        darkgrey = '\033[100m'
+        red = '\033[101m'
+        green = '\033[102m'
+        yellow = '\033[103m'
+        blue = '\033[104m'
+        magenta = '\033[105m'
+        cyan = '\033[106m'
+        white = '\033[107m'

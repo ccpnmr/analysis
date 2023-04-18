@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-17 12:50:36 +0100 (Mon, April 17, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-18 16:08:03 +0100 (Tue, April 18, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -82,7 +82,7 @@ from ccpn.core.lib.ContextManagers import \
 
 from ccpn.framework.Application import Arguments
 from ccpn.framework import Version
-from ccpn.framework.AutoBackup import AutoBackup
+from ccpn.framework.AutoBackup import AutoBackupHandler
 from ccpn.framework.credits import printCreditsText
 from ccpn.framework.Current import Current
 from ccpn.framework.Translation import defaultLanguage
@@ -213,7 +213,6 @@ class Framework(NotifierBase, GuiBase):
         # Process info
         self._process = getProcess()
 
-        self._backupTimerQ = None
         self._autoBackupThread = None
 
         self._tip_of_the_day = None
@@ -474,7 +473,7 @@ class Framework(NotifierBase, GuiBase):
             return
 
         self._experimentClassifications = project._getExperimentClassifications()
-        # self._updateAutoBackup()
+        self._updateAutoBackup()
 
         sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
         self.ui.startUi()
@@ -484,39 +483,48 @@ class Framework(NotifierBase, GuiBase):
         """Cleanup at the end of program execution; i.e. once the command loop
         has stopped
         """
-        self._setAutoBackupTime('kill')
+        self._updateAutoBackup(kill=True)
 
     #-----------------------------------------------------------------------------------------
     # Backup (TODO: need refactoring in AutoBackupManager)
     #-----------------------------------------------------------------------------------------
 
-    def _updateAutoBackup(self):
+    def _updateAutoBackup(self, disable=False, kill=False):
         # CCPNINTERNAL: also called from preferences popup
-        raise NotImplementedError('AutoBackup is not available in the current release')
-
-        # if self.preferences.general.autoBackupEnabled:
-        #     self._setAutoBackupTime(self.preferences.general.autoBackupFrequency)
-        # else:
-        #     self._setAutoBackupTime(None)
-
-    def _setAutoBackupTime(self, time):
-        raise NotImplementedError('AutoBackup is not available in the current release')
-
-        if self._backupTimerQ is None:
-            from queue import Queue
-
-            self._backupTimerQ = Queue(maxsize=1)
-
-        if self._backupTimerQ.full():
-            while not self._backupTimerQ.empty():
-                self._backupTimerQ.get()
+        # raise NotImplementedError('AutoBackup is not available in the current release')
 
         if self._autoBackupThread is None:
-            self._autoBackupThread = AutoBackup(backupFrequencyQueue=self._backupTimerQ,
-                                                backupFunction=self._backupProject)
+            self._autoBackupThread = AutoBackupHandler(eventFunction=self._backupProject,
+                                                       eventInterval=self.preferences.general.autoBackupFrequency * 60
+                                                       )
+        if disable:
+            # stores the remaining time
+            self._autoBackupThread.stop()
+
+        elif kill or not self.preferences.general.autoBackupEnabled:
+            # ensures that the timer starts again
+            self._autoBackupThread.kill()
+
+        else:
+            # start the thread
+            self._autoBackupThread.setInterval(self.preferences.general.autoBackupFrequency * 60)  # preferences is minutes
             self._autoBackupThread.start()
 
-        self._backupTimerQ.put(time)
+    @contextlib.contextmanager
+    def pauseAutoBackups(self, delay=False):
+        """Temporarily pause backups for loading/saving
+        """
+        try:
+            if delay:
+                # keep remaining interval for restart
+                self._updateAutoBackup(disable=True)
+            else:
+                self._updateAutoBackup(kill=True)
+
+            yield
+
+        finally:
+            self._updateAutoBackup()
 
     def _backupProject(self):
         try:
@@ -525,17 +533,20 @@ class Framework(NotifierBase, GuiBase):
                 getLogger().debug('Backup skipped: Project is read-only')
                 return
 
-            from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+            # NOTE:ED - check with Geerten whether it needs to do anything else here
+            self.project.save(autoBackup=True)
 
-            apiIo.backupProject(self.project._wrappedData.parent)
-            backupPath = self.project.backupPath
-
-            backupStatePath = fetchDir(backupPath, Layout.StateDirName)
-
-            copy_tree(self.statePath, backupStatePath)
-            layoutFile = os.path.join(backupStatePath, Layout.DefaultLayoutFileName)
-            Layout.saveLayoutToJson(self.ui.mainWindow, layoutFile)
-            self.current._dumpStateToFile(backupStatePath)
+            # from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+            #
+            # apiIo.backupProject(self.project._wrappedData.parent)
+            # backupPath = self.project.backupPath
+            #
+            # backupStatePath = fetchDir(backupPath, Layout.StateDirName)
+            #
+            # copy_tree(self.statePath, backupStatePath)
+            # layoutFile = os.path.join(backupStatePath, Layout.DefaultLayoutFileName)
+            # Layout.saveLayoutToJson(self.ui.mainWindow, layoutFile)
+            # self.current._dumpStateToFile(backupStatePath)
 
             # Spectra should not be copied over. Dangerous for disk space
             # backupDataPath = fetchDir(backupPath, DataDirName)
@@ -1164,51 +1175,54 @@ class Framework(NotifierBase, GuiBase):
 
         elif len(_createNew) == 1:
             dataLoader = _createNew[0]
-            with logCommandManager('application.', 'loadProject', dataLoader.path):
 
-                # NOTE:ED - move inside ui._loadProject?
-                if self.project:
-                    if self.project.readOnly and dataLoader.makeArchive:
-                        MessageDialog.showWarning('Archive Project', 'Project is read-only',
-                                                  parent=self.ui.mainWindow
-                                                  )
+            with self.pauseAutoBackups():
+                with logCommandManager('application.', 'loadProject', dataLoader.path):
 
-                    elif dataLoader.makeArchive:
-                        # make an archive in the project specific archive folder before loading
-                        from ccpn.core.lib.ProjectArchiver import ProjectArchiver
-
-                        archiver = ProjectArchiver(projectPath=dataLoader.path)
-                        if archivePath := archiver.makeArchive():
-                            getLogger().info(f'==> Project archived to {archivePath}')
-                        else:
-                            MessageDialog.showWarning('Archive Project',
-                                                      f'There was a problem creating an archive for {dataLoader.path}',
+                    # NOTE:ED - move inside ui._loadProject?
+                    if self.project:
+                        if self.project.readOnly and dataLoader.makeArchive:
+                            MessageDialog.showWarning('Archive Project', 'Project is read-only',
                                                       parent=self.ui.mainWindow
                                                       )
 
-                if not (result := self.ui._loadProject(dataLoader=dataLoader)):
-                    # update the logger read-only state
-                    self.project._updateReadOnlyState()
-                    self.project._updateLoggerState(flush=not self.project.readOnly)
-                    if self.mainWindow:
-                        self.mainWindow._setReadOnlyIcon()
+                        elif dataLoader.makeArchive:
+                            # make an archive in the project specific archive folder before loading
+                            from ccpn.core.lib.ProjectArchiver import ProjectArchiver
 
-                    return []
+                            archiver = ProjectArchiver(projectPath=dataLoader.path)
+                            if archivePath := archiver.makeArchive():
+                                getLogger().info(f'==> Project archived to {archivePath}')
+                            else:
+                                MessageDialog.showWarning('Archive Project',
+                                                          f'There was a problem creating an archive for {dataLoader.path}',
+                                                          parent=self.ui.mainWindow
+                                                          )
 
-                getLogger().info(f"==> Loaded project {result}")
-                if not isIterable(result):
-                    result = [result]
-                objs.extend(result)
-            dataLoaders.remove(dataLoader)
+                    if not (result := self.ui._loadProject(dataLoader=dataLoader)):
+                        # update the logger read-only state
+                        self.project._updateReadOnlyState()
+                        self.project._updateLoggerState(flush=not self.project.readOnly)
+                        if self.mainWindow:
+                            self.mainWindow._setReadOnlyIcon()
 
-        # Now do the remaining ones; put in one undo block
-        with undoBlockWithSideBar():
-            for dataLoader in dataLoaders:
-                with logCommandManager('application.', 'loadData', dataLoader.path):
-                    result = self.ui._loadData(dataLoader=dataLoader)
-                if not isIterable(result):
-                    result = [result]
-                objs.extend(result)
+                        return []
+
+                    getLogger().info(f"==> Loaded project {result}")
+                    if not isIterable(result):
+                        result = [result]
+                    objs.extend(result)
+                dataLoaders.remove(dataLoader)
+
+        with self.pauseAutoBackups(delay=True):
+            # Now do the remaining ones; put in one undo block
+            with undoBlockWithSideBar():
+                for dataLoader in dataLoaders:
+                    with logCommandManager('application.', 'loadData', dataLoader.path):
+                        result = self.ui._loadData(dataLoader=dataLoader)
+                    if not isIterable(result):
+                        result = [result]
+                    objs.extend(result)
 
         if _echoBlocking:
             self._decreaseNotificationBlocking()
@@ -1256,9 +1270,9 @@ class Framework(NotifierBase, GuiBase):
         # Now that all has been restored and updated: save the result
         try:
             project.save()
-            getLogger().info('==> Saved %s as "%s"' % (project, project.path))
+            getLogger().info(f'==> Saved {project} as {project.path!r}')
         except Exception as es:
-            getLogger().warning('Failed saving %s (%s)' % (project, str(es)))
+            getLogger().warning(f'Failed saving {project} ({str(es)})')
 
         return [project]
 
@@ -1299,7 +1313,9 @@ class Framework(NotifierBase, GuiBase):
         else:
             project = self.project
 
-        sparkyReader.importSparkyProject(project, dataBlock)
+        with self.pauseAutoBackups(delay=True):
+            sparkyReader.importSparkyProject(project, dataBlock)
+
         return project
 
     def _loadStarFile(self, dataLoader) -> Project:
@@ -1317,7 +1333,8 @@ class Framework(NotifierBase, GuiBase):
             project = self.project
 
         with rebuildSidebar(application=self):
-            dataLoader._importIntoProject(project)
+            with self.pauseAutoBackups(delay=True):
+                dataLoader._importIntoProject(project)
 
         return project
 
@@ -1369,8 +1386,9 @@ class Framework(NotifierBase, GuiBase):
                 # rename the existing chemical-shift-list, hopefully an unused name
                 ch.rename(TOBEDELETED)
 
-            # import the nef-file
-            dataLoader._importIntoProject(project=project)
+            with self.pauseAutoBackups(delay=True):
+                # import the nef-file
+                dataLoader._importIntoProject(project=project)
 
             if _newProject and ch:
                 # rename chemical-shift-list back again, will add unique extension as required

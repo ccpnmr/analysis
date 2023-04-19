@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:42 +0000 (Thu, January 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-19 15:36:53 +0100 (Wed, April 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import os
 
 from ccpn.core.testing.WrapperTesting import WrapperTesting
-from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 
 
 class ProjectTestRename(WrapperTesting):
@@ -70,7 +69,7 @@ class ProjectTestIo(WrapperTesting):
         self.assertEqual(projDir[-5:], '.ccpn')
         self.assertTrue(projDir.startswith('V3ProjectForTests'))
 
-        self.assertTrue(project.save(newPath=os.path.join(baseDir, '_SAVED_TO_NAME.ccpn'),
-                                     overwriteExisting=True))
+        project.saveAs(newPath=os.path.join(baseDir, '_SAVED_TO_NAME.ccpn'),
+                       overwrite=True)
         self.assertTrue(project.name.startswith('_SAVED_TO_NAME'))
         self.assertTrue(project.name == '_SAVED_TO_NAME' or project.name[14] == '_')

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:41 +0000 (Thu, January 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-19 15:36:53 +0100 (Wed, April 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -664,12 +664,13 @@ class NmrStretchTest(WrapperTesting):
         nmrChain.assignConnectedResidues(residues[1])
         assignedNmrChain = self.project.getByPid('NC:X')
 
-        mergedResidue = nmrResidues[1].assignTo(chainCode=residues[2].chain.shortName,
-                                                sequenceCode=residues[2].sequenceCode,
-                                                mergeToExisting=True)
-        self.assertIs(mergedResidue, nmrResidues[2])
-
-        self.undo.undo()  # undo - assignTo
+        with self.assertRaises(ValueError):
+            mergedResidue = nmrResidues[1].assignTo(chainCode=residues[2].chain.shortName,
+                                                    sequenceCode=residues[2].sequenceCode,
+                                                    mergeToExisting=True)
+        # self.assertIs(mergedResidue, nmrResidues[2])
+        #
+        # self.undo.undo()  # undo - assignTo
 
         self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
                          ['X.2.TRP', 'X.3.GLU', 'X.4.ARG', 'X.5.THR', 'X.6.TYR', ])
@@ -816,8 +817,20 @@ class NmrResidueTest(WrapperTesting):
         self.assertEqual(nr1.id, "A.4.THR")
         nr1.deassign()
         self.assertEqual(nr1.id, "A.@14.")
+
+        self.undo.undo()
+        self.assertEqual(nr1.id, "A.4.THR")
+        self.undo.redo()
+        self.assertEqual(nr1.id, "A.@14.")
+
         nr1.rename('999')
         self.assertEqual(nr1.id, "A.999.")
+
+        self.undo.undo()
+        self.assertEqual(nr1.id, "A.@14.")
+        self.undo.redo()
+        self.assertEqual(nr1.id, "A.999.")
+
         nr1.rename(sequenceCode='999', residueType='ALA')
         self.assertEqual(nr1.id, "A.999.ALA")
         nr1.rename(sequenceCode='998', residueType='VAL')
@@ -840,6 +853,11 @@ class NmrResidueTest(WrapperTesting):
         self.assertEqual(nr1.id, "A.4.THR")
         nr1 = nr1.assignTo(chainCode='A', sequenceCode=999)
         self.assertEqual(nr1.id, "A.999.THR")
+
+        self.undo.undo()
+        self.assertEqual(nr1.id, "A.4.THR")
+        self.undo.redo()
+
         nr1 = nr1.assignTo()
         # This is a no-op
         self.assertEqual(nr1.id, "A.999.THR")

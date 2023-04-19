@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:38 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-04-19 15:36:53 +0100 (Wed, April 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGro
 from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, \
-    renameObject, undoBlock, deleteObject
+    renameObject, undoBlock
 from ccpn.util.Common import makeIterableList
 from ccpn.util.Logging import getLogger
 
@@ -951,10 +951,11 @@ class NmrResidue(AbstractWrapperObject):
     @logCommand(get='self')
     def deassign(self):
         """Reset sequenceCode and residueType assignment to default values"""
-        with undoBlock():
-            apiResonanceGroup = self._apiResonanceGroup
-            apiResonanceGroup.sequenceCode = None
-            apiResonanceGroup.resetResidueType(None)
+        # with undoBlock():
+        #     apiResonanceGroup = self._apiResonanceGroup
+        #     apiResonanceGroup.sequenceCode = None
+        #     apiResonanceGroup.resetResidueType(None)
+        self.rename()
 
     @logCommand(get='self')
     def moveToNmrChain(self, newNmrChain: typing.Union['NmrChain', str] = 'NC:@-', sequenceCode: str = None, residueType: str = None):
@@ -1017,8 +1018,8 @@ class NmrResidue(AbstractWrapperObject):
 
         If no assignment with the same chainCode and sequenceCode exists, the current NmrResidue
         will be reassigned.
-        If an NmrResidue with the same chainCode and sequenceCode already exists,  the function
-        will either raise ValueError. If  mergeToExisting is set to False, it will instead merge the
+        If an NmrResidue with the same chainCode and sequenceCode already exists, the function
+        will either raise ValueError. If mergeToExisting is set to True, it will instead merge the
         two NmrResidues, delete the current one, and return the new one .
         NB Merging is NOT undoable.
         WARNING: When calling with mergeToExisting=True, always use in the form "x = x.assignTo(...)",
@@ -1028,33 +1029,35 @@ class NmrResidue(AbstractWrapperObject):
         will cause an error. Use moveToNmrChain(newNmrChainOrPid) instead
         """
 
-        oldPid = self.longPid
-        apiResonanceGroup = self._wrappedData
-        clearUndo = False
-        undo = apiResonanceGroup.root._undo
+        # oldPid = self.longPid
+        # clearUndo = False
+        # undo = apiResonanceGroup.root._undo
+
+        # check parameters
+        sequenceCode = str(sequenceCode) if sequenceCode else None
+        # apiResonanceGroup = self._apiResonanceGroup
+
+        # oldNmrChain =  apiResonanceGroup.nmrChain
+        # oldSequenceCode = apiResonanceGroup.sequenceCode
+        # oldResidueType = apiResonanceGroup.residueType
+
+        # Check for illegal separators in input values
+        for ss in (chainCode, sequenceCode, residueType):
+            if ss and Pid.altCharacter in ss:
+                raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s.%s.%s" %
+                                 (Pid.altCharacter, chainCode, sequenceCode, residueType))
+
+        # Keep old values to go back to previous state
+        oldChainCode, oldSequenceCode, oldResidueType = self._id.split('.')
+        oldResidueType = oldResidueType or None
+
+        # set missing parameters to existing or default values
+        chainCode = chainCode or oldChainCode
+        sequenceCode = sequenceCode or oldSequenceCode
+        residueType = residueType or oldResidueType
 
         with undoBlock():
-            sequenceCode = str(sequenceCode) if sequenceCode else None
-            # apiResonanceGroup = self._apiResonanceGroup
-
-            # oldNmrChain =  apiResonanceGroup.nmrChain
-            # oldSequenceCode = apiResonanceGroup.sequenceCode
-            # oldResidueType = apiResonanceGroup.residueType
-
-            # Check for illegal separators in input values
-            for ss in (chainCode, sequenceCode, residueType):
-                if ss and Pid.altCharacter in ss:
-                    raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s.%s.%s" %
-                                     (Pid.altCharacter, chainCode, sequenceCode, residueType))
-
-            # Keep old values to go back to previous state
-            oldChainCode, oldSequenceCode, oldResidueType = self._id.split('.')
-            oldResidueType = oldResidueType or None
-
-            # set missing parameters to existing or default values
-            chainCode = chainCode or oldChainCode
-            sequenceCode = sequenceCode or oldSequenceCode
-            residueType = residueType or None
+            apiResonanceGroup = self._wrappedData
 
             partialId = '%s.%s.' % (chainCode, sequenceCode)
             ll = self._project.getObjectsByPartialId(className='NmrResidue', idStartsWith=partialId)
@@ -1078,19 +1081,24 @@ class NmrResidue(AbstractWrapperObject):
                 try:
                     # NB Complex resetting sequence necessary
                     # in case we are setting an offset and illegal sequenceCode
-                    apiResonanceGroup.sequenceCode = None  # To guarantee against clashes
+                    # apiResonanceGroup.sequenceCode = None  # To guarantee against clashes
+                    self.rename(None, residueType)
                     apiResonanceGroup.directNmrChain = newNmrChain._apiNmrChain  # Only directNmrChain is settable
-                    # Now we can (re)set - will throw error for e.g. illegal offset values
-                    apiResonanceGroup.sequenceCode = sequenceCode
-                    if residueType:
-                        apiResonanceGroup.resetResidueType(residueType)
+                    # # Now we can (re)set - will throw error for e.g. illegal offset values
+                    # apiResonanceGroup.sequenceCode = sequenceCode
+                    # if residueType:
+                    #     apiResonanceGroup.resetResidueType(residueType)
+                    self.rename(sequenceCode, residueType)
+
                 except:
-                    apiResonanceGroup.resetResidueType(oldResidueType)
-                    apiResonanceGroup.sequenceCode = None
+                    # apiResonanceGroup.resetResidueType(oldResidueType)
+                    # apiResonanceGroup.sequenceCode = None
+                    self.rename(None, oldResidueType)
                     apiResonanceGroup.directNmrChain = apiResonanceGroup.nmrProject.findFirstNmrChain(
                             code=oldChainCode
                             )
-                    apiResonanceGroup.sequenceCode = oldSequenceCode
+                    # apiResonanceGroup.sequenceCode = oldSequenceCode
+                    self.rename(oldSequenceCode, oldResidueType)
                     self._project._logger.error("Attempt to set illegal or inconsistent assignment: %s.%s.%s"
                                                 % (chainCode, sequenceCode, residueType) + "\n  Reset to original state"
                                                 )

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-06 16:37:07 +0000 (Mon, March 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-19 14:42:44 +0100 (Wed, April 19, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -53,6 +53,10 @@ class _ExperimentalAnalysisTableABC(Table):
     _hiddenColumns = []
     _defaultEditable = False
     _enableDelete = False
+    _enableSearch = True
+    _enableCopyCell = True
+    _enableExport = True
+
     _OBJECT = sv.COLLECTIONPID
 
     def __init__(self, parent, mainWindow=None, guiModule=None, **kwds):

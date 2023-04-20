@@ -134,7 +134,7 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets'] = OD()
         type = self.settings['Current']['SimulationType']
         simulatedSpectrum = SimulatedSpectrum(self.project, [(0, 0, 0, None)], {'0': {'center': float(0), 'indices': [0]}},
-                                              np.zeros((5, 5)), 500, 65536, (12, -2), 'lorentzian', False, None, None,
+                                              np.zeros((1, 1)), 500, 65536, (12, -2), 'lorentzian', False, None, None,
                                               None)
         x, y = createLineshape([(0, 0, 0, None)], limits=(12, -2))
         spectrum = self.project.newEmptySpectrum(['1H'], name='Reference', intensities=y, positions=x)
@@ -181,10 +181,18 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         self.settings['Current']['Frequency'] = self._getValue(widget)
 
         if type == 'Spin System':
-            for i in range(5):
-                self.settings['Current']['SimulatedSpectrum'].multiplets[str(i)] = {'center': float(0), 'indices': [i]}
-                for j in range(5):
-                    self._createSsmGridSpinbox(i, j)
+            grid = _addRow(grid)
+            self.settings['Current']['SsmSize'] = 1
+            self.settings['Current']['Values'] = np.zeros((12, 12))
+            widget = Label(self.scrollAreaLayout, text='Protons', grid=grid, gridSpan=(1, 2))
+            _setWidgetProperties(widget, 200)
+            self.guiDict['TemporaryWidgets']['ProtonSpinboxLabel'] = widget
+            grid = _addColumn(_addColumn(grid))
+            widget = Spinbox(self.scrollAreaLayout, value=1, grid=grid, gridspan=(1, 1), callback=self._protonChange)
+            _setWidgetProperties(widget, 200)
+            self.guiDict['TemporaryWidgets']['ProtonSpinbox'] = widget
+            widget.setRange(0, 6)
+            self.setupSsmGrid()
         elif type == 'Peak List':
             pass
 
@@ -198,22 +206,41 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
     def _frequencyChange(self, frequency):
         self.settings['Current']['SimulatedSpectrum'].setFrequency(frequency)
 
+    def _protonChange(self, protons):
+        self.settings['Current']['SsmSize'] = protons
+        self.setupSsmGrid()
+
+    def setupSsmGrid(self):
+        if 'Spinboxes' in self.guiDict['TemporaryWidgets']:
+            for key in self.guiDict['TemporaryWidgets']['Spinboxes']:
+                self.guiDict['TemporaryWidgets']['Spinboxes'][key].deleteLater()
+        self.guiDict['TemporaryWidgets']['Spinboxes'] = OD()
+        protons = self.settings['Current']['SsmSize']
+        self.settings['Current']['SimulatedSpectrum'].spinSystemMatrix = self.settings['Current']['Values'][:protons, :protons]
+        for i in range(protons):
+            self.settings['Current']['SimulatedSpectrum'].multiplets[str(i)] = {'center': float(0), 'indices': [i]}
+            for j in range(protons):
+                self._createSsmGridSpinbox(i, j)
+
     def _createSsmGridSpinbox(self, row, column):
         def changeMultipletCenter():
             shift = widget.value()
+            self.settings['Current']['Values'][column][row] = shift
             self.settings['Current']['SimulatedSpectrum'].moveMultiplet(multipletId, shift)
 
         def changeCouplingConstant():
             coupling = widget.value()
-            if self._getValue(self.guiDict['TemporaryWidgets'][f'Spinbox-{row}-{column}']) == coupling:
+            self.settings['Current']['Values'][column][row] = coupling
+            self.settings['Current']['Values'][row][column] = coupling
+            if self._getValue(self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{row}-{column}']) == coupling:
                 return
 
             self.settings['Current']['SimulatedSpectrum'].editCouplingConstant(column, row, coupling)
-            self.guiDict['TemporaryWidgets'][f'Spinbox-{row}-{column}'].setValue(coupling)
-        grid = (row + 6, column)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=0, decimals=4, step=0.0001, grid=grid, gridspan=(1, 1))
+            self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{row}-{column}'].setValue(coupling)
+        grid = (row + 7, column)
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=self.settings['Current']['Values'][column][row], decimals=4, step=0.0001, grid=grid, gridspan=(1, 1))
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-        self.guiDict['TemporaryWidgets'][f'Spinbox-{column}-{row}'] = widget
+        self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{column}-{row}'] = widget
         if row == column:
             multipletId = str(column)
             widget.valueChanged.connect(changeMultipletCenter)

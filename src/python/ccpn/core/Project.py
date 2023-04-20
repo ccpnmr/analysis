@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-18 16:08:03 +0100 (Tue, April 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-20 17:12:36 +0100 (Thu, April 20, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -782,7 +782,12 @@ class Project(AbstractWrapperObject):
             except Exception as es:
                 getLogger().warning(f'Error checking project status: {str(es)}')
 
-            self._xmlLoader.saveUserData(keepFallBack=True, autoBackup=autoBackup)
+            if autoBackup:
+                # should be redundant now
+                self._xmlLoader.backupUserData(updateIsModified=False)
+            else:
+                self._xmlLoader.saveUserData(keepFallBack=True)
+
             self._checkProjectSubDirectories()
             self._saveHistory.addSaveRecord(comment=f'{self.name}: {comment}')
             self._saveHistory.save()
@@ -790,6 +795,38 @@ class Project(AbstractWrapperObject):
 
             self._isTemporary = False
             self._isNew = False
+
+    def _backup(self):
+        """Backup project
+        """
+        if self.readOnly:
+            getLogger().warning('Backup skipped: project is read-only')
+            return
+
+        if not self.isModified:
+            getLogger().debug('Project is not modified: ignoring backup')
+            return
+
+        # stop the auto-backups so they don't clash with current save
+        with self.application.pauseAutoBackups():
+
+            try:
+                apiStatus = self._getAPIObjectsStatus()
+                if apiStatus.invalidObjects:
+                    # if deleteInvalidObjects:
+                    # delete here ...
+                    # run save and apiStatus again. Ensure nothing else has been compromised on the deleting process
+                    # else:
+                    errorMsg = '\n '.join(apiStatus.invalidObjectsErrors)
+                    getLogger().critical(f'Backup found compromised items. Project might be left in an invalid state. {errorMsg}')
+                    raise RuntimeError(errorMsg)
+
+            except Exception as es:
+                getLogger().warning(f'Error checking project status: {str(es)}')
+
+            self._xmlLoader.backupUserData(updateIsModified=False)
+
+            # don't touch anything else for the minute
 
     #-----------------------------------------------------------------------------------------
     # CCPN properties

@@ -507,9 +507,41 @@ class TopObject(XmlLoaderABC):
                     forceSetattr(self.apiTopObject, 'isModified', False)
 
             except (PermissionError, FileNotFoundError):
-                self.logger.warning('Folder may be read-only')
+                self.logger.warning('Saving: folder may be read-only')
 
             self.isLoaded = True  # xml-file reflects contents
+
+    def saveBackup(self, updateIsModified=True, autoBackupPath=None):
+        """Save the apiTopObject to the xml file defined by self.path / CCPN_BACKUPS_DIRECTORY
+        """
+        if self.apiTopObject is None:
+            raise RuntimeError('Cannot save: undefined apiTopObject')
+
+        if self.apiTopObject.isDeleted:
+            # ignore deleted objects
+            self.logger.debug2(f'ignoring deleted object {self.apiTopObject}')
+            return
+
+        if not autoBackupPath:
+            raise ValueError('Auto-backup path is not defined')
+
+        if not self.readOnly and not self.root.writeBlockingLevel:
+            try:
+                path = autoBackupPath / self.package.relativePath / self._path
+                if not path.parent.exists():
+                    path.parent.mkdir(parents=True, exist_ok=False)
+
+                with path.open('w') as fp:
+                    saveToStream(fp, self.apiTopObject)
+
+                if updateIsModified:
+                    # make sure that isModified is not updated if the file is not saved
+                    forceSetattr(self.apiTopObject, 'isModified', False)
+
+            except (PermissionError, FileNotFoundError):
+                self.logger.warning('Backing up: folder may be read-only')
+
+            # self.isLoaded = True  # xml-file reflects contents
 
     def __str__(self):
         _loaded = 'loaded' if self.isLoaded else 'not-loaded'
@@ -572,6 +604,12 @@ class Package(XmlLoaderABC):
         """:return the full path of the Package
         """
         return self.repository.path / self._path
+
+    @property
+    def relativePath(self) -> Path:
+        """:return the path of the Package relative to the topObject
+        """
+        return self._path
 
     @property
     def isMemops(self) -> bool:
@@ -1369,6 +1407,11 @@ class XmlLoader(XmlLoaderABC):
                                  which should not change the isModified status.
         :raises RuntimeError on error
         """
+        # NOTE:ED - quick hack for backup
+        if autoBackup:
+            self.backupUserData(updateIsModified=False)
+            return
+
         if self.readOnly:
             raise RuntimeError(f'Project "{self.name}" is read-only')
 
@@ -1384,38 +1427,38 @@ class XmlLoader(XmlLoaderABC):
             raise RuntimeError('No data to save; this should not happen')
 
         app = getApplication()
+        try:
+            # check if we have to keep current ccpnv3 directory before removing it
+            if self.v3Path.exists() and keepFallBack:
 
-        # check if we have to keep current ccpnv3 directory before removing it
-        if self.v3Path.exists() and keepFallBack:
+                self.backupsPath.mkdir(exist_ok=True, parents=False)
 
-            saveCount = app.preferences.general.autoBackupCount if autoBackup else app.preferences.general.backupSaveCount
-            suffix = AUTOBACKUP_SUFFIX if autoBackup else BACKUP_SUFFIX
+                # check existing save/auto-backups
+                _existing = [_p for _p in self.backupsPath.listdir(suffix=BACKUP_SUFFIX) if _p.basename.startswith(CCPN_API_DIRECTORY)]
+                if len(_existing) >= app.preferences.general.backupSaveCount:
+                    # only remove the oldest backup, fileName contains date
+                    #   if the count has been reduced, there may be more many backup here,
+                    #   but we don't want to delete all the extras, only the oldest; they may still be important.
+                    _existing.sort()
+                    _p = _existing.pop(0)
+                    _p.removeDir()
 
-            self.backupsPath.mkdir(exist_ok=True, parents=False)
+                # create the new backup by moving current v3Path
+                bPath = self.backupsPath / (CCPN_API_DIRECTORY + BACKUP_SUFFIX)
+                bPath = bPath.addTimeStamp()
+                self.v3Path.rename(bPath)
+        except (PermissionError, FileNotFoundError):
+            getLogger().debug('Saving user-data: folder may be read-only')
 
-            # check existing save/auto-backups
-            _existing = [_p for _p in self.backupsPath.listdir(suffix=suffix) if _p.basename.startswith(CCPN_API_DIRECTORY)]
-            if len(_existing) >= saveCount:  # XmlLoader.MAX_BACKUPS_ON_SAVE:
-                # only remove the oldest backup, fileName contains date
-                #   if the count has been reduced, there may be more many backup here,
-                #   but we don't want to delete all the extras, only the oldest; they may still be important.
-                _existing.sort()
-                _p = _existing.pop(0)
-                _p.removeDir()
+        else:
+            # Force rename to assure correctness
+            self._rename(self.name)
+            # save memops file in v3Path
+            self._saveMemopsToXml(updateIsModified=updateIsModified)
 
-            # create the new backup by moving current v3Path
-            bPath = self.backupsPath / (CCPN_API_DIRECTORY + suffix)
-            bPath = bPath.addTimeStamp()
-            self.v3Path.rename(bPath)
-
-        # Force rename to assure correctness
-        self._rename(self.name)
-        # save memops file in v3Path
-        self._saveMemopsToXml(updateIsModified=updateIsModified)
-
-        # save all topObject to xml files in v3Path
-        for topObject in topObjects:
-            topObject.save(updateIsModified=updateIsModified)
+            # save all topObject to xml files in v3Path
+            for topObject in topObjects:
+                topObject.save(updateIsModified=updateIsModified)
 
     def _saveMemopsToXml(self, updateIsModified=True):
         """Saves memopsRoot to self.xmlProjectFile;
@@ -1441,9 +1484,91 @@ class XmlLoader(XmlLoaderABC):
                 forceSetattr(self.memopsRoot, 'isModified', False)
 
         except (PermissionError, FileNotFoundError):
-            self.logger.warning('Folder may be read-only')
+            self.logger.warning('Saving Memops: folder may be read-only')
 
         self.memopsXmlPath = _xmlFile
+
+    def backupUserData(self, updateIsModified: bool = False):
+        """Save userData topObjects to Xml.
+        :param updateIsModified: if False, the isModified flag of the apiTopObjects are retained 'as-is'
+                                 and not set to False. This can be used e.g. when creating backups,
+                                 which should not change the isModified status.
+        :raises RuntimeError on error
+        """
+        if self.readOnly:
+            raise RuntimeError(f'Project "{self.name}" is read-only')
+
+        if self.writeBlockingLevel:
+            getLogger().debug('blocking save of .xml files')
+            return
+
+        # Assure that all apiTopObjects are accounted for; some may have been created
+        self._updateTopObjects()
+
+        topObjects = self.userData.getTopObjects()
+        if len(topObjects) == 0:
+            raise RuntimeError('No data to save; this should not happen')
+
+        app = getApplication()
+        try:
+            self.backupsPath.mkdir(exist_ok=True, parents=False)
+
+            # check existing save/auto-backups
+            _existing = [_p for _p in self.backupsPath.listdir(suffix=AUTOBACKUP_SUFFIX) if _p.basename.startswith(CCPN_API_DIRECTORY)]
+            if len(_existing) >= app.preferences.general.autoBackupCount:
+                # only remove the oldest backup, fileName contains date
+                #   if the count has been reduced, there may be more many backup here,
+                #   but we don't want to delete all the extras, only the oldest; they may still be important.
+                _existing.sort()
+                _p = _existing.pop(0)
+                _p.removeDir()
+
+            # create the new backup by moving current v3Path
+            bPath = self.backupsPath / (CCPN_API_DIRECTORY + AUTOBACKUP_SUFFIX)
+            bPath = bPath.addTimeStamp()
+            bPath.mkdir(exist_ok=True, parents=False)
+
+        except (PermissionError, FileNotFoundError):
+            getLogger().debug('Backing up user-data: folder may be read-only')
+
+        else:
+            # Force rename to assure correctness
+            self._rename(self.name)
+            # save memops file in v3Path
+            self._backupMemopsToXml(updateIsModified=updateIsModified, autoBackupPath=bPath)
+
+            # save all topObject to xml files in v3Path
+            for topObject in topObjects:
+                topObject.saveBackup(updateIsModified=updateIsModified, autoBackupPath=bPath)
+
+    def _backupMemopsToXml(self, updateIsModified=True, autoBackupPath=None):
+        """Saves memopsRoot to back-up folder;
+        :param updateIsModified: flag to update isModified status
+        """
+        # shouldn't need all these error-checks, just being careful
+        if self.readOnly:
+            getLogger().debug(f'Project {self.name!r} is read-only')
+            return
+
+        if self.writeBlockingLevel:
+            getLogger().debug(f'blocking save: {self.xmlProjectFile}')
+            return
+
+        if not autoBackupPath:
+            raise ValueError('Auto-backup path is not defined')
+
+        _xmlFile = autoBackupPath / MEMOPS / IMPLEMENTATION / (self.name + XML_SUFFIX)
+        try:
+            _xmlFile.parent.mkdir(parents=True, exist_ok=True)
+            with _xmlFile.open('w') as fp:
+                saveToStream(stream=fp, apiTopObject=self.memopsRoot)
+
+            if updateIsModified:
+                # make sure that isModified is not updated if the file is not saved
+                forceSetattr(self.memopsRoot, 'isModified', False)
+
+        except (PermissionError, FileNotFoundError):
+            self.logger.debug('Backing up Memops: folder may be read-only')
 
     #--------------------------------------------------------------------------------------------
 
@@ -1515,6 +1640,8 @@ class XmlLoader(XmlLoaderABC):
         # set memopsRoot and all topObjects as not-modified
         for topObject in [self.memopsRoot] + list(self.memopsRoot.topObjects):
             forceSetattr(topObject, 'isModified', False)
+
+        getLogger().debug('Setting loader to unModified')
 
     @contextmanager
     def blockReading(self):

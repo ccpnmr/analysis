@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-18 16:08:03 +0100 (Tue, April 18, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-20 17:12:36 +0100 (Thu, April 20, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -534,7 +534,7 @@ class Framework(NotifierBase, GuiBase):
                 return
 
             # NOTE:ED - check with Geerten whether it needs to do anything else here
-            self.project.save(autoBackup=True)
+            self.project._backup()
 
             # from ccpnmodel.ccpncore.lib.Io import Api as apiIo
             #
@@ -580,6 +580,9 @@ class Framework(NotifierBase, GuiBase):
 
         # This wraps the underlying data, including the wrapped graphics data
         newProject._initialiseProject()
+
+        # NOTE:ED - testing here, project seems to be modified after loading
+        newProject._xmlLoader.setUnmodified()
 
         # GWV: this really should not be here; moved to the_update_v2 method
         #      that already existed and gets called

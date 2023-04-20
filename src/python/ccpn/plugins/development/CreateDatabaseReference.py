@@ -134,7 +134,7 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets'] = OD()
         type = self.settings['Current']['SimulationType']
         simulatedSpectrum = SimulatedSpectrum(self.project, [(0, 0, 0, None)], {'0': {'center': float(0), 'indices': [0]}},
-                                              np.zeros((1, 1)), 500, 65536, (12, -2), 'lorentzian', False, None, None,
+                                              np.zeros((5, 5)), 500, 65536, (12, -2), 'lorentzian', False, None, None,
                                               None)
         x, y = createLineshape([(0, 0, 0, None)], limits=(12, -2))
         spectrum = self.project.newEmptySpectrum(['1H'], name='Reference', intensities=y, positions=x)
@@ -181,7 +181,10 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         self.settings['Current']['Frequency'] = self._getValue(widget)
 
         if type == 'Spin System':
-            self._setupSsmWidgets()
+            for i in range(5):
+                self.settings['Current']['SimulatedSpectrum'].multiplets[str(i)] = {'center': float(0), 'indices': [i]}
+                for j in range(5):
+                    self._createSsmGridSpinbox(i, j)
         elif type == 'Peak List':
             pass
 
@@ -189,70 +192,24 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         self.settings['Current']['SimulatedSpectrum'].setWidth(width)
 
     def _scaleChange(self, scale):
+        scale = 10 ** scale
         self.settings['Current']['SimulatedSpectrum'].scaleSpectrum(scale)
 
     def _frequencyChange(self, frequency):
         self.settings['Current']['SimulatedSpectrum'].setFrequency(frequency)
 
-    def _setupSsmWidgets(self):
-        def changeMultipletCenter():
-            shift = widget.value()
-            self.settings['Current']['SimulatedSpectrum'].moveMultiplet('0', shift)
-        grid = (5, 0)
-        self.settings['Current']['ProtonCount'] = 1
-
-        widget = Button(parent=self.scrollAreaLayout, text='Remove Proton', grid=grid, gridSpan=(1, 2), callback=self._removeColumn)
-        _setWidgetProperties(widget, 200)
-        self.guiDict['TemporaryWidgets']['RemoveProtonButton'] = widget
-
-        grid = _addColumn(_addColumn(grid))
-        widget = Button(parent=self.scrollAreaLayout, text='Add Proton', grid=grid, gridSpan=(1, 2),
-                        callback=self._addColumn)
-        _setWidgetProperties(widget, 200)
-        self.guiDict['TemporaryWidgets']['addProtonButton'] = widget
-
-        grid = _addRow(grid)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=float(0), decimals=4, step=0.0001, grid=grid, gridspan=(1,1))
-        widget.setRange(-2, 12)
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-        widget.valueChanged.connect(changeMultipletCenter)
-        self.guiDict['TemporaryWidgets']['Column0ProtonSpinbox0'] = widget
-        self.settings['Current']['ProtonCount'] = 1
-        self.grid = grid
-
-    def _removeColumn(self):
-        num = self.settings['Current']['ProtonCount']
-        if num == 1:
-            return
-        for key in self.guiDict['TemporaryWidgets']:
-            if f'Column{num-1}' in key:
-                self.guiDict['TemporaryWidgets'][key].deleteLater()
-        self.settings['Current']['ProtonCount'] = num - 1
-        self.grid = (self.grid[0]-1, 0)
-        self._modifySpinSystemMatrix()
-
-    def _addColumn(self):
-        if self.settings['Current']['ProtonCount'] > 5:
-            return
-        self.settings['Current']['SimulatedSpectrum'].multiplets[str(self.settings['Current']['ProtonCount'])] = {'center': float(0), 'indices': [self.settings['Current']['ProtonCount']]}
-        column = self.settings['Current']['ProtonCount']
-        for row in range(column+1):
-            self._addSsmSpinbox(column, row)
-        self.settings['Current']['ProtonCount'] = column + 1
-        self.grid = (6, column)
-        self._modifySpinSystemMatrix()
-
-    def _addSsmSpinbox(self, column, row):
+    def _createSsmGridSpinbox(self, row, column):
         def changeMultipletCenter():
             shift = widget.value()
             self.settings['Current']['SimulatedSpectrum'].moveMultiplet(multipletId, shift)
         def changeCouplingConstant():
             coupling = widget.value()
             self.settings['Current']['SimulatedSpectrum'].editCouplingConstant(column, row, coupling)
+            self.guiDict['TemporaryWidgets'][f'Spinbox-{row}-{column}'].setValue(coupling)
         grid = (row + 6, column)
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=0, decimals=4, step=0.0001, grid=grid, gridspan=(1,1))
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=0, decimals=4, step=0.0001, grid=grid, gridspan=(1, 1))
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-        self.guiDict['TemporaryWidgets'][f'Column{column}ProtonSpinbox{row}'] = widget
+        self.guiDict['TemporaryWidgets'][f'Spinbox-{column}-{row}'] = widget
         if row == column:
             multipletId = str(column)
             widget.valueChanged.connect(changeMultipletCenter)
@@ -261,18 +218,6 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
             widget.valueChanged.connect(changeCouplingConstant)
             widget.setRange(0, 20)
             widget.setSingleStep(0.1)
-
-    def _modifySpinSystemMatrix(self):
-        dimension = self.settings['Current']['ProtonCount']
-        ss_matrix = np.zeros((dimension, dimension))
-        for key in [key for key in self.guiDict['TemporaryWidgets'] if key.startswith('Column')]:
-            widget = self.guiDict['TemporaryWidgets'][key]
-            value = widget.value()
-            column = int(key[6]) - 1
-            row = int(key[-1]) - 1
-            ss_matrix[column][row] = value
-            ss_matrix[row][column] = value
-        self.settings['Current']['SimulatedSpectrum'].spinSystemMatrix = ss_matrix
 
     def _getValue(self, widget):
         # Get the current value of the widget:

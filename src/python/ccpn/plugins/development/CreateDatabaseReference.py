@@ -202,8 +202,12 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         def changeMultipletCenter():
             shift = widget.value()
             self.settings['Current']['SimulatedSpectrum'].moveMultiplet(multipletId, shift)
+
         def changeCouplingConstant():
             coupling = widget.value()
+            if self._getValue(self.guiDict['TemporaryWidgets'][f'Spinbox-{row}-{column}']) == coupling:
+                return
+
             self.settings['Current']['SimulatedSpectrum'].editCouplingConstant(column, row, coupling)
             self.guiDict['TemporaryWidgets'][f'Spinbox-{row}-{column}'].setValue(coupling)
         grid = (row + 6, column)

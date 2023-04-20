@@ -4,7 +4,7 @@ Abstract base class to easily implement a popup to edit attributes of V3 layer o
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:44 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-04-20 18:40:09 +0100 (Thu, April 20, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -52,9 +52,9 @@ def getAttributeTipText(klass, attr):
 
       DocString: <string read from klass.attr.__doc__>
 
-    :param klass: klass containing the attribute
-    :param attr: attribute name
-    :return: tipText string
+    :param klass: klass containing the attribute.
+    :param attr: attribute name.
+    :return: tipText string.
     """
     try:
         attrib = getattr(klass, attr)
@@ -64,15 +64,15 @@ def getAttributeTipText(klass, attr):
         dc = attrib.__doc__
 
         if ty == 'property':
-            return '{}.{}\n' \
-                   'Type:   {}\n' \
-                   'DocString:  {}'.format(klass.__name__, at, ty, dc)
+            return f'{klass.__name__}.{at}\n' \
+                   f'Type:   {ty}\n' \
+                   f'{dc}'
         else:
-            return '{}.{}\n' \
-                   'Type:   {}\n' \
-                   'String form:    {}\n' \
-                   'DocString:  {}'.format(klass.__name__, at, ty, st, dc)
-    except:
+            return f'{klass.__name__}.{at}\n' \
+                   f'Type:   {ty}\n' \
+                   f'String form:    {st}\n' \
+                   f'{dc}'
+    except Exception:
         return None
 
 
@@ -156,9 +156,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
             _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
             self.hWidth = maxDim.width()
 
-        # create the list of widgets and set the callbacks for each
-        row = 0
-        for _label, attrType, getFunction, setFunction, presetFunction, callback, kwds in self.attributes:
+        for row, (_label, attrType, getFunction, setFunction, presetFunction, callback, kwds) in enumerate(self.attributes):
 
             # remove whitespaces to give the attribute name in the class
             attr = stringToCamelCase(_label)
@@ -168,7 +166,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
             newWidget = attrType(self.mainWidget, mainWindow=self.mainWindow, labelText=_label, editable=editable,
                                  grid=(row, 0),
                                  tipText=tipText, compoundKwds=kwds)  #, **kwds)
-            widths = [self.hWidth] + [None]*(len(newWidget._widgets)-1)
+            widths = [self.hWidth] + [None] * (len(newWidget._widgets) - 1)
             newWidget.setFixedWidths(widths)
 
             # connect the signal
@@ -197,7 +195,6 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
             self.edits[attr] = newWidget
 
             setattr(self, attr, newWidget)
-            row += 1
 
     def _populate(self):
         """Populate the widgets in the popup
@@ -219,7 +216,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
                         # call the preset function for the widget (e.g. populate pulldowns with modified list)
                         _presetFunction(self, self.obj)
 
-                    if getFunction:     # and self.EDITMODE:
+                    if getFunction:  # and self.EDITMODE:
                         # set the current value
                         value = getFunction(self.obj, attr, None)
                         attrSetter(self.edits[attr], value)
@@ -242,7 +239,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
 
         applyState = True
         revertState = False
-        allChanges = True if self._changes else False
+        allChanges = bool(self._changes)
 
         return changeState(self, allChanges, applyState, revertState, self._okButton, None, self._revertButton, 0)
 
@@ -257,7 +254,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
             attrGetter = CommonWidgetsEdits[attrType.__name__][ATTRGETTER]
             value = attrGetter(self.edits[attr])
 
-            if getFunction: # and self.EDITMODE:
+            if getFunction:  # and self.EDITMODE:
                 oldValue = self._getValue(attr, getFunction, None)
                 if (value or None) != (oldValue or None):
                     return partial(self._setValue, attr, setFunction, value)
@@ -469,7 +466,8 @@ class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
         # create the list of widgets and set the callbacks for each
         self._setAttributeSet(self.mainWidget, None, self.attributes)
 
-    def _linkAttributeGroups(self, attribGroups):
+    @staticmethod
+    def _linkAttributeGroups(attribGroups):
         if attribGroups and len(attribGroups):
             for groupNum, groups in attribGroups.items():
                 widths = [klass._hWidth for klass in groups]
@@ -522,7 +520,7 @@ class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
                         # call the preset function for the widget (e.g. populate pulldowns with modified list)
                         _presetFunction(self, self.obj)
 
-                    if getFunction:     # and self.EDITMODE:
+                    if getFunction:  # and self.EDITMODE:
                         # set the current value
                         value = getFunction(self.obj, attr, None)
                         attrSetter(self.edits[attr], value)

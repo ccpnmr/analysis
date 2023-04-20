@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:42 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-04-20 18:40:09 +0100 (Thu, April 20, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
+from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 
 
 NULL = object()
@@ -119,6 +120,8 @@ class PulldownList(QtWidgets.QComboBox, Base):
             self.lineEdit().editingFinished.connect(self._textReady)
         if toolTips:
             self.setToolTips(toolTips)
+
+        self._list.setItemDelegate(ComboBoxDividerDelegate())
 
         # possibly for later if gray 'Select' preferred
         # self.currentIndexChanged.connect(self._highlightCurrentText)
@@ -299,7 +302,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         :return index of selected item
         """
         if default < 0 or default > len(self.texts):
-            raise ValueError('%s.selectValue: invalid value for default "%s"' % (self.__class__.__name__, default))
+            raise ValueError(f'{self.__class__.__name__}.selectValue: invalid value for default {default!r}')
         idx = self.texts.index(value) if value in self.texts else default
         self.setIndex(idx)
         return idx
@@ -445,6 +448,45 @@ class PulldownList(QtWidgets.QComboBox, Base):
     #         self.setPalette(palette)
 
 
+#=========================================================================================
+# ComboBoxDividerDelegate - adds a visible divider
+#=========================================================================================
+
+class ComboBoxDividerDelegate(QtWidgets.QStyledItemDelegate):
+    """ComboBox with a visible divider
+    """
+
+    _DIVIDERCOLOR = None
+    _BORDER = None
+
+    def __init__(self, *args, **kwds):
+        super().__init__(*args, *kwds)
+
+        # set the parameters for the divider
+        self._DIVIDERCOLOR = QtGui.QColor(getColours()[DIVIDER])
+        self._BORDER = getFontHeight() // 4
+
+    def paint(self, painter, option, index) -> None:
+        if not index.isValid():
+            return
+
+        if index.data(QtCore.Qt.AccessibleDescriptionRole) is not None:
+            # draw a dividing line across the pulldown list
+            painter.save()
+            painter.setPen(QtGui.QPen(self._DIVIDERCOLOR, 2))
+
+            painter.drawLine(option.rect.left() + self._BORDER, option.rect.center().y(),
+                             option.rect.right() - self._BORDER, option.rect.center().y())
+
+            painter.restore()
+
+        return super().paint(painter, option, index)
+
+
+#=========================================================================================
+# Testing
+#=========================================================================================
+
 def main():
     """A few small tests
     """
@@ -452,31 +494,25 @@ def main():
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
     from functools import partial
 
-
     app = TestApplication()
 
     texts = ['Int', 'Float', 'String', '']
     objects = [int, float, str, 'Green']
     icons = [None, None, None, Icon(color='#008000')]
 
-
     def callback(obj):
         print('callback', obj)
-
 
     def callback2(obj):
         print('HEY')
         print('callback2', obj)
 
-
     def callback21():
         print('clicked')
         print('callback2')
 
-
     def abts(s):
         print('s', s.texts)
-
 
     popup = CcpnDialog(windowTitle='Test PulldownList', setLayout=True)
     #popup.setSize(250,50)
@@ -530,6 +566,7 @@ def main():
     # combo.show()
     #
     # sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     # call testing

@@ -214,19 +214,17 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         if 'Spinboxes' in self.guiDict['TemporaryWidgets']:
             for key in self.guiDict['TemporaryWidgets']['Spinboxes']:
                 self.guiDict['TemporaryWidgets']['Spinboxes'][key].deleteLater()
+            for key in self.guiDict['TemporaryWidgets']['Checkboxes']:
+                self.guiDict['TemporaryWidgets']['Checkboxes'][key].deleteLater()
         self.guiDict['TemporaryWidgets']['Spinboxes'] = OD()
+        self.guiDict['TemporaryWidgets']['Checkboxes'] = OD()
         protons = self.settings['Current']['SsmSize']
         self.settings['Current']['SimulatedSpectrum'].spinSystemMatrix = self.settings['Current']['Values'][:protons, :protons]
-        grid = (7, 0)
-        widget = Label(self.scrollAreaLayout, text='Proton Counts', grid=grid, gridSpan=(1, 2))
-        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-        self.guiDict['TemporaryWidgets']['ProtonCountLabel'] = widget
+        grid = (6, 0)
         for i in range(protons):
-            grid = _addColumn(grid)
-            widget = Spinbox(self.scrollAreaLayout, value=1, grid=grid, gridspan=(1, 1), callback=self._protonCountChange)
-            _setWidgetProperties(widget, _setWidth(columnWidths, grid))
-            self.guiDict['TemporaryWidgets']['ProtonCountSpinbox'] = widget
-            widget.setRange(1, 3)
+            grid = _addRow(grid)
+            widget = CheckBox(self.scrollAreaLayout, checked=False, grid=grid)
+            self.guiDict['TemporaryWidgets']['Checkboxes'][f'Checkbox-{i}'] = widget
             self.settings['Current']['SimulatedSpectrum'].multiplets[str(i)] = {'center': float(0), 'indices': [i]}
             for j in range(protons):
                 self._createSsmGridSpinbox(i, j)
@@ -237,19 +235,34 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
     def _createSsmGridSpinbox(self, row, column):
         def changeMultipletCenter():
             shift = widget.value()
-            self.settings['Current']['Values'][column][row] = shift
+            self.settings['Current']['Values'][row][column] = shift
+            if self._getValue(self.guiDict['TemporaryWidgets']['Checkboxes'][f'Checkbox-{row}']) is True:
+                for key in self.guiDict['TemporaryWidgets']['Checkboxes']:
+                    if self._getValue(self.guiDict['TemporaryWidgets']['Checkboxes'][key]) is True:
+                        index = key.split('-')[-1]
+                        self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{index}-{index}'].setValue(shift)
             self.settings['Current']['SimulatedSpectrum'].moveMultiplet(multipletId, shift)
 
         def changeCouplingConstant():
             coupling = widget.value()
             self.settings['Current']['Values'][column][row] = coupling
             self.settings['Current']['Values'][row][column] = coupling
-            if self._getValue(self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{row}-{column}']) == coupling:
-                return
+            rowbool = self._getValue(self.guiDict['TemporaryWidgets']['Checkboxes'][f'Checkbox-{row}'])
+            columnbool = self._getValue(self.guiDict['TemporaryWidgets']['Checkboxes'][f'Checkbox-{column}'])
+            if rowbool is not columnbool:
+                for key in self.guiDict['TemporaryWidgets']['Checkboxes']:
+                    if self._getValue(self.guiDict['TemporaryWidgets']['Checkboxes'][key]) is True:
+                        index = key.split('-')[-1]
+                        if rowbool:
+                            self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{index}-{column}'].setValue(coupling)
+                        if columnbool:
+                            self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{row}-{index}'].setValue(coupling)
+            '''if self._getValue(self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{row}-{column}']) == coupling:
+                return'''
 
             self.settings['Current']['SimulatedSpectrum'].editCouplingConstant(column, row, coupling)
             self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{row}-{column}'].setValue(coupling)
-        grid = (row + 8, column + 1)
+        grid = (row + 7, column + 1)
         widget = DoubleSpinbox(self.scrollAreaLayout, value=self.settings['Current']['Values'][column][row], decimals=4, step=0.0001, grid=grid, gridspan=(1, 1))
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
         self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{column}-{row}'] = widget
@@ -261,6 +274,7 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
             widget.valueChanged.connect(changeCouplingConstant)
             widget.setRange(0, 20)
             widget.setSingleStep(0.1)
+        widget.coordinates = (row, column)
 
     def _getValue(self, widget):
         # Get the current value of the widget:

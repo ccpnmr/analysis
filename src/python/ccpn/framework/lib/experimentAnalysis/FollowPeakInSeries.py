@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-21 16:41:02 +0100 (Fri, April 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-21 16:57:46 +0100 (Fri, April 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -110,15 +110,16 @@ class FollowPeakAbc(abc.ABC):
                 matched.append(self.getMatchedPeak(originPeak, peakList.peaks))
         return matched
 
-class FollowByMinimalShiftMapping(FollowPeakAbc):
+class FollowByMinimalDistance(FollowPeakAbc):
 
     name = 'Minimal Distance'
-    info = 'Use the Minimal Distance  among items to create clusters'
+    info = '''The method computes the standardised Euclidian distance  between each pair of the peaks among the peaklists. 
+     Then it creates clusters by solving the linear sum assignment. https://en.wikipedia.org/wiki/Assignment_problem '''
 
 
     def matchPeaks(self):
         """
-        Compute the (Euclidian) distance between each pair of the two collections of peak inputs.
+        Compute the standardised Euclidian distance between each pair of the two collections of peak inputs.
         """
 
         from scipy.spatial.distance import cdist
@@ -141,7 +142,7 @@ class FollowByMinimalShiftMapping(FollowPeakAbc):
             if len(originPeaks) == 0:
                 break
             ## Compute distance between each pair of the two PeakLists
-            distanceMatrix = cdist(originPeakPos, targetPeakPos, metric='seuclidean',)
+            distanceMatrix = cdist(originPeakPos, targetPeakPos, metric='seuclidean',) # can add the variance factors as V=[0.142,1] for HN spectra. but it doesn't seem changing the results as the variance is automatically computed
             originIndexes, targetIndexes = linear_sum_assignment(distanceMatrix)
             originPeaks = originPeaks[originIndexes]
             targetPeaks = targetPeaks[targetIndexes]
@@ -192,5 +193,5 @@ class FollowSameAssignmentPeak(FollowPeakAbc):
 
 AVAILABLEFOLLOWPEAKS = {
                     FollowSameAssignmentPeak.name: FollowSameAssignmentPeak,
-                    FollowByMinimalShiftMapping.name: FollowByMinimalShiftMapping
+                    FollowByMinimalDistance.name: FollowByMinimalDistance
                     }

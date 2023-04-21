@@ -227,7 +227,8 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
             self.guiDict['TemporaryWidgets']['Checkboxes'][f'Checkbox-{i}'] = widget
             self.settings['Current']['SimulatedSpectrum'].multiplets[str(i)] = {'center': float(0), 'indices': [i]}
             for j in range(protons):
-                self._createSsmGridSpinbox(i, j)
+                if i <= j:
+                    self._createSsmGridSpinbox(i, j)
 
     def _protonCountChange(self):
         pass
@@ -254,14 +255,8 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
                     if self._getValue(self.guiDict['TemporaryWidgets']['Checkboxes'][key]) is True:
                         index = key.split('-')[-1]
                         if rowbool:
-                            self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{index}-{column}'].setValue(coupling)
-                        if columnbool:
-                            self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{row}-{index}'].setValue(coupling)
-            '''if self._getValue(self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{row}-{column}']) == coupling:
-                return'''
-
+                            self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{column}-{index}'].setValue(coupling)
             self.settings['Current']['SimulatedSpectrum'].editCouplingConstant(column, row, coupling)
-            self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{row}-{column}'].setValue(coupling)
         grid = (row + 7, column + 1)
         widget = DoubleSpinbox(self.scrollAreaLayout, value=self.settings['Current']['Values'][column][row], decimals=4, step=0.0001, grid=grid, gridspan=(1, 1))
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))

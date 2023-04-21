@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-06 12:41:51 +0000 (Mon, March 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-21 16:41:02 +0100 (Fri, April 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -217,7 +217,7 @@ def _navigateToPeak(guiModule, peak):
 def getPeaksFromCollection(collection):
     from ccpn.core.Peak import Peak
     if collection is None:
-        return
+        return []
     peaks = set()
     for item in collection.items:
         if isinstance(item, Peak):

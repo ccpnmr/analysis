@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-27 15:06:50 +0100 (Mon, March 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-21 16:41:02 +0100 (Fri, April 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, renameO
 from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
 from ccpn.util.DataEnum import DataEnum
-from ccpn.core.lib.PeakCollectionLib import _getCollectionNameForPeak
+from ccpn.core.lib.PeakCollectionLib import _getCollectionNameForPeak, _makeCollectionsOfPeaks
 from collections import defaultdict
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking, progressHandler
 
@@ -453,14 +453,13 @@ class SpectrumGroup(AbstractWrapperObject):
                             if refit:
                                 newPeak.fit(fitMethod=fitMethod, keepPosition=True)
                                 newPeak.estimateVolume()
-
                             collectionPeaks[collectionName].add(newPeak)
 
                         if peak.spectrum in self.spectra:  # don't add in cluster if the origin is not from this series
                             collectionPeaks[collectionName].add(peak)
 
                 ## finally, create collections
-                topCollection = self._makeCollectionsOfPeaks(collectionPeaks, topCollectionName)
+                topCollection = _makeCollectionsOfPeaks(self.project, collectionPeaks, topCollectionName)
         return topCollection
 
     def followAndCollectPeaksInSeries(self, sourcePeakList,
@@ -469,7 +468,8 @@ class SpectrumGroup(AbstractWrapperObject):
                                       pickPeaks=False,
                                       copyAssignment=False,
                                       useSliceColour=True,
-                                      topCollectionName=None):
+                                      topCollectionName=None,
+                                      **kwargs):
         """
         Given a source PeakList with peaks, find all corresponding peaks in each spectrum of the series.
         Matched Peaks are then grouped together in new collections.
@@ -487,49 +487,25 @@ class SpectrumGroup(AbstractWrapperObject):
         """
         from ccpn.framework.lib.experimentAnalysis.FollowPeakInSeries import AVAILABLEFOLLOWPEAKS
 
-        matcher = AVAILABLEFOLLOWPEAKS.get(engine)
-        if matcher is None:
+        PeakMatcher = AVAILABLEFOLLOWPEAKS.get(engine)
+        if PeakMatcher is None:
             raise RuntimeError('Please use an available FollowPeak algorithm.')
-        matcherObj = matcher()
 
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
-                collectionPeaks = defaultdict(set)  ## set to avoid duplicates
-                ## define the peakLists as needed
                 peakLists = self._getPeakLists4Collections(sourcePeakList,
                                                            createNewTargetPeakList=newTargetPeakList,
                                                            pickPeaks=pickPeaks,
                                                            useSliceColour=useSliceColour)
                 ## do the matches
-                for peak in sourcePeakList.peaks:
-                    ## define a cluster name
-                    collectedPeaks = set()
-                    collectionName = _getCollectionNameForPeak(peak)
-                    if peak.spectrum in self.spectra:
-                        collectedPeaks.add(peak)
-                    matchedPeaks = matcherObj.getCollectionPeaks(peak, peakLists)  #do match here
-                    if len(matchedPeaks) == 0:
-                        continue
-                    for matchedPeak in matchedPeaks:
-                        collectedPeaks.add(matchedPeak)
-                        if copyAssignment:
-                            try:
-                                peak.copyAssignmentTo(matchedPeak)
-                            except Exception as e:
-                                getLogger().warning(f'Failed to copy assignments for peak {peak}. Skipping with error: {e}')
-                        collectionName = _getCollectionNameForPeak(matchedPeak)
-                    collectionPeaks[collectionName] = collectedPeaks
-                topCollection = self._makeCollectionsOfPeaks(collectionPeaks, topCollectionName)
+                peakMatcher = PeakMatcher(sourcePeakList=sourcePeakList,
+                                                    targetPeakLists=peakLists,
+                                                    cloneAssignment = copyAssignment,
+                                                    ** kwargs)
 
-        return topCollection
+                collectionPeaks = peakMatcher.matchPeaks()
+                topCollection = _makeCollectionsOfPeaks(self.project, collectionPeaks, topCollectionName)
 
-    def _makeCollectionsOfPeaks(self, clusters, topCollectionName=None):
-        collections = []
-        for clusterName, clusterPeaks in clusters.items():
-            newCollection = self.project.newCollection(clusterPeaks, name=clusterName)
-            collections.append(newCollection)
-        collectionName = topCollectionName or self.name
-        topCollection = self.project.newCollection(collections, name=collectionName)
         return topCollection
 
     #=========================================================================================

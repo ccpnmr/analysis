@@ -4,7 +4,7 @@ This module defines base classes for Series Analysis
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-26 15:40:26 +0100 (Wed, October 26, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-04-21 16:41:02 +0100 (Fri, April 21, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,6 +30,8 @@ import numpy as np
 import abc
 from ccpn.core.PeakList import PeakList
 from ccpn.util.Logging import getLogger
+from collections import defaultdict
+from ccpn.core.lib.PeakCollectionLib import _getCollectionNameForPeak, _makeCollectionsOfPeaks
 
 
 class FollowPeakAbc(abc.ABC):
@@ -37,7 +39,36 @@ class FollowPeakAbc(abc.ABC):
     name = 'FollowPeak Abc'
     info = 'Abc class'
 
-    @abc.abstractmethod
+    def __init__(self, sourcePeakList, targetPeakLists,  cloneAssignment=False,
+                  **kwargs):
+
+        self.sourcePeakList = sourcePeakList
+        self.targetPeakLists = targetPeakLists
+        self.cloneAssignment = cloneAssignment
+        self.project = self.sourcePeakList.project
+
+    def matchPeaks(self):
+        """ """
+        collectionPeaks = defaultdict(set)  ## set to avoid duplicates
+
+        for peak in self.sourcePeakList.peaks:
+            collectedPeaks = set()
+            matchedPeaks = self.getCollectionPeaks(peak,  self.targetPeakLists)
+            if len(matchedPeaks) == 0:
+                continue
+            for matchedPeak in matchedPeaks:
+                collectedPeaks.add(matchedPeak)
+                if self.cloneAssignment:
+                    try:
+                        peak.copyAssignmentTo(matchedPeak)
+                    except Exception as e:
+                        getLogger().warning(f'Failed to copy assignments for peak {peak}. Skipping with error: {e}')
+                collectionName = _getCollectionNameForPeak(matchedPeak)
+                collectionPeaks[collectionName] = collectedPeaks
+
+        return collectionPeaks
+
+
     def getMatchedIndex(self, originPosition, targets) -> int:
         '''
         :param originPosition:  1D array. e.g.: the peak position as an array
@@ -73,63 +104,59 @@ class FollowPeakAbc(abc.ABC):
         Given a list of peakList (the PeakList object containing peaks) find the best match from each of the list.
         Used to create collections. Subclass for following peak in Perturbation Analysis.
         '''
-
         matched = []
         for peakList in targetPeakLists:
             if isinstance(peakList, PeakList) and len(peakList.peaks)>0:
                 matched.append(self.getMatchedPeak(originPeak, peakList.peaks))
         return matched
 
-class FollowNearestPeak(FollowPeakAbc):
+class FollowByMinimalShiftMapping(FollowPeakAbc):
 
-    name = 'Nearest Match'
-    info = 'Find the nearest peak by ppm position'
-
-    def getMatchedIndex(self, originPosition, targets, **kwargs) -> int:
-        '''
-        :param originPosition:  1D array. e.g.: the peak position as an array
-        :param targets: array of  available positions excluding the originPosition.
-        :param kwargs: any required for the algorithm, Ideally none or predefined.
-        :return: int.  the index of the matched item in targets.
-        originPosition = np.array([8.4918091  124.83767383])
-        targets = array([  [  8.15360558, 119.62046656],
-                           [  8.46365954, 120.46016675],
-                           [  8.34154712, 121.38129515],
-                           ...
-                        ])
-        expected index -> 2
-        '''
-        idx = np.array([np.linalg.norm(x + y) for (x, y) in targets - originPosition]).argmin()
-        return idx
+    name = 'Minimal Distance'
+    info = 'Use the Minimal Distance  among items to create clusters'
 
 
-class _FollowByMinimalShiftMapping(FollowPeakAbc):
-    """
-    INTERNAL. under development
-    """
-    name = 'MinimalShiftMapping'
-    info = 'Use the Minimal Shift Mapping to create clusters'
-
-
-    def findMatches(self, originPeaks, targetPeaks):
+    def matchPeaks(self):
         """
-        INTERNAL. under development """
-        getLogger().warn('Under development. Do not use yet.')
+        Compute the (Euclidian) distance between each pair of the two collections of peak inputs.
+        """
+
         from scipy.spatial.distance import cdist
         from scipy.optimize import linear_sum_assignment
-        originPeaks = np.array(originPeaks)
-        targetPeaks = np.array(targetPeaks)
-        originPeakPos = [pk.position for pk in originPeaks]
-        targetPeakPos = [pk.position for pk in targetPeaks]
-        originPeakPos = np.array(originPeakPos)
-        targetPeakPos = np.array(targetPeakPos)
-        Vs= {'1H':1, '13C':0.25, '15N':0.142} # alpha factors
-        ## Compute distance between each pair of the two PeakLists
-        distanceMatrix = cdist(originPeakPos, targetPeakPos, metric='seuclidean', V=[0.142,1])
-        originIndexes, targetIndexes = linear_sum_assignment(distanceMatrix)
-        originPeaks = originPeaks[originIndexes]
-        targetPeaks = targetPeaks[targetIndexes]
-        return list(zip(originPeaks, targetPeaks))
+
+        collectionPeaks = defaultdict(set)
+        # Loop over the targetPeakLists and compare to the originPeaks and not to previous List in the targetPeakList.
+        # This might spot peaks in slow exchange (e.g.: "disappear" at a middle of the titration and "reappear" at the end.)
+        for targetPeakList in self.targetPeakLists:
+            targetPeaks = targetPeakList.peaks
+            targetPeaks = np.array(targetPeaks)
+            targetPeakPos = [pk.position for pk in targetPeaks]
+            targetPeakPos = np.array(targetPeakPos)
+            originPeaks = self.sourcePeakList.peaks
+            originPeaks = np.array(originPeaks)
+            originPeakPos = [pk.position for pk in originPeaks]
+            originPeakPos = np.array(originPeakPos)
+            if len(targetPeaks) == 0:
+                continue
+            if len(originPeaks) == 0:
+                break
+            ## Compute distance between each pair of the two PeakLists
+            distanceMatrix = cdist(originPeakPos, targetPeakPos, metric='seuclidean',)
+            originIndexes, targetIndexes = linear_sum_assignment(distanceMatrix)
+            originPeaks = originPeaks[originIndexes]
+            targetPeaks = targetPeaks[targetIndexes]
+            # make the collection set
+            for o, t in list(zip(originPeaks, targetPeaks)):
+                collectionName = _getCollectionNameForPeak(o)
+                collectionPeaks[collectionName].add(t)
+                collectionPeaks[collectionName].add(o)
+                if self.cloneAssignment:
+                    try:
+                        o.copyAssignmentTo(t)
+                    except Exception as e:
+                        getLogger().warning(f'Failed to copy assignments for peak {o}. Skipping with error: {e}')
+        return collectionPeaks
+
 
 class FollowSameAssignmentPeak(FollowPeakAbc):
 
@@ -164,6 +191,6 @@ class FollowSameAssignmentPeak(FollowPeakAbc):
 
 
 AVAILABLEFOLLOWPEAKS = {
-                    FollowNearestPeak.name: FollowNearestPeak,
-                    FollowSameAssignmentPeak.name: FollowSameAssignmentPeak
+                    FollowSameAssignmentPeak.name: FollowSameAssignmentPeak,
+                    FollowByMinimalShiftMapping.name: FollowByMinimalShiftMapping
                     }

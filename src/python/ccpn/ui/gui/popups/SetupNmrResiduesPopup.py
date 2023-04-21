@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-20 18:40:09 +0100 (Thu, April 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-21 11:43:49 +0100 (Fri, April 21, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -47,14 +47,14 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
     _NMRCHAIN = '_nmrChain'
     _ASSIGNMENT = '_assignment'
     _CURRENTSTRIP = '_currentStrip'
-    _BADCOLOR = QtGui.QColor('darkorange')
+    _BADCOLOR = QtGui.QColor('darkgrey')
     _STRIPCOLOR = QtGui.QColor('blue')
     _DIVIDERCOLOR = QtGui.QColor('grey')
 
     storeStateOnReject = True  # store the state if the dialog is cancelled
 
     def __init__(self, parent=None, mainWindow=None,
-                 title='Set up nmrResidues', **kwds):
+                 title='Set up NmrResidues', **kwds):
         """
         Initialise the dialog
 
@@ -75,10 +75,10 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
 
         self._setWidgets()
 
-        self._acceptButtonText = 'Setup NMR Residues'
+        self._acceptButtonText = 'Set up NmrResidues'
         self.BUTTON_CANCEL = 'Cancel'
 
-        self.setOkButton(callback=self._setupNmrResidues, text=self._acceptButtonText, tipText='Setup Nmr Residues and close')
+        self.setOkButton(callback=self._setupNmrResidues, text=self._acceptButtonText, tipText='Set up NmrResidues and close')
         self.setCancelButton(callback=self.reject, text=self.BUTTON_CANCEL, tipText='Cancel and close')
         self.setDefaultButton(CcpnDialogMainWidget.OKBUTTON)
 
@@ -106,13 +106,17 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
     def _setWidgets(self):
         """Setup widgets for the dialog
         """
-        toolTip = 'Peaklists in the project.\n' \
-                  'PeakLists from current.strip are at the top of the list and highlighted blue.\n' \
-                  'Empty peakLists are highlighted in orange.'
-        label1a = Label(self.mainWidget, text="Source PeakList ", grid=(0, 0), tipText=toolTip)
+        toolTip = 'PeakLists in the project.\n' \
+                  'PeakLists from current.strip are displayed first,\n' \
+                  'those visible are highlighted blue.\n' \
+                  'Empty peakLists are greyed-out.'
+        Label(self.mainWidget, text="Source PeakList ", grid=(0, 0), tipText=toolTip)
         self.peakListPulldown = PulldownList(self.mainWidget, grid=(0, 1), tipText=toolTip)
-        label1a = Label(self.mainWidget, text="NmrChain ", grid=(0, 2))
-        self.nmrChainPulldown = PulldownList(self.mainWidget, grid=(0, 3))
+
+        toolTip = 'Destination nmrChain for new nmrAtoms'
+        Label(self.mainWidget, text="NmrChain ", grid=(0, 2), tipText=toolTip)
+        self.nmrChainPulldown = PulldownList(self.mainWidget, grid=(0, 3), tipText=toolTip)
+
         self.assignmentCheckBox = CheckBox(self.mainWidget, text="Keep existing assignments", checked=True, grid=(1, 0), gridSpan=(1, 3))
         self.assignmentCheckBox.setToolTip('Keep the existing assignments attached to the peaks when assigning new nmrAtoms,\n'
                                            'or delete the assignments for each peak first.')
@@ -120,23 +124,25 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
         HLine(self.mainWidget, grid=(2, 0), gridSpan=(1, 4), colour=getColours()[DIVIDER], height=20)
         self.useCurrentStrip = CheckBox(self.mainWidget, text="Select peakList from current strip",
                                         checked=True, grid=(3, 0), gridSpan=(1, 3))
-        self.useCurrentStrip.setToolTip('Select the first peakList from current.strip,\n'
+        self.useCurrentStrip.setToolTip('Select the first visible peakList from current.strip,\n'
                                         'or remember the peakList from the previous popup.')
 
         if self.project:
             self.nmrChainPulldown.setData([nmrChain.pid for nmrChain in self.project.nmrChains])
 
             allPkLists = OrderedSet(peakList.pid for peakList in self.project.peakLists)
-            stripPkLists = OrderedSet()
+            stripPkLists = visiblePkLists = OrderedSet()
             if self.current and (strip := self.current.strip):
                 with contextlib.suppress(Exception):
-                    stripPkLists = OrderedSet(peakList.pid for spec in strip.getVisibleSpectra()
-                                              for peakList in spec.peakLists)
+                    stripPkLists = OrderedSet(plv.peakList.pid for sv in strip.getSpectrumViews() for plv in sv.peakListViews)
+                    visiblePkLists = OrderedSet(plv.peakList.pid for sv in strip.getSpectrumViews() if sv.isDisplayed
+                                                for plv in sv.peakListViews if plv.isDisplayed)
 
             # separate peak-lists into those belonging to the current strip, and all the others
             texts = list(stripPkLists) + list(allPkLists - stripPkLists)
             self.peakListPulldown.setData(texts)
-            self.peakListPulldown.insertSeparator(len(stripPkLists))
+            if stripPkLists:
+                self.peakListPulldown.insertSeparator(len(stripPkLists))
 
             # highlight peak-lists that are bad or empty
             combo = self.peakListPulldown
@@ -145,7 +151,7 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
                 if (item := model.item(combo.getItemIndex(txt))) is not None:
                     if (pkList := self.project.getByPid(txt)) is None or not pkList.peaks:
                         item.setForeground(self._BADCOLOR)
-                    elif txt in stripPkLists:
+                    elif txt in visiblePkLists:
                         item.setForeground(self._STRIPCOLOR)
 
     def _setupNmrResidues(self):
@@ -174,9 +180,9 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
         if useCurrent:
             if self.current and (strip := self.current.strip):
                 # use the first peak-list from the current strip
-                with contextlib.suppress(Exception):
-                    pkListPid = strip.getVisibleSpectra()[0].peakLists[0].pid
-                    self.peakListPulldown.set(pkListPid)
+                if visiblePkLists := [plv.peakList.pid for sv in strip.getSpectrumViews() if sv.isDisplayed
+                                      for plv in sv.peakListViews if plv.isDisplayed]:
+                    self.peakListPulldown.set(visiblePkLists[0])
 
         else:
             self.peakListPulldown.set(SetupNmrResiduesPopup._storedState.get(self._PEAKLIST, False))

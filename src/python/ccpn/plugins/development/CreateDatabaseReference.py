@@ -129,9 +129,11 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         self.settings['Current']['SimulationType'] = type
 
     def _createNewSimulation(self):
-        for key in self.guiDict['TemporaryWidgets']:
-            self.guiDict['TemporaryWidgets'][key].deleteLater()
+        for dictkey in self.guiDict['TemporaryWidgets']:
+            for widgetkey in self.guiDict['TemporaryWidgets'][dictkey]:
+                self.guiDict['TemporaryWidgets'][dictkey][widgetkey].deleteLater()
         self.guiDict['TemporaryWidgets'] = OD()
+        self.guiDict['TemporaryWidgets']['SpectrumWidgets'] = OD()
         type = self.settings['Current']['SimulationType']
         simulatedSpectrum = SimulatedSpectrum(self.project, [(0, 0, 0, None)], {'0': {'center': float(0), 'indices': [0]}},
                                               np.zeros((1, 1)), 500, 65536, (12, -2), 'lorentzian', False, None, None,
@@ -148,36 +150,36 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         # Add a widget for the simulated spectrum peak width
         widget = Label(self.scrollAreaLayout, text=f'Width', grid=grid, gridSpan=(1, 2))
         _setWidgetProperties(widget, 200)
-        self.guiDict['TemporaryWidgets']['WidthLabel'] = widget
+        self.guiDict['TemporaryWidgets']['SpectrumWidgets']['WidthLabel'] = widget
         grid = _addColumn(_addColumn(grid))
         widget = DoubleSpinbox(self.scrollAreaLayout, value=1, decimals=1, step=0.1, grid=grid, gridSpan=(1, 2), callback=self._widthChange, suffix='Hz')
         widget.setRange(0.1, 5)
         _setWidgetProperties(widget, 200)
-        self.guiDict['TemporaryWidgets']['Width'] = widget
+        self.guiDict['TemporaryWidgets']['SpectrumWidgets']['Width'] = widget
         self.settings['Current']['Width'] = self._getValue(widget)
 
         # Add a widget for the simulated spectrum scale
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Scale (10^n)', grid=grid, gridSpan=(1, 2))
         _setWidgetProperties(widget, 200)
-        self.guiDict['TemporaryWidgets']['ScaleLabel'] = widget
+        self.guiDict['TemporaryWidgets']['SpectrumWidgets']['ScaleLabel'] = widget
         grid = _addColumn(_addColumn(grid))
         widget = DoubleSpinbox(self.scrollAreaLayout, value=1, decimals=3, step=0.001, grid=grid, gridSpan=(1, 2), callback=self._scaleChange)
         widget.setRange(-10, 10)
         _setWidgetProperties(widget, 200)
-        self.guiDict['TemporaryWidgets']['Scale'] = widget
+        self.guiDict['TemporaryWidgets']['SpectrumWidgets']['Scale'] = widget
         self.settings['Current']['Scale'] = self._getValue(widget)
 
         # Add a widget for the simulated spectrum frequency
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text=f'Frequency', grid=grid, gridSpan=(1, 2))
         _setWidgetProperties(widget, 200)
-        self.guiDict['TemporaryWidgets']['FrequencyLabel'] = widget
+        self.guiDict['TemporaryWidgets']['SpectrumWidgets']['FrequencyLabel'] = widget
         grid = _addColumn(_addColumn(grid))
         widget = DoubleSpinbox(self.scrollAreaLayout, value=500, step=10, grid=grid, gridSpan=(1, 2), suffix='MHz', callback=self._frequencyChange)
         widget.setRange(10, 1200)
         _setWidgetProperties(widget, 200)
-        self.guiDict['TemporaryWidgets']['Frequency'] = widget
+        self.guiDict['TemporaryWidgets']['SpectrumWidgets']['Frequency'] = widget
         self.settings['Current']['Frequency'] = self._getValue(widget)
 
         if type == 'Spin System':
@@ -186,11 +188,11 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
             self.settings['Current']['Values'] = np.zeros((12, 12))
             widget = Label(self.scrollAreaLayout, text='Total Protons', grid=grid, gridSpan=(1, 2))
             _setWidgetProperties(widget, 200)
-            self.guiDict['TemporaryWidgets']['ProtonSpinboxLabel'] = widget
+            self.guiDict['TemporaryWidgets']['SpectrumWidgets']['ProtonSpinboxLabel'] = widget
             grid = _addColumn(_addColumn(grid))
             widget = Spinbox(self.scrollAreaLayout, value=1, grid=grid, gridspan=(1, 1), callback=self._protonChange)
             _setWidgetProperties(widget, 200)
-            self.guiDict['TemporaryWidgets']['ProtonSpinbox'] = widget
+            self.guiDict['TemporaryWidgets']['SpectrumWidgets']['ProtonSpinbox'] = widget
             widget.setRange(0, 10)
             self.setupSsmGrid()
         elif type == 'Peak List':
@@ -229,9 +231,9 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
             for j in range(protons):
                 if i <= j:
                     self._createSsmGridSpinbox(i, j)
-
-    def _protonCountChange(self):
-        pass
+        widget = Button(parent=self.scrollAreaLayout, text='Save to Database', grid=grid, gridSpan=(7+protons, 0), callback=self._saveToDatabase)
+        _setWidgetProperties(widget, 200)
+        self.guiDict['CoreWidgets']['SaveToDatabaseButton'] = widget
 
     def _createSsmGridSpinbox(self, row, column):
         def changeMultipletCenter():
@@ -270,6 +272,10 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
             widget.setRange(0, 20)
             widget.setSingleStep(0.1)
         widget.coordinates = (row, column)
+
+    def _saveToDatabase(self):
+        caller = self.simulator.caller
+
 
     def _getValue(self, widget):
         # Get the current value of the widget:

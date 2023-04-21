@@ -125,6 +125,11 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(widget, 200)
         self.guiDict['CoreWidgets']['SimulationTypeButton'] = widget
 
+        grid = _addColumn(_addColumn(grid))
+        widget = Button(parent=self.scrollAreaLayout, text='Save to Database', grid=grid, gridSpan=(1, 2), callback=self._saveToDatabase)
+        _setWidgetProperties(widget, 200)
+        self.guiDict['CoreWidgets']['SaveToDatabaseButton'] = widget
+
     def _chooseSimulationType(self, type):
         self.settings['Current']['SimulationType'] = type
 
@@ -139,16 +144,38 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
                                               np.zeros((1, 1)), 500, 65536, (12, -2), 'lorentzian', False, None, None,
                                               None)
         x, y = createLineshape([(0, 0, 0, None)], limits=(12, -2))
-        spectrum = self.project.newEmptySpectrum(['1H'], name='Reference', intensities=y, positions=x)
+        spectrum = self.project.newEmptySpectrum(['1H'], name='User_Defined_Metabolite', intensities=y, positions=x)
         self.settings['Current']['Spectrum'] = spectrum
         simulatedSpectrum.spectrum = spectrum
         self.settings['Current']['SimulatedSpectrum'] = simulatedSpectrum
         simulatedSpectrum.scaleSpectrum(10)
 
+        name = 'User_Defined_Metabolite'
+        self.settings['Current']['MetaboliteName'] = name
+        sample = self.project.newSample(name=f'{name}_sample', amountUnits='µL', ionicStrengthUnits='mM')
+        self.settings['Current']['Sample'] = sample
+        substance = self.project.newSubstance(name=name, labelling='metabolite', substanceType='Molecule')
+        self.settings['Current']['Substance'] = substance
+        sample_component = sample.newSampleComponent(name=name, labelling='metabolite', comment='Something',
+                                                     role='Compound', concentrationUnit='mol/mol')
+        substance.referenceSpectra = [spectrum]
+        sample.spectra = [spectrum]
+
         grid = (1, 0)
 
+        # Add a widget for setting the metabolite name
+        widget = Label(self.scrollAreaLayout, text=f'Metabolite Name', grid=grid, gridSpan=(1, 2))
+        _setWidgetProperties(widget, 200)
+        self.guiDict['TemporaryWidgets']['SpectrumWidgets']['NameLabel'] = widget
+        grid = _addColumn(_addColumn(grid))
+        widget = LineEdit(self.scrollAreaLayout, text=name, grid=grid, gridSpan=(1, 2))
+        widget.textChanged.connect(self._nameChange)
+        _setWidgetProperties(widget, 200)
+        self.guiDict['TemporaryWidgets']['SpectrumWidgets']['Name'] = widget
+
         # Add a widget for the simulated spectrum peak width
-        widget = Label(self.scrollAreaLayout, text=f'Width', grid=grid, gridSpan=(1, 2))
+        grid = _addRow(grid)
+        widget = Label(self.scrollAreaLayout, text=f'Peak Width', grid=grid, gridSpan=(1, 2))
         _setWidgetProperties(widget, 200)
         self.guiDict['TemporaryWidgets']['SpectrumWidgets']['WidthLabel'] = widget
         grid = _addColumn(_addColumn(grid))
@@ -193,10 +220,16 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
             widget = Spinbox(self.scrollAreaLayout, value=1, grid=grid, gridspan=(1, 1), callback=self._protonChange)
             _setWidgetProperties(widget, 200)
             self.guiDict['TemporaryWidgets']['SpectrumWidgets']['ProtonSpinbox'] = widget
-            widget.setRange(0, 10)
+            widget.setRange(1, 10)
             self.setupSsmGrid()
         elif type == 'Peak List':
             pass
+
+    def _nameChange(self, name):
+        self.settings['Current']['MetaboliteName'] = name.replace(' ', '_')
+        self.settings['Current']['Sample'].name = f'{name}_sample'
+        self.settings['Current']['Substance'].rename(name=f'{name}_substance', labelling='metabolite')
+        self.settings['Current']['Spectrum'].name = f'{name}_spectrum'
 
     def _widthChange(self, width):
         self.settings['Current']['SimulatedSpectrum'].setWidth(width)
@@ -222,7 +255,7 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets']['Checkboxes'] = OD()
         protons = self.settings['Current']['SsmSize']
         self.settings['Current']['SimulatedSpectrum'].spinSystemMatrix = self.settings['Current']['Values'][:protons, :protons]
-        grid = (6, 0)
+        grid = (7, 0)
         for i in range(protons):
             grid = _addRow(grid)
             widget = CheckBox(self.scrollAreaLayout, checked=False, grid=grid)
@@ -231,9 +264,6 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
             for j in range(protons):
                 if i <= j:
                     self._createSsmGridSpinbox(i, j)
-        widget = Button(parent=self.scrollAreaLayout, text='Save to Database', grid=grid, gridSpan=(7+protons, 0), callback=self._saveToDatabase)
-        _setWidgetProperties(widget, 200)
-        self.guiDict['CoreWidgets']['SaveToDatabaseButton'] = widget
 
     def _createSsmGridSpinbox(self, row, column):
         def changeMultipletCenter():
@@ -259,7 +289,7 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
                         if rowbool:
                             self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{column}-{index}'].setValue(coupling)
             self.settings['Current']['SimulatedSpectrum'].editCouplingConstant(column, row, coupling)
-        grid = (row + 7, column + 1)
+        grid = (row + 8, column + 1)
         widget = DoubleSpinbox(self.scrollAreaLayout, value=self.settings['Current']['Values'][column][row], decimals=4, step=0.0001, grid=grid, gridspan=(1, 1))
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
         self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{column}-{row}'] = widget
@@ -275,7 +305,6 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
 
     def _saveToDatabase(self):
         caller = self.simulator.caller
-
 
     def _getValue(self, widget):
         # Get the current value of the widget:

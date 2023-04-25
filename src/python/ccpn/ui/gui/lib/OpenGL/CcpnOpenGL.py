@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-17 11:25:18 +0000 (Fri, March 17, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-04-25 15:41:44 +0100 (Tue, April 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -853,6 +853,8 @@ class CcpnGLWidget(QOpenGLWidget):
             # transfer event to the correct widget for changing the plane OR raising base contour level...
             if (keyModifiers & Qt.ShiftModifier):
                 # raise/lower base contour level - should be strip I think
+                if self.strip.spectrumDisplay.is1D:
+                    return
                 if scrollDirection > 0:
                     self.strip.spectrumDisplay.raiseContourBase()
                 else:

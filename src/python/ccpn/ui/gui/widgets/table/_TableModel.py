@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 15:25:12 +0100 (Tue, March 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-04-25 17:42:32 +0100 (Tue, April 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -137,27 +137,37 @@ class _TableModel(QtCore.QAbstractTableModel):
     def displayedDf(self):
         """Return the visible dataFrame as displayed, sorted and filtered
         """
-        from ccpn.util.OrderedSet import OrderedSet
+        return self._getVisibleDataFrame(includeHiddenColumns=False)
 
-        df = self._df
-        table = self._view
-        rows, cols = df.shape[0], df.shape[1]
 
-        if df.empty:
-            return df
+    def _getVisibleDataFrame(self, includeHiddenColumns=False):
+            """Return the visible dataFrame as displayed, sorted and filtered.
+            includeHiddenColumns: True to return the dataFrame containing  all columns.
+            """
+            from ccpn.util.OrderedSet import OrderedSet
 
-        colList = [col for ii, col, in enumerate(list(df.columns)) if
-                   not table.horizontalHeader().isSectionHidden(ii)]
+            df = self._df
+            table = self._view
+            rows, cols = df.shape[0], df.shape[1]
 
-        if self._filterIndex is None:
-            rowList = [self._sortIndex[row] for row in range(rows)]
-        else:
-            #  map to sorted indexes
-            rowList = list(OrderedSet(self._sortIndex[row] for row in range(rows)) &
-                           OrderedSet(self._sortIndex[ii] for ii in self._filterIndex))
+            if df.empty:
+                return df
 
-        df = df[colList]
-        return df[:].iloc[rowList]
+            if includeHiddenColumns:
+                colList = list(df.columns)
+            else:
+                colList = [col for ii, col, in enumerate(list(df.columns)) if
+                           not table.horizontalHeader().isSectionHidden(ii)]
+
+            if self._filterIndex is None:
+                rowList = [self._sortIndex[row] for row in range(rows)]
+            else:
+                #  map to sorted indexes
+                rowList = list(OrderedSet(self._sortIndex[row] for row in range(rows)) &
+                               OrderedSet(self._sortIndex[ii] for ii in self._filterIndex))
+
+            df = df[colList]
+            return df[:].iloc[rowList]
 
     def setToolTips(self, orientation, values):
         """Set the tooltips for the horizontal/vertical headers.

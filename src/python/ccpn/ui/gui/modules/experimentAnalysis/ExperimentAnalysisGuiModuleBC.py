@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-21 16:41:02 +0100 (Fri, April 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-25 17:41:51 +0100 (Tue, April 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalys
 from ccpn.util.Logging import getLogger
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import numpy as np
+import pandas as pd
 
 ######## gui/ui imports ########
 from PyQt5 import QtWidgets
@@ -95,6 +96,15 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     def inputDataTables(self) -> list:
         return self.backendHandler.inputDataTables
 
+
+    def getVisibleDataFrame(self, includeHiddenColumns=False):
+        tablePanel = self.panelHandler.getPanel(guiNameSpaces.TablePanel)
+        if tablePanel is not None:
+            table = tablePanel.mainTable
+            tableModel = table.model()
+            if tableModel is not None:
+                return tableModel._getVisibleDataFrame(includeHiddenColumns=includeHiddenColumns)
+        return pd.DataFrame()
 
     def getGuiResultDataFrame(self):
         """Get the SelectedOutputDataTable and transform the raw data to a displayable table for the main widgets.

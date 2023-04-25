@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-02-23 14:32:50 +0000 (Thu, February 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-25 17:41:51 +0100 (Tue, April 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -277,6 +277,7 @@ class BarPlotPanel(GuiPanel):
             self._errorHeights = {'xError': xError.values, 'yError': yError, 'topError': topError}
         ## set ticks for the xAxis. As they Xs are strs, Need to create a dict Index:Value
         ticks = dict(zip(dataFrame[xColumnName].index, dataFrame[xColumnName].values))
+        print('Ticks', ticks)
         xaxis = self._getAxis('bottom')
         if self.barGraphWidget._tickOption == MinimalTicks:
             # setTicks uses a list of 3 dicts. Major, minor, sub minors ticks. (used for when zooming in-out)

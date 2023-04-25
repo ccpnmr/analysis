@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-04-25 17:41:51 +0100 (Tue, April 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -344,6 +344,7 @@ def _getApplicationSpecificModules(mainWindow, applicationName) -> list:
 
 def _getAvailableModules(mainWindow, layout, neededModules):
     from ccpn.ui.gui import modules as gM
+    from ccpn.ui.gui.modules import experimentAnalysis  as ea
 
     if General in layout:
         if ApplicationName in layout.general:
@@ -356,6 +357,7 @@ def _getAvailableModules(mainWindow, layout, neededModules):
             else:
                 modules = _getApplicationSpecificModules(mainWindow, applicationName)
             modules.append(gM)
+            modules.append(ea)
             paths = [item.__path__ for item in modules]
 
             ccpnModules = [ccpnModule for path in paths for ccpnModule in _ccpnModulesImporter(path, neededModules)]

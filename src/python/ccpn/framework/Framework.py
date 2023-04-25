@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-20 17:12:36 +0100 (Thu, April 20, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-04-25 17:41:51 +0100 (Tue, April 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -2255,7 +2255,7 @@ class Framework(NotifierBase, GuiBase):
         return cs
 
     def showChemicalShiftMappingModule(self, position: str = 'top', relativeTo: CcpnModule = None):
-        from ccpn.ui.gui.modules.experimentAnalysis.chemicalShiftMapping.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
+        from ccpn.ui.gui.modules.experimentAnalysis.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
 
         mainWindow = self.ui.mainWindow
         if not relativeTo:
@@ -2265,7 +2265,7 @@ class Framework(NotifierBase, GuiBase):
         return cs
 
     def showRelaxationModule(self, position: str = 'top', relativeTo: CcpnModule = None):
-        from ccpn.ui.gui.modules.experimentAnalysis.relaxation.RelaxationGuiModule import RelaxationGuiModule
+        from ccpn.ui.gui.modules.experimentAnalysis.RelaxationGuiModule import RelaxationGuiModule
 
         mainWindow = self.ui.mainWindow
         if not relativeTo:

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 18:46:14 +0100 (Tue, March 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-04-25 17:41:51 +0100 (Tue, April 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -217,7 +217,9 @@ class GuiBase(object):
             (),
             ("Restraint Analysis Inspector", partial(self.showRestraintAnalysisTable, selectFirstItem=True), [('shortcut', 'at')]),
             ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
-            # ("Chemical Shift Mapping (Alpha)", self.showChemicalShiftMappingBeta),
+            # ("Chemical Shift Mapping (Alpha)", self.showChemicalShiftMappingModule),
+            # ("Relaxation Analysis (Alpha)", self.showRelaxationModule),
+
             ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no'),
                                                                                    # ('icon', 'icons/null')
                                                                                    ]),

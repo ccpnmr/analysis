@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-06 12:41:51 +0000 (Mon, March 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-25 17:41:51 +0100 (Tue, April 25, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -24,33 +24,33 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 #=========================================================================================
 
 ######## core imports ########
-from ccpn.framework.lib.experimentAnalysis.RelaxationAnalysisBC import RelaxationAnalysisBC
-import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.framework.lib.experimentAnalysis.ChemicalShiftMappingAnalysisBC import ChemicalShiftMappingAnalysisBC
 from ccpn.util.Logging import getLogger
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 ######## gui/ui imports ########
 from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+import ccpn.ui.gui.modules.experimentAnalysis.CSMSettingsPanel as settingsPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import ToolBarPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import ExperimentAnalysisGuiModuleBC
-import ccpn.ui.gui.modules.experimentAnalysis.relaxation.RelaxationSettingsPanel as settingsPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
 
 #####################################################################
 #######################  The main GUI Module ########################
 #####################################################################
 
-class RelaxationGuiModule(ExperimentAnalysisGuiModuleBC):
+class ChemicalShiftMappingGuiModule(ExperimentAnalysisGuiModuleBC):
 
-    className = 'Relaxation'
-    analysisType = sv.RelaxationAnalysis
+    className = 'ChemicalShiftMapping'
+    analysisType = sv.ChemicalShiftMappingAnalysis
 
-    def __init__(self, mainWindow, name='Relaxation (Alpha)', **kwds):
+    def __init__(self, mainWindow, name='Chemical Shift Mapping (Alpha)', **kwds):
         super(ExperimentAnalysisGuiModuleBC, self)
 
         ## link to the Non-Gui backend and its Settings
-        backendHandler = RelaxationAnalysisBC()
+        backendHandler = ChemicalShiftMappingAnalysisBC()
         ExperimentAnalysisGuiModuleBC.__init__(self, mainWindow=mainWindow, name=name, backendHandler=backendHandler)
 
     #################################################################
@@ -65,8 +65,19 @@ class RelaxationGuiModule(ExperimentAnalysisGuiModuleBC):
         """
         Add the Settings Panels to the Gui. To retrieve a Panel use/see the settingsPanelsManager.
         """
-        self.settingsPanelHandler.append(settingsPanel.RelaxationGuiInputDataPanel(self))
-        self.settingsPanelHandler.append(settingsPanel.RelaxationCalculationPanel(self))
-        self.settingsPanelHandler.append(settingsPanel.RelaxationFittingPanel(self))
-        self.settingsPanelHandler.append(settingsPanel.RelaxationAppearancePanel(self))
+        self.settingsPanelHandler.append(settingsPanel.CSMGuiInputDataPanel(self))
+        self.settingsPanelHandler.append(settingsPanel.CSMCalculationPanel(self))
+        self.settingsPanelHandler.append(settingsPanel.CSMGuiFittingPanel(self))
+        self.settingsPanelHandler.append(settingsPanel.CSMAppearancePanel(self))
+
+
+    #####################################################################
+    #####################  Widgets callbacks  ###########################
+    #####################################################################
+
+
+
+
+
+
 

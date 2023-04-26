@@ -54,7 +54,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-13 11:29:46 +0100 (Thu, April 13, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-26 19:19:14 +0100 (Wed, April 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -744,6 +744,34 @@ class Spectrum(AbstractWrapperObject):
         CCPNINTERNAL:
         """
         _path = self._dataStore.redirectPath()
+        _dataStore = DataStore.newFromPath(path=_path,
+                                           dataFormat=self._dataStore.dataFormat,
+                                           autoRedirect=self._dataStore.autoRedirect,
+                                           autoVersioning=self._dataStore.autoVersioning,
+                                           )
+        _dataStore.spectrum = self
+        _dataStore._saveInternal()
+        self._spectrumTraits.dataStore = _dataStore
+        return self._dataStore.path
+
+    @property
+    def _isAlongside(self) -> bool:
+        """Return True if the spectrum is already defined as Alongside
+        """
+        from ccpn.core.lib.DataStore import AlongsideRedirection
+
+        return self._dataStore.redirectionIdentifier == AlongsideRedirection.identifier
+
+    def _makeNewRelativePath(self , newPath) -> Path:
+        """Insert a possible redirection in the path, as maintained in the dataStore object
+        by creating a new one with the relative path.
+        NB. The dataSource object already used the absolute path, so no need to re-initialise
+
+        :return The new relative path as a Path object
+
+        CCPNINTERNAL:
+        """
+        _path = self._dataStore.redirectPath(newPath)
         _dataStore = DataStore.newFromPath(path=_path,
                                            dataFormat=self._dataStore.dataFormat,
                                            autoRedirect=self._dataStore.autoRedirect,

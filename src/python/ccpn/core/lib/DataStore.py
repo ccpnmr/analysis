@@ -23,8 +23,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:39 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-04-26 19:19:14 +0100 (Wed, April 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -331,6 +331,13 @@ class DataStore(CcpNmrJson):
                 _path = Path(d) / _path.relative_to(p)
                 break
         return _path
+
+    @property
+    def redirectionIdentifier(self):
+        """Return the identifier of the current redirection
+        """
+        # check in reverse order, prioritising $INSIDE, then $ALONGSIDE, then $DATA
+        return next((d for d, p in self._getPathRedirections() if self._path.startswith(d)), None)
 
     def aPath(self) -> Path:
         """:return aPath instance of self, decoded for $DATA, $ALONGSIDE, $INSIDE redirections

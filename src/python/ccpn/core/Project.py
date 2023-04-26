@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-20 17:12:36 +0100 (Thu, April 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-26 19:19:14 +0100 (Wed, April 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -741,6 +741,12 @@ class Project(AbstractWrapperObject):
             parent = _newPath.parent
             _newPath.removeDir()
             parent.fetchDir(_newPath)
+
+        for sp in self.spectra:
+            # check if any spectra are referenced as ALONGSIDE and update to the new path
+            if sp._isAlongside and sp.hasValidPath() and aPath(self.path).parent != _newPath.parent:
+                getLogger().debug(f'Redirecting spectrum {aPath(self.path).parent} -> {_newPath.parent}')
+                sp._makeAbsolutePath()
 
         _newXmlLoader = XmlLoader.newFromLoader(self._xmlLoader, path=_newPath, create=True)
         self._xmlLoader = _newXmlLoader

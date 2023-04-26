@@ -56,7 +56,7 @@ from ccpn.util.nef.GenericStarParser import SaveFrame, DataBlock, DataExtent, Lo
 from functools import partial
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.util.decorators import logCommand
-from Classes.Simulator_rework import Simulator
+from Classes.Simulator import Simulator
 from .pluginAddons import _addRow, _addColumn, _addVerticalSpacer, _setWidth, _setWidgetProperties
 
 
@@ -164,7 +164,14 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         df = self.metabolites.data.sort_values('name')[['name', 'hmdb_accession', 'bmrb_id', 'chemical_formula', 'average_molecular_weight', 'smiles', 'inchi', 'metabolite_id', 'description']]
         widget = Table(self.scrollAreaLayout, df=df, grid=grid, gridSpan=(1, 2), selectionCallback=self._selectMetabolite, borderWidth=4)
         _setWidgetProperties(widget, _setWidth([500], grid), 300)
-        self.guiDict['CoreWidgets']['metabolite'] = widget
+        self.guiDict['CoreWidgets']['Metabolite'] = widget
+
+        grid = _addColumn(_addColumn(grid))
+        widget = Button(self.scrollAreaLayout, text='Add Unknown Signal', grid=grid, gridSpan=(1, 2), callback=self._addUnknownSignal)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+        self.guiDict['CoreWidgets']['AddUnknownSignalButton'] = widget
+        self.settings['Current']['UnknownSignalCount'] = 0
+
 
         # table widget for selecting the simulation of the metabolite
         grid = _addRow(grid)
@@ -177,17 +184,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                                    'origin'])
         widget = Table(self.scrollAreaLayout, df=df, grid=grid, gridSpan=(1, 2), selectionCallback=self._setupSimulatedSpectrum, borderWidth=4)
         _setWidgetProperties(widget, _setWidth([500], grid), 300)
-        self.guiDict['CoreWidgets']['simulation'] = widget
-
-        '''# Action buttons: Filter creates a new filtered peak list
-        grid = _addVerticalSpacer(self.scrollAreaLayout, grid)
-        grid = _addColumn(grid)
-        grid = _addColumn(grid)
-        texts = ['Filter']
-        tipTexts = [help['Filter']]
-        callbacks = [self.filterNoiseButton]
-        widget = ButtonList(parent=self.scrollAreaLayout, texts=texts, callbacks=callbacks, tipTexts=tipTexts, grid=grid)
-        _setWidgetProperties(widget, heightType='Minimum')'''
+        self.guiDict['CoreWidgets']['Simulation'] = widget
 
         '''Spacer(self.scrollAreaLayout, 5, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                grid=(grid[0] + 1, 10),
@@ -294,10 +291,23 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         metaboliteName = selectedRow.name.iloc[0]
         self.settings['Current']['metabolite'] = metaboliteName
         metabolite_id = selectedRow.metabolite_id.iloc[0]
-        widget = self.guiDict['CoreWidgets']['simulation']
+        widget = self.guiDict['CoreWidgets']['Simulation']
         query = f'select * from samples natural join spectra where metabolite_id is "{metabolite_id}"'
         data = self.simulator.caller.execute_query(query)
         widget.updateDf(data)
+
+    def _addUnknownSignal(self):
+        self.settings["Current"]["UnknownSignalCount"] += 1
+        self.settings['Current']['metabolite'] = f'Unknown_Signal_{self.settings["Current"]["UnknownSignalCount"]}'
+        widget = self.guiDict['CoreWidgets']['Simulation']
+        data = pd.DataFrame({'name': self.settings['Current']['metabolite'],
+                             'metabolite_id': None,
+                             'spectrum_id': None,
+                             'origin': 'template'}, index=[len(self.metabolites.data)])
+        widget.updateDf(data)
+        data = {'name': self.settings['Current']['metabolite']}
+        self.metabolites.data = self.metabolites.data.append(pd.Series(data, index=self.metabolites.data.columns[:len(data)]), ignore_index=True)
+        self.guiDict['CoreWidgets']['Metabolite'].df = self.metabolites.data
 
     def _setupSimulatedSpectrum(self, newRow, previousRow, selectedRow, lastRow):
         metabolitesData = self.metabolites.data
@@ -308,9 +318,12 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             plotting = 'spinSystem'
         elif origin == 'bmrb':
             plotting = 'onlypeaks'
+        elif origin == 'template':
+            plotting = 'template'
         else:
             plotting = 'peaklist'
-        metaboliteName = metabolitesData.loc[metabolitesData['metabolite_id'] == metaboliteID, 'name'].iloc[0]
+        # metaboliteName = metabolitesData.loc[metabolitesData['metabolite_id'] == metaboliteID, 'name'].iloc[0]
+        metaboliteName = selectedRow.metabolite_id.iloc[0]
         self.settings['Current']['currentSimulatedSpectrumId'] = spectrumId
         self.settings['Current']['currentMetaboliteName'] = metaboliteName
         if spectrumId not in self.metaboliteSimulations:
@@ -318,7 +331,10 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             scale = 1
             globalShift = 0
             frequency = round(self.settings['Current']['referenceSumSpectrumFrequency']/10)*10
-            self.simspec = self.simulator.pureSpectrum(spectrumId=spectrumId, width=width, frequency=frequency, points=self.settings['Current']['referenceSumSpectrumPoints'], limits=self.settings['Current']['referenceSumSpectrumLimits'], plotting=plotting)
+            if plotting != 'template':
+                self.simspec = self.simulator.pureSpectrum(spectrumId=spectrumId, width=width, frequency=frequency, points=self.settings['Current']['referenceSumSpectrumPoints'], limits=self.settings['Current']['referenceSumSpectrumLimits'], plotting=plotting)
+            else:
+                self.simspec = self.simulator.blankSpectrum(frequency=frequency, points=self.settings['Current']['referenceSumSpectrumPoints'], limits=self.settings['Current']['referenceSumSpectrumLimits'])
             self.metaboliteSimulations[spectrumId] = self.simspec
             self.addSimSpectrumToList(self.simspec)
             self.settings['Current']['referenceSpectrumGroup'].addSpectrum(self.simspec.spectrum)
@@ -409,6 +425,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             for index, multipletId in enumerate(self.simspec.multiplets):
                 self.addDoubleSpinbox(index, multipletId)
         self.project.widgetDict = self.guiDict['TemporaryWidgets']
+
+    def _setupTemplate(self):
+        pass
 
     def addSimSpectrumToList(self, spectrum):
         if 'SimulatedSpectra' not in self.settings['Spectra']:

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-20 15:48:11 +0000 (Mon, March 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-26 16:08:35 +0100 (Wed, April 26, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -45,7 +45,7 @@ from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
-from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
+from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox, DoubleSpinbox
 from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -695,7 +695,7 @@ class GeneralTab(Widget):
             row += 1
 
             Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'scale'))
-            self.spectrumScalingData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=0.1, max=100.0)
+            self.spectrumScalingData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=-1e12, max=1e12, decimals=8)
             self.spectrumScalingData.valueChanged.connect(partial(self._queueSpectrumScaleChange, spectrum, self.spectrumScalingData.textFromValue))
             row += 1
 
@@ -733,7 +733,7 @@ class GeneralTab(Widget):
             row += 1
 
             spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'scale'))
-            self.spectrumScalingData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=0.1, max=100.0)
+            self.spectrumScalingData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=-1e12, max=1e12, decimals=8)
             self.spectrumScalingData.valueChanged.connect(partial(self._queueSpectrumScaleChange, spectrum, self.spectrumScalingData.textFromValue))
             row += 1
 
@@ -771,7 +771,7 @@ class GeneralTab(Widget):
 
             try:
                 index = self.spectrum.project.chemicalShiftLists.index(self.spectrum.chemicalShiftList)
-            except:
+            except Exception:
                 index = 0
             self.chemicalShiftListPulldown.setData([csList.pid for csList in self.spectrum.project.chemicalShiftLists] + ['<New>'])
             self.chemicalShiftListPulldown.setIndex(index)
@@ -2571,7 +2571,7 @@ class ColourTab(Widget):
                     state = checkBoxList[cc]
                     try:
                         self._copyCheckBoxes[cc].setChecked(state)
-                    except Exception as es:
+                    except Exception:
                         pass
 
             if self._copyToSpectra:

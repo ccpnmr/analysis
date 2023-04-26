@@ -56,7 +56,7 @@ from ccpn.util.nef.GenericStarParser import SaveFrame, DataBlock, DataExtent, Lo
 from functools import partial
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.util.decorators import logCommand
-from Classes.Simulator_rework import Simulator, SimulatedSpectrum
+from Classes.Simulator import Simulator, SimulatedSpectrum
 import numpy as np
 from Functions.LineshapeCreator import createLineshape
 from .pluginAddons import _addRow, _addColumn, _addVerticalSpacer, _setWidth, _setWidgetProperties

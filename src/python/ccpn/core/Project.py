@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-27 15:58:57 +0100 (Thu, April 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-27 16:38:07 +0100 (Thu, April 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import contextlib
 import functools
-# import os
+import os
 import sys
 import typing
 import operator
@@ -2423,6 +2423,11 @@ def _loadProject(application, path: str) -> Project:
     project = Project(xmlLoader)
     # back linkage
     xmlLoader.project = project
+
+    if not os.access(_path.parent, os.W_OK) or \
+            next((dd for root, dirs, files in os.walk(_path)
+                  for dd in dirs if not os.access(aPath(root) / dd, os.W_OK)), False):
+        getLogger().warning('Project contains a read-only folder')
 
     project._application = application  # bit of a hack, isn't set until initialise
     project._updateReadOnlyState()

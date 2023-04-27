@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-04 17:14:17 +0100 (Tue, April 04, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-04-27 15:58:57 +0100 (Thu, April 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -76,6 +76,7 @@ from ccpn.util.Colour import colorSchemeTable
 #from collections import OrderedDict
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
+
 
 # For readability there should be a class:
 # _MainWindowMenus which (Only!) has menu instantiations, the callbacks to initiate them, + relevant methods
@@ -1870,7 +1871,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         """
         Clears all marks in all windows for the current task.
         """
-        self.project.deleteObjects(*self.project.marks)
+        self.project.deleteObjects(*self.marks)
 
     def markPositions(self, axisCodes, chemicalShifts):
         """

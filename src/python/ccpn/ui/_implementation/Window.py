@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-14 09:51:15 +0000 (Tue, March 14, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-27 15:58:57 +0100 (Thu, April 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -74,20 +74,20 @@ class Window(AbstractWrapperObject):
         getLogger().debug(f'Initialised {self.pid}')
 
     #=========================================================================================
-    @property
-    def spectrumDisplays(self) -> tuple:
-        """A tuple of SpectrumDisplay instances displayed in the window"""
-        ll = [x for x in self._wrappedData.sortedModules() if isinstance(x, ApiBoundDisplay)]
-        return tuple(self._project._data2Obj[x] for x in ll if x in self._project._data2Obj)
 
     @property
-    def marks(self) -> tuple:
-        """A redirections for now, as the marks still live in the project (for now)"""
-        return tuple(self.application.project.marks)
+    def spectrumDisplays(self):
+        """STUB: hot-fixed later"""
+        return None
+
+    @property
+    def marks(self):
+        """STUB: hot-fixed later"""
+        return None
 
     @property
     def strips(self):
-        return tuple([strip for display in self.spectrumDisplays for strip in display.strips])
+        return tuple(strip for display in self.spectrumDisplays for strip in display.strips)
 
     #=========================================================================================
     # CCPN properties
@@ -215,10 +215,7 @@ class Window(AbstractWrapperObject):
                 if vv not in insertsDict:
                     parent = cntrsDict[cntr]
                     typ = cntr.type()
-                    if typ == 'vertical':
-                        position = 'bottom'
-                    else:
-                        position = 'right'  # assume no 'tab' yet
+                    position = 'bottom' if typ == 'vertical' else 'right'
                     insertsDict[vv] = (position, parent)
 
             # go through the next depth
@@ -246,15 +243,16 @@ class Window(AbstractWrapperObject):
             self.moduleArea.moveDock(mods, pos, rel)
             # recover sizes?
 
-    def _recoverSpectrumToolbar(self, display, specViewList):
+    @staticmethod
+    def _recoverSpectrumToolbar(display, specViewList):
         """Re-insert the spectra into the spectrumToolbar
         """
         for specView, selected in specViewList:
-            action = display.spectrumToolBar._addSpectrumViewToolButtons(specView)
-            if action:
+            if action := display.spectrumToolBar._addSpectrumViewToolButtons(specView):
                 action.setChecked(selected)
 
-    def _setBlankingSpectrumDisplayNotifiers(self, display, value):
+    @staticmethod
+    def _setBlankingSpectrumDisplayNotifiers(display, value):
         """Blank all spectrumDisplay and contained strip notifiers
         """
         display.setBlankingAllNotifiers(value)
@@ -270,10 +268,7 @@ class Window(AbstractWrapperObject):
         """get wrappedData (ccp.gui.windows) for all Window children of parent NmrProject.windowStore"""
         windowStore = parent._wrappedData.windowStore
 
-        if windowStore is None:
-            return []
-        else:
-            return windowStore.sortedWindows()
+        return [] if windowStore is None else windowStore.sortedWindows()
 
     #=========================================================================================
     # 'new' methods
@@ -305,11 +300,11 @@ class Window(AbstractWrapperObject):
     #Command logging done inside the method
     def newSpectrumDisplay(self, spectra, axisCodes: Sequence[str] = (), stripDirection: str = 'Y',
                            position='right', relativeTo=None):
-        """Create new SpectrumDisplay
+        """Create new SpectrumDisplay.
 
-        :param spectra: a Spectrum or SpectrumGroup instance, or a list,tuple of Spectrum Instances to be displayed
-        :param axisCodes: display order of the dimensions of spectrum (defaults to spectrum.preferredAxisOrdering)
-        :param stripDirection: stripDirection: if 'X' or 'Y' sets strip axis
+        :param spectra: a Spectrum or SpectrumGroup instance, or a list,tuple of Spectrum Instances to be displayed.
+        :param axisCodes: display order of the dimensions of spectrum (defaults to spectrum.preferredAxisOrdering).
+        :param stripDirection: stripDirection: if 'X' or 'Y' sets strip axis.
 
         :return: a new SpectrumDisplay instance.
         """
@@ -322,7 +317,7 @@ class Window(AbstractWrapperObject):
             spectra = self.project.getByPid(spectra)
 
         if not isinstance(spectra, (Spectrum, SpectrumGroup, list, tuple)):
-            raise ValueError('Invalid spectra argument, expected Spectrum, list of Spectra or SpectrumGroup; got "%s"' % spectra)
+            raise ValueError(f'Invalid spectra argument, expected Spectrum, list of Spectra or SpectrumGroup; got "{spectra}"')
 
         spectrum = None
         if isinstance(spectra, Spectrum):
@@ -338,9 +333,9 @@ class Window(AbstractWrapperObject):
             isList = True
             spectrum = spectra[0]
             if not isinstance(spectrum, Spectrum):
-                raise ValueError('Invalid spectra argument, expected list to contain Spectra; got "%s"' % spectra)
+                raise ValueError(f'Invalid spectra argument, expected list to contain Spectra; got "{spectra}"')
         else:
-            raise ValueError('%s has no spectra' % spectra)
+            raise ValueError(f'{spectra} has no spectra')
 
         if not axisCodes:
             axisCodes = tuple(spectrum.axisCodes[ac] for ac in spectrum._preferredAxisOrdering)
@@ -456,26 +451,22 @@ class Window(AbstractWrapperObject):
     @logCommand('mainWindow.')
     def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str],
                 style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()):
-        """Create new Mark
+        """Create new Mark.
 
-        :param str colour: Mark colour
-        :param tuple/list positions: Position in unit (default ppm) of all lines in the mark
-        :param tuple/list axisCodes: Axis codes for all lines in the mark
-        :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
-        :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
-        :param tuple/list labels: Ruler labels for all lines in the mark. Default: None
+        :param str colour: Mark colour.
+        :param tuple/list positions: Position in unit (default ppm) of all lines in the mark.
+        :param tuple/list axisCodes: Axis codes for all lines in the mark.
+        :param str style: Mark drawing style (dashed line etc.) default: full line ('simple').
+        :param tuple/list units: Axis units for all lines in the mark, Default: all ppm.
+        :param tuple/list labels: Ruler labels for all lines in the mark. Default: None.
 
-        :return Mark instance
+        :return Mark instance.
         """
         from ccpn.ui._implementation.Mark import _newMark, _removeMarkAxes
 
-        # Marks are stored in the project!
-        project = self.project
-
-        marks = _removeMarkAxes(project, positions=positions, axisCodes=axisCodes, labels=labels)
-        if marks:
+        if marks := _removeMarkAxes(self, positions=positions, axisCodes=axisCodes, labels=labels):
             pos, axes, lbls = marks
-            return _newMark(project, colour=colour, positions=pos, axisCodes=axes,
+            return _newMark(self, colour=colour, positions=pos, axisCodes=axes,
                             style=style, units=units, labels=lbls
                             )
 
@@ -497,7 +488,7 @@ def _newWindow(self: Project, title: str = None, position: tuple = (), size: tup
     """
 
     if title and Pid.altCharacter in title:
-        raise ValueError("Character %s not allowed in gui.core.Window.title" % Pid.altCharacter)
+        raise ValueError(f"Character {Pid.altCharacter} not allowed in gui.core.Window.title")
 
     apiWindowStore = self._project._wrappedData.windowStore
 

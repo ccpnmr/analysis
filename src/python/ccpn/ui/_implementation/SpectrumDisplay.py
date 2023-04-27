@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-04-27 15:58:57 +0100 (Thu, April 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from numpy import ndarray
 from typing import Sequence, Tuple, Optional
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
@@ -45,7 +44,7 @@ from ccpn.core.lib import Pid
 
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, undoBlockWithoutSideBar, deleteObject, renameObject
+from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, renameObject
 from ccpn.util.Logging import getLogger
 
 from ccpn.core._implementation.updates.update_3_0_4 import _updateSpectumDisplay_3_0_4_to_3_1_0
@@ -64,7 +63,8 @@ class SpectrumDisplay(AbstractWrapperObject):
     # Attribute it necessary as subclasses must use superclass className
     className = 'SpectrumDisplay'
 
-    _parentClass = Project
+    _parentClass = Window
+    _parentClassName = Window.__class__.__name__
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'spectrumDisplays'
@@ -131,7 +131,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 
         # check that the spectrumView indexing has been set, or is populated correctly
         if len(_strips) > 0 and \
-           (specViews := _strips[0].getSpectrumViews()):
+                (specViews := _strips[0].getSpectrumViews()):
             indexing = [v._index for v in specViews]
             if None in indexing or len(indexing) != len(set(indexing)):
                 # set new indexing
@@ -241,9 +241,7 @@ class SpectrumDisplay(AbstractWrapperObject):
     @property
     def dimensionCount(self) -> int:
         """Dimensionality of the SpectrumDisplay"""
-        if self.is1D:
-            return 1
-        return len(self.axisCodes)
+        return 1 if self.is1D else len(self.axisCodes)
 
     @property
     def is1D(self) -> bool:
@@ -377,10 +375,10 @@ class SpectrumDisplay(AbstractWrapperObject):
         Renaming from the GuiSpectrumDisplay ensures all graphical objects are updated correctly.
         """
         oldName = self.title
-        if name != self.id:
-            if self._project.getSpectrumDisplay(name):
-                getLogger().warning('Cannot rename spectrum Display', 'Name Already Taken')
-                return (oldName,)
+        if name != self.id and self._project.getSpectrumDisplay(name):
+            getLogger().warning('Cannot rename spectrum Display', 'Name Already Taken')
+            return (oldName,)
+
         try:
             self._validateStringValue('name', name)
             del self.project._pid2Obj[self.shortClassName][self._id]
@@ -502,11 +500,12 @@ class SpectrumDisplay(AbstractWrapperObject):
     #=========================================================================================
 
     @classmethod
-    def _getAllWrappedData(cls, parent: Project) -> list:
-        """get wrappedData (ccp.gui.Module) for all SpectrumDisplay children of Project"""
-
-        apiGuiTask = (parent._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
-                      parent._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
+    def _getAllWrappedData(cls, parent: Window) -> list:
+        """get wrappedData (ccp.gui.Module) for all SpectrumDisplay children of Project
+        """
+        # hike from mainWindow to project to find GuiTasks
+        apiGuiTask = (parent.project._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
+                      parent.project._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
         return [x for x in apiGuiTask.sortedModules() if isinstance(x, ApiBoundDisplay)]
 
     #=========================================================================================
@@ -518,11 +517,11 @@ class SpectrumDisplay(AbstractWrapperObject):
         """
         # For now: do not allow spectrum mapping with higher dimensionality than the display
         if spectrum.dimensionCount > self.dimensionCount:
-            raise RuntimeError('Cannot display %s onto %s; dimensionality mismatch' % (spectrum, self))
+            raise RuntimeError(f'Cannot display {spectrum} onto {self}; dimensionality mismatch')
 
         spectrumAxisCodes = spectrum._mapAxisCodes(self.axisCodes)[:spectrum.dimensionCount]
         if None in spectrumAxisCodes:
-            raise RuntimeError('Cannot display %s on %s; incompatible axisCodes' % (spectrum, self))
+            raise RuntimeError(f'Cannot display {spectrum} on {self}; incompatible axisCodes')
 
         dimensionOrder = spectrum.getByAxisCodes('dimensions', spectrumAxisCodes, exactMatch=True)
 
@@ -550,6 +549,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 
         return _copyStrip(self, strip=strip, newIndex=newIndex)
 
+
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
@@ -559,14 +559,15 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
                         stripDirection: str = 'Y', name: str = None,
                         zPlaneNavigationMode: str = None,
                         isGrouped: bool = False):
-    """Create new SpectrumDisplay
+    """Create new SpectrumDisplay.
 
     :param window:
-    :param spectrum: a Spectrum instance to be displayed
-    :param axisCodes: display order of the dimensions of spectrum
-    :param stripDirection: stripDirection: if 'X' or 'Y' set strip axis
-    :param name: optional name
+    :param spectrum: a Spectrum instance to be displayed.
+    :param axisCodes: display order of the dimensions of spectrum.
+    :param stripDirection: stripDirection: if 'X' or 'Y' set strip axis.
+    :param name: optional name.
     :param zPlaneNavigationMode:
+
     :return: a new SpectrumDisplay instance.
     """
     # local import to avoid cycles
@@ -597,7 +598,8 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     # Add name, setting and insuring uniqueness if necessary
     if name is None:
         excludedNames = [SpectrumDisplay.INTENSITY]
-        name = ''.join(['%dD_' % spectrum.dimensionCount] + [str(x)[0:1] for x in axisCodes if x not in excludedNames])
+        name = ''.join(['%dD_' % spectrum.dimensionCount]
+                       + [str(x)[:1] for x in axisCodes if x not in excludedNames])
     name = SpectrumDisplay._uniqueApiName(project, name)
     displayPars['name'] = name
 
@@ -611,14 +613,14 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     if zPlaneNavigationMode:
         display.zPlaneNavigationMode = zPlaneNavigationMode
     # GWV: no idea what these are for; just adapted from original code
-    # it gets crazy on 1D displays
+    # it gets crazy on 1D-displays
     # display._useFirstDefault = (False if is1D else True)
     display.isGrouped = isGrouped
 
     # Create first strip; looks like we need this before other things, otherwise the api goes crazy
     apiStrip = apiSpectrumDisplay.newBoundStrip()
     if (strip := project._data2Obj.get(apiStrip)) is None:
-        raise RuntimeError('Unable to generate new Strip for %s' % display)
+        raise RuntimeError(f'Unable to generate new Strip for {display}')
 
     # Create axes
     if is1D:

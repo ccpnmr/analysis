@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-26 19:19:14 +0100 (Wed, April 26, 2023) $"
+__dateModified__ = "$dateModified: 2023-04-27 15:58:57 +0100 (Thu, April 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1829,16 +1829,6 @@ class Project(AbstractWrapperObject):
     # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
-
-    def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str],
-                style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()):
-        """
-        To be depreciated in next version; use mainWindow.newMark() instead
-        """
-
-        return self.application.mainWindow.newMark(colour=colour, positions=positions,
-                                                   axisCodes=axisCodes, style=style,
-                                                   units=units, labels=labels)
 
     @logCommand('project.')
     def newSpectrum(self, path: str, name: str = None):

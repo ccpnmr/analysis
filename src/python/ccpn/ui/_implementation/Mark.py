@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-04-27 15:58:57 +0100 (Thu, April 27, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -32,13 +32,11 @@ import collections
 from typing import Sequence, Tuple
 from itertools import zip_longest
 
-from ccpn.core.Project import Project
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
-from ccpn.util.decorators import logCommand
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib.ContextManagers import newObject
-from ccpn.util.Logging import getLogger
+from ccpn.core.Project import Project
+from ccpn.ui._implementation.Window import Window
 
 
 RulerData = collections.namedtuple('RulerData', ['position', 'axisCode', 'unit', 'label'])
@@ -53,8 +51,8 @@ class Mark(AbstractWrapperObject):
     # Attribute it necessary as subclasses must use superclass className
     className = 'Mark'
 
-    _parentClassName = 'Project'
-    _parentClass = Project
+    _parentClass = Window
+    _parentClassName = Window.__class__.__name__
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'marks'
@@ -168,24 +166,27 @@ class Mark(AbstractWrapperObject):
     #=========================================================================================
 
     @classmethod
-    def _getAllWrappedData(cls, parent: Project) -> list:
-        """get wrappedData (ccp.gui.windows) for all Window children of parent NmrProject.windowStore"""
-
-        apiGuiTask = (parent._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
-                      parent._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
+    def _getAllWrappedData(cls, parent: Window) -> list:
+        """get wrappedData (ccp.gui.windows) for all Window children of parent NmrProject.windowStore
+        """
+        # hike from mainWindow to project to find GuiTasks
+        apiGuiTask = (parent.project._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
+                      parent.project._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
         return apiGuiTask.sortedMarks()
 
     def __str__(self):
         if self.isDeleted:
             return super().__str__()
-        else:
-            ll = min(len(self.positions), len(self.axisCodes))
 
-            def roundedValue(value):
-                return float('%.2f' % value)
+        ll = min(len(self.positions), len(self.axisCodes))
 
-            pstring = str(tuple([(self.axisCodes[i], roundedValue(self.positions[i])) for i in range(ll)]))
-            return '<%s:%s %s>' % (self.shortClassName, self.serial, pstring[1:-1])
+        def roundedValue(value):
+            return float('%.2f' % value)
+
+        pstring = str(tuple((self.axisCodes[i], roundedValue(self.positions[i]))
+                            for i in range(ll)))
+
+        return f'<{self.shortClassName}:{self.serial} {pstring[1:-1]}>'
 
     #=========================================================================================
     # CCPN functions
@@ -201,7 +202,7 @@ class Mark(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
-def _removeMarkAxes(self: Project, positions: Sequence[float], axisCodes: Sequence[str], labels: Sequence[str] = ()) -> Tuple[Tuple, ...]:
+def _removeMarkAxes(self: Window, positions: Sequence[float], axisCodes: Sequence[str], labels: Sequence[str] = ()) -> Tuple[Tuple, ...]:
     """Remove existing Mark rulers based on position, axisCode and label.
 
     :param tuple/list positions: Position in unit (default ppm) of all lines in the mark
@@ -211,7 +212,7 @@ def _removeMarkAxes(self: Project, positions: Sequence[float], axisCodes: Sequen
     """
     markList = list(zip_longest(positions, axisCodes, labels))
     if not markList:
-        raise TypeError('_removeMarkAxes: badly defined parameters {}; {}; {}'.format(positions, axisCodes, labels))
+        raise TypeError(f'_removeMarkAxes: badly defined parameters {positions}; {axisCodes}; {labels}')
 
     indices = list(axisCodes)
     for pos, axis, label in markList:
@@ -222,11 +223,12 @@ def _removeMarkAxes(self: Project, positions: Sequence[float], axisCodes: Sequen
                     if mAxis == axis and mLabel == label and posClose and axis in indices:
                         # remove this axis from the list
                         indices.remove(axis)
-                except:
+                except Exception:
                     # mark may not be defined correctly.
                     continue
 
-    return tuple(tuple(mark[ind] for ii, mark in enumerate(markList) if mark[1] in indices) for ind in range(3))
+    return tuple(tuple(mark[ind] for mark in markList if mark[1] in indices) for ind in range(3))
+
 
 #=========================================================================================
 # Registering
@@ -238,22 +240,23 @@ def _removeMarkAxes(self: Project, positions: Sequence[float], axisCodes: Sequen
 #=========================================================================================
 
 @newObject(Mark)
-def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: Sequence,
+def _newMark(self: Window, colour: str, positions: Sequence[float], axisCodes: Sequence,
              style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()
              ) -> Mark:
-    """Create new Mark
+    """Create new Mark.
 
-    :param str colour: Mark colour
-    :param tuple/list positions: Position in unit (default ppm) of all lines in the mark
-    :param tuple/list axisCodes: Axis codes for all lines in the mark
-    :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
-    :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
-    :param tuple/list labels: Ruler labels for all lines in the mark. Default: None
+    :param str colour: Mark colour.
+    :param tuple/list positions: Position in unit (default ppm) of all lines in the mark.
+    :param tuple/list axisCodes: Axis codes for all lines in the mark.
+    :param str style: Mark drawing style (dashed line etc.) default: full line ('simple').
+    :param tuple/list units: Axis units for all lines in the mark, Default: all ppm.
+    :param tuple/list labels: Ruler labels for all lines in the mark. Default: None.
     :return: a new Mark instance.
     """
+    project = self.project
 
-    apiGuiTask = (self._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
-                  self._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
+    apiGuiTask = (project._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
+                  project._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
     apiMark = apiGuiTask.newMark(colour=colour, style=style)
 
     for ii, position in enumerate(positions):
@@ -266,9 +269,9 @@ def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: 
             label = labels[ii]
             if label is not None:
                 dd['label'] = label
-        apiRuler = apiMark.newRuler(**dd)
+        _apiRuler = apiMark.newRuler(**dd)
 
-    result = self._data2Obj.get(apiMark)
+    result = project._data2Obj.get(apiMark)
     if result is None:
         raise RuntimeError('Unable to generate new Mark item')
 

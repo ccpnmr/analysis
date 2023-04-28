@@ -57,6 +57,7 @@ from functools import partial
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.util.decorators import logCommand
 from Classes.Simulator import Simulator
+from Classes.DatabaseCaller import DatabaseCaller
 from .pluginAddons import _addRow, _addColumn, _addVerticalSpacer, _setWidth, _setWidgetProperties
 
 
@@ -111,9 +112,10 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         #     return
 
         # setup database metabolite tables
-        self.simulator = Simulator(self.project, '/Users/mh653/Documents/PhD/Database/Merged_Databases/merged_database.db')
+        self.simulator = Simulator(self.project)
+        self.caller = DatabaseCaller('/Users/mh653/Documents/PhD/Database/Merged_Databases/merged_database.db')
 
-        metabolites = self.simulator.caller.execute_query('select * from metabolites')
+        metabolites = self.caller.execute_query('select * from metabolites')
 
         self.metabolites = self.project.newDataTable(name='metabolites_table', data=metabolites)
 
@@ -290,10 +292,10 @@ class ProfileByReferenceGuiPlugin(PluginModule):
     def _selectMetabolite(self, newRow, previousRow, selectedRow, lastRow):
         metaboliteName = selectedRow.name.iloc[0]
         self.settings['Current']['metabolite'] = metaboliteName
+        self.settings['Current']['metaboliteData'] = selectedRow
         metabolite_id = selectedRow.metabolite_id.iloc[0]
         widget = self.guiDict['CoreWidgets']['Simulation']
-        query = f'select * from samples natural join spectra where metabolite_id is "{metabolite_id}"'
-        data = self.simulator.caller.execute_query(query)
+        data = self.caller.getSpectra(metabolite_id)
         widget.updateDf(data)
 
     def _addUnknownSignal(self):
@@ -310,19 +312,10 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['CoreWidgets']['Metabolite'].df = self.metabolites.data
 
     def _setupSimulatedSpectrum(self, newRow, previousRow, selectedRow, lastRow):
-        metabolitesData = self.metabolites.data
+        metaboliteData = self.settings['Current']['metaboliteData']
         metaboliteID = selectedRow.metabolite_id.iloc[0]
         spectrumId = selectedRow.spectrum_id.iloc[0]
         origin = selectedRow.origin.iloc[0]
-        if origin == 'gissmo':
-            plotting = 'spinSystem'
-        elif origin == 'bmrb':
-            plotting = 'onlypeaks'
-        elif origin == 'template':
-            plotting = 'template'
-        else:
-            plotting = 'peaklist'
-        # metaboliteName = metabolitesData.loc[metabolitesData['metabolite_id'] == metaboliteID, 'name'].iloc[0]
         metaboliteName = selectedRow.metabolite_id.iloc[0]
         self.settings['Current']['currentSimulatedSpectrumId'] = spectrumId
         self.settings['Current']['currentMetaboliteName'] = metaboliteName
@@ -331,10 +324,25 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             scale = 1
             globalShift = 0
             frequency = round(self.settings['Current']['referenceSumSpectrumFrequency']/10)*10
-            if plotting != 'template':
-                self.simspec = self.simulator.pureSpectrum(spectrumId=spectrumId, width=width, frequency=frequency, points=self.settings['Current']['referenceSumSpectrumPoints'], limits=self.settings['Current']['referenceSumSpectrumLimits'], plotting=plotting)
+            if origin != 'template':
+                simulationData = self.caller.getSimulationData(spectrumId)
+                sampleData = self.caller.getSampleData(simulationData['SpectrumData'].sample_id.iloc[0])
+                spectrumData = simulationData['SpectrumData']
+                synonyms = ([synonym for synonym in self.caller.getSynonymData(metaboliteID).synonym])
+                self.simspec = self.simulator.spectrumFromDatabase(simulationData, points=self.settings['Current']['referenceSumSpectrumPoints'], limits=self.settings['Current']['referenceSumSpectrumLimits'])
+                self.simulator.buildCcpnObjects(self.simspec, metaboliteName=metaboliteName,
+                                                frequency=spectrumData.frequency.iloc[0],
+                                                temperature=spectrumData.temperature.iloc[0], pH=sampleData.pH.iloc[0],
+                                                smiles=metaboliteData.smiles.iloc[0],
+                                                inChi=metaboliteData.inchi.iloc[0],
+                                                empiricalFormula=metaboliteData.chemical_formula.iloc[0],
+                                                molecularMass=metaboliteData.average_molecular_weight.iloc[0],
+                                                synonyms=synonyms, description=metaboliteData.description.iloc[0])
+                if simulationData['SpectrumData'].spectrum_type.iloc[0] == 'spin_system':
+                    self.simspec.setFrequency(frequency)
             else:
-                self.simspec = self.simulator.blankSpectrum(frequency=frequency, points=self.settings['Current']['referenceSumSpectrumPoints'], limits=self.settings['Current']['referenceSumSpectrumLimits'])
+                self.simspec = self.simulator.spectrumFromScratch(frequency=frequency, points=self.settings['Current']['referenceSumSpectrumPoints'], limits=self.settings['Current']['referenceSumSpectrumLimits'])
+                self.simulator.buildCcpnObjects(self.simspec, metaboliteName, frequency)
             self.metaboliteSimulations[spectrumId] = self.simspec
             self.addSimSpectrumToList(self.simspec)
             self.settings['Current']['referenceSpectrumGroup'].addSpectrum(self.simspec.spectrum)
@@ -421,7 +429,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets']['GlobalShift'] = widget
         self.settings['Current']['GlobalShift'] = self._getValue(widget)
 
-        if self.simspec.multiplets:
+        if self.simspec.multiplets and origin != 'bmrb':
             for index, multipletId in enumerate(self.simspec.multiplets):
                 self.addDoubleSpinbox(index, multipletId)
         self.project.widgetDict = self.guiDict['TemporaryWidgets']

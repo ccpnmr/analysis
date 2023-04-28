@@ -188,6 +188,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(widget, _setWidth([500], grid), 300)
         self.guiDict['CoreWidgets']['Simulation'] = widget
 
+        self.settings['Current']['MultipletUpdateStatus'] = True
+
         '''Spacer(self.scrollAreaLayout, 5, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                grid=(grid[0] + 1, 10),
                gridSpan=(1, 1))'''
@@ -195,10 +197,11 @@ class ProfileByReferenceGuiPlugin(PluginModule):
     def addDoubleSpinbox(self, index, multipletId):
         def valueChange():
             shift = widget.value()
-            self.simspec.moveMultiplet(multipletId, shift)
+            update = self.settings['Current']['MultipletUpdateStatus']
+            self.simspec.moveMultiplet(multipletId, shift, update)
             self.refreshSumSpectrum()
         def resetMultiplet():
-            widget.setValue(self.simspec.originalMultiplets[multipletId]['center'])
+            widget.setValue(self.simspec.originalMultiplets[multipletId]['center'] + self.simspec.globalShift)
         def navigateToMultiplet():
             target = widget.value()
             # todo code here to move the view to the target value above
@@ -252,10 +255,15 @@ class ProfileByReferenceGuiPlugin(PluginModule):
     def globalShiftChange(self):
         shift = self.guiDict['TemporaryWidgets']['GlobalShift'].value()
         difference = shift - self.simspec.globalShift
-        for widget in self.guiDict['TemporaryWidgets']:
-            if widget.endswith('ChemicalShift'):
+        multipletWidgetList = [widget for widget in self.guiDict['TemporaryWidgets'] if widget.endswith('ChemicalShift')]
+        if len(multipletWidgetList) > 0:
+            self.settings['Current']['MultipletUpdateStatus'] = False
+            for widgetNum, widget in enumerate(multipletWidgetList):
+                if widgetNum+1 == len(multipletWidgetList):
+                    self.settings['Current']['MultipletUpdateStatus'] = True
                 self.guiDict['TemporaryWidgets'][widget].setValue(self.guiDict['TemporaryWidgets'][widget].value() + difference)
-        self.simspec.shiftOriginalMultiplets(difference)
+        else:
+            self.simspec.globalPeakShift(difference)
         self.simspec.globalShift = shift
         self.refreshSumSpectrum()
 
@@ -316,7 +324,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         metaboliteID = selectedRow.metabolite_id.iloc[0]
         spectrumId = selectedRow.spectrum_id.iloc[0]
         origin = selectedRow.origin.iloc[0]
-        metaboliteName = selectedRow.metabolite_id.iloc[0]
+        metaboliteName = metaboliteData.name.iloc[0]
         self.settings['Current']['currentSimulatedSpectrumId'] = spectrumId
         self.settings['Current']['currentMetaboliteName'] = metaboliteName
         if spectrumId not in self.metaboliteSimulations:
@@ -330,7 +338,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                 spectrumData = simulationData['SpectrumData']
                 synonyms = ([synonym for synonym in self.caller.getSynonymData(metaboliteID).synonym])
                 self.simspec = self.simulator.spectrumFromDatabase(simulationData, points=self.settings['Current']['referenceSumSpectrumPoints'], limits=self.settings['Current']['referenceSumSpectrumLimits'])
-                self.simulator.buildCcpnObjects(self.simspec, metaboliteName=metaboliteName,
+                self.simulator.buildCcpnObjects(self.simspec, metaboliteName=f"{metaboliteName}_{origin}_{simulationData['SpectrumData'].spectrum_type.iloc[0]}",
                                                 frequency=spectrumData.frequency.iloc[0],
                                                 temperature=spectrumData.temperature.iloc[0], pH=sampleData.pH.iloc[0],
                                                 smiles=metaboliteData.smiles.iloc[0],
@@ -429,9 +437,13 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets']['GlobalShift'] = widget
         self.settings['Current']['GlobalShift'] = self._getValue(widget)
 
-        if self.simspec.multiplets and origin != 'bmrb':
+        if self.simspec.multiplets:
             for index, multipletId in enumerate(self.simspec.multiplets):
                 self.addDoubleSpinbox(index, multipletId)
+            if origin == 'bmrb':
+                for widget in [widget for widget in self.guiDict['TemporaryWidgets'] if 'Multiplet' in widget]:
+                    self.guiDict['TemporaryWidgets'][widget].setUpdatesEnabled(False)
+                    self.guiDict['TemporaryWidgets'][widget].setEnabled(False)
         self.project.widgetDict = self.guiDict['TemporaryWidgets']
 
     def _setupTemplate(self):

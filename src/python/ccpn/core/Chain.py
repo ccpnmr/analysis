@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-22 13:05:22 +0000 (Wed, March 22, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-02 14:33:41 +0100 (Tue, May 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from typing import Tuple, Optional, Union, Sequence, Iterable
+import numpy as np
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Substance import Substance
@@ -246,6 +247,22 @@ class Chain(AbstractWrapperObject):
                 if c:
                     sequence += c
         return sequence
+
+    @property
+    def _sequenceCodesAsIntegers(self):
+        """
+        :return: list of sequence codes as integers. If a code cannot be interpreted as int it uses nan (float). This is to keep the same lenght as the residues and to allow
+        numerical operations such as min, max or proper sorting.
+        """
+        codes = []
+        for r in self.residues:
+            try:
+                sequenceCode = int(r.sequenceCode)
+                codes.append(sequenceCode)
+            except Exception as ex:
+                codes.append(np.nan)
+                getLogger().debug3(f'Cannot convert {r.sequenceCode} to integer. {ex}')
+        return codes
 
     @property
     def hasAssignedAtoms(self) -> bool:

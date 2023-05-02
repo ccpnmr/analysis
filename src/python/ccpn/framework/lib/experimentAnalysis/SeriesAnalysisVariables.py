@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-06 12:41:50 +0000 (Mon, March 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-02 14:29:03 +0100 (Tue, May 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -49,6 +49,7 @@ ASHTAG           = '#'                   # -> int   | incremental serial
 VALUE            = 'Value'               # -> str   | The column header  prefix in a SeriesTable. Used to store data after the CONSTANT_TABLE_COLUMNS
 TIME             = 'Time'                # -> str   | A general prefix in a SeriesTable.
 
+NA = 'NA'
 SEP              =  '_'   # the prefix-name-suffix global separator. E.g., used in Value columns: Value_height_at_0
 VALUE_           = f'{VALUE}{SEP}'
 TIME_            = f'{TIME}{SEP}'

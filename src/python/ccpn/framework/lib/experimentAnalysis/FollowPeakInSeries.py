@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-21 16:57:46 +0100 (Fri, April 21, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-02 14:29:03 +0100 (Tue, May 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -39,13 +39,14 @@ class FollowPeakAbc(abc.ABC):
     name = 'FollowPeak Abc'
     info = 'Abc class'
 
-    def __init__(self, sourcePeakList, targetPeakLists,  cloneAssignment=False,
+    def __init__(self, sourcePeakList, targetPeakLists, spectrumGroup, cloneAssignment=False,
                   **kwargs):
 
         self.sourcePeakList = sourcePeakList
         self.targetPeakLists = targetPeakLists
         self.cloneAssignment = cloneAssignment
         self.project = self.sourcePeakList.project
+        self.spectrumGroup = spectrumGroup
 
     def matchPeaks(self):
         """ """
@@ -56,6 +57,8 @@ class FollowPeakAbc(abc.ABC):
             matchedPeaks = self.getCollectionPeaks(peak,  self.targetPeakLists)
             if len(matchedPeaks) == 0:
                 continue
+            if peak.spectrum in self.spectrumGroup.spectra:
+                collectedPeaks.add(peak)
             for matchedPeak in matchedPeaks:
                 collectedPeaks.add(matchedPeak)
                 if self.cloneAssignment:

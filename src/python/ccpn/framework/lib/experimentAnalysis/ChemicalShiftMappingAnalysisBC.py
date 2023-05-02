@@ -15,13 +15,14 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-25 22:24:05 +0000 (Wed, January 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-02 14:29:03 +0100 (Tue, May 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Luca Mureddu $"
 __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
+
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -31,6 +32,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.framework.lib.experimentAnalysis.CSMappingModels import FittingModels, CalculationModels, EuclideanCalculationModel
+
 
 class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
     """
@@ -46,7 +48,7 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         self._filteringAtoms = sv.DEFAULT_FILTERING_ATOMS
         self._alphaFactors = sv.DEFAULT_ALPHA_FACTORS
         self._excludedResidueTypes = sv.DEFAULT_EXCLUDED_RESIDUES
-        self._untraceableValue = 1.0 # default value for replacing NaN values in the DeltaDeltas column
+        self._untraceableValue = 1.0  # default value for replacing NaN values in the DeltaDeltas column
         self.fittingModels = self._registerModels(FittingModels)
         self.calculationModels = self._registerModels(CalculationModels)
         fittingModel = self._getFirstModel(self.fittingModels)
@@ -69,15 +71,15 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
              Factors are usually values between 0.1-1
         """
         if isinstance(_1H, (float, int)):
-            self._alphaFactors.update({sv._1H:_1H})
+            self._alphaFactors.update({sv._1H: _1H})
         if isinstance(_15N, (float, int)):
             self._alphaFactors.update({sv._15N: _15N})
         if isinstance(_13C, (float, int)):
-            self._alphaFactors.update({sv._13C:_13C})
+            self._alphaFactors.update({sv._13C: _13C})
         if isinstance(_Other, (float, int)):
             self._alphaFactors.update({sv._OTHER: _Other})
 
-    def fitInputData(self,  *args, **kwargs):
+    def fitInputData(self, *args, **kwargs):
         """
         Perform calculation using the currentFittingModel and currentCalculationModel
         """
@@ -90,7 +92,6 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
 
         if len(self.inputDataTables) == 0:
             raise RuntimeError('Cannot run any fitting models. Add a valid inputData first')
-
 
         calculationFrame = self.currentCalculationModel.calculateValues(self.inputDataTables)
         fittingFrame = self.currentFittingModel.fitSeries(calculationFrame)

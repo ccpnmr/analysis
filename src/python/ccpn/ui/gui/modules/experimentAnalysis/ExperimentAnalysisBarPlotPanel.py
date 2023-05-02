@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-25 17:41:51 +0100 (Tue, April 25, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-02 14:29:03 +0100 (Tue, May 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,9 @@ from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, GUISTRIP_PIVOT, 
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.Font import getFont
 from ccpn.ui.gui.widgets.Label import Label
+import numpy as np
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
+import pandas as pd
 
 class BarPlotPanel(GuiPanel):
 
@@ -47,6 +50,7 @@ class BarPlotPanel(GuiPanel):
         GuiPanel.__init__(self, guiModule,*args , **Framekwargs)
         self._appearancePanel = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
         self._toolbarPanel = self.guiModule.panelHandler.getToolBarPanel()
+        self._linkToMainTable = True
         self._plottedDf = None
         self._aboveX = []
         self._belowX = []
@@ -77,6 +81,8 @@ class BarPlotPanel(GuiPanel):
         #     current
         self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
                                                  callback=self._currentCollectionCallback, onceOnly=True)
+
+        self.guiModule.mainTableSortingChanged.connect(self._mainTableSortingChanged)
 
     def initWidgets(self):
         ## this colour def could go in an higher position as they are same for all possible plots
@@ -128,6 +134,13 @@ class BarPlotPanel(GuiPanel):
                 with w.blockWidgetSignals():
                     w.setValue(pos)
         self.updatePanel()
+
+    def _mainTableSortingChanged(self, callDict, *args):
+        sortingColumn = callDict.get('sortColumnName', None)
+
+
+        print('change _mainTableSortingChanged',sortingColumn, )
+        self._thresholdLineMoved()
 
     @property
     def xColumnName(self):
@@ -225,7 +238,10 @@ class BarPlotPanel(GuiPanel):
 
     def updatePanel(self, *args, **kwargs):
         getLogger().info('Updating  barPlot panel')
-        dataFrame = self.guiModule.getGuiResultDataFrame()
+        if self._linkToMainTable:
+            dataFrame = self.guiModule.getVisibleDataFrame(includeHiddenColumns=True)
+        else:
+            dataFrame = self.guiModule.getGuiResultDataFrame()
         if dataFrame is not None:
             self.plotDataFrame(dataFrame)
         else:
@@ -234,6 +250,52 @@ class BarPlotPanel(GuiPanel):
     def _updateThresholdValueFromSettings(self, value, *args):
         self.thresholdValue = value
 
+
+    def _expandDFSequenceCodesFromChain(self, dataFrame,  getCodesFromChain = True):
+        """
+       Fill any assignment sequenceCode gaps present in a DataFrame so that when displaying the bar graph
+       all ticks are available in the x Axis .
+       The routine will work only if assignment definitions are available in the dataFrame.
+       Will first search for chains linked to an NmrChain from the NmrChainName, otherwise use the nmrChain.
+       Take the first residue sequence code and enumerate until the last.
+       Note a chain can contain gaps to (as user can delete residues)
+       If gaps are found, then fill it with Nones. This will be enough to create ticks in the barGraph.
+       :return the amended dataframe
+       """
+        df = dataFrame
+        nmrChainCodesFromDf = df[seriesVariables.NMRCHAINNAME].unique()
+        nmrChains = [self.project.getNmrChain(c) for c in nmrChainCodesFromDf]
+
+        ## fetch the full needed sequence
+        codesByChain = {}
+
+        for nmrChain in nmrChains:
+            codes = nmrChain._sequenceCodesAsIntegers
+            chain = nmrChain.chain
+            if chain is not None and getCodesFromChain:
+                codes = chain._sequenceCodesAsIntegers
+            expandedSequence = []
+            if len(codes) > 0:
+                expandedSequence = np.arange(min(codes), max(codes) + 1)
+            codesByChain[nmrChain.name] = expandedSequence
+
+        ## check what is missing from the data
+        missingCodesByChain = {}
+        for chainName, groupByChainDF in df.groupby(seriesVariables.NMRCHAINNAME):
+            nmrResiduesCodesFromDf = pd.to_numeric(groupByChainDF[seriesVariables.NMRRESIDUECODE], errors='coerce').values
+            expandedNmrResidueCodes = codesByChain.get(chainName, [])
+            missingNmrResCodesMask = ~ np.isin(expandedNmrResidueCodes, nmrResiduesCodesFromDf)
+            missingCodesByChain[chainName] = expandedNmrResidueCodes[missingNmrResCodesMask]
+
+        ## Add the missing information in the dataframe
+        for name, missingCodes in missingCodesByChain.items():
+            for i in missingCodes:
+                df.loc[i, seriesVariables.NMRRESIDUECODE] = i
+                df.loc[i, seriesVariables.NMRCHAINNAME] = name
+                df.loc[i, seriesVariables.COLLECTIONPID] = None # as to be None and not np.nan which is a float
+        df[sv.ASHTAG] = np.arange(1, len(df) + 1)
+        return df
+
     def _setPlottingData(self, dataFrame, xColumnName, yColumnName):
         """Set the plotting variables from the current Dataframe.\
         """
@@ -241,8 +303,11 @@ class BarPlotPanel(GuiPanel):
             return False
         if not yColumnName in dataFrame:
             return False
-        # we need the index as seriesIds
+
+        # set the index exactly in the same order as given (sorted by Gui Table)
+        # dataFrame[sv.ASHTAG] = np.arange(1, len(dataFrame)+1)
         dataFrame.set_index(sv.ASHTAG, drop=False, inplace=True)
+
         ## group by threshold value
         aboveDf = dataFrame[dataFrame[yColumnName] >= self.thresholdValue]
         belowDf = dataFrame[dataFrame[yColumnName] < self.thresholdValue]
@@ -277,7 +342,6 @@ class BarPlotPanel(GuiPanel):
             self._errorHeights = {'xError': xError.values, 'yError': yError, 'topError': topError}
         ## set ticks for the xAxis. As they Xs are strs, Need to create a dict Index:Value
         ticks = dict(zip(dataFrame[xColumnName].index, dataFrame[xColumnName].values))
-        print('Ticks', ticks)
         xaxis = self._getAxis('bottom')
         if self.barGraphWidget._tickOption == MinimalTicks:
             # setTicks uses a list of 3 dicts. Major, minor, sub minors ticks. (used for when zooming in-out)
@@ -285,10 +349,10 @@ class BarPlotPanel(GuiPanel):
                             list(ticks.items())[4::5],  # steps of 5
                             list(ticks.items())[::1]]) # steps of 1, show all labels
         else:
-            # setTicks show all (equivalent to 1 for each Major, minor or sub minor
+            ## setTicks show all (equivalent to 1 for each Major, minor or sub minor
             xaxis.setTicks([list(ticks.items())[::1],
-                            list(ticks.items())[::1],
-                            list(ticks.items())[::1]])
+                                list(ticks.items())[::1],
+                                list(ticks.items())[::1]])
         ## update labels on axes
         self._updateAxisLabels()
         self._plottedDf = dataFrame

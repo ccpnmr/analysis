@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-19 14:42:44 +0100 (Wed, April 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-02 14:29:03 +0100 (Tue, May 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ from ccpn.util.DataEnum import DataEnum
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.Notifiers import Notifier
+import numpy as np
 ######## gui/ui imports ########
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
@@ -92,6 +93,7 @@ class _ExperimentalAnalysisTableABC(Table):
         self.headerColumnMenu.setInternalColumns(self._internalColumns)
         self.guiModule = guiModule
         self.moduleParent = guiModule
+        self._selectionHeader =sv.COLLECTIONPID
 
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
@@ -101,9 +103,15 @@ class _ExperimentalAnalysisTableABC(Table):
         self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
                                                  callback=self._currentCollectionCallback, onceOnly=True)
 
+        self.sortingChanged.connect(self._tableSortingChangedCallback)
+
     # =========================================================================================
     # dataFrame
     # =========================================================================================
+
+    def _tableSortingChangedCallback(self, *args):
+        """   Fire a notifier for other widgets to refresh their ordering (if needed). """
+        self.guiModule.mainTableSortingChanged.emit(*args)
 
     @property
     def dataFrame(self):
@@ -111,8 +119,12 @@ class _ExperimentalAnalysisTableABC(Table):
 
     @dataFrame.setter
     def dataFrame(self, dataFrame):
+        selectedRows = self.selectedRows()
         self._dataFrame = dataFrame
         self.build(dataFrame)
+        if self._selectionHeader in self.headerColumnMenu.columnTexts and len(selectedRows)>0:
+            selPids = selectedRows[sv.COLLECTIONPID].values
+            self.selectRowsByValues(selPids, sv.COLLECTIONPID, scrollToSelection=True, doCallback=True)
 
     def build(self, dataFrame):
         if dataFrame is not None:

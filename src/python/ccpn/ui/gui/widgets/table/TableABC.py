@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 15:25:12 +0100 (Tue, March 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-05-02 14:29:03 +0100 (Tue, May 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -63,6 +63,7 @@ class TableABC(QtWidgets.QTableView):
     The view defines the communication between the display and the model.
     """
     tableChanged = QtCore.pyqtSignal()
+    sortingChanged = QtCore.pyqtSignal(dict)
 
     styleSheet = """QTableView {
                         background-color: %(GUITABLE_BACKGROUND)s;
@@ -445,6 +446,13 @@ class TableABC(QtWidgets.QTableView):
                     # unblock to enable again
                     selModel.blockSignals(False)
                     self.blockSignals(False)
+
+            self.sortingChanged.emit({
+                                                    'sortColumnName': self.headerColumnMenu.columnTexts[model._sortColumn],
+                                                    'sortColumnIndex': model._sortColumn,
+                                                    'oldSort': model._oldSortIndex,
+                                                    'newSort': model._sortIndex
+                                                    })
 
     def _close(self):
         """Clean up the notifiers

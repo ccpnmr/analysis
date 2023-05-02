@@ -161,27 +161,23 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets']['SpectrumWidgets'] = OD()
         type = self.settings['Current']['SimulationType']
         referenceSpectrum = self.settings['Current']['ReferenceSpectrum']
+        name = 'User_Defined_Metabolite'
         frequency = round(referenceSpectrum.spectrometerFrequencies[0]/10)*10
         points = len(referenceSpectrum.positions)
         limits = (max(referenceSpectrum.positions), min(referenceSpectrum.positions))
+        temperature = referenceSpectrum.temperature
         simulatedSpectrum = self.simulator.spectrumFromScratch(frequency, points, limits)
-        x, y = createLineshape([(0, 0, 0, None)], points=points, limits=limits)
-        spectrum = self.project.newEmptySpectrum(['1H'], name='User_Defined_Metabolite', intensities=y, positions=x)
+        spectrum, sample, substance = self.simulator.buildCcpnObjects(simulatedSpectrum,
+                                                                      metaboliteName=name,
+                                                                      frequency=frequency, temperature=temperature)
         self.settings['Current']['Spectrum'] = spectrum
         simulatedSpectrum.spectrum = spectrum
         self.settings['Current']['SimulatedSpectrum'] = simulatedSpectrum
         simulatedSpectrum.scaleSpectrum(10)
 
-        name = 'User_Defined_Metabolite'
         self.settings['Current']['MetaboliteName'] = name
-        sample = self.project.newSample(name=f'{name}_sample', amountUnits='µL', ionicStrengthUnits='mM')
         self.settings['Current']['Sample'] = sample
-        substance = self.project.newSubstance(name=name, labelling='metabolite', substanceType='Molecule')
         self.settings['Current']['Substance'] = substance
-        sample_component = sample.newSampleComponent(name=name, labelling='metabolite', comment='Something',
-                                                     role='Compound', concentrationUnit='mol/mol')
-        substance.referenceSpectra = [spectrum]
-        sample.spectra = [spectrum]
 
         grid = (2, 0)
 

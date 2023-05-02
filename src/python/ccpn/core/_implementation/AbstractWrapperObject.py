@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 18:59:24 +0100 (Tue, March 28, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-05-02 14:20:32 +0100 (Tue, May 02, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1077,6 +1077,9 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
         Returns None for invalid or unrecognised input strings.
         """
+        if isinstance(pid, float):
+            return None
+
         if pid is None or len(pid) is None:
             return None
 

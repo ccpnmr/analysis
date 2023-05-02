@@ -231,13 +231,15 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
             grid = _addRow(grid)
             self.settings['Current']['SsmSize'] = 1
             self.settings['Current']['Values'] = np.zeros((12, 12))
-            widget = Label(self.scrollAreaLayout, text='Total Protons', grid=grid, gridSpan=(1, 2))
+            self.settings['Current']['ProtonCounts'] = [1]*12
+            self.settings['Current']['Shifts'] = [0]*12
+            widget = Label(self.scrollAreaLayout, text='Total Multiplets', grid=grid, gridSpan=(1, 2))
             _setWidgetProperties(widget, 200)
-            self.guiDict['TemporaryWidgets']['SpectrumWidgets']['ProtonSpinboxLabel'] = widget
+            self.guiDict['TemporaryWidgets']['SpectrumWidgets']['MultipletSpinboxLabel'] = widget
             grid = _addColumn(_addColumn(grid))
-            widget = Spinbox(self.scrollAreaLayout, value=1, grid=grid, gridspan=(1, 1), callback=self._protonChange)
+            widget = Spinbox(self.scrollAreaLayout, value=1, grid=grid, gridspan=(1, 1), callback=self._multipletChange)
             _setWidgetProperties(widget, 200)
-            self.guiDict['TemporaryWidgets']['SpectrumWidgets']['ProtonSpinbox'] = widget
+            self.guiDict['TemporaryWidgets']['SpectrumWidgets']['MultipletSpinbox'] = widget
             widget.setRange(1, 10)
             self.setupSsmGrid()
         elif type == 'Peak List':
@@ -259,54 +261,55 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
     def _frequencyChange(self, frequency):
         self.settings['Current']['SimulatedSpectrum'].setFrequency(frequency)
 
-    def _protonChange(self, protons):
-        self.settings['Current']['SsmSize'] = protons
+    def _multipletChange(self, multiplets):
+        self.settings['Current']['SsmSize'] = multiplets
         self.setupSsmGrid()
 
     def setupSsmGrid(self):
         if 'Spinboxes' in self.guiDict['TemporaryWidgets']:
             for key in self.guiDict['TemporaryWidgets']['Spinboxes']:
                 self.guiDict['TemporaryWidgets']['Spinboxes'][key].deleteLater()
-            for key in self.guiDict['TemporaryWidgets']['Checkboxes']:
-                self.guiDict['TemporaryWidgets']['Checkboxes'][key].deleteLater()
         self.guiDict['TemporaryWidgets']['Spinboxes'] = OD()
         self.guiDict['TemporaryWidgets']['Checkboxes'] = OD()
-        protons = self.settings['Current']['SsmSize']
-        self.settings['Current']['SimulatedSpectrum'].spinSystemMatrix = self.settings['Current']['Values'][:protons, :protons]
+        multiplets = self.settings['Current']['SsmSize']
+        self._guiGridToRealSsm()
+        # self.settings['Current']['SimulatedSpectrum'].spinSystemMatrix = self.settings['Current']['Values'][:multiplets, :multiplets]
         grid = (7, 0)
-        for i in range(protons):
+        for i in range(multiplets):
+            self.createProtonCountSpinbox(i)
             grid = _addRow(grid)
-            widget = CheckBox(self.scrollAreaLayout, checked=False, grid=grid)
-            self.guiDict['TemporaryWidgets']['Checkboxes'][f'Checkbox-{i}'] = widget
             self.settings['Current']['SimulatedSpectrum'].multiplets[str(i)] = {'center': float(0), 'indices': [i]}
-            for j in range(protons):
+            for j in range(multiplets):
                 if i <= j:
                     self._createSsmGridSpinbox(i, j)
+
+    def createProtonCountSpinbox(self, column):
+        def changeProtonCount():
+            count = widget.value()
+            protonCounts = self.settings['Current']['ProtonCounts']
+            protonCounts[column] = count
+            self.settings['Current']['ProtonCounts'] = protonCounts
+            self._guiGridToRealSsm()
+            self.settings['Current']['SimulatedSpectrum'].updateLineshapeFromSpinSystem()
+        widget = Spinbox(self.scrollAreaLayout, value=1, step=1, grid=(7, column+1), gridSpan=(1, 1))
+        widget.setRange(1, 6)
+        widget.valueChanged.connect(changeProtonCount)
+        self.guiDict['TemporaryWidgets']['Spinboxes'][f'ProtonSpinbox-{column}'] = widget
 
     def _createSsmGridSpinbox(self, row, column):
         def changeMultipletCenter():
             shift = widget.value()
-            self.settings['Current']['Values'][row][column] = shift
-            if self._getValue(self.guiDict['TemporaryWidgets']['Checkboxes'][f'Checkbox-{row}']) is True:
-                for key in self.guiDict['TemporaryWidgets']['Checkboxes']:
-                    if self._getValue(self.guiDict['TemporaryWidgets']['Checkboxes'][key]) is True:
-                        index = key.split('-')[-1]
-                        self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{index}-{index}'].setValue(shift)
-            self.settings['Current']['SimulatedSpectrum'].moveMultiplet(multipletId, shift)
-
+            shifts = self.settings['Current']['Shifts']
+            shifts[row] = shift
+            self.settings['Current']['Shifts'] = shifts
+            self._guiGridToRealSsm()
+            self.settings['Current']['SimulatedSpectrum'].updateLineshapeFromSpinSystem()
         def changeCouplingConstant():
             coupling = widget.value()
             self.settings['Current']['Values'][column][row] = coupling
             self.settings['Current']['Values'][row][column] = coupling
-            rowbool = self._getValue(self.guiDict['TemporaryWidgets']['Checkboxes'][f'Checkbox-{row}'])
-            columnbool = self._getValue(self.guiDict['TemporaryWidgets']['Checkboxes'][f'Checkbox-{column}'])
-            if rowbool is not columnbool:
-                for key in self.guiDict['TemporaryWidgets']['Checkboxes']:
-                    if self._getValue(self.guiDict['TemporaryWidgets']['Checkboxes'][key]) is True:
-                        index = key.split('-')[-1]
-                        if rowbool:
-                            self.guiDict['TemporaryWidgets']['Spinboxes'][f'Spinbox-{column}-{index}'].setValue(coupling)
-            self.settings['Current']['SimulatedSpectrum'].editCouplingConstant(column, row, coupling)
+            self._guiGridToRealSsm()
+            self.settings['Current']['SimulatedSpectrum'].updateLineshapeFromSpinSystem()
         grid = (row + 8, column + 1)
         widget = DoubleSpinbox(self.scrollAreaLayout, value=self.settings['Current']['Values'][column][row], decimals=4, step=0.0001, grid=grid, gridspan=(1, 1))
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
@@ -320,6 +323,29 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
             widget.setRange(0, 20)
             widget.setSingleStep(0.1)
         widget.coordinates = (row, column)
+
+    def _guiGridToRealSsm(self):
+        multiplets = self.settings['Current']['SsmSize']
+        guiGrid = self.settings['Current']['Values'][:multiplets, :multiplets]
+        protonCounts = self.settings['Current']['ProtonCounts'][:multiplets]
+        shifts = self.settings['Current']['Shifts'][:multiplets]
+        RealSsm = []
+        count = 0
+        for i, row in enumerate(guiGrid):
+            for j in range(protonCounts[i]):
+                newrow = []
+                for k, value in enumerate(row):
+                    count += 1
+                    newrow += [value] * protonCounts[k]
+                RealSsm.append(newrow)
+        ss_matrix = np.array(RealSsm, dtype='float')
+        ss_matrix = ss_matrix + ss_matrix.T
+        RealShifts = []
+        for i, shift in enumerate(shifts):
+            RealShifts += [shift] * protonCounts[i]
+        for i, shift in enumerate(RealShifts):
+            ss_matrix[i][i] = shift
+        self.settings['Current']['SimulatedSpectrum'].spinSystemMatrix = ss_matrix
 
     def _saveToDatabase(self):
         caller = self.simulator.caller

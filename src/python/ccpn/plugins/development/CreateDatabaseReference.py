@@ -57,6 +57,7 @@ from functools import partial
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.util.decorators import logCommand
 from Classes.Simulator import Simulator, SimulatedSpectrum
+from Classes.DatabaseCaller import DatabaseCaller
 import numpy as np
 from Functions.LineshapeCreator import createLineshape
 from .pluginAddons import _addRow, _addColumn, _addVerticalSpacer, _setWidth, _setWidgetProperties
@@ -107,11 +108,27 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         #     return
 
         # setup database metabolite tables
-        self.simulator = Simulator(self.project, '/Users/mh653/Documents/PhD/Database/Merged_Databases/merged_database.db')
+        self.simulator = Simulator(self.project)
+        self.caller = DatabaseCaller('/Users/mh653/Documents/PhD/Database/Merged_Databases/merged_database.db')
 
         grid = (0, 0)
 
+        widget = Label(self.scrollAreaLayout, text='Reference Spectrum', grid=grid)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+
+        grid = _addColumn(grid)
+        widget = PulldownList(self.scrollAreaLayout, grid=grid, gridSpan=(1, 2), callback=self._selectSpectrum)
+        _setWidgetProperties(widget, _setWidth(columnWidths, grid))
+
+        self.spectra = [spectrum.id for spectrum in self.project.spectra]
+        widget.setData(self.spectra)
+        self.guiDict['CoreWidgets']['SpectrumId'] = widget
+        self.settings['Current']['SpectrumId'] = self._getValue(widget)
+        if self.spectra:
+            self._selectSpectrum(self.spectra[0])
+
         # Pull down and button to create a new reference spectrum
+        grid = _addRow(grid)
         widget = PulldownList(self.scrollAreaLayout, grid=grid, gridSpan=(1, 2), tipText=help['SimulationType'], callback=self._chooseSimulationType)
         _setWidgetProperties(widget, 200)
 
@@ -130,6 +147,9 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(widget, 200)
         self.guiDict['CoreWidgets']['SaveToDatabaseButton'] = widget
 
+    def _selectSpectrum(self, spectrumID):
+        self.settings['Current']['ReferenceSpectrum'] = self.project.getByPid('SP:' + spectrumID)
+
     def _chooseSimulationType(self, type):
         self.settings['Current']['SimulationType'] = type
 
@@ -140,10 +160,12 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets'] = OD()
         self.guiDict['TemporaryWidgets']['SpectrumWidgets'] = OD()
         type = self.settings['Current']['SimulationType']
-        simulatedSpectrum = SimulatedSpectrum(self.project, [(0, 0, 0, None)], {'0': {'center': float(0), 'indices': [0]}},
-                                              np.zeros((1, 1)), 500, 65536, (12, -2), 'lorentzian', False, None, None,
-                                              None)
-        x, y = createLineshape([(0, 0, 0, None)], limits=(12, -2))
+        referenceSpectrum = self.settings['Current']['ReferenceSpectrum']
+        frequency = round(referenceSpectrum.spectrometerFrequencies[0]/10)*10
+        points = len(referenceSpectrum.positions)
+        limits = (max(referenceSpectrum.positions), min(referenceSpectrum.positions))
+        simulatedSpectrum = self.simulator.spectrumFromScratch(frequency, points, limits)
+        x, y = createLineshape([(0, 0, 0, None)], points=points, limits=limits)
         spectrum = self.project.newEmptySpectrum(['1H'], name='User_Defined_Metabolite', intensities=y, positions=x)
         self.settings['Current']['Spectrum'] = spectrum
         simulatedSpectrum.spectrum = spectrum
@@ -161,7 +183,7 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         substance.referenceSpectra = [spectrum]
         sample.spectra = [spectrum]
 
-        grid = (1, 0)
+        grid = (2, 0)
 
         # Add a widget for setting the metabolite name
         widget = Label(self.scrollAreaLayout, text=f'Metabolite Name', grid=grid, gridSpan=(1, 2))
@@ -203,7 +225,7 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(widget, 200)
         self.guiDict['TemporaryWidgets']['SpectrumWidgets']['FrequencyLabel'] = widget
         grid = _addColumn(_addColumn(grid))
-        widget = DoubleSpinbox(self.scrollAreaLayout, value=500, step=10, grid=grid, gridSpan=(1, 2), suffix='MHz', callback=self._frequencyChange)
+        widget = DoubleSpinbox(self.scrollAreaLayout, value=frequency, step=10, grid=grid, gridSpan=(1, 2), suffix='MHz', callback=self._frequencyChange)
         widget.setRange(10, 1200)
         _setWidgetProperties(widget, 200)
         self.guiDict['TemporaryWidgets']['SpectrumWidgets']['Frequency'] = widget

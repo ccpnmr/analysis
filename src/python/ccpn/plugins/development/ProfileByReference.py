@@ -174,7 +174,6 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['CoreWidgets']['AddUnknownSignalButton'] = widget
         self.settings['Current']['UnknownSignalCount'] = 0
 
-
         # table widget for selecting the simulation of the metabolite
         grid = _addRow(grid)
         widget = Label(self.scrollAreaLayout, text='Simulation', grid=grid)
@@ -316,8 +315,13 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                              'origin': 'template'}, index=[len(self.metabolites.data)])
         widget.updateDf(data)
         data = {'name': self.settings['Current']['metabolite']}
-        self.metabolites.data = self.metabolites.data.append(pd.Series(data, index=self.metabolites.data.columns[:len(data)]), ignore_index=True)
-        self.guiDict['CoreWidgets']['Metabolite'].df = self.metabolites.data
+        row = pd.DataFrame(data, columns=self.metabolites.data.columns, index=[len(self.metabolites.data)])
+        self.metabolites.data = pd.concat([self.metabolites.data, row])
+        df = self.metabolites.data.sort_values('name')[
+            ['name', 'hmdb_accession', 'bmrb_id', 'chemical_formula', 'average_molecular_weight', 'smiles', 'inchi',
+             'metabolite_id', 'description']]
+        self.guiDict['CoreWidgets']['Metabolite'].updateDf(df)
+        self.settings['Current']['metaboliteData'] = row
 
     def _setupSimulatedSpectrum(self, newRow, previousRow, selectedRow, lastRow):
         metaboliteData = self.settings['Current']['metaboliteData']

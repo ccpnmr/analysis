@@ -304,6 +304,7 @@ class CreateDatabaseReferenceGuiPlugin(PluginModule):
             self.settings['Current']['Shifts'] = shifts
             self._guiGridToRealSsm()
             self.settings['Current']['SimulatedSpectrum'].updateLineshapeFromSpinSystem()
+            self.settings['Current']['SimulatedSpectrum'].multiplets[multipletId]['center'] = shift
         def changeCouplingConstant():
             coupling = widget.value()
             self.settings['Current']['Values'][column][row] = coupling

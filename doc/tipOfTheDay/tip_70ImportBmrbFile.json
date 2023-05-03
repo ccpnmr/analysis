@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can import a BMRB NmrStar file simply by dragging it into the DropArea. Select <span style=%(purple)s>Import</span> and then which elements to import. The data will be added to your project in the sidebar.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/ImportBmrbFile.png"
+  ]
+}

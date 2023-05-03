@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can overlay a 2D spectrum onto a 3D spectrum, as long as you open the 3D spectrum in a SpectrumDisplay whose XY plane isotopes match those of the 2D. Open the 3D first, flip axes if required, then drag the 2D on top.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/Overlay2DOn3D.png"
+  ]
+}

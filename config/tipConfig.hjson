@@ -35,7 +35,7 @@
         ],
 
         # what to display if there are  no more tips
-        EMPTY_TEXT: All tips viewed to reset goto Project / Preferences->tips and click 'reset tips'
+        EMPTY_TEXT: All tips viewed to reset goto File -> Preferences -> Appearance -> Tip of the Day and click to 'Clear' the Tip history
 
         # directories to search for tips
         DIRECTORIES: [

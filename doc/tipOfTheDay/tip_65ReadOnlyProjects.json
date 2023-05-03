@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>Click on the padlock in the bottom right-hand corner of the program to set your project to be <span style=%(purple)s>Read-only</span> if you don't want (another person) to save things by accident. If your project is in a directory to which you only have read-only access, it will automatically be opened in read-only mode.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/ReadOnlyProjects.png"
+  ]
+}

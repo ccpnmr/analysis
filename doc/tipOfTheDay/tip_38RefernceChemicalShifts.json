@@ -1,5 +1,5 @@
 {
-  "header": "<p style=%(para)s>View the distribution of chemical shifts observed for 1-H, 15-N and 13-C nuclei in the 20 canonical amino acids by going to <span style=%(purple)s>Molecules / Reference Chemical Shifts</span> or using the shortcut <span style=%(purple)s>RC</span>.</p>",
+  "header": "<p style=%(para)s>View the distribution of chemical shifts observed for 1-H, 15-N and 13-C nuclei in the 20 canonical amino acids by going to <span style=%(purple)s>Molecules / Reference Chemical Shifts</span> or using the shortcut <span style=%(purple)s>RC</span>. The mouse cursor is linked between this module and the SpectrumDisplays.</p>",
   "type": "picture",
   "styles": {
     "style_file": "tipStyles.txt"

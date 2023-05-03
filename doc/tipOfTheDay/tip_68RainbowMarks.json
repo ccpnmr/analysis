@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>If you set your <span style=%(purple)s>Default marks colour</span> to a rainbow option in <span style=%(purple)s>File / Preferences / Spectrum</span>, then each mark will be a different colour.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/RainbowMarks.png"
+  ]
+}

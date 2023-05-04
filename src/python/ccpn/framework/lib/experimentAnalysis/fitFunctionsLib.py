@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-02 14:29:03 +0100 (Tue, May 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 17:21:59 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -365,9 +365,15 @@ def _formatValue(value, maxInt=3, floatPrecision=3, expDigits=1):
         getLogger().debug2(f'Impossible to format {value}. Error:{ex}')
     return value
 
-def movingAverage(interval, windowSize=10,  mode='same'):
+def calculateRollingAverage(data, windowSize=10):
+    """
+    Get the rolling average of an array
+    :param data:
+    :param windowSize: the number of point to use for calculating the average
+    :return: array of same length as the input data
+    """
     window = np.ones(int(windowSize))/float(windowSize)
-    return np.convolve(interval, window,  mode=mode)
+    return np.convolve(data, window,  mode='same')
 
 ############################################################
 ############### Spectral density mapping functions ################

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 09:08:52 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 17:21:59 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -400,6 +400,11 @@ ToolbarPanel = 'ToolbarPanel'
 TablePanel = 'TablePanel'
 PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
 PYMOL = 'pymol'
+
+BARITEM = 'BarItem'
+SCATTERITEM = 'ScatterItem'
+ERRORBARITEM = 'ErrorBarItem'
+ROLLINGLINEITEM = 'RollingLineItem'
 
 # Table Groupping Headers
 _Assignments = 'Assignments'

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 14:06:22 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 17:21:59 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ from ccpn.ui.gui.widgets.Font import getFont
 from ccpn.ui.gui.widgets.Label import Label
 import numpy as np
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
+from ccpn.framework.lib.experimentAnalysis.fitFunctionsLib import calculateRollingAverage
 import pandas as pd
 
 class BarPlotPanel(GuiPanel):
@@ -104,7 +105,8 @@ class BarPlotPanel(GuiPanel):
                                              selectionBoxEnabled = False,
                                              threshouldLine=0.1, grid=(1,0), gridSpan=(1, 2))
         self.barGraphWidget.showThresholdLine(True)
-
+        self.rollingAverageLineItem = self.barGraphWidget.plotWidget.plotItem.plot()
+        self.scattersItem = self.barGraphWidget.plotWidget.plotItem.plot()
         self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._thresholdLineMoved)
         self._setBarGraphWidget()
         self.toolbar = BarPlotToolBar(parent=self, plotItem=self.barGraphWidget, guiModule=self.guiModule,
@@ -119,6 +121,13 @@ class BarPlotPanel(GuiPanel):
         if mode not in guiNameSpaces.PlotViewModes:
             raise RuntimeError(f'View Mode {mode} not implemented')
         self._viewMode = mode
+
+
+    def _isItemToggledOn(self, itemName):
+        action = self.toolbar.getButton(itemName)
+        if action is not None:
+            return action.isChecked()
+        return False
 
     def setXLabel(self, label='', includeSortingLabel=True):
 
@@ -460,9 +469,18 @@ class BarPlotPanel(GuiPanel):
                                        )
         self.barGraphWidget.xLine.setPen(self._tresholdLineBrush)
 
-        # movAv = dataFrame[self.yColumnName].rolling(window=7).mean()
-        # self.rollingAverageLine = self.barGraphWidget.plotWidget.plotItem.plot(dataFrame.index.values, movAv.values)
-        # self.scatters = self.barGraphWidget.plotWidget.plotItem.plot(dataFrame.index.values, dataFrame, symbol='o', brush=self._aboveBrush)
+
+        x = dataFrame.index.values
+        y = dataFrame[self.yColumnName].values
+        self.scattersItem = self.barGraphWidget.plotWidget.plotItem.plot(x, y, symbol='o', pen=None)
+        rollingAverage = calculateRollingAverage(y, 7)
+        self.rollingAverageLine = self.barGraphWidget.plotWidget.plotItem.plot(x, rollingAverage)
+
+        self.toggleBars(self._isItemToggledOn(guiNameSpaces.BARITEM))
+        self.toggleErrorBars(self._isItemToggledOn(guiNameSpaces.ERRORBARITEM))
+        self.toggleScatters(self._isItemToggledOn(guiNameSpaces.SCATTERITEM))
+        self.toggleRollingAverage(self._isItemToggledOn(guiNameSpaces.ROLLINGLINEITEM))
+
 
     def toggleErrorBars(self, setVisible=True):
         if self.barGraphWidget.errorBars:
@@ -470,6 +488,12 @@ class BarPlotPanel(GuiPanel):
 
     def toggleBars(self, setVisible=True):
             self.barGraphWidget.setBarsVisible(setVisible)
+
+    def toggleScatters(self, setVisible=True):
+        self.scattersItem.setVisible(setVisible)
+
+    def toggleRollingAverage(self, setVisible=True):
+        self.rollingAverageLine.setVisible(setVisible)
 
     def _currentCollectionCallback(self, *args):
         # select collection on table.

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 15:53:59 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 17:21:59 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -199,6 +199,7 @@ class ToolBarPanel(GuiPanel):
 
 
 class ExperimentAnalysisPlotToolBar(ToolBar):
+    toolButtons = {}
 
     def __init__(self, parent, plotItem, guiModule, **kwds):
         super().__init__(parent=parent, **kwds)
@@ -208,12 +209,14 @@ class ExperimentAnalysisPlotToolBar(ToolBar):
         self.setToolActions(self.getToolBarDefs())
         self.setMaximumHeight(30)
 
+
     def setToolActions(self, actionDefinitions):
         for name, dd in actionDefinitions.items():
             if isinstance(dd, od):
                 action = Action(self, **dd)
                 action.setObjectName(name)
                 self.addAction(action)
+                self.toolButtons.update({name: action})
             else:
                 self.addSeparator()
 
@@ -244,6 +247,8 @@ class ExperimentAnalysisPlotToolBar(ToolBar):
             ))
         return toolBarDefs
 
+    def getButton(self, name):
+        return self.toolButtons.get(name)
 
 class BarPlotToolBar(ExperimentAnalysisPlotToolBar):
 
@@ -253,10 +258,11 @@ class BarPlotToolBar(ExperimentAnalysisPlotToolBar):
         self.parentPanel = parent
 
 
+
     def getToolBarDefs(self):
         toolBarDefs = super().getToolBarDefs()
         extraDefs = (
-            ('Bars', od((
+            (guiNameSpaces.BARITEM, od((
                 ('text', 'Toggle Bars'),
                 ('toolTip', 'Toggle the Bars from the plot'),
                 ('icon', Icon('icons/bars-icon')),
@@ -264,29 +270,32 @@ class BarPlotToolBar(ExperimentAnalysisPlotToolBar):
                 ('enabled', True),
                 ('checkable', True)
                 ))),
-            ('Scatters', od((
+            (guiNameSpaces.SCATTERITEM, od((
                 ('text', 'Toggle Scatters'),
                 ('toolTip', 'Toggle the Scatters from the plot'),
                 ('icon', Icon('icons/Scatters')),
-                ('callback', None),
-                ('enabled', False),
-                ('checkable', True)
+                ('callback', self._toggleScatters),
+                ('enabled', True),
+                ('checkable', True),
+                ('checked', False)
                 ))),
-            ('ErrorBars', od((
+            (guiNameSpaces.ERRORBARITEM, od((
                 ('text', 'Toggle ErrorBars'),
                 ('toolTip', 'Toggle the Error Bars from the plot'),
                 ('icon', Icon('icons/errorBars')),
                 ('callback', self._toggleErrorBars),
                 ('enabled', True),
-                ('checkable', True)
+                ('checkable', True),
+                ('checked', False)
                 ))),
-            ('Rolling', od((
+            (guiNameSpaces.ROLLINGLINEITEM, od((
                 ('text', 'Toggle Rolling Average Line'),
                 ('toolTip',  'Toggle the Rolling Average Line from the plot'),
                 ('icon', Icon('icons/rollingAverage-icon')),
-                ('callback', None),
-                ('enabled', False),
-                ('checkable', True)
+                ('callback', self._toggleRollingAverage),
+                ('enabled', True),
+                ('checkable', True),
+                ('checked',False),
                 ))),
             )
         toolBarDefs.update(extraDefs)
@@ -294,9 +303,13 @@ class BarPlotToolBar(ExperimentAnalysisPlotToolBar):
 
 
     def _toggleErrorBars(self):
-        action = self.sender()
-        self.parentPanel.toggleErrorBars(action.isChecked())
+        self.parentPanel.toggleErrorBars(self.sender().isChecked())
 
     def _toggleBars(self):
-        action = self.sender()
-        self.parentPanel.toggleBars(action.isChecked())
+        self.parentPanel.toggleBars(self.sender().isChecked())
+
+    def _toggleScatters(self):
+        self.parentPanel.toggleScatters(self.sender().isChecked())
+
+    def _toggleRollingAverage(self):
+        self.parentPanel.toggleRollingAverage(self.sender().isChecked())

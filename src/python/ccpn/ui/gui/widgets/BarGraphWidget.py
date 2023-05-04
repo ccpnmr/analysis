@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-01-24 15:00:38 +0000 (Tue, January 24, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 09:08:53 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -536,6 +536,9 @@ class BarGraphWidget(Widget):
             self.legendItem.show()
         else:
             self.legendItem.hide()
+
+    def hideButtons(self):
+        self.plotWidget.plotItem.hideButtons()
 
 #######################################################################################################
 ####################################      Mock DATA TESTING    ########################################

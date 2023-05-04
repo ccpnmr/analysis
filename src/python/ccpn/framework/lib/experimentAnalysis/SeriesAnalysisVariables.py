@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-02 14:29:03 +0100 (Tue, May 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 09:08:52 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -45,7 +45,7 @@ NMRATOMNAMES     = f'{NMRATOMNAME}s'        # -> str   | nmrAtom names comma sep
 NMRRESIDUECODETYPE = f'{NMRRESIDUECODE}-{NMRRESIDUETYPE}'  # -> str   | nmrResidue Sequence Code + Type (e.g.: '1-ALA')
 EXPERIMENT = 'experiment' # -> str, e.g.: T1, T2, HetNoe, 'Cest', etc
 _ROW_UID         = 'ROW_UID'             # -> str   | Internal. Unique Identifier (e.g.: randomly generated 6 letters UUID)
-ASHTAG           = '#'                   # -> int   | incremental serial
+INDEX           = 'Index'                   # -> int   | incremental serial
 VALUE            = 'Value'               # -> str   | The column header  prefix in a SeriesTable. Used to store data after the CONSTANT_TABLE_COLUMNS
 TIME             = 'Time'                # -> str   | A general prefix in a SeriesTable.
 

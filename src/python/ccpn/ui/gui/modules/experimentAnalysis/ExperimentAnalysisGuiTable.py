@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-02 14:29:03 +0100 (Tue, May 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 09:08:52 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -87,6 +87,7 @@ class _ExperimentalAnalysisTableABC(Table):
                                sv.SERIES_STEP_X, sv.SERIES_STEP_Y, sv.MINIMISER_METHOD, sv.MINIMISER_MODEL, sv.CHISQR,
                                sv.REDCHI, sv.AIC, sv.BIC,
                                sv.MODEL_NAME, sv.NMRRESIDUECODETYPE]
+        self._internalColumns = [sv.INDEX]
         errCols = [tt for tt in self.headerColumnMenu.columnTexts if sv._ERR in tt]
         self._hiddenColumns += errCols
         self.headerColumnMenu.setDefaultColumns(self._hiddenColumns, update=False)

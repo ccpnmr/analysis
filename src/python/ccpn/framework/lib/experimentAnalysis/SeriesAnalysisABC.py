@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-06 16:37:07 +0000 (Mon, March 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 09:08:52 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -159,9 +159,9 @@ class SeriesAnalysisABC(ABC):
         else:
             outDataFrame.sort_values(by=sv.COLLECTIONID, inplace=True)
         ## apply an ascending ASHTAG. This is needed for tables and BarPlotting
-        outDataFrame[sv.ASHTAG] = np.arange(1, len(outDataFrame)+1)
+        outDataFrame[sv.INDEX] = np.arange(1, len(outDataFrame) + 1)
         ## put ASHTAG as first header
-        outDataFrame.insert(0, sv.ASHTAG, outDataFrame.pop(sv.ASHTAG))
+        outDataFrame.insert(0, sv.INDEX, outDataFrame.pop(sv.INDEX))
         return outDataFrame
 
     @property
@@ -418,6 +418,12 @@ class SeriesAnalysisABC(ABC):
                 if not filteredData.empty:
                     return True
         return False
+
+    def _getChainsFromDataFrame(self, df):
+        nmrChainCodesFromDf = df[sv.NMRCHAINNAME].unique()
+        nmrChains = [self.project.getNmrChain(c) for c in nmrChainCodesFromDf]
+        chains = [nmrChain.chain for nmrChain in nmrChains]
+        return chains
 
     @classmethod
     def exportToFile(cls, path, fileType, *args, **kwargs):

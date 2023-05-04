@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-06 12:41:51 +0000 (Mon, March 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 09:08:52 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -925,6 +925,35 @@ class AppearancePanel(GuiSettingPanel):
                        'colour': DividerColour,
                        'gridSpan': (1, 2),
                        'tipText': guiNameSpaces.TipText_BarGraphAppearance}}),
+
+            (guiNameSpaces.WidgetVarName_PlotViewMode,
+             {'label': guiNameSpaces.Label_PlotViewMode,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': None,
+              'callBack': self._viewModeChanged,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_PlotViewMode,
+                       'hAlign': 'l',
+                       'tipText': '',
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds': {'texts': guiNameSpaces.PlotViewModes,
+                                        'tipTexts': guiNameSpaces.PlotViewModesTT,
+                                        'direction': 'v',
+                                        'selectedInd': 0,
+                                        }}}),
+
+            (guiNameSpaces.WidgetVarName_Chain,
+             {'label': guiNameSpaces.Label_Chain,
+              'callBack': self._commonCallback,
+              'tipText': guiNameSpaces.TipText_Chain,
+              'type': objectPulldowns.ChainPulldown,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_Chain,
+                       'tipText': guiNameSpaces.TipText_Chain,
+                       'callback': self._commonCallback,
+                       'objectName': guiNameSpaces.WidgetVarName_Chain,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+
             (guiNameSpaces.WidgetVarName_BarGraphXcolumnName,
              {'label': guiNameSpaces.Label_XcolumnName,
               'callBack': self._commonCallback,
@@ -1128,6 +1157,15 @@ class AppearancePanel(GuiSettingPanel):
     def _preselectDefaultYaxisBarGraph(self):
         pass
 
+    def _viewModeChanged(self, *args):
+        barGraphPanel = self.guiModule.panelHandler.getPanel(guiNameSpaces.BarPlotPanel)
+        if barGraphPanel is not None:
+            viewModeWidget = self.getWidget(guiNameSpaces.WidgetVarName_PlotViewMode)
+            viewMode = viewModeWidget.getByText()
+            barGraphPanel.setViewMode(viewMode)
+            self._commonCallback()
+
+
     def _getModelNameFromData(self, data, modelNameColumn):
         modelName = None
         if modelNameColumn in data.columns:
@@ -1182,7 +1220,7 @@ class AppearancePanel(GuiSettingPanel):
         """ Get the columns names for plottable data. E.g.: the Fitting results and stats. """
 
         allowed = [
-                   sv.ASHTAG,
+                   sv.INDEX,
                    sv.COLLECTIONID,
                    sv.COLLECTIONPID,
                    sv.NMRRESIDUECODE,

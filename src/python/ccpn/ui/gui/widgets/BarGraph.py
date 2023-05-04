@@ -4,7 +4,7 @@ Module Documentation Here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:47 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-05-04 09:08:52 +0100 (Thu, May 04, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -271,18 +271,18 @@ class BarGraph(pg.BarGraphItem):
         p.setBrush(fn.mkBrush(brush))
 
         heightGroups = [[height]]
-        if brushes and self.useGradient:
+        if brushes is not None and self.useGradient:
             count = len(brushes)
             heightGroups = np.array_split(np.sort(height), count)
         for i in range(len(x0 if not np.isscalar(x0) else y0)):
             if pens is not None:
                 p.setPen(fn.mkPen(pens[i]))
-            if brushes and not self.useGradient:
+            if brushes is not None and not self.useGradient:
                 try:
                     p.setBrush(fn.mkBrush(brushes[i]))
                     self.barColoursDict[x + width/2] = brushes[i]
                 except:
-                    getLogger().warn(f'BarGraph error. Cannot find a brush for at position {i}')
+                    getLogger().warning(f'BarGraph error. Cannot find a brush for at position {i}')
 
             if np.isscalar(x0):
                 x = x0
@@ -705,7 +705,7 @@ customViewBox = CustomViewBox()
 plotWidget = pg.PlotWidget(viewBox=customViewBox, background='w')
 customViewBox.setParent(plotWidget)
 
-x=[
+x=np.array([
     6,
     8,
     10,
@@ -722,9 +722,9 @@ x=[
     36,
     48,
     60
-   ]
+   ])
 
-y = [
+y = np.array([
     1.731,
     20.809,
     10.658,
@@ -741,18 +741,26 @@ y = [
     50.287,
     20.971,
     400.412,
-    ]
+    ])
 
-
-L = 'abcdefghilmnopqrstuvz'
-x = np.arange(1,len(L))
-ticks = [list(zip(x, L))]
-y = np.random.normal(1,100,len(L))
-y = np.absolute(y)
+belowColour = '#CD5C5C'
+aboveColour = '#DDA0DD'
+otherColour = '#00FFFF'
+threshold = 10
+colours = np.array([otherColour]*len(y))
+colours[y>=threshold] = aboveColour
+colours[y<threshold] = belowColour
 gradientName = 'gray-black'
+
 from ccpn.util.Colour import colorSchemeTable
 brushes = colorSchemeTable[gradientName]
 
+scaleDict = {i:f' ' for i in np.arange(0, max(x)+100)}
+
+for xv, i , r in zip(x, y, colours):
+    scaleDict[xv] = str(xv)
+
+ticks = scaleDict
 
 
 if __name__ == '__main__':
@@ -761,50 +769,26 @@ if __name__ == '__main__':
     window = QtWidgets.QWidget()
     window.setLayout(QtWidgets.QGridLayout())
 
+    xaxis = plotWidget.getAxis('bottom')
 
-    xax = plotWidget.getAxis('bottom')
-    xticks = list(x)+list(xMids)+list(xHighs)
-    xLabelTicks = [f'{str(i)}_abcd' for i in xticks]
-    xLabelTicksNumb = [int(i)+1 for i in range(len(xLabelTicks))]
-
-    # ticks = [list(zip(xLabelTicksNumb, xLabelTicks))]
-
-    # xax.setTicks(ticks)
+    xaxis.setTicks([list(ticks.items())[::1],
+                    list(ticks.items())[::1],
+                    list(ticks.items())[::1]])
     xLow = BarGraph(window,
                     viewBox=customViewBox, xValues=x-0.5,
-                    yValues=y, objects=[], brushes=brushes, useGradient=True,
+                    yValues=y, objects=[], brushes=colours, useGradient=False,
                     drawLabels=False,
                     widht=1)
-    # xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b', widht=1)
-    # xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs, objects=[nmrResidues], brush='g', widht=1)
-
     customViewBox.addItem(xLow)
-    # customViewBox.addItem(xMid)
-    # customViewBox.addItem(xHigh)
-
-    # xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen='b')
-    # customViewBox.addItem(xLine)
-
     l = pg.LegendItem((100,60), offset=(70,30))  # args are (size, offset)
     l.setParentItem(customViewBox.graphicsItem())
-
     c1 = plotWidget.plot(pen='r', name='low')
-    # c2 = plotWidget.plot(pen='b', name='mid')
-    # c3 = plotWidget.plot(pen='g', name='high')
-
     l.addItem(c1, 'low')
-    # l.addItem(c2, 'mid')
-    # l.addItem(c3, 'high')
-
-    # customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
-    customViewBox.setRange(xRange=[10,200], yRange=[0.01,1000],)
+    customViewBox.setRange(xRange=[0, max(x)+10], yRange=[0,max(y)],)
     customViewBox.setMenuEnabled(enableMenu=False)
-
     plotWidget.show()
-
     window.show()
     window.raise_()
-
     app.start()
 
 

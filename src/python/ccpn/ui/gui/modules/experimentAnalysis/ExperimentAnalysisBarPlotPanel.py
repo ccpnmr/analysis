@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-02 14:29:03 +0100 (Tue, May 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 09:08:52 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -50,7 +50,7 @@ class BarPlotPanel(GuiPanel):
         GuiPanel.__init__(self, guiModule,*args , **Framekwargs)
         self._appearancePanel = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
         self._toolbarPanel = self.guiModule.panelHandler.getToolBarPanel()
-        self._linkToMainTable = True
+        self._viewMode = guiNameSpaces.PlotViewMode_Mirrored
         self._plottedDf = None
         self._aboveX = []
         self._belowX = []
@@ -106,11 +106,35 @@ class BarPlotPanel(GuiPanel):
         self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._thresholdLineMoved)
         self._setBarGraphWidget()
         self.toolbar = BarPlotToolBar(parent=self, plotItem=self.barGraphWidget, guiModule=self.guiModule,
-                                                     grid=(0, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
-        self.currentCollectionLabel = Label(self, text='', grid=(0, 1), hAlign='r',)
+                                                     grid=(0, 0),  hAlign='l', hPolicy='preferred')
+        self.currentCollectionLabel = Label(self , text='', grid=(0, 1), hAlign='r',)
 
-    def setXLabel(self, label=''):
-        self.barGraphWidget.plotWidget.setLabel('bottom', label)
+    @property
+    def viewMode(self):
+        return self._viewMode
+
+    def setViewMode(self, mode):
+        if mode not in guiNameSpaces.PlotViewModes:
+            raise RuntimeError(f'View Mode {mode} not implemented')
+        self._viewMode = mode
+
+    def setXLabel(self, label='', includeSortingLabel=True):
+
+        htmlLabel = f'''<p><strong>{label}</strong></p> '''
+
+        if includeSortingLabel:
+            sortingLabel, sortOrder = self.guiModule._getSortingHeaderFromMainTable()
+            if self.viewMode == guiNameSpaces.PlotViewMode_SecondaryStructure:
+                sortingLabel, sortOrder = sv.NMRRESIDUECODE, 0  # this viewmode is only sorted by ResidueCode (ascending)
+
+            if sortingLabel not in [label, '', ' ', None] :
+                upSymbol = guiNameSpaces.TRIANGLE_UP_HTML
+                downSymbol =  guiNameSpaces.TRIANGLE_DOWN_HTML
+                sortOrderIcon = upSymbol if sortOrder == 0 else downSymbol
+                sortingLabel = f' (Sorted by {sortingLabel} {sortOrderIcon})'
+                htmlLabel = f''' <p><strong>{label}</strong> <em>{sortingLabel}</em></p> ''' #Use HTML to have different fonts in the same label.
+
+        self.barGraphWidget.plotWidget.setLabel('bottom', htmlLabel)
 
     def setYLabel(self, label=''):
         self.barGraphWidget.plotWidget.setLabel('left', label)
@@ -136,11 +160,10 @@ class BarPlotPanel(GuiPanel):
         self.updatePanel()
 
     def _mainTableSortingChanged(self, callDict, *args):
-        sortingColumn = callDict.get('sortColumnName', None)
-
-
-        print('change _mainTableSortingChanged',sortingColumn, )
-        self._thresholdLineMoved()
+        if self.viewMode == guiNameSpaces.PlotViewMode_SecondaryStructure:
+            getLogger().debug2(f'BarGraph: Sorting disable for the selected view mode.')
+            return
+        self.updatePanel()
 
     @property
     def xColumnName(self):
@@ -237,64 +260,54 @@ class BarPlotPanel(GuiPanel):
                 w.select(colourName)
 
     def updatePanel(self, *args, **kwargs):
-        getLogger().info('Updating  barPlot panel')
-        if self._linkToMainTable:
-            dataFrame = self.guiModule.getVisibleDataFrame(includeHiddenColumns=True)
-        else:
-            dataFrame = self.guiModule.getGuiResultDataFrame()
-        if dataFrame is not None:
-            self.plotDataFrame(dataFrame)
-        else:
+        getLogger().debug('Updating  barPlot panel')
+        dataFrame = self.guiModule.getVisibleDataFrame(includeHiddenColumns=True)
+
+        if dataFrame is None:
             self.barGraphWidget.clear()
+            return
+
+        if self.viewMode == guiNameSpaces.PlotViewMode_SecondaryStructure:
+            chainWidget = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_Chain)
+            if chainWidget is not None:
+                pid = chainWidget.getText()
+                chain = self.project.getByPid(pid)
+                dataFrame =  self.filterBySecondaryStructure(dataFrame, chain)
+        self.plotDataFrame(dataFrame)
+
 
     def _updateThresholdValueFromSettings(self, value, *args):
         self.thresholdValue = value
 
-
-    def _expandDFSequenceCodesFromChain(self, dataFrame,  getCodesFromChain = True):
-        """
-       Fill any assignment sequenceCode gaps present in a DataFrame so that when displaying the bar graph
-       all ticks are available in the x Axis .
-       The routine will work only if assignment definitions are available in the dataFrame.
-       Will first search for chains linked to an NmrChain from the NmrChainName, otherwise use the nmrChain.
-       Take the first residue sequence code and enumerate until the last.
-       Note a chain can contain gaps to (as user can delete residues)
-       If gaps are found, then fill it with Nones. This will be enough to create ticks in the barGraph.
-       :return the amended dataframe
-       """
+    def filterBySecondaryStructure(self, dataFrame, chain):
         df = dataFrame
-        nmrChainCodesFromDf = df[seriesVariables.NMRCHAINNAME].unique()
-        nmrChains = [self.project.getNmrChain(c) for c in nmrChainCodesFromDf]
+        backboneAtomsComb = ['H,N', 'Hn,Nh'] # hack while developing the feature. This has to be replaced with information from the MoleculeDefinitions
+        codes = chain._sequenceCodesAsIntegers
+        expandedSequenceResCodes = np.arange(min(codes), max(codes) + 1)  #make sure we have all residues codes ( chain can have gaps if altered by the users)
+        filteredDf = pd.DataFrame()
+        bbRows = []
+        # filterDataFrame by the chain code first
+        chainCode = chain.name
+        df = df[df[seriesVariables.NMRCHAINNAME] == chainCode]
+        for resCode in expandedSequenceResCodes:
+            availableResiduesCodes = df[seriesVariables.NMRRESIDUECODE].values
+            if not str(resCode) in availableResiduesCodes:
+                filteredDf.loc[resCode, df.columns] = 0
+                filteredDf.loc[resCode, seriesVariables.NMRRESIDUECODE] = str(resCode)
+                filteredDf.loc[resCode, seriesVariables.NMRCHAINNAME] = chainCode
+                continue
+            nmrResiduesCodeDF = df[df[seriesVariables.NMRRESIDUECODE] == str(resCode)]
+            # search for the BB atoms
+            for ix, row in nmrResiduesCodeDF.iterrows():
+                atomNames = row[seriesVariables.NMRATOMNAMES]
+                if not isinstance(atomNames, str):
+                    continue
+                if atomNames in backboneAtomsComb:
+                    bbRows.append(row)
+                    filteredDf.loc[resCode, df.columns] = row.values
+        filteredDf[sv.INDEX] = np.arange(1, len(filteredDf) + 1)
+        return filteredDf
 
-        ## fetch the full needed sequence
-        codesByChain = {}
-
-        for nmrChain in nmrChains:
-            codes = nmrChain._sequenceCodesAsIntegers
-            chain = nmrChain.chain
-            if chain is not None and getCodesFromChain:
-                codes = chain._sequenceCodesAsIntegers
-            expandedSequence = []
-            if len(codes) > 0:
-                expandedSequence = np.arange(min(codes), max(codes) + 1)
-            codesByChain[nmrChain.name] = expandedSequence
-
-        ## check what is missing from the data
-        missingCodesByChain = {}
-        for chainName, groupByChainDF in df.groupby(seriesVariables.NMRCHAINNAME):
-            nmrResiduesCodesFromDf = pd.to_numeric(groupByChainDF[seriesVariables.NMRRESIDUECODE], errors='coerce').values
-            expandedNmrResidueCodes = codesByChain.get(chainName, [])
-            missingNmrResCodesMask = ~ np.isin(expandedNmrResidueCodes, nmrResiduesCodesFromDf)
-            missingCodesByChain[chainName] = expandedNmrResidueCodes[missingNmrResCodesMask]
-
-        ## Add the missing information in the dataframe
-        for name, missingCodes in missingCodesByChain.items():
-            for i in missingCodes:
-                df.loc[i, seriesVariables.NMRRESIDUECODE] = i
-                df.loc[i, seriesVariables.NMRCHAINNAME] = name
-                df.loc[i, seriesVariables.COLLECTIONPID] = None # as to be None and not np.nan which is a float
-        df[sv.ASHTAG] = np.arange(1, len(df) + 1)
-        return df
 
     def _setPlottingData(self, dataFrame, xColumnName, yColumnName):
         """Set the plotting variables from the current Dataframe.\
@@ -306,7 +319,7 @@ class BarPlotPanel(GuiPanel):
 
         # set the index exactly in the same order as given (sorted by Gui Table)
         # dataFrame[sv.ASHTAG] = np.arange(1, len(dataFrame)+1)
-        dataFrame.set_index(sv.ASHTAG, drop=False, inplace=True)
+        dataFrame.set_index(sv.INDEX, drop=False, inplace=True)
 
         ## group by threshold value
         aboveDf = dataFrame[dataFrame[yColumnName] >= self.thresholdValue]
@@ -341,22 +354,32 @@ class BarPlotPanel(GuiPanel):
             topError = dataFrame[errorColumn].values
             self._errorHeights = {'xError': xError.values, 'yError': yError, 'topError': topError}
         ## set ticks for the xAxis. As they Xs are strs, Need to create a dict Index:Value
-        ticks = dict(zip(dataFrame[xColumnName].index, dataFrame[xColumnName].values))
-        xaxis = self._getAxis('bottom')
-        if self.barGraphWidget._tickOption == MinimalTicks:
-            # setTicks uses a list of 3 dicts. Major, minor, sub minors ticks. (used for when zooming in-out)
-            xaxis.setTicks([list(ticks.items())[9::10], # define steps of 10, show only 10 labels (max zoomed out)
-                            list(ticks.items())[4::5],  # steps of 5
-                            list(ticks.items())[::1]]) # steps of 1, show all labels
-        else:
-            ## setTicks show all (equivalent to 1 for each Major, minor or sub minor
-            xaxis.setTicks([list(ticks.items())[::1],
-                                list(ticks.items())[::1],
-                                list(ticks.items())[::1]])
+        labels = dataFrame[xColumnName].values
+        coordinates = dataFrame[xColumnName].index
+        self._setTicks(labels, coordinates)
         ## update labels on axes
         self._updateAxisLabels()
         self._plottedDf = dataFrame
         return True
+
+    def _setTicks(self, labels, coordinates):
+        """
+        :param labels: list or 1d array of strings.  the values to be shown on the x-axis of the plot
+        :param coordinates:  list or 1d array of int or floats.  the coordinates where to place the labels
+        :return:
+        """
+        ticks = dict(zip(coordinates, labels))
+        xaxis = self._getAxis('bottom')
+        if self.barGraphWidget._tickOption == MinimalTicks:
+            # setTicks uses a list of 3 dicts. Major, minor, sub minors ticks. (used for when zooming in-out)
+            xaxis.setTicks([list(ticks.items())[9::10],  # define steps of 10, show only 10 labels (max zoomed out)
+                            list(ticks.items())[4::5],  # steps of 5
+                            list(ticks.items())[::1]])  # steps of 1, show all labels
+        else:
+            ## setTicks show all (equivalent to 1 for each Major, minor or sub minor
+            xaxis.setTicks([list(ticks.items())[::1],
+                            list(ticks.items())[::1],
+                            list(ticks.items())[::1]])
 
     def _setCurrentObjs(self, df, ix):
         from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import getPeaksFromCollection
@@ -405,7 +428,7 @@ class BarPlotPanel(GuiPanel):
          """
         self.barGraphWidget.clear()
         self._updateAxisLabels()
-
+        self.barGraphWidget.hideButtons()
 
         if not self.xColumnName and not self.yColumnName in dataFrame.columns:
             getLogger().warning(f'Column names  not found in dataFrame: {self.xColumnName}, {self.yColumnName}')
@@ -450,5 +473,5 @@ class BarPlotPanel(GuiPanel):
         filtered = df.getByHeader(sv.COLLECTIONPID, pids)
         if filtered.empty:
             return
-        barNumbers = filtered[sv.ASHTAG].values
+        barNumbers = filtered[sv.INDEX].values
         self.barGraphWidget._selectBarNumbers(selected=barNumbers)

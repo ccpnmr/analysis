@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-02 14:29:03 +0100 (Tue, May 02, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 09:08:52 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -99,15 +99,15 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         return self.backendHandler.inputDataTables
 
     def getVisibleDataFrame(self, includeHiddenColumns=False):
-        tablePanel = self.panelHandler.getPanel(guiNameSpaces.TablePanel)
-        if tablePanel is not None:
-            table = tablePanel.mainTable
-            tableModel = table.model()
-            if tableModel is not None:
-                dataFrame = tableModel._getVisibleDataFrame(includeHiddenColumns=includeHiddenColumns)
-                dataFrame[sv.ASHTAG] = np.arange(1, len(dataFrame) + 1)
-                return dataFrame
+        """ Get the dataframe displayed on the mainTable. """
+        table = self._getMainTableWidget()
+        tableModel = table.model()
+        if tableModel is not None:
+            dataFrame = tableModel._getVisibleDataFrame(includeHiddenColumns=includeHiddenColumns)
+            dataFrame[sv.INDEX] = np.arange(1, len(dataFrame) + 1)
+            return dataFrame
         return pd.DataFrame()
+
 
     def getGuiResultDataFrame(self):
         """Get the SelectedOutputDataTable and transform the raw data to a displayable table for the main widgets.
@@ -179,10 +179,7 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         ## make sure all is selected as before the update
         self.current.collections = []
         self.current.collections = currentCollections
-        #set update done.
-        toolbar = self.panelHandler.getToolBarPanel()
-        if toolbar:
-            toolbar.setUpdateState(PanelUpdateState.DONE)
+        self._setUpdateDone()
 
     def setNeedRefitting(self):
         self.backendHandler._needsRefitting = True
@@ -197,10 +194,37 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         if toolbar:
             toolbar.setUpdateState(PanelUpdateState.DETECTED)
 
+    def _setUpdateDone(self):
+        """ Set the update completed icon on toolbar"""
+        toolbar = self.panelHandler.getToolBarPanel()
+        if toolbar:
+            toolbar.setUpdateState(PanelUpdateState.DONE)
+
+    def _getMainTableWidget(self):
+        tablePanel = self.panelHandler.getPanel(guiNameSpaces.TablePanel)
+        if tablePanel is not None:
+            table = tablePanel.mainTable
+            return table
+
+    def _getSortingHeaderFromMainTable(self):
+        _sortColumn = ''
+        _sortOrder = 0
+        table = self._getMainTableWidget()
+        if not table:
+            return _sortColumn, _sortOrder
+
+        model = table.model()
+        _sortColumn = model._sortColumn
+        if _sortColumn:
+            _sortColumn =  table.headerColumnMenu.columnTexts[_sortColumn]
+            _sortOrder = model._sortOrder
+        return _sortColumn, _sortOrder
+
     def restoreWidgetsState(self, **widgetsState):
         # with self.blockWidgetSignals():
         super().restoreWidgetsState(**widgetsState)
         ## restore and apply filters correctly
+        self._setUpdateDone()
 
     def _closeModule(self):
         ## de-register/close all notifiers. Handler

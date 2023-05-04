@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-06 12:41:51 +0000 (Mon, March 06, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 09:08:52 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,8 @@ EmptySpace = '< >'
 ToolBar = 'ToolBar'
 DELTA = '\u0394'
 Delta = '\u03B4'
+TRIANGLE_UP_HTML = '&#9650;'
+TRIANGLE_DOWN_HTML = '&#9660;'
 
 #### colours
 BackgroundColour = gs.getColours()[gs.CCPNGLWIDGET_HEXBACKGROUND]
@@ -266,6 +268,27 @@ WidgetVarName_BarGraphSeparator = 'GeneralAppearanceSeparator'
 Label_BarGraphAppearance = 'BarGraph'
 TipText_BarGraphAppearance = 'General Appearance settings for the BarGraph'
 
+WidgetVarName_PlotViewMode = 'PlotViewModeSelection'
+Label_PlotViewMode = 'View Mode'
+TipText_PlotViewMode = 'Select the plot View Mode. '
+
+WidgetVarName_PlotMirrored = 'PlotMirrored'
+PlotViewMode_Mirrored = 'Mirrored To Table'
+TipText_Mirrored = ''' In this view mode the plot is mirrored to the main Table.
+ Each row in the table corresponds to a plot item. 
+ Table filtering and sorting are reflected to the plot.  
+ Note, molecular structure(s) information is not taken into consideration. Plotting as function of ResidueCode is not recommended as it might contain duplicated codes, for example for sidechains or multiple chains.'''
+
+WidgetVarName_PlotSecondaryStructure = 'PlotBySS'
+PlotViewMode_SecondaryStructure = 'Secondary Structure'
+TipText_SS = ''' In this view mode the plot is built following the molecular information of the selected Chain.
+ Each residue corresponds to a plot item.
+ Assignments must be present in the data, missing assignments result in gaps in the plot. Unassigned or non-secondary structure data is not displayed '''
+
+WidgetVarName_Chain = 'ChainSelector'
+Label_Chain = 'Chain'
+TipText_Chain = f'Select the chain to display on plots. Only available for the {PlotViewMode_SecondaryStructure} view mode.'
+
 WidgetVarName_BarGraphXcolumnName = 'XcolumnName'
 Label_XcolumnName = 'X Axis Data'
 TipText_XcolumnName = 'Set the BarGraph X Axis Data'
@@ -387,9 +410,14 @@ _Errors = 'Errors'
 _Fitting = 'Fitting'
 TableGrouppingHeaders = [_Assignments, _SeriesSteps, _Calculation, _Fitting, _Stats, _Errors]
 
-### Appearance BarGraph X axis
+### Appearance BarGraph
+
+PlotViewModes = [PlotViewMode_Mirrored, PlotViewMode_SecondaryStructure]
+PlotViewModesVars = [WidgetVarName_PlotMirrored, WidgetVarName_PlotSecondaryStructure]
+PlotViewModesTT = [TipText_Mirrored, TipText_SS]
+
 XBarGraphColumnNameOptions = [
-    seriesVariables.ASHTAG,
+    seriesVariables.INDEX,
     ColumnID,
     ColumnCollectionPid,
     ColumnResidueCode,
@@ -397,7 +425,7 @@ XBarGraphColumnNameOptions = [
 ]
 
 _ExcludedFromPreferredYAxisOptions = [
-                                         seriesVariables.ASHTAG,
+                                         seriesVariables.INDEX,
                                          seriesVariables.COLLECTIONID,
                                          seriesVariables.COLLECTIONPID,
                                          seriesVariables._ROW_UID,

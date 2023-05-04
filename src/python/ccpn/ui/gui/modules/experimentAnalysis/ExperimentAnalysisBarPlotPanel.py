@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 17:21:59 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 17:38:48 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -473,7 +473,8 @@ class BarPlotPanel(GuiPanel):
         x = dataFrame.index.values
         y = dataFrame[self.yColumnName].values
         self.scattersItem = self.barGraphWidget.plotWidget.plotItem.plot(x, y, symbol='o', pen=None)
-        rollingAverage = calculateRollingAverage(y, 7)
+        windowRollingAverage =  self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_WindowRollingAverage).getValue()
+        rollingAverage = calculateRollingAverage(y, windowRollingAverage)
         self.rollingAverageLine = self.barGraphWidget.plotWidget.plotItem.plot(x, rollingAverage)
 
         self.toggleBars(self._isItemToggledOn(guiNameSpaces.BARITEM))

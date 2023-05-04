@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 09:08:52 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 17:38:48 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1012,6 +1012,19 @@ class AppearancePanel(GuiSettingPanel):
                        'value': 0.1,
                        'step': 0.01,
                        'decimals': 4,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+
+            (guiNameSpaces.WidgetVarName_WindowRollingAverage,
+             {'label': guiNameSpaces.Label_WindowRollingAverage,
+              'tipText': guiNameSpaces.TipText_WindowRollingAverage,
+              'callBack': self._commonCallback,
+              'enabled': True,
+              'type': compoundWidget.DoubleSpinBoxCompoundWidget,
+              '_init': None,
+              'kwds': {'labelText': guiNameSpaces.Label_WindowRollingAverage,
+                       'tipText': guiNameSpaces.TipText_WindowRollingAverage,
+                       'value': 7,
+                       'step': 1,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
 
             (guiNameSpaces.WidgetVarName_AboveThrColour,

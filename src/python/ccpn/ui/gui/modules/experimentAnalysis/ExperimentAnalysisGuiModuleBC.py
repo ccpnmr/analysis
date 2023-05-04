@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 09:08:52 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 09:15:11 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -162,13 +162,13 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
 
     def updateAll(self, refit=False, rebuildInputData=False):
         """ Update all Gui panels"""
-        getLogger().info(f'Updating All ...')
+        getLogger().info(f'{self}. Updating data and GUI items...')
         currentCollections = self.current.collections
         if rebuildInputData or self.backendHandler._needsRebuildingInputDataTables:
             self.backendHandler._rebuildInputData()
             self.backendHandler._needsRebuildingInputDataTables = False
         if refit or self.backendHandler._needsRefitting and len(self.backendHandler.inputDataTables) > 0:
-            getLogger().info(f'Nothing to refit. Skipping...')
+            getLogger().info(f'{self}. Nothing to refit. Skipping...')
             self.backendHandler.fitInputData()
             self.backendHandler._needsRefitting = False
         appearance = self.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)

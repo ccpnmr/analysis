@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 09:08:52 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 14:06:22 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -71,10 +71,11 @@ class ToolBarPanel(GuiPanel):
                 'text': '',
                 'icon': 'icons/filter',
                 'tipText': 'Apply filters as defined in settings',
-                'toggle': True,
+                'toggle': False,
                 'callback': f'_{guiNameSpaces.FilterButton}{guiNameSpaces.Callback}',  # the exact name as the function def
                 'objectName': guiNameSpaces.FilterButton,
                 'enabled': False,
+                'visible':False,
             },
 
             guiNameSpaces.UpdateButton: {
@@ -99,11 +100,13 @@ class ToolBarPanel(GuiPanel):
         for i, buttonName in enumerate(toolButtonsDefs, start=1):
             colPos+=i
             callbackAtt = toolButtonsDefs.get(buttonName).pop('callback')
+            isVisible =  toolButtonsDefs.get(buttonName).pop('visible', True)
             button = Button(self, **toolButtonsDefs.get(buttonName), grid=(0, colPos))
             callback = getattr(self, callbackAtt or '', None)
             button.setCallback(callback)
             button.setMaximumHeight(25)
             button.setMaximumWidth(25)
+            button.setVisible(isVisible)
             setattr(self, buttonName, button)
             self.toolButtons.update({buttonName:button})
 
@@ -253,16 +256,38 @@ class BarPlotToolBar(ExperimentAnalysisPlotToolBar):
     def getToolBarDefs(self):
         toolBarDefs = super().getToolBarDefs()
         extraDefs = (
+            ('Bars', od((
+                ('text', 'Toggle Bars'),
+                ('toolTip', 'Toggle the Bars from the plot'),
+                ('icon', Icon('icons/bars-icon')),
+                ('callback', None),
+                ('enabled', True),
+                ('checkable', True)
+                ))),
+            ('Scatters', od((
+                ('text', 'Toggle Scatters'),
+                ('toolTip', 'Toggle the Scatters from the plot'),
+                ('icon', Icon('icons/Scatters')),
+                ('callback', None),
+                ('enabled', True),
+                ('checkable', True)
+                ))),
             ('ErrorBars', od((
                 ('text', 'Toggle ErrorBars'),
-                ('toolTip', 'Toggle the ErrorBars from the plot'),
+                ('toolTip', 'Toggle the Error Bars from the plot'),
                 ('icon', Icon('icons/errorBars')),
                 ('callback', self._toggleErrorBars),
                 ('enabled', True),
                 ('checkable', True)
-                ))
-             ),
-
+                ))),
+            ('Rolling', od((
+                ('text', 'Toggle Rolling Average Line'),
+                ('toolTip',  'Toggle the Rolling Average Line from the plot'),
+                ('icon', Icon('icons/rollingAverage-icon')),
+                ('callback', None),
+                ('enabled', True),
+                ('checkable', True)
+                ))),
             )
         toolBarDefs.update(extraDefs)
         return toolBarDefs
@@ -271,3 +296,7 @@ class BarPlotToolBar(ExperimentAnalysisPlotToolBar):
     def _toggleErrorBars(self):
         action = self.sender()
         self.parentPanel.toggleErrorBars(action.isChecked())
+
+    def _toggleBars(self):
+        action = self.sender()
+        self.parentPanel.toggleBars(action.isChecked())

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-01 15:13:20 +0000 (Wed, March 01, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-05-04 14:06:22 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -740,6 +740,7 @@ class TableSearchMenu(TableMenuABC):
             model.resetFilter()
 
             model.layoutChanged.emit()
+            self._parent.tableChanged.emit()
 
         else:
             getLogger().debug(f'{self.__class__.__name__}.refreshTable: defaultDf is not defined')

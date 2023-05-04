@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 09:15:11 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 14:06:22 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -58,7 +58,8 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     analysisType = None
     _includeInLastSeen = False
     settingsChanged = pyqtSignal(dict)
-    mainTableSortingChanged = pyqtSignal(dict)
+    mainTableSortingChanged = pyqtSignal()
+    mainTableChanged = pyqtSignal()
 
 
     def __init__(self, mainWindow, name='Experiment Analysis', backendHandler=None, **kwds):

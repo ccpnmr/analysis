@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 09:48:36 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 14:06:22 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -82,7 +82,9 @@ class BarPlotPanel(GuiPanel):
         self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
                                                  callback=self._currentCollectionCallback, onceOnly=True)
 
-        self.guiModule.mainTableSortingChanged.connect(self._mainTableSortingChanged)
+        self.guiModule.mainTableChanged.connect(self._mainTableChanged)
+        self.guiModule.mainTableSortingChanged.connect(self._mainTableChanged)
+
 
     def initWidgets(self):
         ## this colour def could go in an higher position as they are same for all possible plots
@@ -159,9 +161,9 @@ class BarPlotPanel(GuiPanel):
                     w.setValue(pos)
         self.updatePanel()
 
-    def _mainTableSortingChanged(self, callDict, *args):
+    def _mainTableChanged(self):
         if self.viewMode == guiNameSpaces.PlotViewMode_SecondaryStructure:
-            getLogger().debug2(f'BarGraph: Sorting disable for the selected view mode.')
+            getLogger().debug2(f'BarGraph-view {self.viewMode}: Sorting/Filtering on the main table does not change the Plot.')
             return
         self.updatePanel()
 
@@ -458,19 +460,25 @@ class BarPlotPanel(GuiPanel):
                                        )
         self.barGraphWidget.xLine.setPen(self._tresholdLineBrush)
 
+        # movAv = dataFrame[self.yColumnName].rolling(window=7).mean()
+        # self.rollingAverageLine = self.barGraphWidget.plotWidget.plotItem.plot(dataFrame.index.values, movAv.values)
+        # self.scatters = self.barGraphWidget.plotWidget.plotItem.plot(dataFrame.index.values, dataFrame, symbol='o', brush=self._aboveBrush)
+
     def toggleErrorBars(self, setVisible=True):
         if self.barGraphWidget.errorBars:
             self.barGraphWidget.errorBars.setVisible(setVisible)
 
+    def toggleBars(self, setVisible=True):
+            self.barGraphWidget.setBarsVisible(setVisible)
+
     def _currentCollectionCallback(self, *args):
         # select collection on table.
         backendHandler = self.guiModule.backendHandler
-
         df = self._plottedDf
         if df is None:
             return
         pids = [co.pid for co in self.current.collections]
-        filtered = df.getByHeader(sv.COLLECTIONPID, pids)
+        filtered =  df[df[sv.COLLECTIONPID].isin(pids)]
         if filtered.empty:
             return
         barNumbers = filtered[sv.INDEX].values

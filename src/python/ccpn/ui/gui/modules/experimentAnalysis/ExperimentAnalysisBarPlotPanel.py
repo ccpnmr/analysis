@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 17:38:48 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 19:17:56 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -270,6 +270,16 @@ class BarPlotPanel(GuiPanel):
             if w:
                 w.select(colourName)
 
+    @property
+    def rollingAverageBrushColour(self):
+        """Returns selected colour name"""
+        value = None
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_RALColour)
+            if w:
+                value = w.getText()
+        return value
+
     def updatePanel(self, *args, **kwargs):
         getLogger().debug('Updating  barPlot panel')
         dataFrame = self.guiModule.getVisibleDataFrame(includeHiddenColumns=True)
@@ -475,7 +485,9 @@ class BarPlotPanel(GuiPanel):
         self.scattersItem = self.barGraphWidget.plotWidget.plotItem.plot(x, y, symbol='o', pen=None)
         windowRollingAverage =  self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_WindowRollingAverage).getValue()
         rollingAverage = calculateRollingAverage(y, windowRollingAverage)
-        self.rollingAverageLine = self.barGraphWidget.plotWidget.plotItem.plot(x, rollingAverage)
+        self._rollingAverageBrush = colourNameToHexDict.get(self.rollingAverageBrushColour, guiNameSpaces.BAR_rollingAvLine)
+
+        self.rollingAverageLine = self.barGraphWidget.plotWidget.plotItem.plot(x, rollingAverage, pen=self._rollingAverageBrush)
 
         self.toggleBars(self._isItemToggledOn(guiNameSpaces.BARITEM))
         self.toggleErrorBars(self._isItemToggledOn(guiNameSpaces.ERRORBARITEM))

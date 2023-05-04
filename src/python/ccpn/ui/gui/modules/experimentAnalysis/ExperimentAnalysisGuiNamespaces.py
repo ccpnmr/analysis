@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 17:38:48 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 19:17:56 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -49,6 +49,7 @@ BAR_aboveBrush = 'CCPNgreen'
 BAR_belowBrush = 'CCPNyellow'
 BAR_untracBrush = 'CCPNpurple'
 BAR_thresholdLine = 'blue'
+BAR_rollingAvLine = 'grey'
 
 ##### SETTINGS  ######
 
@@ -341,6 +342,10 @@ TipText_UntraceableColour = 'Select the colour for for Untraceable Observations.
 WidgetVarName_ThrColour = 'ThresholdColour'
 Label_ThrColour = 'Threshold Line Colour'
 TipText_ThrColour = 'Select the colour for the threshold line in the BarPlot'
+
+WidgetVarName_RALColour = 'RollingAverageColour'
+Label_RALColour = 'Rolling Average Line Colour'
+TipText_RALColour = 'Select the colour for the rolling average line in the BarPlot'
 
 WidgetVarName_MolStrucSeparator = 'MolStructureSeparator'
 Label_MolStrucSeparator = 'Molecular Viewer'

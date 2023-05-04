@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 17:38:48 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 19:17:56 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1069,6 +1069,17 @@ class AppearancePanel(GuiSettingPanel):
                        'tipText': guiNameSpaces.TipText_ThrColour,
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'selectItem': guiNameSpaces.BAR_thresholdLine,
+                       'compoundKwds': {'includeGradients': False,
+                                        }}}),
+            (guiNameSpaces.WidgetVarName_RALColour,
+             {'label': guiNameSpaces.Label_RALColour,
+              'callBack': self._commonCallback,
+              'tipText': guiNameSpaces.TipText_RALColour,
+              'type': compoundWidget.ColourSelectionCompoundWidget,
+              'kwds': {'labelText': guiNameSpaces.Label_RALColour,
+                       'tipText': guiNameSpaces.TipText_RALColour,
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'selectItem': guiNameSpaces.BAR_rollingAvLine,
                        'compoundKwds': {'includeGradients': False,
                                         }}}),
             (guiNameSpaces.WidgetVarName_BarXTickOpt,

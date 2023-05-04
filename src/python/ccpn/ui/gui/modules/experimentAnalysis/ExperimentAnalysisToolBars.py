@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 14:06:22 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 15:53:59 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -260,7 +260,7 @@ class BarPlotToolBar(ExperimentAnalysisPlotToolBar):
                 ('text', 'Toggle Bars'),
                 ('toolTip', 'Toggle the Bars from the plot'),
                 ('icon', Icon('icons/bars-icon')),
-                ('callback', None),
+                ('callback', self._toggleBars),
                 ('enabled', True),
                 ('checkable', True)
                 ))),
@@ -269,7 +269,7 @@ class BarPlotToolBar(ExperimentAnalysisPlotToolBar):
                 ('toolTip', 'Toggle the Scatters from the plot'),
                 ('icon', Icon('icons/Scatters')),
                 ('callback', None),
-                ('enabled', True),
+                ('enabled', False),
                 ('checkable', True)
                 ))),
             ('ErrorBars', od((
@@ -285,7 +285,7 @@ class BarPlotToolBar(ExperimentAnalysisPlotToolBar):
                 ('toolTip',  'Toggle the Rolling Average Line from the plot'),
                 ('icon', Icon('icons/rollingAverage-icon')),
                 ('callback', None),
-                ('enabled', True),
+                ('enabled', False),
                 ('checkable', True)
                 ))),
             )

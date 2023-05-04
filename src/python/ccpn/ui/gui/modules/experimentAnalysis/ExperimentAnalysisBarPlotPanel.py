@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 09:08:52 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-04 09:48:36 +0100 (Thu, May 04, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -466,7 +466,7 @@ class BarPlotPanel(GuiPanel):
         # select collection on table.
         backendHandler = self.guiModule.backendHandler
 
-        df = self.guiModule.getGuiResultDataFrame()
+        df = self._plottedDf
         if df is None:
             return
         pids = [co.pid for co in self.current.collections]

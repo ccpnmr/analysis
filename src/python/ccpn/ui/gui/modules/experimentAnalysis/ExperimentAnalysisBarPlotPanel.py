@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-05 13:50:06 +0100 (Fri, May 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-05 16:08:04 +0100 (Fri, May 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -99,6 +99,8 @@ class BarPlotPanel(GuiPanel):
         self.originAxesPen = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1,
                                                 style=QtCore.Qt.DashLine)
         self.fittingLinePen = pg.functions.mkPen(hexToRgb(getColours()[DIVIDER]), width=0.5, style=QtCore.Qt.DashLine)
+        self.scatterPen = pg.functions.mkPen(colour, width=0.5, style=QtCore.Qt.SolidLine)
+
         self.selectedPointPen = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
         self.selectedLabelPen = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
         self.barGraphWidget = BarGraphWidget(self, application=self.application, backgroundColour=self.backgroundColour,
@@ -496,7 +498,9 @@ class BarPlotPanel(GuiPanel):
         y = dataFrame[self.yColumnName].values
         brushes = dataFrame.get(guiNameSpaces.BRUSHLABEL, pd.Series([], dtype='str')).values
         brushes = [fn.mkBrush(brush) for brush in brushes]
-        self.scattersItem = self.barGraphWidget.plotWidget.plotItem.plot(x, y, symbol='o', pen=None, symbolBrush=brushes)
+        self.scattersItem = self.barGraphWidget.plotWidget.plotItem.plot(x, y, symbol='o', pen=None, symbolPen=self.scatterPen, symbolBrush=brushes) #pen=None will not plot a line connecting scatters
+        self.scattersItem.sigPointsClicked.connect(self._scatterMouseClickEvent)
+
         windowRollingAverage =  self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_WindowRollingAverage).getValue()
         rollingAverage = calculateRollingAverage(y, windowRollingAverage)
         self._rollingAverageBrush = colourNameToHexDict.get(self.rollingAverageBrushColour, guiNameSpaces.BAR_rollingAvLine)
@@ -507,6 +511,15 @@ class BarPlotPanel(GuiPanel):
         self.toggleErrorBars(self._isItemToggledOn(guiNameSpaces.ERRORBARITEM))
         self.toggleScatters(self._isItemToggledOn(guiNameSpaces.SCATTERITEM))
         self.toggleRollingAverage(self._isItemToggledOn(guiNameSpaces.ROLLINGLINEITEM))
+
+    def _scatterMouseClickEvent(self, item, points):
+
+        selectedIndices = []
+        for i in points:
+            x,y = i.pos().x(), i.pos().y()
+            selectedIndices.append(y)
+            self._mouseSingleClickEvent(x,y)
+
 
 
     def toggleErrorBars(self, setVisible=True):
@@ -534,3 +547,13 @@ class BarPlotPanel(GuiPanel):
             return
         barNumbers = filtered[sv.INDEX].values
         self.barGraphWidget._selectBarNumbers(selected=barNumbers)
+        self._selectScatterItems(barNumbers)
+
+    def _selectScatterItems(self, selectedIndices):
+        "Select the scatter item on the plot. Called from current notifier"
+        if self.scattersItem is not None:
+            for i in self.scattersItem.scatter.points():
+                if  i.pos().x() in selectedIndices:
+                    i.setPen(self.selectedPointPen)
+                else:
+                    i.setPen(self.scatterPen)

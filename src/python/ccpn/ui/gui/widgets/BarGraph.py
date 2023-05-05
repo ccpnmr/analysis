@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 09:08:52 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-05 16:08:05 +0100 (Fri, May 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -450,7 +450,6 @@ class CustomViewBox(pg.ViewBox):
             self.selectionBox.hide()
 
     def mouseClickEvent(self, event):
-
         if event.button() == QtCore.Qt.RightButton:
             event.accept()
             self._raiseContextMenu(event)
@@ -536,10 +535,7 @@ class CustomViewBox(pg.ViewBox):
                             label.setSelected(True)
 
     def upDateSelections(self, positions):
-        if self.getLabels():
-            for label in self.getLabels():
-                for position in positions:
-                    print('Not impl')
+        pass
 
     def _resetBoxes(self):
         "Reset/Hide the boxes "
@@ -643,8 +639,6 @@ class CustomViewBox(pg.ViewBox):
                     else:
                         label.hide()
                         label.isBelowThreshold = True
-        else:
-            print('NOT FOUND')
 
     def selectAboveThreshold(self):
         """Reimplement this in the module subclass"""

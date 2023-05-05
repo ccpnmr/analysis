@@ -262,7 +262,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                     self.settings['Current']['MultipletUpdateStatus'] = True
                 self.guiDict['TemporaryWidgets'][widget].setValue(self.guiDict['TemporaryWidgets'][widget].value() + difference)
         else:
-            self.simspec.globalPeakShift(difference)
+            self.simspec.globalShift(difference)
         self.simspec.globalShift = shift
         self.refreshSumSpectrum()
 
@@ -312,7 +312,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         data = pd.DataFrame({'name': self.settings['Current']['metabolite'],
                              'metabolite_id': None,
                              'spectrum_id': None,
-                             'origin': 'template'}, index=[len(self.metabolites.data)])
+                             'origin': 'unknown_signal'}, index=[len(self.metabolites.data)])
         widget.updateDf(data)
         data = {'name': self.settings['Current']['metabolite']}
         row = pd.DataFrame(data, columns=self.metabolites.data.columns, index=[len(self.metabolites.data)])
@@ -336,7 +336,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             scale = 1
             globalShift = 0
             frequency = round(self.settings['Current']['referenceSumSpectrumFrequency']/10)*10
-            if origin != 'template':
+            if origin != 'unknown_signal':
                 simulationData = self.caller.getSimulationData(spectrumId)
                 sampleData = self.caller.getSampleData(simulationData['SpectrumData'].sample_id.iloc[0])
                 spectrumData = simulationData['SpectrumData']
@@ -441,16 +441,66 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets']['GlobalShift'] = widget
         self.settings['Current']['GlobalShift'] = self._getValue(widget)
 
-        if self.simspec.multiplets:
+        if self.simspec.multiplets and origin != 'unknown_signal':
             for index, multipletId in enumerate(self.simspec.multiplets):
                 self.addDoubleSpinbox(index, multipletId)
             if origin == 'bmrb':
                 for widget in [widget for widget in self.guiDict['TemporaryWidgets'] if 'Multiplet' in widget]:
                     self.guiDict['TemporaryWidgets'][widget].setUpdatesEnabled(False)
                     self.guiDict['TemporaryWidgets'][widget].setEnabled(False)
+        else:
+            grid = _addColumn(grid)
+            self.settings['Current']['Grid'] = grid
+            self.settings['Current']['SignalCount'] = 0
+            buttonWidget = Button(parent=self.scrollAreaLayout, text='Add Signal From Scratch', grid=grid, callback=self._addSignalFromScratch)
+            _setWidgetProperties(buttonWidget, heightType='Minimum')
+            self.guiDict['TemporaryWidgets'][f'AddSignal'] = buttonWidget
+
+            grid = _addColumn(grid)
+            buttonWidget = Button(parent=self.scrollAreaLayout, text='Add Signal From Peaks', grid=grid,
+                                  callback=self._addSignalFromPeaks)
+            _setWidgetProperties(buttonWidget, heightType='Minimum')
+            self.guiDict['TemporaryWidgets'][f'AddSignal'] = buttonWidget
         self.project.widgetDict = self.guiDict['TemporaryWidgets']
 
-    def _setupTemplate(self):
+    def _addSignalFromScratch(self):
+        def shiftChange():
+            shift = shiftWidget.value()
+            self.simspec.moveMultiplet(str(count), shift)
+            self.refreshSumSpectrum()
+        def heightChange():
+            height = 10 ** heightWidget.value()
+            self.simspec.scaleMultiplet(str(count), height)
+            self.refreshSumSpectrum()
+        grid = self.settings['Current']['Grid']
+        grid = _addRow(grid)
+        self.settings['Current']['Grid'] = grid
+        count = self.settings['Current']['SignalCount'] + 1
+        self.settings['Current']['SignalCount'] = count
+        self.simspec.multiplets[f'{count}'] = {'center': 0, 'indices': [count-1]}
+        self.simspec.peakList.append((0, 1, self.simspec.width/self.simspec.frequency, str(count)))
+
+        labelWidget = Label(self.scrollAreaLayout, text=f'Signal_{count}', grid=grid)
+        _setWidgetProperties(labelWidget, _setWidth(columnWidths, grid))
+        self.guiDict['TemporaryWidgets'][f'Signal_{count}_label'] = labelWidget
+
+        grid = _addColumn(grid)
+        shiftWidget = DoubleSpinbox(self.scrollAreaLayout, value=0, decimals=4, step=0.0001, grid=grid, gridSpan=(1, 1))
+        shiftWidget.setRange(0, 10)
+        _setWidgetProperties(shiftWidget, _setWidth(columnWidths, grid), hAlign='r')
+        shiftWidget.valueChanged.connect(shiftChange)
+        self.settings['Current'][f'Signal_{count}_Shift'] = self._getValue(shiftWidget)
+        self.guiDict['TemporaryWidgets'][f'Signal_{count}_Shift'] = shiftWidget
+
+        grid = _addColumn(grid)
+        heightWidget = DoubleSpinbox(self.scrollAreaLayout, value=0, decimals=3, step=0.001, grid=grid, gridSpan=(1, 1))
+        heightWidget.setRange(-7, 7)
+        _setWidgetProperties(heightWidget, _setWidth(columnWidths, grid), hAlign='r')
+        heightWidget.valueChanged.connect(heightChange)
+        self.settings['Current'][f'Signal_{count}_Height'] = self._getValue(heightWidget)
+        self.guiDict['TemporaryWidgets'][f'Signal_{count}_Height'] = heightWidget
+
+    def _addSignalFromPeaks(self):
         pass
 
     def addSimSpectrumToList(self, spectrum):

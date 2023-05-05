@@ -285,6 +285,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         limits = (max(spectrum.positions), min(spectrum.positions))
         points = len(spectrum.positions)
         frequency = spectrum.spectrometerFrequencies[0]
+        self.settings['Current']['ActiveSpectrum'] = spectrum
         self.settings['Current']['referenceSumSpectrumLimits'] = limits
         self.settings['Current']['referenceSumSpectrumPoints'] = points
         self.settings['Current']['currentSpectrumId'] = spectrumID
@@ -354,6 +355,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                     self.simspec.setFrequency(frequency)
             else:
                 self.simspec = self.simulator.spectrumFromScratch(frequency=frequency, points=self.settings['Current']['referenceSumSpectrumPoints'], limits=self.settings['Current']['referenceSumSpectrumLimits'])
+                self.simspec.scale = 10
                 self.simulator.buildCcpnObjects(self.simspec, metaboliteName, frequency)
             self.metaboliteSimulations[spectrumId] = self.simspec
             self.addSimSpectrumToList(self.simspec)
@@ -501,7 +503,15 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets'][f'Signal_{count}_Height'] = heightWidget
 
     def _addSignalFromPeaks(self):
-        pass
+        if len(self.settings['Current']['ActiveSpectrum'].multiplets) > 0:
+            peakList = []
+            for i, multiplet in enumerate(self.settings['Current']['ActiveSpectrum'].multiplets):
+                for peak in multiplet.peaks:
+                    peakList.append((peak.position[0], peak.height/(10**self.settings['Current']['Scale']), self.simspec.width/self.simspec.frequency, str(i)))
+        else:
+            peakList = [(peak.position[0], peak.height/(10**self.settings['Current']['Scale']), self.simspec.width/self.simspec.frequency, '1') for peak in self.settings['Current']['ActiveSpectrum'].peaks]
+        self.simspec.peakList = peakList
+        self.simspec.setSpectrumLineshape()
 
     def addSimSpectrumToList(self, spectrum):
         if 'SimulatedSpectra' not in self.settings['Spectra']:

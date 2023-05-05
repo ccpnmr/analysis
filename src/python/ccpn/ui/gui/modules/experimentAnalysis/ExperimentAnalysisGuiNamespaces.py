@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 19:17:56 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-05 13:50:06 +0100 (Fri, May 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ TRIANGLE_DOWN_HTML = '&#9660;'
 BackgroundColour = gs.getColours()[gs.CCPNGLWIDGET_HEXBACKGROUND]
 
 ## Default fallback colours for BarGraph.
+BRUSHLABEL = 'brush'
 BAR_aboveBrushHex = '#1020aa'  # dark blue
 BAR_belowBrushHex = '#FF0000'  # red
 BAR_untracBrushHex = '#b0b0b0'  # light grey

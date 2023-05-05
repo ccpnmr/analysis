@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-13 13:15:04 +0000 (Fri, January 13, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-05-05 13:50:06 +0100 (Fri, May 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -864,6 +864,16 @@ def autoCorrectHexColour(colour, referenceHexColour='#ffffff', addNewColour=True
 def name2Hex(name):
     return colourNameToHexDict.get(name, None)
 
+def splitDataByColours(data, colours):
+    gradientColours = []
+    count = len(colours)
+    groups = np.array_split(np.sort(data), count)
+    for h in data:
+        for group, c in zip(groups, colours):
+            if h in group:
+                gradientColours.append(c)
+    return gradientColours
+
 
 def getGradientBrushByArray(gradientName, yArray):
     """ USed to create a gradient in BarGraph"""
@@ -875,7 +885,6 @@ def getGradientBrushByArray(gradientName, yArray):
     grad = QtGui.QLinearGradient(0, 0, 0, np.std(yArray))
     for colour, colourAt in zip(colourList, z):
         grad.setColorAt(colourAt, QtGui.QColor(colour))
-
     return QtGui.QBrush(grad)
 
 

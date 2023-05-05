@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-05 11:27:52 +0100 (Fri, May 05, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-05 13:50:06 +0100 (Fri, May 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -37,10 +37,13 @@ from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, GUISTRIP_PIVOT, 
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.Font import getFont
 from ccpn.ui.gui.widgets.Label import Label
+from pyqtgraph import functions as fn
 import numpy as np
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
 from ccpn.framework.lib.experimentAnalysis.fitFunctionsLib import calculateRollingAverage
 import pandas as pd
+from functools import partial
+from ccpn.util.Colour import hexToRgb, splitDataByColours
 
 class BarPlotPanel(GuiPanel):
 
@@ -83,8 +86,8 @@ class BarPlotPanel(GuiPanel):
         self._selectCurrentCONotifier = Notifier(self.current, [Notifier.CURRENT], targetName='collections',
                                                  callback=self._currentCollectionCallback, onceOnly=True)
 
-        self.guiModule.mainTableChanged.connect(self._mainTableChanged)
-        self.guiModule.mainTableSortingChanged.connect(self._mainTableChanged)
+        self.guiModule.mainTableChanged.connect(partial(self._mainTableChanged, True))
+        self.guiModule.mainTableSortingChanged.connect(partial(self._mainTableChanged, False))
 
 
     def initWidgets(self):
@@ -170,11 +173,13 @@ class BarPlotPanel(GuiPanel):
                     w.setValue(pos)
         self.updatePanel()
 
-    def _mainTableChanged(self):
+    def _mainTableChanged(self, resetZoom=False):
         if self.viewMode == guiNameSpaces.PlotViewMode_SecondaryStructure:
             getLogger().debug2(f'BarGraph-view {self.viewMode}: Sorting/Filtering on the main table does not change the Plot.')
             return
         self.updatePanel()
+        if resetZoom:
+            self.barGraphWidget.zoomFull()
 
     @property
     def xColumnName(self):
@@ -341,6 +346,7 @@ class BarPlotPanel(GuiPanel):
         # set the index exactly in the same order as given (sorted by Gui Table)
         # dataFrame[sv.ASHTAG] = np.arange(1, len(dataFrame)+1)
         dataFrame.set_index(sv.INDEX, drop=False, inplace=True)
+        self._plottedDf = dataFrame
 
         ## group by threshold value
         aboveDf = dataFrame[dataFrame[yColumnName] >= self.thresholdValue]
@@ -366,6 +372,14 @@ class BarPlotPanel(GuiPanel):
         self._untraceableBrush = colourNameToHexDict.get(self.untraceableBrushColour, guiNameSpaces.BAR_untracBrushHex)
         self._tresholdLineBrush = colourNameToHexDict.get(self.thresholdBrushColour, guiNameSpaces.BAR_thresholdLineHex)
         self._gradientbrushes = colorSchemeTable.get(self.aboveThresholdBrushColour, []) #in case there is one.
+        if len(self._gradientbrushes)>0:
+            _aboveBrush = splitDataByColours(self._aboveY, self._gradientbrushes)
+        else:
+            _aboveBrush = self._aboveBrush
+        self._plottedDf.loc[aboveDf.index, guiNameSpaces.BRUSHLABEL] = _aboveBrush
+        self._plottedDf.loc[belowDf.index, guiNameSpaces.BRUSHLABEL] = self._belowBrush
+        self._plottedDf.loc[untraceableDd.index, guiNameSpaces.BRUSHLABEL] = self._untraceableBrush
+
         index = dataFrame[xColumnName].index
         # get the errors
         errorColumn = f'{yColumnName}{sv._ERR}'
@@ -380,7 +394,6 @@ class BarPlotPanel(GuiPanel):
         self._setTicks(labels, coordinates)
         ## update labels on axes
         self._updateAxisLabels()
-        self._plottedDf = dataFrame
         return True
 
     def _setTicks(self, labels, coordinates):
@@ -479,10 +492,11 @@ class BarPlotPanel(GuiPanel):
                                        )
         self.barGraphWidget.xLine.setPen(self._tresholdLineBrush)
 
-
         x = dataFrame.index.values
         y = dataFrame[self.yColumnName].values
-        self.scattersItem = self.barGraphWidget.plotWidget.plotItem.plot(x, y, symbol='o', pen=None)
+        brushes = dataFrame.get(guiNameSpaces.BRUSHLABEL, pd.Series([], dtype='str')).values
+        brushes = [fn.mkBrush(brush) for brush in brushes]
+        self.scattersItem = self.barGraphWidget.plotWidget.plotItem.plot(x, y, symbol='o', pen=None, symbolBrush=brushes)
         windowRollingAverage =  self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_WindowRollingAverage).getValue()
         rollingAverage = calculateRollingAverage(y, windowRollingAverage)
         self._rollingAverageBrush = colourNameToHexDict.get(self.rollingAverageBrushColour, guiNameSpaces.BAR_rollingAvLine)

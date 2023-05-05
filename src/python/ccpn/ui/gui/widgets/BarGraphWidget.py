@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 14:06:22 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-05 13:50:06 +0100 (Fri, May 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -202,8 +202,8 @@ class BarGraphWidget(Widget):
         xs, ys = self.getPlotData()
         if len(xs) == 0:
             return
-        xMin, xMax = int(np.min(xs)), int(np.max(xs))
-        yMin, yMax = np.min(ys), np.max(ys)
+        xMin, xMax = int(np.nanmin(xs)), int(np.nanmax(xs))
+        yMin, yMax = np.nanmin(ys), np.nanmax(ys)
         if yMin > 0:
             yMin = 0
         else:
@@ -262,8 +262,8 @@ class BarGraphWidget(Widget):
             filtered = xAll[masked.mask]
             # filter for only the visible range.
             if len(filtered)>0:
-                _max = np.max(filtered)
-                _min = np.min(filtered)
+                _max = np.nanmax(filtered)
+                _min = np.nanmin(filtered)
                 self.plotWidget.setXRange(_min, _max)
             else:
                 self.zoomFull()
@@ -281,13 +281,13 @@ class BarGraphWidget(Widget):
             # filter for only the visible range.
             masked = np.ma.masked_inside(xAll, xm, xM)
             filtered = yAll[masked.mask]
-            yMin = np.min(filtered)
+            yMin = np.nanmin(filtered)
             if yMin > 0:
                 yMin = 0
             else:
                 yMin += yMin / 2
             if len(filtered) > 0:
-                self.plotWidget.setYRange(yMin,  np.max(filtered))
+                self.plotWidget.setYRange(yMin,  np.nanmax(filtered))
             else:
                 self.zoomFull()
 

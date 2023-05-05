@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-04 09:08:53 +0100 (Thu, May 04, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-05 11:27:52 +0100 (Fri, May 05, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -447,8 +447,11 @@ class TableABC(QtWidgets.QTableView):
                     selModel.blockSignals(False)
                     self.blockSignals(False)
 
+            sortColumnName = None
+            if model._sortColumn is not None:
+                sortColumnName = self.headerColumnMenu.columnTexts[model._sortColumn]
             self.sortingChanged.emit({
-                                                    'sortColumnName': self.headerColumnMenu.columnTexts[model._sortColumn],
+                                                    'sortColumnName': sortColumnName,
                                                     'sortColumnIndex': model._sortColumn,
                                                     'oldSort': model._oldSortIndex,
                                                     'newSort': model._sortIndex,

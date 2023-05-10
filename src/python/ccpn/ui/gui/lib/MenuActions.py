@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-28 15:18:45 +0100 (Tue, March 28, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-10 19:09:58 +0100 (Wed, May 10, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -36,6 +36,7 @@ from ccpn.core.Note import Note
 from ccpn.core.Sample import Sample
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.NmrChain import NmrChain
+from ccpn.core.NmrResidue import NmrResidue, MoveToEnd
 from ccpn.core.Chain import Chain
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.RestraintTable import RestraintTable
@@ -46,6 +47,7 @@ from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
 from ccpn.ui.gui.widgets.Font import setWidgetFont
+from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.popups.ChainPopup import ChainPopup
 from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListEditor
 from ccpn.ui.gui.popups.ComplexEditorPopup import ComplexEditorPopup
@@ -821,6 +823,42 @@ class _openItemNmrChainTable(OpenItemABC):
 class _openItemNmrResidueItem(OpenItemABC):
     objectArgumentName = 'nmrResidue'
     hasOpenMethod = False
+
+    def _openContextMenu(self, parentWidget, position, objs, deferExec=False):
+        """Open a context menu.
+        """
+        moveToHeadIcon = Icon('icons/move-to-head')
+        moveToTailIcon = Icon('icons/move-to-tail')
+
+        nmrResidue = objs[0]
+        contextMenu = super()._openContextMenu(parentWidget, position, objs, deferExec=True)
+
+        # add new actions to move the nmrResidue to the head/tail
+        actionToHead = contextMenu.addAction(moveToHeadIcon, 'Move nmrResidue to Head', partial(nmrResidue.mainNmrResidue.moveToEnd, MoveToEnd.HEAD))
+        actionToTail = contextMenu.addAction(moveToTailIcon, 'Move nmrResidue to Tail', partial(nmrResidue.mainNmrResidue.moveToEnd, MoveToEnd.TAIL))
+
+        if (_actions := contextMenu.actions()) and len(_actions) > 2:
+            _topMenuItem = _actions[0]
+            _topSeparator = contextMenu.insertSeparator(_topMenuItem)
+
+            # move new actions to the top of the existing actions
+            contextMenu.insertActions(_topMenuItem, [actionToHead, actionToTail, _topSeparator])
+
+        actionToHead.setEnabled(False)
+        actionToTail.setEnabled(False)
+        if nmrResidue.nmrChain.isConnected:
+            mainRess = nmrResidue.nmrChain.mainNmrResidues
+            if len(mainRess) > 1 and nmrResidue.mainNmrResidue in mainRess:
+                ind = mainRess.index(nmrResidue.mainNmrResidue)
+
+                # enable if the first/last mainNmrResidue
+                if ind == 0:
+                    actionToTail.setEnabled(True)
+                elif ind == len(mainRess) - 1:
+                    actionToHead.setEnabled(True)
+
+        contextMenu.move(position)
+        contextMenu.exec_()
 
 
 class _openItemNmrAtomItem(OpenItemABC):

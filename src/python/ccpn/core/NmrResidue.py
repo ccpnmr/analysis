@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-19 15:36:53 +0100 (Wed, April 19, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-10 19:09:58 +0100 (Wed, May 10, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -41,10 +41,16 @@ from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, \
     renameObject, undoBlock
 from ccpn.util.Common import makeIterableList
 from ccpn.util.Logging import getLogger
+from ccpn.util.DataEnum import DataEnum
 
 
 # Value used for sorting with no offset - puts no_offset just before offset +0
 SORT_NO_OFFSET = -0.1
+
+
+class MoveToEnd(DataEnum):
+    HEAD = 0, 'head'
+    TAIL = 1, 'tail'
 
 
 # ASSIGNEDPEAKSCHANGED = '_assignedPeaksChanged'
@@ -957,6 +963,31 @@ class NmrResidue(AbstractWrapperObject):
         #     apiResonanceGroup.resetResidueType(None)
         self.rename()
 
+    def moveToEnd(self, end: typing.Union[int, MoveToEnd] = MoveToEnd.TAIL):
+        """Move an nmrResidue from one end of a connected chain to the other.
+        """
+        if not self.nmrChain.isConnected:
+            raise RuntimeError(f'{self} does not belong to a connected nmrChain.')
+        if not isinstance(end, (int, MoveToEnd)):
+            raise TypeError(f'end must be of type {MoveToEnd.__class__.__name__} or int {list(MoveToEnd.values())}')
+        if isinstance(end, int):
+            if end not in MoveToEnd.values():
+                raise TypeError(f'end must be of type {MoveToEnd.__class__.__name__} or int {list(MoveToEnd.values())}')
+
+            # change to the enum-type for later
+            end = MoveToEnd(end)
+
+        nmrs = self.nmrChain.mainNmrResidues
+        ind = nmrs.index(self.mainNmrResidue)
+
+        if end == MoveToEnd.HEAD and ind != len(nmrs) - 1:
+            raise RuntimeError(f'{self} is not at the end of a connected nmrChain.')
+        elif end == MoveToEnd.TAIL and ind != 0:
+            raise RuntimeError(f'{self} is not at the head of a connected nmrChain.')
+
+        with undoBlock():
+            self._wrappedData.moveDirectNmrChain(self.nmrChain._wrappedData, end.description)
+
     @logCommand(get='self')
     def moveToNmrChain(self, newNmrChain: typing.Union['NmrChain', str] = 'NC:@-', sequenceCode: str = None, residueType: str = None):
         """Move residue to newNmrChain, breaking connected NmrChain if necessary.
@@ -1219,19 +1250,22 @@ class NmrResidue(AbstractWrapperObject):
         apiNmrChain = self._wrappedData.directNmrChain
         if apiNmrChain and apiNmrChain.isConnected:
             stretch = tuple(apiNmrChain.mainResonanceGroups)
-            atHeadOfChain = True if len(stretch) > 1 and stretch[0] is self._wrappedData else False
+            atHeadOfChain = True if len(stretch) > 1 and stretch[0].mainResonanceGroup is self._wrappedData else False
 
-        if not atHeadOfChain:
-            with undoBlock():
-                # remove all the mmrAtoms from their associated chemicalShifts
-                # - clearing before the delete handles the notifiers nicely
-                _shs = [sh for nmrAt in self.nmrAtoms for sh in nmrAt.chemicalShifts]
-                for sh in _shs:
-                    sh.nmrAtom = None
-                super().delete()
+        with undoBlock():
+            if atHeadOfChain:
+                # can be deleted from the end
+                self.moveToEnd()
 
-        else:
-            raise ValueError('Cannot delete nmrResidues from the head of a connected chain.')
+            # remove all the mmrAtoms from their associated chemicalShifts
+            # - clearing before the delete handles the notifiers nicely
+            _shs = [sh for nmrAt in self.nmrAtoms for sh in nmrAt.chemicalShifts]
+            for sh in _shs:
+                sh.nmrAtom = None
+            super().delete()
+
+            # else:
+            #     raise ValueError('Cannot delete nmrResidues from the head of a connected chain.')
             # # disconnect and then delete
             # nextNmrResidue = self.project._data2Obj[stretch[1]]
             # removeNmrChain = nextNmrResidue.disconnectPrevious()
@@ -1609,6 +1643,7 @@ Project._setupApiNotifier(_renameNmrResidue, ApiResonanceGroup, 'setDirectNmrCha
 Project._setupApiNotifier(_renameNmrResidue, ApiResonanceGroup, 'setAssignedResidue')
 del _renameNmrResidue
 
+
 # # Rename notifiers put in to ensure renaming of NmrAtoms:
 # className = ApiResonanceGroup._metaclass.qualifiedName()
 # Project._apiNotifiers.extend(
@@ -1616,3 +1651,10 @@ del _renameNmrResidue
 #          ('_finaliseApiRename', {}, className, 'addResonance'),
 #          )
 #         )
+
+def main():
+    val = MoveToEnd.HEAD.value
+
+
+if __name__ == '__main__':
+    main()

@@ -240,6 +240,8 @@ from ccpn.framework.PathsAndUrls import \
     userCcpnDataPath, \
     CCPN_BACKUPS_DIRECTORY
 
+from ccpn.ui.gui.guiSettings import consoleStyle
+
 
 #--------------------------------------------------------------------------------------------
 # definitions
@@ -419,6 +421,8 @@ class TopObject(XmlLoaderABC):
         if self.apiTopObject is None:
             _apiTopObjects = forceGetattr(self.root.memopsRoot, 'topObjects')
             self.apiTopObject = _apiTopObjects.get(self.guid)
+            if not self.apiTopObject:
+                getLogger().debug(f'{consoleStyle.fg.darkyellow}Undefined apiTopObject {self.guid}{consoleStyle.reset}')
 
         _stack = self.root.loadingStack
         _stack.append(self)
@@ -442,7 +446,7 @@ class TopObject(XmlLoaderABC):
         """Load api topObject from self.path
         """
         if not self.path.exists():
-            raise FileNotFoundError(f'Failed to load "{self.path}": file does not exist')
+            raise FileNotFoundError(f'Failed to load {self.path!r}: file does not exist')
 
         if not self.isReading:
             self.isReading += 1
@@ -488,7 +492,9 @@ class TopObject(XmlLoaderABC):
         """Save the apiTopObject to the xml file defined by self.path
         """
         if self.apiTopObject is None:
-            raise RuntimeError('Cannot save: undefined apiTopObject')
+            getLogger().warning(f'{consoleStyle.fg.red}Cannot save {self._path}: undefined apiTopObject{consoleStyle.reset}')
+            return
+
         if self.apiTopObject.isDeleted:
             # ignore deleted objects
             self.logger.debug2(f'ignoring deleted object {self.apiTopObject}')
@@ -515,7 +521,8 @@ class TopObject(XmlLoaderABC):
         """Save the apiTopObject to the xml file defined by self.path / CCPN_BACKUPS_DIRECTORY
         """
         if self.apiTopObject is None:
-            raise RuntimeError('Cannot save: undefined apiTopObject')
+            getLogger().warning(f'{consoleStyle.fg.red}Cannot save {self._path}: undefined apiTopObject{consoleStyle.reset}')
+            return
 
         if self.apiTopObject.isDeleted:
             # ignore deleted objects
@@ -1726,6 +1733,7 @@ def loadFromStream(stream, topObjId=None, topObject=None, partialLoad=False):
         gc.disable()
 
     try:
+        getLogger().debug2(f'{consoleStyle.fg.darkblue}Loading stream {topObject}{consoleStyle.reset}')
         result = XmlImp.loadFromStream(stream,
                                        topObjId=topObjId,
                                        topObject=topObject,

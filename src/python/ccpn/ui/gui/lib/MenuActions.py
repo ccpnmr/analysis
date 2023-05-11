@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-10 19:09:58 +0100 (Wed, May 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-11 12:23:34 +0100 (Thu, May 11, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -484,7 +484,7 @@ class OpenItemABC():
                                           self.mainWindow, self.getObj(), self.node))
         if any(any(sp.isTimeDomains) for sp in spectra):  # 3.1.0 alpha feature from macro.
             contextMenu.addAction('Split Planes to SpectrumGroup', partial(self._splitPlanesToSpectrumGroup, objs))
-        contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
+        contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
         self._addCollectionMenu(contextMenu, objs)
         contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
         canBeCloned = all(hasattr(obj, 'clone') for obj in objs)
@@ -770,7 +770,7 @@ class _openItemChemicalShiftListTable(OpenItemABC):
         contextMenu.addSeparator()
         contextMenu.addAction('Simulate Spectrum', partial(self._openSimulateSpectrumFromCSLPopup, objs))
         contextMenu.addSeparator()
-        contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
+        contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
         self._addCollectionMenu(contextMenu, objs)
         contextMenu.addAction('Duplicate', partial(self._duplicateAction, objs))
         contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
@@ -834,8 +834,8 @@ class _openItemNmrResidueItem(OpenItemABC):
         contextMenu = super()._openContextMenu(parentWidget, position, objs, deferExec=True)
 
         # add new actions to move the nmrResidue to the head/tail
-        actionToHead = contextMenu.addAction(moveToHeadIcon, 'Move nmrResidue to Head', partial(nmrResidue.mainNmrResidue.moveToEnd, MoveToEnd.HEAD))
-        actionToTail = contextMenu.addAction(moveToTailIcon, 'Move nmrResidue to Tail', partial(nmrResidue.mainNmrResidue.moveToEnd, MoveToEnd.TAIL))
+        actionToHead = contextMenu.addAction(moveToHeadIcon, 'Move NmrResidue to Front', partial(nmrResidue.mainNmrResidue.moveToEnd, MoveToEnd.HEAD))
+        actionToTail = contextMenu.addAction(moveToTailIcon, 'Move NmrResidue to End', partial(nmrResidue.mainNmrResidue.moveToEnd, MoveToEnd.TAIL))
 
         if (_actions := contextMenu.actions()) and len(_actions) > 2:
             _topMenuItem = _actions[0]
@@ -876,7 +876,7 @@ class _openItemAtomItem(OpenItemABC):
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
-        contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
+        contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
         self._addCollectionMenu(contextMenu, objs)
 
         contextMenu.addSeparator()
@@ -901,7 +901,7 @@ class _openItemResidueTable(OpenItemABC):
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
-        contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
+        contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
         self._addCollectionMenu(contextMenu, objs)
 
         contextMenu.addSeparator()

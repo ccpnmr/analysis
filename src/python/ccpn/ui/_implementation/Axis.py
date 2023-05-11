@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:40 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-05-11 19:16:26 +0100 (Thu, May 11, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -49,8 +49,8 @@ class Axis(AbstractWrapperObject):
     # Attribute it necessary as subclasses must use superclass className
     className = 'Axis'
 
-    _parentClassName = 'Strip'
     _parentClass = Strip
+    _parentClassName = Strip.__class__.__name__
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'axes'
@@ -63,7 +63,7 @@ class Axis(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiStripAxis._metaclass.qualifiedName()
 
-   #-----------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------
 
     def __init__(self, project, wrappedData):
         super().__init__(project, wrappedData)
@@ -154,7 +154,7 @@ class Axis(AbstractWrapperObject):
 
     @unit.setter
     def unit(self, value: str):
-        options = tuple(list(AXISUNITS) + [AXISUNIT_NUMBER]) # To allow for 1D intensity axis unit
+        options = tuple(list(AXISUNITS) + [AXISUNIT_NUMBER])  # To allow for 1D intensity axis unit
         if value not in options:
             raise ValueError('Axis.unit: invalid value "%s", should be one of %r' %
                              (value, options)
@@ -199,6 +199,7 @@ class Axis(AbstractWrapperObject):
     def delete(self):
         """Overrides normal delete"""
         raise ValueError("Axes cannot be deleted independently")
+
 
 #=========================================================================================
 # Registering

@@ -5,7 +5,7 @@ Currently this is peaks and multiplets
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-11-30 11:22:05 +0000 (Wed, November 30, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2023-05-11 19:16:27 +0100 (Thu, May 11, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -306,6 +306,39 @@ class GLLabelling():
 
         return r, w, symbolType, symbolWidth, pr, pw
 
+    def _getLabelOffsets(self, spectrumView, tx, ty):
+        """return the required r, w, symbolWidth for the current screen scaling.
+        """
+        symbolType = self.strip.symbolType
+        symbolWidth = self.strip.symbolSize / 2.0
+
+        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        vPP = spectrumView.spectrum.ppmPerPoints
+
+        # try:
+        #     r = tx * abs(self._GLParent.pixelX)  # change from pixels to ppm
+        #     pr = r / vPP[pIndex[0]]              # change from ppm to points
+        # except Exception:
+        #     pr = r
+        # try:
+        #     w = ty * abs(self._GLParent.pixelY)
+        #     pw = w / vPP[pIndex[1]]
+        # except Exception:
+        #     pw = w
+
+        try:
+            r = tx  #* np.sign(self._GLParent.pixelX)  # change from pixels to ppm
+            pr = r / vPP[pIndex[0]]  # change from ppm to points
+        except Exception:
+            pr = r
+        try:
+            w = ty  #* np.sign(self._GLParent.pixelY)
+            pw = w / vPP[pIndex[1]]
+        except Exception:
+            pw = w
+
+        return r, w, symbolType, symbolWidth, pr, pw
+
     def _appendLabel(self, spectrumView, objListView, stringList, obj):
         """Append a new label to the end of the list
         """
@@ -343,7 +376,11 @@ class GLLabelling():
         except Exception:
             alias = 0
 
-        _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
+        if textOffset := obj.getTextOffset(objListView):
+            tx, ty = textOffset
+            _, _, symbolType, symbolWidth, r, w = self._getLabelOffsets(spectrumView, tx, ty)
+        else:
+            _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
         stringOffset = None
         if symbolType in (1, 2):
@@ -420,7 +457,11 @@ class GLLabelling():
         except Exception:
             alias = 0
 
-        _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
+        if textOffset := obj.getTextOffset(objListView):
+            tx, ty = textOffset
+            _, _, symbolType, symbolWidth, r, w = self._getLabelOffsets(spectrumView, tx, ty)
+        else:
+            _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
         stringOffset = None
         if symbolType in (1, 2):
@@ -1483,7 +1524,12 @@ class GLLabelling():
         if symbolType == 0 or symbolType == 3:  # a cross/plus
 
             for drawStr in drawList.stringList:
-                drawStr.setStringOffset((r, w))
+                if textOffset := drawStr.stringObject.getTextOffset(objListView):
+                    tx, ty = textOffset
+                    _, _, _, _, tr, tw = self._getLabelOffsets(spectrumView, tx, ty)
+                    drawStr.setStringOffset((tr, tw))
+                else:
+                    drawStr.setStringOffset((r, w))
                 drawStr.updateTextArrayVBOAttribs()
 
         elif symbolType == 1:
@@ -1708,29 +1754,29 @@ class GLLabelling():
             return
 
         for olv in [(spectrumView, objListView) for spectrumView in self._ordering if not spectrumView.isDeleted
-                        for objListView in self.listViews(spectrumView) if objListView.isDeleted and self._objIsInVisiblePlanesCache.get(objListView)
-                       ]:
+                    for objListView in self.listViews(spectrumView) if objListView.isDeleted and self._objIsInVisiblePlanesCache.get(objListView)
+                    ]:
             del self._objIsInVisiblePlanesCache[olv]
 
         objListViews = [(spectrumView, objListView) for spectrumView in self._ordering if not spectrumView.isDeleted
                         for objListView in self.listViews(spectrumView) if not objListView.isDeleted
-                       ]
+                        ]
 
         for spectrumView, objListView in objListViews:
 
-        # # list through the valid peakListViews attached to the strip - including undeleted
-        # for spectrumView in self._ordering:  # strip.spectrumViews:
-        #
-        #     if spectrumView.isDeleted:
-        #         continue
-        #
-        #     # for peakListView in spectrumView.peakListViews:
-        #     for objListView in self.listViews(spectrumView):  # spectrumView.peakListViews:
-        #
-        #         if objListView.isDeleted:
-        #             if objListView in self._objIsInVisiblePlanesCache:
-        #                 del self._objIsInVisiblePlanesCache[objListView]
-        #             continue
+            # # list through the valid peakListViews attached to the strip - including undeleted
+            # for spectrumView in self._ordering:  # strip.spectrumViews:
+            #
+            #     if spectrumView.isDeleted:
+            #         continue
+            #
+            #     # for peakListView in spectrumView.peakListViews:
+            #     for objListView in self.listViews(spectrumView):  # spectrumView.peakListViews:
+            #
+            #         if objListView.isDeleted:
+            #             if objListView in self._objIsInVisiblePlanesCache:
+            #                 del self._objIsInVisiblePlanesCache[objListView]
+            #             continue
 
             if objListView.buildSymbols:
                 objListView.buildSymbols = False
@@ -1754,7 +1800,7 @@ class GLLabelling():
         _buildList = []
         objListViews = [(spectrumView, objListView) for spectrumView in self._ordering if not spectrumView.isDeleted
                         for objListView in self.listViews(spectrumView) if not objListView.isDeleted
-                       ]
+                        ]
 
         for sView, olv in objListViews:
             # spectrumView not deleted
@@ -2255,7 +2301,11 @@ class GL1dLabelling():
         if stringList and obj in (sl.stringObject for sl in stringList):
             return
 
-        _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
+        if textOffset := obj.getTextOffset(objListView):
+            tx, ty = textOffset
+            _, _, symbolType, symbolWidth, r, w = self._getLabelOffsets(spectrumView, round(tx), round(ty))
+        else:
+            _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
         try:
@@ -2314,7 +2364,12 @@ class GL1dLabelling():
             _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
             for drawStr in drawList.stringList:
-                drawStr.setStringOffset((r, w))
+                if textOffset := drawStr.stringObject.getTextOffset(objListView):
+                    tx, ty = textOffset
+                    _, _, _, _, tr, tw = self._getLabelOffsets(spectrumView, tx, ty)
+                    drawStr.setStringOffset((tr, tw))
+                else:
+                    drawStr.setStringOffset((r, w))
                 drawStr.updateTextArrayVBOAttribs()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

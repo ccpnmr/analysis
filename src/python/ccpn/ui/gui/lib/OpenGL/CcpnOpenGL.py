@@ -100,7 +100,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
     makeDragEvent
 
 from ccpn.ui.gui.lib.OpenGL import GL
-import OpenGL.arrays.vbo as VBO
+# import OpenGL.arrays.vbo as VBO
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
@@ -116,7 +116,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLPeak import GLpeakNdLabelling, GLpeak1dLab
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLIntegral import GLintegralNdLabelling, GLintegral1dLabelling
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
-from ccpn.util.Common import makeIterableList
+# from ccpn.util.Common import makeIterableList
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from typing import Tuple
 from ccpn.util.Constants import AXIS_FULLATOMNAME
@@ -125,7 +125,7 @@ from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking, undoStackBlocking
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib import Pid
-from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _setEnabledAllItems
+from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _setEnabledAllItems, _ARRANGELABELS, _RESETLABELS
 
 
 UNITS_PPM = 'ppm'
@@ -6344,6 +6344,11 @@ class CcpnGLWidget(QOpenGLWidget):
             strip._estimateVolumesItemSelected.setVisible(False)
             if PEAKSELECT not in selectedDict:
                 _setEnabledAllItems(strip._selectedPeaksMenu, True if self.current.peaks else False)
+
+                # keep arrange/reset items enabled
+                for name in [_ARRANGELABELS, _RESETLABELS]:
+                    if act := strip._selectedPeaksMenu.getActionByName(name):
+                        act.setEnabled(True)
 
             # check other menu items before raising menus
             strip._addItemsToNavigateToCursorPosMenu()

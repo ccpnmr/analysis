@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 20:43:40 +0100 (Mon, October 11, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2023-05-11 19:16:26 +0100 (Thu, May 11, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -72,22 +72,19 @@ class PMIListABC(AbstractWrapperObject):
 
     # Special error-raising functions as this is a container for a list
     def __iter__(self):
-        raise TypeError("'%s object is not iterable - for a list of %s use %s.%s" % (self.className,
-                                                                                     self._primaryChildClass._pluralLinkName,
-                                                                                     self.className,
-                                                                                     self._primaryChildClass._pluralLinkName))
+        raise TypeError(f"'{self.className} object is not iterable - "
+                        f"for a list of {self._primaryChildClass._pluralLinkName} "
+                        f"use {self.className}.{self._primaryChildClass._pluralLinkName}")
 
     def __getitem__(self, index):
-        raise TypeError("'%s object does not support indexing - for a list of %s use %s.%s" % (self.className,
-                                                                                               self._primaryChildClass._pluralLinkName,
-                                                                                               self.className,
-                                                                                               self._primaryChildClass._pluralLinkName))
+        raise TypeError(f"'{self.className} object does not support indexing - "
+                        f"for a list of {self._primaryChildClass._pluralLinkName} "
+                        f"use {self.className}.{self._primaryChildClass._pluralLinkName}")
 
     def __len__(self):
-        raise TypeError("'%s object has no length - for a list of %s use %s.%s" % (self.className,
-                                                                                   self._primaryChildClass._pluralLinkName,
-                                                                                   self.className,
-                                                                                   self._primaryChildClass._pluralLinkName))
+        raise TypeError(f"'{self.className} object has no length - "
+                        f"for a list of {self._primaryChildClass._pluralLinkName} "
+                        f"use {self.className}.{self._primaryChildClass._pluralLinkName}")
 
     def _setPrimaryChildClass(self):
         """Set the primary classType for the child list attached to this container
@@ -151,9 +148,9 @@ class PMIListABC(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def symbolColour(self, value: str):
         if not isinstance(value, str):
-            raise TypeError("symbolColour must be a hex colour string (e.g. '#ABCDEF' or '%s')" % INHERITCOLOUR)
+            raise TypeError(f"symbolColour must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
         if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
-            raise ValueError("symbolColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
+            raise ValueError(f"symbolColour {value} not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
 
         value = value.upper()
         self._wrappedData.symbolColour = value
@@ -170,9 +167,9 @@ class PMIListABC(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def textColour(self, value: str):
         if not isinstance(value, str):
-            raise TypeError("textColour must be a hex colour string (e.g. '#ABCDEF' or '%s')" % INHERITCOLOUR)
+            raise TypeError(f"textColour must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
         if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
-            raise ValueError("textColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
+            raise ValueError(f"textColour {value} not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
 
         value = value.upper()
         self._wrappedData.textColour = value
@@ -199,9 +196,9 @@ class PMIListABC(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def meritColour(self, value: str):
         if not isinstance(value, str):
-            raise TypeError("meritColour must be a hex colour string (e.g. '#ABCDEF' or '%s')" % INHERITCOLOUR)
+            raise TypeError(f"meritColour must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
         if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
-            raise ValueError("meritColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
+            raise ValueError(f"meritColour {value} not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
 
         value = value.upper()
         self._setInternalParameter(self._MERITCOLOUR, value)
@@ -251,9 +248,9 @@ class PMIListABC(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def lineColour(self, value: str):
         if not isinstance(value, str):
-            raise TypeError("lineColour must be a hex colour string (e.g. '#ABCDEF' or '%s')" % INHERITCOLOUR)
+            raise TypeError(f"lineColour must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
         if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
-            raise ValueError("lineColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
+            raise ValueError(f"lineColour {value} not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
 
         value = value.upper()
         self._setInternalParameter(self._LINECOLOUR, value)

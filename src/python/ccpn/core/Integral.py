@@ -360,7 +360,7 @@ class Integral(AbstractWrapperObject):
                         x = spectrum.positions
                         index01 = np.where((x <= limit2) & (x >= limit1))
                         values = spectrum.intensities[index01]
-                        if len(values)>0 and all(values):
+                        if len(values) > 0 and all(values):
                             self.value = float(trapz(values))
 
                             # small change, only calculate if there is a peak
@@ -397,6 +397,11 @@ class Integral(AbstractWrapperObject):
         # else:
         #   raise ValueError("The slopes value %s does not match the dimensionality of the spectrum, %s"
         #                    % value, len(peakDims))
+
+    @property
+    def integralViews(self) -> list:
+        """STUB: hot-fixed later"""
+        return []
 
     #=========================================================================================
     # Implementation functions
@@ -495,10 +500,10 @@ def _newIntegral(self: IntegralList,
     :return a new Integral instance.
     """
 
-    dd = {'volume': value, 'volumeError': valueError, 'offset': offset, 'slopes': slopes,
+    dd = {'volume'    : value, 'volumeError': valueError, 'offset': offset, 'slopes': slopes,
           'figOfMerit': figureOfMerit, 'constraintWeight': constraintWeight,
           'annotation': annotation, 'details': comment,
-          'limits': limits, 'pointLimits': pointLimits}
+          'limits'    : limits, 'pointLimits': pointLimits}
 
     if not constraintWeight: del dd['constraintWeight']
     if not offset: del dd['offset']

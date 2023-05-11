@@ -73,7 +73,7 @@ def _calculateCenterOfMass(multiplet):
                 position = (sum([peak.position[0] for peak in _peaks]) / _lenPeaks,
                             sum([peak.height for peak in _peaks]) / _lenPeaks)
             return position
-    except:
+    except Exception:
         return None
 
 
@@ -460,6 +460,11 @@ class Multiplet(AbstractWrapperObject):
         # quickest for the moment - need to imagine case where peaks are not from the same aliased region
         if self.peaks:
             return self.peaks[0].aliasing
+
+    @property
+    def multipletViews(self) -> list:
+        """STUB: hot-fixed later"""
+        return []
 
     #=========================================================================================
     # Implementation functions

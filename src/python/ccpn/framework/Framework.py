@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-23 15:27:39 +0100 (Tue, May 23, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-11 19:16:26 +0100 (Thu, May 11, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -743,7 +743,7 @@ class Framework(NotifierBase, GuiBase):
 
         try:
             if self.preferences.general.restoreLayoutOnOpening and \
-                                mainWindow.moduleLayouts:
+                    mainWindow.moduleLayouts:
                 Layout.restoreLayout(mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
         except Exception as e:
             getLogger().warning(f'Impossible to restore Layout {e}')
@@ -2213,6 +2213,24 @@ class Framework(NotifierBase, GuiBase):
                 popup.exec_()
             except Exception as es:
                 getLogger().warning(f'Cannot show popup: {es}')
+
+    def arrangeLabels(self):
+        """Auto-arrange the peak/multiplet labels to minimise any overlaps.
+        """
+        if (strp := self.current.strip) is None:
+            getLogger().warning('No strip selected')
+
+        else:
+            strp.spectrumDisplay.arrangeLabels()
+
+    def resetLabels(self):
+        """Reset arrangement of peak/multiplet labels.
+        """
+        if (strp := self.current.strip) is None:
+            getLogger().warning('No strip selected')
+
+        else:
+            strp.spectrumDisplay.resetLabels()
 
     def showReorderPeakListAxesPopup(self):
         """

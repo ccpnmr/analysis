@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:48:27 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-05-11 19:16:27 +0100 (Thu, May 11, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -26,18 +26,9 @@ __date__ = "$Date: 2017-03-22 15:13:45 +0000 (Wed, March 22, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore, QtGui
-from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
-from ccpn.util.OrderedSet import OrderedSet
-from collections import OrderedDict
-
 from ccpn.core.Project import Project
+from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
 from ccpn.ui._implementation.PeakListView import PeakListView as _CoreClassPeakListView
-
-
-NULL_RECT = QtCore.QRectF()
-IDENTITY = QtGui.QTransform()
-IDENTITY.reset()
 
 
 class GuiPeakListView(GuiListViewABC):
@@ -46,6 +37,13 @@ class GuiPeakListView(GuiListViewABC):
 
     def __init__(self):
         super().__init__()
+
+        vPeaks = {view.peak for view in self._wrappedData.peakListView.peakViews}
+        # create peakViews that don't already exist for all peaks in peakList
+        for obj in self.peakList.peaks:
+            apiPeak = obj._wrappedData
+            if apiPeak not in vPeaks:
+                self._wrappedData.peakListView.newPeakView(peak=apiPeak, peakSerial=0)
 
 
 class PeakListView(_CoreClassPeakListView, GuiPeakListView):
@@ -57,131 +55,6 @@ class PeakListView(_CoreClassPeakListView, GuiPeakListView):
 
         # hack for now
         self.application = project.application
-        GuiPeakListView.__init__(self)
         self._init()
 
-# #=========================================================================================
-# # Registering
-# #=========================================================================================
-#
-# def _factoryFunction(project: Project, wrappedData):
-#     """create PeakListView
-#     """
-#     return PeakListView(project, wrappedData)
-#
-# # _CoreClassPeakListView._registerCoreClass(factoryFunction=_factoryFunction)
-#
-# #=========================================================================================
-
-#GWV: moved to core.lib.peakUtils
-
-# def _getPeakId(peak):
-#     """Get the current id for the peak
-#     """
-#     return peak.id
-#
-# def _getPeakAnnotation(peak):
-#     """Get the current annotation for the peak
-#     """
-#     return peak.annotation
-#
-# def _getPeakClusterId(peak):
-#     """Get the current clusterId for the peak
-#     """
-#     v = peak.clusterId
-#     return str(v) if v else None
-#
-# def _getPeakLabelling(peak):
-#     """Create the labelling for Pids method
-#     """
-#     peakLabel = []
-#
-#     for dimension in range(peak.peakList.spectrum.dimensionCount):
-#         pdNA = peak.dimensionNmrAtoms
-#
-#         pdNADim = [atom for atom in pdNA[dimension] if not atom.isDeleted]
-#
-#         if not pdNADim:  # len(pdNA[dimension]) == 0:
-#             if len(pdNA) == 1:
-#                 peakLabel.append(peak.id)
-#             else:
-#                 peakLabel.append('-')
-#         else:
-#             peakNmrResidues = [atom[0].nmrResidue.id for atom in pdNA if len(atom) != 0 and not atom[0].isDeleted]
-#             if all(x == peakNmrResidues[0] for x in peakNmrResidues):
-#
-#                 for item in pdNADim:  # pdNA[dimension]:
-#                     if len(peakLabel) > 0:
-#                         peakLabel.append(item.name)
-#                     else:
-#                         peakLabel.append(item.pid.id)
-#
-#             else:
-#                 pdNADim = [atom for atom in pdNA[dimension] if not atom.isDeleted]
-#                 for item in pdNADim:  # pdNA[dimension]:
-#                     label = '.'.join((item.nmrResidue.id, item.name))
-#                     # label = item.nmrResidue.id + '.' + item.name
-#                     peakLabel.append(label)
-#
-#     text = ', '.join(peakLabel)
-#     return text
-#
-#
-# def _getScreenPeakAnnotation(peak, useShortCode=False, useMinimalCode=False, usePid=False):
-#     """Create labelling for short, long, minimal
-#     """
-#
-#     def chainLabel(item):
-#         try:
-#             chainLabel = item.nmrResidue.nmrChain.id
-#             assignedOnlyOneChain = len(peak.project.chains) == 1 and item.nmrResidue.residue
-#
-#             if assignedOnlyOneChain or chainLabel == '@-':
-#                 return ''
-#             elif chainLabel:
-#                 chainLabel += '_'
-#         except:
-#             chainLabel = ''
-#         return chainLabel
-#
-#     def shortCode(item):
-#         try:
-#             shortCode = item.nmrResidue.residue.shortName
-#         except:
-#             shortCode = ''
-#         return shortCode
-#
-#     peakLabel = []
-#     pdNA = peak.dimensionNmrAtoms
-#     numDims = peak.peakList.spectrum.dimensionCount
-#
-#     # list all the unique nmrResidues in the peakList
-#
-#     # ids = [OrderedDict((atom.nmrResidue.id, []) for atom in pdNAs) for pdNAs in pdNA]
-#     ids = OrderedDict((atom.nmrResidue.id, []) for pdNAs in pdNA for atom in pdNAs)
-#
-#     for dimension in range(peak.peakList.spectrum.dimensionCount):
-#         pdNADim = [atom for atom in pdNA[dimension] if not atom.isDeleted]
-#
-#         for atom in pdNADim:
-#             nmrRes = ids[atom.nmrResidue.id]
-#
-#             if nmrRes and (useShortCode or usePid):
-#
-#                 if useMinimalCode:
-#                     continue
-#
-#                 label = atom.name
-#             else:
-#                 if useMinimalCode:
-#                     label = shortCode(atom) + atom.nmrResidue.sequenceCode
-#                 elif usePid:
-#                     label = '.'.join((atom.nmrResidue.id, atom.name))
-#                 else:
-#                     label = chainLabel(atom) + shortCode(atom) + atom.nmrResidue.sequenceCode + atom.name
-#
-#             nmrRes.append(label)
-#
-#     text = '; '.join(', '.join(atoms) for atoms in ids.values())
-#     return text if text else ','.join(['_'] * numDims)
-
+        GuiPeakListView.__init__(self)

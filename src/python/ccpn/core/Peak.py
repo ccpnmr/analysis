@@ -973,6 +973,11 @@ class Peak(AbstractWrapperObject):
 
         self._wrappedData.clusterId = value
 
+    @property
+    def peakViews(self) -> list:
+        """STUB: hot-fixed later"""
+        return []
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================

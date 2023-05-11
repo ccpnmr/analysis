@@ -46,6 +46,11 @@ ItemTypes = {
     SEPARATOR: Menu._addSeparator.__name__
     }
 
+_ARRANGELABELS = 'Auto-arrange All Labels'
+_RESETLABELS = 'Reset All Labels'
+_ARRANGESELECTEDLABELS = 'Auto-arrange Selected Labels'
+_RESETSELECTEDLABELS = 'Reset Selected Labels'
+
 
 class _SCMitem(object):
     """Strip context menu item base class. Used to autogenerate the context menu items in a Gui strip """
@@ -493,6 +498,50 @@ def _reorderPeakListAxesItem():
                     callback=_app.mainWindow.reorderPeakListAxes)
 
 
+def _arrangePeakLabelsItem():
+    """Auto-arrange the peak/multiplet labels to minimise any overlaps.
+    """
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
+    return _SCMitem(name=_ARRANGELABELS,
+                    typeItem=ItemTypes.get(ITEM), toolTip='Auto-arrange peak/multiplet labels to minimum overlaps.', shortcut='AV',
+                    callback=_app.mainWindow.arrangeLabels)
+
+
+def _resetLabelsItem():
+    """Reset arrangement of peak/multiplet labels.
+    """
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
+    return _SCMitem(name=_RESETLABELS,
+                    typeItem=ItemTypes.get(ITEM), toolTip='Reset peak/multiplet labels to their default positions.', shortcut='RV',
+                    callback=_app.mainWindow.resetLabels)
+
+
+def _arrangePeakLabelsSelectedItem():
+    """Auto-arrange the selected peak/multiplet labels to minimise any overlaps.
+    """
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
+    return _SCMitem(name=_ARRANGESELECTEDLABELS,
+                    typeItem=ItemTypes.get(ITEM), toolTip='Auto-arrange peak/multiplet labels to minimum overlaps.',
+                    callback=partial(_app.mainWindow.arrangeLabels, selected=True))
+
+
+def _resetLabelsSelectedItem():
+    """Reset arrangement of selected peak/multiplet labels.
+    """
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
+    return _SCMitem(name=_RESETSELECTEDLABELS,
+                    typeItem=ItemTypes.get(ITEM), toolTip='Reset peak/multiplet labels to their default positions.',
+                    callback=partial(_app.mainWindow.resetLabels, selected=True))
+
+
 def _makeStripPlotItem(menuId):
     from ccpn.framework.Application import getApplication
 
@@ -734,6 +783,8 @@ def _showActivePhaseTraceItem(strip):
 
 
 def _setEnabledAllItems(menu, state):
+    """Set the state of all the items in a menu to True/False.
+    """
     for action in menu.actions():
         action.setEnabled(state)
 
@@ -930,6 +981,12 @@ def _get1dPeakMenuItems(menuId) -> list:
         _makeStripPlotItem(menuId),
         _separator(),
 
+        _arrangePeakLabelsItem(),
+        _resetLabelsItem(),
+        _arrangePeakLabelsSelectedItem(),
+        _resetLabelsSelectedItem(),
+        _separator(),
+
         _newMultipletItem(),
         _newCollectionItem(),
         _integrate1DItem(),
@@ -1116,6 +1173,12 @@ def _getNdPeakMenuItems(menuId) -> list:
         _estimateVolumesItem(menuId),
         _estimateCurrentVolumesItem(),
         _reorderPeakListAxesItem(),
+        _separator(),
+
+        _arrangePeakLabelsItem(),
+        _resetLabelsItem(),
+        _arrangePeakLabelsSelectedItem(),
+        _resetLabelsSelectedItem(),
         _separator(),
 
         _makeStripPlotItem(menuId),

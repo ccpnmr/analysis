@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-10 19:10:47 +0000 (Fri, March 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-11 19:16:27 +0100 (Thu, May 11, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -26,10 +26,12 @@ __date__ = "$Date: 2021-09-17 15:02:29 +0100 (Fri, September 17, 2021) $"
 # Start of code
 #=========================================================================================
 
+import numpy as np
+from typing import List
+
 from ccpn.core.NmrAtom import NmrAtom
 # from ccpn.core.Peak import Peak
 # from ccpn.core.Project import Project
-from typing import List
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, navigateToNmrAtomsInStrip
 from ccpn.core.lib.ContextManagers import undoStackBlocking
@@ -200,3 +202,155 @@ def navigateToNmrResidueInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, nmrR
     strip.header.reset()
     strip.header.setLabelText(position='c', text=nmrResidue.pid)
     # strip.header.headerVisible = True
+
+
+def resetPeakLabelPositions(spectrumDisplay: GuiSpectrumDisplay, selected: bool = False) -> None:
+    """
+    Automatically tidy the peak annotation labels in the x-y plane
+    of a window for a given list of peaks.
+
+    .. describe:: Input
+
+    List of nmr.Nmr,peaks, Analysis.SpectrumWindow, Analysis GUI
+
+    .. describe: Output
+
+    None
+    """
+    from ccpn.framework.Application import getApplication
+
+    app = getApplication()
+
+    views = list(spectrumDisplay.peakViews)
+    if selected and app:
+        # only update selected peaks
+        pks = set(app.current.peaks)
+        views = [pv for pv in views if pv.peak in pks]
+
+    if not views:
+        if selected:
+            getLogger().debug('resetPeakLabelPositions: There are no selected peaks in the spectrumDisplay')
+        return
+
+    for view in views:
+        view.textOffset = (0.0, 0.0)
+
+
+def arrangePeakLabelPositions(spectrumDisplay: GuiSpectrumDisplay, selected: bool = False) -> None:
+    """
+
+    :param spectrumDisplay:
+    """
+    from ccpn.framework.Application import getApplication
+    from ccpn.ui.gui.lib.textalloc.src import allocate_text
+
+    # if current.strip:
+    #     spectrumDisplay = current.strip.spectrumDisplay
+
+    # get the list of texts/positions/points
+    # v3views = list(spectrumDisplay.peakViews)
+    # strip = current.strip  # spectrumDisplay.strips[0]
+
+    if not spectrumDisplay.strips:
+        return
+
+    strip = spectrumDisplay.strips[0]
+    px, py = strip._CcpnGLWidget.pixelX, strip._CcpnGLWidget.pixelY  # ppm-per-pixel
+    # ppmPoss = strip.positions
+    # ppmWidths = strip.widths
+
+    _data2Obj = strip.project._data2Obj
+    labels = [(_data2Obj.get(pLabel.stringObject._wrappedData.findFirstPeakView(peakListView=plv._wrappedData.peakListView)),
+               pLabel)
+              for plv, ss in strip._CcpnGLWidget._GLPeaks._GLLabels.items() if plv.isDisplayed
+              for pLabel in ss.stringList]
+
+    posnX = []
+    posnY = []
+    # facsX = []
+    # facsY = []
+    # pppX = []
+    # pppY = []
+    # data = []
+    ws = []
+    hs = []
+
+    app = getApplication()
+    if selected and app:
+        # only update selected peaks
+        pks = set(app.current.peaks)
+        labels = [(view, label) for (view, label) in labels if view.peak in pks]
+
+    if not labels:
+        if selected:
+            getLogger().debug('arrangePeakLabelPositions: There are no selected peaks in the spectrumDisplay')
+        return
+
+    for view, label in labels:
+        corePeak = view.peak
+        peak = corePeak._wrappedData
+
+        dims = spectrumDisplay.spectrumViews[0].displayOrder  # 1-based for the model
+        # ppmPerPoints = corePeak.spectrum.ppmPerPoints
+        peakDimX = peak.findFirstPeakDim(dim=dims[0])
+        peakDimY = peak.findFirstPeakDim(dim=dims[1])
+
+        posnX.append(int(peakDimX.value / px))  # pixelPosition
+        if spectrumDisplay.is1D:
+            posnY.append(int(corePeak.height / py))
+        else:
+            posnY.append(int(peakDimY.value / py))
+        ws.append(label.width)
+        hs.append(label.height)
+
+    posnX, posnY = np.array(posnX), np.array(posnY)
+    minX, maxX = np.min(posnX), np.max(posnX)
+    minY, maxY = np.min(posnY), np.max(posnY)
+    meanX, meanY = np.mean(posnX), np.mean(posnY)
+    maxW, maxH = max(ws), max(hs)
+    maxX -= minX
+    maxY -= minY
+
+    # process from the mean peak-position outwards
+    sortPos = np.argsort((posnX - meanX)**2 + (posnY - meanY)**2)
+    posnX = posnX[sortPos]
+    posnY = posnY[sortPos]
+    labels = [labels[ind] for ind in sortPos]
+
+    kx, ky = 2, 2
+    xlims = (0, maxX + kx * 2 * maxW)
+    ylims = (0, maxY + ky * 2 * maxH)
+
+    posnX = posnX - minX + kx * maxW
+    posnY = posnY - minY + ky * maxH
+
+    texts = [val.text for _, val in labels]  # grab the labels
+
+    HALF_POINTSIZE = 12 // 2
+    x_boxes = [np.array([xx - HALF_POINTSIZE, xx + HALF_POINTSIZE]) for xx in posnX]
+    y_boxes = [np.array([yy - HALF_POINTSIZE, yy + HALF_POINTSIZE]) for yy in posnY]
+
+    output = allocate_text(posnX, posnY, text_list=texts,
+                           xlims=xlims,
+                           ylims=ylims,
+                           x_boxes=x_boxes, y_boxes=y_boxes,  # boxes to avoid
+                           textsize=15,
+                           nbr_candidates=300,
+                           margin=0.0,
+                           minx_distance=0.02,  # sort this, have changed internally to pixels
+                           maxx_distance=0.2,
+                           miny_distance=0.03,
+                           maxy_distance=1.0,
+                           include_arrows=False,
+                           )
+
+    non_over, over_ind = output
+
+    # need to check which over_ind are bad and discard
+    for posx, posy, moved, (view, ss) in zip(posnX, posnY, non_over, labels):
+        # view.textOffset = (moved[0] - posx, moved[1] - posy)  # pixels
+        # offset is always orientated +ve to the top-right
+        view.textOffset = (moved[0] - posx) * np.abs(px), (moved[1] - posy) * np.abs(py)  # ppm
+
+    if over_ind:
+        getLogger().debug(f'Contains bad label indices {over_ind}')

@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:47:14 +0000 (Mon, December 20, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2023-05-11 19:16:26 +0100 (Thu, May 11, 2023) $"
+__version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,6 +44,7 @@ class PMIListViewABC(AbstractWrapperObject):
     className = 'Undefined'
 
     _parentClass = SpectrumView
+    _parentClassName = SpectrumView.__class__.__name__
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'Undefined'
@@ -93,7 +94,7 @@ class PMIListViewABC(AbstractWrapperObject):
 
     def delete(self):
         """ListViews cannot be deleted, except as a byproduct of deleting other things"""
-        raise Exception("%s cannot be deleted directly" % str(self._pluralLinkName))
+        raise RuntimeError(f"{str(self._pluralLinkName)} cannot be deleted directly")
 
     # @property
     # def _key(self) -> str:
@@ -149,11 +150,13 @@ class PMIListViewABC(AbstractWrapperObject):
     def symbolColour(self, value: typing.Optional[str]):
         # ccpnInternal - changes this to '#' for non-valid colour check to validate in model
         if not isinstance(value, (str, type(None))):
-            raise TypeError("symbolColour must be a hex colour string (e.g. '#ABCDEF' or '%s') or None" % INHERITCOLOUR)
+            raise TypeError(f"symbolColour must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}') or None")
+
         if value:
             # a non-empty string
             if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
-                raise ValueError("symbolColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
+                raise ValueError(f"symbolColour {value} not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
+
             value = value.upper()
 
         self._apiListView.symbolColour = value or INHERITCOLOUR
@@ -181,11 +184,13 @@ class PMIListViewABC(AbstractWrapperObject):
     def textColour(self, value: typing.Optional[str]):
         # ccpnInternal - changes this to '#' for non-valid colour check to validate in model
         if not isinstance(value, (str, type(None))):
-            raise TypeError("textColour must be a hex colour string (e.g. '#ABCDEF' or '%s') or None" % INHERITCOLOUR)
+            raise TypeError(f"textColour must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}') or None")
+
         if value:
             # a non-empty string
             if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
-                raise ValueError("textColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
+                raise ValueError(f"textColour {value} not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
+
             value = value.upper()
 
         self._apiListView.textColour = value or INHERITCOLOUR
@@ -245,11 +250,13 @@ class PMIListViewABC(AbstractWrapperObject):
     @ccpNmrV3CoreUndoBlock()
     def meritColour(self, value: typing.Optional[str]):
         if not isinstance(value, (str, type(None))):
-            raise TypeError("meritColour must be a hex colour string (e.g. '#ABCDEF' or '%s') or None" % INHERITCOLOUR)
+            raise TypeError(f"meritColour must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}') or None")
+
         if value:
             # a non-empty string
             if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
-                raise ValueError("meritColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
+                raise ValueError(f"meritColour {value} not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
+
             value = value.upper()
 
         self._setInternalParameter(self._MERITCOLOUR, value or INHERITCOLOUR)
@@ -322,11 +329,13 @@ class PMIListViewABC(AbstractWrapperObject):
     @ccpNmrV3CoreUndoBlock()
     def lineColour(self, value: typing.Optional[str]):
         if not isinstance(value, (str, type(None))):
-            raise TypeError("lineColour must be a hex colour string (e.g. '#ABCDEF' or '%s') or None" % INHERITCOLOUR)
+            raise TypeError(f"lineColour must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}') or None")
+
         if value:
             # a non-empty string
             if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
-                raise ValueError("lineColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
+                raise ValueError(f"lineColour {value} not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
+
             value = value.upper()
 
         self._setInternalParameter(self._LINECOLOUR, value or INHERITCOLOUR)

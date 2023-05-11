@@ -1684,11 +1684,32 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
                 popup = ReorderPeakListAxesPopup(parent=self, mainWindow=self, peakList=clickedPeaks[0].peakList)
                 popup.exec_()
 
+    def arrangeLabels(self, selected: bool = False):
+        """Auto-arrange the peak/multiplet labels to minimise any overlaps, in the current spectrumDisplay.
+        :param selected:
+        """
+        current = self.application.current
+
+        if current.strip:
+            with undoBlockWithoutSideBar():
+                current.strip.spectrumDisplay.arrangeLabels(selected=selected)
+
+    def resetLabels(self, selected: bool = False):
+        """Reset arrangement of peak/multiplet labels, in the current spectrumDisplay.
+        :param selected:
+        """
+        current = self.application.current
+
+        if current.strip:
+            with undoBlockWithoutSideBar():
+                current.strip.spectrumDisplay.resetLabels(selected=selected)
+
     def selectAllPeaks(self, strip=None):
-        """selects all peaks in the strip or current strip if any and if the spectrum is toggled on"""
-        if strip is None:
-            if self.application.current.strip:
-                strip = self.application.current.strip
+        """selects all peaks in the strip or current strip if any and if the spectrum is toggled on.
+        """
+        if strip is None and self.application.current.strip:
+            strip = self.application.current.strip
+
         if strip and not strip.isDeleted:
             spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews
                        if spectrumView.isDisplayed]

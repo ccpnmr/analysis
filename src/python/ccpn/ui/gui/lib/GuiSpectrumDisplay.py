@@ -1303,7 +1303,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
             else:
                 showWarning(
-                    f'Dropped item "{obj}"',
+                    f'Dropped item {obj!r}',
                     'Wrong kind; drop Spectrum, SpectrumGroup, Peak, PeakList,'
                     ' NmrChain, NmrResidue, NmrAtom or Strip',
                 )
@@ -1689,6 +1689,20 @@ class GuiSpectrumDisplay(CcpnModule):
                 self.showSpectrumToolbar()
             else:
                 self.hideSpectrumToolbar()
+
+    def arrangeLabels(self, selected: bool = False):
+        """Auto-arrange the peak/multiplet labels to minimise any overlaps.
+        """
+        from ccpn.ui.gui.lib.SpectrumDisplayLib import arrangePeakLabelPositions
+
+        arrangePeakLabelPositions(self, selected=selected)
+
+    def resetLabels(self, selected: bool = False):
+        """Reset arrangement of peak/multiplet labels.
+        """
+        from ccpn.ui.gui.lib.SpectrumDisplayLib import resetPeakLabelPositions
+
+        resetPeakLabelPositions(self, selected=selected)
 
     def _closeModule(self):
         """

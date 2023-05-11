@@ -1291,6 +1291,10 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         NB: the returned list of NmrResidues is sorted; if not: breaks the programme
         """
         from ccpn.core.NmrResidue import NmrResidue  # Local import to avoid cycles
+        from ccpn.ui.gui.lib.Strip import Strip
+        from ccpn.ui._implementation.PeakView import PeakView
+        from ccpn.ui._implementation.MultipletView import MultipletView
+        from ccpn.ui._implementation.IntegralView import IntegralView
 
         if descendantClasses is None or len(descendantClasses) == 0:
             # we should never be here
@@ -1315,6 +1319,10 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             #     ii=0
 
         else:
+            if descendantClasses[0] == Strip and descendantClasses[-1] in [PeakView, MultipletView, IntegralView]:
+                # NOTE:ED - hack to remove duplicated peakViews
+                children = children[:1]
+
             # we are not at the end; traverse down the tree for each child
             for child in children:
                 objs.extend(child._allDescendants(descendantClasses=descendantClasses[1:]))

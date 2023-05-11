@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:48:27 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-05-11 19:16:27 +0100 (Thu, May 11, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -27,8 +27,8 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
 from ccpn.core.Project import Project
+from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
 from ccpn.ui._implementation.IntegralListView import IntegralListView as _CoreClassIntegralListView
 
 
@@ -38,6 +38,13 @@ class GuiIntegralListView(GuiListViewABC):
 
     def __init__(self):
         super().__init__()
+
+        vIntegrals = {view.integral for view in self._wrappedData.integralListView.integralViews}
+        # create integralViews that don't already exist for all integrals in integralList
+        for obj in self.integralList.integrals:
+            apiIntegral = obj._wrappedData
+            if apiIntegral not in vIntegrals:
+                self._wrappedData.integralListView.newIntegralView(integral=apiIntegral, integralSerial=0)
 
 
 class IntegralListView(_CoreClassIntegralListView, GuiIntegralListView):
@@ -49,16 +56,6 @@ class IntegralListView(_CoreClassIntegralListView, GuiIntegralListView):
 
         # hack for now
         self.application = project.application
-        GuiIntegralListView.__init__(self)
         self._init()
 
-# #=========================================================================================
-# # Registering
-# #=========================================================================================
-#
-# def _factoryFunction(project: Project, wrappedData):
-#     """create IntegralListView
-#     """
-#     return IntegralListView(project, wrappedData)
-#
-# # _CoreClassIntegralListView._registerCoreClass(factoryFunction=_factoryFunction)
+        GuiIntegralListView.__init__(self)

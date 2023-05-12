@@ -59,6 +59,8 @@ from ccpn.util.decorators import logCommand
 from Classes.Simulator import Simulator
 from Classes.DatabaseCaller import DatabaseCaller
 from .pluginAddons import _addRow, _addColumn, _addVerticalSpacer, _setWidth, _setWidgetProperties
+from ccpn.util.Colour import hexToRgbRatio
+from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySelectionWidget
 
 
 ############
@@ -118,6 +120,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         metabolites = self.caller.execute_query('select * from metabolites')
 
         self.metabolites = self.project.newDataTable(name='metabolites_table', data=metabolites)
+
+        self.display = self.project.windows[0].modules[0]
 
         grid = (0, 4)
 
@@ -199,6 +203,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             update = self.settings['Current']['MultipletUpdateStatus']
             self.simspec.moveMultiplet(multipletId, shift, update)
             self.refreshSumSpectrum()
+        def lineValueChange():
+            shift = lineWidget.values
+            widget.setValue(shift)
         def resetMultiplet():
             widget.setValue(self.simspec.originalMultiplets[multipletId]['center'] + self.simspec.globalShift)
         def navigateToMultiplet():
@@ -231,6 +238,12 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(buttonWidget, heightType='Minimum')
         buttonWidget.clicked.connect(navigateToMultiplet)
         self.guiDict['TemporaryWidgets'][f'Multiplet{index+1}NavigateTo'] = buttonWidget
+
+        brush = hexToRgbRatio(self.simspec.spectrum.sliceColour) + (0.3,)
+        lineWidget = self.display.strips[0]._CcpnGLWidget.addInfiniteLine(values=self.simspec.multiplets[multipletId]['center'], colour=brush, movable=True, lineStyle='dashed',
+                                                   lineWidth=2.0, obj=self.simspec.spectrum, orientation='v',)
+        lineWidget.valuesChanged.connect(lineValueChange)
+        self.guiDict['TemporaryWidgets'][f'Multiplet{index + 1}Line'] = lineWidget
 
     def widthChange(self):
         width = self.guiDict['TemporaryWidgets']['Width'].value()
@@ -376,7 +389,10 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             self.settings['ResultsTables']['currentTable'].data.at[self.settings['Current']['currentSpectrumId'], metaboliteName] = integration
 
         for key in self.guiDict['TemporaryWidgets']:
-            self.guiDict['TemporaryWidgets'][key].deleteLater()
+            if 'Line' in key:
+                self.display.strips[0]._CcpnGLWidget.removeInfiniteLine(self.guiDict['TemporaryWidgets'][key])
+            else:
+                self.guiDict['TemporaryWidgets'][key].deleteLater()
         self.guiDict['TemporaryWidgets'] = OD()
 
         grid = (4, 1)

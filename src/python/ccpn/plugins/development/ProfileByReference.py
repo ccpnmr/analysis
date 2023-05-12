@@ -394,6 +394,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         else:
             integration = scale * width
             self.settings['ResultsTables']['currentTable'].data.at[self.settings['Current']['currentSpectrumId'], metaboliteName] = integration
+        self.display.displaySpectrum(spectrum=self.simspec.spectrum.pid)
 
         for key in self.guiDict['TemporaryWidgets']:
             if 'Line' in key:

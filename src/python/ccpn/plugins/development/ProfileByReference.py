@@ -119,9 +119,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
         metabolites = self.caller.execute_query('select * from metabolites')
 
-        self.metabolites = self.project.newDataTable(name='metabolites_table', data=metabolites)
-
-        self.display = self.project.windows[0].modules[0]
+        if 'DT:metabolites_table' not in [dataTable.pid for dataTable in self.project.dataTables]:
+            self.metabolites = self.project.newDataTable(name='metabolites_table', data=metabolites)
 
         grid = (0, 4)
 
@@ -153,7 +152,11 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                               callback=self._selectSpectrum, tipText=help['Spectrum'])
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
-        self.spectra = [spectrum.id for spectrum in self.project.getByPid(self.settings['Current']['SpectrumGroupId']).spectra]
+
+        try:
+            self.spectra = [spectrum.id for spectrum in self.project.getByPid(self.settings['Current']['SpectrumGroupId']).spectra]
+        except:
+            raise Exception("Please create a spectrum group first.")
         widget.setData(self.spectra)
         self.guiDict['CoreWidgets']['SpectrumId'] = widget
         self.settings['Current']['SpectrumId'] = self._getValue(widget)

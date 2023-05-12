@@ -328,12 +328,12 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
     def _addUnknownSignal(self):
         self.settings["Current"]["UnknownSignalCount"] += 1
-        self.settings['Current']['metabolite'] = f'Unknown_Signal_{self.settings["Current"]["UnknownSignalCount"]}'
+        self.settings['Current']['metabolite'] = f'Unknown_Substance_{self.settings["Current"]["UnknownSignalCount"]}'
         widget = self.guiDict['CoreWidgets']['Simulation']
         data = pd.DataFrame({'name': self.settings['Current']['metabolite'],
                              'metabolite_id': None,
                              'spectrum_id': None,
-                             'origin': 'unknown_signal'}, index=[len(self.metabolites.data)])
+                             'origin': 'unknown_substance'}, index=[len(self.metabolites.data)])
         widget.updateDf(data)
         data = {'name': self.settings['Current']['metabolite']}
         row = pd.DataFrame(data, columns=self.metabolites.data.columns, index=[len(self.metabolites.data)])
@@ -357,7 +357,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             scale = 1
             globalShift = 0
             frequency = round(self.settings['Current']['referenceSumSpectrumFrequency']/10)*10
-            if origin != 'unknown_signal':
+            if origin != 'unknown_substance':
                 simulationData = self.caller.getSimulationData(spectrumId)
                 sampleData = self.caller.getSampleData(simulationData['SpectrumData'].sample_id.iloc[0])
                 spectrumData = simulationData['SpectrumData']
@@ -466,7 +466,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.guiDict['TemporaryWidgets']['GlobalShift'] = widget
         self.settings['Current']['GlobalShift'] = self._getValue(widget)
 
-        if self.simspec.multiplets and origin != 'unknown_signal':
+        if self.simspec.multiplets and origin != 'unknown_substance':
             for index, multipletId in enumerate(self.simspec.multiplets):
                 self.addDoubleSpinbox(index, multipletId)
             if origin == 'bmrb':
@@ -533,6 +533,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                     peakList.append((peak.position[0], peak.height/(10**self.settings['Current']['Scale']), self.simspec.width/self.simspec.frequency, str(i)))
         else:
             peakList = [(peak.position[0], peak.height/(10**self.settings['Current']['Scale']), self.simspec.width/self.simspec.frequency, '1') for peak in self.settings['Current']['ActiveSpectrum'].peaks]
+        if len(peakList) < 1:
+            raise Exception(f"Please pick at least one peak in spectrum {self.settings['Current']['ActiveSpectrum'].pid}")
         self.simspec.peakList = peakList
         self.simspec.setSpectrumLineshape()
 

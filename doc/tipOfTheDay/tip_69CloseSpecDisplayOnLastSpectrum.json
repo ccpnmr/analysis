@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>Go to <span style=%(purple)s>File / Preferences / Appearance</span> to select whether or not you want to <span style=%(purple)s>Close SpectrumDisplay on last spectrum</span>, i.e. whether you want a SpectrumDisplay to close automatically or remain open (without any spectra in it) after deleting the last spectrum from it (e.g. with <span style=%(purple)s>right-click / Remove Spectrum</span> on the spectrum toolbar button).</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/CloseSpectrumDisplayOnLastSpectrum.png"
+  ]
+}

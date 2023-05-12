@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>If your spectra were recorded under different conditions, resulting in different chemical shifts, then you can associate them with different Chemical Shift Lists. Create and delete Chemical Shift Lists in the sidebar. <span style=%(purple)s>Double-click</span> on a Chemical Shift List to edit it and move spectra into or out of it. Alternatively, set the Chemical Shift List in the <span style=%(purple)s>Spectrum Properties / General</span> tab (double-click on a Spectrum in the sidebar).</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/MoveSpectraBetweenCSLs.png"
+  ]
+}

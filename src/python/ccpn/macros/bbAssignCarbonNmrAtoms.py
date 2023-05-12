@@ -4,14 +4,10 @@ backbone assignment.
 
 This should work with any combination of HNCA, HNcoCA, HNCACB, HNcoCACB, HNCO and HNcaCO spectra.
 
-REQUIREMENTS:
+REQUIREMENTS/USAGE:
 1. Make sure your spectra have the correct Experiment Types associated with them (shortcut
    ET to set these).
-2. The macro assumes that all 3D carbon AxisCodes are 'C'. For HNcaCO experiments you
-   may find that these are 'CO'. We recommend setting these to 'C' by going to
-   Spectrum Properties (double-click on the spectrum in the sidebar), then the Dimensions tab
-   and here you can check/change the AxisCode.
-3. Pick and Assign the peaks for an NmrResidue using the Pick and Assign module (PA), then
+2. Pick and Assign the peaks for an NmrResidue using the Pick and Assign module (PA), then
    run the macro before moving to the next residue. This is easiest if you associate the
    macro with a keyboard shortcut (you can do this with shortcut DU).
 
@@ -27,7 +23,6 @@ before you move on to the next residue or go on to the backbone assignment stage
 
 ##############################     Settings      #################################
 
-assignAxCde = 'C'   # Carbon AxisCode to be assigned, may need changing for HNCO/HNcoCA expts
 assignIsotope = '13C'       # Isotope of dimension to be assigned
 rootIsotope = '1H'         # Isotope of one of the root dimensions which has already been assigned
 casPosCbsNeg = True # True if Ca peaks are positive and Cb peaks are negative in HNCACB,
@@ -47,16 +42,26 @@ from collections import defaultdict
 from statistics import mean
 
 
+def getAssignDim(peak):
+    assignDim = [ind for ind, value in enumerate(peak.peakList.spectrum.isotopeCodes) if value == assignIsotope][0]
+    return assignDim
+
+def getAssignAxisCode(peak):
+    assignDim = getAssignDim(peak)
+    assignAxCde = peak.peakList.spectrum.axisCodes[assignDim]
+    return assignAxCde
+
 def assignNmrAtom(seqCode, atomName, offset):
     if offset == -1:
         newsc = ''.join((seqCode, '-1'))
         newnr = peakNmrChain.fetchNmrResidue(sequenceCode=newsc, residueType=None)
         newna = newnr.fetchNmrAtom(name=atomName, isotopeCode=assignIsotope)
+        assignAxCde = getAssignAxisCode(peak)
         peak.assignDimension(axisCode=assignAxCde, value=newna)
     elif offset == 0:
         newna = peakNmrRes.fetchNmrAtom(name=atomName, isotopeCode=assignIsotope)
+        assignAxCde = getAssignAxisCode(peak)
         peak.assignDimension(axisCode=assignAxCde, value=newna)
-
 
 def storeDataForGlyCheck(peakShift, peak, atomType):
     glyCheckDict[atomType]['shifts'].append(peakShift)
@@ -71,25 +76,33 @@ def checkForGly(glyDict):
         if len(cbs_1) == 0 and 48.5 > mean(cas0) > 40.0:
             # this is an i Glycine
             for pk in glyDict['CB0']['peaks']:
+                assignDim = getAssignDim(pk)
                 nr = pk.assignmentsByDimensions[assignDim][0].nmrResidue.getOffsetNmrResidue(-1)
                 na = nr.fetchNmrAtom(name='CB', isotopeCode=assignIsotope)
+                assignAxCde = getAssignAxisCode(pk)
                 pk.assignDimension(axisCode=assignAxCde, value=na)
     else:
         if len(cas_1) == 0 and 48.5 > mean(cbs_1) > 40.0:
             # this is an i-1 Glycine
             for pk in glyDict['CB-1']['peaks']:
+                assignDim = getAssignDim(pk)
                 nr = pk.assignmentsByDimensions[assignDim][0].nmrResidue.mainNmrResidue
                 na = nr.fetchNmrAtom(name='CA', isotopeCode=assignIsotope)
+                assignAxCde = getAssignAxisCode(pk)
                 pk.assignDimension(axisCode=assignAxCde, value=na)
         elif len(cas_1) == 0 and 48.5 > mean(cbs0) > 40.0:
             # this is an i Glycine
             for pk in glyDict['CB0']['peaks']:
+                assignDim = getAssignDim(pk)
                 nr = pk.assignmentsByDimensions[assignDim][0].nmrResidue
                 na = nr.fetchNmrAtom(name='CA', isotopeCode=assignIsotope)
+                assignAxCde = getAssignAxisCode(pk)
                 pk.assignDimension(axisCode=assignAxCde, value=na)
             for pk in glyDict['CA0']['peaks']:
+                assignDim = getAssignDim(pk)
                 nr = pk.assignmentsByDimensions[assignDim][0].nmrResidue.getOffsetNmrResidue(-1)
                 na = nr.fetchNmrAtom(name='CA', isotopeCode=assignIsotope)
+                assignAxCde = getAssignAxisCode(pk)
                 pk.assignDimension(axisCode=assignAxCde, value=na)
 
 
@@ -105,9 +118,11 @@ def checkForGST(gstDict):
     if len(cas) == 0 and len(cbs) != 0:
         # this is a Glycine
         for pk in peaks:
+            assignDim = getAssignDim(pk)
             nr = pk.assignmentsByDimensions[assignDim][0].nmrResidue
             if 48.5 > pk.ppmPositions[assignDim] > 40.0:
                 na = nr.fetchNmrAtom(name='CA', isotopeCode=assignIsotope)
+                assignAxCde = getAssignAxisCode(pk)
                 pk.assignDimension(axisCode=assignAxCde, value=na)
             na = nr.fetchNmrAtom(name='CB', isotopeCode=assignIsotope)
             if not na.assignedPeaks:
@@ -115,9 +130,11 @@ def checkForGST(gstDict):
     elif len(cbs) == 0 and len(cas) >= 2:
         # this is a Serine or Threonine
         for pk in peaks:
+            assignDim = getAssignDim(pk)
             if pk.ppmPositions[assignDim] > mean(cas):
                 nr = pk.assignmentsByDimensions[assignDim][0].nmrResidue
                 na = nr.fetchNmrAtom(name='CB', isotopeCode=assignIsotope)
+                assignAxCde = getAssignAxisCode(pk)
                 pk.assignDimension(axisCode=assignAxCde, value=na)
 
 
@@ -140,8 +157,6 @@ with undoBlock():
                     'CB-1': {'shifts': [], 'peaks': []}}
 
     for peak in current.peaks:
-        assignDim = [ind for ind, value in enumerate(peak.peakList.spectrum.isotopeCodes) if value == assignIsotope][0]
-        assignAxCde = peak.peakList.spectrum.axisCodes[assignDim]
         rootDim = [ind for ind, value in enumerate(peak.peakList.spectrum.isotopeCodes) if value == rootIsotope][0]
         # Check peak root dim is assigned
         if peak.assignmentsByDimensions[rootDim]:
@@ -171,6 +186,7 @@ with undoBlock():
             highestPeak = allPeaks[0]
             lowestPeak = allPeaks[-1]
         for peak in pkDict[expt]:
+            assignDim = getAssignDim(peak)
             peakNmrRes = peak.assignmentsByDimensions[rootDim][0].nmrResidue
             peakSeqCode = peakNmrRes.sequenceCode
             peakShift = peak.ppmPositions[assignDim]

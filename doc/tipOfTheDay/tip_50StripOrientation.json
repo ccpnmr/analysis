@@ -1,5 +1,5 @@
 {
-  "header": "<p style=%(para)s>You can change the orientation of your strips from vertical to horizontal. This can be useful for 13-C-detected ssNMR spectra as well as for HCCH-TOCSY spectra which can view in horizontal strips as an alternative to rotating the spectrum. Select your strip orientation in the <span style=%(purple)s>Spectrum Display Settings</span> or set your preferred orientation globally in your <span style=%(purple)s>Preferences</span> (go to <span style=%(purple)s>File / Preferences</span>).</p>",
+  "header": "<p style=%(para)s>You can change the orientation of your strips from vertical to horizontal. This can be useful for 13-C-detected ssNMR spectra, as well as for HCCH-TOCSY spectra which you can view in horizontal strips as an alternative to rotating the spectrum. Select your strip orientation in the <span style=%(purple)s>Spectrum Display Settings</span> or set your preferred orientation globally in your <span style=%(purple)s>Preferences</span> (go to <span style=%(purple)s>File / Preferences</span>).</p>",
   "type": "picture",
   "styles": {
     "style_file": "tipStyles.txt"

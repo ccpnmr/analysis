@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>Reorder the spectra in a SpectrumDisplay by <span style=%(purple)s>middle-dragging</span> the spectrum buttons in the spectrum toolbar.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/ReorderSpectraInSpectrumDisplay.png"
+  ]
+}

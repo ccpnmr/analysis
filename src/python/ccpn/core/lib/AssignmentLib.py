@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2023-03-20 21:01:51 +0000 (Mon, March 20, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-12 09:59:29 +0100 (Fri, May 12, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -1266,7 +1266,7 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
                                     thisDims = [[] for _nd in range(numDims)]
                                     nmrResidue = nmrChain.newNmrResidue()
                                     for i, (axis, isotope) in enumerate(axisIso):
-                                        nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)
+                                        nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis[0]), isotopeCode=isotope)
                                         existingDims[i].append(nmrAtom)
                                         thisDims[i] = nmrAtom
 
@@ -1283,7 +1283,7 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
                             # for i, (axis, isotope) in enumerate(axisIso):
                             #     nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)
                             #     peak.assignDimension(axisCode=axis, value=[nmrAtom])
-                            newNmrs = [[nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)] for axis, isotope in axisIso]
+                            newNmrs = [[nmrResidue.fetchNmrAtom(name=str(axis[0]), isotopeCode=isotope)] for axis, isotope in axisIso]
                             peak.assignDimensions(axisCodes=peak.axisCodes, values=newNmrs)
 
         if progress.error:

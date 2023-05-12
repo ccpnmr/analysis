@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>Check if a 2D and 3D are correctly referenced to one another by overlaying them (the 3D must have the 2D isotopes in the XY plane!) and then increasing the 3D plane count so that you get a de facto projection of the 3D spectrum. Now adjust your referencing if required.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/Check2D3DOverlay.png"
+  ]
+}

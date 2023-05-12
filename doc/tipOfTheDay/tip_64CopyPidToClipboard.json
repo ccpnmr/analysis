@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can copy the Pid (Project ID) of any item on the sidebar or from a table cell for easy use in a macros or elsewhere. Simply <span style=%(purple)s>right-click</span> and select either <span style=%(purple)s>Copy Pid to clipboard</span> or <span style=%(purple)s>Copy clicked cell value</span>.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/CopyPidToClipboard.png"
+  ]
+}

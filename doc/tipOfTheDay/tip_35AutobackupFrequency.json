@@ -1,5 +1,5 @@
 {
-  "header": "<p style=%(para)s>You can change the frequency of your autobackups (or switch them off completely) in the General tab of your Preferences (<span style=%(purple)s>File / Preferences</span>). The maximum frequency is once every 10 minutes.</p>",
+  "header": "<p style=%(para)s>You can change the frequency of your autobackups (or switch them off completely) in the General tab of your Preferences (<span style=%(purple)s>File / Preferences</span>). You can also change the number of backups you save, e.g. if the size of your project is particularly large. Backups are saved in the <span style=%(purple)s>project.ccpn/backups folder</span>.</p>",
   "type": "picture",
   "styles": {
     "style_file": "tipStyles.txt"

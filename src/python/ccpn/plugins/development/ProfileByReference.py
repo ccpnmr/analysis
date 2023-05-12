@@ -121,6 +121,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
         if 'DT:metabolites_table' not in [dataTable.pid for dataTable in self.project.dataTables]:
             self.metabolites = self.project.newDataTable(name='metabolites_table', data=metabolites)
+        else:
+            self.metabolites = self.project.application.get('DT:metabolites_table')
 
         grid = (0, 4)
 
@@ -284,6 +286,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
 
     def _selectSpectrumGroup(self, spectrumGroupID):
         spectrumGroup = self.project.getByPid('SG:' + spectrumGroupID)
+        self.display = self.project.application.mainWindow.newSpectrumDisplay([spectrum for spectrum in spectrumGroup.spectra], axisCodes=('H',), stripDirection='Y', position='top', relativeTo='MO:Profile by Reference')
+        self.display.rename("Profile_By_Reference_Display")
         tableName = f'deconv_{spectrumGroupID}'
         if tableName not in self.settings['ResultsTables']:
             spectra = [spectrum.name for spectrum in spectrumGroup.spectra]

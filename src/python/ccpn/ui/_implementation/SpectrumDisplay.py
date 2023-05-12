@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-04-27 15:58:57 +0100 (Thu, April 27, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-12 15:31:27 +0100 (Fri, May 12, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -126,8 +126,8 @@ class SpectrumDisplay(AbstractWrapperObject):
         for strip in _strips:
             strip._updatePlaneAxes()
 
-        if not result.is1D:
-            result.setVisibleAxes()
+        # if not result.is1D:
+        result.setVisibleAxes()
 
         # check that the spectrumView indexing has been set, or is populated correctly
         if len(_strips) > 0 and \

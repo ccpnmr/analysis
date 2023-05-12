@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-03-10 19:10:47 +0000 (Fri, March 10, 2023) $"
+__dateModified__ = "$dateModified: 2023-05-12 15:31:27 +0100 (Fri, May 12, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -282,7 +282,7 @@ def _clearMarksItem(strip):
 
 
 def _estimateNoise(strip):
-    return _SCMitem(name='Estimate Noise',
+    return _SCMitem(name='Estimate Noise...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Estimate spectral noise in the visible region', shortcut='EN',
                     callback=strip.estimateNoise)
 
@@ -845,6 +845,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
 
         _estimateNoise(guiStrip1d),
         _showNoise(guiStrip1d),
+        _makeStripPlot(guiStrip1d),
         _separator(),
 
         _selectedPeaksMenuItem(guiStrip1d),
@@ -861,7 +862,9 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         _spectrumToolBarItem(guiStrip1d),
         # _crosshairItem(guiStrip1d),
         _gridItem(guiStrip1d),
+        _shareYAxisItem(guiStrip1d),
         _cyclePeakLabelsItem(guiStrip1d),
+        # _cyclePeakSymbolsItem(guiStrip1d),
         ]
     items = [itm for itm in items if itm is not None]
     # attach to the _customiseMenu submenu
@@ -922,6 +925,9 @@ def _get1dPeakMenuItems(menuId) -> list:
         _snapToExtremaItem(),
         _estimateVolumesItem(menuId),
         _estimateCurrentVolumesItem(),
+        _separator(),
+
+        _makeStripPlotItem(menuId),
         _separator(),
 
         _newMultipletItem(),

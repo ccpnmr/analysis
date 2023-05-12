@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-03-06 12:41:51 +0000 (Mon, March 06, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-05-12 15:31:27 +0100 (Fri, May 12, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -198,11 +198,11 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.stripArrangementButtons.radioButtons[2].setVisible(False)
         self.stripArrangementButtons.setCallback(self._stripArrangementChanged)
 
-        if self._spectrumDisplay.is1D:
-            # not currently required for 1D
-            self.stripArrangementLabel.setVisible(False)
-            self.stripArrangementButtons.setVisible(False)
-            self.stripArrangementButtons.setEnabled(False)
+        # if self._spectrumDisplay.is1D:
+        #     # not currently required for 1D
+        #     self.stripArrangementLabel.setVisible(False)
+        #     self.stripArrangementButtons.setVisible(False)
+        #     self.stripArrangementButtons.setEnabled(False)
 
         row += 1
         self.zPlaneNavigationModeLabel = Label(parent, text="Plane Navigation Mode", grid=(row, 0))

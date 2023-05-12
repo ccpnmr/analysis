@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:41 +0000 (Thu, February 02, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-05-12 15:31:27 +0100 (Fri, May 12, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -311,11 +311,10 @@ class GuiStrip1d(GuiStrip):
             if self.calibrateX1DWidgets is None:
                 self._addCalibrate1DXSpectrumWidget()
             self.calibrateX1DWidgets.setVisible(True)
-            self.calibrateX1DWidgets._toggleLines()
-
         else:
             self.calibrateX1DWidgets.setVisible(False)
-            self.calibrateX1DWidgets._toggleLines()
+
+        self.calibrateX1DWidgets._toggleLines()
 
     def _addCalibrate1DYSpectrumWidget(self):
         """Add a new widget for calibrateY.
@@ -383,11 +382,10 @@ class GuiStrip1d(GuiStrip):
             if self.calibrateY1DWidgets is None:
                 self._addCalibrate1DYSpectrumWidget()
             self.calibrateY1DWidgets.setVisible(True)
-            self.calibrateY1DWidgets._toggleLines()
-
         else:
             self.calibrateY1DWidgets.setVisible(False)
-            self.calibrateY1DWidgets._toggleLines()
+
+        self.calibrateY1DWidgets._toggleLines()
 
     def _closeCalibrateX(self):
         self.calibrateXAction.setChecked(False)
@@ -400,13 +398,14 @@ class GuiStrip1d(GuiStrip):
     def _getInitialOffset(self):
         offSets = []
         offSet = 0  # Default
-        for i, spectrumView in enumerate(self.spectrumViews):
+        for spectrumView in self.spectrumViews:
             sp = spectrumView.spectrum
             y = sp.intensities
             offSet = np.std(y)
             offSets.append(offSet)
-        if len(offSets) > 0:
+        if offSets:
             offSet = np.mean(offSets)
+
         return offSet
 
     def _toggleOffsetWidget(self):
@@ -444,7 +443,7 @@ class GuiStrip1d(GuiStrip):
 
             try:
                 self._CcpnGLWidget.setStackingMode(False)
-            except:
+            except Exception:
                 getLogger().debugGL('OpenGL widget not instantiated')
 
     def _toggleStackPhaseFromShortCut(self):
@@ -463,7 +462,7 @@ class GuiStrip1d(GuiStrip):
 
             try:
                 self._CcpnGLWidget.setStackingMode(False)
-            except:
+            except Exception:
                 getLogger().debugGL('OpenGL widget not instantiated')
 
     def _stack1DSpectra(self, offSet=(0.0, 0.0)):
@@ -471,16 +470,16 @@ class GuiStrip1d(GuiStrip):
         try:
             self._CcpnGLWidget.setStackingValue(offSet)
             self._CcpnGLWidget.setStackingMode(True)
-        except:
+        except Exception:
             getLogger().debugGL('OpenGL widget not instantiated')
 
     def toggleHorizontalTrace(self):
-        """Toggles whether or not horizontal trace is displayed.
+        """Toggles whether horizontal trace is displayed.
         """
         pass
 
     def toggleVerticalTrace(self):
-        """Toggles whether or not vertical trace is displayed.
+        """Toggles whether vertical trace is displayed.
         """
         pass
 
@@ -506,7 +505,7 @@ class GuiStrip1d(GuiStrip):
                 _prefsGeneral._defaultMarksCount = _prefsGeneral._defaultMarksCount % len(colourList)
                 defaultColour = colourList[_prefsGeneral._defaultMarksCount]
                 _prefsGeneral._defaultMarksCount += 1
-        except:
+        except Exception:
             defaultColour = '#FF0000'
 
         try:
@@ -541,3 +540,7 @@ class GuiStrip1d(GuiStrip):
     #     """
     #     # Not implemented for 1d strips
     #     pass
+
+    def _toggleLastAxisOnly(self):
+        self.spectrumDisplay.setLastAxisOnly(lastAxisOnly=self.lastAxisOnlyCheckBox.isChecked())
+        self.spectrumDisplay.showAxes()

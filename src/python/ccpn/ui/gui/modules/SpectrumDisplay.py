@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-04-04 16:08:27 +0100 (Tue, April 04, 2023) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2023-05-12 15:31:27 +0100 (Fri, May 12, 2023) $"
 __version__ = "$Revision: 3.1.1 $"
 #=========================================================================================
 # Created
@@ -98,15 +98,15 @@ class SpectrumDisplay1d(SpectrumDisplay, GuiSpectrumDisplay):
         self.mainWindow = self.application.ui.mainWindow
         GuiSpectrumDisplay.__init__(self, mainWindow=self.mainWindow, useScrollArea=True)
 
-    def setVisibleAxes(self):
-        # Not implemented for 1D
-        pass
+    # def setVisibleAxes(self):
+    #     # Not implemented for 1D
+    #     pass
 
-    def _highlightAxes(self, strip, state):
-        """Highlight the last row axis if strip
-        """
-        # Not implemented for 1D
-        pass
+    # def _highlightAxes(self, strip, state):
+    #     """Highlight the last row axis if strip
+    #     """
+    #     # Not implemented for 1D
+    #     pass
 
 
 class SpectrumDisplayNd(SpectrumDisplay, GuiSpectrumDisplay):

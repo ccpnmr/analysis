@@ -460,7 +460,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         grid = _addColumn(grid)
         widget = DoubleSpinbox(self.scrollAreaLayout, value=globalShift, decimals=4, step=0.0001,
                                grid=grid, gridSpan=(1, 2), suffix='ppm')
-        widget.setRange(-1, 1)
+        widget.setRange(-10, 10)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid), hAlign='r')
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(self.globalShiftChange)

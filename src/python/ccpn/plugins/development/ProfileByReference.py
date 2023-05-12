@@ -306,6 +306,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         points = len(spectrum.positions)
         frequency = spectrum.spectrometerFrequencies[0]
         self.settings['Current']['ActiveSpectrum'] = spectrum
+        self.settings['Current']['ActiveSpectrumScale'] = log10(numpy.mean(spectrum.intensities[spectrum.intensities > 1]))
         self.settings['Current']['referenceSumSpectrumLimits'] = limits
         self.settings['Current']['referenceSumSpectrumPoints'] = points
         self.settings['Current']['currentSpectrumId'] = spectrumID
@@ -354,7 +355,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.settings['Current']['currentMetaboliteName'] = metaboliteName
         if spectrumId not in self.metaboliteSimulations:
             width = 1
-            scale = 1
+            scale = self.settings['Current']['ActiveSpectrumScale']
             globalShift = 0
             frequency = round(self.settings['Current']['referenceSumSpectrumFrequency']/10)*10
             if origin != 'unknown_substance':
@@ -375,7 +376,6 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                     self.simspec.setFrequency(frequency)
             else:
                 self.simspec = self.simulator.spectrumFromScratch(frequency=frequency, points=self.settings['Current']['referenceSumSpectrumPoints'], limits=self.settings['Current']['referenceSumSpectrumLimits'])
-                self.simspec.scale = 10
                 self.simulator.buildCcpnObjects(self.simspec, metaboliteName, frequency)
             self.metaboliteSimulations[spectrumId] = self.simspec
             self.addSimSpectrumToList(self.simspec)
@@ -432,6 +432,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         widget.valueChanged.connect(self.scaleChange)
         self.guiDict['TemporaryWidgets']['Scale'] = widget
         self.settings['Current']['Scale'] = self._getValue(widget)
+        self.scaleChange()
 
         # Add a widget for the simulated spectrum frequency
         if origin != 'bmrb':

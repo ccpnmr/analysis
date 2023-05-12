@@ -480,13 +480,13 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             self.settings['Current']['SignalCount'] = 0
             buttonWidget = Button(parent=self.scrollAreaLayout, text='Add Signal From Scratch', grid=grid, callback=self._addSignalFromScratch)
             _setWidgetProperties(buttonWidget, heightType='Minimum')
-            self.guiDict['TemporaryWidgets'][f'AddSignal'] = buttonWidget
+            self.guiDict['TemporaryWidgets'][f'AddSignalFromScratch'] = buttonWidget
 
             grid = _addColumn(grid)
             buttonWidget = Button(parent=self.scrollAreaLayout, text='Add Signal From Peaks', grid=grid,
                                   callback=self._addSignalFromPeaks)
             _setWidgetProperties(buttonWidget, heightType='Minimum')
-            self.guiDict['TemporaryWidgets'][f'AddSignal'] = buttonWidget
+            self.guiDict['TemporaryWidgets'][f'AddSignalFromPeaks'] = buttonWidget
         self.project.widgetDict = self.guiDict['TemporaryWidgets']
 
     def _addSignalFromScratch(self):

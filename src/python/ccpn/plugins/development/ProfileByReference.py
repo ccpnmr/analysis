@@ -104,7 +104,10 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         # deepcopy doesn't work on dictionaries with the qt widgets, so to get a separation of gui widgets and values for storage
         # it is needed to create the two dictionaries alongside each other
         self.guiDict = OD([('CoreWidgets', OD()), ('TemporaryWidgets', OD())])
-        self.settings = OD([('Spectra', OD()), ('Current', OD()), ('ResultsTables', OD())])
+        self.settings = OD([('CoreWidgets', OD()), ('TemporaryWidgets', OD())])
+        self.current = OD()
+        self.spectra = OD([('SimulatedSpectra', OD())])
+        self.resultsTables = OD()
         self.metaboliteSimulations = OD()
         self.sumSpectra = OD()
         self.subSpectra = OD()
@@ -140,7 +143,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         self.spectrumGroups = [spectrumGroup.id for spectrumGroup in sorted(self.project.spectrumGroups)]
         widget.setData(self.spectrumGroups)
         self.guiDict['CoreWidgets']['SpectrumGroupId'] = widget
-        self.settings['Current']['SpectrumGroupId'] = f'SG:{self._getValue(widget)}'
+        self.settings['CoreWidgets']['SpectrumGroupId'] = self._getValue(widget)
 
         if self.spectrumGroups:
             self._selectSpectrumGroup(self.spectrumGroups[0])
@@ -155,17 +158,16 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                               callback=self._selectSpectrum, tipText=help['Spectrum'])
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
 
-
         try:
-            self.spectra = [spectrum.id for spectrum in self.project.getByPid(self.settings['Current']['SpectrumGroupId']).spectra]
+            spectra = [spectrum.id for spectrum in self.project.getByPid(f"SG:{self.settings['CoreWidgets']['SpectrumGroupId']}").spectra]
         except:
             raise Exception("Please create a spectrum group first.")
-        widget.setData(self.spectra)
+        widget.setData(spectra)
         self.guiDict['CoreWidgets']['SpectrumId'] = widget
-        self.settings['Current']['SpectrumId'] = self._getValue(widget)
+        self.settings['CoreWidgets']['SpectrumId'] = self._getValue(widget)
 
-        if self.spectra:
-            self._selectSpectrum(self.spectra[0])
+        if spectra:
+            self._selectSpectrum(spectra[0])
 
         # table widget for selecting the current metabolite by name
         grid = _addRow(grid)
@@ -182,7 +184,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         widget = Button(self.scrollAreaLayout, text='Add Unknown Signal', grid=grid, gridSpan=(1, 2), callback=self._addUnknownSignal)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
         self.guiDict['CoreWidgets']['AddUnknownSignalButton'] = widget
-        self.settings['Current']['UnknownSignalCount'] = 0
+        self.settings['CoreWidgets']['UnknownSignalCount'] = 0
 
         # table widget for selecting the simulation of the metabolite
         grid = _addRow(grid)
@@ -197,7 +199,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         _setWidgetProperties(widget, _setWidth([500], grid), 300)
         self.guiDict['CoreWidgets']['Simulation'] = widget
 
-        self.settings['Current']['MultipletUpdateStatus'] = True
+        self.multipletUpdateStatus = True
 
         '''Spacer(self.scrollAreaLayout, 5, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                grid=(grid[0] + 1, 10),
@@ -206,9 +208,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
     def addDoubleSpinbox(self, index, multipletId):
         def valueChange():
             shift = widget.value()
-            update = self.settings['Current']['MultipletUpdateStatus']
+            update = self.multipletUpdateStatus
             self.simspec.moveMultiplet(multipletId, shift, update)
-            self.refreshSumSpectrum()
+            self.refreshSumAndSubSpectrum()
         def lineValueChange():
             shift = lineWidget.values
             widget.setValue(shift)
@@ -231,7 +233,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(valueChange)
         self.guiDict['TemporaryWidgets'][f'Multiplet{index+1}ChemicalShift'] = widget
-        self.settings['Current'][f'Multiplet {index+1} Chemical Shift'] = self._getValue(widget)
+        self.settings['TemporaryWidgets'][f'Multiplet {index+1} Chemical Shift'] = self._getValue(widget)
 
         grid = _addColumn(grid)
         buttonWidget = Button(parent=self.scrollAreaLayout, text='Reset', grid=grid)
@@ -254,51 +256,53 @@ class ProfileByReferenceGuiPlugin(PluginModule):
     def widthChange(self):
         width = self.guiDict['TemporaryWidgets']['Width'].value()
         integration = self.simspec.scale * width
-        self.settings['ResultsTables']['currentTable'].data.at[self.settings['Current']['currentSpectrumId'], self.settings['Current']['currentMetaboliteName']] = integration
+        resultsTableName = f"deconv_{self.settings['CoreWidgets']['SpectrumGroupId']}"
+        self.resultsTables[resultsTableName].data.at[self._getValue(self.guiDict['CoreWidgets']['SpectrumId']), self.current['CurrentMetaboliteName']] = integration
         self.simspec.setWidth(width)
-        self.refreshSumSpectrum()
+        self.refreshSumAndSubSpectrum()
 
     def scaleChange(self):
         scale = 10**self.guiDict['TemporaryWidgets']['Scale'].value()
         integration = scale * self.simspec.width
-        self.settings['ResultsTables']['currentTable'].data.at[self.settings['Current']['currentSpectrumId'], self.settings['Current']['currentMetaboliteName']] = integration
+        resultsTableName = f"deconv_{self.settings['CoreWidgets']['SpectrumGroupId']}"
+        self.resultsTables[resultsTableName].data.at[self._getValue(self.guiDict['CoreWidgets']['SpectrumId']), self.current['CurrentMetaboliteName']] = integration
         self.simspec.scaleSpectrum(scale)
-        self.refreshSumSpectrum()
+        self.refreshSumAndSubSpectrum()
 
     def frequencyChange(self):
         frequency = self.guiDict['TemporaryWidgets']['Frequency'].value()
         self.simspec.setFrequency(frequency)
-        self.refreshSumSpectrum()
+        self.refreshSumAndSubSpectrum()
 
     def globalShiftChange(self):
         shift = self.guiDict['TemporaryWidgets']['GlobalShift'].value()
         difference = shift - self.simspec.globalShift
         multipletWidgetList = [widget for widget in self.guiDict['TemporaryWidgets'] if widget.endswith('ChemicalShift')]
         if len(multipletWidgetList) > 0:
-            self.settings['Current']['MultipletUpdateStatus'] = False
+            self.multipletUpdateStatus = False
             for widgetNum, widget in enumerate(multipletWidgetList):
                 if widgetNum+1 == len(multipletWidgetList):
-                    self.settings['Current']['MultipletUpdateStatus'] = True
+                    self.multipletUpdateStatus = True
                 self.guiDict['TemporaryWidgets'][widget].setValue(self.guiDict['TemporaryWidgets'][widget].value() + difference)
         else:
             self.simspec.globalShift(difference)
         self.simspec.globalShift = shift
-        self.refreshSumSpectrum()
+        self.refreshSumAndSubSpectrum()
 
     def _selectSpectrumGroup(self, spectrumGroupID):
+        self.settings['CoreWidgets']['SpectrumGroupId'] = spectrumGroupID
         spectrumGroup = self.project.getByPid('SG:' + spectrumGroupID)
         self.display = self.project.application.mainWindow.newSpectrumDisplay([spectrum for spectrum in spectrumGroup.spectra], axisCodes=('H',), stripDirection='Y', position='top', relativeTo='MO:Profile by Reference')
         self.display.rename("Profile_By_Reference_Display")
         tableName = f'deconv_{spectrumGroupID}'
         spectra = [spectrum.name for spectrum in spectrumGroup.spectra]
-        if tableName not in self.settings['ResultsTables']:
+        if tableName not in self.resultsTables:
             tableData = pd.DataFrame(spectra, columns=['spectrum'], index=spectra)
             resultsTable = self.project.newDataTable(name=tableName, data=tableData)
-            self.settings['ResultsTables'][tableName] = resultsTable
-        self.settings['ResultsTables']['currentTable'] = resultsTable
+            self.resultsTables[tableName] = resultsTable
         # create the simulated spectrum group
         if 'Reference_Spectra' not in self.project.spectrumGroups:
-            self.settings['Current']['referenceSpectrumGroup'] = self.project.newSpectrumGroup(
+            self.spectra['ReferenceSpectrumGroup'] = self.project.newSpectrumGroup(
                 name='Reference_Spectra')
         for spectrumId in spectra:
             spectrum = self.project.getByPid('SP:' + spectrumId)
@@ -317,63 +321,63 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                                                                             spectrometerFrequencies=[frequency])
 
     def _selectSpectrum(self, spectrumId):
+        self.settings['CoreWidgets']['SpectrumId'] = spectrumId
         spectrum = self.project.getByPid('SP:' + spectrumId)
         limits = (max(spectrum.positions), min(spectrum.positions))
         points = len(spectrum.positions)
         frequency = spectrum.spectrometerFrequencies[0]
-        self.settings['Current']['ActiveSpectrum'] = spectrum
-        self.settings['Current']['ActiveSpectrumScale'] = log10(numpy.mean(spectrum.intensities[spectrum.intensities > 1]))
-        self.settings['Current']['referenceSumSpectrumLimits'] = limits
-        self.settings['Current']['referenceSumSpectrumPoints'] = points
-        self.settings['Current']['currentSpectrumId'] = spectrumId
-        self.settings['Current']['referenceSumSpectrumFrequency'] = frequency
+        self.current['ActiveSpectrum'] = spectrum
+        self.current['ActiveSpectrumScale'] = log10(numpy.mean(spectrum.intensities[spectrum.intensities > 1]))
+        self.current['ReferenceSumSpectrumLimits'] = limits
+        self.current['ReferenceSumSpectrumPoints'] = points
+        self.current['ReferenceSumSpectrumFrequency'] = frequency
 
     def _selectMetabolite(self, newRow, previousRow, selectedRow, lastRow):
         metaboliteName = selectedRow.name.iloc[0]
-        self.settings['Current']['metabolite'] = metaboliteName
-        self.settings['Current']['metaboliteData'] = selectedRow
+        self.current['metabolite'] = metaboliteName
+        self.current['metaboliteData'] = selectedRow
         metabolite_id = selectedRow.metabolite_id.iloc[0]
         widget = self.guiDict['CoreWidgets']['Simulation']
         data = self.caller.getSpectra(metabolite_id)
         widget.updateDf(data)
 
     def _addUnknownSignal(self):
-        self.settings['Current']['UnknownSignalCount'] += 1
-        self.settings['Current']['metabolite'] = f"Unknown_Substance_{self.settings['Current']['UnknownSignalCount']}"
+        self.current['UnknownSignalCount'] += 1
+        self.current['metabolite'] = f"Unknown_Substance_{self.current['UnknownSignalCount']}"
         widget = self.guiDict['CoreWidgets']['Simulation']
-        data = pd.DataFrame({'name': self.settings['Current']['metabolite'],
+        data = pd.DataFrame({'name': self.current['metabolite'],
                              'metabolite_id': None,
                              'spectrum_id': None,
                              'origin': 'unknown_substance'}, index=[len(self.metabolites.data)])
         widget.updateDf(data)
-        data = {'name': self.settings['Current']['metabolite']}
+        data = {'name': self.current['metabolite']}
         row = pd.DataFrame(data, columns=self.metabolites.data.columns, index=[len(self.metabolites.data)])
         self.metabolites.data = pd.concat([self.metabolites.data, row])
         df = self.metabolites.data.sort_values('name')[
             ['name', 'hmdb_accession', 'bmrb_id', 'chemical_formula', 'average_molecular_weight', 'smiles', 'inchi',
              'metabolite_id', 'description']]
         self.guiDict['CoreWidgets']['Metabolite'].updateDf(df)
-        self.settings['Current']['metaboliteData'] = row
+        self.current['metaboliteData'] = row
 
     def _setupSimulatedSpectrum(self, newRow, previousRow, selectedRow, lastRow):
-        metaboliteData = self.settings['Current']['metaboliteData']
+        metaboliteData = self.current['metaboliteData']
         metaboliteID = selectedRow.metabolite_id.iloc[0]
         spectrumId = selectedRow.spectrum_id.iloc[0]
         origin = selectedRow.origin.iloc[0]
         metaboliteName = metaboliteData.name.iloc[0]
-        self.settings['Current']['currentSimulatedSpectrumId'] = spectrumId
-        self.settings['Current']['currentMetaboliteName'] = metaboliteName
+        self.current['CurrentSimulatedSpectrumId'] = spectrumId
+        self.current['CurrentMetaboliteName'] = metaboliteName
         if spectrumId not in self.metaboliteSimulations:
             width = 1
-            scale = self.settings['Current']['ActiveSpectrumScale']
+            scale = self.current['ActiveSpectrumScale']
             globalShift = 0
-            frequency = round(self.settings['Current']['referenceSumSpectrumFrequency']/10)*10
+            frequency = round(self.current['ReferenceSumSpectrumFrequency']/10)*10
             if origin != 'unknown_substance':
                 simulationData = self.caller.getSimulationData(spectrumId)
                 sampleData = self.caller.getSampleData(simulationData['SpectrumData'].sample_id.iloc[0])
                 spectrumData = simulationData['SpectrumData']
                 synonyms = ([synonym for synonym in self.caller.getSynonymData(metaboliteID).synonym])
-                self.simspec = self.simulator.spectrumFromDatabase(simulationData, points=self.settings['Current']['referenceSumSpectrumPoints'], limits=self.settings['Current']['referenceSumSpectrumLimits'])
+                self.simspec = self.simulator.spectrumFromDatabase(simulationData, points=self.current['ReferenceSumSpectrumPoints'], limits=self.current['ReferenceSumSpectrumLimits'])
                 self.simulator.buildCcpnObjects(self.simspec, metaboliteName=f"{metaboliteName}_{origin}_{simulationData['SpectrumData'].spectrum_type.iloc[0]}",
                                                 frequency=spectrumData.frequency.iloc[0],
                                                 temperature=spectrumData.temperature.iloc[0], pH=sampleData.pH.iloc[0],
@@ -385,25 +389,26 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                 if simulationData['SpectrumData'].spectrum_type.iloc[0] == 'spin_system':
                     self.simspec.setFrequency(frequency)
             else:
-                self.simspec = self.simulator.spectrumFromScratch(frequency=frequency, points=self.settings['Current']['referenceSumSpectrumPoints'], limits=self.settings['Current']['referenceSumSpectrumLimits'])
+                self.simspec = self.simulator.spectrumFromScratch(frequency=frequency, points=self.current['ReferenceSumSpectrumPoints'], limits=self.current['ReferenceSumSpectrumLimits'])
                 self.simulator.buildCcpnObjects(self.simspec, metaboliteName, frequency)
             self.metaboliteSimulations[spectrumId] = self.simspec
             self.addSimSpectrumToList(self.simspec)
-            self.settings['Current']['referenceSpectrumGroup'].addSpectrum(self.simspec.spectrum)
-            self.refreshSumSpectrum()
+            self.spectra['ReferenceSpectrumGroup'].addSpectrum(self.simspec.spectrum)
+            self.refreshSumAndSubSpectrum()
         else:
             self.simspec = self.metaboliteSimulations[spectrumId]
             scale = log10(self.simspec.scale)
             width = self.simspec.width
             frequency = self.simspec.frequency
             globalShift = self.simspec.globalShift
-        if metaboliteName not in self.settings['ResultsTables']['currentTable'].data.columns.to_list():
-            column = [None] * len(self.settings['ResultsTables']['currentTable'].data)
-            self.settings['ResultsTables']['currentTable'].data[metaboliteName] = column
-            self.settings['ResultsTables']['currentTable'].data.at[self.settings['Current']['currentSpectrumId'], metaboliteName] = 1
+        resultsTableName = f"deconv_{self.settings['CoreWidgets']['SpectrumGroupId']}"
+        if metaboliteName not in self.resultsTables[resultsTableName].data.columns.to_list():
+            column = [None] * len(self.resultsTables[resultsTableName].data)
+            self.resultsTables[resultsTableName].data[metaboliteName] = column
+            self.resultsTables[resultsTableName].data.at[self.settings['CoreWidgets']['SpectrumId'], metaboliteName] = 1
         else:
             integration = scale * width
-            self.settings['ResultsTables']['currentTable'].data.at[self.settings['Current']['currentSpectrumId'], metaboliteName] = integration
+            self.resultsTables[resultsTableName].data.at[self.settings['CoreWidgets']['SpectrumId'], metaboliteName] = integration
         self.display.displaySpectrum(spectrum=self.simspec.spectrum.pid)
 
         for key in self.guiDict['TemporaryWidgets']:
@@ -427,7 +432,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(self.widthChange)
         self.guiDict['TemporaryWidgets']['Width'] = widget
-        self.settings['Current']['Width'] = self._getValue(widget)
+        self.current['Width'] = self._getValue(widget)
 
         # Add a widget for the simulated spectrum scale
         grid = _addRow(grid)
@@ -442,7 +447,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(self.scaleChange)
         self.guiDict['TemporaryWidgets']['Scale'] = widget
-        self.settings['Current']['Scale'] = self._getValue(widget)
+        self.current['Scale'] = self._getValue(widget)
         self.scaleChange()
 
         # Add a widget for the simulated spectrum frequency
@@ -460,7 +465,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             widget.setButtonSymbols(2)
             widget.valueChanged.connect(self.frequencyChange)
             self.guiDict['TemporaryWidgets']['Frequency'] = widget
-            self.settings['Current']['Frequency'] = self._getValue(widget)
+            self.current['Frequency'] = self._getValue(widget)
 
         # Add a widget for the simulated spectrum global shift
         grid = _addRow(grid)
@@ -476,7 +481,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         widget.setButtonSymbols(2)
         widget.valueChanged.connect(self.globalShiftChange)
         self.guiDict['TemporaryWidgets']['GlobalShift'] = widget
-        self.settings['Current']['GlobalShift'] = self._getValue(widget)
+        self.current['GlobalShift'] = self._getValue(widget)
 
         if self.simspec.multiplets and origin != 'unknown_substance':
             for index, multipletId in enumerate(self.simspec.multiplets):
@@ -487,8 +492,8 @@ class ProfileByReferenceGuiPlugin(PluginModule):
                     self.guiDict['TemporaryWidgets'][widget].setEnabled(False)
         else:
             grid = _addColumn(grid)
-            self.settings['Current']['Grid'] = grid
-            self.settings['Current']['SignalCount'] = 0
+            self.current['Grid'] = grid
+            self.current['SignalCount'] = 0
             buttonWidget = Button(parent=self.scrollAreaLayout, text='Add Signal From Scratch', grid=grid, callback=self._addSignalFromScratch)
             _setWidgetProperties(buttonWidget, heightType='Minimum')
             self.guiDict['TemporaryWidgets'][f'AddSignalFromScratch'] = buttonWidget
@@ -504,16 +509,16 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         def shiftChange():
             shift = shiftWidget.value()
             self.simspec.moveMultiplet(str(count), shift)
-            self.refreshSumSpectrum()
+            self.refreshSumAndSubSpectrum()
         def heightChange():
             height = 10 ** heightWidget.value()
             self.simspec.scaleMultiplet(str(count), height)
-            self.refreshSumSpectrum()
-        grid = self.settings['Current']['Grid']
+            self.refreshSumAndSubSpectrum()
+        grid = self.current['Grid']
         grid = _addRow(grid)
-        self.settings['Current']['Grid'] = grid
-        count = self.settings['Current']['SignalCount'] + 1
-        self.settings['Current']['SignalCount'] = count
+        self.current['Grid'] = grid
+        count = self.current['SignalCount'] + 1
+        self.current['SignalCount'] = count
         self.simspec.multiplets[f'{count}'] = {'center': 0, 'indices': [count-1]}
         self.simspec.peakList.append((0, 1, self.simspec.width/self.simspec.frequency, str(count)))
 
@@ -526,7 +531,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         shiftWidget.setRange(0, 10)
         _setWidgetProperties(shiftWidget, _setWidth(columnWidths, grid), hAlign='r')
         shiftWidget.valueChanged.connect(shiftChange)
-        self.settings['Current'][f'Signal_{count}_Shift'] = self._getValue(shiftWidget)
+        self.current[f'Signal_{count}_Shift'] = self._getValue(shiftWidget)
         self.guiDict['TemporaryWidgets'][f'Signal_{count}_Shift'] = shiftWidget
 
         grid = _addColumn(grid)
@@ -534,36 +539,37 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         heightWidget.setRange(-7, 7)
         _setWidgetProperties(heightWidget, _setWidth(columnWidths, grid), hAlign='r')
         heightWidget.valueChanged.connect(heightChange)
-        self.settings['Current'][f'Signal_{count}_Height'] = self._getValue(heightWidget)
+        self.current[f'Signal_{count}_Height'] = self._getValue(heightWidget)
         self.guiDict['TemporaryWidgets'][f'Signal_{count}_Height'] = heightWidget
 
     def _addSignalFromPeaks(self):
-        if len(self.settings['Current']['ActiveSpectrum'].multiplets) > 0:
+        if len(self.current['ActiveSpectrum'].multiplets) > 0:
             peakList = []
-            for i, multiplet in enumerate(self.settings['Current']['ActiveSpectrum'].multiplets):
+            for i, multiplet in enumerate(self.current['ActiveSpectrum'].multiplets):
                 for peak in multiplet.peaks:
-                    peakList.append((peak.position[0], peak.height/(10**self.settings['Current']['Scale']), self.simspec.width/self.simspec.frequency, str(i)))
+                    peakList.append((peak.position[0], peak.height/(10**self.current['Scale']), self.simspec.width/self.simspec.frequency, str(i)))
         else:
-            peakList = [(peak.position[0], peak.height/(10**self.settings['Current']['Scale']), self.simspec.width/self.simspec.frequency, '1') for peak in self.settings['Current']['ActiveSpectrum'].peaks]
+            peakList = [(peak.position[0], peak.height/(10**self.current['Scale']), self.simspec.width/self.simspec.frequency, '1') for peak in self.current['ActiveSpectrum'].peaks]
         if len(peakList) < 1:
-            raise Exception(f"Please pick at least one peak in spectrum {self.settings['Current']['ActiveSpectrum'].pid}")
+            raise Exception(f"Please pick at least one peak in spectrum {self.current['ActiveSpectrum'].pid}")
         self.simspec.peakList = peakList
         self.simspec.setSpectrumLineshape()
 
     def addSimSpectrumToList(self, spectrum):
-        if 'SimulatedSpectra' not in self.settings['Spectra']:
-            self.settings['Spectra']['SimulatedSpectra'] = [spectrum]
+        spectrumId = self.settings['CoreWidgets']['SpectrumId']
+        if 'SimulatedSpectra' not in self.spectra['SimulatedSpectra']:
+            self.spectra['SimulatedSpectra'][spectrumId] = [spectrum]
         else:
-            self.settings['Spectra']['SimulatedSpectra'].append(spectrum)
+            self.spectra['SimulatedSpectra'][spectrumId].append(spectrum)
 
-    def refreshSumSpectrum(self):
-        sumIntensities = numpy.zeros(self.settings['Current']['referenceSumSpectrumPoints'])
-        for spectrum in self.settings['Spectra']['SimulatedSpectra']:
-            sumIntensities += spectrum.spectrum.intensities
-        self.settings['Current']['referenceSumSpectrum'].intensities = sumIntensities
-
-    def refreshSubSpectrum(self):
-        pass
+    def refreshSumAndSubSpectrum(self):
+        spectrumId = self.settings['CoreWidgets']['SpectrumId']
+        realSpectrum = self.project.getByPid('SP:' + spectrumId)
+        sumIntensities = numpy.zeros(self.current['ReferenceSumSpectrumPoints'])
+        for simulatedSpectrum in self.spectra['SimulatedSpectra'][spectrumId]:
+            sumIntensities += simulatedSpectrum.spectrum.intensities
+        self.sumSpectra[spectrumId].intensities = sumIntensities
+        self.subSpectra[spectrumId].intensities = realSpectrum.intensities - sumIntensities
 
     def _getValue(self, widget):
         # Get the current value of the widget:

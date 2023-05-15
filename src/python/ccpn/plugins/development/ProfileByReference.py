@@ -184,7 +184,7 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         widget = Button(self.scrollAreaLayout, text='Add Unknown Signal', grid=grid, gridSpan=(1, 2), callback=self._addUnknownSignal)
         _setWidgetProperties(widget, _setWidth(columnWidths, grid))
         self.guiDict['CoreWidgets']['AddUnknownSignalButton'] = widget
-        self.settings['CoreWidgets']['UnknownSignalCount'] = 0
+        self.current['UnknownSignalCount'] = 0
 
         # table widget for selecting the simulation of the metabolite
         grid = _addRow(grid)
@@ -514,6 +514,9 @@ class ProfileByReferenceGuiPlugin(PluginModule):
             height = 10 ** heightWidget.value()
             self.simspec.scaleMultiplet(str(count), height)
             self.refreshSumAndSubSpectrum()
+        def lineValueChange():
+            shift = lineWidget.values
+            shiftWidget.setValue(shift)
         grid = self.current['Grid']
         grid = _addRow(grid)
         self.current['Grid'] = grid
@@ -541,6 +544,13 @@ class ProfileByReferenceGuiPlugin(PluginModule):
         heightWidget.valueChanged.connect(heightChange)
         self.current[f'Signal_{count}_Height'] = self._getValue(heightWidget)
         self.guiDict['TemporaryWidgets'][f'Signal_{count}_Height'] = heightWidget
+
+        brush = hexToRgbRatio(self.simspec.spectrum.sliceColour) + (0.3,)
+        lineWidget = self.display.strips[0]._CcpnGLWidget.addInfiniteLine(
+            values=self.simspec.multiplets[str(count)]['center'], colour=brush, movable=True, lineStyle='dashed',
+            lineWidth=2.0, obj=self.simspec.spectrum, orientation='v', )
+        lineWidget.valuesChanged.connect(lineValueChange)
+        self.guiDict['TemporaryWidgets'][f'Multiplet{count}Line'] = lineWidget
 
     def _addSignalFromPeaks(self):
         if len(self.current['ActiveSpectrum'].multiplets) > 0:
